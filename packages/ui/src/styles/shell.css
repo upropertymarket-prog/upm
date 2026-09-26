@@ -1,0 +1,542 @@
+/**
+ * App shell — sidebar, topbar e cabeçalho de página (P1-05)
+ * =========================================================================
+ * 04 §5.5, medido nos protótipos `App Proprietario / Comprador / Admin /
+ * Suporte`. O shell é **idêntico nos 4 perfis**: o que muda é só a lista de
+ * navegação e a etiqueta de grupo, passadas por props.
+ *
+ * Larguras: sidebar 248 px, rail 84 px (04 §5.5 — os protótipos tinham 86 px),
+ * topbar 68 px (a doc admite 64–68).
+ *
+ * Responsivo (02 §13): < 1024 px a sidebar fica sempre em rail; < 768 px sai
+ * do fluxo e passa a drawer sobreposto.
+ */
+
+.upm-shell {
+  display: grid;
+  grid-template-columns: var(--shell-rail, var(--sidebar-w)) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.upm-shell[data-collapsed="true"] {
+  --shell-rail: var(--sidebar-rail-w);
+}
+
+/* A coluna-fantasma reserva o espaço da sidebar, que é `position: fixed` para
+   não se mexer com o scroll (04 §5.5 e requisito explícito do Mapa em 04 §8.4). */
+.upm-shell__gutter {
+  min-width: 0;
+}
+
+.upm-shell__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.upm-shell__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+  padding: var(--sp-9);
+  min-width: 0;
+}
+
+/* --- Sidebar --------------------------------------------------------- */
+
+.upm-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: var(--z-sidebar);
+  width: var(--shell-rail, var(--sidebar-w));
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-7) var(--sp-6);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.upm-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  margin: 2px 0 var(--sp-8);
+  min-width: 0;
+}
+
+.upm-shell[data-collapsed="true"] .upm-sidebar__brand {
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+/* Marca — o wordmark certo aparece por CSS, sem esperar por JS. */
+.upm-brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.upm-brand__logo {
+  height: 39px;
+  width: 120px;
+  max-width: 100%;
+  /* O wordmark tem uma proporção própria; `contain` impede que um
+     arredondamento de meio pixel lhe corte o topo. */
+  object-fit: contain;
+}
+
+.upm-brand__logo--light {
+  display: var(--logo-light);
+}
+
+.upm-brand__logo--dark {
+  display: var(--logo-dark);
+}
+
+/* Espaço reservado do ícone da marca no rail de 84 px — 07 §10.1.
+   Neutro de propósito: nada aqui insinua um desenho. */
+.upm-brand__mark {
+  display: inline-flex;
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  border: 1px dashed var(--border2);
+  border-radius: var(--r-xl);
+  background: var(--surface2);
+}
+
+.upm-sidebar__group {
+  padding: 0 var(--sp-4) var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.upm-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.upm-nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  height: var(--h-lg);
+  min-height: var(--tap);
+  padding: 0 var(--sp-5);
+  border: none;
+  border-radius: var(--r-lg);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.upm-nav__item:hover:not([aria-current="page"]) {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.upm-nav__item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Item ativo: fundo `--accent-soft`, texto e ícone `--accent` (07 §4.2). */
+.upm-nav__item[aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.upm-shell[data-collapsed="true"] .upm-nav__item {
+  position: relative;
+  justify-content: center;
+  width: 42px;
+  padding: 0;
+  column-gap: 0;
+}
+
+/* No rail o contador não cabe ao lado do ícone: sobe para o canto do item. */
+.upm-shell[data-collapsed="true"] .upm-nav__item .upm-badge {
+  position: absolute;
+  top: 0;
+  left: 32px;
+}
+
+/* No rail de 84 px a etiqueta de grupo não cabe e cortava a meio da palavra. */
+.upm-shell[data-collapsed="true"] .upm-sidebar__group {
+  display: none;
+}
+
+.upm-nav__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upm-nav__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.upm-sidebar__footer {
+  margin-top: auto;
+  padding-top: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* Reportar problema: largura total, borda em cima e em baixo, hover laranja
+   suave (04 §5.5). As margens negativas levam as bordas às paredes da sidebar. */
+.upm-sidebar__report {
+  height: var(--h-xl);
+  min-height: var(--tap);
+  margin: 0 calc(var(--sp-6) * -1);
+  padding: 0 var(--sp-6);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-black);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.upm-sidebar__report:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.upm-sidebar__report:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.upm-shell[data-collapsed="true"] .upm-sidebar__report {
+  justify-content: center;
+}
+
+.upm-usercard {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+
+.upm-shell[data-collapsed="true"] .upm-usercard {
+  justify-content: center;
+}
+
+.upm-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-solid);
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-black);
+}
+
+.upm-avatar--lg {
+  width: 64px;
+  height: 64px;
+  font-size: var(--fs-title-sm);
+}
+
+/* Estado online (04 §5.5). */
+.upm-avatar__dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  background: var(--ok);
+  border: 2px solid var(--surface);
+}
+
+.upm-usercard__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.upm-usercard__name {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upm-usercard__meta {
+  font-size: var(--fs-label);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Topbar ---------------------------------------------------------- */
+
+.upm-topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  height: var(--topbar-h);
+  padding: 0 var(--sp-9);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.upm-topbar__search {
+  flex: 1 1 220px;
+  max-width: 380px;
+  min-width: 0;
+}
+
+.upm-topbar__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex: none;
+}
+
+.upm-menu {
+  position: relative;
+}
+
+.upm-menu__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--sp-3));
+  z-index: var(--z-topbar);
+  min-width: 260px;
+  max-width: min(92vw, 380px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.upm-menu__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-6);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.upm-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: var(--tap);
+  padding: var(--sp-4) var(--sp-6);
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.upm-menu__item:hover {
+  background: var(--surface2);
+}
+
+.upm-menu__item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.upm-menu__item[aria-checked="true"],
+.upm-menu__item[aria-selected="true"] {
+  color: var(--accent);
+}
+
+.upm-menu__item--unread {
+  background: var(--accent-soft);
+}
+
+/* --- Cabeçalho de página --------------------------------------------- */
+
+.upm-pagehead {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-7);
+  flex-wrap: wrap;
+  padding-bottom: var(--sp-7);
+  border-bottom: 1px solid var(--border);
+}
+
+.upm-pagehead__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.upm-pagehead__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  margin: 0;
+}
+
+.upm-pagehead__subtitle {
+  font-size: var(--fs-body-lg);
+  color: var(--muted);
+}
+
+.upm-pagehead__actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+/* --- Responsivo (02 §13) --------------------------------------------- */
+
+@media (width < 1024px) {
+  /* Abaixo de 1024 px não há largura para a sidebar expandida: fica em rail,
+     independentemente da preferência guardada. */
+  .upm-shell {
+    grid-template-columns: var(--sidebar-rail-w) minmax(0, 1fr);
+  }
+
+  .upm-sidebar {
+    width: var(--sidebar-rail-w);
+  }
+
+  .upm-sidebar__brand {
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+
+  .upm-nav__item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .upm-nav__label,
+  .upm-sidebar__group,
+  .upm-usercard__text {
+    display: none;
+  }
+
+  .upm-sidebar__report {
+    justify-content: center;
+  }
+}
+
+@media (width < 768px) {
+  /* Abaixo de 768 px a sidebar sai do fluxo e passa a drawer: a coluna deixa de
+     existir e o conteúdo usa a largura toda. */
+  .upm-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .upm-shell__gutter {
+    display: none;
+  }
+
+  .upm-sidebar {
+    width: min(86vw, var(--sidebar-w));
+    transform: translateX(-100%);
+    transition: transform var(--transition);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .upm-shell[data-mobile-open="true"] .upm-sidebar {
+    transform: translateX(0);
+  }
+
+  .upm-shell[data-mobile-open="true"] .upm-sidebar .upm-nav__item {
+    justify-content: flex-start;
+    padding: 0 var(--sp-5);
+  }
+
+  .upm-shell[data-mobile-open="true"] .upm-nav__label,
+  .upm-shell[data-mobile-open="true"] .upm-sidebar__group,
+  .upm-shell[data-mobile-open="true"] .upm-usercard__text {
+    display: initial;
+  }
+
+  .upm-shell[data-mobile-open="true"] .upm-usercard__text {
+    display: flex;
+  }
+
+  .upm-shell__content {
+    padding: var(--sp-7);
+  }
+
+  .upm-topbar {
+    padding: 0 var(--sp-7);
+  }
+}
+
+/* O botão de menu só existe abaixo de 768 px; acima, quem colapsa é o botão
+   junto ao logótipo. */
+.upm-topbar__burger {
+  display: none;
+}
+
+@media (width < 768px) {
+  .upm-topbar__burger {
+    display: inline-flex;
+  }
+}
