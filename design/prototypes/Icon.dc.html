@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<span style="display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:0">{{ svg }}</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:60,&quot;height&quot;:60},&quot;icon&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;house&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:18,&quot;tsType&quot;:&quot;number&quot;},&quot;color&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;currentColor&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;stroke&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1.75,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state = { ready: typeof window !== 'undefined' && !!window.lucide };
+  componentDidMount() {
+    if (this.state.ready) return;
+    if (!window.__upmLucide) {
+      window.__upmLucide = true;
+      const sc = document.createElement('script');
+      sc.src = 'https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js';
+      document.head.appendChild(sc);
+    }
+    this._iv = setInterval(() => { if (window.lucide) { clearInterval(this._iv); this.setState({ ready: true }); } }, 120);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  pascal(n) { return String(n || '').split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(''); }
+  renderVals() {
+    const size = this.props.size || 18, color = this.props.color || 'currentColor', sw = this.props.stroke || 1.75;
+    const box = { display: 'inline-flex', width: size, height: size, color: color };
+    if (!this.state.ready || !window.lucide) return { svg: React.createElement('span', { style: box }) };
+    const lib = window.lucide.icons || {};
+    const node = lib[this.pascal(this.props.icon)] || lib.Circle;
+    let html = '';
+    try { html = window.lucide.createElement(node).outerHTML; } catch (e) { html = ''; }
+    html = html.replace('<svg', '<svg width="' + size + '" height="' + size + '" stroke-width="' + sw + '"');
+    return { svg: React.createElement('span', { style: box, dangerouslySetInnerHTML: { __html: html } }) };
+  }
+}
+</script>
+</body>
+</html>

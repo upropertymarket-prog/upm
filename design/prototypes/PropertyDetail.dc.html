@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <button style="height:36px;padding:0 13px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ onBack }}">
+      <dc-import name="Icon" icon="arrow-left" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Voltar
+    </button>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Ref. {{ p.ref }}</span>
+  </div>
+  <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:24px;flex:3 1 440px;min-width:0">
+      <div style="position:relative;height:360px;border-radius:16px;border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--ph1) 0 12px,var(--ph2) 12px 24px);display:flex;align-items:center;justify-content:center;cursor:zoom-in" onClick="{{ onLightbox }}">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">{{ shotLabel }}</span>
+        <span style="position:absolute;bottom:12px;right:12px;font-size:12px;font-weight:700;background:rgba(2,6,23,.72);color:#fff;padding:5px 10px;border-radius:999px">{{ shotCount }}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="6">
+          <button style="width:74px;height:56px;border-radius:9px;border:2px solid {{ t.border }};background:repeating-linear-gradient(135deg,var(--ph1) 0 8px,var(--ph2) 8px 16px);cursor:pointer;padding:0" title="{{ t.label }}" onClick="{{ t.pick }}"></button>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;line-height:1.12;letter-spacing:-.02em;margin:0;font-weight:700">{{ p.title }}</h2>
+        <span style="font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:7px">
+          <dc-import name="Icon" icon="map-pin" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ p.location }}
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+        <sc-for list="{{ specs }}" as="s" hint-placeholder-count="6">
+          <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 14px;display:flex;align-items:center;gap:10px">
+            <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+            <div style="display:flex;flex-direction:column;min-width:0">
+              <span style="font-size:12px;color:var(--muted)">{{ s.label }}</span>
+              <strong style="font-size:13px;white-space:nowrap">{{ s.value }}</strong>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <strong style="font-size:16px">Descrição do proprietário</strong>
+        <p style="font-size:14px;line-height:1.75;color:var(--muted);margin:0">{{ p.desc }}</p>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <dc-import name="Icon" icon="map" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+          <strong style="font-size:13.5px">Localização</strong>
+          <div style="margin-left:auto;display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--border);background:var(--surface2)">
+            <sc-for list="{{ mapTabs }}" as="t" hint-placeholder-count="2">
+              <button style="height:30px;padding:0 14px;border-radius:999px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:{{ t.bg }};color:{{ t.color }};white-space:nowrap" onClick="{{ t.pick }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:relative;height:300px;background:var(--surface2);background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:56px 56px">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:{{ radiusSize }};height:{{ radiusSize }};border-radius:99px;background:var(--accent);opacity:.14;display:{{ radiusShow }}"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:{{ radiusSize }};height:{{ radiusSize }};border-radius:99px;border:2px dashed var(--accent);opacity:.5;display:{{ radiusShow }}"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);display:{{ pinShow }}">
+            <dc-import name="Icon" icon="map-pin" size="{{ 34 }}" color="var(--accent)" stroke="{{ 2.2 }}" hint-size="34px,34px"></dc-import>
+          </div>
+          <div style="position:absolute;left:14px;bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;display:flex;flex-direction:column;gap:3px;max-width:78%">
+            <strong style="font-size:12.5px">{{ mapTitle }}</strong>
+            <span style="font-size:12px;color:var(--muted);line-height:1.45">{{ mapNote }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1 1 280px;max-width:360px;min-width:0;position:sticky;top:96px;align-self:flex-start;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:22px;display:flex;flex-direction:column;gap:16px">
+      <span style="align-self:flex-start;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:{{ dealBg }};color:#fff">
+        <dc-import name="Icon" icon="{{ dealIcon }}" size="{{ 12 }}" color="#fff" hint-size="12px,12px"></dc-import>{{ p.kind }}
+      </span>
+      <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700">{{ p.price }}</strong>
+      <div style="display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)">
+        <span style="width:40px;height:40px;border-radius:99px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none">{{ ownerInitials }}</span>
+        <div style="display:flex;flex-direction:column;min-width:0">
+          <strong style="font-size:13px">{{ p.owner }}</strong>
+          <span style="font-size:12px;color:var(--muted)">Proprietário verificado · responde em ~2 h</span>
+        </div>
+      </div>
+      <button style="height:46px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--accent-hover)" onClick="{{ onChat }}">
+        <dc-import name="Icon" icon="message-square" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>{{ chatLabel }}
+      </button>
+      <button style="height:46px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ onSave }}">
+        <dc-import name="Icon" icon="bookmark" size="{{ 15 }}" color="{{ saveColor }}" hint-size="15px,15px"></dc-import>{{ saveLabel }}
+      </button>
+      <button style="height:46px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ onShare }}">
+        <dc-import name="Icon" icon="share-2" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Partilhar
+      </button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:1100},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;saved&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false},&quot;shot&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0},&quot;mapMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;aprox&quot;,&quot;exata&quot;],&quot;default&quot;:&quot;aprox&quot;},&quot;logged&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false},&quot;onBack&quot;:{&quot;editor&quot;:null},&quot;onSave&quot;:{&quot;editor&quot;:null},&quot;onShare&quot;:{&quot;editor&quot;:null},&quot;onChat&quot;:{&quot;editor&quot;:null},&quot;onShot&quot;:{&quot;editor&quot;:null},&quot;onMap&quot;:{&quot;editor&quot;:null},&quot;onLightbox&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props.p || {};
+    const shots = ['sala comum', 'cozinha equipada', 'suite principal', 'casa de banho', 'varanda', 'planta do piso'];
+    const i = Math.min(this.props.shot || 0, shots.length - 1);
+    const aprox = (this.props.mapMode || 'aprox') === 'aprox';
+    const rent = /arrend/i.test(p.kind || '');
+    const noop = () => {};
+    return {
+      p,
+      onBack: this.props.onBack || noop, onSave: this.props.onSave || noop, onShare: this.props.onShare || noop,
+      onChat: this.props.onChat || noop, onLightbox: this.props.onLightbox || noop,
+      dealBg: rent ? '#7C3AED' : '#1D4ED8', dealIcon: rent ? 'key' : 'home',
+      saveColor: this.props.saved ? 'var(--accent)' : 'currentColor',
+      saveLabel: this.props.saved ? 'Guardado' : 'Guardar imóvel',
+      chatLabel: this.props.logged ? 'Contactar proprietário' : 'Entrar para falar',
+      shotLabel: 'foto ' + (i + 1) + ' · ' + shots[i],
+      shotCount: (i + 1) + ' / ' + shots.length,
+      thumbs: shots.map((label, n) => ({ label, border: n === i ? 'var(--accent)' : 'var(--border)', pick: () => (this.props.onShot || noop)(n) })),
+      specs: [
+        { icon: 'bed-double', label: 'Tipologia', value: p.typology },
+        { icon: 'ruler', label: 'Área', value: p.area },
+        { icon: 'bath', label: 'Casas de banho', value: p.rooms },
+        { icon: 'building', label: 'Piso', value: p.floor },
+        { icon: 'calendar', label: 'Construção', value: p.year },
+        { icon: 'zap', label: 'Certificado', value: p.energy }
+      ],
+      ownerInitials: String(p.owner || '').split(' ').map(s => s[0] || '').join('').slice(0, 2),
+      mapTabs: [['aprox', 'Aproximada'], ['exata', 'Morada exata']].map(([k, label]) => {
+        const on = (aprox ? 'aprox' : 'exata') === k;
+        return { label, pick: () => (this.props.onMap || noop)(k), bg: on ? 'var(--accent)' : 'transparent', color: on ? '#fff' : 'var(--muted)' };
+      }),
+      radiusShow: aprox ? 'block' : 'none', radiusSize: aprox ? '190px' : '0px', pinShow: aprox ? 'none' : 'block',
+      mapTitle: aprox ? 'Zona aproximada · raio de 400 m' : p.location,
+      mapNote: aprox ? 'A morada exata é revelada depois de o proprietário aceitar o contacto.' : 'Coordenadas ' + (p.lat || '') + ', ' + (p.lng || '') + ' · partilhadas pelo proprietário.'
+    };
+  }
+}
+</script>
+</body>
+</html>

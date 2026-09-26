@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js"></script>
+<style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface2:#F1F5F9;--surface3:#E9EEF5;--border:#E2E8F0;--border2:#CBD5E1;--text:#0F172A;--muted:#64748B;--accent:#EA580C;--accent-hover:#C2410C;--accent-ink:#C2410C;--accent-soft:#FFF1E7;--ph1:#E4E9F0;--ph2:#EEF2F7;--ok:#059669;--ok-soft:#ECFDF5;--warn:#B45309;--warn-soft:#FFFBEB;--danger:#DC2626;--danger-soft:#FEF2F2;--info:#2563EB;--info-soft:#EFF6FF;--logo-l:block;--logo-d:none}
+:root[data-theme="dark"]{--bg:#050A16;--surface:#0B1220;--surface2:#101B2E;--surface3:#16223A;--border:#1E293B;--border2:#2B3A52;--text:#E6EDF6;--muted:#93A4BC;--accent:#F97316;--accent-hover:#FB923C;--accent-ink:#FDBA74;--accent-soft:#20130A;--ph1:#101A2C;--ph2:#152338;--ok:#34D399;--ok-soft:#082F23;--warn:#FBBF24;--warn-soft:#2A1D05;--danger:#F87171;--danger-soft:#2A0E0E;--info:#60A5FA;--info-soft:#0B1E3A;--logo-l:none;--logo-d:block}
+*{box-sizing:border-box}
+[data-sc-name="Icon"]{display:inline-flex;align-items:center;justify-content:center;line-height:0;flex:none}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,'Helvetica Neue',Helvetica,sans-serif;-webkit-font-smoothing:antialiased;text-wrap:pretty}
+a{color:var(--accent)}
+a:hover{color:var(--accent-ink)}
+input,textarea,select,button{font-family:inherit}
+button{color:var(--text)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+</style>
+<script>
+(function(){try{var t=localStorage.getItem('upm-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
+</helmet>
+<div style="min-height:100vh;display:grid;grid-template-columns:{{ sidebarWidth }} minmax(0,1fr);background:var(--bg);color:var(--text)">
+  <div aria-hidden="true"></div>
+  <aside style="border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;padding:18px 14px;gap:4px;position:fixed;top:0;left:0;bottom:0;width:{{ sidebarWidth }};z-index:25;overflow-y:auto;height:100vh">
+    <div style="display:flex;align-items:center;gap:8px;margin:2px 0 20px;justify-content:{{ brandJustify }}">
+      <img src="assets/upm-logo-light.svg" alt="UProperty Market" style="height: 39px; display: {{ logoFullL }}; margin-left: 6px; width: 120px">
+      <img src="assets/upm-logo-dark.svg" alt="UProperty Market" style="height: 39px; display: {{ logoFullD }}; margin-left: 6px; width: 120px">
+      <span style="width:38px;height:38px;border-radius:12px;background:var(--accent);color:#fff;display:{{ logoMark }};align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;flex:none">U</span>
+      <button style="margin-left:{{ railToggleMargin }};width:30px;height:30px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" title="{{ railTitle }}" onClick="{{ toggleRail }}">
+        <dc-import name="Icon" icon="{{ railIcon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+      </button>
+    </div>
+    <span style="display:{{ labelShow }};font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:0 10px 6px">Administração</span>
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+      <button style="text-align:left;height:42px;padding:0 12px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:{{ n.bg }};color:{{ n.color }};display:flex;align-items:center;gap:11px;white-space:nowrap;justify-content:{{ n.justify }};overflow:hidden" style-hover="background:var(--surface2)" title="{{ n.label }}" onClick="{{ n.pick }}">
+        <dc-import name="Icon" icon="{{ n.icon }}" size="{{ 17 }}" hint-size="17px,17px"></dc-import>
+        <span style="display:{{ labelShow }};flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.label }}</span>
+        <span style="margin-left:auto;display:{{ n.badgeShow }};min-width:20px;height:19px;padding:0 6px;border-radius:999px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;align-items:center;justify-content:center">{{ n.badge }}</span>
+      </button>
+    </sc-for>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px;padding-top:14px">
+      <button style="height:44px;margin:0 -14px;border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:{{ bugJustify }};gap:9px;padding:0 14px;white-space:nowrap;transition:background .15s ease,color .15s ease" style-hover="color:var(--accent);background:var(--accent-soft)" title="Reportar problema" onClick="{{ openBug }}">
+        <span style="display:{{ labelShow }}">Reportar problema</span>
+        <dc-import name="Icon" icon="bug" size="{{ 16 }}" hint-size="16px,16px"></dc-import>
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);transition:border-color .15s ease;justify-content:{{ brandJustify }}" style-hover="border-color:var(--accent)">
+        <span style="position:relative;flex:none">
+          <span style="width:36px;height:36px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800">HM</span>
+          <span style="position:absolute;right:0;bottom:0;width:10px;height:10px;border-radius:99px;background:var(--ok);border:2px solid var(--surface2)"></span>
+        </span>
+        <div style="display:{{ labelShow }};flex-direction:column;min-width:0;flex:1;cursor:pointer" onClick="{{ goSettings }}">
+          <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Helena Marques</strong>
+          <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Administração</span>
+        </div>
+        <span style="display:{{ labelShow }};align-items:center;gap:5px;color:var(--muted);font-size:12.5px;font-weight:700;flex:none;cursor:pointer">
+          <dc-import name="Icon" icon="log-out" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Sair
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:68px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:20">
+      <div style="display:flex;align-items:center;gap:9px;height:42px;padding:0 14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:13px;flex:1 1 220px;max-width:380px;min-width:0">
+        <dc-import name="Icon" icon="search" size="{{ 16 }}" hint-size="16px,16px"></dc-import>
+        <input placeholder="Pesquisar utilizadores, imóveis, faturas…" style="border:none;background:transparent;color:var(--text);font-size:13px;width:100%;outline:none;min-width:0">
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex:none">
+        <div style="position:relative">
+          <button style="height:42px;padding:0 12px;border-radius:12px;border:1px solid {{ langBorder }};background:var(--surface2);color:{{ langColor }};cursor:pointer;display:flex;align-items:center;gap:6px" title="Idioma" onClick="{{ toggleLang }}">
+            <dc-import name="Icon" icon="languages" size="{{ 17 }}" color="{{ langColor }}" hint-size="17px,17px"></dc-import>
+            <dc-import name="Icon" icon="{{ langChevron }}" size="{{ 13 }}" color="{{ langColor }}" hint-size="13px,13px"></dc-import>
+          </button>
+          <div style="position:absolute;top:50px;right:0;min-width:160px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(2,6,23,.16);padding:6px;display:{{ langMenu }};flex-direction:column;gap:2px;z-index:50">
+            <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+              <button style="height:38px;padding:0 12px;border-radius:9px;border:none;background:{{ l.bg }};color:{{ l.color }};font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;white-space:nowrap" style-hover="background:var(--surface2)" onClick="{{ l.pick }}">{{ l.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;padding:4px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);flex:none">
+          <sc-for list="{{ themeToggle }}" as="th" hint-placeholder-count="2">
+            <button style="height:34px;padding:0 13px;border-radius:9px;border:none;background:{{ th.bg }};color:{{ th.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:{{ th.shadow }}" onClick="{{ th.pick }}">
+              <dc-import name="Icon" icon="{{ th.icon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>{{ th.label }}
+            </button>
+          </sc-for>
+        </div>
+        <div style="position:relative">
+          <button style="width:42px;height:42px;border-radius:12px;border:1px solid {{ notifBorder }};background:var(--surface2);color:{{ notifColor }};cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative" title="Notificações" onClick="{{ toggleNotif }}">
+            <dc-import name="Icon" icon="bell" size="{{ 17 }}" color="{{ notifColor }}" hint-size="17px,17px"></dc-import>
+            <span style="position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;display:{{ notifBadgeShow }};align-items:center;justify-content:center;border:2px solid var(--surface)">{{ notifBadge }}</span>
+          </button>
+          <div style="position:absolute;top:50px;right:0;width:360px;max-width:min(360px,80vw);background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 44px rgba(2,6,23,.18);display:{{ notifMenu }};flex-direction:column;overflow:hidden;z-index:60">
+            <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+              <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px">Notificações</strong>
+              <span style="font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px;white-space:nowrap">{{ notifUnread }}</span>
+              <button style="margin-left:auto;font-size:12.5px;font-weight:700;color:var(--accent);background:transparent;border:none;cursor:pointer;white-space:nowrap" onClick="{{ readAllNotif }}">Marcar todas</button>
+            </div>
+            <div style="max-height:340px;overflow:auto;display:flex;flex-direction:column">
+              <sc-for list="{{ notifList }}" as="n" hint-placeholder-count="5">
+                <div style="padding:12px 15px;border-bottom:1px solid var(--border);display:flex;gap:11px;cursor:pointer;background:{{ n.bg }}" style-hover="background:var(--surface2)" onClick="{{ n.go }}">
+                  <span style="width:34px;height:34px;border-radius:10px;background:{{ n.iconBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                    <dc-import name="Icon" icon="{{ n.icon }}" size="{{ 16 }}" color="{{ n.iconColor }}" hint-size="16px,16px"></dc-import>
+                  </span>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                    <strong style="font-size:12.5px;line-height:1.35">{{ n.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);line-height:1.45">{{ n.body }}</span>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ n.when }}</span>
+                  </div>
+                  <span style="width:8px;height:8px;border-radius:99px;background:{{ n.dot }};margin-top:6px;flex:none"></span>
+                </div>
+              </sc-for>
+            </div>
+            <button style="padding:12px;border:none;border-top:1px solid var(--border);background:var(--surface2);color:var(--accent);font-size:12.5px;font-weight:700;cursor:pointer" onClick="{{ allNotif }}">Ver todas as notificações</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="padding:24px;display:flex;flex-direction:column;gap:18px;min-width:0">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(24px,3vw,32px);line-height:1.1;letter-spacing:-.02em;margin:0;font-weight:700">{{ pageTitle }}</h1>
+          <span style="font-size:13.5px;color:var(--muted)">{{ pageSub }}</span>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ exportData }}">
+            <dc-import name="Icon" icon="download" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Exportar
+          </button>
+          <button style="height:44px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ primaryRun }}">
+            <dc-import name="Icon" icon="{{ primaryIcon }}" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>{{ primaryAction }}
+          </button>
+        </div>
+      </div>
+
+      <sc-if value="{{ sPainel }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <strong style="font-size:15px">As suas estatísticas</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Acesso rápido</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+            <sc-for list="{{ quickAccess }}" as="qa" hint-placeholder-count="4">
+              <button style="text-align:left;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease" style-hover="transform:translateY(-2px);border-color:var(--accent);box-shadow:0 10px 26px rgba(2,6,23,.1)" onClick="{{ qa.go }}">
+                <span style="display:flex;align-items:center;gap:10px">
+                  <span style="width:36px;height:36px;border-radius:11px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex:none">
+                    <dc-import name="Icon" icon="{{ qa.icon }}" size="{{ 17 }}" color="var(--accent)" hint-size="17px,17px"></dc-import>
+                  </span>
+                  <strong style="font-size:14px;color:var(--text)">{{ qa.title }}</strong>
+                </span>
+                <span style="font-size:12.5px;color:var(--muted);line-height:1.5">{{ qa.body }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Gráficos</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:stretch">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <strong style="font-size:13.5px">Receita recorrente (MRR)</strong>
+                <div style="margin-left:auto;display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--border);background:var(--surface2)">
+                  <sc-for list="{{ ranges }}" as="rg" hint-placeholder-count="3">
+                    <button style="height:26px;padding:0 12px;border-radius:999px;border:none;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ rg.bg }};color:{{ rg.color }};white-space:nowrap" onClick="{{ rg.pick }}">{{ rg.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:10px;height:180px">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end">
+                    <span style="font-size:12.5px;font-weight:700;color:{{ b.valueColor }}">{{ b.value }}</span>
+                    <div style="width:100%;max-width:40px;height:{{ b.h }};border-radius:8px 8px 4px 4px;background:{{ b.fill }}"></div>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ b.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0">
+              <strong style="font-size:13.5px">Distribuição por plano</strong>
+              <sc-for list="{{ planSplit }}" as="ps" hint-placeholder-count="4">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="width:10px;height:10px;border-radius:3px;background:{{ ps.color }};flex:none"></span>
+                    <strong style="font-size:12.5px">{{ ps.label }}</strong>
+                    <span style="margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ ps.count }} · {{ ps.pct }}</span>
+                  </div>
+                  <div style="height:8px;border-radius:99px;background:var(--surface3);overflow:hidden">
+                    <div style="height:100%;width:{{ ps.pct }};background:{{ ps.color }};border-radius:99px"></div>
+                  </div>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ ps.revenue }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Atividade recente</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px">
+            <sc-for list="{{ panels }}" as="pn" hint-placeholder-count="2">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column">
+                <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+                  <dc-import name="Icon" icon="{{ pn.icon }}" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+                  <strong style="font-size:13.5px">{{ pn.title }}</strong>
+                  <span style="margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ pn.meta }}</span>
+                </div>
+                <sc-for list="{{ pn.items }}" as="it" hint-placeholder-count="3">
+                  <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer" style-hover="background:var(--surface2)" onClick="{{ it.go }}">
+                    <div style="display:flex;flex-direction:column;min-width:0;flex:1;gap:3px">
+                      <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.title }}</strong>
+                      <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.sub }}</span>
+                    </div>
+                    <span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ it.tagBg }};color:#fff;white-space:nowrap;flex:none">{{ it.tag }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sUtilizadores }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ userStats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+            <sc-for list="{{ userFilters }}" as="f" hint-placeholder-count="5">
+              <button style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px" onClick="{{ f.pick }}">
+                <span style="width:8px;height:8px;border-radius:99px;background:{{ f.dot }}"></span>{{ f.label }}
+              </button>
+            </sc-for>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:12.5px;min-width:0;flex:0 1 240px">
+              <dc-import name="Icon" icon="search" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+              <input placeholder="Nome ou e-mail" value="{{ userQuery }}" onInput="{{ setUserQuery }}" style="border:none;background:transparent;color:var(--text);font-size:12.5px;width:100%;outline:none;min-width:0">
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;gap:12px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+              <span style="flex:2;min-width:0">Utilizador</span><span style="flex:1;min-width:0">Perfil</span><span style="flex:1;min-width:0">Plano</span><span style="width:110px;flex:none">Estado</span><span style="width:120px;flex:none;text-align:right">Ações</span>
+            </div>
+            <sc-for list="{{ users }}" as="u" hint-placeholder-count="6">
+              <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center" style-hover="background:var(--surface2)">
+                <div style="flex:2;min-width:0;display:flex;align-items:center;gap:11px">
+                  <span style="width:36px;height:36px;border-radius:99px;background:var(--surface3);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">{{ u.initials }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0">
+                    <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.name }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.email }}</span>
+                  </div>
+                </div>
+                <span style="flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.role }}</span>
+                <span style="flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ u.plan }}</span>
+                <span style="width:110px;flex:none"><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ u.tagBg }};color:#fff;white-space:nowrap">{{ u.status }}</span></span>
+                <div style="width:120px;flex:none;display:flex;gap:6px;justify-content:flex-end">
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ u.open }}">Detalhes</button>
+                  <button style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--danger);color:var(--danger)" title="{{ u.banTitle }}" onClick="{{ u.ban }}">
+                    <dc-import name="Icon" icon="{{ u.banIcon }}" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+                  </button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sImoveis }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ propStats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <sc-for list="{{ propFilters }}" as="f" hint-placeholder-count="4">
+              <button style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px" onClick="{{ f.pick }}">
+                <span style="width:8px;height:8px;border-radius:99px;background:{{ f.dot }}"></span>{{ f.label }}
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ moderation }}" as="m" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-left:3px solid {{ m.accent }};border-radius:16px;background:var(--surface);display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));overflow:hidden">
+                <div style="padding:16px;display:flex;gap:14px;min-width:0;border-right:1px solid var(--border)">
+                  <div style="width:84px;height:74px;border-radius:12px;background:repeating-linear-gradient(135deg,var(--ph1) 0 9px,var(--ph2) 9px 18px);flex:none"></div>
+                  <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                      <strong style="font-size:14px">{{ m.title }}</strong>
+                      <span style="font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:{{ m.tagBg }};color:#fff;white-space:nowrap">{{ m.status }}</span>
+                    </div>
+                    <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                      <dc-import name="Icon" icon="map-pin" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ m.location }}
+                    </span>
+                    <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                      <dc-import name="Icon" icon="user" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ m.owner }}
+                    </span>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ m.submitted }}</span>
+                  </div>
+                </div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:11px;min-width:0">
+                  <div style="display:flex;gap:16px;flex-wrap:wrap">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700">{{ m.price }}</span>
+                    <span style="font-size:12.5px;color:var(--muted);align-self:center">{{ m.specs }}</span>
+                  </div>
+                  <span style="font-size:12.5px;color:{{ m.checkColor }};display:flex;align-items:center;gap:7px">
+                    <dc-import name="Icon" icon="{{ m.checkIcon }}" size="{{ 14 }}" color="{{ m.checkColor }}" hint-size="14px,14px"></dc-import>{{ m.check }}
+                  </span>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                    <sc-for list="{{ m.actions }}" as="ac" hint-placeholder-count="3">
+                      <button style="height:34px;padding:0 13px;border-radius:9px;border:1px solid {{ ac.border }};background:{{ ac.bg }};color:{{ ac.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:filter .15s ease" style-hover="filter:brightness(.94)" onClick="{{ ac.run }}">
+                        <dc-import name="Icon" icon="{{ ac.icon }}" size="{{ 14 }}" hint-size="14px,14px"></dc-import>{{ ac.label }}
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sMonetizacao }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ moneyStats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+                <dc-import name="Icon" icon="layers" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+                <strong style="font-size:13.5px">Planos ativos</strong>
+                <button style="margin-left:auto;height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ newPlan }}">Novo plano</button>
+              </div>
+              <sc-for list="{{ planRows }}" as="pr" hint-placeholder-count="5">
+                <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                  <span style="width:10px;height:34px;border-radius:5px;background:{{ pr.color }};flex:none"></span>
+                  <div style="display:flex;flex-direction:column;min-width:0;flex:1 1 140px">
+                    <strong style="font-size:13px">{{ pr.name }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ pr.audience }} · {{ pr.price }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;flex:none">
+                    <strong style="font-size:13px">{{ pr.subs }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">subscritores</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;flex:none;min-width:88px">
+                    <strong style="font-size:13px;color:var(--ok)">{{ pr.mrr }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">MRR</span>
+                  </div>
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ pr.edit }}">Editar</button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:14px">
+              <strong style="font-size:13.5px">Saúde da receita</strong>
+              <sc-for list="{{ health }}" as="hl" hint-placeholder-count="4">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <strong style="font-size:12.5px">{{ hl.label }}</strong>
+                    <span style="margin-left:auto;font-size:12.5px;font-weight:700;color:{{ hl.color }}">{{ hl.value }}</span>
+                  </div>
+                  <div style="height:8px;border-radius:99px;background:var(--surface3);overflow:hidden">
+                    <div style="height:100%;width:{{ hl.pct }};background:{{ hl.color }};border-radius:99px"></div>
+                  </div>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ hl.hint }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+            <div style="padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;gap:12px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+              <span style="flex:2;min-width:0">Cliente</span><span style="flex:1;min-width:0">Plano</span><span style="width:110px;flex:none">Valor</span><span style="width:110px;flex:none">Estado</span><span style="width:100px;flex:none;text-align:right">Fatura</span>
+            </div>
+            <sc-for list="{{ billing }}" as="bl" hint-placeholder-count="5">
+              <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center">
+                <div style="flex:2;min-width:0;display:flex;flex-direction:column">
+                  <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ bl.client }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ bl.meta }}</span>
+                </div>
+                <span style="flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ bl.plan }}</span>
+                <span style="width:110px;flex:none;font-size:13px;font-weight:700">{{ bl.amount }}</span>
+                <span style="width:110px;flex:none"><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ bl.tagBg }};color:#fff;white-space:nowrap">{{ bl.status }}</span></span>
+                <div style="width:100px;flex:none;display:flex;justify-content:flex-end">
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ bl.download }}">Transferir</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sContratos }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:12px;flex:1 1 262px;max-width:322px;min-width:0;position:sticky;top:96px;align-self:flex-start">
+            <button style="height:40px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ newTemplate }}">
+              <dc-import name="Icon" icon="file-plus" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>Novo modelo
+            </button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+              <sc-for list="{{ contractKinds }}" as="k" hint-placeholder-count="2">
+                <button style="height:36px;padding:0 10px;border-radius:10px;border:1px solid {{ k.border }};background:{{ k.bg }};color:{{ k.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-width:0" onClick="{{ k.pick }}">
+                  <dc-import name="Icon" icon="{{ k.icon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>{{ k.label }}
+                </button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ templates }}" as="tp" hint-placeholder-count="3">
+              <button style="text-align:left;border:1px solid {{ tp.border }};border-radius:13px;background:var(--surface);padding:13px;display:flex;flex-direction:column;gap:7px;cursor:pointer" style-hover="border-color:var(--accent)" onClick="{{ tp.pick }}">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <dc-import name="Icon" icon="file-text" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>
+                  <strong style="font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tp.name }}</strong>
+                </div>
+                <span style="font-size:12.5px;color:var(--muted);line-height:1.45">{{ tp.meta }}</span>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:{{ tp.tagBg }};color:#fff">{{ tp.status }}</span>
+                  <span style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace">{{ tp.usage }}</span>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;flex:3 1 460px;min-width:0">
+            <div style="padding:14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+                <input value="{{ tplName }}" onInput="{{ setTplName }}" style="border:none;background:transparent;color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;outline:none;width:100%;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--surface3);color:var(--muted)">Modelo oficial</span>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ tplSaved }}</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                <div style="display:flex;padding:3px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);flex:none">
+                  <sc-for list="{{ modes }}" as="md" hint-placeholder-count="2">
+                    <button style="height:30px;padding:0 12px;border-radius:7px;border:none;background:{{ md.bg }};color:{{ md.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap" onClick="{{ md.pick }}">
+                      <dc-import name="Icon" icon="{{ md.icon }}" size="{{ 14 }}" hint-size="14px,14px"></dc-import>{{ md.label }}
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:nowrap;margin-left:auto;flex:none">
+                  <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ saveTpl }}">
+                    <dc-import name="Icon" icon="save" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Guardar
+                  </button>
+                  <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ exportTpl }}">
+                    <dc-import name="Icon" icon="download" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Exportar
+                  </button>
+                  <button style="height:36px;padding:0 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:var(--accent-hover)" onClick="{{ publishTpl }}">
+                    <dc-import name="Icon" icon="upload-cloud" size="{{ 14 }}" color="#fff" hint-size="14px,14px"></dc-import>{{ publishLabel }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style="padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:6px;flex-wrap:wrap;opacity:{{ toolbarOpacity }};pointer-events:{{ toolbarEvents }}">
+              <select style="height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:600;padding:0 8px;min-width:96px">
+                <option>Normal</option><option>Título 1</option><option>Título 2</option><option>Cláusula</option>
+              </select>
+              <span style="width:1px;height:22px;background:var(--border);margin:0 4px"></span>
+              <sc-for list="{{ tools }}" as="tl" hint-placeholder-count="9">
+                <button style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:var(--accent);color:var(--accent)" title="{{ tl.title }}" onClick="{{ tl.run }}">
+                  <dc-import name="Icon" icon="{{ tl.icon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+                </button>
+              </sc-for>
+              <span style="width:1px;height:22px;background:var(--border);margin:0 4px"></span>
+              <div style="position:relative">
+                <button style="height:32px;padding:0 12px;border-radius:8px;border:1px solid {{ varBorder }};background:{{ varBg }};color:{{ varColor }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap" onClick="{{ toggleVars }}">
+                  <dc-import name="Icon" icon="braces" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Variável
+                  <dc-import name="Icon" icon="chevron-down" size="{{ 13 }}" hint-size="13px,13px"></dc-import>
+                </button>
+                <div style="position:absolute;top:38px;left:0;z-index:30;width:230px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 14px 34px rgba(2,6,23,.18);padding:7px;display:{{ varMenuShow }};flex-direction:column;gap:3px">
+                  <sc-for list="{{ variables }}" as="vr" hint-placeholder-count="6">
+                    <button style="text-align:left;height:32px;padding:0 10px;border-radius:8px;border:none;background:transparent;color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:9px;white-space:nowrap" style-hover="background:var(--surface2)" onClick="{{ vr.insert }}">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">{{ vr.token }}</span>
+                      <span style="color:var(--muted);font-size:12.5px;margin-left:auto">{{ vr.hint }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;overflow:auto;background:var(--surface2);padding:22px;display:flex;justify-content:center">
+              <div style="width:100%;max-width:760px;min-height:760px;background:#fff;color:#0F172A;border:1px solid var(--border);border-radius:4px;box-shadow:0 6px 20px rgba(2,6,23,.1);padding:clamp(24px,7%,64px);display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ docBlocks }}" as="bl" hint-placeholder-count="8">
+                  <p style="margin:0;font-size:{{ bl.size }};font-weight:{{ bl.weight }};line-height:1.75;letter-spacing:{{ bl.spacing }};text-transform:{{ bl.transform }};color:#0F172A"><sc-for list="{{ bl.segs }}" as="sg" hint-placeholder-count="2"><span style="display:{{ sg.display }};padding:{{ sg.pad }};border-radius:{{ sg.radius }};background:{{ sg.bg }};color:{{ sg.color }};font-size:{{ sg.fs }};font-weight:{{ sg.fw }};border:{{ sg.border }};white-space:{{ sg.wrap }};line-height:{{ sg.lh }}">{{ sg.text }}</span></sc-for></p>
+                </sc-for>
+              </div>
+            </div>
+            <div style="padding:9px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap">
+              <span>{{ tplWords }}</span><span>{{ tplVars }}</span>
+              <span style="margin-left:auto">{{ tplKindLabel }} · {{ modeLabel }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sReports }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:start">
+            <sc-for list="{{ pipeline }}" as="col" hint-placeholder-count="5">
+              <div style="display:flex;flex-direction:column;gap:10px;border:1px solid var(--border);border-radius:14px;background:var(--surface2);padding:10px;min-height:170px">
+                <div style="display:flex;align-items:center;gap:8px;padding:2px 4px">
+                  <span style="width:8px;height:8px;border-radius:99px;background:{{ col.dot }}"></span>
+                  <strong style="font-size:12.5px">{{ col.label }}</strong>
+                  <span style="margin-left:auto;font-size:12.5px;color:var(--muted)">{{ col.count }}</span>
+                </div>
+                <sc-for list="{{ col.items }}" as="bg" hint-placeholder-count="2">
+                  <button style="text-align:left;border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:11px;display:flex;flex-direction:column;gap:7px;cursor:pointer" style-hover="border-color:var(--accent)" onClick="{{ bg.pick }}">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ bg.id }}</span>
+                      <span style="margin-left:auto;font-size:12px;font-weight:800;padding:3px 7px;border-radius:999px;background:{{ bg.sevBg }};color:#fff;white-space:nowrap">{{ bg.severity }}</span>
+                    </div>
+                    <strong style="font-size:12.5px;line-height:1.35">{{ bg.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ bg.reporter }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sDefinicoes }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:15px;position:sticky;top:96px;align-self:flex-start">
+            <strong style="font-size:14px">Perfil de administração</strong>
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="width:64px;height:64px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex:none">HM</span>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button style="height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ changeAvatar }}">
+                  <dc-import name="Icon" icon="image-plus" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Alterar avatar
+                </button>
+                <span style="font-size:12.5px;color:var(--muted)">Visível apenas para a equipa.</span>
+              </div>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Nome
+              <input value="Helena Marques" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">E-mail corporativo
+              <input value="helena@upm.pt" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Autenticação em dois passos
+              <select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+                <option>Aplicação autenticadora</option><option>Chave de segurança</option><option>SMS</option>
+              </select>
+            </label>
+            <button style="align-self:flex-start;height:42px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ saveSettings }}">Guardar alterações</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:13px">
+              <strong style="font-size:14px">Equipa e permissões</strong>
+              <sc-for list="{{ team }}" as="tm" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:11px;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--surface2)">
+                  <span style="width:34px;height:34px;border-radius:99px;background:var(--surface3);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">{{ tm.initials }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+                    <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tm.name }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tm.email }}</span>
+                  </div>
+                  <select value="{{ tm.role }}" onChange="{{ tm.change }}" style="height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;padding:0 8px;flex:none">
+                    <option>Administração</option><option>Suporte IT</option><option>Moderação</option><option>Financeiro</option>
+                  </select>
+                </div>
+              </sc-for>
+              <button style="align-self:flex-start;height:38px;padding:0 14px;border-radius:10px;border:1px dashed var(--border2);background:transparent;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ inviteTeam }}">
+                <dc-import name="Icon" icon="user-plus" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Convidar membro
+              </button>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:11px">
+              <strong style="font-size:14px">Definições da plataforma</strong>
+              <sc-for list="{{ platformFlags }}" as="pf" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+                    <strong style="font-size:12.5px">{{ pf.label }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ pf.hint }}</span>
+                  </div>
+                  <button style="width:46px;height:26px;border-radius:99px;border:none;background:{{ pf.trackBg }};cursor:pointer;position:relative;flex:none" onClick="{{ pf.toggle }}">
+                    <span style="position:absolute;top:3px;left:{{ pf.knobLeft }};width:20px;height:20px;border-radius:99px;background:#fff;transition:left .18s ease"></span>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:1px solid var(--danger);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:11px">
+              <strong style="font-size:14px;color:var(--danger)">Zona de perigo</strong>
+              <button style="height:40px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ maintenance }}">Ativar modo de manutenção</button>
+              <button style="height:40px;border-radius:10px;border:1px solid var(--danger);background:transparent;color:var(--danger);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--danger);color:#fff" onClick="{{ purge }}">Limpar contas inativas</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sContas }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:12.5px;color:var(--warn);background:var(--warn-soft);border-radius:11px;padding:11px 13px;display:flex;gap:8px;align-items:flex-start;line-height:1.5"><dc-import name="Icon" icon="shield" size="{{ 14 }}" color="var(--warn)" hint-size="14px,14px"></dc-import>As caixas são associadas a um departamento e a um responsável; quando existirem coordenadores, poderão redistribuir os e-mails pela equipa.</span>
+          <sc-for list="{{ accounts }}" as="ac" hint-placeholder-count="2">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+              <span style="width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex:none"><dc-import name="Icon" icon="at-sign" size="{{ 18 }}" color="var(--accent)" hint-size="18px,18px"></dc-import></span>
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 200px"><strong style="font-size:14px">{{ ac.address }}</strong><span style="font-size:12.5px;color:var(--muted)">{{ ac.proto }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px;flex:1 1 180px;min-width:0"><span style="font-size:12.5px;color:var(--muted)">Departamento · responsável</span><strong style="font-size:12.5px">{{ ac.owner }}</strong></div>
+              <span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ ac.tagBg }};color:#fff;white-space:nowrap">{{ ac.status }}</span>
+              <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ ac.edit }}"><dc-import name="Icon" icon="settings" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Configurar</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sLeads }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ leadStats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600"><dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}</span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;padding:4px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);flex:none">
+              <sc-for list="{{ phaseTabs }}" as="pt" hint-placeholder-count="3">
+                <button style="height:32px;padding:0 12px;border-radius:9px;border:none;background:{{ pt.bg }};color:{{ pt.color }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:{{ pt.shadow }}" onClick="{{ pt.pick }}">{{ pt.label }}</button>
+              </sc-for>
+            </div>
+            <select value="{{ leadSource }}" onChange="{{ setLeadSource }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 10px;font-size:12.5px;font-weight:600">
+              <option>Todas as origens</option><option>Pré-inscrição</option><option>Formulário de contacto</option><option>Registo na app</option><option>Empresas</option>
+            </select>
+            <sc-for list="{{ leadStatusChips }}" as="f" hint-placeholder-count="5">
+              <button style="height:34px;padding:0 13px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" onClick="{{ f.pick }}"><span style="width:8px;height:8px;border-radius:99px;background:{{ f.dot }}"></span>{{ f.label }}</button>
+            </sc-for>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);flex:0 1 240px;min-width:0">
+              <dc-import name="Icon" icon="search" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+              <input placeholder="Nome, e-mail ou mensagem" value="{{ leadQuery }}" onInput="{{ setLeadQuery }}" style="border:none;background:transparent;color:var(--text);font-size:12.5px;width:100%;outline:none;min-width:0">
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:auto">
+            <div style="min-width:860px">
+              <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;gap:12px;align-items:center;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+                <span style="width:18px;flex:none"></span><span style="flex:2;min-width:0">Lead</span><span style="flex:1.2;min-width:0">Origem</span><span style="width:110px;flex:none">Perfil</span><span style="width:120px;flex:none">Fase</span><span style="flex:2;min-width:0">Mensagem</span><span style="width:104px;flex:none">Estado</span><span style="width:86px;flex:none;text-align:right">Data</span>
+              </div>
+              <sc-for list="{{ leads }}" as="ld" hint-placeholder-count="8">
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;cursor:pointer" style-hover="background:var(--surface2)" onClick="{{ ld.open }}">
+                  <span style="width:18px;height:18px;border-radius:5px;border:1px solid {{ ld.boxBorder }};background:{{ ld.boxBg }};display:flex;align-items:center;justify-content:center;flex:none" onClick="{{ ld.check }}"><dc-import name="Icon" icon="check" size="{{ 11 }}" color="{{ ld.checkColor }}" hint-size="11px,11px"></dc-import></span>
+                  <div style="flex:2;min-width:0;display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:99px;background:var(--surface3);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">{{ ld.initials }}</span><div style="display:flex;flex-direction:column;min-width:0"><strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ld.name }}</strong><span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ld.email }}</span></div></div>
+                  <span style="flex:1.2;min-width:0;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden"><dc-import name="Icon" icon="{{ ld.srcIcon }}" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ ld.source }}</span>
+                  <span style="width:110px;flex:none;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ ld.profile }}</span>
+                  <span style="width:120px;flex:none"><span style="font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px;background:{{ ld.phaseBg }};color:{{ ld.phaseColor }};white-space:nowrap">{{ ld.phase }}</span></span>
+                  <span style="flex:2;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ld.message }}</span>
+                  <span style="width:104px;flex:none"><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ ld.tagBg }};color:#fff;white-space:nowrap">{{ ld.status }}</span></span>
+                  <span style="width:86px;flex:none;text-align:right;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ ld.date }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:12.5px;color:var(--muted)">{{ leadCount }}</span>
+            <div style="margin-left:auto;display:{{ bulkShow }};gap:8px;flex-wrap:wrap">
+              <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ bulkContacted }}">Marcar como contactados</button>
+              <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ bulkInvite }}">Enviar convite de lançamento</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sTrafego }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;padding:3px;border-radius:10px;border:1px solid var(--border);background:var(--surface2)"><sc-for list="{{ trSites }}" as="ts" hint-placeholder-count="3"><button style="height:30px;padding:0 12px;border-radius:7px;border:none;background:{{ ts.bg }};color:{{ ts.color }};box-shadow:{{ ts.shadow }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" onClick="{{ ts.pick }}">{{ ts.label }}</button></sc-for></div>
+            <div style="margin-left:auto;display:flex;padding:3px;border-radius:10px;border:1px solid var(--border);background:var(--surface2)"><sc-for list="{{ trRanges }}" as="rg" hint-placeholder-count="3"><button style="height:30px;padding:0 12px;border-radius:7px;border:none;background:{{ rg.bg }};color:{{ rg.color }};box-shadow:{{ rg.shadow }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" onClick="{{ rg.pick }}">{{ rg.label }}</button></sc-for></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <sc-for list="{{ trKpis }}" as="k" hint-placeholder-count="6">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:15px;display:flex;flex-direction:column;gap:8px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:700">{{ k.value }}</strong>
+                <span style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted)"><dc-import name="Icon" icon="{{ k.icon }}" size="{{ 14 }}" color="var(--accent)" hint-size="14px,14px"></dc-import>{{ k.label }}</span>
+                <span style="font-size:12px;font-weight:700;color:{{ k.deltaColor }}">{{ k.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><strong style="font-size:14px">{{ trChartTitle }}</strong><span style="margin-left:auto;display:flex;gap:14px;flex-wrap:wrap"><sc-for list="{{ trLegend }}" as="lg" hint-placeholder-count="2"><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)"><span style="width:10px;height:10px;border-radius:3px;background:{{ lg.c }}"></span>{{ lg.label }}</span></sc-for></span></div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:200px">
+              <sc-for list="{{ trBars }}" as="b" hint-placeholder-count="14">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end" title="{{ b.tip }}">
+                  <div style="width:100%;max-width:30px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px">
+                    <div style="height:{{ b.h2 }};border-radius:5px 5px 2px 2px;background:var(--accent)"></div>
+                    <div style="height:{{ b.h1 }};border-radius:2px;background:var(--border2)"></div>
+                  </div>
+                  <span style="font-size:12px;color:var(--muted);white-space:nowrap">{{ b.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch">
+            <sc-for list="{{ trLists }}" as="ls" hint-placeholder-count="3">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+                <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px"><dc-import name="Icon" icon="{{ ls.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import><strong style="font-size:13.5px">{{ ls.title }}</strong><span style="margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">{{ ls.unit }}</span></div>
+                <sc-for list="{{ ls.rows }}" as="rw" hint-placeholder-count="5">
+                  <div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--border)">
+                    <div style="display:flex;gap:10px;font-size:13px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ rw.label }}</span><strong style="margin-left:auto;white-space:nowrap">{{ rw.value }}</strong></div>
+                    <div style="height:5px;border-radius:99px;background:var(--surface2)"><div style="height:100%;width:{{ rw.pct }};border-radius:99px;background:var(--accent)"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <span style="font-size:12.5px;color:var(--muted);line-height:1.55;display:flex;gap:8px;align-items:flex-start"><dc-import name="Icon" icon="shield-check" size="{{ 14 }}" color="var(--ok)" hint-size="14px,14px"></dc-import>Medição sem cookies e anonimizada (sem dados pessoais), compatível com o RGPD — não exige banner de consentimento.</span>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <sc-if value="{{ userModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;justify-content:flex-end" onClick="{{ closeUser }}">
+      <div style="width:100%;max-width:460px;height:100vh;overflow:auto;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column" onClick="{{ stop }}">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+          <span style="width:44px;height:44px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex:none">{{ selUser.initials }}</span>
+          <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+            <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selUser.name }}</strong>
+            <span style="font-size:12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ selUser.email }}</span>
+          </div>
+          <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" onClick="{{ closeUser }}">
+            <dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+          </button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:16px;flex:1">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">
+            <sc-for list="{{ selUser.facts }}" as="f" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:12px;display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:12.5px;color:var(--muted)">{{ f.label }}</span>
+                <strong style="font-size:13px">{{ f.value }}</strong>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Atividade</span>
+            <sc-for list="{{ selUser.activity }}" as="ac" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;border:1px solid var(--border);background:var(--surface2)">
+                <dc-import name="Icon" icon="{{ ac.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>
+                <span style="font-size:12.5px;min-width:0;flex:1">{{ ac.label }}</span>
+                <span style="font-size:12.5px;color:var(--muted);white-space:nowrap">{{ ac.when }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Alterar plano
+            <select value="{{ selUser.plan }}" onChange="{{ changePlan }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+              <option>Gratuito</option><option>Essential</option><option>Smarter</option><option>Premium</option><option>Interno</option>
+            </select>
+          </label>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--danger);background:transparent;color:var(--danger);font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--danger);color:#fff" onClick="{{ suspendUser }}">{{ suspendLabel }}</button>
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ resetUser }}">Repor palavra-passe</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ saveUser }}">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ accModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closeAcc }}">
+      <div style="width:100%;max-width:640px;max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;display:flex;flex-direction:column" onClick="{{ stop }}">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px"><dc-import name="Icon" icon="at-sign" size="{{ 18 }}" color="var(--accent)" hint-size="18px,18px"></dc-import><strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px">{{ accTitle }}</strong></div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Endereço<input value="{{ accAddress }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Nome a apresentar<input value="Suporte UProperty Market" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label></div>
+          <span style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Receção</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Protocolo<select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600"><option>IMAP (recomendado)</option><option>POP3</option></select></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Servidor<input value="imap.upm.pt" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Porta<input value="993" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Segurança<select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600"><option>SSL/TLS</option><option>STARTTLS</option><option>Nenhuma</option></select></label></div>
+          <span style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Envio (SMTP)</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Servidor<input value="smtp.upm.pt" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Porta<input value="587" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Segurança<select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600"><option>STARTTLS</option><option>SSL/TLS</option></select></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Utilizador<input value="{{ accAddress }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Palavra-passe<input type="password" value="••••••••••" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;min-width:0"></label></div>
+          <span style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Associação</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Departamento<select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600"><option>Suporte</option><option>Financeiro</option><option>Moderação</option></select></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Responsável<select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600"><option>Miguel Torres</option><option>Sofia Lima</option><option>Toda a equipa do departamento</option></select></label></div>
+          <span style="font-size:12.5px;color:{{ testColor }};display:flex;align-items:center;gap:8px"><dc-import name="Icon" icon="{{ testIcon }}" size="{{ 14 }}" color="{{ testColor }}" hint-size="14px,14px"></dc-import>{{ testText }}</span>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap"><button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ testAcc }}"><dc-import name="Icon" icon="plug-zap" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Testar ligação</button><button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ closeAcc }}"><dc-import name="Icon" icon="x" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Cancelar</button><button style="height:36px;padding:0 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:var(--accent-hover)" onClick="{{ saveAcc }}"><dc-import name="Icon" icon="save" size="{{ 14 }}" color="#fff" hint-size="14px,14px"></dc-import>Guardar caixa</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ leadModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;justify-content:flex-end" onClick="{{ closeLead }}">
+      <div style="width:100%;max-width:460px;height:100vh;overflow:auto;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column" onClick="{{ stop }}">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+          <span style="width:44px;height:44px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:none">{{ lv.initials }}</span>
+          <div style="display:flex;flex-direction:column;min-width:0;flex:1"><strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px">{{ lv.name }}</strong><span style="font-size:12.5px;color:var(--muted)">{{ lv.email }} · {{ lv.phone }}</span></div>
+          <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" onClick="{{ closeLead }}"><dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import></button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:16px;flex:1">
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ lv.tagBg }};color:#fff">{{ lv.status }}</span><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:6px;background:{{ lv.phaseBg }};color:{{ lv.phaseColor }}">{{ lv.phase }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Mensagem</span><p style="margin:0;font-size:13.5px;line-height:1.65;padding:13px 14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)">{{ lv.message }}</p></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ lv.facts }}" as="f" hint-placeholder-count="7"><div style="display:flex;gap:12px;font-size:12.5px"><span style="color:var(--muted)">{{ f.k }}</span><strong style="margin-left:auto;text-align:right;font-weight:600;overflow-wrap:anywhere">{{ f.v }}</strong></div></sc-for>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Nota interna<textarea placeholder="Ex.: ligar na segunda-feira de manhã" style="min-height:80px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:10px 12px;font-size:13px;line-height:1.55;resize:vertical"></textarea></label>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button style="height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--danger);color:var(--danger)" onClick="{{ discardLead }}">Descartar</button>
+          <button style="height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ contactLead }}">Marcar contactado</button>
+          <button style="height:42px;padding:0 16px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ convertLead }}">Converter em conta</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ planModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closePlan }}">
+      <div style="width:100%;max-width:620px;max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;display:flex;flex-direction:column" onClick="{{ stop }}">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+          <span style="width:12px;height:38px;border-radius:6px;background:{{ pe.color }};flex:none"></span>
+          <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+            <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px">{{ pe.title }}</strong>
+            <span style="font-size:12.5px;color:var(--muted)">{{ pe.subs }} subscritores · MRR {{ pe.mrr }}</span>
+          </div>
+          <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" onClick="{{ closePlan }}">
+            <dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+          </button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Nome do plano
+              <input value="{{ pe.name }}" onInput="{{ setPeName }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Público
+              <select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+                <option>Proprietários</option><option>Compradores</option><option>Proprietários e compradores</option><option>Empresas</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Preço anual (€)
+              <input value="{{ pe.yearly }}" onInput="{{ setPeYearly }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:700">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Preço mensal (€)
+              <input value="{{ pe.monthly }}" onInput="{{ setPeMonthly }}" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:700">
+            </label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Limites</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+              <sc-for list="{{ pe.limits }}" as="lm" hint-placeholder-count="4">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)">{{ lm.label }}
+                  <input value="{{ lm.value }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:700">
+                </label>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Funcionalidades incluídas</span>
+            <sc-for list="{{ pe.features }}" as="ft" hint-placeholder-count="6">
+              <button style="text-align:left;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer" onClick="{{ ft.toggle }}">
+                <span style="width:22px;height:22px;border-radius:7px;background:{{ ft.boxBg }};border:1px solid {{ ft.boxBorder }};display:flex;align-items:center;justify-content:center;flex:none">
+                  <dc-import name="Icon" icon="check" size="{{ 13 }}" color="{{ ft.checkColor }}" hint-size="13px,13px"></dc-import>
+                </span>
+                <span style="font-size:12.5px;font-weight:600;color:var(--text)">{{ ft.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)">
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+              <strong style="font-size:12.5px">Plano visível na página de preços</strong>
+              <span style="font-size:12.5px;color:var(--muted);line-height:1.45">Desligado, o plano mantém os subscritores atuais mas deixa de estar à venda.</span>
+            </div>
+            <button style="width:46px;height:26px;border-radius:99px;border:none;background:{{ pe.visTrack }};cursor:pointer;position:relative;flex:none" onClick="{{ togglePeVis }}">
+              <span style="position:absolute;top:3px;left:{{ pe.visKnob }};width:20px;height:20px;border-radius:99px;background:#fff;transition:left .18s ease"></span>
+            </button>
+          </div>
+          <span style="font-size:12.5px;color:var(--warn);display:flex;align-items:flex-start;gap:8px;line-height:1.5;padding:11px 13px;border-radius:11px;background:var(--warn-soft)">
+            <dc-import name="Icon" icon="info" size="{{ 14 }}" color="var(--warn)" hint-size="14px,14px"></dc-import>Alterações de preço aplicam-se a novas subscrições e às renovações a partir da próxima data de faturação.
+          </span>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" onClick="{{ closePlan }}">Cancelar</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ savePlan }}">{{ pe.cta }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ modModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closeMod }}">
+      <div style="width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px" onClick="{{ stop }}">
+        <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px">{{ modTitle }}</strong>
+        <span style="font-size:12.5px;color:var(--muted);line-height:1.6">{{ modHint }}</span>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Motivo
+          <select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+            <option>Fotografias insuficientes</option><option>Descrição incompleta</option><option>Documentação em falta</option><option>Preço fora de mercado</option><option>Conteúdo impróprio</option>
+          </select>
+        </label>
+        <textarea placeholder="Nota para o proprietário (opcional)…" style="min-height:96px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:11px 12px;font-size:13.5px;line-height:1.55;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" onClick="{{ closeMod }}">Cancelar</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:{{ modCtaBg }};color:#fff;font-size:13px;font-weight:700;cursor:pointer" onClick="{{ confirmMod }}">{{ modCta }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ bugOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closeBug }}">
+      <div style="width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px" onClick="{{ stop }}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <dc-import name="Icon" icon="bug" size="{{ 18 }}" color="var(--accent)" hint-size="18px,18px"></dc-import>
+          <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px">Reportar um problema</strong>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);line-height:1.6">Descreva o que aconteceu. Os dados técnicos são recolhidos automaticamente.</span>
+        <input placeholder="O que correu mal?" style="height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+        <textarea placeholder="Conte-nos o que estava a fazer…" style="min-height:100px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:11px 12px;font-size:13.5px;line-height:1.55;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" onClick="{{ closeBug }}">Cancelar</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ sendBug }}">Enviar report</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:120;background:#0B1220;color:#E6EDF6;border:1px solid #1E293B;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:600">{{ toastText }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#EA580C&quot;,&quot;#0F766E&quot;,&quot;#1D4ED8&quot;,&quot;#9333EA&quot;],&quot;default&quot;:&quot;#EA580C&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;},&quot;railDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Navegação&quot;}}">
+class Component extends DCLogic {
+  state = {
+    route: 'painel', theme: 'light', rail: false, range: '12 meses',
+    notifOpen: false, notifRead: false, langOpen: false, lang: 'pt',
+    bugOpen: false, toast: '',
+    userFilter: 'Todos', userQuery: '', userModal: false, selUserId: '',
+    userState: {}, propFilter: 'Em fila', modState: {},
+    modModal: false, modKind: '', modTarget: '',
+    tplKind: 'venda', tplId: 'Contrato de reserva v3', tplName: '', viewMode: 'editar', varMenu: false,
+    flags: { registos: true, moderacao: true, destaques: true, beta: false }
+  };
+
+  componentDidMount() { this.setState({ theme: document.documentElement.getAttribute('data-theme') || 'light' }); }
+
+  toast = (t) => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2400); };
+
+  download(name, content) {
+    try {
+      const url = URL.createObjectURL(new Blob([content || 'UProperty Market\n'], { type: 'text/plain' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      this.toast('Transferência iniciada · ' + name);
+    } catch (e) { this.toast('Não foi possível transferir'); }
+  }
+
+  solid(s) {
+    return ({
+      'Ativo': '#0D9488', 'Pendente': '#B45309', 'Suspenso': '#DC2626', 'Verificação': '#B45309',
+      'Aprovado': '#0D9488', 'Em fila': '#B45309', 'Rejeitado': '#DC2626', 'Reportado': '#DC2626',
+      'Publicado': '#0D9488', 'Rascunho': '#64748B', 'Arquivado': '#334155',
+      'Paga': '#0D9488', 'Falhada': '#DC2626', 'Reembolsada': '#334155',
+      'Crítica': '#DC2626', 'Alta': '#B45309', 'Média': '#1D4ED8', 'Baixa': '#64748B',
+      'Novo': '#0EA5E9', 'Triagem': '#B45309', 'Em curso': '#EA580C', 'Em teste': '#1D4ED8', 'Resolvido': '#0D9488',
+      'Contactado': '#1D4ED8', 'Convertido': '#0D9488', 'Descartado': '#64748B', 'Ligada': '#0D9488', 'Erro de ligação': '#DC2626', 'Proprietário': '#1D4ED8', 'Comprador': '#7C3AED', 'IT': '#334155', 'Administração': '#EA580C'
+    })[s] || '#64748B';
+  }
+
+  usersData() {
+    const ov = this.state.userState;
+    return [
+      { id: 'u1', name: 'Ana Silva', email: 'ana.silva@email.pt', role: 'Proprietário', plan: 'Premium', status: ov.u1 || 'Ativo', since: 'Mar 2026', props: '4', spend: '59,90 €' },
+      { id: 'u2', name: 'João Costa', email: 'joao.costa@email.pt', role: 'Comprador', plan: 'Smarter', status: ov.u2 || 'Ativo', since: 'Jun 2026', props: '0', spend: '29,90 €' },
+      { id: 'u3', name: 'Carla Nunes', email: 'carla.nunes@email.pt', role: 'Proprietário', plan: 'Essential', status: ov.u3 || 'Ativo', since: 'Jan 2026', props: '3', spend: '5,99 €' },
+      { id: 'u4', name: 'Rui Mendes', email: 'rui.mendes@email.pt', role: 'Proprietário', plan: 'Smarter', status: ov.u4 || 'Verificação', since: 'Set 2026', props: '3', spend: '0 €' },
+      { id: 'u5', name: 'Marta Reis', email: 'marta.reis@email.pt', role: 'Comprador', plan: 'Gratuito', status: ov.u5 || 'Ativo', since: 'Ago 2026', props: '0', spend: '0 €' },
+      { id: 'u6', name: 'Pedro Alves', email: 'pedro.alves@email.pt', role: 'Comprador', plan: 'Essential', status: ov.u6 || 'Suspenso', since: 'Mai 2026', props: '0', spend: '5,99 €' },
+      { id: 'u7', name: 'Miguel Torres', email: 'miguel@upm.pt', role: 'IT', plan: 'Interno', status: ov.u7 || 'Ativo', since: 'Jan 2026', props: '0', spend: '—' },
+      { id: 'u8', name: 'Sofia Lima', email: 'sofia@upm.pt', role: 'IT', plan: 'Interno', status: ov.u8 || 'Ativo', since: 'Fev 2026', props: '0', spend: '—' }
+    ];
+  }
+
+  modData() {
+    const ov = this.state.modState;
+    return [
+      { id: 'm1', title: 'Quinta com 2 hectares', location: 'Évora · Arraiolos', owner: 'Carla Nunes', price: '540 000 €', specs: 'T5 · 2 ha · 3 WC', submitted: 'submetido há 20 min', status: ov.m1 || 'Em fila', check: 'Documentação completa · 18 fotografias', checkTone: 'ok' },
+      { id: 'm2', title: 'Apartamento T2 com terraço', location: 'Braga · São Vítor', owner: 'Rui Mendes', price: '189 000 €', specs: 'T2 · 86 m² · 2 WC', submitted: 'submetido há 1 h', status: ov.m2 || 'Em fila', check: 'Falta o certificado energético', checkTone: 'warn' },
+      { id: 'm3', title: 'Apartamento T4 vista rio', location: 'Porto · Foz do Douro', owner: 'Carla Nunes', price: '890 000 €', specs: 'T4 · 198 m² · 3 WC', submitted: 'aprovado hoje, 09h12', status: ov.m3 || 'Aprovado', check: 'Tudo verificado', checkTone: 'ok' },
+      { id: 'm4', title: 'Apartamento T1 no centro', location: 'Faro · Sé', owner: 'Rui Mendes', price: '165 000 €', specs: 'T1 · 58 m² · 1 WC', submitted: 'rejeitado ontem', status: ov.m4 || 'Rejeitado', check: 'Fotografias insuficientes (3 de 8)', checkTone: 'danger' },
+      { id: 'm5', title: 'Moradia T3 térrea', location: 'Setúbal · Azeitão', owner: 'Ana Silva', price: '395 000 €', specs: 'T3 · 160 m² · 3 WC', submitted: 'reportado por 2 utilizadores', status: ov.m5 || 'Reportado', check: 'Suspeita de preço enganoso', checkTone: 'danger' }
+    ];
+  }
+
+  tplSource(kind) {
+    return kind === 'arrendamento' ? [
+      ['h1', 'CONTRATO DE ARRENDAMENTO URBANO'],
+      ['p', 'Entre {proprietario}, adiante designada Senhoria, e {inquilino}, adiante designado Arrendatário.'],
+      ['h2', '1. Objeto'],
+      ['p', 'A Senhoria dá de arrendamento o imóvel {imovel}, destinado a habitação própria permanente.'],
+      ['h2', '2. Renda'],
+      ['p', 'A renda mensal é de {renda}, a pagar até ao dia 8 do mês a que respeita.'],
+      ['h2', '3. Prazo'],
+      ['p', 'O contrato tem a duração de {duracao}, com início em {data}, renovável por períodos iguais.'],
+      ['h2', '4. Caução'],
+      ['p', 'O Arrendatário entrega, a título de caução, o equivalente a dois meses de renda.']
+    ] : [
+      ['h1', 'CONTRATO DE RESERVA'],
+      ['p', 'Entre {proprietario}, adiante designada Primeira Outorgante, e {comprador}, adiante designado Segundo Outorgante.'],
+      ['h2', '1. Objeto'],
+      ['p', 'O presente contrato tem por objeto a reserva do imóvel {imovel}, pelo preço de {preco}.'],
+      ['h2', '2. Sinal'],
+      ['p', 'O Segundo Outorgante entrega, a título de sinal, o valor de {sinal}, no prazo de cinco dias úteis.'],
+      ['h2', '3. Prazo'],
+      ['p', 'A escritura pública será celebrada no prazo de 90 dias a contar de {data}.'],
+      ['h2', '4. Documentação'],
+      ['p', 'A Primeira Outorgante disponibiliza a certidão permanente, a caderneta predial e o certificado energético.']
+    ];
+  }
+
+  templatesFor(kind) {
+    return kind === 'venda' ? [
+      ['Contrato de reserva v3', 'Venda · publicado 12 set', 'Publicado', '218 usos'],
+      ['Contrato-promessa de compra e venda', 'Venda · publicado 08 set', 'Publicado', '96 usos'],
+      ['Declaração de visita', 'Venda · rascunho', 'Rascunho', '—']
+    ] : [
+      ['Contrato de arrendamento v2', 'Arrendamento · publicado 04 ago', 'Publicado', '142 usos'],
+      ['Arrendamento não habitacional', 'Arrendamento · publicado 30 jul', 'Publicado', '31 usos'],
+      ['Adenda de atualização de renda', 'Arrendamento · arquivado', 'Arquivado', '12 usos']
+    ];
+  }
+
+  openPlan(p) {
+    const defaults = {
+      'Essential': ['5,99', '0,69', ['1', '3', '1', '—'], ['Anúncio de imóvel', 'Agenda de visitas', 'Chat com interessados']],
+      'Smarter': ['29,90', '2,99', ['5', '5', '4', '5 GB'], ['Anúncio de imóvel', 'Agenda de visitas', 'Chat com interessados', 'Cloud de documentação', 'Suporte prioritário']],
+      'Premium': ['59,90', '5,99', ['∞', '∞', '∞', '20 GB'], ['Anúncio de imóvel', 'Agenda de visitas', 'Chat com interessados', 'Cloud de documentação', 'Suporte prioritário', 'Destaque permanente', 'Editor de contratos']],
+      'Premium Comprador': ['49,90', '4,99', ['∞', '∞', '∞', '10 GB'], ['Chat com interessados', 'Alertas de preço', 'Cloud de documentação', 'Suporte prioritário']],
+      'Gratuito': ['0', '0', ['0', '1', '1', '—'], ['Chat com interessados']]
+    };
+    const d = p ? (defaults[p.name] || defaults.Essential) : ['', '', ['1', '3', '1', '—'], []];
+    this.setState({ planModal: true, pe: {
+      isNew: !p, name: p ? p.name : 'Novo plano', color: p ? p.color : '#94A3B8',
+      subs: p ? p.subs : '0', mrr: p ? p.mrr : '0 €',
+      yearly: d[0], monthly: d[1], limits: d[2], features: d[3], visible: true
+    } });
+  }
+
+  planEditor() {
+    const pe = this.state.pe || { features: [], limits: ['', '', '', ''] };
+    const all = ['Anúncio de imóvel', 'Agenda de visitas', 'Chat com interessados', 'Cloud de documentação', 'Alertas de preço', 'Suporte prioritário', 'Destaque permanente', 'Editor de contratos'];
+    return {
+      title: pe.isNew ? 'Criar plano' : 'Editar plano · ' + (pe.name || ''),
+      name: pe.name || '', color: pe.color || '#94A3B8', subs: pe.subs || '0', mrr: pe.mrr || '0 €',
+      yearly: pe.yearly || '', monthly: pe.monthly || '',
+      limits: ['Imóveis ativos', 'Visitas agendadas', 'Chats ativos', 'Cloud'].map((label, i) => ({ label, value: (pe.limits || [])[i] || '' })),
+      features: all.map(label => {
+        const on = (pe.features || []).indexOf(label) >= 0;
+        return {
+          label, boxBg: on ? 'var(--accent)' : 'transparent', boxBorder: on ? 'var(--accent)' : 'var(--border2)',
+          checkColor: on ? '#fff' : 'transparent',
+          toggle: () => {
+            const cur = pe.features || [];
+            this.setState({ pe: Object.assign({}, pe, { features: on ? cur.filter(x => x !== label) : cur.concat(label) }) });
+          }
+        };
+      }),
+      visTrack: pe.visible ? 'var(--accent)' : 'var(--border2)', visKnob: pe.visible ? '23px' : '3px',
+      cta: pe.isNew ? 'Criar plano' : 'Guardar alterações'
+    };
+  }
+
+  leadsData() {
+    const ov = (this.state || {}).leadState || {};
+    return [
+      { id: 'l1', name: 'Sofia Andrade', email: 'sofia.andrade@email.pt', phone: '+351 912 334 101', source: 'Pré-inscrição', profile: 'Proprietário', phase: 'Pré-lançamento', message: 'Tenho dois apartamentos em Lisboa para vender e quero ser das primeiras a publicar.', status: 'Novo', date: '21 set', utm: 'instagram / pre-launch', consent: 'Sim · 21 set 2026, 10h14', city: 'Lisboa' },
+      { id: 'l2', name: 'Construtora Horizonte, Lda.', email: 'comercial@horizonte.pt', phone: '+351 222 104 880', source: 'Empresas', profile: 'Empresa', phase: 'Pré-lançamento', message: 'Temos um empreendimento de 24 frações em Matosinhos. Gostávamos de saber condições para empresas.', status: 'Contactado', date: '19 set', utm: 'google / empresas', consent: 'Sim · 19 set 2026, 15h02', city: 'Porto' },
+      { id: 'l3', name: 'Tiago Ramos', email: 'tiago.ramos@email.pt', phone: '—', source: 'Formulário de contacto', profile: 'Comprador', phase: 'Pré-lançamento', message: 'Quando é que a plataforma abre? Procuro T2 em Braga até 220 000 €.', status: 'Novo', date: '18 set', utm: 'direto', consent: 'Sim · 18 set 2026, 21h40', city: 'Braga' },
+      { id: 'l4', name: 'Inês Faria', email: 'ines.faria@email.pt', phone: '+351 936 002 771', source: 'Pré-inscrição', profile: 'Comprador', phase: 'Pré-lançamento', message: 'Quero ser avisada quando houver moradias em Cascais.', status: 'Convertido', date: '12 set', utm: 'facebook / pre-launch', consent: 'Sim · 12 set 2026, 09h31', city: 'Cascais' },
+      { id: 'l5', name: 'Nuno Pereira', email: 'nuno.pereira@email.pt', phone: '+351 917 440 229', source: 'Registo na app', profile: 'Proprietário', phase: 'Após lançamento', message: 'Registo concluído · ainda não publicou o primeiro imóvel.', status: 'Novo', date: 'hoje', utm: 'google / marca', consent: 'Sim · 22 set 2026, 08h05', city: 'Setúbal' },
+      { id: 'l6', name: 'Beatriz Lopes', email: 'beatriz.lopes@email.pt', phone: '—', source: 'Formulário de contacto', profile: 'Comprador', phase: 'Após lançamento', message: 'O plano Smarter inclui alertas de descida de preço?', status: 'Contactado', date: 'ontem', utm: 'direto', consent: 'Sim · 21 set 2026, 18h22', city: 'Lisboa' },
+      { id: 'l7', name: 'Imobiliária Norte', email: 'geral@imonorte.pt', phone: '+351 253 900 110', source: 'Formulário de contacto', profile: 'Empresa', phase: 'Após lançamento', message: 'Podemos publicar como agência?', status: 'Descartado', date: '20 set', utm: 'linkedin', consent: 'Sim · 20 set 2026, 11h48', city: 'Braga' },
+      { id: 'l8', name: 'Rita Bastos', email: 'rita.bastos@email.pt', phone: '+351 964 118 330', source: 'Registo na app', profile: 'Comprador', phase: 'Após lançamento', message: 'Registo concluído · guardou 3 imóveis.', status: 'Convertido', date: '17 set', utm: 'instagram / anuncio', consent: 'Sim · 17 set 2026, 13h10', city: 'Lisboa' }
+    ].map(l => Object.assign({}, l, { status: ov[l.id] || l.status }));
+  }
+
+  exportLeads() {
+    const rows = [['Nome', 'E-mail', 'Telefone', 'Origem', 'Perfil', 'Fase', 'Estado', 'Data', 'Mensagem']].concat(this.leadsData().map(l => [l.name, l.email, l.phone, l.source, l.profile, l.phase, l.status, l.date, l.message]));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\n');
+    try {
+      const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+      const el = document.createElement('a'); el.href = url; el.download = 'leads-upm.csv';
+      document.body.appendChild(el); el.click(); el.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      this.toast('Transferência iniciada · leads-upm.csv');
+    } catch (e) { this.toast('Não foi possível exportar'); }
+  }
+
+
+  metricRanges(key) {
+    const st = this.state, cur = st[key] || '30d';
+    return [['7d', '7 dias'], ['30d', '30 dias'], ['90d', '90 dias']].map(([k, label]) => ({ label, pick: () => this.setState({ [key]: k }), bg: cur === k ? 'var(--surface)' : 'transparent', color: cur === k ? 'var(--text)' : 'var(--muted)', shadow: cur === k ? '0 1px 2px rgba(2,6,23,.16)' : 'none' }));
+  }
+
+  metricBars(key, a, b, tipA, tipB) {
+    const cur = this.state[key] || '30d', n = cur === '7d' ? 7 : 14;
+    const mul = cur === '90d' ? 3 : 1;
+    const days = cur === '7d' ? ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'] : Array.from({ length: n }, (x, i) => cur === '90d' ? 's' + (i + 1) : String(10 + i));
+    const A = days.map((d, i) => Math.round((a[i % a.length]) * mul)), B = days.map((d, i) => Math.round((b[i % b.length]) * mul));
+    const mx = Math.max.apply(null, A.map((v, i) => v + B[i])) || 1;
+    return days.map((d, i) => ({ label: d, h1: Math.round(A[i] / mx * 170) + 'px', h2: Math.round(B[i] / mx * 170) + 'px', tip: d + ' · ' + tipA + ' ' + A[i] + ' · ' + tipB + ' ' + B[i] }));
+  }
+
+  metricList(icon, title, unit, rows) {
+    const mx = Math.max.apply(null, rows.map(r => r[1])) || 1;
+    return { icon, title, unit, rows: rows.map(r => ({ label: r[0], value: r[2] || String(r[1]).replace(/\B(?=(\d{3})+(?!\d))/g, ' '), pct: Math.round(r[1] / mx * 100) + '%' })) };
+  }
+
+  trafficVals() {
+    const st = this.state, site = st.trSite || 'all', rg = st.trRange || '30d';
+    const f = (rg === '7d' ? 0.24 : rg === '90d' ? 2.9 : 1) * (site === 'pre' ? 0.62 : site === 'pos' ? 0.38 : 1);
+    const fmt = (v) => String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const convLabel = site === 'pos' ? 'Contas criadas' : 'Pré-inscrições';
+    return {
+      sTrafego: st.route === 'trafego',
+      trSites: [['all', 'Todo o site'], ['pre', 'Pré-lançamento'], ['pos', 'Pós-lançamento']].map(([k, label]) => ({ label, pick: () => this.setState({ trSite: k }), bg: site === k ? 'var(--surface)' : 'transparent', color: site === k ? 'var(--text)' : 'var(--muted)', shadow: site === k ? '0 1px 2px rgba(2,6,23,.16)' : 'none' })),
+      trRanges: this.metricRanges('trRange'),
+      trKpis: [
+        ['eye', 'Visitas', fmt(18420 * f), '+18% vs período anterior', 'var(--ok)'],
+        ['users', 'Visitantes únicos', fmt(11960 * f), '+14%', 'var(--ok)'],
+        ['user-plus', convLabel, fmt(612 * f), '+22%', 'var(--ok)'],
+        ['percent', 'Conversão', '5,1%', '+0,6 p.p.', 'var(--ok)'],
+        ['timer', 'Tempo médio', '2 min 38 s', '+12 s', 'var(--ok)'],
+        ['log-out', 'Taxa de rejeição', '41%', '−3 p.p.', 'var(--ok)']
+      ].map(k => ({ icon: k[0], label: k[1], value: k[2], delta: k[3], deltaColor: k[4] })),
+      trChartTitle: 'Visitas e conversões por dia', trLegend: [{ label: 'Visitas', c: 'var(--border2)' }, { label: convLabel, c: 'var(--accent)' }],
+      trBars: this.metricBars('trRange', [520, 610, 580, 720, 860, 470, 390, 650, 700, 810, 760, 540, 690, 740], [22, 28, 25, 38, 46, 19, 14, 31, 35, 44, 40, 24, 33, 37], 'visitas', convLabel.toLowerCase()),
+      trLists: [
+        this.metricList('file-text', 'Páginas mais vistas', 'visitas', [['/ (início)', Math.round(9420 * f)], ['/#precos', Math.round(3310 * f)], ['/#plataforma', Math.round(2870 * f)], ['/#empresas', Math.round(1240 * f)], [site === 'pos' ? '/imoveis' : '/pre-inscricao', Math.round(1580 * f)]]),
+        this.metricList('share-2', 'Origem', 'visitas', [['Pesquisa Google', Math.round(6810 * f)], ['Direto', Math.round(4920 * f)], ['Instagram', Math.round(3140 * f)], ['Facebook', Math.round(1870 * f)], ['LinkedIn', Math.round(980 * f)], ['Outros sites', Math.round(700 * f)]]),
+        this.metricList('monitor-smartphone', 'Dispositivos', 'visitas', [['Telemóvel', Math.round(11240 * f), (fmt(11240 * f)) + ' · 61%'], ['Computador', Math.round(6310 * f), fmt(6310 * f) + ' · 34%'], ['Tablet', Math.round(870 * f), fmt(870 * f) + ' · 5%']]),
+        this.metricList('map-pin', 'Cidades', 'visitas', [['Lisboa', Math.round(6120 * f)], ['Porto', Math.round(3980 * f)], ['Braga', Math.round(1420 * f)], ['Faro', Math.round(1130 * f)], ['Coimbra', Math.round(980 * f)]])
+      ]
+    };
+  }
+
+  renderVals() {
+    return Object.assign(this.baseVals(), this.trafficVals());
+  }
+
+  baseVals() {
+    const st = this.state, r = st.route, rail = st.rail;
+    const lq = (st.leadQuery || '').trim().toLowerCase();
+    const leadList = this.leadsData().filter(l => ((st.leadPhase || 'Todas') === 'Todas' || l.phase === st.leadPhase) && ((st.leadSource || 'Todas as origens') === 'Todas as origens' || l.source === st.leadSource) && ((st.leadStatus || 'Todos') === 'Todos' || l.status === st.leadStatus) && (!lq || (l.name + ' ' + l.email + ' ' + l.message).toLowerCase().indexOf(lq) >= 0));
+    const hour = new Date().getHours();
+    const greet = hour < 13 ? 'Bom dia' : hour < 20 ? 'Boa tarde' : 'Boa noite';
+    const navItems = [
+      ['painel', 'Painel', 'layout-dashboard', ''],
+      ['leads', 'Leads do site', 'user-round-plus', String(this.leadsData().filter(l => l.status === 'Novo').length)],
+      ['utilizadores', 'Utilizadores', 'users-round', '2'],
+      ['imoveis', 'Gestão de imóveis', 'building-2', '2'],
+      ['trafego', 'Tráfego do site', 'chart-line', ''],
+      ['monetizacao', 'Planos', 'wallet', ''],
+      ['contratos', 'Modelos de contrato', 'file-signature', ''],
+      ['email', 'Caixas de e-mail', 'at-sign', ''],
+      ['reports', 'Reports', 'life-buoy', '4'],
+      ['definicoes', 'Definições', 'settings', '']
+    ];
+    const titles = {
+      painel: [greet + ', Helena', 'Visão geral da plataforma nos últimos 30 dias'],
+      leads: ['Leads do site', 'Pré-inscrições, contactos e registos vindos do site público'],
+      utilizadores: ['Utilizadores', 'Contas, perfis, planos e estado de verificação'],
+      imoveis: ['Gestão de imóveis', 'Moderação de anúncios e conteúdos reportados'],
+      trafego: ['Tráfego do site', 'Visitas, origem e conversão do site público'],
+      monetizacao: ['Planos', 'Receita, planos e faturação da plataforma'],
+      contratos: ['Modelos de contrato', 'Modelos oficiais disponibilizados aos proprietários'],
+      email: ['Caixas de e-mail', 'Ligação das caixas por IMAP/POP3 e SMTP e associação a departamentos'],
+      reports: ['Reports de bugs', 'Visão de plataforma do pipeline de suporte'],
+      definicoes: ['Definições', 'Perfil, equipa e configuração da plataforma']
+    };
+    const t = titles[r] || titles.painel;
+    const primary = ({
+      leads: ['Exportar CSV', 'file-down', () => this.exportLeads()],
+      utilizadores: ['Convidar utilizador', 'user-plus', () => this.toast('Convite enviado por e-mail')],
+      imoveis: ['Rever fila', 'shield-check', () => { this.setState({ propFilter: 'Em fila' }); this.toast('Fila de moderação'); }],
+      monetizacao: ['Novo plano', 'plus', () => this.openPlan(null)],
+      contratos: ['Novo modelo', 'file-plus', () => this.toast('Novo modelo criado')],
+      email: ['Adicionar caixa', 'plus', () => this.setState({ accModal: true, accAddr: 'novo@upm.pt', testState: '' })],
+      reports: ['Abrir pipeline', 'git-branch', () => this.toast('Pipeline de IT')],
+      definicoes: ['Guardar', 'save', () => this.toast('Definições guardadas')]
+    })[r] || ['Relatório mensal', 'file-bar-chart', () => this.download('relatorio-mensal-upm.txt', 'Relatório mensal UProperty Market')];
+
+    const barsBy = {
+      '30 dias': [['s1', 35800], ['s2', 36500], ['s3', 37900], ['s4', 38940, true]],
+      '6 meses': [['abr', 29100], ['mai', 31400], ['jun', 33200], ['jul', 35100], ['ago', 36800], ['set', 38940, true]],
+      '12 meses': [['out', 21500], ['dez', 24300], ['fev', 27800], ['abr', 29100], ['jun', 33200], ['set', 38940, true]]
+    };
+    const bars = barsBy[st.range] || barsBy['12 meses'];
+    const max = bars.reduce((m, b) => Math.max(m, b[1]), 1);
+
+    const item = (title, sub, tag, go) => ({ title, sub, tag, tagBg: this.solid(tag), go: go || (() => {}) });
+    const nav = (k) => () => this.setState({ route: k });
+
+    const users = this.usersData().filter(u => {
+      const q = st.userQuery.trim().toLowerCase();
+      return (st.userFilter === 'Todos' || u.role === st.userFilter || u.status === st.userFilter) &&
+        (!q || (u.name + ' ' + u.email).toLowerCase().indexOf(q) >= 0);
+    });
+    const selUser = this.usersData().find(u => u.id === st.selUserId) || this.usersData()[0];
+
+    const mods = this.modData().filter(m => st.propFilter === 'Todos' || m.status === st.propFilter);
+
+    const tplList = this.templatesFor(st.tplKind);
+    const tplCur = tplList.find(x => x[0] === st.tplId) || tplList[0];
+    const src = this.tplSource(st.tplKind);
+    const mode = st.viewMode;
+    const labels = { imovel: 'Imóvel', proprietario: 'Proprietário', comprador: 'Comprador', inquilino: 'Inquilino', preco: 'Preço', sinal: 'Sinal', renda: 'Renda', duracao: 'Duração', data: 'Data' };
+    const sample = { imovel: 'Apartamento T3 · Campo de Ourique', proprietario: 'Ana Silva', comprador: 'João Costa', inquilino: 'Pedro Alves', preco: '485 000 €', sinal: '24 250 €', renda: '950 €', duracao: '3 anos', data: '18 de setembro de 2026' };
+
+    const bugs = [
+      { id: 'UPM-141', title: 'Mapa mostra morada exata', severity: 'Crítica', reporter: 'João Costa', status: 'Em teste' },
+      { id: 'UPM-142', title: 'Galeria não abre em ecrã pequeno', severity: 'Alta', reporter: 'Ana Silva', status: 'Em curso' },
+      { id: 'UPM-137', title: 'Contrato sem morada fiscal', severity: 'Média', reporter: 'Ana Silva', status: 'Em curso' },
+      { id: 'UPM-139', title: 'Notificação duplicada', severity: 'Média', reporter: 'João Costa', status: 'Triagem' },
+      { id: 'UPM-138', title: 'Filtro de preço reinicia', severity: 'Baixa', reporter: 'Marta Reis', status: 'Novo' },
+      { id: 'UPM-140', title: 'Premium sem destaques', severity: 'Alta', reporter: 'Carla Nunes', status: 'Resolvido' }
+    ];
+
+    return {
+      sidebarWidth: rail ? '84px' : '248px',
+      labelShow: rail ? 'none' : 'flex',
+      brandJustify: rail ? 'center' : 'flex-start',
+      bugJustify: rail ? 'center' : 'space-between',
+      logoFullL: rail ? 'none' : 'var(--logo-l)',
+      logoFullD: rail ? 'none' : 'var(--logo-d)',
+      logoMark: rail ? 'flex' : 'none',
+      railToggleMargin: rail ? '0' : 'auto',
+      railIcon: rail ? 'panel-left-open' : 'panel-left-close',
+      railTitle: rail ? 'Expandir menu' : 'Recolher menu',
+      toggleRail: () => this.setState({ rail: !rail }),
+      nav: navItems.map(([k, label, icon, badge]) => ({
+        label, icon, badge, badgeShow: badge && !rail ? 'inline-flex' : 'none',
+        justify: rail ? 'center' : 'flex-start',
+        pick: () => { this.setState({ route: k }); window.scrollTo(0, 0); },
+        bg: r === k ? 'var(--accent-soft)' : 'transparent',
+        color: r === k ? 'var(--accent)' : 'var(--muted)'
+      })),
+      pageTitle: t[0], pageSub: t[1],
+      primaryAction: primary[0], primaryIcon: primary[1], primaryRun: primary[2],
+      exportData: () => this.download(r + '-upm.csv', 'UProperty Market · exportação de ' + r),
+      goSettings: () => this.setState({ route: 'definicoes' }),
+      openBug: () => this.setState({ bugOpen: true }),
+      closeBug: () => this.setState({ bugOpen: false }),
+      sendBug: () => { this.setState({ bugOpen: false }); this.toast('Report enviado à equipa de IT'); },
+      bugOpen: st.bugOpen, stop: (e) => e.stopPropagation(),
+      toastOpen: !!st.toast, toastText: st.toast,
+
+      themeToggle: [['light', 'Claro', 'sun'], ['dark', 'Escuro', 'moon']].map(([k, label, icon]) => {
+        const on = st.theme === k;
+        return {
+          label, icon,
+          pick: () => {
+            document.documentElement.setAttribute('data-theme', k);
+            try { localStorage.setItem('upm-theme', k); } catch (e) {}
+            this.setState({ theme: k });
+          },
+          bg: on ? 'var(--surface)' : 'transparent', color: on ? 'var(--text)' : 'var(--muted)',
+          shadow: on ? '0 1px 2px rgba(2,6,23,.16)' : 'none'
+        };
+      }),
+      langMenu: st.langOpen ? 'flex' : 'none',
+      langChevron: st.langOpen ? 'chevron-up' : 'chevron-down',
+      langBorder: st.langOpen ? 'var(--accent)' : 'var(--border)',
+      langColor: st.langOpen ? 'var(--accent)' : 'var(--text)',
+      toggleLang: () => this.setState({ langOpen: !st.langOpen }),
+      langs: [['pt', 'Português'], ['en', 'English']].map(([k, label]) => ({
+        label, bg: st.lang === k ? 'var(--accent-soft)' : 'transparent',
+        color: st.lang === k ? 'var(--accent)' : 'var(--text)',
+        pick: () => { this.setState({ lang: k, langOpen: false }); this.toast(k === 'pt' ? 'Idioma: Português' : 'Language: English'); }
+      })),
+      notifMenu: st.notifOpen ? 'flex' : 'none',
+      notifBorder: st.notifOpen ? 'var(--accent)' : 'var(--border)',
+      notifColor: st.notifOpen ? 'var(--accent)' : 'var(--text)',
+      toggleNotif: () => this.setState({ notifOpen: !st.notifOpen, langOpen: false }),
+      notifBadge: st.notifRead ? '0' : '4',
+      notifBadgeShow: st.notifRead ? 'none' : 'flex',
+      notifUnread: (st.notifRead ? 0 : 4) + ' por ler',
+      readAllNotif: (e) => { e.stopPropagation(); this.setState({ notifRead: true }); this.toast('Notificações marcadas como lidas'); },
+      allNotif: () => { this.setState({ notifOpen: false, route: 'painel' }); this.toast('Centro de notificações'); },
+      notifList: [
+        { icon: 'shield-alert', tone: 'danger', unread: true, title: 'Imóvel reportado', body: 'A Moradia T3 em Azeitão foi reportada por 2 utilizadores.', when: 'há 12 min', route: 'imoveis' },
+        { icon: 'user-plus', tone: 'info', unread: true, title: '18 novas contas', body: '12 compradores e 6 proprietários registaram-se hoje.', when: 'há 2 h', route: 'utilizadores' },
+        { icon: 'credit-card', tone: 'warn', unread: true, title: 'Pagamento falhado', body: 'A subscrição de Pedro Alves falhou a segunda tentativa.', when: 'há 4 h', route: 'monetizacao' },
+        { icon: 'life-buoy', tone: 'accent', unread: true, title: 'Bug crítico em teste', body: 'UPM-141 avançou para validação no ambiente de testes.', when: 'ontem', route: 'reports' },
+        { icon: 'file-signature', tone: 'ok', unread: false, title: 'Modelo publicado', body: 'O contrato de reserva v3 está disponível aos proprietários.', when: '12 set', route: 'contratos' }
+      ].map(n => ({
+        title: n.title, body: n.body, when: n.when, icon: n.icon,
+        iconBg: n.tone === 'ok' ? 'var(--ok-soft)' : n.tone === 'warn' ? 'var(--warn-soft)' : n.tone === 'info' ? 'var(--info-soft)' : n.tone === 'danger' ? 'var(--danger-soft)' : 'var(--accent-soft)',
+        iconColor: n.tone === 'ok' ? 'var(--ok)' : n.tone === 'warn' ? 'var(--warn)' : n.tone === 'info' ? 'var(--info)' : n.tone === 'danger' ? 'var(--danger)' : 'var(--accent)',
+        bg: n.unread && !st.notifRead ? 'var(--accent-soft)' : 'transparent',
+        dot: n.unread && !st.notifRead ? 'var(--accent)' : 'transparent',
+        go: () => this.setState({ notifOpen: false, route: n.route })
+      })),
+
+      sLeads: r === 'leads',
+      leadStats: [
+        { icon: 'users-round', label: 'Leads totais', value: String(this.leadsData().length), delta: '+5 esta semana', deltaColor: 'var(--ok)' },
+        { icon: 'rocket', label: 'Pré-inscrições', value: String(this.leadsData().filter(l => l.phase === 'Pré-lançamento').length), delta: 'antes da abertura', deltaColor: 'var(--muted)' },
+        { icon: 'circle-check', label: 'Taxa de conversão', value: Math.round(this.leadsData().filter(l => l.status === 'Convertido').length / this.leadsData().length * 100) + '%', delta: 'leads com conta criada', deltaColor: 'var(--ok)' },
+        { icon: 'inbox', label: 'Por contactar', value: String(this.leadsData().filter(l => l.status === 'Novo').length), delta: 'responder em 24 h', deltaColor: 'var(--warn)' }
+      ],
+      phaseTabs: [['Todas', 'Todas'], ['Pré-lançamento', 'Pré-lançamento'], ['Após lançamento', 'Após lançamento']].map(([k, label]) => ({ label, pick: () => this.setState({ leadPhase: k }), bg: (st.leadPhase || 'Todas') === k ? 'var(--surface)' : 'transparent', color: (st.leadPhase || 'Todas') === k ? 'var(--text)' : 'var(--muted)', shadow: (st.leadPhase || 'Todas') === k ? '0 1px 2px rgba(2,6,23,.16)' : 'none' })),
+      leadSource: st.leadSource || 'Todas as origens', setLeadSource: (e) => this.setState({ leadSource: e.target.value }),
+      leadStatusChips: ['Todos', 'Novo', 'Contactado', 'Convertido', 'Descartado'].map(label => { const on = (st.leadStatus || 'Todos') === label; return { label, pick: () => this.setState({ leadStatus: label }), dot: label === 'Todos' ? 'var(--muted)' : this.solid(label), bg: on ? 'var(--accent-soft)' : 'var(--surface)', color: on ? 'var(--accent)' : 'var(--muted)', border: on ? 'var(--accent)' : 'var(--border)' }; }),
+      leadQuery: st.leadQuery || '', setLeadQuery: (e) => this.setState({ leadQuery: e.target.value }),
+      leads: leadList.map(l => { const sel = (st.leadSel || []).indexOf(l.id) >= 0; return {
+        name: l.name, email: l.email, source: l.source, profile: l.profile, phase: l.phase, message: l.message, status: l.status, date: l.date,
+        initials: l.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        srcIcon: ({ 'Pré-inscrição': 'rocket', 'Formulário de contacto': 'mail', 'Registo na app': 'user-plus', 'Empresas': 'building-2' })[l.source] || 'globe',
+        phaseBg: l.phase === 'Pré-lançamento' ? 'var(--accent-soft)' : 'var(--info-soft)', phaseColor: l.phase === 'Pré-lançamento' ? 'var(--accent)' : 'var(--info)',
+        tagBg: this.solid(l.status),
+        boxBg: sel ? 'var(--accent)' : 'transparent', boxBorder: sel ? 'var(--accent)' : 'var(--border2)', checkColor: sel ? '#fff' : 'transparent',
+        check: (e) => { e.stopPropagation(); const cur = st.leadSel || []; this.setState({ leadSel: sel ? cur.filter(x => x !== l.id) : cur.concat(l.id) }); },
+        open: () => this.setState({ leadModal: true, leadOpen: l.id })
+      }; }),
+      leadCount: leadList.length + ' leads' + ((st.leadSel || []).length ? ' · ' + st.leadSel.length + ' selecionadas' : ''),
+      bulkShow: (st.leadSel || []).length ? 'flex' : 'none',
+      bulkContacted: () => { const ov = Object.assign({}, st.leadState); (st.leadSel || []).forEach(id => { ov[id] = 'Contactado'; }); this.setState({ leadState: ov, leadSel: [] }); this.toast('Leads marcadas como contactadas'); },
+      bulkInvite: () => { this.setState({ leadSel: [] }); this.toast('Convite de lançamento enviado às leads selecionadas'); },
+      leadModal: !!st.leadModal, closeLead: () => this.setState({ leadModal: false }),
+      lv: (() => { const l = this.leadsData().find(x => x.id === st.leadOpen) || this.leadsData()[0]; return {
+        name: l.name, email: l.email, phone: l.phone, message: l.message, status: l.status, phase: l.phase, tagBg: this.solid(l.status),
+        initials: l.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        phaseBg: l.phase === 'Pré-lançamento' ? 'var(--accent-soft)' : 'var(--info-soft)', phaseColor: l.phase === 'Pré-lançamento' ? 'var(--accent)' : 'var(--info)',
+        facts: [['Origem', l.source], ['Perfil', l.profile], ['Localidade', l.city], ['Data', l.date], ['Campanha (UTM)', l.utm], ['Consentimento RGPD', l.consent]].map(f => ({ k: f[0], v: f[1] }))
+      }; })(),
+      discardLead: () => { this.setState({ leadState: Object.assign({}, st.leadState, { [st.leadOpen]: 'Descartado' }), leadModal: false }); this.toast('Lead descartada'); },
+      contactLead: () => { this.setState({ leadState: Object.assign({}, st.leadState, { [st.leadOpen]: 'Contactado' }), leadModal: false }); this.toast('Lead marcada como contactada'); },
+      convertLead: () => { this.setState({ leadState: Object.assign({}, st.leadState, { [st.leadOpen]: 'Convertido' }), leadModal: false }); this.toast('Convite de criação de conta enviado'); },
+      sPainel: r === 'painel', sUtilizadores: r === 'utilizadores', sImoveis: r === 'imoveis',
+      sMonetizacao: r === 'monetizacao', sContratos: r === 'contratos', sReports: r === 'reports',
+      sDefinicoes: r === 'definicoes', sContas: r === 'email',
+      accounts: [['suporte@upm.pt', 'IMAP · imap.upm.pt:993 · SMTP 587', 'Suporte · Miguel Torres', 'Ligada'], ['faturacao@upm.pt', 'POP3 · pop.upm.pt:995 · SMTP 587', 'Financeiro · Helena Marques', 'Erro de ligação']].map(a => ({ address: a[0], proto: a[1], owner: a[2], status: a[3], tagBg: this.solid(a[3]), edit: () => this.setState({ accModal: true, accAddr: a[0], testState: '' }) })),
+      accModal: st.accModal, accTitle: st.accAddr === 'novo@upm.pt' ? 'Adicionar caixa de e-mail' : 'Configurar ' + st.accAddr, accAddress: st.accAddr,
+      closeAcc: () => this.setState({ accModal: false }),
+      testAcc: () => { this.setState({ testState: 'a testar' }); setTimeout(() => this.setState({ testState: 'ok' }), 900); },
+      testText: st.testState === 'ok' ? 'Receção e envio verificados com sucesso' : st.testState ? 'A testar ligação…' : 'Teste a ligação antes de guardar',
+      testIcon: st.testState === 'ok' ? 'circle-check' : st.testState ? 'loader' : 'info',
+      testColor: st.testState === 'ok' ? 'var(--ok)' : 'var(--muted)',
+      saveAcc: () => { this.setState({ accModal: false }); this.toast('Caixa guardada e associada ao departamento'); },
+
+      stats: [
+        { icon: 'users-round', label: 'Utilizadores', value: '8 412', delta: '+214 no mês', deltaColor: 'var(--ok)' },
+        { icon: 'building-2', label: 'Imóveis ativos', value: '1 245', delta: '+63 no mês', deltaColor: 'var(--ok)' },
+        { icon: 'wallet', label: 'Receita MRR', value: '38 940 €', delta: '+8,2% face a agosto', deltaColor: 'var(--ok)' },
+        { icon: 'shield-alert', label: 'A precisar de ação', value: '6', delta: '2 em fila, 4 bugs abertos', deltaColor: 'var(--warn)' }
+      ],
+      quickAccess: [
+        { icon: 'shield-check', title: 'Fila de moderação', body: '2 anúncios por rever e 1 imóvel reportado.', go: nav('imoveis') },
+        { icon: 'users-round', title: 'Gestão de utilizadores', body: 'Contas, perfis, planos e verificações pendentes.', go: nav('utilizadores') },
+        { icon: 'wallet', title: 'Planos', body: 'MRR, distribuição por plano e faturação.', go: nav('monetizacao') },
+        { icon: 'file-signature', title: 'Modelos de contrato', body: 'Edite e publique os modelos oficiais.', go: nav('contratos') }
+      ],
+      ranges: ['30 dias', '6 meses', '12 meses'].map(label => ({
+        label, pick: () => this.setState({ range: label }),
+        bg: st.range === label ? 'var(--accent)' : 'transparent', color: st.range === label ? '#fff' : 'var(--muted)'
+      })),
+      bars: bars.map(b => ({
+        label: b[0], value: Math.round(b[1] / 1000) + 'k',
+        h: Math.max(8, Math.round((b[1] / max) * 136)) + 'px',
+        fill: b[2] ? 'var(--accent)' : 'var(--surface3)',
+        valueColor: b[2] ? 'var(--accent)' : 'var(--muted)'
+      })),
+      planSplit: [
+        { label: 'Essential', count: '1 204', pct: '50%', revenue: '7 212 € /ano', color: '#64748B' },
+        { label: 'Smarter', count: '842', pct: '35%', revenue: '25 176 € /ano', color: '#1D4ED8' },
+        { label: 'Premium', count: '318', pct: '13%', revenue: '19 048 € /ano', color: '#EA580C' },
+        { label: 'Gratuito', count: '6 048', pct: '2%', revenue: '0 € · conversão 8,4%', color: '#0D9488' }
+      ],
+      panels: [
+        { icon: 'shield-check', title: 'Fila de moderação', meta: '2 por rever', items: [
+          item('Quinta · Arraiolos', 'submetido há 20 min · Carla Nunes', 'Em fila', nav('imoveis')),
+          item('Apartamento T2 · São Vítor', 'falta certificado energético', 'Em fila', nav('imoveis')),
+          item('Moradia T3 · Azeitão', 'reportado por 2 utilizadores', 'Reportado', nav('imoveis'))
+        ] },
+        { icon: 'activity', title: 'Última atividade', meta: 'hoje', items: [
+          item('18 novas contas', '12 compradores · 6 proprietários', 'Novo', nav('utilizadores')),
+          item('Pagamento falhado · Pedro Alves', 'Essential · segunda tentativa', 'Falhada', nav('monetizacao')),
+          item('UPM-141 · mapa mostra morada exata', 'crítico · em teste', 'Em teste', nav('reports'))
+        ] }
+      ],
+
+      userStats: [
+        { icon: 'users-round', label: 'Total de contas', value: '8 412', delta: '+214 no mês', deltaColor: 'var(--ok)' },
+        { icon: 'home', label: 'Proprietários', value: '2 108', delta: '+42 no mês', deltaColor: 'var(--ok)' },
+        { icon: 'search', label: 'Compradores', value: '6 288', delta: '+170 no mês', deltaColor: 'var(--ok)' },
+        { icon: 'shield-alert', label: 'Suspensos', value: '16', delta: '−3 no mês', deltaColor: 'var(--ok)' }
+      ],
+      userFilters: ['Todos', 'Proprietário', 'Comprador', 'IT', 'Verificação', 'Suspenso'].map(label => {
+        const on = st.userFilter === label;
+        return {
+          label, pick: () => this.setState({ userFilter: label }),
+          dot: label === 'Todos' ? 'var(--muted)' : this.solid(label),
+          bg: on ? 'var(--accent-soft)' : 'var(--surface)', color: on ? 'var(--accent)' : 'var(--muted)',
+          border: on ? 'var(--accent)' : 'var(--border)'
+        };
+      }),
+      userQuery: st.userQuery,
+      setUserQuery: (e) => this.setState({ userQuery: e.target.value }),
+      users: users.map(u => ({
+        name: u.name, email: u.email, role: u.role, plan: u.plan, status: u.status,
+        initials: u.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+        tagBg: this.solid(u.status),
+        open: () => this.setState({ userModal: true, selUserId: u.id }),
+        banIcon: u.status === 'Suspenso' ? 'user-check' : 'user-x',
+        banTitle: u.status === 'Suspenso' ? 'Reativar conta' : 'Suspender conta',
+        ban: () => {
+          const nxt = u.status === 'Suspenso' ? 'Ativo' : 'Suspenso';
+          this.setState({ userState: Object.assign({}, st.userState, { [u.id]: nxt }) });
+          this.toast(u.name + ' · conta ' + (nxt === 'Suspenso' ? 'suspensa' : 'reativada'));
+        }
+      })),
+      userModal: st.userModal,
+      closeUser: () => this.setState({ userModal: false }),
+      selUser: {
+        name: selUser.name, email: selUser.email, plan: selUser.plan,
+        initials: selUser.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+        facts: [
+          { label: 'Perfil', value: selUser.role }, { label: 'Plano', value: selUser.plan },
+          { label: 'Cliente desde', value: selUser.since }, { label: 'Imóveis', value: selUser.props },
+          { label: 'Receita anual', value: selUser.spend }, { label: 'Estado', value: selUser.status }
+        ],
+        activity: [
+          { icon: 'log-in', label: 'Último acesso', when: 'hoje, 09h12' },
+          { icon: 'message-square', label: '12 conversas nos últimos 30 dias', when: 'set 2026' },
+          { icon: 'credit-card', label: 'Última fatura paga', when: '01 set 2026' }
+        ]
+      },
+      changePlan: (e) => this.toast(selUser.name + ' → plano ' + e.target.value),
+      suspendLabel: selUser.status === 'Suspenso' ? 'Reativar conta' : 'Suspender conta',
+      suspendUser: () => {
+        const nxt = selUser.status === 'Suspenso' ? 'Ativo' : 'Suspenso';
+        this.setState({ userState: Object.assign({}, st.userState, { [selUser.id]: nxt }), userModal: false });
+        this.toast(selUser.name + ' · conta ' + (nxt === 'Suspenso' ? 'suspensa' : 'reativada'));
+      },
+      resetUser: () => { this.setState({ userModal: false }); this.toast('Ligação de reposição enviada'); },
+      saveUser: () => { this.setState({ userModal: false }); this.toast('Alterações guardadas'); },
+
+      propStats: [
+        { icon: 'inbox', label: 'Em fila', value: String(this.modData().filter(m => m.status === 'Em fila').length), delta: 'tempo médio 3 h', deltaColor: 'var(--warn)' },
+        { icon: 'circle-check', label: 'Aprovados hoje', value: '31', delta: '+6 face a ontem', deltaColor: 'var(--ok)' },
+        { icon: 'circle-x', label: 'Rejeitados', value: '2', delta: 'fotos insuficientes', deltaColor: 'var(--danger)' },
+        { icon: 'flag', label: 'Reportados', value: '1', delta: 'a precisar de revisão', deltaColor: 'var(--danger)' }
+      ],
+      propFilters: ['Todos', 'Em fila', 'Aprovado', 'Rejeitado', 'Reportado'].map(label => {
+        const on = st.propFilter === label;
+        return {
+          label, pick: () => this.setState({ propFilter: label }),
+          dot: label === 'Todos' ? 'var(--muted)' : this.solid(label),
+          bg: on ? 'var(--accent-soft)' : 'var(--surface)', color: on ? 'var(--accent)' : 'var(--muted)',
+          border: on ? 'var(--accent)' : 'var(--border)'
+        };
+      }),
+      moderation: mods.map(m => {
+        const act = (label, icon, run, kind) => ({
+          label, icon, run,
+          bg: kind === 'primary' ? 'var(--accent)' : 'var(--surface2)',
+          color: kind === 'primary' ? '#fff' : kind === 'danger' ? 'var(--danger)' : 'var(--text)',
+          border: kind === 'primary' ? 'var(--accent)' : kind === 'danger' ? 'var(--danger)' : 'var(--border)'
+        });
+        const actions = [act('Ver anúncio', 'eye', () => this.toast('A abrir ' + m.title))];
+        if (m.status === 'Em fila' || m.status === 'Reportado') {
+          actions.push(act('Aprovar', 'check', () => { this.setState({ modState: Object.assign({}, st.modState, { [m.id]: 'Aprovado' }) }); this.toast(m.title + ' aprovado · proprietário notificado'); }, 'primary'));
+          actions.push(act('Rejeitar', 'x', () => this.setState({ modModal: true, modKind: 'rejeitar', modTarget: m.id }), 'danger'));
+        }
+        if (m.status === 'Aprovado') actions.push(act('Remover anúncio', 'trash-2', () => this.setState({ modModal: true, modKind: 'remover', modTarget: m.id }), 'danger'));
+        if (m.status === 'Rejeitado') actions.push(act('Repor em fila', 'rotate-ccw', () => { this.setState({ modState: Object.assign({}, st.modState, { [m.id]: 'Em fila' }) }); this.toast(m.title + ' voltou à fila'); }));
+        return {
+          title: m.title, location: m.location, owner: m.owner, price: m.price, specs: m.specs,
+          submitted: m.submitted, status: m.status, tagBg: this.solid(m.status), accent: this.solid(m.status),
+          check: m.check,
+          checkIcon: m.checkTone === 'ok' ? 'circle-check' : 'circle-alert',
+          checkColor: m.checkTone === 'ok' ? 'var(--ok)' : m.checkTone === 'warn' ? 'var(--warn)' : 'var(--danger)',
+          actions
+        };
+      }),
+      modModal: st.modModal,
+      modTitle: st.modKind === 'remover' ? 'Remover anúncio' : 'Rejeitar anúncio',
+      modHint: st.modKind === 'remover' ? 'O anúncio deixa de estar visível e o proprietário é notificado com o motivo.' : 'O proprietário recebe o motivo e pode corrigir e voltar a submeter.',
+      modCta: st.modKind === 'remover' ? 'Remover' : 'Rejeitar',
+      modCtaBg: 'var(--danger)',
+      closeMod: () => this.setState({ modModal: false }),
+      confirmMod: () => {
+        const nxt = st.modKind === 'remover' ? 'Rejeitado' : 'Rejeitado';
+        this.setState({ modState: Object.assign({}, st.modState, { [st.modTarget]: nxt }), modModal: false });
+        this.toast('Anúncio ' + (st.modKind === 'remover' ? 'removido' : 'rejeitado') + ' · proprietário notificado');
+      },
+
+      moneyStats: [
+        { icon: 'wallet', label: 'MRR', value: '38 940 €', delta: '+8,2% face a agosto', deltaColor: 'var(--ok)' },
+        { icon: 'trending-up', label: 'ARR projetado', value: '467 280 €', delta: '+14% face ao plano', deltaColor: 'var(--ok)' },
+        { icon: 'user-minus', label: 'Churn mensal', value: '1,8%', delta: '−0,3 p.p.', deltaColor: 'var(--ok)' },
+        { icon: 'receipt', label: 'Pagamentos falhados', value: '7', delta: '3 em recuperação', deltaColor: 'var(--warn)' }
+      ],
+      planRows: [
+        { name: 'Essential', audience: 'Proprietários', price: '5,99 €/ano', subs: '1 204', mrr: '601 €', color: '#64748B' },
+        { name: 'Smarter', audience: 'Proprietários e compradores', price: '29,90 €/ano', subs: '842', mrr: '2 098 €', color: '#1D4ED8' },
+        { name: 'Premium', audience: 'Proprietários', price: '59,90 €/ano', subs: '318', mrr: '1 587 €', color: '#EA580C' },
+        { name: 'Premium Comprador', audience: 'Compradores', price: '49,90 €/ano', subs: '196', mrr: '815 €', color: '#7C3AED' },
+        { name: 'Gratuito', audience: 'Compradores', price: '0 €', subs: '6 048', mrr: '0 €', color: '#0D9488' }
+      ].map(p => Object.assign({}, p, { edit: () => this.openPlan(p) })),
+      newPlan: () => this.openPlan(null),
+      planModal: st.planModal, closePlan: () => this.setState({ planModal: false }),
+      pe: this.planEditor(),
+      setPeName: (e) => this.setState({ pe: Object.assign({}, st.pe, { name: e.target.value }) }),
+      setPeYearly: (e) => this.setState({ pe: Object.assign({}, st.pe, { yearly: e.target.value }) }),
+      setPeMonthly: (e) => this.setState({ pe: Object.assign({}, st.pe, { monthly: e.target.value }) }),
+      togglePeVis: () => this.setState({ pe: Object.assign({}, st.pe, { visible: !(st.pe || {}).visible }) }),
+      savePlan: () => { this.setState({ planModal: false }); this.toast(((st.pe || {}).isNew ? 'Plano criado · ' : 'Plano atualizado · ') + ((st.pe || {}).name || '')); },
+      health: [
+        { label: 'Conversão gratuito → pago', value: '8,4%', pct: '42%', color: 'var(--ok)', hint: 'meta trimestral: 10%' },
+        { label: 'Retenção a 12 meses', value: '86%', pct: '86%', color: 'var(--info)', hint: '+4 p.p. face ao ano passado' },
+        { label: 'Recuperação de pagamentos', value: '63%', pct: '63%', color: 'var(--warn)', hint: '3 de 7 falhados recuperados' },
+        { label: 'Receita de destaques', value: '4 120 €', pct: '28%', color: 'var(--accent)', hint: '28% da receita do mês' }
+      ],
+      billing: [
+        { client: 'Ana Silva', meta: 'renova 12 out 2026', plan: 'Premium', amount: '59,90 €', status: 'Paga' },
+        { client: 'João Costa', meta: 'renova 03 nov 2026', plan: 'Smarter', amount: '29,90 €', status: 'Paga' },
+        { client: 'Carla Nunes', meta: 'renova 21 jan 2027', plan: 'Essential', amount: '5,99 €', status: 'Paga' },
+        { client: 'Pedro Alves', meta: 'segunda tentativa a 14 set', plan: 'Essential', amount: '5,99 €', status: 'Falhada' },
+        { client: 'Rui Mendes', meta: 'reembolso pedido a 09 set', plan: 'Smarter', amount: '29,90 €', status: 'Reembolsada' }
+      ].map(b => Object.assign({}, b, {
+        tagBg: this.solid(b.status),
+        download: () => this.download('fatura-' + b.client.toLowerCase().replace(/\s+/g, '-') + '.txt', b.client + ' · ' + b.plan + ' · ' + b.amount)
+      })),
+
+      contractKinds: [['venda', 'Compra e venda', 'home'], ['arrendamento', 'Arrendamento', 'key']].map(([k, label, icon]) => {
+        const on = st.tplKind === k;
+        return {
+          label, icon,
+          pick: () => this.setState({ tplKind: k, tplId: this.templatesFor(k)[0][0], tplName: '' }),
+          bg: on ? 'var(--accent-soft)' : 'var(--surface)', color: on ? 'var(--accent)' : 'var(--muted)',
+          border: on ? 'var(--accent)' : 'var(--border)'
+        };
+      }),
+      templates: tplList.map(x => ({
+        name: x[0], meta: x[1], status: x[2], usage: x[3], tagBg: this.solid(x[2]),
+        border: tplCur[0] === x[0] ? 'var(--accent)' : 'var(--border)',
+        pick: () => this.setState({ tplId: x[0], tplName: '' })
+      })),
+      newTemplate: () => this.toast('Novo modelo criado a partir de um em branco'),
+      tplName: st.tplName || tplCur[0],
+      setTplName: (e) => this.setState({ tplName: e.target.value }),
+      tplSaved: 'Guardado automaticamente · há 1 min',
+      tplKindLabel: st.tplKind === 'venda' ? 'Compra e venda' : 'Arrendamento',
+      modes: [['editar', 'Editar', 'pencil'], ['prever', 'Pré-visualizar', 'eye']].map(([k, label, icon]) => ({
+        label, icon, pick: () => this.setState({ viewMode: k }),
+        bg: mode === k ? 'var(--surface)' : 'transparent', color: mode === k ? 'var(--text)' : 'var(--muted)'
+      })),
+      modeLabel: mode === 'editar' ? 'Modo de edição' : 'Pré-visualização',
+      toolbarOpacity: mode === 'editar' ? '1' : '.45',
+      toolbarEvents: mode === 'editar' ? 'auto' : 'none',
+      docBlocks: src.map(b => {
+        const isH1 = b[0] === 'h1', isH2 = b[0] === 'h2';
+        const segs = []; const re = /\{([a-z]+)\}/g; let last = 0, m;
+        while ((m = re.exec(b[1])) !== null) {
+          if (m.index > last) segs.push({ text: b[1].slice(last, m.index), chip: false });
+          segs.push({ text: m[1], chip: true });
+          last = m.index + m[0].length;
+        }
+        if (last < b[1].length) segs.push({ text: b[1].slice(last), chip: false });
+        return {
+          size: (isH1 ? 20 : isH2 ? 15 : 14) + 'px',
+          weight: isH1 || isH2 ? 700 : 400,
+          spacing: isH1 ? '.04em' : 'normal',
+          transform: isH1 ? 'uppercase' : 'none',
+          segs: segs.map(sg => {
+            if (!sg.chip) return { text: sg.text, display: 'inline', pad: '0', radius: '0', bg: 'transparent', color: '#0F172A', fs: 'inherit', fw: 'inherit', border: 'none', wrap: 'pre-wrap', lh: 'inherit' };
+            if (mode === 'prever') return { text: sample[sg.text] || sg.text, display: 'inline', pad: '0', radius: '0', bg: 'transparent', color: '#0F172A', fs: 'inherit', fw: '700', border: 'none', wrap: 'pre-wrap', lh: 'inherit' };
+            return { text: labels[sg.text] || sg.text, display: 'inline-block', pad: '0 9px', radius: '999px', bg: '#FFF1E7', color: '#C2410C', fs: '.84em', fw: '700', border: '1px solid #FBD5BC', wrap: 'nowrap', lh: '1.5' };
+          })
+        };
+      }),
+      tplWords: src.reduce((n, b) => n + b[1].split(/\s+/).length, 0) + ' palavras',
+      tplVars: (() => { const o = []; src.forEach(b => (b[1].match(/\{[a-z]+\}/g) || []).forEach(v => { if (o.indexOf(v) < 0) o.push(v); })); return o.length + ' variáveis'; })(),
+      tools: [['bold', 'Negrito'], ['italic', 'Itálico'], ['underline', 'Sublinhado'], ['align-left', 'Alinhar à esquerda'], ['align-center', 'Centrar'], ['align-justify', 'Justificar'], ['list', 'Lista'], ['list-ordered', 'Lista numerada'], ['table', 'Inserir tabela']].map(x => ({
+        icon: x[0], title: x[1], run: () => this.toast(x[1] + ' aplicado')
+      })),
+      varMenuShow: st.varMenu ? 'flex' : 'none',
+      varBg: st.varMenu ? 'var(--accent-soft)' : 'var(--surface)',
+      varColor: st.varMenu ? 'var(--accent)' : 'var(--text)',
+      varBorder: st.varMenu ? 'var(--accent)' : 'var(--border)',
+      toggleVars: () => this.setState({ varMenu: !st.varMenu }),
+      variables: (st.tplKind === 'venda'
+        ? [['{imovel}', 'imóvel'], ['{proprietario}', 'proprietário'], ['{comprador}', 'comprador'], ['{preco}', 'preço'], ['{sinal}', 'sinal'], ['{data}', 'data']]
+        : [['{imovel}', 'imóvel'], ['{proprietario}', 'senhorio'], ['{inquilino}', 'inquilino'], ['{renda}', 'renda'], ['{duracao}', 'duração'], ['{data}', 'data']]
+      ).map(([token, hint]) => ({ token, hint, insert: () => { this.setState({ varMenu: false }); this.toast('Variável ' + token + ' inserida'); } })),
+      saveTpl: () => this.toast('Modelo guardado'),
+      exportTpl: () => this.download(tplCur[0].toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt', src.map(b => b[1]).join('\n\n')),
+      publishLabel: tplCur[2] === 'Publicado' ? 'Despublicar' : 'Publicar',
+      publishTpl: () => this.toast(tplCur[2] === 'Publicado' ? 'Modelo despublicado' : 'Modelo publicado · disponível aos proprietários'),
+
+      pipeline: ['Novo', 'Triagem', 'Em curso', 'Em teste', 'Resolvido'].map(s => {
+        const items = bugs.filter(b => b.status === s);
+        return {
+          label: s, count: items.length, dot: this.solid(s),
+          items: items.map(b => ({
+            id: b.id, title: b.title, severity: b.severity, reporter: b.reporter,
+            sevBg: this.solid(b.severity),
+            pick: () => this.toast(b.id + ' · atribuído à equipa de IT')
+          }))
+        };
+      }),
+
+      changeAvatar: () => this.toast('Selecione uma imagem'),
+      saveSettings: () => this.toast('Definições guardadas'),
+      team: [
+        { name: 'Helena Marques', email: 'helena@upm.pt', role: 'Administração' },
+        { name: 'Miguel Torres', email: 'miguel@upm.pt', role: 'Suporte IT' },
+        { name: 'Sofia Lima', email: 'sofia@upm.pt', role: 'Suporte IT' },
+        { name: 'Tiago Brito', email: 'tiago@upm.pt', role: 'Moderação' }
+      ].map(m => ({
+        name: m.name, email: m.email, role: m.role,
+        initials: m.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+        change: (e) => this.toast(m.name + ' → ' + e.target.value)
+      })),
+      inviteTeam: () => this.toast('Convite interno enviado'),
+      platformFlags: [
+        ['registos', 'Registos abertos', 'Permitir novas contas sem convite'],
+        ['moderacao', 'Moderação obrigatória', 'Cada anúncio passa por revisão antes de publicar'],
+        ['destaques', 'Destaques pagos', 'Permitir destaque de anúncios nos planos superiores'],
+        ['beta', 'Funcionalidades beta', 'Disponibilizar novidades a 5% dos utilizadores']
+      ].map(([k, label, hint]) => {
+        const on = !!st.flags[k];
+        return { label, hint, trackBg: on ? 'var(--accent)' : 'var(--border2)', knobLeft: on ? '23px' : '3px', toggle: () => this.setState({ flags: Object.assign({}, st.flags, { [k]: !on }) }) };
+      }),
+      maintenance: () => this.toast('Modo de manutenção ativado por 30 min'),
+      purge: () => this.toast('318 contas inativas assinaladas para revisão')
+    };
+  }
+}
+</script>
+</body>
+</html>

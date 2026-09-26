@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;height:100%;transition:transform .18s ease,box-shadow .18s ease,border-color .18s" style-hover="transform:translateY(-3px);box-shadow:0 12px 30px rgba(2,6,23,.12);border-color:var(--accent)" onClick="{{ onOpen }}">
+  <div style="position:relative;height:172px;background:repeating-linear-gradient(135deg,var(--ph1) 0 10px,var(--ph2) 10px 20px);display:flex;align-items:center;justify-content:center">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase">{{ p.photoLabel }}</span>
+    <div style="position:absolute;top:10px;left:10px;display:flex;gap:6px">
+      <span style="background:{{ dealBg }};color:#fff;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;display:flex;align-items:center;gap:5px">
+        <dc-import name="Icon" icon="{{ dealIcon }}" size="{{ 12 }}" color="#fff" hint-size="12px,12px"></dc-import>{{ p.kind }}
+      </span>
+      <span style="background:rgba(2,6,23,.72);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px">{{ p.status }}</span>
+    </div>
+    <button style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;border:none;background:rgba(2,6,23,.6);cursor:pointer;display:flex;align-items:center;justify-content:center" onClick="{{ onSave }}" title="Guardar">
+      <dc-import name="Icon" icon="bookmark" size="{{ 15 }}" color="{{ saveColor }}" hint-size="15px,15px"></dc-import>
+    </button>
+  </div>
+  <div style="padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1">
+    <strong style="font-size:15px;font-weight:700;line-height:1.25">{{ p.title }}</strong>
+    <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+      <dc-import name="Icon" icon="map-pin" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ p.location }}
+    </span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:7px;white-space:nowrap">
+        <dc-import name="Icon" icon="bed-double" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ p.typology }}
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:7px;white-space:nowrap">
+        <dc-import name="Icon" icon="ruler" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ p.area }}
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:7px;white-space:nowrap">
+        <dc-import name="Icon" icon="bath" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ p.rooms }}
+      </span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;white-space:nowrap">{{ p.price }}</span>
+      <span style="font-size:12px;color:var(--muted);white-space:nowrap;text-align:right">{{ p.views }}</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:320,&quot;height&quot;:340},&quot;p&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;saved&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onOpen&quot;:{&quot;editor&quot;:null},&quot;onSave&quot;:{&quot;editor&quot;:null}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props.p || {};
+    const rent = /arrend/i.test(p.kind || '');
+    return {
+      p,
+      dealBg: rent ? '#7C3AED' : '#1D4ED8',
+      dealIcon: rent ? 'key' : 'home',
+      saveColor: this.props.saved ? '#F97316' : '#FFFFFF',
+      onOpen: this.props.onOpen || (() => {}),
+      onSave: (e) => { e.stopPropagation(); (this.props.onSave || (() => {}))(); }
+    };
+  }
+}
+</script>
+</body>
+</html>

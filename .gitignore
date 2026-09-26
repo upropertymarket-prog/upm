@@ -1,0 +1,24 @@
+# Node / Next / Turborepo
+node_modules/
+.next/
+.turbo/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Credenciais locais — nunca versionadas
+.secrets/
+
+# Sistema
+.DS_Store
+Thumbs.db

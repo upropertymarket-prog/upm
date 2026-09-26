@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js"></script>
+<style>
+:root{--bg:#F8FAFC;--surface:#FFFFFF;--surface2:#F1F5F9;--surface3:#E9EEF5;--border:#E2E8F0;--border2:#CBD5E1;--text:#0F172A;--muted:#64748B;--accent:#EA580C;--accent-hover:#C2410C;--accent-ink:#C2410C;--accent-soft:#FFF1E7;--ph1:#E4E9F0;--ph2:#EEF2F7;--ok:#059669;--ok-soft:#ECFDF5;--warn:#B45309;--warn-soft:#FFFBEB;--danger:#DC2626;--danger-soft:#FEF2F2;--info:#2563EB;--info-soft:#EFF6FF;--logo-l:block;--logo-d:none}
+:root[data-theme="dark"]{--bg:#050A16;--surface:#0B1220;--surface2:#101B2E;--surface3:#16223A;--border:#1E293B;--border2:#2B3A52;--text:#E6EDF6;--muted:#93A4BC;--accent:#F97316;--accent-hover:#FB923C;--accent-ink:#FDBA74;--accent-soft:#20130A;--ph1:#101A2C;--ph2:#152338;--ok:#34D399;--ok-soft:#082F23;--warn:#FBBF24;--warn-soft:#2A1D05;--danger:#F87171;--danger-soft:#2A0E0E;--info:#60A5FA;--info-soft:#0B1E3A;--logo-l:none;--logo-d:block}
+*{box-sizing:border-box}
+[data-sc-name="Icon"]{display:inline-flex;align-items:center;justify-content:center;line-height:0;flex:none}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,'Helvetica Neue',Helvetica,sans-serif;-webkit-font-smoothing:antialiased;text-wrap:pretty}
+a{color:var(--accent)}
+a:hover{color:var(--accent-ink)}
+input,textarea,select,button{font-family:inherit}
+button{color:var(--text)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+</style>
+<script>
+(function(){try{var q=location.search;if(/[?&]demo=1/.test(q)){var sp=Storage.prototype,o1=sp.setItem,o2=sp.removeItem;sp.setItem=function(k,v){if(k==='upm-theme')return;return o1.call(this,k,v)};sp.removeItem=function(k){if(k==='upm-theme')return;return o2.call(this,k)};var m=q.match(/[?&]theme=(dark|light)/);document.documentElement.setAttribute('data-theme',m?m[1]:'light');return;}var t=localStorage.getItem('upm-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
+</helmet>
+<div style="min-height:100vh;display:grid;grid-template-columns:{{ sidebarWidth }} minmax(0,1fr);background:var(--bg);color:var(--text)">
+  <div aria-hidden="true"></div>
+  <aside style="border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;padding:18px 14px;gap:4px;position:fixed;top:0;left:0;bottom:0;width:{{ sidebarWidth }};z-index:25;overflow-y:auto;height:100vh">
+    <div style="display:flex;align-items:center;gap:8px;margin:2px 0 20px;justify-content:{{ brandJustify }}">
+      <img src="assets/upm-logo-light.svg" alt="UProperty Market" style="height: 39px; display: {{ logoFullL }}; margin-left: 6px; width: 120px">
+      <img src="assets/upm-logo-dark.svg" alt="UProperty Market" style="height: 39px; display: {{ logoFullD }}; margin-left: 6px; width: 120px">
+      <span style="width:38px;height:38px;border-radius:12px;background:var(--accent);color:#fff;display:{{ logoMark }};align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;flex:none">U</span>
+      <button style="margin-left:{{ railToggleMargin }};width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" title="{{ railTitle }}" onClick="{{ toggleRail }}">
+        <dc-import name="Icon" icon="{{ railIcon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+      </button>
+    </div>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:0 10px 6px;display:{{ labelShow }}">Procurar</span>
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="10">
+      <button style="text-align:left;height:42px;padding:0 12px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:{{ n.bg }};color:{{ n.color }};display:flex;align-items:center;gap:11px;white-space:nowrap;justify-content:{{ n.justify }};overflow:hidden" style-hover="background:var(--surface2)" title="{{ n.label }}" onClick="{{ n.pick }}">
+        <dc-import name="Icon" icon="{{ n.icon }}" size="{{ 17 }}" hint-size="17px,17px"></dc-import>
+        <span style="display:{{ labelShow }};flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.label }}</span>
+        <span style="margin-left:auto;display:{{ n.badgeShow }};min-width:20px;height:19px;padding:0 6px;border-radius:999px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;align-items:center;justify-content:center">{{ n.badge }}</span>
+      </button>
+    </sc-for>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px;padding-top:14px">
+      <button style="height:44px;margin:0 -14px;border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:{{ bugJustify }};gap:9px;padding:0 14px;white-space:nowrap;transition:background .15s ease,color .15s ease" style-hover="color:var(--accent);background:var(--accent-soft)" title="Reportar problema" onClick="{{ openBug }}">
+        <span style="display:{{ labelShow }}">Reportar problema</span>
+        <dc-import name="Icon" icon="bug" size="{{ 16 }}" hint-size="16px,16px"></dc-import>
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);transition:border-color .15s ease;justify-content:{{ brandJustify }}" style-hover="border-color:var(--accent)">
+        <span style="position:relative;flex:none">
+          <span style="width:36px;height:36px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800">JC</span>
+          <span style="position:absolute;right:0;bottom:0;width:10px;height:10px;border-radius:99px;background:var(--ok);border:2px solid var(--surface2)"></span>
+        </span>
+        <div style="display:{{ labelShow }};flex-direction:column;min-width:0;flex:1;cursor:pointer" onClick="{{ goSettings }}">
+          <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">João Costa</strong>
+          <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Comprador · Smarter</span>
+        </div>
+        <span style="display:{{ labelShow }};align-items:center;gap:5px;color:var(--muted);font-size:12.5px;font-weight:700;flex:none;cursor:pointer">
+          <dc-import name="Icon" icon="log-out" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Sair
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:68px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:20">
+      <div style="display:flex;align-items:center;gap:9px;height:42px;padding:0 14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:13px;flex:1 1 220px;max-width:380px;min-width:0">
+        <dc-import name="Icon" icon="search" size="{{ 16 }}" hint-size="16px,16px"></dc-import>
+        <input placeholder="Pesquisar…" style="border:none;background:transparent;color:var(--text);font-size:13px;width:100%;outline:none;min-width:0">
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex:none">
+        <div style="position:relative">
+          <button style="height:42px;padding:0 12px;border-radius:12px;border:1px solid {{ langBorder }};background:var(--surface2);color:{{ langColor }};cursor:pointer;display:flex;align-items:center;gap:6px" title="Idioma" onClick="{{ toggleLang }}">
+            <dc-import name="Icon" icon="languages" size="{{ 17 }}" color="{{ langColor }}" hint-size="17px,17px"></dc-import>
+            <dc-import name="Icon" icon="{{ langChevron }}" size="{{ 13 }}" color="{{ langColor }}" hint-size="13px,13px"></dc-import>
+          </button>
+          <div style="position:absolute;top:50px;right:0;min-width:160px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(2,6,23,.16);padding:6px;display:{{ langMenu }};flex-direction:column;gap:2px;z-index:50">
+            <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+              <button style="height:38px;padding:0 12px;border-radius:9px;border:none;background:{{ l.bg }};color:{{ l.color }};font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;white-space:nowrap" style-hover="background:var(--surface2)" onClick="{{ l.pick }}">{{ l.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;padding:4px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);flex:none">
+          <sc-for list="{{ themeToggle }}" as="th" hint-placeholder-count="2">
+            <button style="height:34px;padding:0 13px;border-radius:9px;border:none;background:{{ th.bg }};color:{{ th.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:{{ th.shadow }}" onClick="{{ th.pick }}">
+              <dc-import name="Icon" icon="{{ th.icon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>{{ th.label }}
+            </button>
+          </sc-for>
+        </div>
+        <div style="position:relative">
+          <button style="width:42px;height:42px;border-radius:12px;border:1px solid {{ notifBorder }};background:var(--surface2);color:{{ notifColor }};cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative" title="Notificações" onClick="{{ toggleNotif }}">
+            <dc-import name="Icon" icon="bell" size="{{ 17 }}" color="{{ notifColor }}" hint-size="17px,17px"></dc-import>
+            <span style="position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;display:{{ notifBadgeShow }};align-items:center;justify-content:center;border:2px solid var(--surface)">{{ notifBadge }}</span>
+          </button>
+          <div style="position:absolute;top:50px;right:0;width:360px;max-width:min(360px,80vw);background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 44px rgba(2,6,23,.18);display:{{ notifMenu }};flex-direction:column;overflow:hidden;z-index:60">
+            <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+              <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px">Notificações</strong>
+              <span style="font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px;white-space:nowrap">{{ notifUnread }}</span>
+              <button style="margin-left:auto;font-size:12.5px;font-weight:700;color:var(--accent);background:transparent;border:none;cursor:pointer;white-space:nowrap" onClick="{{ readAllNotif }}">Marcar todas</button>
+            </div>
+            <div style="max-height:340px;overflow:auto;display:flex;flex-direction:column">
+              <sc-for list="{{ notifList }}" as="n" hint-placeholder-count="5">
+                <div style="padding:12px 15px;border-bottom:1px solid var(--border);display:flex;gap:11px;cursor:pointer;background:{{ n.bg }}" style-hover="background:var(--surface2)" onClick="{{ n.go }}">
+                  <span style="width:34px;height:34px;border-radius:10px;background:{{ n.iconBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                    <dc-import name="Icon" icon="{{ n.icon }}" size="{{ 16 }}" color="{{ n.iconColor }}" hint-size="16px,16px"></dc-import>
+                  </span>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                    <strong style="font-size:12.5px;line-height:1.35">{{ n.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);line-height:1.45">{{ n.body }}</span>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ n.when }}</span>
+                  </div>
+                  <span style="width:8px;height:8px;border-radius:99px;background:{{ n.dot }};margin-top:6px;flex:none"></span>
+                </div>
+              </sc-for>
+            </div>
+            <button style="padding:12px;border:none;border-top:1px solid var(--border);background:var(--surface2);color:var(--accent);font-size:12.5px;font-weight:700;cursor:pointer" onClick="{{ allNotif }}">Ver todas as notificações</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="padding:24px;display:flex;flex-direction:column;gap:20px;min-width:0">
+      <sc-if value="{{ updBannerShow }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent);flex-wrap:wrap">
+          <dc-import name="Icon" icon="sparkles" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+          <strong style="font-size:13px;color:var(--text)">Há novidades na UProperty Market</strong>
+          <span style="font-size:12.5px;color:var(--muted)">{{ updBannerText }}</span>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <button style="height:32px;padding:0 13px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ openUpd }}">Ver novidades</button>
+            <button style="width:32px;height:32px;border-radius:9px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:var(--text)" title="Fechar" onClick="{{ dismissUpdBanner }}"><dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import></button>
+          </div>
+        </div>
+      </sc-if>
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--border)">
+        <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(24px,3vw,32px);line-height:1.1;letter-spacing:-.02em;margin:0;font-weight:700">{{ pageTitle }}</h1>
+          <span style="font-size:13.5px;color:var(--muted)">{{ pageSub }}</span>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ exportData }}">
+            <dc-import name="Icon" icon="download" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Exportar
+          </button>
+          <button style="height:44px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ primaryRun }}">
+            <dc-import name="Icon" icon="{{ primaryIcon }}" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>{{ primaryAction }}
+          </button>
+        </div>
+      </div>
+      <sc-if value="{{ sPainel }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <strong style="font-size:15px">As suas estatísticas</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family: 'Bricolage Grotesque',sans-serif; font-size: 28px; font-weight: 700; color: #E6EDF6">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Acesso rápido</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+            <sc-for list="{{ quickAccess }}" as="qa" hint-placeholder-count="4">
+              <button style="text-align:left;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease" style-hover="transform:translateY(-2px);border-color:var(--accent);box-shadow:0 10px 26px rgba(2,6,23,.1)" onClick="{{ qa.go }}">
+                <span style="display:flex;align-items:center;gap:10px">
+                  <span style="width:36px;height:36px;border-radius:11px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex:none">
+                    <dc-import name="Icon" icon="{{ qa.icon }}" size="{{ 17 }}" color="var(--accent)" hint-size="17px,17px"></dc-import>
+                  </span>
+                  <strong style="font-size:14px;color:var(--text)">{{ qa.title }}</strong>
+                </span>
+                <span style="font-size:12.5px;color:var(--muted);line-height:1.5">{{ qa.body }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Gráficos</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:stretch">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <strong style="font-size:13.5px">Propriedades vistas</strong>
+                <div style="margin-left:auto;display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--border);background:var(--surface2)">
+                  <sc-for list="{{ ranges }}" as="rg" hint-placeholder-count="3">
+                    <button style="height:26px;padding:0 12px;border-radius:999px;border:none;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ rg.bg }};color:{{ rg.color }};white-space:nowrap" onClick="{{ rg.pick }}">{{ rg.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:10px;height:180px">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end">
+                    <span style="font-size:12.5px;font-weight:700;color:{{ b.valueColor }}">{{ b.value }}</span>
+                    <div style="width:100%;max-width:40px;height:{{ b.h }};border-radius:8px 8px 4px 4px;background:{{ b.fill }}"></div>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ b.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div style="display:flex;align-items:center;gap:9px">
+                <dc-import name="Icon" icon="calendar-days" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+                <strong style="font-size:13.5px">As minhas visitas</strong>
+                <button style="margin-left:auto;font-size:12.5px;font-weight:700;color:var(--accent);background:transparent;border:none;cursor:pointer;white-space:nowrap" onClick="{{ goVisits }}">Ver todas</button>
+              </div>
+              <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px;align-items:center;padding:11px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);min-width:0">
+                  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;flex:none;padding:5px 0;border-radius:10px;background:var(--accent-soft)">
+                    <strong style="font-size:15px;color:var(--accent);line-height:1">{{ a.day }}</strong>
+                    <span style="font-size:12px;font-weight:800;color:var(--accent);text-transform:uppercase">{{ a.month }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                    <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.sub }}</span>
+                  </div>
+                  <span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ a.tagBg }};color:#fff;flex:none;white-space:nowrap">{{ a.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <strong style="font-size:15px;margin-top:4px">Atividade recente</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px">
+            <sc-for list="{{ panels }}" as="pn" hint-placeholder-count="2">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column">
+                <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+                  <dc-import name="Icon" icon="{{ pn.icon }}" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+                  <strong style="font-size:13.5px">{{ pn.title }}</strong>
+                  <span style="margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ pn.meta }}</span>
+                </div>
+                <sc-for list="{{ pn.items }}" as="it" hint-placeholder-count="3">
+                  <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer" style-hover="background:var(--surface2)" onClick="{{ it.go }}">
+                    <div style="display:flex;flex-direction:column;min-width:0;flex:1;gap:3px">
+                      <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.title }}</strong>
+                      <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.sub }}</span>
+                    </div>
+                    <span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ it.tagBg }};color:#fff;white-space:nowrap;flex:none">{{ it.tag }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sMarket }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface);align-items:end">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Pesquisar
+              <input placeholder="Cidade, zona ou referência" value="{{ mkQuery }}" onInput="{{ setMkQuery }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Negócio
+              <select value="{{ mkDeal }}" onChange="{{ setMkDeal }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600">
+                <option>Todos</option><option>Venda</option><option>Arrendamento</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Tipologia
+              <select value="{{ mkType }}" onChange="{{ setMkType }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600">
+                <option>Todas</option><option>T0</option><option>T1</option><option>T2</option><option>T3</option><option>T4</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Localidade
+              <select value="{{ mkCity }}" onChange="{{ setMkCity }}" style="height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13px;font-weight:600">
+                <option>Todas</option><option>Lisboa</option><option>Porto</option><option>Cascais</option><option>Faro</option><option>Braga</option>
+              </select>
+            </label>
+            <button style="height:40px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ clearMk }}">Limpar filtros</button>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <span style="font-size:12.5px;color:var(--muted)">{{ mkCount }}</span>
+            <button style="margin-left:auto;height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ createAlert }}">
+              <dc-import name="Icon" icon="bell-plus" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Criar alerta com estes filtros
+            </button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+            <sc-for list="{{ marketList }}" as="m" hint-placeholder-count="6">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease" style-hover="transform:translateY(-3px);border-color:var(--accent);box-shadow:0 12px 30px rgba(2,6,23,.12)" onClick="{{ m.open }}">
+                <div style="height:168px;background:repeating-linear-gradient(135deg,var(--ph1) 0 10px,var(--ph2) 10px 20px);position:relative;display:flex;align-items:flex-end;padding:10px">
+                  <span style="position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:{{ m.dealBg }};color:#fff;white-space:nowrap">
+                    <dc-import name="Icon" icon="{{ m.dealIcon }}" size="{{ 11 }}" color="#fff" hint-size="11px,11px"></dc-import>{{ m.deal }}
+                  </span>
+                  <button style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:99px;border:none;background:rgba(2,6,23,.62);cursor:pointer;display:flex;align-items:center;justify-content:center" title="Guardar" onClick="{{ m.save }}">
+                    <dc-import name="Icon" icon="bookmark" size="{{ 15 }}" color="{{ m.heartColor }}" hint-size="15px,15px"></dc-import>
+                  </button>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 7px;border-radius:6px">{{ m.photos }}</span>
+                </div>
+                <div style="padding:15px;display:flex;flex-direction:column;gap:9px;flex:1">
+                  <strong style="font-size:14.5px;line-height:1.3">{{ m.title }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                    <dc-import name="Icon" icon="map-pin" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ m.location }}
+                  </span>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-for list="{{ m.specs }}" as="sp" hint-placeholder-count="3">
+                      <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:7px;white-space:nowrap">
+                        <dc-import name="Icon" icon="{{ sp.icon }}" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ sp.label }}
+                      </span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px">
+                    <div style="display:flex;flex-direction:column;min-width:0">
+                      <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;white-space:nowrap">{{ m.price }}</strong>
+                      <span style="font-size:12.5px;font-weight:700;color:var(--ok);display:{{ m.dropShow }}">{{ m.drop }}</span>
+                    </div>
+                    <button style="height:34px;padding:0 13px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ m.open }}">Ver detalhes</button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sDetalhe }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <button style="align-self:flex-start;height:36px;padding:0 13px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ backMarket }}">
+            <dc-import name="Icon" icon="arrow-left" size="{{ 15 }}" hint-size="15px,15px"></dc-import>{{ backLabel }}
+          </button>
+          <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:26px;flex:3 1 460px;min-width:0">
+              <div style="height:360px;border-radius:16px;border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--ph1) 0 12px,var(--ph2) 12px 24px);display:flex;align-items:flex-end;padding:12px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 9px;border-radius:7px">{{ dt.shotLabel }}</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ dt.thumbs }}" as="th" hint-placeholder-count="5">
+                  <button style="width:74px;height:56px;border-radius:9px;border:2px solid {{ th.border }};background:repeating-linear-gradient(135deg,var(--ph1) 0 8px,var(--ph2) 8px 16px);cursor:pointer;padding:0" onClick="{{ th.pick }}"></button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">Ref. {{ dt.ref }}</span>
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;line-height:1.15;letter-spacing:-.02em;margin:0;font-weight:700">{{ dt.title }}</h2>
+                <span style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px">
+                  <dc-import name="Icon" icon="map-pin" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ dt.location }}
+                </span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">
+                <sc-for list="{{ dt.facts }}" as="f" hint-placeholder-count="6">
+                  <div style="border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px;display:flex;align-items:center;gap:11px">
+                    <dc-import name="Icon" icon="{{ f.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>
+                    <div style="display:flex;flex-direction:column;min-width:0">
+                      <span style="font-size:12.5px;color:var(--muted)">{{ f.label }}</span>
+                      <strong style="font-size:12.5px;white-space:nowrap">{{ f.value }}</strong>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <strong style="font-size:16px;display:flex;align-items:center;gap:9px">
+                  <dc-import name="Icon" icon="quote" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>Descrição do proprietário
+                </strong>
+                <p style="margin:0;font-size:14px;line-height:1.75;color:var(--muted)">{{ dt.desc }}</p>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+                <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                  <dc-import name="Icon" icon="map" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>
+                  <strong style="font-size:13px">Localização aproximada</strong>
+                  <span style="margin-left:auto;font-size:12.5px;color:var(--muted)">morada exata após contacto aceite</span>
+                </div>
+                <div style="position:relative;height:320px;background:var(--surface2);background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px">
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:99px;background:var(--accent);opacity:.15"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:99px;border:2px dashed var(--accent);opacity:.5"></div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1 1 300px;max-width:360px;min-width:0;position:sticky;top:88px;align-self:flex-start;display:flex;flex-direction:column;gap:16px">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:22px;display:flex;flex-direction:column;gap:18px">
+                <span style="align-self:flex-start;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:{{ dt.dealBg }};color:#fff">
+                  <dc-import name="Icon" icon="{{ dt.dealIcon }}" size="{{ 11 }}" color="#fff" hint-size="11px,11px"></dc-import>{{ dt.deal }}
+                </span>
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700">{{ dt.price }}</strong>
+                <div style="display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)">
+                  <span style="width:40px;height:40px;border-radius:99px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none">{{ dt.ownerInitials }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+                    <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dt.owner }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">Responde em ~2 h</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <button style="height:46px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ dt.chat }}">
+                    <dc-import name="Icon" icon="message-square" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>Contactar proprietário
+                  </button>
+                  <button style="height:46px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ dt.visit }}">
+                    <dc-import name="Icon" icon="calendar-plus" size="{{ 15 }}" hint-size="15px,15px"></dc-import>Pedir visita
+                  </button>
+                  <button style="height:46px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ dt.save }}">
+                    <dc-import name="Icon" icon="bookmark" size="{{ 15 }}" color="{{ dt.heartColor }}" hint-size="15px,15px"></dc-import>{{ dt.saveLabel }}
+                  </button>
+                </div>
+              </div>
+              <button style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px 18px;display:flex;align-items:center;gap:13px;cursor:pointer;text-align:left" style-hover="border-color:var(--accent)" onClick="{{ dt.next }}">
+                <div style="display:flex;flex-direction:column;min-width:0;flex:1;gap:3px">
+                  <span style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Anúncio seguinte</span>
+                  <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dt.nextTitle }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dt.nextMeta }}</span>
+                </div>
+                <dc-import name="Icon" icon="arrow-right" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+              </button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sMapa }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap">
+          <div style="flex:1 1 300px;max-width:360px;min-width:0;max-height:calc(100vh - 150px);border:1px solid var(--border);border-radius:16px;background:var(--surface);display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:8px">
+                <input placeholder="Cidade" value="{{ mkCity2 }}" onInput="{{ setMkCity2 }}" style="flex:1;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13px;font-weight:600;min-width:0">
+                <button style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" title="Limpar" onClick="{{ clearArea }}">
+                  <dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+                </button>
+              </div>
+              <span style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)">
+                <dc-import name="Icon" icon="map-pin" size="{{ 14 }}" hint-size="14px,14px"></dc-import>{{ mapCount }}
+              </span>
+            </div>
+            <div style="flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ mapProperties }}" as="mp" hint-placeholder-count="5">
+                <button style="text-align:left;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:11px;display:flex;gap:11px;cursor:pointer;align-items:center" style-hover="border-color:var(--accent)" onClick="{{ mp.open }}">
+                  <div style="width:62px;height:56px;border-radius:10px;background:repeating-linear-gradient(135deg,var(--ph1) 0 8px,var(--ph2) 8px 16px);flex:none"></div>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                    <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ mp.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ mp.location }}</span>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ mp.specs }}</span>
+                    <strong style="font-size:13px;color:var(--accent)">{{ mp.price }}</strong>
+                  </div>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:3 1 460px;min-width:0;height:calc(100vh - 150px);min-height:480px;border:1px solid var(--border);border-radius:16px;background:var(--surface2);overflow:hidden;position:relative;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:52px 52px">
+            <div style="position:absolute;inset:0;background:linear-gradient(115deg,transparent 44%,var(--border2) 44.5%,var(--border2) 46%,transparent 46.5%),linear-gradient(28deg,transparent 64%,var(--border2) 64.4%,var(--border2) 65.6%,transparent 66%)"></div>
+            <div style="position:absolute;left:18%;top:22%;width:46%;height:54%;border:2px dashed var(--accent);border-radius:22px;background:var(--accent);opacity:.12"></div>
+            <sc-for list="{{ mapPins }}" as="pin" hint-placeholder-count="5">
+              <button style="position:absolute;left:{{ pin.left }};top:{{ pin.top }};transform:translate(-50%,-100%);height:28px;padding:0 10px;border-radius:999px;border:2px solid var(--surface);background:{{ pin.bg }};color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(2,6,23,.25)" onClick="{{ pin.open }}">{{ pin.label }}</button>
+            </sc-for>
+            <div style="position:absolute;top:14px;left:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <button style="height:36px;padding:0 13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ drawArea }}">
+                <dc-import name="Icon" icon="pencil-ruler" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Desenhar área
+              </button>
+              <button style="height:36px;padding:0 13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ clearArea }}">
+                <dc-import name="Icon" icon="eraser" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Limpar área
+              </button>
+            </div>
+            <button style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:var(--accent);color:var(--accent)" title="Ecrã inteiro" onClick="{{ fullscreenMap }}">
+              <dc-import name="Icon" icon="maximize" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+            </button>
+            <span style="position:absolute;left:14px;bottom:14px;font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:7px 11px;border-radius:9px;line-height:1.45">Localizações aproximadas · a morada exata é revelada após o contacto ser aceite</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sGuardados }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ savedStats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:9px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.value }}</strong>
+                <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600">
+                  <dc-import name="Icon" icon="{{ s.icon }}" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>{{ s.label }}
+                </span>
+                <span style="font-size:12.5px;color:{{ s.deltaColor }}">{{ s.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+            <sc-for list="{{ savedList }}" as="m" hint-placeholder-count="3">
+              <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .16s ease,border-color .16s ease" style-hover="transform:translateY(-3px);border-color:var(--accent)" onClick="{{ m.open }}">
+                <div style="height:160px;background:repeating-linear-gradient(135deg,var(--ph1) 0 10px,var(--ph2) 10px 20px);position:relative;display:flex;align-items:flex-end;padding:10px">
+                  <span style="position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:{{ m.dealBg }};color:#fff;white-space:nowrap">
+                    <dc-import name="Icon" icon="{{ m.dealIcon }}" size="{{ 11 }}" color="#fff" hint-size="11px,11px"></dc-import>{{ m.deal }}
+                  </span>
+                  <button style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:99px;border:none;background:rgba(2,6,23,.62);cursor:pointer;display:flex;align-items:center;justify-content:center" title="Remover dos guardados" onClick="{{ m.save }}">
+                    <dc-import name="Icon" icon="bookmark" size="{{ 15 }}" color="{{ m.heartColor }}" hint-size="15px,15px"></dc-import>
+                  </button>
+                </div>
+                <div style="padding:15px;display:flex;flex-direction:column;gap:9px;flex:1">
+                  <strong style="font-size:14.5px;line-height:1.3">{{ m.title }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ m.location }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0;margin-top:auto;padding-top:10px;gap:11px">
+                    <div style="display:flex;flex-direction:column;min-width:0">
+                      <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;white-space:nowrap">{{ m.price }}</strong>
+                      <span style="font-size:12.5px;font-weight:700;color:var(--ok);display:{{ m.dropShow }}">{{ m.drop }}</span>
+                    </div>
+                    <div style="display:flex;gap:7px;padding-top:11px;border-top:1px solid var(--border)">
+                      <button style="flex:1;height:34px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:7px;min-width:0" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ m.open }}">
+                        <dc-import name="Icon" icon="eye" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Ver detalhes
+                      </button>
+                      <button style="width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" title="Partilhar" onClick="{{ m.share }}">
+                        <dc-import name="Icon" icon="share-2" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+                      </button>
+                      <button style="width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" title="Pedir visita" onClick="{{ m.visit }}">
+                        <dc-import name="Icon" icon="calendar" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+                      </button>
+                      <button style="width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="border-color:var(--danger);color:var(--danger)" title="Remover" onClick="{{ m.remove }}">
+                        <dc-import name="Icon" icon="trash-2" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ savedEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+              <dc-import name="Icon" icon="bookmark" size="{{ 40 }}" color="var(--muted)" hint-size="40px,40px"></dc-import>
+              <strong style="font-size:16px">Nenhum imóvel guardado</strong>
+              <span style="font-size:13px;color:var(--muted);line-height:1.6;max-width:44ch">Guarde os imóveis de que gostar para os encontrar aqui mais tarde.</span>
+              <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ goMarket }}">Explorar propriedades</button>
+            </div>
+          </sc-if>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+              <dc-import name="Icon" icon="bell-ring" size="{{ 16 }}" color="var(--accent)" hint-size="16px,16px"></dc-import>
+              <strong style="font-size:13.5px">Alertas de pesquisa</strong>
+              <button style="margin-left:auto;height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ createAlert }}">Novo alerta</button>
+            </div>
+            <sc-for list="{{ alerts }}" as="al" hint-placeholder-count="3">
+              <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+                <div style="display:flex;flex-direction:column;min-width:0;flex:1;gap:3px">
+                  <strong style="font-size:12.5px">{{ al.title }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ al.meta }}</span>
+                </div>
+                <span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ al.tagBg }};color:#fff;white-space:nowrap;flex:none">{{ al.tag }}</span>
+                <button style="width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="color:var(--danger)" title="Apagar alerta" onClick="{{ al.remove }}">
+                  <dc-import name="Icon" icon="trash-2" size="{{ 14 }}" hint-size="14px,14px"></dc-import>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sVisitas }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <div style="display:inline-flex;padding:3px;border-radius:10px;border:1px solid var(--border);background:var(--surface2)">
+              <sc-for list="{{ viewModes }}" as="vm" hint-placeholder-count="2">
+                <button style="height:32px;padding:0 14px;border-radius:8px;border:none;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ vm.bg }};color:{{ vm.color }};display:flex;align-items:center;gap:7px;white-space:nowrap" onClick="{{ vm.pick }}">
+                  <dc-import name="Icon" icon="{{ vm.icon }}" size="{{ 14 }}" hint-size="14px,14px"></dc-import>{{ vm.label }}
+                </button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ visitFilters }}" as="f" hint-placeholder-count="4">
+              <button style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px" onClick="{{ f.pick }}">
+                <span style="width:8px;height:8px;border-radius:99px;background:{{ f.dot }}"></span>{{ f.label }}
+              </button>
+            </sc-for>
+            <span style="margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap">{{ visitCount }}</span>
+          </div>
+          <sc-if value="{{ isCalView }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:16px">Setembro 2026</strong>
+                <div style="margin-left:auto;display:flex;gap:7px">
+                  <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:var(--accent);color:var(--accent)">
+                    <dc-import name="Icon" icon="chevron-left" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+                  </button>
+                  <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:var(--accent);color:var(--accent)">
+                    <dc-import name="Icon" icon="chevron-right" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+                  </button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--surface2);border-bottom:1px solid var(--border)">
+                <sc-for list="{{ weekDays }}" as="w" hint-placeholder-count="7">
+                  <span style="padding:9px 10px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center">{{ w.label }}</span>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+                <sc-for list="{{ calDays }}" as="d" hint-placeholder-count="35">
+                  <div style="min-height:96px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:7px;display:flex;flex-direction:column;gap:5px;background:{{ d.bg }};min-width:0">
+                    <span style="font-size:12.5px;font-weight:{{ d.weight }};color:{{ d.color }}">{{ d.n }}</span>
+                    <sc-for list="{{ d.events }}" as="e" hint-placeholder-count="1">
+                      <span style="font-size:12.5px;font-weight:700;padding:3px 6px;border-radius:6px;background:{{ e.bg }};color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.label }}</span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isListView }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ visits }}" as="v" hint-placeholder-count="4">
+            <div style="border:1px solid var(--border);border-left:3px solid {{ v.accent }};border-radius:16px;background:var(--surface);overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+              <div style="padding:16px;display:flex;gap:14px;min-width:0;border-right:1px solid var(--border)">
+                <div style="width:74px;height:74px;border-radius:12px;background:repeating-linear-gradient(135deg,var(--ph1) 0 9px,var(--ph2) 9px 18px);flex:none"></div>
+                <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <strong style="font-size:14px">{{ v.property }}</strong>
+                    <span style="font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:{{ v.tagBg }};color:#fff;white-space:nowrap">{{ v.status }}</span>
+                  </div>
+                  <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                    <dc-import name="Icon" icon="map-pin" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ v.address }}
+                  </span>
+                  <span style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                    <dc-import name="Icon" icon="user" size="{{ 13 }}" hint-size="13px,13px"></dc-import>{{ v.owner }}
+                  </span>
+                  <span style="font-size:12.5px;color:var(--muted);display:{{ v.noteShow }}">«{{ v.note }}»</span>
+                </div>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:11px;min-width:0">
+                <div style="display:flex;gap:16px;flex-wrap:wrap">
+                  <span style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700">
+                    <dc-import name="Icon" icon="calendar" size="{{ 14 }}" color="var(--accent)" hint-size="14px,14px"></dc-import>{{ v.date }}
+                  </span>
+                  <span style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700">
+                    <dc-import name="Icon" icon="clock" size="{{ 14 }}" color="var(--accent)" hint-size="14px,14px"></dc-import>{{ v.time }}
+                  </span>
+                </div>
+                <span style="font-size:12.5px;color:var(--muted)">{{ v.hint }}</span>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                  <sc-for list="{{ v.actions }}" as="ac" hint-placeholder-count="2">
+                    <button style="height:34px;padding:0 13px;border-radius:9px;border:1px solid {{ ac.border }};background:{{ ac.bg }};color:{{ ac.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:filter .15s ease,border-color .15s ease" style-hover="filter:brightness(.94);border-color:var(--accent)" onClick="{{ ac.run }}">
+                      <dc-import name="Icon" icon="{{ ac.icon }}" size="{{ 14 }}" hint-size="14px,14px"></dc-import>{{ ac.label }}
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sMensagens }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0;height:calc(100vh - 150px);min-height:540px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)">
+          <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;min-width:0;max-width:320px">
+            <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+              <strong style="font-size:13px">Conversas</strong>
+              <span style="margin-left:auto;font-size:12.5px;color:var(--muted)">{{ unreadTotal }}</span>
+            </div>
+            <div style="flex:1;overflow:auto">
+              <sc-for list="{{ threads }}" as="t" hint-placeholder-count="3">
+                <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;gap:11px;cursor:pointer;background:{{ t.bg }}" style-hover="background:var(--surface2)" onClick="{{ t.pick }}">
+                  <span style="width:36px;height:36px;border-radius:99px;background:var(--surface3);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">{{ t.initials }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0;gap:3px;flex:1">
+                    <strong style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</strong>
+                    <span style="font-size:12.5px;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.property }}</span>
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.last }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none">
+                    <span style="font-size:12.5px;color:var(--muted);white-space:nowrap">{{ t.time }}</span>
+                    <span style="min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;display:{{ t.unreadShow }};align-items:center;justify-content:center">{{ t.unread }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;min-width:0">
+            <div style="padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+              <span style="width:36px;height:36px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">{{ chatInitials }}</span>
+              <div style="display:flex;flex-direction:column;min-width:0;flex:1 1 130px">
+                <strong style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ chatName }}</strong>
+                <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ chatProperty }}</span>
+              </div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0">
+                <button style="height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;min-width:0" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ chatOpenProp }}">
+                  <dc-import name="Icon" icon="building-2" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Ver imóvel
+                </button>
+                <button style="height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ chatVisit }}">
+                  <dc-import name="Icon" icon="calendar-plus" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Pedir visita
+                </button>
+              </div>
+            </div>
+            <div style="flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface2)">
+              <sc-for list="{{ messages }}" as="ms" hint-placeholder-count="5">
+                <div style="display:flex;justify-content:{{ ms.align }}">
+                  <div style="max-width:72%;display:flex;flex-direction:column;gap:5px;background:{{ ms.bg }};color:{{ ms.color }};border:1px solid {{ ms.border }};border-radius:14px;padding:11px 13px">
+                    <span style="font-size:13.5px;line-height:1.55">{{ ms.text }}</span>
+                    <span style="font-size:12.5px;opacity:.7;align-self:flex-end">{{ ms.time }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center">
+              <input placeholder="Escreva a sua mensagem…" value="{{ draft }}" onInput="{{ setDraft }}" onKeyDown="{{ draftKey }}" style="flex:1;height:44px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 14px;font-size:13.5px;min-width:0">
+              <button style="height:44px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none" style-hover="background:var(--accent-hover)" onClick="{{ sendMsg }}">
+                <dc-import name="Icon" icon="send" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sCloud }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button style="height:40px;padding:0 16px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap" style-hover="background:var(--accent-hover)" onClick="{{ upload }}">
+              <dc-import name="Icon" icon="upload" size="{{ 15 }}" color="#fff" hint-size="15px,15px"></dc-import>Carregar documento
+            </button>
+            <span style="margin-left:auto;font-size:12.5px;color:var(--muted)">{{ driveUsage }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+            <sc-for list="{{ driveFolders }}" as="fd" hint-placeholder-count="4">
+              <div style="border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:14px;display:flex;align-items:center;gap:11px;cursor:pointer" style-hover="border-color:var(--accent)" onClick="{{ fd.open }}">
+                <dc-import name="Icon" icon="folder" size="{{ 20 }}" color="var(--accent)" hint-size="20px,20px"></dc-import>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ fd.name }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ fd.meta }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;gap:12px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+              <span style="flex:3">Documento</span><span style="flex:2">Origem</span><span style="width:120px">Estado</span><span style="width:120px">Ações</span>
+            </div>
+            <sc-for list="{{ driveFiles }}" as="fl" hint-placeholder-count="5">
+              <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center">
+                <div style="flex:3;min-width:0;display:flex;align-items:center;gap:10px">
+                  <dc-import name="Icon" icon="{{ fl.icon }}" size="{{ 17 }}" color="var(--muted)" hint-size="17px,17px"></dc-import>
+                  <div style="display:flex;flex-direction:column;min-width:0">
+                    <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ fl.name }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ fl.meta }}</span>
+                  </div>
+                </div>
+                <span style="flex:2;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ fl.origin }}</span>
+                <span style="width:120px;flex:none"><span style="font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ fl.tagBg }};color:#fff;white-space:nowrap">{{ fl.status }}</span></span>
+                <div style="width:120px;display:flex;gap:6px;justify-content:flex-end;flex:none">
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ fl.download }}">Transferir</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sContratos }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:12px;flex:1 1 262px;max-width:322px;min-width:0;position:sticky;top:88px;align-self:flex-start">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Partilhados consigo</span>
+            <sc-for list="{{ buyerContracts }}" as="c" hint-placeholder-count="3">
+              <button style="text-align:left;border:1px solid {{ c.border }};border-radius:13px;background:var(--surface);padding:13px;display:flex;flex-direction:column;gap:7px;cursor:pointer" style-hover="border-color:var(--accent)" onClick="{{ c.pick }}">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <dc-import name="Icon" icon="file-text" size="{{ 15 }}" color="var(--accent)" hint-size="15px,15px"></dc-import>
+                  <strong style="font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</strong>
+                </div>
+                <span style="font-size:12.5px;color:var(--muted);line-height:1.45">{{ c.meta }}</span>
+                <span style="align-self:flex-start;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:{{ c.tagBg }};color:#fff">{{ c.status }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;flex:3 1 460px;min-width:0">
+            <div style="padding:14px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 200px">
+                <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:16px">{{ cDocTitle }}</strong>
+                <span style="font-size:12.5px;color:var(--muted)">{{ cDocMeta }}</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:nowrap;margin-left:auto;flex:none">
+                <button style="height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ saveToCloud }}">
+                  <dc-import name="Icon" icon="cloud-upload" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Guardar
+                </button>
+                <button style="height:36px;padding:0 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:var(--accent-hover)" onClick="{{ downloadContract }}">
+                  <dc-import name="Icon" icon="download" size="{{ 14 }}" color="#fff" hint-size="14px,14px"></dc-import>Transferir
+                </button>
+              </div>
+            </div>
+            <div style="flex:1;overflow:auto;background:var(--surface2);padding:22px;display:flex;justify-content:center">
+              <div style="width:100%;max-width:760px;min-height:700px;background:#fff;color:#0F172A;border:1px solid var(--border);border-radius:4px;box-shadow:0 6px 20px rgba(2,6,23,.1);padding:clamp(24px,7%,64px);display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ contractBlocks }}" as="cb" hint-placeholder-count="8">
+                  <p style="margin:0;font-size:{{ cb.size }};font-weight:{{ cb.weight }};line-height:1.75;letter-spacing:{{ cb.spacing }};text-transform:{{ cb.transform }};color:#0F172A">{{ cb.text }}</p>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sReports }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button style="height:44px;border-radius:12px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px" style-hover="background:var(--accent);color:#fff" onClick="{{ openBug }}">
+              <dc-import name="Icon" icon="bug" size="{{ 16 }}" hint-size="16px,16px"></dc-import>Reportar novo problema
+            </button>
+            <sc-for list="{{ reports }}" as="rp" hint-placeholder-count="3">
+              <button style="text-align:left;border:1px solid {{ rp.border }};border-radius:14px;background:var(--surface);padding:15px;display:flex;flex-direction:column;gap:9px;cursor:pointer" style-hover="border-color:var(--accent)" onClick="{{ rp.pick }}">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ rp.id }}</span>
+                  <span style="margin-left:auto;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:{{ rp.tagBg }};color:#fff;white-space:nowrap">{{ rp.status }}</span>
+                </div>
+                <strong style="font-size:13.5px;line-height:1.35">{{ rp.title }}</strong>
+                <span style="font-size:12.5px;color:var(--muted)">{{ rp.meta }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">{{ repId }}</span>
+              <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px">{{ repTitle }}</strong>
+              <span style="font-size:13px;color:var(--muted);line-height:1.6">{{ repDesc }}</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ repSteps }}" as="sp" hint-placeholder-count="5">
+                <span style="font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:{{ sp.bg }};color:{{ sp.color }};white-space:nowrap">{{ sp.label }}</span>
+              </sc-for>
+            </div>
+            <sc-for list="{{ repTimeline }}" as="u" hint-placeholder-count="3">
+              <div style="display:flex;gap:12px">
+                <div style="display:flex;flex-direction:column;align-items:center;flex:none">
+                  <span style="width:11px;height:11px;border-radius:99px;background:{{ u.dot }};margin-top:5px"></span>
+                  <span style="width:2px;flex:1;background:var(--border)"></span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;padding-bottom:16px;min-width:0">
+                  <strong style="font-size:12.5px">{{ u.status }}</strong>
+                  <span style="font-size:12.5px;color:var(--muted);line-height:1.5">{{ u.note }}</span>
+                  <span style="font-size:12.5px;color:var(--muted)">{{ u.at }}</span>
+                </div>
+              </div>
+            </sc-for>
+            <div style="margin-top:auto;padding:12px 14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.55">A informação técnica foi recolhida automaticamente. Será avisado a cada atualização.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPlano }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div style="border:1px solid var(--accent);border-radius:16px;background:var(--accent-soft);padding:20px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+              <span style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)">Plano atual</span>
+              <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px">Smarter</strong>
+              <span style="font-size:12.5px;color:var(--muted)">Renova a 3 de novembro de 2026 · 29,90 €/ano</span>
+            </div>
+            <div style="display:flex;gap:22px;margin-left:auto;flex-wrap:wrap">
+              <sc-for list="{{ planUsage }}" as="u" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:12.5px;color:var(--muted)">{{ u.label }}</span>
+                  <strong style="font-size:17px">{{ u.value }}</strong>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+            <sc-for list="{{ plans }}" as="pl" hint-placeholder-count="3">
+              <div style="border:1px solid {{ pl.border }};border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:12px">
+                <span style="align-self:flex-start;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:{{ pl.badgeBg }};color:{{ pl.badgeColor }}">{{ pl.name }}</span>
+                <div style="display:flex;align-items:baseline;gap:6px"><strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px">{{ pl.price }}</strong><span style="font-size:12.5px;color:var(--muted)">/ano</span></div>
+                <sc-for list="{{ pl.features }}" as="ft" hint-placeholder-count="4">
+                  <div style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45">
+                    <dc-import name="Icon" icon="{{ ft.icon }}" size="{{ 14 }}" color="{{ ft.color }}" hint-size="14px,14px"></dc-import>
+                    <span style="color:{{ ft.text }}">{{ ft.label }}</span>
+                  </div>
+                </sc-for>
+                <button style="margin-top:auto;height:42px;border-radius:11px;border:none;background:{{ pl.ctaBg }};color:{{ pl.ctaColor }};font-size:13px;font-weight:700;cursor:pointer" style-hover="filter:brightness(.95)" onClick="{{ pl.pick }}">{{ pl.cta }}</button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+            <div style="padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Faturas</div>
+            <sc-for list="{{ invoices }}" as="iv" hint-placeholder-count="3">
+              <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <dc-import name="Icon" icon="receipt" size="{{ 16 }}" color="var(--muted)" hint-size="16px,16px"></dc-import>
+                <strong style="font-size:13px">{{ iv.ref }}</strong>
+                <span style="font-size:12.5px;color:var(--muted)">{{ iv.date }}</span>
+                <span style="font-size:13px;font-weight:700;margin-left:auto">{{ iv.total }}</span>
+                <div style="display:flex;gap:7px">
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ iv.save }}">Guardar</button>
+                  <button style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ iv.export }}">Exportar</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sDefinicoes }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+          <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:15px;position:sticky;top:88px;align-self:flex-start">
+            <strong style="font-size:14px">Perfil</strong>
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="width:64px;height:64px;border-radius:99px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex:none">JC</span>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button style="height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ changeAvatar }}">
+                  <dc-import name="Icon" icon="image-plus" size="{{ 14 }}" hint-size="14px,14px"></dc-import>Alterar avatar
+                </button>
+                <span style="font-size:12.5px;color:var(--muted)">JPG ou PNG, até 2 MB.</span>
+              </div>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Nome
+              <input value="João Costa" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">E-mail
+              <input value="joao.costa@email.pt" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Telefone (privado)
+              <input value="+351 913 000 000" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <button style="align-self:flex-start;height:42px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ saveSettings }}">Guardar alterações</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:13px">
+              <strong style="font-size:14px">Preferências de procura</strong>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Zonas de interesse
+                <input value="Lisboa · Campo de Ourique, Alvalade" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Orçamento máximo
+                <input value="520 000 €" style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Objetivo
+                <select style="height:42px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+                  <option>Comprar</option><option>Arrendar</option><option>Comprar ou arrendar</option>
+                </select>
+              </label>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:11px">
+              <strong style="font-size:14px">Notificações</strong>
+              <sc-for list="{{ notifSettings }}" as="ns" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+                    <strong style="font-size:12.5px">{{ ns.label }}</strong>
+                    <span style="font-size:12.5px;color:var(--muted)">{{ ns.hint }}</span>
+                  </div>
+                  <button style="width:46px;height:26px;border-radius:99px;border:none;background:{{ ns.trackBg }};cursor:pointer;position:relative;flex:none" onClick="{{ ns.toggle }}">
+                    <span style="position:absolute;top:3px;left:{{ ns.knobLeft }};width:20px;height:20px;border-radius:99px;background:#fff;transition:left .18s ease"></span>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:13px">
+              <strong style="font-size:14px">Aparência</strong>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <sc-for list="{{ themeChoices }}" as="tc" hint-placeholder-count="3">
+                  <button style="flex:1 1 90px;height:44px;border-radius:11px;border:1px solid {{ tc.border }};background:{{ tc.bg }};color:{{ tc.color }};font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap" onClick="{{ tc.pick }}">
+                    <dc-import name="Icon" icon="{{ tc.icon }}" size="{{ 15 }}" hint-size="15px,15px"></dc-import>{{ tc.label }}
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="border:1px solid var(--danger);border-radius:16px;background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:11px">
+              <strong style="font-size:14px;color:var(--danger)">Zona de perigo</strong>
+              <button style="height:40px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ changePass }}">Alterar palavra-passe</button>
+              <button style="height:40px;border-radius:10px;border:1px solid var(--danger);background:transparent;color:var(--danger);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--danger);color:#fff" onClick="{{ deleteAccount }}">Eliminar conta</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ visitModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closeVisit }}">
+      <div style="width:100%;max-width:520px;max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;display:flex;flex-direction:column" onClick="{{ stop }}">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px">
+          <span style="width:38px;height:38px;border-radius:11px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex:none">
+            <dc-import name="Icon" icon="calendar-plus" size="{{ 17 }}" color="var(--accent)" hint-size="17px,17px"></dc-import>
+          </span>
+          <div style="display:flex;flex-direction:column;min-width:0;flex:1">
+            <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:16px">Pedir visita</strong>
+            <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ visitProperty }}</span>
+          </div>
+          <button style="width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" onClick="{{ closeVisit }}">
+            <dc-import name="Icon" icon="x" size="{{ 15 }}" hint-size="15px,15px"></dc-import>
+          </button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:15px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Data preferida
+              <input type="date" style="height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Hora
+              <select style="height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 10px;font-size:13.5px;font-weight:600">
+                <option>10h00</option><option>11h00</option><option>15h00</option><option>16h30</option><option>18h00</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Mensagem ao proprietário
+            <textarea placeholder="Diga o que gostaria de ver com mais atenção…" style="min-height:100px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:11px 12px;font-size:13.5px;line-height:1.55;resize:vertical"></textarea>
+          </label>
+          <span style="font-size:12.5px;color:var(--muted);line-height:1.55;padding:11px 13px;border-radius:11px;background:var(--surface2);border:1px solid var(--border)">O proprietário recebe o pedido no painel dele e pode aceitar, propor outra data ou recusar. Será avisado assim que houver resposta.</span>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" onClick="{{ closeVisit }}">Cancelar</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ sendVisit }}">Enviar pedido</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ bugOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(2,6,23,.6);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ closeBug }}">
+      <div style="width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px" onClick="{{ stop }}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <dc-import name="Icon" icon="bug" size="{{ 18 }}" color="var(--accent)" hint-size="18px,18px"></dc-import>
+          <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px">Reportar um problema</strong>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);line-height:1.6">Descreva o que aconteceu. Os dados técnicos são recolhidos automaticamente.</span>
+        <input placeholder="O que correu mal?" style="height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0 12px;font-size:13.5px;font-weight:600">
+        <textarea placeholder="Conte-nos o que estava a fazer…" style="min-height:100px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:11px 12px;font-size:13.5px;line-height:1.55;resize:vertical"></textarea>
+        <button style="border:1px dashed var(--border2);border-radius:12px;background:var(--surface2);padding:14px;display:flex;align-items:center;gap:11px;cursor:pointer;text-align:left" style-hover="border-color:var(--accent)" onClick="{{ attachShot }}">
+          <dc-import name="Icon" icon="image-up" size="{{ 18 }}" color="var(--accent)" hint-size="18px,18px"></dc-import>
+          <span style="font-size:12.5px;color:var(--text);font-weight:700">{{ shotName }}</span>
+        </button>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button style="height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer" onClick="{{ closeBug }}">Cancelar</button>
+          <button style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:var(--accent-hover)" onClick="{{ sendBug }}">Enviar report</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ updOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:110;background:rgba(2,6,23,.62);display:flex;align-items:center;justify-content:center;padding:24px" onClick="{{ laterUpd }}">
+      <div style="width:100%;max-width:520px;max-height:88vh;overflow:auto;border:1px solid var(--border);border-radius:20px;background:var(--surface);display:flex;flex-direction:column" onClick="{{ stopUpd }}">
+        <div style="height:150px;border-radius:20px 20px 0 0;background:repeating-linear-gradient(135deg,var(--ph1) 0 12px,var(--ph2) 12px 24px);display:flex;align-items:flex-end;padding:12px"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:4px 9px;border-radius:7px">{{ upd.image }}</span></div>
+        <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:9px"><span style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Novidades</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:999px">v{{ upd.version }}</span></div>
+          <strong style="font-family:'Bricolage Grotesque',sans-serif;font-size:21px;line-height:1.2">{{ upd.title }}</strong>
+          <span style="font-size:13.5px;line-height:1.65;color:var(--muted)">{{ upd.lead }}</span>
+        </div>
+        <div style="padding:12px 22px;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ upd.points }}" as="pt" hint-placeholder-count="3">
+            <span style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--text)"><span style="width:22px;height:22px;border-radius:7px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex:none"><dc-import name="Icon" icon="check" size="{{ 13 }}" color="var(--accent)" hint-size="13px,13px"></dc-import></span>{{ pt.text }}</span>
+          </sc-for>
+        </div>
+        <div style="padding:14px 22px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="display:flex;gap:6px"><sc-for list="{{ updDots }}" as="d" hint-placeholder-count="2"><span style="width:{{ d.w }};height:7px;border-radius:99px;background:{{ d.bg }};transition:width .2s ease"></span></sc-for></div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <sc-if value="{{ updHasPrev }}" hint-placeholder-val="{{ false }}"><button style="height:40px;padding:0 15px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ prevUpd }}">Anterior</button></sc-if>
+            <sc-if value="{{ updIsFirst }}" hint-placeholder-val="{{ true }}"><button style="height:40px;padding:0 15px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--accent);color:var(--accent)" onClick="{{ laterUpd }}">Mais tarde</button></sc-if>
+            <button style="height:40px;padding:0 16px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:var(--accent-hover)" onClick="{{ nextUpd }}">{{ updCta }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:120;background:#0B1220;color:#E6EDF6;border:1px solid #1E293B;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:600">{{ toastText }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#EA580C&quot;,&quot;#0F766E&quot;,&quot;#1D4ED8&quot;,&quot;#9333EA&quot;],&quot;default&quot;:&quot;#EA580C&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;},&quot;railDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Navegação&quot;}}">
+class Component extends DCLogic {
+  state = {
+    route: 'painel', theme: 'light', rail: false, range: '7 dias',
+    saved: ['UPM-1042', 'UPM-1047'], mkSel: 'UPM-1041', shotSel: 0,
+    vFilter: 'Todas', visitState: {}, chatId: 'c1', draft: '', msgs: [],
+    bugOpen: false, shot: '', toast: '', notifOpen: false, notifRead: false,
+    visitModal: false, visitProperty: '', cDoc: 'Reserva · T3 Campo de Ourique',
+    selReport: 'UPM-141', notifPrefs: { msg: true, price: true, docs: true, news: false },
+    removedAlerts: []
+  };
+
+  componentDidMount() { this.setState({ theme: document.documentElement.getAttribute('data-theme') || 'light' }); }
+
+  toast = (t) => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2400); };
+
+  download(name, content) {
+    try {
+      const url = URL.createObjectURL(new Blob([content || 'UProperty Market\n'], { type: 'text/plain' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      this.toast('Transferência iniciada · ' + name);
+    } catch (e) { this.toast('Não foi possível transferir'); }
+  }
+
+  solid(s) {
+    return ({
+      'Venda': '#1D4ED8', 'Arrendamento': '#7C3AED', 'Aceite': '#0D9488',
+      'Pendente': '#B45309', 'Reagendada': '#1D4ED8', 'Cancelada': '#DC2626',
+      'Arquivada': '#334155', 'Novo': '#0EA5E9', 'Ativo': '#334155', 'Urgente': '#DC2626',
+      'Por ler': '#EA580C', 'Em curso': '#EA580C', 'Resolvido': '#0D9488', 'Triagem': '#B45309',
+      'Em teste': '#1D4ED8', 'Partilhado': '#1D4ED8', 'Assinado': '#0D9488', 'Rascunho': '#64748B',
+      'Descida': '#0D9488'
+    })[s] || '#64748B';
+  }
+
+  marketData() {
+    return [
+      { ref: 'UPM-1041', title: 'Apartamento T3 com varanda', location: 'Lisboa · Campo de Ourique', city: 'Lisboa', price: '485 000 €', deal: 'Venda', type: 'T3', area: '118 m²', wc: '2 WC', floor: '3.º andar', year: '2019', energy: 'B', photos: '12 fotos', owner: 'Ana Silva', drop: '', desc: 'Apartamento remodelado em 2019, orientação nascente-poente e varanda de 12 m² sobre o jardim interior do quarteirão. Cozinha equipada, ar condicionado e lugar de garagem incluído.' },
+      { ref: 'UPM-1042', title: 'Moradia T4 com jardim', location: 'Cascais · Birre', city: 'Cascais', price: '1 250 000 €', deal: 'Venda', type: 'T4', area: '265 m²', wc: '4 WC', floor: 'Moradia isolada', year: '2008', energy: 'A', photos: '24 fotos', owner: 'Ana Silva', drop: '−25 000 € esta semana', desc: 'Moradia isolada em lote de 900 m², piscina aquecida, jardim maduro e anexo convertido em escritório, a seis minutos da praia do Guincho.' },
+      { ref: 'UPM-1047', title: 'Apartamento T4 vista rio', location: 'Porto · Foz do Douro', city: 'Porto', price: '890 000 €', deal: 'Venda', type: 'T4', area: '198 m²', wc: '3 WC', floor: '6.º andar', year: '2018', energy: 'A+', photos: '18 fotos', owner: 'Carla Nunes', drop: '', desc: 'Último piso com vista frontal sobre a foz do Douro, duas frentes, dois lugares de garagem e arrecadação.' },
+      { ref: 'UPM-1049', title: 'Apartamento T1 no centro', location: 'Faro · Sé', city: 'Faro', price: '720 €/mês', deal: 'Arrendamento', type: 'T1', area: '58 m²', wc: '1 WC', floor: '2.º andar', year: '2005', energy: 'C', photos: '11 fotos', owner: 'Rui Mendes', drop: '', desc: 'T1 na malha histórica de Faro, a cinco minutos da marina. Arrendamento de longa duração, disponível de imediato.' },
+      { ref: 'UPM-1044', title: 'Apartamento T2 com terraço', location: 'Braga · São Vítor', city: 'Braga', price: '189 000 €', deal: 'Venda', type: 'T2', area: '86 m²', wc: '2 WC', floor: '4.º andar', year: '2015', energy: 'B', photos: '14 fotos', owner: 'Rui Mendes', drop: '', desc: 'T2 com terraço privativo de 30 m² e vista desafogada sobre a cidade. Condomínio com elevador e videoporteiro.' },
+      { ref: 'UPM-1045', title: 'Loft industrial T1', location: 'Lisboa · Marvila', city: 'Lisboa', price: '950 €/mês', deal: 'Arrendamento', type: 'T1', area: '74 m²', wc: '1 WC', floor: 'R/C', year: '2021', energy: 'A', photos: '9 fotos', owner: 'Ana Silva', drop: '', desc: 'Antiga oficina convertida em loft, pé-direito de 4,2 m, janelas metálicas originais recuperadas e pátio privativo.' }
+    ];
+  }
+
+  marketFiltered() {
+    const st = this.state, q = (st.mkQuery || '').trim().toLowerCase();
+    return this.marketData().filter(m =>
+      (!q || (m.title + ' ' + m.location + ' ' + m.ref).toLowerCase().indexOf(q) >= 0) &&
+      ((st.mkDeal || 'Todos') === 'Todos' || m.deal === st.mkDeal) &&
+      ((st.mkType || 'Todas') === 'Todas' || m.type === st.mkType) &&
+      ((st.mkCity || 'Todas') === 'Todas' || m.city === st.mkCity));
+  }
+
+  cardOf(m) {
+    const saved = this.state.saved.indexOf(m.ref) >= 0;
+    return {
+      title: m.title, location: m.location, price: m.price, photos: m.photos, deal: m.deal,
+      dealBg: this.solid(m.deal), dealIcon: m.deal === 'Venda' ? 'home' : 'key',
+      heartColor: saved ? '#F97316' : '#fff',
+      drop: m.drop, dropShow: m.drop ? 'block' : 'none',
+      specs: [{ icon: 'bed-double', label: m.type }, { icon: 'ruler', label: m.area }, { icon: 'bath', label: m.wc }],
+      open: () => { this.setState({ route: 'detalhe', mkSel: m.ref, shotSel: 0, backTo: ['mapa', 'guardados'].indexOf(this.state.route) >= 0 ? this.state.route : 'market' }); window.scrollTo(0, 0); },
+      save: (e) => { e.stopPropagation(); this.toggleSave(m.ref); },
+      chat: (e) => { e.stopPropagation(); this.setState({ route: 'mensagens' }); this.toast('Conversa aberta com ' + m.owner); }
+    };
+  }
+
+  toggleSave(ref) {
+    const has = this.state.saved.indexOf(ref) >= 0;
+    this.setState({ saved: has ? this.state.saved.filter(r => r !== ref) : this.state.saved.concat(ref) });
+    this.toast(has ? 'Removido dos guardados' : 'Imóvel guardado · alerta de preço ativo');
+  }
+
+  visitsData() {
+    const ls = this.state.visitState;
+    return [
+      { id: 'v1', property: 'Apartamento T3', address: 'Campo de Ourique, Lisboa', owner: 'Ana Silva', note: 'Posso chegar 10 minutos mais cedo.', date: '21 set 2026', day: 21, time: '11h00', status: ls.v1 || 'Aceite', hint: 'O proprietário aceitou. Receberá a morada exata 1 h antes.' },
+      { id: 'v2', property: 'Apartamento T4 vista rio', address: 'Foz do Douro, Porto', owner: 'Carla Nunes', note: 'Gostava de ver a garagem.', date: '24 set 2026', day: 24, time: '16h00', status: ls.v2 || 'Pendente', hint: 'Pedido enviado — a aguardar resposta do proprietário.' },
+      { id: 'v3', property: 'Loft industrial T1', address: 'Marvila, Lisboa', owner: 'Ana Silva', note: '', date: '25 set 2026', day: 25, time: '18h00', status: ls.v3 || 'Reagendada', hint: 'A proprietária propôs uma nova data. Confirme se lhe serve.' },
+      { id: 'v4', property: 'Apartamento T2 com terraço', address: 'São Vítor, Braga', owner: 'Rui Mendes', note: '', date: '11 set 2026', day: 11, time: '15h00', status: ls.v4 || 'Arquivada', hint: 'Visita concluída. Pode enviar uma proposta pelo chat.' }
+    ];
+  }
+
+  threadList() {
+    return [
+      { id: 'c1', name: 'Ana Silva', initials: 'AS', property: 'Apartamento T3 · Campo de Ourique', last: '«Sábado às 11h está ótimo»', time: '09:40', unread: 1, msgs: [
+        ['me', 'Boa tarde! Vi o anúncio do T3 e gostava de saber se a garagem é individual.', 'ontem 17:40'],
+        ['them', 'Boa tarde João. É individual, com portão automático e arrecadação anexa.', 'ontem 18:02'],
+        ['me', 'Seria possível visitar sábado de manhã?', '09:12'],
+        ['them', 'Sábado às 11h está ótimo. Confirmo a visita na agenda.', '09:40']
+      ] },
+      { id: 'c2', name: 'Carla Nunes', initials: 'CN', property: 'Apartamento T4 · Foz do Douro', last: '«Envio a certidão energética»', time: 'ontem', unread: 0, msgs: [
+        ['me', 'Bom dia, o certificado energético está disponível?', 'ontem 10:02'],
+        ['them', 'Bom dia! Envio a certidão energética hoje para a sua cloud.', 'ontem 10:31'],
+        ['me', 'Obrigado. Recebi, está tudo certo.', 'ontem 12:14']
+      ] },
+      { id: 'c3', name: 'Rui Mendes', initials: 'RM', property: 'Apartamento T2 · São Vítor', last: 'Proposta em análise', time: '2 dias', unread: 0, msgs: [
+        ['me', 'Depois da visita, faço uma proposta de 180 000 € com escritura em 60 dias.', '2 dias'],
+        ['them', 'Obrigado João, vou analisar com calma e respondo esta semana.', '2 dias']
+      ] }
+    ];
+  }
+
+  reportList() {
+    return [
+      { id: 'UPM-141', title: 'Mapa aproximado mostra morada exata', desc: 'No anúncio aparece a morada completa mesmo antes de o proprietário aceitar o contacto.', status: 'Em teste', meta: 'Enviado 17 set · atualizado 19 set', updates: [
+        ['Recebido', 'Report recebido e registado no pipeline.', '17 set, 16h45'],
+        ['Em análise', 'Confirmado pela equipa. Classificado como incidente de privacidade.', '17 set, 17h20'],
+        ['A corrigir', 'O raio de ocultação passa a ser aplicado no servidor.', '18 set, 10h02'],
+        ['Em teste', 'Correção em validação no ambiente de testes.', '19 set, 09h30']
+      ] },
+      { id: 'UPM-139', title: 'Notificação de mensagem duplicada', desc: 'Recebo duas notificações por cada mensagem nova no chat.', status: 'Triagem', meta: 'Enviado 17 set · atualizado 17 set', updates: [
+        ['Recebido', 'Report recebido e registado no pipeline.', '17 set, 08h21'],
+        ['Em análise', 'A analisar duplicação no serviço de notificações.', '17 set, 14h02']
+      ] },
+      { id: 'UPM-133', title: 'Filtro de preço reinicia ao voltar atrás', desc: 'Sempre que abro um imóvel e volto à lista, os filtros ficam limpos.', status: 'Resolvido', meta: 'Enviado 02 set · resolvido 05 set', updates: [
+        ['Recebido', 'Report recebido e registado no pipeline.', '02 set, 07h56'],
+        ['A corrigir', 'Estado dos filtros passa a ser guardado na sessão.', '03 set, 11h10'],
+        ['Resolvido', 'Correção publicada na versão 2.3.9.', '05 set, 16h40']
+      ] }
+    ];
+  }
+
+  updVals() {
+    const st = this.state, list = [{"version":"2.5.0","image":"imagem · mapa do Market","title":"Procure no mapa","lead":"Veja o que está à venda e para arrendar na zona que lhe interessa.","points":["Desenhe uma área para filtrar os resultados","Pins com o preço de cada imóvel","Voltar ao mapa a partir do detalhe do imóvel"]},{"version":"2.4.2","image":"imagem · guardados","title":"Guardados e alertas","lead":"Acompanhe os imóveis de que gosta sem ter de os procurar outra vez.","points":["Guardar com um toque no marcador","Aviso quando um imóvel guardado baixa de preço","Alertas a partir dos filtros do Market"]}];
+    const key = 'upm-seen-updates-' + list[0].version;
+    if (!this._updChecked) {
+      this._updChecked = true;
+      setTimeout(() => {
+        let seen = false, demo = false;
+        try { seen = localStorage.getItem(key) === '1'; demo = /[?&]demo=1/.test(location.search); } catch (e) {}
+        if (!seen && !demo) this.setState({ updOpen: true, updIdx: 0 });
+      }, 700);
+    }
+    const i = Math.min(st.updIdx || 0, list.length - 1), u = list[i], last = i === list.length - 1;
+    const markSeen = () => { try { localStorage.setItem(key, '1'); } catch (e) {} };
+    return {
+      updOpen: !!st.updOpen,
+      upd: { version: u.version, image: u.image, title: u.title, lead: u.lead, points: u.points.map(t => ({ text: t })) },
+      updDots: list.map((x, n) => ({ w: n === i ? '20px' : '7px', bg: n === i ? 'var(--accent)' : 'var(--border2)' })),
+      updHasPrev: i > 0, updIsFirst: i === 0,
+      updCta: last ? 'Entendi' : 'Seguinte',
+      prevUpd: () => this.setState({ updIdx: Math.max(0, i - 1) }),
+      nextUpd: () => { if (last) { markSeen(); this.setState({ updOpen: false, updBanner: false, updIdx: 0 }); this.toast('Novidades marcadas como vistas'); } else this.setState({ updIdx: i + 1 }); },
+      laterUpd: () => this.setState({ updOpen: false, updBanner: true }),
+      stopUpd: (e) => e.stopPropagation(),
+      updBannerShow: !!st.updBanner && !st.updOpen,
+      updBannerText: list.length + ' novidades desde a última visita · v' + list[0].version,
+      openUpd: () => this.setState({ updOpen: true, updIdx: 0 }),
+      dismissUpdBanner: () => { markSeen(); this.setState({ updBanner: false }); }
+    };
+  }
+
+  renderVals() {
+    return Object.assign(this.coreVals(), this.updVals());
+  }
+
+  coreVals() {
+    const st = this.state, r = st.route;
+    const rail = st.rail;
+    const navItems = [
+      ['painel', 'Painel', 'layout-dashboard', ''],
+      ['market', 'Market', 'store', ''],
+      ['mensagens', 'Mensagens', 'message-square', '1'],
+      ['visitas', 'Pedidos de visitas', 'calendar-days', '2'],
+      ['guardados', 'Guardados', 'bookmark', String(st.saved.length)],
+      ['mapa', 'Mapa', 'map', ''],
+      ['cloud', 'Cloud', 'cloud', ''],
+      ['contratos', 'Contratos', 'file-signature', '1'],
+      ['reports', 'Os meus reports', 'life-buoy', ''],
+      ['plano', 'Plano', 'credit-card', ''],
+      ['definicoes', 'Definições', 'settings', '']
+    ];
+    const hour = new Date().getHours();
+    const greet = hour < 13 ? 'Bom dia' : hour < 20 ? 'Boa tarde' : 'Boa noite';
+    const titles = {
+      painel: [greet + ', João', 'Aqui está um resumo da sua atividade'],
+      mapa: ['Mapa', 'Desenhe uma área no mapa para filtrar propriedades'],
+      mapaSub: '',
+      market: ['Market', 'Todas as propriedades publicadas na plataforma'],
+      detalhe: ['Detalhe da propriedade', 'Ficha completa, fotografias e localização'],
+      guardados: ['Imóveis Guardados', 'Gerencie os imóveis guardados'],
+      mensagens: ['Mensagens', 'Fale diretamente com quem vende'],
+      visitas: ['Pedidos de visitas', 'Pedidos de visita enviados e visitas confirmadas'],
+      cloud: ['A minha cloud', 'Documentos recebidos e pessoais'],
+      contratos: ['Contratos', 'Documentos partilhados consigo'],
+      reports: ['Os meus reports', 'Estado de cada problema que reportou'],
+      plano: ['Plano e faturação', 'Plano Smarter · renova a 3 de novembro'],
+      definicoes: ['Definições', 'Conta, preferências e notificações']
+    };
+    const t = titles[r] || titles.painel;
+    const primary = ({
+      market: ['Criar alerta', 'bell-plus', () => this.toast('Alerta criado com os filtros atuais')],
+      guardados: ['Criar alerta', 'bell-plus', () => this.toast('Alerta criado')],
+      mensagens: ['Nova conversa', 'plus', () => this.setState({ route: 'market' })],
+      visitas: ['Pedir visita', 'calendar-plus', () => this.setState({ visitModal: true, visitProperty: 'Escolha um imóvel no Market' })],
+      cloud: ['Carregar', 'upload', () => this.toast('Documento carregado')],
+      reports: ['Reportar', 'bug', () => this.setState({ bugOpen: true })]
+    })[r] || ['Explorar imóveis', 'search', () => this.setState({ route: 'market' })];
+
+    const barsBy = {
+      '7 dias': [['seg', 6], ['ter', 9], ['qua', 7], ['qui', 12], ['sex', 18, true], ['sáb', 11], ['dom', 5]],
+      '30 dias': [['s1', 28], ['s2', 34], ['s3', 41], ['s4', 52, true]],
+      '12 meses': [['abr', 96], ['mai', 118], ['jun', 142], ['jul', 165], ['ago', 138], ['set', 188, true]]
+    };
+    const bars = barsBy[st.range] || barsBy['7 dias'];
+    const max = bars.reduce((m, b) => Math.max(m, b[1]), 1);
+
+    const item = (title, sub, tag, go) => ({ title, sub, tag, tagBg: this.solid(tag), go: go || (() => {}) });
+    const nav = (k) => () => this.setState({ route: k });
+
+    const visitsAll = this.visitsData();
+    const visits = visitsAll.filter(v => st.vFilter === 'Todas' || v.status === st.vFilter);
+    const threads = this.threadList();
+    const curThread = threads.find(x => x.id === st.chatId) || threads[0];
+    const extra = st.msgs.filter(m => m.thread === curThread.id);
+    const bubble = { me: { bg: 'var(--accent)', color: '#fff', border: 'var(--accent)', align: 'flex-end' }, them: { bg: 'var(--surface)', color: 'var(--text)', border: 'var(--border)', align: 'flex-start' } };
+
+    const reports = this.reportList();
+    const selRep = reports.find(x => x.id === st.selReport) || reports[0];
+    const repFlow = ['Recebido', 'Em análise', 'A corrigir', 'Em teste', 'Resolvido'];
+    const repIdx = repFlow.indexOf((selRep.updates[selRep.updates.length - 1] || [])[0]);
+
+    const alertsBase = [
+      { id: 'a1', title: 'T3 até 500 000 € em Lisboa', meta: '4 novos resultados esta semana', tag: 'Novo' },
+      { id: 'a2', title: 'Moradias em Cascais', meta: '1 novo resultado', tag: 'Novo' },
+      { id: 'a3', title: 'Arrendamento T1 no Porto', meta: 'sem resultados novos', tag: 'Ativo' }
+    ].filter(a => st.removedAlerts.indexOf(a.id) < 0);
+
+    const contractDocs = [
+      { name: 'Reserva · T3 Campo de Ourique', meta: 'Partilhado por Ana Silva · 18 set', status: 'Partilhado' },
+      { name: 'Comprovativo de visita · T3', meta: 'Partilhado por Ana Silva · 10 set', status: 'Assinado' },
+      { name: 'Minuta de proposta · T2 Braga', meta: 'Partilhado por Rui Mendes · 12 set', status: 'Rascunho' }
+    ];
+    const cSource = [
+      ['h1', 'CONTRATO DE RESERVA'],
+      ['p', 'Entre Ana Silva, adiante designada Primeira Outorgante, e João Costa, adiante designado Segundo Outorgante.'],
+      ['h2', '1. Objeto'],
+      ['p', 'O presente contrato tem por objeto a reserva do imóvel Apartamento T3 · Campo de Ourique, pelo preço de 485 000 €.'],
+      ['h2', '2. Sinal'],
+      ['p', 'O Segundo Outorgante entrega, a título de sinal, o valor de 24 250 €, no prazo de cinco dias úteis.'],
+      ['h2', '3. Prazo'],
+      ['p', 'A escritura pública será celebrada no prazo de 90 dias a contar de 18 de setembro de 2026.'],
+      ['h2', '4. Documentação'],
+      ['p', 'A Primeira Outorgante disponibiliza, na cloud da plataforma, a certidão permanente, a caderneta predial e o certificado energético.']
+    ];
+
+    return {
+      sidebarWidth: rail ? '84px' : '248px',
+      labelShow: rail ? 'none' : 'flex',
+      brandJustify: rail ? 'center' : 'flex-start',
+      bugJustify: rail ? 'center' : 'space-between',
+      logoFullL: rail ? 'none' : 'var(--logo-l)',
+      logoFullD: rail ? 'none' : 'var(--logo-d)',
+      logoMark: rail ? 'flex' : 'none',
+      railToggleMargin: rail ? '0' : 'auto',
+      railIcon: rail ? 'panel-left-open' : 'panel-left-close',
+      railTitle: rail ? 'Expandir menu' : 'Recolher menu',
+      toggleRail: () => this.setState({ rail: !rail }),
+      nav: navItems.map(([k, label, icon, badge]) => ({
+        label, icon, badge, badgeShow: badge && !rail ? 'inline-flex' : 'none',
+        justify: rail ? 'center' : 'flex-start',
+        pick: () => { this.setState({ route: k }); window.scrollTo(0, 0); },
+        bg: r === k || (r === 'detalhe' && k === (st.backTo || 'market')) ? 'var(--accent-soft)' : 'transparent',
+        color: r === k || (r === 'detalhe' && k === (st.backTo || 'market')) ? 'var(--accent)' : 'var(--muted)'
+      })),
+      pageTitle: t[0], pageSub: t[1],
+      primaryAction: primary[0], primaryIcon: primary[1], primaryRun: primary[2],
+      themeIcon: st.theme === 'dark' ? 'moon' : 'sun',
+      themeKnob: st.theme === 'dark' ? '36px' : '3px',
+      toggleTheme: () => {
+        const th = st.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', th);
+        try { localStorage.setItem('upm-theme', th); } catch (e) {}
+        this.setState({ theme: th });
+      },
+      goSettings: () => this.setState({ route: 'definicoes' }),
+      goVisits: () => this.setState({ route: 'visitas' }),
+      openBug: () => this.setState({ bugOpen: true }),
+      closeBug: () => this.setState({ bugOpen: false, shot: '' }),
+      sendBug: () => { this.setState({ bugOpen: false, shot: '' }); this.toast('Report enviado à equipa de IT'); },
+      attachShot: () => this.setState({ shot: 'captura-' + Date.now().toString().slice(-6) + '.png' }),
+      shotName: st.shot || 'Anexar captura de ecrã',
+      bugOpen: st.bugOpen, stop: (e) => e.stopPropagation(),
+      toastOpen: !!st.toast, toastText: st.toast,
+
+      notifMenu: st.notifOpen ? 'flex' : 'none',
+      notifBorder: st.notifOpen ? 'var(--accent)' : 'var(--border)',
+      notifColor: st.notifOpen ? 'var(--accent)' : 'var(--text)',
+      toggleNotif: () => this.setState({ notifOpen: !st.notifOpen, langOpen: false }),
+      notifBadge: st.notifRead ? '0' : '3',
+      notifBadgeShow: st.notifRead ? 'none' : 'flex',
+      notifUnread: (st.notifRead ? 0 : 3) + ' por ler',
+      readAllNotif: (e) => { e.stopPropagation(); this.setState({ notifRead: true }); this.toast('Notificações marcadas como lidas'); },
+      allNotif: () => { this.setState({ notifOpen: false, route: 'painel' }); this.toast('Centro de notificações'); },
+      langMenu: st.langOpen ? 'flex' : 'none',
+      langChevron: st.langOpen ? 'chevron-up' : 'chevron-down',
+      langBorder: st.langOpen ? 'var(--accent)' : 'var(--border)',
+      langColor: st.langOpen ? 'var(--accent)' : 'var(--text)',
+      toggleLang: () => this.setState({ langOpen: !st.langOpen }),
+      langs: [['pt', 'Português'], ['en', 'English']].map(([k, label]) => ({
+        label, bg: (st.lang || 'pt') === k ? 'var(--accent-soft)' : 'transparent',
+        color: (st.lang || 'pt') === k ? 'var(--accent)' : 'var(--text)',
+        pick: () => { this.setState({ lang: k, langOpen: false }); this.toast(k === 'pt' ? 'Idioma: Português' : 'Language: English'); }
+      })),
+      themeToggle: [['light', 'Claro', 'sun'], ['dark', 'Escuro', 'moon']].map(([k, label, icon]) => {
+        const on = st.theme === k;
+        return {
+          label, icon,
+          pick: () => {
+            document.documentElement.setAttribute('data-theme', k);
+            try { localStorage.setItem('upm-theme', k); } catch (e) {}
+            this.setState({ theme: k });
+          },
+          bg: on ? 'var(--surface)' : 'transparent', color: on ? 'var(--text)' : 'var(--muted)',
+          shadow: on ? '0 1px 2px rgba(2,6,23,.16)' : 'none'
+        };
+      }),
+      exportData: () => this.download((r || 'painel') + '-upm.csv', 'UProperty Market · exportação de ' + r),
+      notifList: [
+        { icon: 'calendar-check', tone: 'var(--ok)', bgTone: 'var(--ok-soft)', unread: true, title: 'Visita confirmada', body: 'Ana Silva confirmou a visita ao T3 de Campo de Ourique para sábado, 11h00.', when: 'há 20 min', route: 'visitas' },
+        { icon: 'trending-down', tone: 'var(--ok)', bgTone: 'var(--ok-soft)', unread: true, title: 'Descida de preço', body: 'A Moradia T4 em Birre baixou 25 000 €.', when: 'há 3 h', route: 'guardados' },
+        { icon: 'message-square', tone: 'var(--accent)', bgTone: 'var(--accent-soft)', unread: true, title: 'Nova mensagem', body: 'Ana Silva respondeu na conversa do T3.', when: 'há 5 h', route: 'mensagens' },
+        { icon: 'file-text', tone: 'var(--info)', bgTone: 'var(--info-soft)', unread: false, title: 'Documento partilhado', body: 'Recebeu o contrato de reserva na sua cloud.', when: 'ontem', route: 'contratos' }
+      ].map(n => ({
+        icon: n.icon, title: n.title, body: n.body, when: n.when,
+        iconBg: n.bgTone, iconColor: n.tone,
+        bg: n.unread && !st.notifRead ? 'var(--accent-soft)' : 'transparent',
+        dot: n.unread && !st.notifRead ? 'var(--accent)' : 'transparent',
+        go: () => this.setState({ route: n.route, notifOpen: false })
+      })),
+
+      sPainel: r === 'painel', sMarket: r === 'market', sDetalhe: r === 'detalhe', sMapa: r === 'mapa',
+      quickAccess: [
+        { icon: 'search', title: 'Procurar propriedades', body: 'Explore todos os imóveis publicados na plataforma.', go: nav('market') },
+        { icon: 'bookmark', title: 'Guardadas', body: 'Reveja os imóveis que guardou e os alertas de preço.', go: nav('guardados') },
+        { icon: 'calendar-days', title: 'Pedidos de visitas', body: 'Acompanhe os pedidos de visita que enviou.', go: nav('visitas') },
+        { icon: 'message-square', title: 'Mensagens', body: 'Fale diretamente com quem vende, sem intermediários.', go: nav('mensagens') }
+      ],
+      mapProperties: this.marketFiltered().map(m => ({
+        title: m.title, location: m.location, price: m.price, district: m.city,
+        specs: m.type + ' · ' + m.area + ' · ' + m.wc,
+        open: () => { this.setState({ route: 'detalhe', mkSel: m.ref, shotSel: 0, backTo: ['mapa', 'guardados'].indexOf(this.state.route) >= 0 ? this.state.route : 'market' }); window.scrollTo(0, 0); }
+      })),
+      mapCount: this.marketFiltered().length + ' propriedades na área',
+      mapPins: this.marketFiltered().map((m, i) => ({
+        left: (14 + (i * 13.5) % 70) + '%', top: (18 + (i * 21) % 62) + '%',
+        label: m.price, bg: this.solid(m.deal),
+        open: () => { this.setState({ route: 'detalhe', mkSel: m.ref, shotSel: 0, backTo: ['mapa', 'guardados'].indexOf(this.state.route) >= 0 ? this.state.route : 'market' }); window.scrollTo(0, 0); }
+      })),
+      mkCity2: st.mkCity === 'Todas' ? '' : st.mkCity,
+      setMkCity2: (e) => this.setState({ mkCity: e.target.value || 'Todas' }),
+      drawArea: () => this.toast('Desenhe a área no mapa para filtrar'),
+      clearArea: () => { this.setState({ mkQuery: '', mkDeal: 'Todos', mkType: 'Todas', mkCity: 'Todas' }); this.toast('Área e filtros limpos'); },
+      fullscreenMap: () => this.toast('Mapa em ecrã inteiro'),
+      sGuardados: r === 'guardados', sVisitas: r === 'visitas', sMensagens: r === 'mensagens',
+      sCloud: r === 'cloud', sContratos: r === 'contratos', sReports: r === 'reports',
+      sPlano: r === 'plano', sDefinicoes: r === 'definicoes',
+
+      stats: [
+        { icon: 'bookmark', label: 'Imóveis guardados', value: String(st.saved.length), delta: '1 baixou de preço', deltaColor: 'var(--ok)' },
+        { icon: 'calendar-check', label: 'Visitas agendadas', value: '2', delta: '1 confirmada, 1 a aguardar', deltaColor: 'var(--warn)' },
+        { icon: 'message-square', label: 'Conversas ativas', value: '3', delta: '1 mensagem por ler', deltaColor: 'var(--accent)' },
+        { icon: 'file-signature', label: 'Documentos recebidos', value: '4', delta: '1 novo esta semana', deltaColor: 'var(--ok)' }
+      ],
+      ranges: ['7 dias', '30 dias', '12 meses'].map(label => ({
+        label, pick: () => this.setState({ range: label }),
+        bg: st.range === label ? 'var(--accent)' : 'transparent', color: st.range === label ? '#fff' : 'var(--muted)'
+      })),
+      bars: bars.map(b => ({
+        label: b[0], value: String(b[1]),
+        h: Math.max(8, Math.round((b[1] / max) * 136)) + 'px',
+        fill: b[2] ? 'var(--accent)' : 'var(--surface3)',
+        valueColor: b[2] ? 'var(--accent)' : 'var(--muted)'
+      })),
+      agenda: visitsAll.filter(v => v.status !== 'Arquivada').slice(0, 3).map(v => ({
+        day: v.date.split(' ')[0], month: v.date.split(' ')[1], title: 'Visita · ' + v.property,
+        sub: v.owner + ' · ' + v.time, status: v.status, tagBg: this.solid(v.status)
+      })),
+      panels: [
+        { icon: 'bell-ring', title: 'Alertas das propriedades guardadas', meta: 'últimas 48 h', items: [
+          item('Moradia T4 · Birre', 'baixou 25 000 € esta semana', 'Descida', nav('guardados')),
+          item('Apartamento T4 · Foz do Douro', 'nova fotografia adicionada', 'Novo', nav('guardados')),
+          item('T3 até 500 000 € em Lisboa', '4 novos resultados', 'Novo', nav('market'))
+        ] },
+        { icon: 'clipboard-check', title: 'A precisar de si', meta: '2 ações pendentes', items: [
+          item('Confirmar nova data · Loft T1', 'Ana Silva propôs 25 set às 18h00', 'Pendente', nav('visitas')),
+          item('Contrato de reserva · T3', 'partilhado por Ana Silva', 'Partilhado', nav('contratos')),
+          item('Responder a Rui Mendes', 'proposta de 180 000 € em análise', 'Por ler', nav('mensagens'))
+        ] }
+      ],
+
+      mkQuery: st.mkQuery || '', setMkQuery: (e) => this.setState({ mkQuery: e.target.value }),
+      mkDeal: st.mkDeal || 'Todos', setMkDeal: (e) => this.setState({ mkDeal: e.target.value }),
+      mkType: st.mkType || 'Todas', setMkType: (e) => this.setState({ mkType: e.target.value }),
+      mkCity: st.mkCity || 'Todas', setMkCity: (e) => this.setState({ mkCity: e.target.value }),
+      clearMk: () => this.setState({ mkQuery: '', mkDeal: 'Todos', mkType: 'Todas', mkCity: 'Todas' }),
+      mkCount: this.marketFiltered().length + ' de ' + this.marketData().length + ' propriedades',
+      createAlert: () => this.toast('Alerta criado · será avisado por email'),
+      marketList: this.marketFiltered().map(m => this.cardOf(m)),
+      backMarket: () => { this.setState({ route: st.backTo || 'market' }); window.scrollTo(0, 0); },
+      backLabel: ({ mapa: 'Voltar ao mapa', guardados: 'Voltar aos guardados', mensagens: 'Voltar às mensagens' })[st.backTo] || 'Voltar ao Market',
+      dt: (() => {
+        const all = this.marketData();
+        const idx = Math.max(0, all.findIndex(x => x.ref === st.mkSel));
+        const m = all[idx], nx = all[(idx + 1) % all.length];
+        const shots = ['sala comum', 'cozinha', 'quarto principal', 'casa de banho', 'varanda'];
+        const i = Math.min(st.shotSel || 0, shots.length - 1);
+        const saved = st.saved.indexOf(m.ref) >= 0;
+        return {
+          ref: m.ref, title: m.title, location: m.location, price: m.price, deal: m.deal, desc: m.desc,
+          dealBg: this.solid(m.deal), dealIcon: m.deal === 'Venda' ? 'home' : 'key',
+          shotLabel: 'foto ' + (i + 1) + ' de ' + shots.length + ' · ' + shots[i],
+          thumbs: shots.map((s, n) => ({ border: n === i ? 'var(--accent)' : 'var(--border)', pick: () => this.setState({ shotSel: n }) })),
+          facts: [
+            { icon: 'bed-double', label: 'Tipologia', value: m.type },
+            { icon: 'ruler', label: 'Área', value: m.area },
+            { icon: 'bath', label: 'Casas de banho', value: m.wc },
+            { icon: 'building', label: 'Piso', value: m.floor },
+            { icon: 'calendar', label: 'Construção', value: m.year },
+            { icon: 'zap', label: 'Certificado', value: m.energy }
+          ],
+          owner: m.owner, ownerInitials: m.owner.split(' ').map(w => w[0]).join('').slice(0, 2),
+          chat: () => { this.setState({ route: 'mensagens' }); this.toast('Conversa aberta com ' + m.owner); },
+          visit: () => this.setState({ visitModal: true, visitProperty: m.title + ' · ' + m.location }),
+          save: () => this.toggleSave(m.ref),
+          heartColor: saved ? 'var(--accent)' : 'currentColor',
+          saveLabel: saved ? 'Guardado' : 'Guardar imóvel',
+          nextTitle: nx.title, nextMeta: nx.location + ' · ' + nx.price,
+          next: () => { this.setState({ mkSel: nx.ref, shotSel: 0 }); window.scrollTo(0, 0); }
+        };
+      })(),
+
+      savedStats: [
+        { icon: 'bookmark', label: 'Guardados', value: String(st.saved.length), delta: 'limite 25 no plano Smarter', deltaColor: 'var(--muted)' },
+        { icon: 'trending-down', label: 'Descidas de preço', value: '1', delta: '−25 000 € esta semana', deltaColor: 'var(--ok)' },
+        { icon: 'bell-ring', label: 'Alertas ativos', value: String(alertsBase.length), delta: '5 novos resultados', deltaColor: 'var(--ok)' },
+        { icon: 'eye', label: 'Vistos este mês', value: '38', delta: '+12 face a agosto', deltaColor: 'var(--ok)' }
+      ],
+      savedList: this.marketData().filter(m => st.saved.indexOf(m.ref) >= 0).map(m => Object.assign(this.cardOf(m), {
+        visit: (e) => { e.stopPropagation(); this.setState({ visitModal: true, visitProperty: m.title + ' · ' + m.location }); },
+        share: (e) => { e.stopPropagation(); this.toast('Ligação do imóvel copiada'); },
+        remove: (e) => { e.stopPropagation(); this.toggleSave(m.ref); }
+      })),
+      savedEmpty: st.saved.length === 0,
+      goMarket: () => this.setState({ route: 'market' }),
+      alerts: alertsBase.map(a => ({
+        title: a.title, meta: a.meta, tag: a.tag, tagBg: this.solid(a.tag),
+        remove: () => { this.setState({ removedAlerts: st.removedAlerts.concat(a.id) }); this.toast('Alerta apagado'); }
+      })),
+
+      viewModes: [['lista', 'Lista', 'list'], ['calendario', 'Calendário', 'calendar']].map(([k, label, icon]) => ({
+        label, icon, pick: () => this.setState({ visitView: k }),
+        bg: (st.visitView || 'lista') === k ? 'var(--surface)' : 'transparent',
+        color: (st.visitView || 'lista') === k ? 'var(--text)' : 'var(--muted)'
+      })),
+      isListView: (st.visitView || 'lista') === 'lista',
+      isCalView: (st.visitView || 'lista') === 'calendario',
+      weekDays: ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(label => ({ label })),
+      calDays: (() => {
+        const out = [];
+        for (let i = 0; i < 35; i++) {
+          const n = i - 1, inMonth = n >= 1 && n <= 30;
+          const evs = visitsAll.filter(v => v.day === n).map(v => ({ label: v.time + ' ' + v.property.split(' ')[0], bg: this.solid(v.status) }));
+          out.push({
+            n: inMonth ? String(n) : '', events: evs,
+            bg: n === 20 ? 'var(--accent-soft)' : inMonth ? 'var(--surface)' : 'var(--surface2)',
+            color: n === 20 ? 'var(--accent)' : inMonth ? 'var(--text)' : 'var(--muted)',
+            weight: n === 20 ? 800 : 600
+          });
+        }
+        return out;
+      })(),
+      visitFilters: ['Todas', 'Pendente', 'Aceite', 'Reagendada', 'Arquivada'].map(label => {
+        const on = st.vFilter === label;
+        const c = label === 'Todas' ? 'var(--muted)' : this.solid(label);
+        return {
+          label, pick: () => this.setState({ vFilter: label }), dot: c,
+          bg: on ? 'var(--accent-soft)' : 'var(--surface)', color: on ? 'var(--accent)' : 'var(--muted)',
+          border: on ? 'var(--accent)' : 'var(--border)'
+        };
+      }),
+      visitCount: visits.length + ' visitas',
+      visits: visits.map(v => {
+        const act = (label, icon, run, kind) => ({
+          label, icon, run,
+          bg: kind === 'primary' ? 'var(--accent)' : 'var(--surface2)',
+          color: kind === 'primary' ? '#fff' : kind === 'danger' ? 'var(--danger)' : 'var(--text)',
+          border: kind === 'primary' ? 'var(--accent)' : kind === 'danger' ? 'var(--danger)' : 'var(--border)'
+        });
+        const actions = [act('Abrir conversa', 'message-square', () => this.setState({ route: 'mensagens' }))];
+        if (v.status === 'Reagendada') actions.unshift(act('Aceitar nova data', 'check', () => { this.setState({ visitState: Object.assign({}, st.visitState, { [v.id]: 'Aceite' }) }); this.toast('Nova data aceite · proprietário notificado'); }, 'primary'));
+        if (v.status === 'Pendente' || v.status === 'Reagendada' || v.status === 'Aceite') actions.push(act('Cancelar', 'x', () => { this.setState({ visitState: Object.assign({}, st.visitState, { [v.id]: 'Cancelada' }) }); this.toast('Pedido cancelado'); }, 'danger'));
+        if (v.status === 'Arquivada') actions.push(act('Enviar proposta', 'hand-coins', () => { this.setState({ route: 'mensagens' }); this.toast('Escreva a sua proposta no chat'); }, 'primary'));
+        return {
+          property: v.property, address: v.address, owner: v.owner, note: v.note, noteShow: v.note ? 'block' : 'none',
+          date: v.date, time: v.time, status: v.status, hint: v.hint,
+          tagBg: this.solid(v.status), accent: this.solid(v.status), actions
+        };
+      }),
+
+      unreadTotal: threads.filter(x => x.unread > 0).length + ' não lidas',
+      threads: threads.map(x => ({
+        name: x.name, initials: x.initials, property: x.property, last: x.last, time: x.time,
+        unread: String(x.unread), unreadShow: x.unread > 0 && x.id !== curThread.id ? 'flex' : 'none',
+        bg: x.id === curThread.id ? 'var(--surface2)' : 'transparent',
+        pick: () => this.setState({ chatId: x.id })
+      })),
+      chatName: curThread.name, chatInitials: curThread.initials, chatProperty: curThread.property,
+      chatOpenProp: () => { this.setState({ route: 'detalhe', mkSel: 'UPM-1041', shotSel: 0, backTo: 'mensagens' }); window.scrollTo(0, 0); },
+      chatVisit: () => this.setState({ visitModal: true, visitProperty: curThread.property }),
+      messages: curThread.msgs.map(m => Object.assign({ text: m[1], time: m[2] }, bubble[m[0]]))
+        .concat(extra.map(m => Object.assign({ text: m.text, time: 'agora' }, bubble.me))),
+      draft: st.draft,
+      setDraft: (e) => this.setState({ draft: e.target.value }),
+      draftKey: (e) => { if (e.key === 'Enter') this.send(curThread.id); },
+      sendMsg: () => this.send(curThread.id),
+
+      driveUsage: '340 MB usados de 5 GB',
+      upload: () => this.toast('Documento carregado na sua cloud'),
+      driveFolders: [['Documentos recebidos', '6 ficheiros'], ['Contratos', '3 ficheiros'], ['Visitas', '2 ficheiros'], ['Pessoais', '4 ficheiros']].map(f => ({
+        name: f[0], meta: f[1], open: () => this.toast('Pasta «' + f[0] + '» aberta')
+      })),
+      driveFiles: [
+        ['file-signature', 'Contrato de reserva · T3', 'PDF · 240 KB · 18 set', 'Ana Silva', 'Partilhado'],
+        ['file-text', 'Certidão permanente · T3', 'PDF · 1,2 MB · 17 set', 'Ana Silva', 'Partilhado'],
+        ['image', 'Planta · Moradia T4', 'PNG · 2,4 MB · 12 set', 'Ana Silva', 'Partilhado'],
+        ['file-check', 'Comprovativo de visita', 'PDF · 180 KB · 10 set', 'Ana Silva', 'Assinado'],
+        ['file-text', 'Simulação de crédito', 'PDF · 320 KB · 02 set', 'Documento pessoal', 'Rascunho']
+      ].map(f => ({
+        icon: f[0], name: f[1], meta: f[2], origin: f[3], status: f[4], tagBg: this.solid(f[4]),
+        download: () => this.download(f[1].toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt', f[1])
+      })),
+
+      buyerContracts: contractDocs.map(c => ({
+        name: c.name, meta: c.meta, status: c.status, tagBg: this.solid(c.status),
+        border: st.cDoc === c.name ? 'var(--accent)' : 'var(--border)',
+        pick: () => this.setState({ cDoc: c.name })
+      })),
+      cDocTitle: st.cDoc,
+      cDocMeta: (contractDocs.find(c => c.name === st.cDoc) || contractDocs[0]).meta,
+      contractBlocks: cSource.map(b => ({
+        text: b[1],
+        size: b[0] === 'h1' ? '20px' : b[0] === 'h2' ? '15px' : '14px',
+        weight: b[0] === 'p' ? 400 : 700,
+        spacing: b[0] === 'h1' ? '.04em' : 'normal',
+        transform: b[0] === 'h1' ? 'uppercase' : 'none'
+      })),
+      saveToCloud: () => { this.setState({ route: 'cloud' }); this.toast('Guardado na sua cloud'); },
+      downloadContract: () => this.download(st.cDoc.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt', cSource.map(b => b[1]).join('\n\n')),
+
+      reports: reports.map(rp => ({
+        id: rp.id, title: rp.title, status: rp.status, meta: rp.meta, tagBg: this.solid(rp.status),
+        border: selRep.id === rp.id ? 'var(--accent)' : 'var(--border)',
+        pick: () => this.setState({ selReport: rp.id })
+      })),
+      repId: selRep.id, repTitle: selRep.title, repDesc: selRep.desc,
+      repSteps: repFlow.map((label, i) => ({
+        label, bg: i <= repIdx ? this.solid(selRep.status) : 'var(--surface2)',
+        color: i <= repIdx ? '#fff' : 'var(--muted)'
+      })),
+      repTimeline: selRep.updates.slice().reverse().map(u => ({ status: u[0], note: u[1], at: u[2], dot: this.solid(selRep.status) })),
+
+      planUsage: [
+        { label: 'Guardados', value: st.saved.length + ' / 25' },
+        { label: 'Chats ativos', value: '3 / 5' },
+        { label: 'Alertas', value: alertsBase.length + ' / 10' }
+      ],
+      plans: [
+        { name: 'Gratuito', price: '0 €', tone: 'muted', f: [[1, 'Pesquisa completa'], [1, '5 imóveis guardados'], [1, '1 chat ativo'], [0, 'Alertas de descida de preço'], [0, 'Acesso antecipado']] },
+        { name: 'Smarter', price: '29,90 €', tone: 'accent', f: [[1, '25 imóveis guardados'], [1, '5 chats ativos'], [1, 'Alertas de descida de preço'], [1, 'Agenda de visitas'], [0, 'Gestor de conta']] },
+        { name: 'Premium', price: '49,90 €', tone: 'info', f: [[1, 'Guardados ilimitados'], [1, 'Chats ilimitados'], [1, 'Alertas em tempo real'], [1, 'Prioridade em visitas'], [1, 'Gestor de conta dedicado']] }
+      ].map(p => ({
+        name: p.name, price: p.price,
+        border: p.name === 'Smarter' ? 'var(--accent)' : 'var(--border)',
+        badgeBg: p.name === 'Smarter' ? 'var(--accent)' : 'var(--surface3)',
+        badgeColor: p.name === 'Smarter' ? '#fff' : 'var(--muted)',
+        features: p.f.map(f => ({ icon: f[0] ? 'check' : 'x', color: f[0] ? 'var(--ok)' : 'var(--danger)', text: f[0] ? 'var(--text)' : 'var(--muted)', label: f[1] })),
+        cta: p.name === 'Smarter' ? 'Plano atual' : 'Mudar para ' + p.name,
+        ctaBg: p.name === 'Smarter' ? 'var(--surface2)' : 'var(--accent)',
+        ctaColor: p.name === 'Smarter' ? 'var(--text)' : '#fff',
+        pick: () => this.toast(p.name === 'Smarter' ? 'Já está no plano Smarter' : 'Plano alterado para ' + p.name)
+      })),
+      invoices: [
+        { ref: 'FAT-2026-1104', date: '03 nov 2025', total: '29,90 €' },
+        { ref: 'FAT-2025-0987', date: '03 nov 2024', total: '24,90 €' }
+      ].map(iv => Object.assign({}, iv, {
+        save: () => { this.setState({ route: 'cloud' }); this.toast('Fatura guardada na cloud'); },
+        export: () => this.download(iv.ref.toLowerCase() + '.txt', iv.ref + ' · ' + iv.date + ' · ' + iv.total)
+      })),
+
+      changeAvatar: () => this.toast('Selecione uma imagem'),
+      saveSettings: () => this.toast('Alterações guardadas'),
+      changePass: () => this.toast('Enviámos um email para alterar a palavra-passe'),
+      deleteAccount: () => this.toast('Pedido de eliminação: confirme por email'),
+      notifSettings: [['msg', 'Mensagens novas', 'Notificação na app'], ['price', 'Descidas de preço', 'Nos imóveis que guardou'], ['docs', 'Documentos partilhados', 'Quando recebe um documento'], ['news', 'Novidades da plataforma', 'No máximo uma vez por mês']].map(([k, label, hint]) => {
+        const on = !!st.notifPrefs[k];
+        return { label, hint, trackBg: on ? 'var(--accent)' : 'var(--border2)', knobLeft: on ? '23px' : '3px', toggle: () => this.setState({ notifPrefs: Object.assign({}, st.notifPrefs, { [k]: !on }) }) };
+      }),
+      themeChoices: [['light', 'Claro', 'sun'], ['dark', 'Escuro', 'moon'], ['system', 'Sistema', 'monitor']].map(([k, label, icon]) => ({
+        label, icon,
+        border: st.theme === k ? 'var(--accent)' : 'var(--border)',
+        bg: st.theme === k ? 'var(--accent-soft)' : 'var(--surface2)',
+        color: st.theme === k ? 'var(--accent)' : 'var(--text)',
+        pick: () => {
+          const th = k === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : k;
+          document.documentElement.setAttribute('data-theme', th);
+          try { k === 'system' ? localStorage.removeItem('upm-theme') : localStorage.setItem('upm-theme', th); } catch (e) {}
+          this.setState({ theme: th });
+        }
+      })),
+
+      visitModal: st.visitModal, visitProperty: st.visitProperty,
+      closeVisit: () => this.setState({ visitModal: false }),
+      sendVisit: () => { this.setState({ visitModal: false, route: 'visitas' }); this.toast('Pedido enviado · o proprietário foi notificado'); }
+    };
+  }
+
+  send(threadId) {
+    const st = this.state;
+    if (!st.draft.trim()) return;
+    this.setState({ msgs: st.msgs.concat({ thread: threadId, text: st.draft }), draft: '' });
+  }
+}
+</script>
+</body>
+</html>
