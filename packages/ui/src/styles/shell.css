@@ -173,14 +173,13 @@
   align-items: center;
 }
 
-/* Botão quadrado de 32 px. Nota: fica abaixo de `--tap` (40 px, 07 §5.14) —
-   é uma exceção pedida para o rail, não o novo mínimo do resto do sistema. */
+/* Botão quadrado de 42 px: `--h-lg` é a altura que o item já tem, por isso
+   basta fixar a largura para ficar quadrado — e 42 px cumpre `--tap` (40 px,
+   07 §5.14) sem precisar de exceção. */
 .upm-shell[data-collapsed="true"] .upm-nav__item {
   position: relative;
   justify-content: center;
-  width: var(--h-xs);
-  height: var(--h-xs);
-  min-height: 0;
+  width: var(--h-lg);
   padding: 0;
   column-gap: 0;
 }
