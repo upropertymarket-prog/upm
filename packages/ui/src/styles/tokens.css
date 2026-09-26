@@ -1,0 +1,373 @@
+/**
+ * Tokens do design system — UProperty Market
+ * =========================================================================
+ * Fonte normativa: 04 §5.1 (paleta claro/escuro) + 07 §10 (`--accent-ink`,
+ * `--ph1`, `--ph2`, confirmados nos protótipos `design/prototypes/*.dc.html`)
+ * + 04 §5.6 (cores de estado) + 07 §3 (escala tipográfica) e 07 §5.14 (alvos).
+ *
+ * REGRA QUE NÃO SE NEGOCEIA: nenhum componente escreve uma cor literal.
+ * Tudo o que é cor sai daqui. Garantido pelos testes em
+ * `packages/ui/src/styles/tokens.test.ts`.
+ *
+ * O bloco escuro aparece duas vezes de propósito:
+ *  - `[data-theme="dark"]` — escolha explícita do utilizador ou do script
+ *    anti-flash (04 §5.2);
+ *  - `@media (prefers-color-scheme: dark)` com `:root:not([data-theme])` —
+ *    rede de segurança para o caso de o script não correr (JS desligado).
+ * Os testes garantem que os dois blocos nunca divergem.
+ *
+ * Os dois temas são declarados por ATRIBUTO e não só na raiz, para que uma ilha
+ * de tema possa existir dentro de outra: é o que 07 §7 exige na demonstração do
+ * site público ("o tema da demo é independente do tema do site") e o que permite
+ * aos canvases do design system mostrar claro e escuro lado a lado.
+ * =========================================================================
+ */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* --- Paleta · claro (04 §5.1) ------------------------------------- */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface2: #f1f5f9;
+  --surface3: #e9eef5;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
+  --accent-ink: #c2410c;
+  --accent-soft: #fff1e7;
+  --ph1: #e4e9f0;
+  --ph2: #eef2f7;
+  --ok: #059669;
+  --ok-soft: #ecfdf5;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --info: #2563eb;
+  --info-soft: #eff6ff;
+
+  /* Texto sobre superfícies sólidas de estado ou de marca (tags, botão
+     primário). Fixo por ser o par de contraste dos sólidos, não uma cor de
+     conteúdo. */
+  --on-solid: #ffffff;
+
+  /* Véu dos overlays de modal e drawer — protótipos: rgba(2,6,23,.6). */
+  --overlay: rgb(2 6 23 / 60%);
+
+  /* Sombra — protótipos do site público. */
+  --shadow: 0 1px 2px rgb(15 23 42 / 5%), 0 10px 30px rgb(15 23 42 / 7%);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 10%), 0 24px 48px -12px rgb(15 23 42 / 18%);
+
+  /* Troca de logótipo sem JS (protótipos: `--logo-l` / `--logo-d`). */
+  --logo-light: block;
+  --logo-dark: none;
+}
+
+/* --- Paleta · escuro (04 §5.1) --------------------------------------- */
+/* Os azuis escuros das superfícies grandes nunca clareiam: base #050A16. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #050a16;
+  --surface: #0b1220;
+  --surface2: #101b2e;
+  --surface3: #16223a;
+  --border: #1e293b;
+  --border2: #2b3a52;
+  --text: #e6edf6;
+  --muted: #93a4bc;
+  --accent: #f97316;
+  --accent-hover: #fb923c;
+  --accent-ink: #fdba74;
+  --accent-soft: #20130a;
+  --ph1: #101a2c;
+  --ph2: #152338;
+  --ok: #34d399;
+  --ok-soft: #082f23;
+  --warn: #fbbf24;
+  --warn-soft: #2a1d05;
+  --danger: #f87171;
+  --danger-soft: #2a0e0e;
+  --info: #60a5fa;
+  --info-soft: #0b1e3a;
+
+  --overlay: rgb(2 6 23 / 72%);
+  --shadow: 0 1px 2px rgb(0 0 0 / 50%), 0 14px 40px rgb(0 0 0 / 45%);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 60%), 0 24px 48px -12px rgb(0 0 0 / 55%);
+
+  --logo-light: none;
+  --logo-dark: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --bg: #050a16;
+    --surface: #0b1220;
+    --surface2: #101b2e;
+    --surface3: #16223a;
+    --border: #1e293b;
+    --border2: #2b3a52;
+    --text: #e6edf6;
+    --muted: #93a4bc;
+    --accent: #f97316;
+    --accent-hover: #fb923c;
+    --accent-ink: #fdba74;
+    --accent-soft: #20130a;
+    --ph1: #101a2c;
+    --ph2: #152338;
+    --ok: #34d399;
+    --ok-soft: #082f23;
+    --warn: #fbbf24;
+    --warn-soft: #2a1d05;
+    --danger: #f87171;
+    --danger-soft: #2a0e0e;
+    --info: #60a5fa;
+    --info-soft: #0b1e3a;
+
+    --overlay: rgb(2 6 23 / 72%);
+    --shadow: 0 1px 2px rgb(0 0 0 / 50%), 0 14px 40px rgb(0 0 0 / 45%);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 60%), 0 24px 48px -12px rgb(0 0 0 / 55%);
+
+    --logo-light: none;
+    --logo-dark: block;
+  }
+}
+
+/**
+ * Cores de estado (04 §5.6)
+ * -------------------------------------------------------------------------
+ * Iguais nos dois temas, como nos protótipos: são sólidos de fundo com texto
+ * `--on-solid`, não cores de conteúdo. Uma cor nunca serve dois significados.
+ */
+:root {
+  /* Visitas (07 §5.6) */
+  --state-visit-pending: #b45309;
+  --state-visit-accepted: #0f766e;
+  --state-visit-rescheduled: #1d4ed8;
+  --state-visit-cancelled: #dc2626;
+  --state-visit-completed: #047857;
+  --state-visit-archived: #334155;
+
+  /* Tickets (04 §5.6 · 07 §5.11) */
+  --state-ticket-new: #a16207;
+  --state-ticket-triage: #a16207;
+  --state-ticket-progress: #2563eb;
+  --state-ticket-awaiting: #7c3aed;
+  --state-ticket-closed: #047857;
+
+  /* Gravidade */
+  --state-severity-critical: #dc2626;
+  --state-severity-high: #b45309;
+  --state-severity-medium: #334155;
+  --state-severity-low: #64748b;
+
+  /* Negócio */
+  --state-deal-sale: #1d4ed8;
+  --state-deal-rent: #7c3aed;
+  --state-deal-rented: #0f766e;
+
+  /* Ciclo de vida genérico (imóveis, contas, contratos, faturas) */
+  --state-active: #0f766e;
+  --state-pending: #b45309;
+  --state-draft: #64748b;
+  --state-archived: #334155;
+  --state-rejected: #dc2626;
+  --state-new: #0369a1;
+}
+
+/**
+ * Tipografia (07 §3 — substitui 04 §5.3)
+ * -------------------------------------------------------------------------
+ * App autenticada: mínimo 13 px. Site público: mínimo 14 px — conseguido com
+ * `data-app="web"` no `<html>` do `apps/web`. Os níveis de 12 px e 12,5 px dos
+ * protótipos foram eliminados.
+ * As famílias vêm de `packages/ui/src/fonts` (next/font/local, auto-hospedadas).
+ */
+:root {
+  /* O fallback dentro do `var()` não é decorativo: sem ele, um contexto onde
+     `--font-bricolage` não existe (o host dos canvases, que não corre
+     `next/font`) tornaria a declaração inteira inválida e o texto cairia na
+     fonte do sistema em vez de na família nomeada. */
+  --font-display: var(--font-bricolage, "Bricolage Grotesque"), system-ui, sans-serif;
+  --font-sans: var(--font-manrope, "Manrope"), "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: var(--font-jetbrains, "JetBrains Mono"), ui-monospace, monospace;
+
+  --fs-label: 13px;
+  --fs-body: 13px;
+  --fs-body-lg: 14px;
+  --fs-subtitle: 15px;
+  --fs-subtitle-lg: 17px;
+  --fs-title-sm: 22px;
+  --fs-title: clamp(24px, 3vw, 32px);
+  --fs-title-lg: clamp(32px, 5vw, 56px);
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  --lh-tight: 1.1;
+  --lh-snug: 1.35;
+  --lh-normal: 1.55;
+
+  --ls-label: 0.08em;
+  --ls-title: -0.02em;
+}
+
+/* Site público (`apps/web`): nada desce abaixo de 14 px — 07 §3. */
+[data-app="web"] {
+  --fs-label: 14px;
+  --fs-body: 14px;
+}
+
+/**
+ * Geometria, alvos e movimento
+ * -------------------------------------------------------------------------
+ * Valores medidos nos protótipos. `--tap` é a regra dura de 07 §5.14:
+ * todo o elemento interativo tem área clicável ≥ 40 × 40 px, mesmo quando o
+ * ícone desenhado é de 14 px.
+ */
+:root {
+  --tap: 40px;
+
+  --r-xs: 8px;
+  --r-sm: 9px;
+  --r-md: 10px;
+  --r-lg: 11px;
+  --r-xl: 12px;
+  --r-2xl: 16px;
+  --r-3xl: 18px;
+  --r-pill: 999px;
+
+  --h-xs: 32px;
+  --h-sm: 36px;
+  --h-md: 40px;
+  --h-lg: 42px;
+  --h-xl: 44px;
+
+  --sp-1: 4px;
+  --sp-2: 6px;
+  --sp-3: 8px;
+  --sp-4: 10px;
+  --sp-5: 12px;
+  --sp-6: 14px;
+  --sp-7: 16px;
+  --sp-8: 20px;
+  --sp-9: 24px;
+
+  /* Shell (04 §5.5) */
+  --sidebar-w: 248px;
+  --sidebar-rail-w: 84px;
+  --topbar-h: 68px;
+  --drawer-w: 460px;
+
+  /* Empilhamento — protótipos: topbar 20, sidebar 25, overlays 100, toast 120 */
+  --z-topbar: 20;
+  --z-sidebar: 25;
+  --z-overlay: 100;
+  --z-toast: 120;
+
+  --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+  --transition: 140ms ease;
+}
+
+/**
+ * Base
+ * -------------------------------------------------------------------------
+ * Traduz o `<style>` dos protótipos. Fica aqui e não em cada app para as três
+ * partilharem exatamente o mesmo ponto de partida.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-ink);
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+button {
+  color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: var(--r-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/** Utilitário de acessibilidade usado pelos componentes (labels, aria-live). */
+.upm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
