@@ -18,24 +18,28 @@ export default function AppShellCanvas() {
         name="Shell · Proprietário (claro)"
         component={Proprietario2}
         layout={{ x: 0, y: 0, width: 1556, height: 860 }}
+        vrt
       />
       <Storyboard
         id="Admin"
         name="Shell · Admin (escuro)"
         component={Admin2}
         layout={{ x: 1636, y: 0, width: 1556, height: 860 }}
+        vrt
       />
       <Storyboard
         id="Rail"
         name="Shell · sidebar colapsada a 84 px"
         component={Rail2}
         layout={{ x: 0, y: 940, width: 1556, height: 860 }}
+        vrt
       />
       <Storyboard
         id="Cabecalho"
         name="PageHeader e Brand"
         component={Cabecalho2}
         layout={{ x: 1636, y: 940, width: 1180, height: 460, intrinsicSizing: "root-element" }}
+        vrt
       />
     </Canvas>
   );
