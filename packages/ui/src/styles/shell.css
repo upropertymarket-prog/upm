@@ -173,19 +173,26 @@
   align-items: center;
 }
 
+/* Botão quadrado de 32 px. Nota: fica abaixo de `--tap` (40 px, 07 §5.14) —
+   é uma exceção pedida para o rail, não o novo mínimo do resto do sistema. */
 .upm-shell[data-collapsed="true"] .upm-nav__item {
   position: relative;
   justify-content: center;
-  width: 42px;
+  width: var(--h-xs);
+  height: var(--h-xs);
+  min-height: 0;
   padding: 0;
   column-gap: 0;
 }
 
-/* No rail o contador não cabe ao lado do ícone: sobe para o canto do item. */
+/* No rail o contador não cabe ao lado do ícone: sobe para o canto superior
+   direito do botão. Ancorado a `right` para que um contador de dois dígitos
+   cresça para dentro do rail em vez de ir contra a parede. */
 .upm-shell[data-collapsed="true"] .upm-nav__item .upm-badge {
   position: absolute;
-  top: 0;
-  left: 32px;
+  top: -6px;
+  right: -6px;
+  left: auto;
 }
 
 /* No rail de 84 px a etiqueta de grupo não cabe e cortava a meio da palavra. */
