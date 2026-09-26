@@ -32,6 +32,9 @@ export type AppShellProps = {
  * A preferência de rail é do dispositivo, não da conta: é sobre o tamanho do
  * ecrã em que se está, não sobre quem se é — por isso fica em `localStorage` e
  * não em `profiles`.
+ *
+ * O canvas deste componente está em tempo/designs/design-system/app-shell/index.canvas.tsx.
+ * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
  */
 export function AppShell({
   sidebar,
@@ -69,7 +72,7 @@ export function AppShell({
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />
       <div className="upm-shell__gutter" aria-hidden="true" />
-      <div className="upm-shell__main" style={{ width: "1308px" }}>
+      <div className="upm-shell__main" style={{ width: "100%" }}>
         <Topbar {...topbar} onOpenSidebar={() => setMobileOpen((value) => !value)} />
         <main className="upm-shell__content">{children}</main>
       </div>
