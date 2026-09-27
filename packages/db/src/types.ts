@@ -22,3 +22,26 @@ export type LaunchMode = (typeof LAUNCH_MODES)[number];
 export function isStaffRole(role: UserRole): boolean {
   return role === "admin" || role === "support";
 }
+
+/** 05 §1.2 / Anexo A — Fase 2 (schema de domínio). */
+export const PROPERTY_DEALS = ["sale", "rent"] as const;
+export type PropertyDeal = (typeof PROPERTY_DEALS)[number];
+
+export const PROPERTY_STATUSES = [
+  "draft",
+  "pending_review",
+  "active",
+  "featured",
+  "rented",
+  "sold",
+  "rejected",
+  "archived",
+] as const;
+export type PropertyStatus = (typeof PROPERTY_STATUSES)[number];
+
+export const PROPERTY_TYPOLOGIES = ["T0", "T1", "T2", "T3", "T4", "T5+"] as const;
+export type PropertyTypology = (typeof PROPERTY_TYPOLOGIES)[number];
+
+/** 05 §1.6 — Fase 2 (planos, ainda sem Stripe). */
+export const PLAN_AUDIENCES = ["owner", "buyer", "both"] as const;
+export type PlanAudience = (typeof PLAN_AUDIENCES)[number];

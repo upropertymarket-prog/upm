@@ -98,6 +98,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      plans: {
+        Row: {
+          audience: Database["public"]["Enums"]["plan_audience"];
+          created_at: string;
+          features: string[];
+          id: string;
+          limits: Json | null;
+          name: string;
+          position: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          stripe_price_month_id: string | null;
+          stripe_price_year_id: string | null;
+          stripe_product_id: string | null;
+          updated_at: string;
+          visible: boolean;
+        };
+        Insert: {
+          audience: Database["public"]["Enums"]["plan_audience"];
+          created_at?: string;
+          features?: string[];
+          id?: string;
+          limits?: Json | null;
+          name: string;
+          position?: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          stripe_price_month_id?: string | null;
+          stripe_price_year_id?: string | null;
+          stripe_product_id?: string | null;
+          updated_at?: string;
+          visible?: boolean;
+        };
+        Update: {
+          audience?: Database["public"]["Enums"]["plan_audience"];
+          created_at?: string;
+          features?: string[];
+          id?: string;
+          limits?: Json | null;
+          name?: string;
+          position?: number;
+          price_month_cents?: number;
+          price_year_cents?: number;
+          slug?: string;
+          stripe_price_month_id?: string | null;
+          stripe_price_year_id?: string | null;
+          stripe_product_id?: string | null;
+          updated_at?: string;
+          visible?: boolean;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_path: string | null;
@@ -150,7 +204,430 @@ export type Database = {
           updated_at?: string;
           verification_grace_until?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "profiles_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      properties: {
+        Row: {
+          accepts_offers: boolean;
+          address_line: string | null;
+          amenities: string[];
+          approx_radius_m: number;
+          bathrooms: number | null;
+          bedrooms: number | null;
+          city: string | null;
+          condition: string;
+          condo_fee_cents: number | null;
+          created_at: string;
+          deal: Database["public"]["Enums"]["property_deal"];
+          description: string;
+          district: string | null;
+          energy_cert: string | null;
+          floor: string | null;
+          gross_area: number | null;
+          id: string;
+          imi_cents: number | null;
+          location: unknown;
+          location_approx: unknown;
+          net_area: number | null;
+          owner_id: string;
+          parish: string | null;
+          postal_code: string | null;
+          price_cents: number | null;
+          property_type: string;
+          published_at: string | null;
+          ref: string;
+          rejection_reason: string | null;
+          rent_cents: number | null;
+          show_exact: boolean;
+          status: Database["public"]["Enums"]["property_status"];
+          title: string;
+          typology: string;
+          updated_at: string;
+          views_count: number;
+          year_built: number | null;
+        };
+        Insert: {
+          accepts_offers?: boolean;
+          address_line?: string | null;
+          amenities?: string[];
+          approx_radius_m?: number;
+          bathrooms?: number | null;
+          bedrooms?: number | null;
+          city?: string | null;
+          condition?: string;
+          condo_fee_cents?: number | null;
+          created_at?: string;
+          deal: Database["public"]["Enums"]["property_deal"];
+          description?: string;
+          district?: string | null;
+          energy_cert?: string | null;
+          floor?: string | null;
+          gross_area?: number | null;
+          id?: string;
+          imi_cents?: number | null;
+          location?: unknown;
+          location_approx?: unknown;
+          net_area?: number | null;
+          owner_id: string;
+          parish?: string | null;
+          postal_code?: string | null;
+          price_cents?: number | null;
+          property_type?: string;
+          published_at?: string | null;
+          ref: string;
+          rejection_reason?: string | null;
+          rent_cents?: number | null;
+          show_exact?: boolean;
+          status?: Database["public"]["Enums"]["property_status"];
+          title?: string;
+          typology: string;
+          updated_at?: string;
+          views_count?: number;
+          year_built?: number | null;
+        };
+        Update: {
+          accepts_offers?: boolean;
+          address_line?: string | null;
+          amenities?: string[];
+          approx_radius_m?: number;
+          bathrooms?: number | null;
+          bedrooms?: number | null;
+          city?: string | null;
+          condition?: string;
+          condo_fee_cents?: number | null;
+          created_at?: string;
+          deal?: Database["public"]["Enums"]["property_deal"];
+          description?: string;
+          district?: string | null;
+          energy_cert?: string | null;
+          floor?: string | null;
+          gross_area?: number | null;
+          id?: string;
+          imi_cents?: number | null;
+          location?: unknown;
+          location_approx?: unknown;
+          net_area?: number | null;
+          owner_id?: string;
+          parish?: string | null;
+          postal_code?: string | null;
+          price_cents?: number | null;
+          property_type?: string;
+          published_at?: string | null;
+          ref?: string;
+          rejection_reason?: string | null;
+          rent_cents?: number | null;
+          show_exact?: boolean;
+          status?: Database["public"]["Enums"]["property_status"];
+          title?: string;
+          typology?: string;
+          updated_at?: string;
+          views_count?: number;
+          year_built?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "properties_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_address_grants: {
+        Row: {
+          buyer_id: string;
+          granted_at: string;
+          granted_by: string;
+          id: string;
+          property_id: string;
+          revoked_at: string | null;
+          source: string;
+          visit_request_id: string | null;
+        };
+        Insert: {
+          buyer_id: string;
+          granted_at?: string;
+          granted_by: string;
+          id?: string;
+          property_id: string;
+          revoked_at?: string | null;
+          source: string;
+          visit_request_id?: string | null;
+        };
+        Update: {
+          buyer_id?: string;
+          granted_at?: string;
+          granted_by?: string;
+          id?: string;
+          property_id?: string;
+          revoked_at?: string | null;
+          source?: string;
+          visit_request_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_address_grants_buyer_id_fkey";
+            columns: ["buyer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_address_grants_granted_by_fkey";
+            columns: ["granted_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_address_grants_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_address_grants_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_documents: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: string;
+          mime: string;
+          name: string;
+          property_id: string;
+          size: number;
+          storage_path: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind: string;
+          mime: string;
+          name: string;
+          property_id: string;
+          size: number;
+          storage_path: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          mime?: string;
+          name?: string;
+          property_id?: string;
+          size?: number;
+          storage_path?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_documents_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_documents_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_media: {
+        Row: {
+          created_at: string;
+          height: number | null;
+          id: string;
+          is_cover: boolean;
+          kind: string;
+          path: string;
+          position: number;
+          property_id: string;
+          updated_at: string;
+          width: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          height?: number | null;
+          id?: string;
+          is_cover?: boolean;
+          kind: string;
+          path: string;
+          position?: number;
+          property_id: string;
+          updated_at?: string;
+          width?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          height?: number | null;
+          id?: string;
+          is_cover?: boolean;
+          kind?: string;
+          path?: string;
+          position?: number;
+          property_id?: string;
+          updated_at?: string;
+          width?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_media_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_views: {
+        Row: {
+          created_at: string;
+          day: string;
+          id: string;
+          property_id: string;
+          views_count: number;
+        };
+        Insert: {
+          created_at?: string;
+          day: string;
+          id?: string;
+          property_id: string;
+          views_count?: number;
+        };
+        Update: {
+          created_at?: string;
+          day?: string;
+          id?: string;
+          property_id?: string;
+          views_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_views_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_views_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      saved_properties: {
+        Row: {
+          created_at: string;
+          id: string;
+          price_at_save_cents: number | null;
+          property_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          price_at_save_cents?: number | null;
+          property_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          price_at_save_cents?: number | null;
+          property_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "saved_properties_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "saved_properties_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "saved_properties_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      search_alerts: {
+        Row: {
+          created_at: string;
+          filters: Json;
+          id: string;
+          last_run_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          filters?: Json;
+          id?: string;
+          last_run_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          filters?: Json;
+          id?: string;
+          last_run_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "search_alerts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       staff_members: {
         Row: {
@@ -193,11 +670,184 @@ export type Database = {
           },
         ];
       };
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean;
+          created_at: string;
+          current_period_end: string | null;
+          id: string;
+          interval: string;
+          plan_id: string;
+          profile_id: string;
+          status: string;
+          stripe_subscription_id: string | null;
+          trial_ends_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          interval?: string;
+          plan_id: string;
+          profile_id: string;
+          status?: string;
+          stripe_subscription_id?: string | null;
+          trial_ends_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          interval?: string;
+          plan_id?: string;
+          profile_id?: string;
+          status?: string;
+          stripe_subscription_id?: string | null;
+          trial_ends_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
-      [_ in never]: never;
+      properties_public: {
+        Row: {
+          accepts_offers: boolean | null;
+          amenities: string[] | null;
+          approx_radius_m: number | null;
+          bathrooms: number | null;
+          bedrooms: number | null;
+          city: string | null;
+          condition: string | null;
+          condo_fee_cents: number | null;
+          created_at: string | null;
+          deal: Database["public"]["Enums"]["property_deal"] | null;
+          description: string | null;
+          district: string | null;
+          energy_cert: string | null;
+          floor: string | null;
+          gross_area: number | null;
+          id: string | null;
+          imi_cents: number | null;
+          location_approx: unknown;
+          net_area: number | null;
+          owner_id: string | null;
+          parish: string | null;
+          price_cents: number | null;
+          property_type: string | null;
+          published_at: string | null;
+          ref: string | null;
+          rent_cents: number | null;
+          status: Database["public"]["Enums"]["property_status"] | null;
+          title: string | null;
+          typology: string | null;
+          updated_at: string | null;
+          views_count: number | null;
+          year_built: number | null;
+        };
+        Insert: {
+          accepts_offers?: boolean | null;
+          amenities?: string[] | null;
+          approx_radius_m?: number | null;
+          bathrooms?: number | null;
+          bedrooms?: number | null;
+          city?: string | null;
+          condition?: string | null;
+          condo_fee_cents?: number | null;
+          created_at?: string | null;
+          deal?: Database["public"]["Enums"]["property_deal"] | null;
+          description?: string | null;
+          district?: string | null;
+          energy_cert?: string | null;
+          floor?: string | null;
+          gross_area?: number | null;
+          id?: string | null;
+          imi_cents?: number | null;
+          location_approx?: unknown;
+          net_area?: number | null;
+          owner_id?: string | null;
+          parish?: string | null;
+          price_cents?: number | null;
+          property_type?: string | null;
+          published_at?: string | null;
+          ref?: string | null;
+          rent_cents?: number | null;
+          status?: Database["public"]["Enums"]["property_status"] | null;
+          title?: string | null;
+          typology?: string | null;
+          updated_at?: string | null;
+          views_count?: number | null;
+          year_built?: number | null;
+        };
+        Update: {
+          accepts_offers?: boolean | null;
+          amenities?: string[] | null;
+          approx_radius_m?: number | null;
+          bathrooms?: number | null;
+          bedrooms?: number | null;
+          city?: string | null;
+          condition?: string | null;
+          condo_fee_cents?: number | null;
+          created_at?: string | null;
+          deal?: Database["public"]["Enums"]["property_deal"] | null;
+          description?: string | null;
+          district?: string | null;
+          energy_cert?: string | null;
+          floor?: string | null;
+          gross_area?: number | null;
+          id?: string | null;
+          imi_cents?: number | null;
+          location_approx?: unknown;
+          net_area?: number | null;
+          owner_id?: string | null;
+          parish?: string | null;
+          price_cents?: number | null;
+          property_type?: string | null;
+          published_at?: string | null;
+          ref?: string | null;
+          rent_cents?: number | null;
+          status?: Database["public"]["Enums"]["property_status"] | null;
+          title?: string | null;
+          typology?: string | null;
+          updated_at?: string | null;
+          views_count?: number | null;
+          year_built?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "properties_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
+      get_property_location: {
+        Args: { p_property_id: string };
+        Returns: unknown;
+      };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
       role_of: {
@@ -206,7 +856,18 @@ export type Database = {
       };
     };
     Enums: {
+      plan_audience: "owner" | "buyer" | "both";
       profile_status: "pending" | "active" | "suspended";
+      property_deal: "sale" | "rent";
+      property_status:
+        | "draft"
+        | "pending_review"
+        | "active"
+        | "featured"
+        | "rented"
+        | "sold"
+        | "rejected"
+        | "archived";
       staff_department: "suporte" | "financeiro" | "moderacao" | "admin";
       user_role: "buyer" | "owner" | "admin" | "support";
     };
@@ -832,7 +1493,19 @@ export const Constants = {
   },
   public: {
     Enums: {
+      plan_audience: ["owner", "buyer", "both"],
       profile_status: ["pending", "active", "suspended"],
+      property_deal: ["sale", "rent"],
+      property_status: [
+        "draft",
+        "pending_review",
+        "active",
+        "featured",
+        "rented",
+        "sold",
+        "rejected",
+        "archived",
+      ],
       staff_department: ["suporte", "financeiro", "moderacao", "admin"],
       user_role: ["buyer", "owner", "admin", "support"],
     },

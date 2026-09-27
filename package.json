@@ -19,7 +19,7 @@
     "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && pnpm gate:db && pnpm gate:deps",
     "gate:env": "node scripts/gate/check-public-env.mjs",
     "gate:bundle": "node scripts/gate/check-client-bundle.mjs",
-    "gate:db": "supabase db lint --linked --level warning --fail-on error",
+    "gate:db": "supabase db lint --linked --schema public --level warning --fail-on error",
     "gate:deps": "pnpm audit --audit-level high"
   },
   "devDependencies": {

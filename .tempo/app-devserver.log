@@ -1,18 +1,24 @@
 No projects matched the filters "c:\Users\alexa\tempo\projects\document-analysis" in "C:\Users\alexa\tempo\projects\document-analysis"
    ▲ Next.js 15.5.26
-   - Local:        http://localhost:55283
-   - Network:      http://192.168.1.78:55283
+   - Local:        http://localhost:62765
+   - Network:      http://192.168.1.78:62765
    - Environments: .env.local
    - Experiments (use with caution):
      · clientTraceMetadata
 
  ✓ Starting...
  ○ Compiling /instrumentation ...
- ✓ Compiled /instrumentation in 4.1s (994 modules)
- ✓ Ready in 11.5s
+ ✓ Compiled /instrumentation in 7.5s (994 modules)
+ ✓ Ready in 13.4s
  ○ Compiling / ...
- ✓ Compiled / in 10.4s (3562 modules)
- GET / 200 in 433ms
- ○ Compiling /%5F%5Ftempo/identity ...
- ✓ Compiled /%5F%5Ftempo/identity in 5.2s (3572 modules)
- GET /__tempo/identity 200 in 30ms
+ ✓ Compiled / in 17.3s (3589 modules)
+ GET / 200 in 6468ms
+ GET / 200 in 374ms
+ GET / 200 in 187ms
+ GET / 200 in 311ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.5s (3567 modules)
+ GET /mensagens 404 in 2940ms
+ GET /mensagens 404 in 107ms
+ GET / 200 in 234ms
+ GET / 200 in 306ms
