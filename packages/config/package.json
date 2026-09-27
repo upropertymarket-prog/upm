@@ -3,11 +3,39 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./i18n.ts",
+  "types": "./i18n.ts",
   "exports": {
+    ".": "./i18n.ts",
+    "./i18n": "./i18n.ts",
+    "./messages/pt.json": "./messages/pt.json",
+    "./messages/en.json": "./messages/en.json",
     "./tsconfig/base.json": "./tsconfig/base.json",
-    "./tsconfig/next.json": "./tsconfig/next.json"
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./server": "./server.ts"
   },
   "files": [
-    "tsconfig"
-  ]
+    "tsconfig",
+    "messages",
+    "i18n.ts",
+    "server.ts"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "next": "15.5.26",
+    "next-intl": "^4.14.7",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.6"
+  },
+  "peerDependencies": {
+    "next": "^15",
+    "next-intl": "^3.26.3"
+  }
 }

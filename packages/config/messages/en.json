@@ -1,0 +1,97 @@
+{
+  "common": {
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "export": "Export",
+    "search": "Search",
+    "loading": "Loading…",
+    "understood": "Got it",
+    "later": "Later"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "summary": "{from}–{to} of {total}"
+  },
+  "theme": {
+    "title": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "appearance": "Appearance",
+    "appearanceHint": "Choose the app theme. “System” follows your device preference."
+  },
+  "locale": {
+    "title": "Language",
+    "pt": "Português",
+    "en": "English"
+  },
+  "topbar": {
+    "search": "Search",
+    "openMenu": "Open menu",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications"
+  },
+  "sidebar": {
+    "collapse": "Collapse menu",
+    "expand": "Expand menu",
+    "report": "Report a problem",
+    "signOut": "Sign out",
+    "countSuffix": "unread",
+    "groups": {
+      "search": "Browse",
+      "manage": "Manage",
+      "admin": "Administration",
+      "support": "Support"
+    }
+  },
+  "greeting": {
+    "morning": "Good morning, {name}",
+    "afternoon": "Good afternoon, {name}",
+    "evening": "Good evening, {name}"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "market": "Market",
+    "saved": "Saved",
+    "messages": "Messages",
+    "map": "Map",
+    "myRequests": "My requests",
+    "cloud": "Cloud",
+    "contracts": "Contracts",
+    "myReports": "My reports",
+    "plan": "Plan",
+    "settings": "Settings",
+    "myProperties": "My properties",
+    "leads": "Leads",
+    "visitSchedule": "Visit schedule",
+    "newProperty": "New property",
+    "users": "Users",
+    "propertyModeration": "Property moderation",
+    "siteTraffic": "Site traffic",
+    "plans": "Plans",
+    "contractTemplates": "Contract templates",
+    "siteLeads": "Site leads",
+    "tickets": "Tickets",
+    "mailboxes": "Mailboxes",
+    "mailbox": "Mailbox",
+    "updates": "Updates",
+    "campaigns": "Campaigns",
+    "emailMetrics": "Email metrics",
+    "internalCloud": "Internal cloud",
+    "subscriptions": "Subscriptions"
+  },
+  "emptyState": {
+    "noResults": "No results",
+    "noResultsHint": "Try changing the filters or the search."
+  },
+  "a11y": {
+    "brand": "UProperty Market",
+    "online": "Online"
+  }
+}

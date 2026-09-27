@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig/base.json",
+  "compilerOptions": { "noEmit": true, "jsx": "react-jsx" },
+  "include": ["i18n.ts", "server.ts", "*.test.ts"]
+}

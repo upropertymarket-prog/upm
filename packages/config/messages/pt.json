@@ -1,0 +1,97 @@
+{
+  "common": {
+    "save": "Guardar",
+    "saveChanges": "Guardar alterações",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "export": "Exportar",
+    "search": "Pesquisar",
+    "loading": "A carregar…",
+    "understood": "Entendi",
+    "later": "Mais tarde"
+  },
+  "pagination": {
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "page": "Página",
+    "summary": "{from}–{to} de {total}"
+  },
+  "theme": {
+    "title": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "appearance": "Aparência",
+    "appearanceHint": "Escolha o tema da aplicação. «Sistema» segue a preferência do seu dispositivo."
+  },
+  "locale": {
+    "title": "Idioma",
+    "pt": "Português",
+    "en": "English"
+  },
+  "topbar": {
+    "search": "Pesquisar",
+    "openMenu": "Abrir menu",
+    "notifications": "Notificações",
+    "markAllRead": "Marcar como lidas",
+    "noNotifications": "Sem notificações"
+  },
+  "sidebar": {
+    "collapse": "Colapsar menu",
+    "expand": "Expandir menu",
+    "report": "Reportar problema",
+    "signOut": "Sair",
+    "countSuffix": "por ler",
+    "groups": {
+      "search": "Procurar",
+      "manage": "Gerir",
+      "admin": "Administração",
+      "support": "Suporte"
+    }
+  },
+  "greeting": {
+    "morning": "Bom dia, {name}",
+    "afternoon": "Boa tarde, {name}",
+    "evening": "Boa noite, {name}"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "market": "Market",
+    "saved": "Guardados",
+    "messages": "Mensagens",
+    "map": "Mapa",
+    "myRequests": "Meus pedidos",
+    "cloud": "Cloud",
+    "contracts": "Contratos",
+    "myReports": "Os meus reports",
+    "plan": "Plano",
+    "settings": "Definições",
+    "myProperties": "As minhas propriedades",
+    "leads": "Leads",
+    "visitSchedule": "Agenda de visitas",
+    "newProperty": "Nova propriedade",
+    "users": "Utilizadores",
+    "propertyModeration": "Moderação de imóveis",
+    "siteTraffic": "Tráfego do site",
+    "plans": "Planos",
+    "contractTemplates": "Templates de contrato",
+    "siteLeads": "Leads do site",
+    "tickets": "Tickets",
+    "mailboxes": "Caixas de e-mail",
+    "mailbox": "Caixa de e-mail",
+    "updates": "Atualizações",
+    "campaigns": "Campanhas",
+    "emailMetrics": "Métricas de e-mail",
+    "internalCloud": "Cloud interna",
+    "subscriptions": "Assinaturas"
+  },
+  "emptyState": {
+    "noResults": "Sem resultados",
+    "noResultsHint": "Tente alterar os filtros ou a pesquisa."
+  },
+  "a11y": {
+    "brand": "UProperty Market",
+    "online": "Online"
+  }
+}

@@ -1,0 +1,913 @@
+/**
+ * Componentes base — UProperty Market (P1-04)
+ * =========================================================================
+ * Estilos dos componentes de `packages/ui/src/components`. Escritos em CSS
+ * simples, sobre os tokens de `tokens.css`, por três razões:
+ *  - as 3 apps partilham exatamente o mesmo ficheiro, sem configuração por app;
+ *  - nenhuma cor literal entra aqui (regra de 04 §5.2), e isso é verificável;
+ *  - os nomes de classe são estáticos, o que mantém os componentes editáveis
+ *    no painel de estilo dos canvases do Tempo.
+ *
+ * Geometria e comportamento medidos nos protótipos `design/prototypes/*.dc.html`.
+ * Todo o elemento interativo tem `min-height: var(--tap)` e `min-width:
+ * var(--tap)` quando é quadrado — 07 §5.14, sem exceções.
+ * Nenhum tamanho de letra desce de `--fs-label` (13 px na app, 14 px no `www`)
+ * — 07 §3.
+ */
+
+/* =========================================================================
+ * Button
+ * ====================================================================== */
+
+.upm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.upm-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-btn:disabled,
+.upm-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tamanhos. O mínimo é `--tap` (40 px) e não menos, mesmo no tamanho `sm`. */
+.upm-btn--sm {
+  height: var(--h-md);
+  min-height: var(--tap);
+  padding: 0 var(--sp-6);
+}
+
+.upm-btn--md {
+  height: var(--h-lg);
+  min-height: var(--tap);
+  padding: 0 var(--sp-7);
+}
+
+.upm-btn--lg {
+  height: var(--h-xl);
+  min-height: var(--tap);
+  padding: 0 var(--sp-8);
+}
+
+/* Só ícone: quadrado e nunca abaixo do alvo de toque, por pequeno que seja o
+   ícone desenhado (07 §5.14 — o caso das ações de hover da lista de e-mail). */
+.upm-btn--icon {
+  padding: 0;
+  width: var(--tap);
+  min-width: var(--tap);
+  height: var(--tap);
+  min-height: var(--tap);
+  border-radius: var(--r-xl);
+}
+
+.upm-btn--primary {
+  background: var(--accent);
+  color: var(--on-solid);
+}
+
+.upm-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.upm-btn--secondary {
+  background: var(--surface);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+.upm-btn--secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.upm-btn--ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.upm-btn--ghost:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.upm-btn--danger {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.upm-btn--danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--on-solid);
+}
+
+.upm-btn--full {
+  width: 100%;
+}
+
+/* =========================================================================
+ * Field · Input · Select · Textarea
+ * ====================================================================== */
+
+.upm-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.upm-field__label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.upm-field__hint {
+  font-size: var(--fs-label);
+  color: var(--muted);
+  line-height: var(--lh-snug);
+}
+
+.upm-field__error {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  color: var(--danger);
+  line-height: var(--lh-snug);
+}
+
+.upm-control {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: var(--h-lg);
+  min-height: var(--tap);
+  padding: 0 var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.upm-control:hover:not([data-disabled="true"]) {
+  border-color: var(--border2);
+}
+
+.upm-control:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.upm-control[data-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.upm-control[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.upm-control__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--muted);
+}
+
+/* O `<input>` é transparente dentro do invólucro: a moldura, o foco e o estado
+   de erro vivem no `.upm-control`, como nos protótipos. */
+.upm-control__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+.upm-control__input:disabled {
+  cursor: not-allowed;
+}
+
+.upm-textarea {
+  height: auto;
+  min-height: calc(var(--tap) * 2);
+  padding: var(--sp-5);
+  align-items: stretch;
+}
+
+.upm-textarea__input {
+  resize: vertical;
+  line-height: var(--lh-normal);
+}
+
+/* Select nativo: o `appearance: none` é necessário para o chevron seguir o
+   token `--muted` em vez da cor do sistema operativo. */
+.upm-select {
+  position: relative;
+}
+
+.upm-select__input {
+  appearance: none;
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  padding-right: var(--sp-8);
+}
+
+.upm-select__chevron {
+  position: absolute;
+  right: var(--sp-5);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted);
+  display: inline-flex;
+}
+
+/* =========================================================================
+ * Tabs
+ * ====================================================================== */
+
+.upm-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.upm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: var(--h-lg);
+  min-height: var(--tap);
+  padding: 0 var(--sp-6);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.upm-tab:hover:not(:disabled):not([aria-selected="true"]) {
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+.upm-tab[aria-selected="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.upm-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* O contador herda a cor do estado quando a tab representa um estado
+   (04 §5.6 — tabs do Suporte). */
+.upm-tab__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-medium);
+  color: var(--tab-count-color, currentcolor);
+}
+
+/* =========================================================================
+ * Badge (contador) e Tag de estado
+ * ====================================================================== */
+
+.upm-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-solid);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+}
+
+.upm-badge--muted {
+  background: var(--surface3);
+  color: var(--muted);
+}
+
+/* Tag de estado: fundo sólido + texto branco, sem contorno (04 §5.6). A cor
+   entra por `--tag-bg`, que os componentes ligam a um token `--state-*`. */
+.upm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-4);
+  border-radius: var(--r-pill);
+  background: var(--tag-bg, var(--state-draft));
+  color: var(--on-solid);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-black);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+ * Card
+ * ====================================================================== */
+
+.upm-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.upm-card--pad {
+  padding: var(--sp-8);
+  gap: var(--sp-6);
+}
+
+.upm-card--interactive {
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.upm-card--interactive:hover {
+  border-color: var(--border2);
+  box-shadow: var(--shadow);
+}
+
+.upm-card--interactive:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-6) var(--sp-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.upm-card__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.upm-card__body {
+  padding: var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  min-width: 0;
+}
+
+.upm-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-8);
+  border-top: 1px solid var(--border);
+}
+
+/* =========================================================================
+ * Table
+ * ====================================================================== */
+
+/* O invólucro é o que rola na horizontal: o `<body>` nunca rola de lado
+   (02 §13 — responsivo de 360 px a 1920 px). */
+.upm-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.upm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+}
+
+.upm-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--sp-5) var(--sp-7);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: var(--fs-label);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.upm-table tbody td {
+  padding: var(--sp-6) var(--sp-7);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.upm-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.upm-table tbody tr:hover td {
+  background: var(--surface2);
+}
+
+.upm-table tbody tr[data-selected="true"] td {
+  background: var(--accent-soft);
+}
+
+.upm-table__num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.upm-table__empty td {
+  padding: 0;
+}
+
+/* =========================================================================
+ * Overlay · Drawer · Modal
+ * ====================================================================== */
+
+.upm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--overlay);
+  display: flex;
+}
+
+.upm-overlay--right {
+  justify-content: flex-end;
+}
+
+.upm-overlay--center {
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-9);
+}
+
+/* Drawer: painel à direita, 460 px, altura total, `border-left` (04 §5.4). */
+.upm-drawer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--drawer-w);
+  height: 100vh;
+  overflow: auto;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  color: var(--text);
+}
+
+.upm-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3xl);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+}
+
+.upm-modal--sm {
+  max-width: 460px;
+}
+
+.upm-modal--md {
+  max-width: 520px;
+}
+
+.upm-modal--lg {
+  max-width: 640px;
+}
+
+.upm-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  padding: var(--sp-7) var(--sp-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.upm-panel__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-subtitle-lg);
+  font-weight: var(--fw-bold);
+  margin: 0;
+  min-width: 0;
+}
+
+.upm-panel__subtitle {
+  font-size: var(--fs-body);
+  color: var(--muted);
+}
+
+.upm-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+  padding: var(--sp-8);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.upm-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-8);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  bottom: 0;
+}
+
+/* =========================================================================
+ * Toast
+ * ====================================================================== */
+
+.upm-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  align-items: center;
+  pointer-events: none;
+}
+
+.upm-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  max-width: min(92vw, 520px);
+  padding: var(--sp-5) var(--sp-8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  pointer-events: auto;
+}
+
+.upm-toast__mark {
+  display: inline-flex;
+  flex: none;
+}
+
+.upm-toast--success .upm-toast__mark {
+  color: var(--ok);
+}
+
+.upm-toast--error .upm-toast__mark {
+  color: var(--danger);
+}
+
+.upm-toast--info .upm-toast__mark {
+  color: var(--info);
+}
+
+/* =========================================================================
+ * Toggle (switch)
+ * ====================================================================== */
+
+/* O invólucro garante o alvo de 40 px sem inflar o desenho do interruptor. */
+.upm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-5);
+  min-height: var(--tap);
+  cursor: pointer;
+}
+
+.upm-toggle[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.upm-toggle__track {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 24px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-pill);
+  background: var(--surface3);
+  cursor: inherit;
+  padding: 0;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.upm-toggle__track:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.upm-toggle__track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-toggle__track[aria-checked="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.upm-toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: transform var(--transition);
+}
+
+.upm-toggle__track[aria-checked="true"] .upm-toggle__knob {
+  transform: translateX(20px);
+}
+
+.upm-toggle__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.upm-toggle__label {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+}
+
+.upm-toggle__hint {
+  font-size: var(--fs-label);
+  color: var(--muted);
+  line-height: var(--lh-snug);
+}
+
+/* =========================================================================
+ * Checkbox
+ * ====================================================================== */
+
+.upm-check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  min-height: var(--tap);
+  padding: var(--sp-4) 0;
+  cursor: pointer;
+}
+
+.upm-check[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* O input nativo fica invisível mas presente: é ele que dá teclado, leitores
+   de ecrã e validação de formulário. O quadrado é só pintura. */
+.upm-check__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.upm-check__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-xs);
+  background: var(--surface2);
+  color: var(--on-solid);
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.upm-check:hover .upm-check__box {
+  border-color: var(--accent);
+}
+
+/* A marca está sempre no DOM e só aparece quando o input está ligado: evita um
+   salto de layout e mantém o SVG fora do caminho de re-render. */
+.upm-check__box > * {
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.upm-check__input:checked + .upm-check__box > *,
+.upm-check__input:indeterminate + .upm-check__box > * {
+  opacity: 1;
+}
+
+.upm-check__input:checked + .upm-check__box,
+.upm-check__input:indeterminate + .upm-check__box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.upm-check__input:focus-visible + .upm-check__box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-check__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.upm-check__label {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+}
+
+.upm-check__hint {
+  font-size: var(--fs-label);
+  color: var(--muted);
+  line-height: var(--lh-snug);
+}
+
+/* =========================================================================
+ * EmptyState
+ * ====================================================================== */
+
+.upm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: 48px var(--sp-9);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  text-align: center;
+}
+
+.upm-empty__icon {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.upm-empty__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-subtitle-lg);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.upm-empty__text {
+  font-size: var(--fs-body-lg);
+  color: var(--muted);
+  line-height: var(--lh-normal);
+  max-width: 44ch;
+  margin: 0;
+}
+
+/* =========================================================================
+ * Pagination
+ * ====================================================================== */
+
+.upm-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.upm-pagination__info {
+  font-size: var(--fs-label);
+  color: var(--muted);
+  margin-right: auto;
+}
+
+.upm-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap);
+  height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition);
+}
+
+.upm-page:hover:not(:disabled):not([aria-current="page"]) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.upm-page:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upm-page[aria-current="page"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-solid);
+  cursor: default;
+}
+
+.upm-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.upm-page__gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap);
+  height: var(--tap);
+  color: var(--muted);
+  font-size: var(--fs-body);
+}

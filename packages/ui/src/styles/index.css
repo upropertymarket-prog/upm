@@ -1,0 +1,11 @@
+/**
+ * Folha única do design system — importada uma vez por app, no root layout.
+ *
+ *   import "@upm/ui/styles.css";
+ *
+ * A ordem importa: tokens primeiro (define tudo o que vem depois), componentes,
+ * shell. Nenhum destes ficheiros contém uma cor literal fora de `tokens.css`.
+ */
+@import "./tokens.css";
+@import "./components.css";
+@import "./shell.css";

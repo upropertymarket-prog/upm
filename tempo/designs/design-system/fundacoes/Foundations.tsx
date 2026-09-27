@@ -85,7 +85,9 @@ function Panel({ theme, children }: { theme: "light" | "dark"; children: React.R
 
 function Pair({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "row", minWidth: 0, fontFamily: "var(--font-sans)" }}>
+    <div
+      style={{ display: "flex", flexDirection: "row", minWidth: 0, fontFamily: "var(--font-sans)" }}
+    >
       <Panel theme="light">{children}</Panel>
       <Panel theme="dark">{children}</Panel>
     </div>

@@ -1,0 +1,15 @@
+{
+  "paths": {
+    "canvases": "./designs"
+  },
+  "scripts": {
+    "install": "cd .. && pnpm install --no-frozen-lockfile && cd tempo && pnpm install --no-frozen-lockfile --ignore-workspace",
+    "start": "npm run dev"
+  },
+  "apps": [
+    {
+      "start": "pnpm --filter @upm/app exec next dev -p ${APP_PORT}",
+      "url": "http://localhost:${APP_PORT}"
+    }
+  ]
+}

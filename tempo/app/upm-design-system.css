@@ -1,0 +1,58 @@
+/**
+ * Estilos do host do canvas — UProperty Market
+ * =========================================================================
+ * O `tempo/app/layout.tsx` é regenerado pelo Tempo a cada arranque do
+ * devserver, logo não serve para importar nada nosso. Este ficheiro é o ponto de
+ * entrada estável: é importado do `globals.css`, FORA do bloco `tempo:managed`.
+ *
+ * Faz duas coisas, e só estas:
+ *  1. importa a folha única do design system, para os storyboards mostrarem o
+ *     produto a sério e não uma aproximação sem tokens;
+ *  2. declara as três famílias auto-hospedadas em `@font-face`.
+ *
+ * Porque é que o `@font-face` existe aqui e não vem de `@upm/ui/fonts`: as apps
+ * carregam as fontes com `next/font/local` (P1-02), que precisa de correr no
+ * `layout.tsx` — e o do host é regenerado. Os ficheiros `.woff2` são os MESMOS,
+ * em `packages/ui/src/fonts/files`; só o mecanismo de carregamento difere.
+ * Se as fontes mudarem, mudam nos dois sítios.
+ */
+@import "../../packages/ui/src/styles/index.css";
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../../packages/ui/src/fonts/files/bricolage-grotesque-latin-wght-normal.woff2")
+    format("woff2");
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Manrope";
+  src: url("../../packages/ui/src/fonts/files/manrope-latin-wght-normal.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../packages/ui/src/fonts/files/jetbrains-mono-latin-wght-normal.woff2")
+    format("woff2");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/**
+ * `tokens.css` compõe as famílias como `var(--font-bricolage), "Bricolage
+ * Grotesque", …` — a primeira é a variable que o `next/font` define nas apps e
+ * que aqui não existe. O fallback nomeado a seguir é exatamente o nome declarado
+ * acima, logo não é preciso redefinir nada: as famílias resolvem-se sozinhas.
+ *
+ * O host renderiza sempre em tema claro por omissão; os storyboards que mostram
+ * o tema escuro usam um invólucro `data-theme="dark"`.
+ */
+:root {
+  color-scheme: light;
+}

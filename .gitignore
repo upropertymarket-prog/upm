@@ -6,19 +6,18 @@ dist/
 build/
 out/
 *.tsbuildinfo
-
 # Ambiente
 .env
 .env.local
 .env.*.local
-
 # Supabase local
 supabase/.branches/
 supabase/.temp/
-
 # Credenciais locais — nunca versionadas
 .secrets/
-
 # Sistema
 .DS_Store
 Thumbs.db
+tempo/.tempo/
+tempo/node_modules/
+tempo/dist/
