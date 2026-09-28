@@ -44,7 +44,7 @@ export function CardTitle({ className, ...rest }: React.HTMLAttributes<HTMLHeadi
 }
 
 export function CardBody({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cx("upm-card__body", className)} style={{ rowGap: "16px", gap: "16px" }} {...rest} />;
+  return <div className={cx("upm-card__body", className)} style={{ rowGap: "16px", gap: "16px", height: "340px" }} {...rest} />;
 }
 
 export function CardFooter({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {

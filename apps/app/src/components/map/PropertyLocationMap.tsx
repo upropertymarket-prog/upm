@@ -12,6 +12,7 @@ export type PropertyLocationMapProps = {
   /** `false` → é a aproximada: desenha o círculo de raio, não um pin exato (07 §1.2). */
   isExact: boolean;
   radiusM: number;
+  style?: React.CSSProperties;
 };
 
 /**
@@ -22,7 +23,7 @@ export type PropertyLocationMapProps = {
  * página à parte, que continua a existir para procurar entre vários imóveis.
  * Este é só um ponto (ou círculo) para ESTE imóvel.
  */
-export function PropertyLocationMap({ lon, lat, isExact, radiusM }: PropertyLocationMapProps) {
+export function PropertyLocationMap({ lon, lat, isExact, radiusM, style }: PropertyLocationMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
 
@@ -71,7 +72,7 @@ export function PropertyLocationMap({ lon, lat, isExact, radiusM }: PropertyLoca
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
       <div
         ref={containerRef}
         style={{ width: "100%", height: 220, borderRadius: 12, overflow: "hidden" }}
