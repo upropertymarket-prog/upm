@@ -31,7 +31,7 @@ function CamposDemo() {
         <div style={{ width: 240 }}>
           <Input
             label="Pesquisar"
-            leadingIcon={<Search size={16} aria-hidden="true" />}
+            leadingIcon={<Search size={16} aria-hidden="true" style={{ stroke: "rgb(100, 116, 139)" }} />}
             placeholder="Referência, localidade…"
           />
         </div>
