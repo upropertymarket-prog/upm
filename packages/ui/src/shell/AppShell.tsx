@@ -75,7 +75,7 @@ export function AppShell({
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />
       <div className="upm-shell__gutter" aria-hidden="true" />
-      <div className="upm-shell__main" style={{ width: "100%", height: "1261px" }}>
+      <div className="upm-shell__main" style={{ width: "100%", height: "1281px" }}>
         <Topbar {...topbar} onOpenSidebar={() => setMobileOpen((value) => !value)} />
         <main className="upm-shell__content" style={{ width: "100%" }}>
           {children}
