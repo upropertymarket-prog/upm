@@ -36,7 +36,7 @@ export default function DetalhePropriedade() {
       <ThemeProvider initialChoice="light">
         <AppChrome role="owner" userName="Ana Silva" userMeta="Proprietária · Premium" activeId="market" locale="pt" onLocaleChange={demoLocaleChange}>
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            <Button variant="secondary" size="sm">← Voltar ao Market</Button>
+            <Button variant="secondary" size="sm" style={{ alignSelf: "flex-start" }}>← Voltar ao Market</Button>
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 360px)", gap: 28, alignItems: "start" }}>
               <main style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 3fr) minmax(110px, 1fr)", gap: 8, height: "372px" }}>
