@@ -78,7 +78,7 @@ export function Topbar({
   const currentLocale = locales.find((item) => item.value === locale);
 
   return (
-    <header className={cx("upm-topbar", className)}>
+    <header className={cx("upm-topbar", className)} style={{ height: "68px" }}>
       {onOpenSidebar ? (
         <Button
           variant="ghost"
