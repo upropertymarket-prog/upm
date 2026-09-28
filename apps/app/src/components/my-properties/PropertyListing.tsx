@@ -68,7 +68,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
             aria-hidden="true"
             style={{
               width: 56,
-              height: 40,
+              height: 46,
               borderRadius: 8,
               background: "var(--surface-muted, #eee)",
             }}
