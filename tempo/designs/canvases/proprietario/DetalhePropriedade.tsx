@@ -11,7 +11,7 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
 import { demoLocaleChange } from "./demo";
 
 function DealTag(props: React.ComponentProps<typeof DealTagBase>) {
-  return <DealTagBase {...props} style={{ ...props.style, position: "static", overflowX: "visible", overflowY: "visible" }} />;
+  return <DealTagBase {...props} style={{ ...props.style, alignSelf: "flex-start", position: "static", overflowX: "visible", overflowY: "visible" }} />;
 }
 
 const property = {
