@@ -1,6 +1,8 @@
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
 
@@ -24,12 +26,17 @@ export const metadata: Metadata = {
  * entre `localStorage` e `prefers-color-scheme` (04 §5.2).
  */
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
+  const [locale, messages, requestHeaders] = await Promise.all([
+    getLocale(),
+    getMessages(),
+    headers(),
+  ]);
+  const nonce = requestHeaders.get(NONCE_HEADER) ?? undefined;
 
   return (
     <html lang={locale} data-app="web" className={fontVariables} suppressHydrationWarning>
       <head>
-        <ThemeScript />
+        <ThemeScript nonce={nonce} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -15,6 +15,9 @@ const ALLOWLIST = new Set([
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "NEXT_PUBLIC_SENTRY_DSN",
   "NEXT_PUBLIC_LAUNCH_MODE",
+  // Fase 3 — cookie de sessão partilhado entre subdomínios (07 §9.1-adjacent,
+  // ver packages/db/src/client.ts). Não é segredo, só um domínio de cookie.
+  "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN",
 ]);
 
 const PUBLIC_VAR = /\bNEXT_PUBLIC_[A-Z0-9_]+/g;

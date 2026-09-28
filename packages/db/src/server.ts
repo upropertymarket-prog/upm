@@ -12,8 +12,12 @@ type CookieStore = {
 /**
  * Cliente Supabase para Server Components e Server Actions.
  * Recebe o cookie store do Next para propagar a sessão (02 §3.3).
+ *
+ * `AUTH_COOKIE_DOMAIN` partilha o cookie de sessão entre `www`, `app.*` e
+ * `interno.*` em produção (ver nota em `client.ts`). Sem valor em dev.
  */
 export function createClient(cookies: CookieStore) {
+  const domain = process.env.AUTH_COOKIE_DOMAIN;
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,6 +30,7 @@ export function createClient(cookies: CookieStore) {
           }
         },
       },
+      ...(domain ? { cookieOptions: { domain } } : {}),
     },
   );
 }

@@ -93,5 +93,113 @@
   "a11y": {
     "brand": "UProperty Market",
     "online": "Online"
+  },
+  "auth": {
+    "backButton": "Voltar",
+    "nextButton": "Continuar",
+    "register": {
+      "title": "Criar conta",
+      "steps": {
+        "profile": "Perfil",
+        "account": "Conta",
+        "verification": "Verificação",
+        "plan": "Plano"
+      },
+      "profile": {
+        "title": "Como pretende usar a UProperty Market?",
+        "buyer": "Comprar ou arrendar",
+        "buyerHint": "Procurar imóveis, guardar favoritos, pedir visitas.",
+        "owner": "Vender ou arrendar",
+        "ownerHint": "Publicar imóveis, gerir leads e visitas."
+      },
+      "account": {
+        "title": "Crie a sua conta",
+        "fullName": "Nome completo",
+        "email": "E-mail",
+        "password": "Palavra-passe",
+        "passwordHint": "Mínimo 10 caracteres.",
+        "passwordPwned": "Esta palavra-passe apareceu em fugas de dados conhecidas. Escolha outra.",
+        "emailInUse": "Já existe uma conta com este e-mail.",
+        "submit": "Criar conta"
+      },
+      "verification": {
+        "title": "Verifique o seu e-mail",
+        "body": "Enviámos um link de confirmação para {email}.",
+        "resend": "Reenviar e-mail",
+        "resendSuccess": "E-mail reenviado.",
+        "changeEmail": "Alterar e-mail"
+      },
+      "plan": {
+        "title": "Escolha um plano",
+        "hint": "Pode mudar de plano mais tarde em Definições.",
+        "free": "Gratuito",
+        "perMonth": "/mês",
+        "perYear": "/ano",
+        "submit": "Concluir registo"
+      }
+    },
+    "login": {
+      "title": "Entrar",
+      "email": "E-mail",
+      "password": "Palavra-passe",
+      "submit": "Entrar",
+      "forgotPassword": "Esqueceu a palavra-passe?",
+      "createAccount": "Ainda não tem conta? Crie uma.",
+      "invalidCredentials": "E-mail ou palavra-passe incorretos.",
+      "staffBlocked": "Contas de equipa acedem em interno.upropertymarket.pt, não aqui.",
+      "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s."
+    },
+    "recovery": {
+      "title": "Recuperar palavra-passe",
+      "email": "E-mail",
+      "submit": "Enviar link",
+      "sentTitle": "Verifique o seu e-mail",
+      "sentBody": "Se existir uma conta com esse e-mail, enviámos um link de recuperação.",
+      "newPasswordTitle": "Defina uma nova palavra-passe",
+      "newPassword": "Nova palavra-passe",
+      "submitNewPassword": "Guardar palavra-passe"
+    },
+    "pendingGate": {
+      "bannerTitle": "Verifique o seu e-mail para ativar a conta — faltam {days} dias",
+      "resend": "Reenviar e-mail",
+      "modalTitle": "Conta por verificar",
+      "modalBody": "Para continuar a usar a UProperty Market, verifique o seu e-mail.",
+      "changeEmail": "Alterar e-mail"
+    },
+    "mfa": {
+      "enroll": {
+        "title": "Ative a autenticação em duas etapas",
+        "body": "Obrigatória para contas de equipa. Digitalize o código com a sua app de autenticação.",
+        "codeLabel": "Código de confirmação",
+        "submit": "Ativar",
+        "recoveryCodesTitle": "Guarde estes códigos de recuperação",
+        "recoveryCodesBody": "Cada código só pode ser usado uma vez. Guarde-os num local seguro — não voltam a ser mostrados.",
+        "recoveryCodesConfirm": "Guardei os códigos"
+      },
+      "challenge": {
+        "title": "Código de verificação",
+        "codeLabel": "Código de 6 dígitos",
+        "submit": "Verificar",
+        "useRecoveryCode": "Usar um código de recuperação"
+      }
+    },
+    "pin": {
+      "setup": {
+        "title": "Defina o seu PIN de operação",
+        "body": "Usado para confirmar ações sensíveis. Diferente da sua palavra-passe.",
+        "pinLabel": "PIN (4 a 6 dígitos)",
+        "confirmLabel": "Confirme o PIN",
+        "mismatch": "Os PINs não coincidem.",
+        "submit": "Guardar PIN"
+      },
+      "stepUp": {
+        "title": "Confirme com o seu PIN",
+        "submit": "Confirmar"
+      }
+    },
+    "errors": {
+      "genericTitle": "Algo correu mal",
+      "tryAgain": "Tente novamente."
+    }
   }
 }

@@ -1,6 +1,8 @@
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
 
@@ -26,16 +28,18 @@ export const metadata: Metadata = {
  * obrigatório e PIN de operação como step-up) é da Fase 3, conforme 07 §6.
  */
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [locale, messages, themeChoice] = await Promise.all([
+  const [locale, messages, themeChoice, requestHeaders] = await Promise.all([
     getLocale(),
     getMessages(),
     getServerThemeChoice(),
+    headers(),
   ]);
+  const nonce = requestHeaders.get(NONCE_HEADER) ?? undefined;
 
   return (
     <html lang={locale} data-app="interno" className={fontVariables} suppressHydrationWarning>
       <head>
-        <ThemeScript serverChoice={themeChoice} />
+        <ThemeScript serverChoice={themeChoice} nonce={nonce} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -1,0 +1,67 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
+
+import { createMiddlewareClient } from "./lib/supabase-middleware";
+
+/** 07 §4.3 — rotas só do proprietário. */
+const OWNER_ONLY_PREFIXES = ["/propriedades", "/leads", "/agenda"];
+/** 07 §4.2 — rotas só do comprador (rota renomeada: /pedidos-de-visita → /meus-pedidos). */
+const BUYER_ONLY_PREFIXES = ["/guardados", "/meus-pedidos"];
+
+function webUrl(path: string, request: NextRequest): URL {
+  const base = process.env.WEB_URL ?? "http://localhost:4300";
+  return new URL(path, base.startsWith("http") ? base : request.nextUrl.origin);
+}
+
+function internoUrl(request: NextRequest): URL {
+  const base = process.env.INTERNO_URL ?? "http://localhost:4302";
+  return new URL("/", base.startsWith("http") ? base : request.nextUrl.origin);
+}
+
+export async function middleware(request: NextRequest) {
+  const nonce = generateNonce();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(NONCE_HEADER, nonce);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const supabase = createMiddlewareClient(request, response);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const next = webUrl("/entrar", request);
+    next.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(next);
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role;
+
+  // Equipa (admin|support) nunca acede aqui (07 §6) — só interno.*.
+  if (role === "admin" || role === "support") {
+    return NextResponse.redirect(internoUrl(request));
+  }
+
+  const { pathname } = request.nextUrl;
+  const isOwnerOnly = OWNER_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const isBuyerOnly = BUYER_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+  if ((isOwnerOnly && role !== "owner") || (isBuyerOnly && role !== "buyer")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  applySecurityHeaders(response.headers, nonce);
+  return response;
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo).*)"],
+};

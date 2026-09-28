@@ -93,5 +93,113 @@
   "a11y": {
     "brand": "UProperty Market",
     "online": "Online"
+  },
+  "auth": {
+    "backButton": "Back",
+    "nextButton": "Continue",
+    "register": {
+      "title": "Create account",
+      "steps": {
+        "profile": "Profile",
+        "account": "Account",
+        "verification": "Verification",
+        "plan": "Plan"
+      },
+      "profile": {
+        "title": "How do you plan to use UProperty Market?",
+        "buyer": "Buy or rent",
+        "buyerHint": "Search properties, save favourites, request visits.",
+        "owner": "Sell or rent out",
+        "ownerHint": "Publish properties, manage leads and visits."
+      },
+      "account": {
+        "title": "Create your account",
+        "fullName": "Full name",
+        "email": "Email",
+        "password": "Password",
+        "passwordHint": "Minimum 10 characters.",
+        "passwordPwned": "This password has appeared in known data breaches. Please choose another one.",
+        "emailInUse": "An account with this email already exists.",
+        "submit": "Create account"
+      },
+      "verification": {
+        "title": "Verify your email",
+        "body": "We sent a confirmation link to {email}.",
+        "resend": "Resend email",
+        "resendSuccess": "Email resent.",
+        "changeEmail": "Change email"
+      },
+      "plan": {
+        "title": "Choose a plan",
+        "hint": "You can change your plan later in Settings.",
+        "free": "Free",
+        "perMonth": "/month",
+        "perYear": "/year",
+        "submit": "Finish registration"
+      }
+    },
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot your password?",
+      "createAccount": "Don't have an account? Create one.",
+      "invalidCredentials": "Incorrect email or password.",
+      "staffBlocked": "Staff accounts sign in at interno.upropertymarket.pt, not here.",
+      "rateLimited": "Too many attempts. Try again in {seconds}s."
+    },
+    "recovery": {
+      "title": "Recover password",
+      "email": "Email",
+      "submit": "Send link",
+      "sentTitle": "Check your email",
+      "sentBody": "If an account exists with that email, we sent a recovery link.",
+      "newPasswordTitle": "Set a new password",
+      "newPassword": "New password",
+      "submitNewPassword": "Save password"
+    },
+    "pendingGate": {
+      "bannerTitle": "Verify your email to activate your account — {days} days left",
+      "resend": "Resend email",
+      "modalTitle": "Unverified account",
+      "modalBody": "To keep using UProperty Market, please verify your email.",
+      "changeEmail": "Change email"
+    },
+    "mfa": {
+      "enroll": {
+        "title": "Set up two-factor authentication",
+        "body": "Required for staff accounts. Scan the code with your authenticator app.",
+        "codeLabel": "Confirmation code",
+        "submit": "Activate",
+        "recoveryCodesTitle": "Save these recovery codes",
+        "recoveryCodesBody": "Each code can only be used once. Keep them somewhere safe — they won't be shown again.",
+        "recoveryCodesConfirm": "I saved the codes"
+      },
+      "challenge": {
+        "title": "Verification code",
+        "codeLabel": "6-digit code",
+        "submit": "Verify",
+        "useRecoveryCode": "Use a recovery code"
+      }
+    },
+    "pin": {
+      "setup": {
+        "title": "Set your operation PIN",
+        "body": "Used to confirm sensitive actions. Different from your password.",
+        "pinLabel": "PIN (4 to 6 digits)",
+        "confirmLabel": "Confirm PIN",
+        "mismatch": "The PINs don't match.",
+        "submit": "Save PIN"
+      },
+      "stepUp": {
+        "title": "Confirm with your PIN",
+        "submit": "Confirm"
+      }
+    },
+    "errors": {
+      "genericTitle": "Something went wrong",
+      "tryAgain": "Please try again."
+    }
   }
 }

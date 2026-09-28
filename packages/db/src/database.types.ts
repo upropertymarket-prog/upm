@@ -74,6 +74,30 @@ export type Database = {
           },
         ];
       };
+      auth_attempts: {
+        Row: {
+          created_at: string;
+          id: string;
+          identifier: string;
+          kind: string;
+          succeeded: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          identifier: string;
+          kind: string;
+          succeeded?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          identifier?: string;
+          kind?: string;
+          succeeded?: boolean;
+        };
+        Relationships: [];
+      };
       feature_flags: {
         Row: {
           created_at: string;
@@ -629,6 +653,44 @@ export type Database = {
           },
         ];
       };
+      staff_auth: {
+        Row: {
+          created_at: string;
+          last_step_up_at: string | null;
+          pin_hash: string | null;
+          pin_updated_at: string | null;
+          profile_id: string;
+          recovery_codes_hash: string[];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          last_step_up_at?: string | null;
+          pin_hash?: string | null;
+          pin_updated_at?: string | null;
+          profile_id: string;
+          recovery_codes_hash?: string[];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          last_step_up_at?: string | null;
+          pin_hash?: string | null;
+          pin_updated_at?: string | null;
+          profile_id?: string;
+          recovery_codes_hash?: string[];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_auth_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_members: {
         Row: {
           created_at: string;
@@ -844,12 +906,20 @@ export type Database = {
       };
     };
     Functions: {
+      check_auth_rate_limit: {
+        Args: { p_identifier: string; p_kind: string };
+        Returns: Json;
+      };
       get_property_location: {
         Args: { p_property_id: string };
         Returns: unknown;
       };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
+      record_auth_attempt: {
+        Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
+        Returns: undefined;
+      };
       role_of: {
         Args: { uid: string };
         Returns: Database["public"]["Enums"]["user_role"];

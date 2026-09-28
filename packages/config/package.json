@@ -12,13 +12,15 @@
     "./messages/en.json": "./messages/en.json",
     "./tsconfig/base.json": "./tsconfig/base.json",
     "./tsconfig/next.json": "./tsconfig/next.json",
-    "./server": "./server.ts"
+    "./server": "./server.ts",
+    "./security": "./security.ts"
   },
   "files": [
     "tsconfig",
     "messages",
     "i18n.ts",
-    "server.ts"
+    "server.ts",
+    "security.ts"
   ],
   "scripts": {
     "lint": "eslint .",

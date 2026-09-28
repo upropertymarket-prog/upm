@@ -26,8 +26,8 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://localhost:3001"
-additional_redirect_urls = ["http://localhost:3000", "http://localhost:3002"]
+site_url = "http://localhost:4301"
+additional_redirect_urls = ["http://localhost:4300", "http://localhost:4302"]
 jwt_expiry = 3600
 enable_signup = true
 

@@ -9,9 +9,9 @@ Plataforma que liga proprietários e compradores/arrendatários diretamente, sem
 ## Estrutura
 
 ```
-apps/web         :3000   site público (upropertymarket.pt)
-apps/app         :3001   comprador e proprietário (app.upropertymarket.pt)
-apps/interno     :3002   admin e suporte (interno.upropertymarket.pt)
+apps/web         :4300   site público (upropertymarket.pt)
+apps/app         :4301   comprador e proprietário (app.upropertymarket.pt)
+apps/interno     :4302   admin e suporte (interno.upropertymarket.pt)
 
 packages/ui              componentes partilhados, sobre tokens CSS
 packages/db              clientes Supabase e tipos gerados

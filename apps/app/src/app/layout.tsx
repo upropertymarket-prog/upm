@@ -1,11 +1,15 @@
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
 
 import { setThemePreference } from "./actions/preferences";
+import { PendingGate } from "../components/PendingGate";
 import { getServerThemeChoice } from "../lib/theme";
+import { getPendingGateInfo } from "../lib/pending-gate";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,21 +33,27 @@ export const metadata: Metadata = {
  * antes da hidratação — a diferença é intencional.
  */
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [locale, messages, themeChoice] = await Promise.all([
+  const [locale, messages, themeChoice, requestHeaders, pendingGateInfo] = await Promise.all([
     getLocale(),
     getMessages(),
     getServerThemeChoice(),
+    headers(),
+    getPendingGateInfo(),
   ]);
+  const nonce = requestHeaders.get(NONCE_HEADER) ?? undefined;
 
   return (
     <html lang={locale} data-app="app" className={fontVariables} suppressHydrationWarning>
       <head>
-        <ThemeScript serverChoice={themeChoice} />
+        <ThemeScript serverChoice={themeChoice} nonce={nonce} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider initialChoice={themeChoice ?? "system"} persist={setThemePreference}>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <PendingGate info={pendingGateInfo} />
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
