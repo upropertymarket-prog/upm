@@ -15,6 +15,7 @@ export type AppShellProps = {
   /** Estado inicial do rail. Persiste por dispositivo em `localStorage`. */
   defaultCollapsed?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 /**
@@ -42,6 +43,7 @@ export function AppShell({
   children,
   defaultCollapsed = false,
   className,
+  style,
 }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -69,13 +71,13 @@ export function AppShell({
       className={cx("upm-shell", className)}
       data-collapsed={collapsed ? "true" : "false"}
       data-mobile-open={mobileOpen ? "true" : "false"}
-      style={{ width: "1440px" }}
+      style={{ width: "1440px", height: "1287px", ...style }}
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />
       <div className="upm-shell__gutter" aria-hidden="true" />
       <div className="upm-shell__main" style={{ width: "100%" }}>
         <Topbar {...topbar} onOpenSidebar={() => setMobileOpen((value) => !value)} />
-        <main className="upm-shell__content" style={{ width: "1079px" }}>
+        <main className="upm-shell__content" style={{ width: "100%" }}>
           {children}
         </main>
       </div>
