@@ -96,7 +96,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
       id: "actions",
       header: "Ações",
       cell: (row) => (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center" }}>
           <a href={`/propriedades/${row.id}/estatisticas`}>Estatísticas</a>
           <a href={`/propriedades/${row.id}/editar`}>Editar</a>
           {row.status !== "archived" ? (
