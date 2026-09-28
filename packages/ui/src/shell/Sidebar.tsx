@@ -81,7 +81,7 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="upm-sidebar" style={{ justifyContent: "space-between" }}>
-      <div className="upm-sidebar__brand">
+      <div className="upm-sidebar__brand" style={{ justifyContent: "space-between" }}>
         <Brand collapsed={collapsed} />
         <button
           type="button"
