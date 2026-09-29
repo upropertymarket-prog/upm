@@ -258,7 +258,22 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
           Limpar
         </Button>
       </div>
-      <div ref={containerRef} style={{ width: "100%", height: 560, borderRadius: 16 }} />
+      {/*
+        A altura acompanha o ecrã em vez de ficar nos 560 px fixos: agora que o
+        Mapa corre a toda a largura (04 §1.5), uma altura fixa dava uma faixa
+        muito achatada num monitor grande. Os 260 px descontados são o que a
+        topbar, o padding do shell, o título e a barra de ações ocupam por cima.
+        O `clamp` trava nos extremos — nunca abaixo de 420 px num portátil
+        pequeno, nunca acima de 900 px num ecrã muito alto.
+      */}
+      <div
+        ref={containerRef}
+        style={{
+          width: "100%",
+          height: "clamp(420px, calc(100vh - 260px), 900px)",
+          borderRadius: 16,
+        }}
+      />
     </div>
   );
 }

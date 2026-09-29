@@ -20,6 +20,8 @@ export type AppChromeProps = {
   /** Contadores por `id` de item de navegação (07 §4.2). */
   counters?: Record<string, number>;
   notifications?: Notification[];
+  /** 04 §1.5 — `"full"` só para o Mapa; tudo o resto fica no limite de 1600 px. */
+  contentWidth?: "default" | "full";
   children: React.ReactNode;
 };
 
@@ -53,6 +55,7 @@ export function AppChrome({
   onLocaleChange,
   counters = {},
   notifications = [],
+  contentWidth = "default",
   children,
 }: AppChromeProps) {
   const t = useTranslations();
@@ -71,6 +74,7 @@ export function AppChrome({
 
   return (
     <AppShell
+      contentWidth={contentWidth}
       sidebar={{
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,

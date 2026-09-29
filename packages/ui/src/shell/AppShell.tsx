@@ -14,6 +14,13 @@ export type AppShellProps = {
   children: React.ReactNode;
   /** Estado inicial do rail. Persiste por dispositivo em `localStorage`. */
   defaultCollapsed?: boolean;
+  /**
+   * Largura do conteúdo (04 §1.5). `"default"` limita a `--content-max`
+   * (1600 px) e centra; `"full"` deixa correr a toda a largura e é só para
+   * ecrãs cujo conteúdo é a própria área visível — o Mapa. Listas,
+   * formulários e tabelas ficam sempre no limite.
+   */
+  contentWidth?: "default" | "full";
   className?: string;
   style?: React.CSSProperties;
 };
@@ -49,6 +56,7 @@ export function AppShell({
   topbar,
   children,
   defaultCollapsed = false,
+  contentWidth = "default",
   className,
   style,
 }: AppShellProps) {
@@ -78,6 +86,7 @@ export function AppShell({
       className={cx("upm-shell", className)}
       data-collapsed={collapsed ? "true" : "false"}
       data-mobile-open={mobileOpen ? "true" : "false"}
+      data-content={contentWidth}
       style={style}
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />

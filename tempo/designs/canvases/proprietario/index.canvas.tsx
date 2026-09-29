@@ -21,6 +21,12 @@ export default function ProprietarioCanvas() {
         component={Painel}
         layout={{ x: 0, y: 0, width: 1440, height: 900 }}
       />
+      <Storyboard
+        id="Painel1920"
+        name="Painel · 1920 (limite de largura)"
+        component={Painel}
+        layout={{ x: 1540, y: 0, width: 1920, height: 1080 }}
+      />
     </Canvas>
   );
 }

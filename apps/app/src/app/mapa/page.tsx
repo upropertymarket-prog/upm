@@ -38,6 +38,9 @@ export default async function MapPage() {
       activeId="map"
       locale={locale}
       onLocaleChange={setLocalePreference}
+      // 04 §1.5 — o Mapa é a exceção ao limite de 1600 px: aqui o conteúdo é a
+      // própria área visível, e limitá-lo desperdiça o ecrã onde ele mais serve.
+      contentWidth="full"
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <h1 className="upm-card__title">Mapa</h1>

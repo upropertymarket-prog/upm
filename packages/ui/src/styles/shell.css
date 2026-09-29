@@ -24,6 +24,12 @@
   --shell-rail: var(--sidebar-rail-w);
 }
 
+/* Um interruptor só para o limite de largura (04 §1.5): anular `--content-max`
+   aqui descapa o conteúdo E a topbar de uma vez, mantendo-os alinhados. */
+.upm-shell[data-content="full"] {
+  --content-max: none;
+}
+
 /* A coluna-fantasma reserva o espaço da sidebar, que é `position: fixed` para
    não se mexer com o scroll (04 §5.5 e requisito explícito do Mapa em 04 §8.4). */
 .upm-shell__gutter {
@@ -42,6 +48,12 @@
   gap: var(--sp-7);
   padding: var(--sp-9);
   min-width: 0;
+  /* 04 §1.5 — o conteúdo para de esticar aos 1600 px e centra-se no que
+     sobra; a sidebar continua encostada à esquerda. `width: 100%` para o
+     `margin-inline: auto` ter do que centrar. */
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
 }
 
 /* --- Sidebar --------------------------------------------------------- */
@@ -331,16 +343,25 @@
   position: sticky;
   top: 0;
   z-index: var(--z-topbar);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-6);
   height: var(--topbar-h);
   /* Não encolhe: é um item flex da coluna `__main` e 68 px é uma medida de
      04 §5.5, não uma sugestão. */
   flex: none;
-  padding: 0 var(--sp-9);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+}
+
+/* O fundo e o traço da barra vão de borda a borda; o conteúdo dela alinha com
+   o da página, pelo mesmo `--content-max` (04 §1.5). */
+.upm-topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  height: 100%;
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: 0 var(--sp-9);
 }
 
 .upm-topbar__search {
@@ -539,7 +560,7 @@
     padding: var(--sp-7);
   }
 
-  .upm-topbar {
+  .upm-topbar__inner {
     padding: 0 var(--sp-7);
   }
 }
