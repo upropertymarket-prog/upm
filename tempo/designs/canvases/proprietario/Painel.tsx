@@ -29,7 +29,7 @@ import { demoDashboardStats, demoLocaleChange, demoViewsSeries } from "./demo";
  */
 function PainelDemo({ theme }: { theme: "light" | "dark" }) {
   return (
-    <div data-theme={theme} style={{ background: "var(--bg)" }}>
+    <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <AppChrome
