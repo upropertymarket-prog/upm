@@ -30,7 +30,7 @@ export default function ProprietarioCanvas() {
         id="DetalhePropriedade"
         name="Detalhe da propriedade (/market/[id])"
         component={DetalhePropriedade}
-        layout={{ x: 2974, y: -432, width: 1400, height: 1329, intrinsicSizing: "root-element" }}
+        layout={{ x: 2974, y: -432, width: 1400, height: 1238, intrinsicSizing: "root-element" }}
       />
       <Storyboard
         id="Mapa"
