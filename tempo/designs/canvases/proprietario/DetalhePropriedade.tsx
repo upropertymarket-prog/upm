@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
-import { Bath, BedDouble, Building2, CalendarDays, Ruler, Zap } from "lucide-react";
+import { Bath, BedDouble, Bookmark, Building2, CalendarDays, MessageCircle, Ruler, Zap } from "lucide-react";
 import { Card, CardBody } from "../../../../packages/ui/src/components/Card";
 import { Button } from "../../../../packages/ui/src/components/Button";
 import { StatusTag as DealTagBase } from "../../../../packages/ui/src/components/StatusTag";
@@ -48,7 +48,7 @@ export default function DetalhePropriedade() {
                 <div><h2 style={{ margin: "0 0 8px", fontSize: 17 }}>Descrição do proprietário</h2><p style={{ margin: 0, lineHeight: 1.75, color: "var(--muted)" }}>{property.description}</p></div>
                 <Card style={{ height: "340px" }}><CardBody style={{ display: "flex", flexDirection: "column", gap: 12, height: "340px" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><strong>Localização aproximada</strong><span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>morada exata somente após contacto</span></div><PropertyLocationMap lon={-9.1642} lat={38.7169} isExact={false} radiusM={400} style={{ height: "300px" }} /></CardBody></Card>
               </main>
-              <aside style={{ position: "sticky", top: 88 }}><Card><CardBody style={{ display: "flex", flexDirection: "column", gap: 18 }}><DealTag tone="dealSale">Venda</DealTag><strong style={{ fontSize: 30 }}>{property.price}</strong><div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", paddingLeft: "16px", paddingRight: "16px" }}><strong>Proprietário</strong><div style={{ color: "var(--muted)", fontSize: 12 }}>Responde em ~2 h</div></div><div style={{ paddingLeft: "0px", paddingRight: "0px", width: "318px", display: "flex", flexDirection: "column", gap: "12px" }}><Button fullWidth>Guardar</Button><Button variant="secondary" fullWidth>Contactar</Button><Button variant="secondary" fullWidth>Marcar visita</Button></div></CardBody></Card></aside>
+              <aside style={{ position: "sticky", top: 88 }}><Card><CardBody style={{ display: "flex", flexDirection: "column", gap: 18 }}><DealTag tone="dealSale">Venda</DealTag><strong style={{ fontSize: 30 }}>{property.price}</strong><div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", paddingLeft: "16px", paddingRight: "16px" }}><strong>Proprietário</strong><div style={{ color: "var(--muted)", fontSize: 12 }}>Responde em ~2 h</div></div><div style={{ paddingLeft: "0px", paddingRight: "0px", width: "318px", display: "flex", flexDirection: "column", gap: "12px" }}><Button leadingIcon={<Bookmark size={16} aria-hidden="true" />} fullWidth>Guardar</Button><Button leadingIcon={<MessageCircle size={16} aria-hidden="true" />} variant="secondary" fullWidth>Contactar por chat</Button><Button leadingIcon={<CalendarDays size={16} aria-hidden="true" />} variant="secondary" fullWidth>Marcar visita</Button></div></CardBody></Card></aside>
             </div>
           </div>
         </AppChrome>
