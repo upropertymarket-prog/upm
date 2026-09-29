@@ -83,9 +83,7 @@ function lastTwelveMonths(rows: ViewRow[], today: Date): ViewsBucket[] {
   }
 
   return Array.from({ length: 12 }, (_, index) => {
-    const date = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (11 - index), 1),
-    );
+    const date = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (11 - index), 1));
     return {
       label: trimDot(MONTH.format(date)),
       value: totals.get(toKey(date).slice(0, 7)) ?? 0,
