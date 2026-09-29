@@ -21,3 +21,9 @@ Thumbs.db
 tempo/.tempo/
 tempo/node_modules/
 tempo/dist/
+
+# Estado local do supervisor do app dev server — porta alocada e log desta
+# máquina, por worktree. O watchdog (.tempo/app-devserver-watchdog.cjs) é
+# código e continua versionado; estes dois são runtime.
+.tempo/app-devserver.json
+.tempo/app-devserver.log

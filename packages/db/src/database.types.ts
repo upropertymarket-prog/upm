@@ -306,7 +306,7 @@ export type Database = {
           price_cents?: number | null;
           property_type?: string;
           published_at?: string | null;
-          ref: string;
+          ref?: string;
           rejection_reason?: string | null;
           rent_cents?: number | null;
           show_exact?: boolean;
@@ -916,6 +916,33 @@ export type Database = {
       };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
+      properties_for_map: {
+        Args: {
+          p_max_lat?: number;
+          p_max_lon?: number;
+          p_min_lat?: number;
+          p_min_lon?: number;
+        };
+        Returns: {
+          deal: Database["public"]["Enums"]["property_deal"];
+          id: string;
+          lat: number;
+          lon: number;
+          price_cents: number;
+          title: string;
+        }[];
+      };
+      properties_within_polygon: {
+        Args: { p_geojson: Json };
+        Returns: {
+          deal: Database["public"]["Enums"]["property_deal"];
+          id: string;
+          lat: number;
+          lon: number;
+          price_cents: number;
+          title: string;
+        }[];
+      };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;

@@ -15,6 +15,7 @@
     "@upm/config": "workspace:*",
     "@upm/db": "workspace:*",
     "@upm/ui": "workspace:*",
+    "maplibre-gl": "^6.11.2",
     "next": "15.5.26",
     "next-intl": "^4.14.7",
     "react": "19.1.0",

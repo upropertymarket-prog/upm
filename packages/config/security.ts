@@ -24,9 +24,14 @@ export function buildContentSecurityPolicy(nonce: string): string {
     // Tailwind é CSS compilado; 'unsafe-inline' aqui cobre os estilos que o
     // próprio Next injeta (muito menor risco do que em script-src).
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co",
+    // `https://tiles.openfreemap.org` — tiles do Mapa (P4-05), MapLibre GL,
+    // estilo keyless.
+    "img-src 'self' data: blob: https://*.supabase.co https://tiles.openfreemap.org",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tiles.openfreemap.org",
+    // MapLibre GL corre o parsing de vetores em Web Workers próprios,
+    // carregados como `blob:` — sem isto o mapa fica sem tiles sob a CSP.
+    "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
     "frame-ancestors 'none'",

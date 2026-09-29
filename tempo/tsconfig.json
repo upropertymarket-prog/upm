@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -33,9 +29,9 @@
     ".next/tempo/types/**/*.ts",
     ".next/tempo/dev/types/**/*.ts",
     ".next/tempo-mukzaij54ous/types/**/*.ts",
-    ".next/tempo-mukzaij54ous/dev/types/**/*.ts"
+    ".next/tempo-mukzaij54ous/dev/types/**/*.ts",
+    ".next/tempo-mulrl53gxr22/types/**/*.ts",
+    ".next/tempo-mulrl53gxr22/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

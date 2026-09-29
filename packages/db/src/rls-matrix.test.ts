@@ -185,6 +185,347 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
   });
 
   // -------------------------------------------------------------------------
+  // get_property_location — Fase 4, requisito transversal (Plano P4-01 AC):
+  // a coordenada exata nunca vaza fora das condições explícitas de 07 §1.2.
+  // Casos que faltavam à cobertura acima: show_exact=true e grant revogado.
+  // -------------------------------------------------------------------------
+
+  it("get_property_location: show_exact=true dá a exata a um buyer sem grant", async () => {
+    await serviceClient
+      .from("properties")
+      .update({ location: "SRID=4326;POINT(-9.14 38.72)", show_exact: true })
+      .eq("id", ownerPropertyId);
+
+    try {
+      const { data: exact } = await clients.owner.rpc("get_property_location", {
+        p_property_id: ownerPropertyId,
+      });
+      const { data: asBuyer } = await clients.buyer.rpc("get_property_location", {
+        p_property_id: ownerPropertyId,
+      });
+      expect(asBuyer).toBe(exact);
+      expect(asBuyer).not.toBeNull();
+    } finally {
+      await serviceClient
+        .from("properties")
+        .update({ location: null, show_exact: false })
+        .eq("id", ownerPropertyId);
+    }
+  });
+
+  it("get_property_location: grant revogado volta a devolver só a aproximada", async () => {
+    await serviceClient
+      .from("properties")
+      .update({
+        location: "SRID=4326;POINT(-9.14 38.72)",
+        location_approx: "SRID=4326;POINT(-9.15 38.73)",
+      })
+      .eq("id", ownerPropertyId);
+
+    const { data: grant } = await serviceClient
+      .from("property_address_grants")
+      .insert({
+        property_id: ownerPropertyId,
+        buyer_id: userIds.buyer,
+        granted_by: userIds.owner,
+        source: "manual",
+      })
+      .select("id")
+      .single();
+
+    try {
+      const { data: whileActive } = await clients.buyer.rpc("get_property_location", {
+        p_property_id: ownerPropertyId,
+      });
+      const { data: approx } = await clients.owner.rpc("get_property_location", {
+        p_property_id: ownerPropertyId,
+      });
+
+      await serviceClient
+        .from("property_address_grants")
+        .update({ revoked_at: new Date().toISOString() })
+        .eq("id", grant!.id);
+
+      const { data: afterRevoke } = await clients.buyer.rpc("get_property_location", {
+        p_property_id: ownerPropertyId,
+      });
+
+      expect(whileActive).not.toBeNull();
+      expect(afterRevoke).not.toBe(whileActive);
+      expect(afterRevoke).not.toBeNull();
+      void approx;
+    } finally {
+      await serviceClient.from("property_address_grants").delete().eq("id", grant!.id);
+      await serviceClient
+        .from("properties")
+        .update({ location: null, location_approx: null })
+        .eq("id", ownerPropertyId);
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // property_media — Fase 4 (fecha D14 para esta tabela). Segue a posse do
+  // imóvel: dono+staff full; público só lê se o imóvel é active/featured.
+  // -------------------------------------------------------------------------
+
+  describe("property_media", () => {
+    let mediaId: string;
+
+    beforeAll(async () => {
+      const { data, error } = await serviceClient
+        .from("property_media")
+        .insert({
+          property_id: ownerPropertyId,
+          path: "property-media/test/cover.jpg",
+          kind: "photo",
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw new Error(`Falha a semear property_media: ${error?.message}`);
+      mediaId = data.id;
+    });
+
+    afterAll(async () => {
+      await serviceClient.from("property_media").delete().eq("id", mediaId);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", true], // imóvel de teste fica `active`
+      ["buyer", true],
+      ["owner", true],
+      ["admin", true],
+      ["support", true],
+    ])("select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role].from("property_media").select("id").eq("id", mediaId);
+      expect((data?.length ?? 0) > 0).toBe(expected);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["owner", true],
+      ["admin", true],
+      ["support", true],
+    ])("update (position) como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role]
+        .from("property_media")
+        .update({ position: 1 })
+        .eq("id", mediaId)
+        .select("id");
+      expect((data?.length ?? 0) > 0).toBe(expected);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // property_documents — Fase 4 (fecha D14). Nunca leitura pública, mesmo
+  // para um buyer autenticado — só dono+staff (05 §1.4, documentos privados).
+  // -------------------------------------------------------------------------
+
+  describe("property_documents", () => {
+    let documentId: string;
+
+    beforeAll(async () => {
+      const { data, error } = await serviceClient
+        .from("property_documents")
+        .insert({
+          property_id: ownerPropertyId,
+          storage_path: "documents/test/certidao.pdf",
+          name: "certidao.pdf",
+          mime: "application/pdf",
+          size: 1024,
+          kind: "certidao",
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw new Error(`Falha a semear property_documents: ${error?.message}`);
+      documentId = data.id;
+    });
+
+    afterAll(async () => {
+      await serviceClient.from("property_documents").delete().eq("id", documentId);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["owner", true],
+      ["admin", true],
+      ["support", true],
+    ])("select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role]
+        .from("property_documents")
+        .select("id")
+        .eq("id", documentId);
+      expect((data?.length ?? 0) > 0).toBe(expected);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // property_views — Fase 4 (fecha D14). Só dono+staff leem; nenhum papel
+  // autenticado por anon-key pode escrever (sem policy de insert — só
+  // service_role, ver 05 §1.2 comentário da migração).
+  // -------------------------------------------------------------------------
+
+  describe("property_views", () => {
+    let viewRowId: string;
+    const today = new Date().toISOString().slice(0, 10);
+
+    beforeAll(async () => {
+      const { data, error } = await serviceClient
+        .from("property_views")
+        .insert({ property_id: ownerPropertyId, day: today, views_count: 3 })
+        .select("id")
+        .single();
+      if (error || !data) throw new Error(`Falha a semear property_views: ${error?.message}`);
+      viewRowId = data.id;
+    });
+
+    afterAll(async () => {
+      await serviceClient.from("property_views").delete().eq("id", viewRowId);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["owner", true],
+      ["admin", true],
+      ["support", true],
+    ])("select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role].from("property_views").select("id").eq("id", viewRowId);
+      expect((data?.length ?? 0) > 0).toBe(expected);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["owner", false],
+      ["admin", false],
+      ["support", false],
+    ])("insert como %s → permitido=%s (só service_role escreve)", async (role, expected) => {
+      const { data, error } = await clients[role]
+        .from("property_views")
+        .insert({ property_id: ownerPropertyId, day: "2020-01-01", views_count: 1 })
+        .select("id");
+      expect(!error && (data?.length ?? 0) > 0).toBe(expected);
+      const created = data?.[0];
+      if (created) await serviceClient.from("property_views").delete().eq("id", created.id);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // saved_properties / search_alerts — Fase 4 (fecha D14). Só o próprio
+  // utilizador; staff lê para suporte, nunca escreve em nome de outro.
+  // -------------------------------------------------------------------------
+
+  describe("saved_properties", () => {
+    it("buyer guarda, lê e remove o seu próprio guardado", async () => {
+      const { data: inserted, error } = await clients.buyer
+        .from("saved_properties")
+        .insert({
+          user_id: userIds.buyer,
+          property_id: ownerPropertyId,
+          price_at_save_cents: 100000,
+        })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      expect(inserted).not.toBeNull();
+
+      const { data: read } = await clients.buyer
+        .from("saved_properties")
+        .select("id")
+        .eq("id", inserted!.id);
+      expect(read?.length ?? 0).toBe(1);
+
+      await clients.buyer.from("saved_properties").delete().eq("id", inserted!.id);
+      const { data: afterDelete } = await serviceClient
+        .from("saved_properties")
+        .select("id")
+        .eq("id", inserted!.id);
+      expect(afterDelete?.length ?? 0).toBe(0);
+    });
+
+    it("owner não consegue guardar em nome do buyer", async () => {
+      const { data, error } = await clients.owner
+        .from("saved_properties")
+        .insert({ user_id: userIds.buyer, property_id: ownerPropertyId })
+        .select("id");
+      expect(!error && (data?.length ?? 0) > 0).toBe(false);
+    });
+
+    it("staff lê guardados de outros, mas não os cria em nome deles", async () => {
+      const { data: seeded } = await serviceClient
+        .from("saved_properties")
+        .insert({ user_id: userIds.buyer, property_id: ownerPropertyId })
+        .select("id")
+        .single();
+
+      try {
+        const { data: readAsAdmin } = await clients.admin
+          .from("saved_properties")
+          .select("id")
+          .eq("id", seeded!.id);
+        expect(readAsAdmin?.length ?? 0).toBe(1);
+
+        const { data: insertedByAdmin } = await clients.admin
+          .from("saved_properties")
+          .insert({ user_id: userIds.buyer, property_id: ownerPropertyId })
+          .select("id");
+        expect(insertedByAdmin?.length ?? 0).toBe(0);
+      } finally {
+        await serviceClient.from("saved_properties").delete().eq("id", seeded!.id);
+      }
+    });
+  });
+
+  describe("search_alerts", () => {
+    it("buyer cria, lê e remove o seu próprio alerta", async () => {
+      const { data: inserted, error } = await clients.buyer
+        .from("search_alerts")
+        .insert({ user_id: userIds.buyer, filters: { city: "Lisboa" } })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      expect(inserted).not.toBeNull();
+
+      const { data: read } = await clients.buyer
+        .from("search_alerts")
+        .select("id")
+        .eq("id", inserted!.id);
+      expect(read?.length ?? 0).toBe(1);
+
+      await clients.buyer.from("search_alerts").delete().eq("id", inserted!.id);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false], // não é o dono do alerta
+      ["owner", true],
+      ["admin", true],
+      ["support", true],
+    ])(
+      "select do alerta de outro utilizador (owner) como %s → permitido=%s",
+      async (role, expected) => {
+        const { data: seeded } = await serviceClient
+          .from("search_alerts")
+          .insert({ user_id: userIds.owner, filters: {} })
+          .select("id")
+          .single();
+
+        try {
+          const { data } = await clients[role]
+            .from("search_alerts")
+            .select("id")
+            .eq("id", seeded!.id);
+          expect((data?.length ?? 0) > 0).toBe(expected);
+        } finally {
+          await serviceClient.from("search_alerts").delete().eq("id", seeded!.id);
+        }
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
   // plans — leitura pública, escrita só admin (05 §1.6, 08 §9 seed)
   // -------------------------------------------------------------------------
 

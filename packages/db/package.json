@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
     "./client": "./src/client.ts",
-    "./auth": "./src/auth.ts"
+    "./auth": "./src/auth.ts",
+    "./geocoding": "./src/geocoding.ts",
+    "./properties": "./src/properties.ts"
   },
   "scripts": {
     "lint": "eslint src",
