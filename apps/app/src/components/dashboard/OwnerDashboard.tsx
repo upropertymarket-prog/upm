@@ -21,7 +21,7 @@ export type OwnerDashboardProps = {
  */
 export function OwnerDashboard({ stats, series }: OwnerDashboardProps) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
       <DashboardStats stats={stats} />
       <QuickAccess />
       <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>

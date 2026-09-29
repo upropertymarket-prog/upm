@@ -80,7 +80,7 @@ export function ViewsChart({ series }: { series: ViewsSeries[] }) {
                     width: "100%",
                     maxWidth: 40,
                     height: Math.round(MIN_BAR + (bucket.value / max) * (PLOT_HEIGHT - 62)),
-                    borderRadius: "4px 4px 0 0",
+                    borderRadius: "8px 8px 4px 4px",
                     background: last ? "var(--accent)" : "var(--surface3)",
                   }}
                 />
