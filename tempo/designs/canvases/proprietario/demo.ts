@@ -1,0 +1,300 @@
+/**
+ * Narração de canvas — dados e ações de demonstração partilhados pelos 4
+ * storyboards do Proprietário (Fase 4). Sem efeito nenhum: os componentes
+ * reais recebem as Server Actions por prop (regra da Fase 3, 08 §7.3); a
+ * app real injeta as verdadeiras, este canvas injeta estas.
+ */
+import type { PropertyListingRow } from "../../../../apps/app/src/components/my-properties/PropertyListing";
+import type { PropertyFormActions } from "../../../../apps/app/src/components/properties/PropertyFormActions";
+import type { PropertyCardData } from "../../../../apps/app/src/components/market/PropertyCard";
+import type { MapProperty } from "../../../../apps/app/src/components/map/mapTypes";
+import type {
+  DashboardStat,
+  ViewsSeries,
+} from "../../../../apps/app/src/components/dashboard/dashboardTypes";
+
+export const demoFormActions: PropertyFormActions = {
+  createDraft: async () => ({ id: "demo-property-id" }),
+  saveIdentification: async () => ({}),
+  saveCharacteristics: async () => ({}),
+  saveLocation: async () => ({}),
+  savePrice: async () => ({}),
+  uploadMedia: async () => ({}),
+  reorderMedia: async () => ({}),
+  setCoverMedia: async () => ({}),
+  deleteMedia: async () => ({}),
+  uploadDocument: async () => ({}),
+  publish: async () => ({}),
+};
+
+export const demoArchiveAction = async () => ({});
+
+export const demoListingRows: PropertyListingRow[] = [
+  {
+    id: "demo-1",
+    owner_id: "demo-owner",
+    ref: "UPM-1041",
+    title: "Apartamento T3 com varanda em Campo de Ourique",
+    description: "",
+    deal: "sale",
+    status: "active",
+    property_type: "Apartamento",
+    typology: "T3",
+    condition: "Remodelado",
+    gross_area: 110,
+    net_area: 95,
+    bedrooms: 3,
+    bathrooms: 2,
+    floor: "3",
+    year_built: 1998,
+    energy_cert: "B",
+    price_cents: 45000000,
+    rent_cents: null,
+    condo_fee_cents: 5000,
+    imi_cents: 30000,
+    accepts_offers: true,
+    amenities: ["Varanda", "Elevador"],
+    address_line: "Rua de Campo de Ourique 12",
+    postal_code: "1350-000",
+    city: "Lisboa",
+    parish: "Campo de Ourique",
+    district: "Lisboa",
+    location: null,
+    location_approx: null,
+    approx_radius_m: 400,
+    show_exact: false,
+    views_count: 128,
+    rejection_reason: null,
+    published_at: "2026-09-10T10:00:00.000Z",
+    created_at: "2026-09-01T10:00:00.000Z",
+    updated_at: "2026-09-10T10:00:00.000Z",
+    coverUrl: null,
+  },
+  {
+    id: "demo-2",
+    owner_id: "demo-owner",
+    ref: "UPM-1042",
+    title: "Moradia T4 com jardim em Cascais",
+    description: "",
+    deal: "sale",
+    status: "pending_review",
+    property_type: "Moradia",
+    typology: "T4",
+    condition: "Usado — bom estado",
+    gross_area: 220,
+    net_area: 190,
+    bedrooms: 4,
+    bathrooms: 3,
+    floor: null,
+    year_built: 2005,
+    energy_cert: "C",
+    price_cents: 85000000,
+    rent_cents: null,
+    condo_fee_cents: null,
+    imi_cents: 60000,
+    accepts_offers: false,
+    amenities: ["Jardim", "Garagem"],
+    address_line: "Rua das Flores 8",
+    postal_code: "2750-000",
+    city: "Cascais",
+    parish: "Cascais",
+    district: "Lisboa",
+    location: null,
+    location_approx: null,
+    approx_radius_m: 400,
+    show_exact: false,
+    views_count: 0,
+    rejection_reason: null,
+    published_at: null,
+    created_at: "2026-09-20T10:00:00.000Z",
+    updated_at: "2026-09-20T10:00:00.000Z",
+    coverUrl: null,
+  },
+  {
+    id: "demo-3",
+    owner_id: "demo-owner",
+    ref: "UPM-1043",
+    title: "Estúdio em Estrela",
+    description: "",
+    deal: "rent",
+    status: "draft",
+    property_type: "Estúdio",
+    typology: "T0",
+    condition: "Novo",
+    gross_area: 38,
+    net_area: 32,
+    bedrooms: 0,
+    bathrooms: 1,
+    floor: "1",
+    year_built: 2024,
+    energy_cert: "A",
+    price_cents: null,
+    rent_cents: 95000,
+    condo_fee_cents: 3000,
+    imi_cents: null,
+    accepts_offers: false,
+    amenities: [],
+    address_line: null,
+    postal_code: null,
+    city: null,
+    parish: null,
+    district: null,
+    location: null,
+    location_approx: null,
+    approx_radius_m: 400,
+    show_exact: false,
+    views_count: 0,
+    rejection_reason: null,
+    published_at: null,
+    created_at: "2026-09-25T10:00:00.000Z",
+    updated_at: "2026-09-25T10:00:00.000Z",
+    coverUrl: null,
+  },
+];
+
+export const demoMarketCards: PropertyCardData[] = [
+  {
+    id: "demo-1",
+    title: "Apartamento T3 com varanda em Campo de Ourique",
+    deal: "sale",
+    typology: "T3",
+    city: "Lisboa",
+    price_cents: 45000000,
+    rent_cents: null,
+    coverUrl: null,
+  },
+  {
+    id: "demo-4",
+    title: "Apartamento T2 renovado em Alvalade",
+    deal: "rent",
+    typology: "T2",
+    city: "Lisboa",
+    price_cents: null,
+    rent_cents: 140000,
+    coverUrl: null,
+  },
+  {
+    id: "demo-5",
+    title: "Loft em Matosinhos",
+    deal: "sale",
+    typology: "T1",
+    city: "Matosinhos",
+    price_cents: 22000000,
+    rent_cents: null,
+    coverUrl: null,
+  },
+];
+
+export const demoMapProperties: MapProperty[] = [
+  {
+    id: "demo-1",
+    lon: -9.1642,
+    lat: 38.7169,
+    price_cents: 45000000,
+    deal: "sale",
+    title: "Campo de Ourique",
+  },
+  {
+    id: "demo-4",
+    lon: -9.1393,
+    lat: 38.7489,
+    price_cents: 140000,
+    deal: "rent",
+    title: "Alvalade",
+  },
+  {
+    id: "demo-5",
+    lon: -8.6884,
+    lat: 41.1848,
+    price_cents: 22000000,
+    deal: "sale",
+    title: "Matosinhos",
+  },
+];
+
+export const demoDrawPolygon = async () => demoMapProperties;
+
+export const demoLocaleChange = () => undefined;
+
+/**
+ * Painel (P4-06). Os baldes são fixos de propósito: `buildViewsSeries` lê o
+ * relógio, e uma storyboard que muda a cada montagem flutua no VRT.
+ */
+export const demoDashboardStats: DashboardStat[] = [
+  {
+    id: "active",
+    icon: "building",
+    label: "Imóveis ativos",
+    value: "4",
+    delta: "5 no total",
+    deltaTone: "muted",
+  },
+  {
+    id: "views",
+    icon: "eye",
+    label: "Visitas às propriedades",
+    value: "1 245",
+    delta: "+12% esta semana",
+    deltaTone: "ok",
+  },
+  {
+    id: "saved",
+    icon: "saved",
+    label: "Guardados por compradores",
+    value: "17",
+    delta: "em listas de compradores",
+    deltaTone: "ok",
+  },
+  {
+    id: "drafts",
+    icon: "draft",
+    label: "Rascunhos",
+    value: "1",
+    delta: "a aguardar para publicar",
+    deltaTone: "warn",
+  },
+];
+
+export const demoViewsSeries: ViewsSeries[] = [
+  {
+    id: "7d",
+    label: "7 dias",
+    buckets: [
+      { label: "qua", value: 142, srLabel: "23 de setembro" },
+      { label: "qui", value: 186, srLabel: "24 de setembro" },
+      { label: "sex", value: 164, srLabel: "25 de setembro" },
+      { label: "sáb", value: 238, srLabel: "26 de setembro" },
+      { label: "dom", value: 205, srLabel: "27 de setembro" },
+      { label: "seg", value: 119, srLabel: "28 de setembro" },
+      { label: "ter", value: 191, srLabel: "29 de setembro" },
+    ],
+  },
+  {
+    id: "30d",
+    label: "30 dias",
+    buckets: [
+      { label: "s1", value: 780, srLabel: "Semana de 2 a 8 de setembro" },
+      { label: "s2", value: 910, srLabel: "Semana de 9 a 15 de setembro" },
+      { label: "s3", value: 1045, srLabel: "Semana de 16 a 22 de setembro" },
+      { label: "s4", value: 1245, srLabel: "Semana de 23 a 29 de setembro" },
+    ],
+  },
+  {
+    id: "12m",
+    label: "12 meses",
+    buckets: [
+      { label: "out", value: 1420, srLabel: "outubro de 2025" },
+      { label: "nov", value: 1180, srLabel: "novembro de 2025" },
+      { label: "dez", value: 940, srLabel: "dezembro de 2025" },
+      { label: "jan", value: 1310, srLabel: "janeiro de 2026" },
+      { label: "fev", value: 1495, srLabel: "fevereiro de 2026" },
+      { label: "mar", value: 1860, srLabel: "março de 2026" },
+      { label: "abr", value: 2100, srLabel: "abril de 2026" },
+      { label: "mai", value: 2480, srLabel: "maio de 2026" },
+      { label: "jun", value: 3010, srLabel: "junho de 2026" },
+      { label: "jul", value: 3620, srLabel: "julho de 2026" },
+      { label: "ago", value: 3180, srLabel: "agosto de 2026" },
+      { label: "set", value: 4120, srLabel: "setembro de 2026" },
+    ],
+  },
+];

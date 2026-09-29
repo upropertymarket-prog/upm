@@ -4,10 +4,17 @@ import Asminhaspropriedades from "./AsMinhasPropriedades";
 import Market2 from "./Market";
 import Mapa2 from "./Mapa";
 import DetalhePropriedade from "./DetalhePropriedade";
+import Painel from "./Painel";
 
 export default function ProprietarioCanvas() {
   return (
     <Canvas name="Proprietario" backgroundColor="#232323">
+      <Storyboard
+        id="Painel"
+        name="Painel (/painel)"
+        component={Painel}
+        layout={{ x: 0, y: 1986, width: 1400, height: 1329, intrinsicSizing: "root-element" }}
+      />
       <Storyboard
         id="NovaPropriedade"
         name="Nova propriedade (/propriedades/nova)"
