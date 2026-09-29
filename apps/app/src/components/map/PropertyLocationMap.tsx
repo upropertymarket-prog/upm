@@ -26,6 +26,7 @@ export type PropertyLocationMapProps = {
 export function PropertyLocationMap({ lon, lat, isExact, radiusM, style }: PropertyLocationMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const hasExplicitHeight = style?.height !== undefined;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -75,7 +76,7 @@ export function PropertyLocationMap({ lon, lat, isExact, radiusM, style }: Prope
     <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
       <div
         ref={containerRef}
-        style={{ width: "100%", height: 220, borderRadius: 12, overflow: "hidden" }}
+        style={{ width: "100%", height: hasExplicitHeight ? undefined : 220, flex: hasExplicitHeight ? "1 1 auto" : undefined, minHeight: hasExplicitHeight ? 0 : undefined, borderRadius: 12, overflow: "hidden" }}
       />
       {!isExact ? (
         <span style={{ fontSize: "0.85em", color: "var(--muted)", textAlign: "center" }}>
