@@ -335,6 +335,9 @@
   align-items: center;
   gap: var(--sp-6);
   height: var(--topbar-h);
+  /* Não encolhe: é um item flex da coluna `__main` e 68 px é uma medida de
+     04 §5.5, não uma sugestão. */
+  flex: none;
   padding: 0 var(--sp-9);
   background: var(--surface);
   border-bottom: 1px solid var(--border);

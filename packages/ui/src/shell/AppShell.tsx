@@ -34,6 +34,13 @@ export type AppShellProps = {
  * ecrã em que se está, não sobre quem se é — por isso fica em `localStorage` e
  * não em `profiles`.
  *
+ * ⚠ O shell **não** tem largura nem altura próprias: ocupa o viewport
+ * (`min-height: 100vh` em `shell.css`) e cresce com o conteúdo, como qualquer
+ * app. Fixar aqui um `height` em pixels — como já aconteceu — comprime a
+ * topbar, deixa faixas vazias por baixo do conteúdo e faz com que todas as
+ * páginas da plataforma passem a ter a altura de uma só. O `style` existe para
+ * o consumidor ajustar o que precisar, não para lhe dar um tamanho fixo.
+ *
  * O canvas deste componente está em tempo/designs/design-system/app-shell/index.canvas.tsx.
  * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
  */
@@ -71,15 +78,13 @@ export function AppShell({
       className={cx("upm-shell", className)}
       data-collapsed={collapsed ? "true" : "false"}
       data-mobile-open={mobileOpen ? "true" : "false"}
-      style={{ width: "1440px", height: "1329px", ...style }}
+      style={style}
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />
       <div className="upm-shell__gutter" aria-hidden="true" />
-      <div className="upm-shell__main" style={{ width: "100%", height: "1281px" }}>
+      <div className="upm-shell__main">
         <Topbar {...topbar} onOpenSidebar={() => setMobileOpen((value) => !value)} />
-        <main className="upm-shell__content" style={{ width: "100%" }}>
-          {children}
-        </main>
+        <main className="upm-shell__content">{children}</main>
       </div>
     </div>
   );

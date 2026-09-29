@@ -70,7 +70,7 @@ export function AppChrome({
   }));
 
   return (
-    <AppShell style={{ height: "1329px" }}
+    <AppShell
       sidebar={{
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,
