@@ -1,5 +1,5 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
-import Painel from "./Painel";
+import Painel, { PainelEscuro } from "./Painel";
 
 /**
  * Canvas do Proprietário — Fase 4.
@@ -11,21 +11,26 @@ import Painel from "./Painel";
  *
  * Sem `intrinsicSizing`: o enquadramento é um viewport de monitor (1440 × 900)
  * e o conteúdo rola lá dentro, como num ecrã verdadeiro.
+ *
+ * O mesmo ecrã aparece duas vezes, lado a lado e alinhados, com 80 px entre
+ * eles: claro e escuro. 04 §5.2 trata o modo escuro como requisito, não como
+ * variante opcional — vê-los juntos é o que apanha um contraste mau antes de
+ * chegar ao código.
  */
 export default function ProprietarioCanvas() {
   return (
     <Canvas name="Proprietario" backgroundColor="#232323">
       <Storyboard
         id="Painel"
-        name="Painel (/painel)"
+        name="Painel · Claro (/painel)"
         component={Painel}
         layout={{ x: 0, y: 0, width: 1440, height: 900 }}
       />
       <Storyboard
-        id="Painel1920"
-        name="Painel · 1920 (limite de largura)"
-        component={Painel}
-        layout={{ x: 1540, y: 0, width: 1920, height: 1080 }}
+        id="PainelEscuro"
+        name="Painel · Escuro (/painel)"
+        component={PainelEscuro}
+        layout={{ x: 1520, y: 0, width: 1440, height: 900 }}
       />
     </Canvas>
   );
