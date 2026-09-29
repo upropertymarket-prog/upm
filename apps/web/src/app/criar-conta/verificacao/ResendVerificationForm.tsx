@@ -4,13 +4,28 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@upm/ui";
 
-import { resendVerificationEmail, type ResendState } from "../actions";
+/**
+ * Definido aqui, não em `../actions`: esse ficheiro importa `next/headers`
+ * (server-only) e importá-lo — mesmo só o tipo — parte a compilação do canvas
+ * para o projeto inteiro. `../actions` importa este tipo daqui.
+ */
+export type ResendState = { sent?: boolean; error?: string };
 
 const initialState: ResendState = {};
 
-export function ResendVerificationForm({ email }: { email: string }) {
+export type ResendVerificationFormProps = {
+  email: string;
+  /**
+   * Injetada pela página (`action={resendVerificationEmail}`), nunca importada
+   * aqui — mesma razão do `LoginForm`. O canvas passa uma ação de
+   * demonstração em vez da real.
+   */
+  action: (state: ResendState, formData: FormData) => Promise<ResendState>;
+};
+
+export function ResendVerificationForm({ email, action }: ResendVerificationFormProps) {
   const t = useTranslations("auth.register.verification");
-  const [state, formAction, pending] = useActionState(resendVerificationEmail, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="flex flex-col items-center gap-2">

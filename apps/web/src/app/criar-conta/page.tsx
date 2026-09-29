@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AuthPage } from "../../components/auth/AuthLayout";
 import { RegisterWizard } from "./RegisterWizard";
 import { registerAccount } from "./actions";
 
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
+    <AuthPage>
       <RegisterWizard action={registerAccount} />
-    </main>
+    </AuthPage>
   );
 }

@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@upm/db/server";
 import { getTranslations } from "next-intl/server";
 
+import { AuthCard, AuthPage, AuthTitle } from "../../../components/auth/AuthLayout";
 import { PlanForm } from "./PlanForm";
+import { selectPlan } from "../actions";
 
 export default async function ChoosePlanPage() {
   const supabase = createClient(await cookies());
@@ -28,12 +30,12 @@ export default async function ChoosePlanPage() {
   const t = await getTranslations("auth.register.plan");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-4 rounded-2xl border border-border bg-surface p-6">
-        <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+    <AuthPage>
+      <AuthCard width="lg">
+        <AuthTitle>{t("title")}</AuthTitle>
         <p className="text-sm text-muted">{t("hint")}</p>
-        <PlanForm plans={plans ?? []} />
-      </div>
-    </main>
+        <PlanForm plans={plans ?? []} action={selectPlan} />
+      </AuthCard>
+    </AuthPage>
   );
 }

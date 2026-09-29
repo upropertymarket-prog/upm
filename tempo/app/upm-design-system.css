@@ -18,6 +18,57 @@
  */
 @import "../../packages/ui/src/styles/index.css";
 
+/**
+ * O bloco gerido do `globals.css` manda o Tailwind varrer `../../packages` e
+ * `../designs`, mas não `apps/`. Sem esta linha, uma storyboard que importe um
+ * componente real de `apps/web` ou `apps/app` renderiza sem nenhuma classe
+ * Tailwind: sem `flex`, sem `gap`, e com o honeypot do `LoginForm` — que é
+ * `absolute -left-[9999px]` — visível no meio do formulário.
+ *
+ * Era isso que obrigava o canvas de autenticação a ter uma cópia do invólucro
+ * das páginas dentro de `tempo/designs`, onde o varrimento chegava. Com o
+ * `@source` certo, a storyboard passa a mostrar a página real.
+ *
+ * Fica aqui, fora do bloco `tempo:managed`, para sobreviver à regeneração.
+ */
+@source "../../apps";
+
+/**
+ * A mesma escala de cor que as apps declaram (ver `globals.css` de `apps/app`
+ * e `apps/web`). Sem ela o Tailwind não gera `bg-bg`, `bg-surface`,
+ * `text-text` nem `border-border` — ignora um utilitário cuja cor não conhece
+ * — e a storyboard ficava com o fundo branco do navegador e texto preto, a
+ * parecer certa em claro por coincidência e meio trocada em escuro.
+ *
+ * `inline` é o que mantém a troca de tema em CSS: o Tailwind emite `var(--bg)`
+ * no utilitário em vez de copiar o valor, por isso um `data-theme` no
+ * documento continua a mandar. Se a escala mudar nas apps, muda aqui também.
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface2);
+  --color-surface3: var(--surface3);
+  --color-border: var(--border);
+  --color-border2: var(--border2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ph1: var(--ph1);
+  --color-ph2: var(--ph2);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+}
+
 @font-face {
   font-family: "Bricolage Grotesque";
   src: url("../../packages/ui/src/fonts/files/bricolage-grotesque-latin-wght-normal.woff2")

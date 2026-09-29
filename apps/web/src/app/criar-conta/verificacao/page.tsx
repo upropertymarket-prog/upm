@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
+import { AuthCard, AuthPage, AuthTitle } from "../../../components/auth/AuthLayout";
 import { ResendVerificationForm } from "./ResendVerificationForm";
+import { resendVerificationEmail } from "../actions";
 
 export default async function VerificationPendingPage({
   searchParams,
@@ -11,12 +13,12 @@ export default async function VerificationPendingPage({
   const t = await getTranslations("auth.register.verification");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4 rounded-2xl border border-border bg-surface p-6 text-center">
-        <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+    <AuthPage>
+      <AuthCard width="md" centered>
+        <AuthTitle>{t("title")}</AuthTitle>
         <p className="text-sm text-muted">{t("body", { email })}</p>
-        <ResendVerificationForm email={email} />
-      </div>
-    </main>
+        <ResendVerificationForm email={email} action={resendVerificationEmail} />
+      </AuthCard>
+    </AuthPage>
   );
 }

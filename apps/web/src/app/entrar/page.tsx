@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { AuthCard, AuthPage, AuthTitle } from "../../components/auth/AuthLayout";
 import { LoginForm } from "./LoginForm";
 import { signIn } from "./actions";
 
@@ -17,11 +18,11 @@ export default async function LoginPage({
   const t = await getTranslations("auth.login");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="relative mx-auto flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-border bg-surface p-6">
-        <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+    <AuthPage>
+      <AuthCard>
+        <AuthTitle>{t("title")}</AuthTitle>
         <LoginForm next={next} action={signIn} />
-      </div>
-    </main>
+      </AuthCard>
+    </AuthPage>
   );
 }

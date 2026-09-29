@@ -15,8 +15,10 @@ import {
 } from "@upm/db/auth";
 
 import type { RegisterState } from "./RegisterWizard";
+import type { ResendState } from "./verificacao/ResendVerificationForm";
+import type { SelectPlanState } from "./plano/PlanForm";
 
-export type { RegisterState };
+export type { RegisterState, ResendState, SelectPlanState };
 
 /**
  * Registo por passos (P3-01) — 03 F2: Perfil → Conta → Verificação → Plano.
@@ -85,8 +87,6 @@ export async function registerAccount(
   redirect(`/criar-conta/verificacao?email=${encodeURIComponent(email)}`);
 }
 
-export type ResendState = { sent?: boolean; error?: string };
-
 export async function resendVerificationEmail(
   _prev: ResendState,
   formData: FormData,
@@ -117,8 +117,6 @@ export async function resendVerificationEmail(
   if (error) return { error: "Não foi possível reenviar o e-mail. Tente novamente." };
   return { sent: true };
 }
-
-export type SelectPlanState = { error?: string };
 
 export async function selectPlan(
   _prev: SelectPlanState,

@@ -4,9 +4,14 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@upm/ui";
 
-import { selectPlan, type SelectPlanState } from "../actions";
+/**
+ * Definido aqui, não em `../actions`: esse ficheiro importa `next/headers`
+ * (server-only) e importá-lo — mesmo só o tipo — parte a compilação do canvas
+ * para o projeto inteiro. `../actions` importa este tipo daqui.
+ */
+export type SelectPlanState = { error?: string };
 
-type Plan = {
+export type Plan = {
   id: string;
   slug: string;
   name: string;
@@ -16,12 +21,21 @@ type Plan = {
 
 const initialState: SelectPlanState = {};
 
-export function PlanForm({ plans }: { plans: Plan[] }) {
+export type PlanFormProps = {
+  plans: Plan[];
+  /**
+   * Injetada pela página (`action={selectPlan}`), nunca importada aqui —
+   * mesma razão do `LoginForm`. O canvas passa uma ação de demonstração.
+   */
+  action: (state: SelectPlanState, formData: FormData) => Promise<SelectPlanState>;
+};
+
+export function PlanForm({ plans, action }: PlanFormProps) {
   const t = useTranslations("auth.register.plan");
   const [selected, setSelected] = useState<string | null>(
     plans.find((plan) => plan.slug === "gratuito")?.id ?? plans[0]?.id ?? null,
   );
-  const [state, formAction, pending] = useActionState(selectPlan, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
