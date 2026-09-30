@@ -1,11 +1,13 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 import Painel, { PainelEscuro } from "./Painel";
+import Mensagens, { Agenda, Leads } from "./Interacao";
 
 /**
- * Canvas do Proprietário — Fase 4.
+ * Canvas do Proprietário — Painel (Fase 4, completo na Fase 5) e os três ecrãs
+ * da Fase 5: Mensagens, Agenda de visitas e Leads.
  *
- * Só o Painel. As storyboards de Market, Mapa, As minhas propriedades, Nova
- * propriedade e Detalhe foram removidas em favor de as reconstruir a partir de
+ * As storyboards de Market, Mapa, As minhas propriedades, Nova propriedade e
+ * Detalhe foram removidas na Fase 4 em favor de as reconstruir a partir de
  * componentes reais da app; o registo do que existia está no doc "Registo —
  * storyboards do Proprietário removidas (Fase 4)" e o código em `174b63f`.
  *
@@ -31,6 +33,24 @@ export default function ProprietarioCanvas() {
         name="Painel · Escuro (/painel)"
         component={PainelEscuro}
         layout={{ x: 1520, y: 0, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="Mensagens"
+        name="Mensagens (/mensagens)"
+        component={Mensagens}
+        layout={{ x: 0, y: 980, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="Agenda"
+        name="Agenda de visitas (/agenda)"
+        component={Agenda}
+        layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="Leads"
+        name="Leads (/leads)"
+        component={Leads}
+        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
       />
     </Canvas>
   );

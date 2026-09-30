@@ -6,8 +6,17 @@ import { Button, PageHeader, greetingKey } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { OwnerDashboard } from "../../components/dashboard/OwnerDashboard";
+import type { ActivityItem } from "../../components/dashboard/RecentActivity";
 import type { DashboardStat } from "../../components/dashboard/dashboardTypes";
+import { formatRelative } from "../../components/interaction/interactionTypes";
 import { buildViewsSeries, weeklyViews, type ViewRow } from "../../lib/dashboard";
+import {
+  countersFor,
+  loadConversations,
+  loadLeads,
+  loadNotifications,
+  loadVisits,
+} from "../../lib/interaction";
 import { setLocalePreference } from "../actions/preferences";
 
 export const dynamic = "force-dynamic";
@@ -15,16 +24,22 @@ export const dynamic = "force-dynamic";
 /** Um ano de histórico chega para os três intervalos do gráfico. */
 const HISTORY_DAYS = 365;
 
+/** Quantas linhas cabem em cada painel de "Atividade recente" (04 §8.3). */
+const ACTIVITY_ROWS = 3;
+
 /**
- * Painel do proprietário — `/painel` (P4-06 · 04 §8.3 · 03 §1.2)
+ * Painel do proprietário — `/painel` (04 §8.3 · 03 §1.2)
  * =========================================================================
- * Substitui o ecrã de verificação de Fase 1 que vivia em `/`. Owner-only, com
- * a mesma defesa em profundidade de `/propriedades`: o middleware já filtra,
- * confirma-se na mesma aqui (08 §7.3).
+ * Os cinco blocos do desenho, completos — **fecha D23**. Os dois que faltavam
+ * ("Próximas visitas" ao lado do gráfico, e "Atividade recente" por baixo)
+ * dependiam de `visit_requests` e `conversations`, que nasceram nesta fase.
  *
- * Só lê o que a Fase 4 tem: `properties`, `property_views` e
- * `saved_properties`. Os blocos "Próximas visitas" e "Atividade recente" do
- * desenho ficam para as Fases 5 e 6, com as tabelas que lhes faltam.
+ * Os KPIs voltaram aos quatro do desenho: 07 §5.8 renomeia o segundo para
+ * "Visualizações dos imóveis" — visitas são as físicas (`visit_requests`),
+ * visualizações são as consultas da página (`property_views`).
+ *
+ * Owner-only, com a mesma defesa em profundidade de `/propriedades`: o
+ * middleware já filtra, confirma-se na mesma aqui (08 §7.3).
  */
 export default async function DashboardPage() {
   const supabase = createClient(await cookies());
@@ -46,7 +61,7 @@ export default async function DashboardPage() {
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("id, status")
+    .select("id, title, ref, status")
     .eq("owner_id", user.id);
 
   const owned = properties ?? [];
@@ -54,30 +69,50 @@ export default async function DashboardPage() {
   const activeCount = owned.filter(
     (property) => property.status === "active" || property.status === "featured",
   ).length;
-  const draftCount = owned.filter((property) => property.status === "draft").length;
 
   const today = new Date();
   const since = new Date(today);
   since.setUTCDate(since.getUTCDate() - HISTORY_DAYS);
 
   // Sem imóveis não há nada a cruzar — poupa-se um `in ()` vazio ao Postgres.
-  const [viewRows, savedCount] = ids.length
-    ? await Promise.all([
-        supabase
-          .from("property_views")
-          .select("day, views_count")
-          .in("property_id", ids)
-          .gte("day", since.toISOString().slice(0, 10))
-          .then(({ data }) => (data ?? []) as ViewRow[]),
-        supabase
-          .from("saved_properties")
-          .select("id", { count: "exact", head: true })
-          .in("property_id", ids)
-          .then(({ count }) => count ?? 0),
-      ])
-    : [[] as ViewRow[], 0];
+  const viewRows: ViewRow[] = ids.length
+    ? await supabase
+        .from("property_views")
+        .select("day, views_count")
+        .in("property_id", ids)
+        .gte("day", since.toISOString().slice(0, 10))
+        .then(({ data }) => (data ?? []) as ViewRow[])
+    : [];
+
+  const [visits, conversations, leads, notifications] = await Promise.all([
+    loadVisits(supabase),
+    loadConversations(supabase),
+    loadLeads(supabase),
+    loadNotifications(supabase),
+  ]);
 
   const week = weeklyViews(viewRows, today);
+
+  // "Próximas visitas": só o que ainda está para acontecer, do mais próximo
+  // para o mais distante — o oposto da ordem da Agenda, que mostra histórico.
+  const upcoming = visits
+    .filter(
+      (visit) =>
+        new Date(visit.proposedAt) >= today &&
+        (visit.status === "pending" ||
+          visit.status === "accepted" ||
+          visit.status === "rescheduled"),
+    )
+    .sort((a, b) => a.proposedAt.localeCompare(b.proposedAt))
+    .slice(0, ACTIVITY_ROWS);
+
+  const newLeads = leads.filter(
+    (lead) => lead.stage === "new" || lead.stage === "contacted",
+  ).length;
+  const scheduled = visits.filter((visit) => visit.status === "accepted").length;
+  const awaiting = visits.filter(
+    (visit) => visit.status === "pending" || visit.status === "rescheduled",
+  ).length;
 
   const stats: DashboardStat[] = [
     {
@@ -89,30 +124,65 @@ export default async function DashboardPage() {
       deltaTone: activeCount === 0 ? "warn" : "muted",
     },
     {
+      // 07 §5.8: "visualizações" são consultas da página; "visitas" são físicas.
       id: "views",
       icon: "eye",
-      label: "Visitas às propriedades",
+      label: "Visualizações dos imóveis",
       value: week.total.toLocaleString("pt-PT"),
       delta: week.delta,
       deltaTone: week.tone,
     },
     {
-      id: "saved",
-      icon: "saved",
-      label: "Guardados por compradores",
-      value: String(savedCount),
-      delta: savedCount === 0 ? "ainda sem interessados" : "em listas de compradores",
-      deltaTone: savedCount === 0 ? "muted" : "ok",
+      id: "leads",
+      icon: "leads",
+      label: "Leads novas",
+      value: String(newLeads),
+      delta: newLeads === 0 ? "ainda sem interessados" : "por contactar ou em conversa",
+      deltaTone: newLeads === 0 ? "muted" : "ok",
     },
     {
-      id: "drafts",
-      icon: "draft",
-      label: "Rascunhos",
-      value: String(draftCount),
-      delta: draftCount === 0 ? "nada por terminar" : "a aguardar para publicar",
-      deltaTone: draftCount === 0 ? "muted" : "warn",
+      id: "visits",
+      icon: "visits",
+      label: "Visitas agendadas",
+      value: String(scheduled),
+      delta: awaiting === 0 ? "nenhuma por confirmar" : `${awaiting} por confirmar`,
+      deltaTone: awaiting === 0 ? "muted" : "warn",
     },
   ];
+
+  const recentMessages: ActivityItem[] = conversations.slice(0, ACTIVITY_ROWS).map((item) => ({
+    id: item.id,
+    title: `${item.other.name} · ${item.propertyTitle}`,
+    subtitle: item.lastMessage ? `«${item.lastMessage}»` : "Conversa aberta, ainda sem mensagens",
+    href: `/mensagens?conversa=${item.id}`,
+    tag: item.unread > 0 ? "Novo" : "Lido",
+    tone: item.unread > 0 ? "new" : "archived",
+  }));
+
+  const unansweredCount = conversations.filter((item) => item.unread > 0).length;
+
+  // "Documentos e contratos": `property_documents` existe desde a Fase 2 e dá a
+  // metade dos documentos. Os contratos entram com P6-03 — por isso o painel
+  // diz "documentos" enquanto for só isso (07 §18 e D23).
+  const documents = ids.length
+    ? await supabase
+        .from("property_documents")
+        .select("id, name, kind, created_at, property_id")
+        .in("property_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(ACTIVITY_ROWS)
+        .then(({ data }) => data ?? [])
+    : [];
+
+  const titleOf = new Map(owned.map((item) => [item.id, item.title || item.ref]));
+  const recentDocuments: ActivityItem[] = documents.map((doc) => ({
+    id: doc.id,
+    title: `${doc.name} · ${titleOf.get(doc.property_id) ?? "Imóvel"}`,
+    subtitle: `anexado ${formatRelative(doc.created_at)}`,
+    href: `/propriedades/${doc.property_id}/editar`,
+    tag: "Documento",
+    tone: "archived",
+  }));
 
   const firstName = (profile.full_name || "").split(/\s+/)[0] || "";
 
@@ -124,6 +194,8 @@ export default async function DashboardPage() {
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
+      counters={countersFor("owner", conversations, visits, leads)}
+      notifications={notifications}
     >
       <PageHeader
         title={t(`greeting.${greetingKey()}`, { name: firstName })}
@@ -134,7 +206,19 @@ export default async function DashboardPage() {
           </Button>
         }
       />
-      <OwnerDashboard stats={stats} series={buildViewsSeries(viewRows, today)} />
+      <OwnerDashboard
+        stats={stats}
+        series={buildViewsSeries(viewRows, today)}
+        upcomingVisits={upcoming}
+        recentMessages={recentMessages}
+        recentMessagesMeta={
+          unansweredCount === 0 ? "tudo respondido" : `${unansweredCount} por responder`
+        }
+        recentDocuments={recentDocuments}
+        recentDocumentsMeta={
+          documents.length === 0 ? "sem documentos" : `${documents.length} recentes`
+        }
+      />
     </AppChrome>
   );
 }

@@ -1,0 +1,71 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { createClient } from "@upm/db/server";
+import { PageHeader } from "@upm/ui";
+
+import { AppChrome } from "../../components/AppChrome";
+import { VisitsScreen } from "../../components/visits/VisitsScreen";
+import {
+  countersFor,
+  loadConversations,
+  loadNotifications,
+  loadVisits,
+} from "../../lib/interaction";
+import { acceptVisit, archiveVisit, cancelVisit, rescheduleVisit } from "../actions/visits";
+import { setLocalePreference } from "../actions/preferences";
+import { currentMonth } from "../../lib/dates";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * Meus pedidos — `/meus-pedidos` (P5-02 · 04 §8.4 · 03 F6)
+ * =========================================================================
+ * O lado do comprador da mesma agenda (rota renomeada em 07 §4.2:
+ * `/pedidos-de-visita` → `/meus-pedidos`). Aqui "Aceitar" aparece quando foi o
+ * proprietário a propor a data — o passo 3′ de 03 F6.
+ */
+export default async function MyRequestsPage() {
+  const supabase = createClient(await cookies());
+  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+
+  const user = authData.user;
+  if (!user) redirect("/");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, full_name")
+    .eq("id", user.id)
+    .single();
+  if (!profile || profile.role !== "buyer") redirect("/");
+
+  const [visits, conversations, notifications] = await Promise.all([
+    loadVisits(supabase),
+    loadConversations(supabase),
+    loadNotifications(supabase),
+  ]);
+
+  return (
+    <AppChrome
+      role="buyer"
+      userName={profile.full_name || "Comprador"}
+      userMeta="Comprador"
+      activeId="myRequests"
+      locale={locale}
+      onLocaleChange={setLocalePreference}
+      counters={countersFor("buyer", conversations, visits, [])}
+      notifications={notifications}
+    >
+      <PageHeader title="Meus pedidos" subtitle="As visitas que pediu e o estado de cada uma" />
+      <VisitsScreen
+        rows={visits}
+        role="buyer"
+        month={currentMonth()}
+        onAccept={acceptVisit}
+        onReschedule={rescheduleVisit}
+        onCancel={cancelVisit}
+        onArchive={archiveVisit}
+      />
+    </AppChrome>
+  );
+}

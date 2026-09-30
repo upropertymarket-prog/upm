@@ -1,4 +1,4 @@
-import { Bookmark, Building2, Eye, PencilLine } from "lucide-react";
+import { Bookmark, Building2, CalendarCheck, Eye, PencilLine, Users } from "lucide-react";
 import { Card } from "@upm/ui";
 
 import type { DashboardStat, StatTone } from "./dashboardTypes";
@@ -8,6 +8,8 @@ const ICONS = {
   eye: Eye,
   draft: PencilLine,
   saved: Bookmark,
+  leads: Users,
+  visits: CalendarCheck,
 } as const;
 
 const TONE: Record<StatTone, string> = {
@@ -19,11 +21,11 @@ const TONE: Record<StatTone, string> = {
 /**
  * "As suas estatísticas" (P4-06) — a fila de KPIs no topo do Painel, 04 §8.3.
  *
- * Quatro cartões de Fase 4. O desenho original tem "Leads novas" e "Visitas
- * agendadas" nos dois últimos lugares, mas essas tabelas só nascem na Fase 5
- * (P5-02 · P5-03); até lá o lugar é de "Rascunhos" e "Guardados por
- * compradores", que já têm dados reais. Trocar de volta é mudar o que o
- * `painel/page.tsx` calcula — este componente não sabe nada disso.
+ * Os quatro KPIs do desenho. Na Fase 4 os dois últimos lugares eram ocupados
+ * por "Rascunhos" e "Guardados por compradores", porque `owner_leads` e
+ * `visit_requests` ainda não existiam; com a Fase 5 voltaram a ser "Leads
+ * novas" e "Visitas agendadas". Quem escolhe é o `painel/page.tsx` — este
+ * componente só desenha o que recebe.
  */
 export function DashboardStats({ stats }: { stats: DashboardStat[] }) {
   return (

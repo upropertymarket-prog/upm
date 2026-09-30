@@ -98,6 +98,65 @@ export type Database = {
         };
         Relationships: [];
       };
+      conversations: {
+        Row: {
+          buyer_id: string;
+          created_at: string;
+          id: string;
+          last_message_at: string | null;
+          owner_id: string;
+          property_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          buyer_id: string;
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          owner_id: string;
+          property_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          buyer_id?: string;
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          owner_id?: string;
+          property_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "conversations_buyer_id_fkey";
+            columns: ["buyer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversations_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversations_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversations_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       feature_flags: {
         Row: {
           created_at: string;
@@ -121,6 +180,229 @@ export type Database = {
           value?: Json;
         };
         Relationships: [];
+      };
+      messages: {
+        Row: {
+          attachments: Json;
+          body: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          read_at: string | null;
+          sender_id: string;
+        };
+        Insert: {
+          attachments?: Json;
+          body?: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          read_at?: string | null;
+          sender_id: string;
+        };
+        Update: {
+          attachments?: Json;
+          body?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          read_at?: string | null;
+          sender_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey";
+            columns: ["sender_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_deliveries: {
+        Row: {
+          attempts: number;
+          channel: string;
+          created_at: string;
+          group_key: string | null;
+          id: string;
+          last_error: string | null;
+          notification_id: string | null;
+          payload: Json;
+          profile_id: string;
+          recipient: string;
+          sent_at: string | null;
+          status: Database["public"]["Enums"]["delivery_status"];
+          template: string;
+          updated_at: string;
+        };
+        Insert: {
+          attempts?: number;
+          channel: string;
+          created_at?: string;
+          group_key?: string | null;
+          id?: string;
+          last_error?: string | null;
+          notification_id?: string | null;
+          payload?: Json;
+          profile_id: string;
+          recipient: string;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["delivery_status"];
+          template: string;
+          updated_at?: string;
+        };
+        Update: {
+          attempts?: number;
+          channel?: string;
+          created_at?: string;
+          group_key?: string | null;
+          id?: string;
+          last_error?: string | null;
+          notification_id?: string | null;
+          payload?: Json;
+          profile_id?: string;
+          recipient?: string;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["delivery_status"];
+          template?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey";
+            columns: ["notification_id"];
+            isOneToOne: false;
+            referencedRelation: "notifications";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_deliveries_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          link: string | null;
+          profile_id: string;
+          read_at: string | null;
+          title: string;
+          type: string;
+        };
+        Insert: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          profile_id: string;
+          read_at?: string | null;
+          title: string;
+          type: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          profile_id?: string;
+          read_at?: string | null;
+          title?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      owner_leads: {
+        Row: {
+          contact_profile_id: string;
+          created_at: string;
+          id: string;
+          last_activity_at: string;
+          offer_cents: number | null;
+          outcome: Database["public"]["Enums"]["lead_outcome"] | null;
+          owner_id: string;
+          property_id: string;
+          source: string;
+          stage: Database["public"]["Enums"]["lead_stage"];
+          updated_at: string;
+        };
+        Insert: {
+          contact_profile_id: string;
+          created_at?: string;
+          id?: string;
+          last_activity_at?: string;
+          offer_cents?: number | null;
+          outcome?: Database["public"]["Enums"]["lead_outcome"] | null;
+          owner_id: string;
+          property_id: string;
+          source: string;
+          stage?: Database["public"]["Enums"]["lead_stage"];
+          updated_at?: string;
+        };
+        Update: {
+          contact_profile_id?: string;
+          created_at?: string;
+          id?: string;
+          last_activity_at?: string;
+          offer_cents?: number | null;
+          outcome?: Database["public"]["Enums"]["lead_outcome"] | null;
+          owner_id?: string;
+          property_id?: string;
+          source?: string;
+          stage?: Database["public"]["Enums"]["lead_stage"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "owner_leads_contact_profile_id_fkey";
+            columns: ["contact_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "owner_leads_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "owner_leads_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "owner_leads_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       plans: {
         Row: {
@@ -424,6 +706,13 @@ export type Database = {
             columns: ["property_id"];
             isOneToOne: false;
             referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_address_grants_visit_request_fkey";
+            columns: ["visit_request_id"];
+            isOneToOne: false;
+            referencedRelation: "visit_requests";
             referencedColumns: ["id"];
           },
         ];
@@ -789,6 +1078,100 @@ export type Database = {
           },
         ];
       };
+      visit_requests: {
+        Row: {
+          buyer_id: string;
+          cancelled_by: string | null;
+          created_at: string;
+          id: string;
+          message: string;
+          notes: string | null;
+          owner_id: string;
+          property_id: string;
+          proposed_at: string;
+          proposed_by: string | null;
+          requested_at: string;
+          reschedule_count: number;
+          status: Database["public"]["Enums"]["visit_status"];
+          updated_at: string;
+        };
+        Insert: {
+          buyer_id: string;
+          cancelled_by?: string | null;
+          created_at?: string;
+          id?: string;
+          message?: string;
+          notes?: string | null;
+          owner_id: string;
+          property_id: string;
+          proposed_at: string;
+          proposed_by?: string | null;
+          requested_at?: string;
+          reschedule_count?: number;
+          status?: Database["public"]["Enums"]["visit_status"];
+          updated_at?: string;
+        };
+        Update: {
+          buyer_id?: string;
+          cancelled_by?: string | null;
+          created_at?: string;
+          id?: string;
+          message?: string;
+          notes?: string | null;
+          owner_id?: string;
+          property_id?: string;
+          proposed_at?: string;
+          proposed_by?: string | null;
+          requested_at?: string;
+          reschedule_count?: number;
+          status?: Database["public"]["Enums"]["visit_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "visit_requests_buyer_id_fkey";
+            columns: ["buyer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visit_requests_cancelled_by_fkey";
+            columns: ["cancelled_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visit_requests_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visit_requests_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visit_requests_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "visit_requests_proposed_by_fkey";
+            columns: ["proposed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       properties_public: {
@@ -906,16 +1289,86 @@ export type Database = {
       };
     };
     Functions: {
+      accept_visit_request: { Args: { p_id: string }; Returns: undefined };
+      archive_visit_request: { Args: { p_id: string }; Returns: undefined };
+      cancel_visit_request: { Args: { p_id: string }; Returns: undefined };
       check_auth_rate_limit: {
         Args: { p_identifier: string; p_kind: string };
         Returns: Json;
       };
+      complete_due_visits: { Args: never; Returns: number };
+      format_eur_cents: { Args: { p_cents: number }; Returns: string };
       get_property_location: {
         Args: { p_property_id: string };
         Returns: unknown;
       };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
+      mark_conversation_read: {
+        Args: { p_conversation_id: string };
+        Returns: undefined;
+      };
+      my_conversations: {
+        Args: never;
+        Returns: {
+          address_shared: boolean;
+          buyer_id: string;
+          id: string;
+          is_owner: boolean;
+          last_message: string;
+          last_message_at: string;
+          other_id: string;
+          other_name: string;
+          property_id: string;
+          property_location: string;
+          property_title: string;
+          unread: number;
+        }[];
+      };
+      my_owner_leads: {
+        Args: never;
+        Returns: {
+          contact_id: string;
+          contact_name: string;
+          conversation_id: string;
+          id: string;
+          last_activity_at: string;
+          last_message: string;
+          outcome: Database["public"]["Enums"]["lead_outcome"];
+          property_id: string;
+          property_location: string;
+          property_title: string;
+          stage: Database["public"]["Enums"]["lead_stage"];
+        }[];
+      };
+      my_visit_requests: {
+        Args: never;
+        Returns: {
+          id: string;
+          is_owner: boolean;
+          message: string;
+          other_id: string;
+          other_name: string;
+          property_id: string;
+          property_location: string;
+          property_title: string;
+          proposed_at: string;
+          proposed_by_me: boolean;
+          reschedule_count: number;
+          status: Database["public"]["Enums"]["visit_status"];
+        }[];
+      };
+      notify: {
+        Args: {
+          p_body?: string;
+          p_group_key?: string;
+          p_link?: string;
+          p_profile_id: string;
+          p_title: string;
+          p_type: string;
+        };
+        Returns: string;
+      };
       properties_for_map: {
         Args: {
           p_max_lat?: number;
@@ -943,16 +1396,65 @@ export type Database = {
           title: string;
         }[];
       };
+      property_location_point: {
+        Args: { p_property_id: string };
+        Returns: {
+          is_exact: boolean;
+          lat: number;
+          lon: number;
+          radius_m: number;
+        }[];
+      };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
       };
+      request_visit: {
+        Args: {
+          p_message?: string;
+          p_property_id: string;
+          p_proposed_at: string;
+        };
+        Returns: string;
+      };
+      reschedule_visit_request: {
+        Args: { p_id: string; p_proposed_at: string };
+        Returns: undefined;
+      };
+      revoke_address_grant: { Args: { p_grant_id: string }; Returns: undefined };
       role_of: {
         Args: { uid: string };
         Returns: Database["public"]["Enums"]["user_role"];
       };
+      run_search_alerts: { Args: never; Returns: number };
+      set_lead_stage: {
+        Args: {
+          p_lead_id: string;
+          p_outcome?: Database["public"]["Enums"]["lead_outcome"];
+          p_stage: Database["public"]["Enums"]["lead_stage"];
+        };
+        Returns: undefined;
+      };
+      share_exact_address: {
+        Args: { p_buyer_id: string; p_property_id: string };
+        Returns: undefined;
+      };
+      start_conversation: { Args: { p_property_id: string }; Returns: string };
+      upsert_owner_lead: {
+        Args: {
+          p_contact_id: string;
+          p_owner_id: string;
+          p_property_id: string;
+          p_source: string;
+          p_stage: Database["public"]["Enums"]["lead_stage"];
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
+      delivery_status: "queued" | "sent" | "failed" | "cancelled";
+      lead_outcome: "won" | "lost";
+      lead_stage: "new" | "contacted" | "visit" | "closed";
       plan_audience: "owner" | "buyer" | "both";
       profile_status: "pending" | "active" | "suspended";
       property_deal: "sale" | "rent";
@@ -967,6 +1469,7 @@ export type Database = {
         | "archived";
       staff_department: "suporte" | "financeiro" | "moderacao" | "admin";
       user_role: "buyer" | "owner" | "admin" | "support";
+      visit_status: "pending" | "accepted" | "rescheduled" | "cancelled" | "completed" | "archived";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1590,6 +2093,9 @@ export const Constants = {
   },
   public: {
     Enums: {
+      delivery_status: ["queued", "sent", "failed", "cancelled"],
+      lead_outcome: ["won", "lost"],
+      lead_stage: ["new", "contacted", "visit", "closed"],
       plan_audience: ["owner", "buyer", "both"],
       profile_status: ["pending", "active", "suspended"],
       property_deal: ["sale", "rent"],
@@ -1605,6 +2111,7 @@ export const Constants = {
       ],
       staff_department: ["suporte", "financeiro", "moderacao", "admin"],
       user_role: ["buyer", "owner", "admin", "support"],
+      visit_status: ["pending", "accepted", "rescheduled", "cancelled", "completed", "archived"],
     },
   },
   storage: {

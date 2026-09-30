@@ -6,6 +6,7 @@ import { AppShell, type NavItem, type Notification } from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
 import { navFor } from "../lib/navigation";
+import { useNotifications } from "./notifications/useNotifications";
 
 export type AppChromeProps = {
   role: "buyer" | "owner";
@@ -19,7 +20,13 @@ export type AppChromeProps = {
   onLocaleChange: (locale: string) => void | Promise<void>;
   /** Contadores por `id` de item de navegação (07 §4.2). */
   counters?: Record<string, number>;
+  /** Primeiro render do sino; a partir daí é o `useNotifications` que manda. */
   notifications?: Notification[];
+  /**
+   * `false` numa storyboard: o sino fica com o que `notifications` trouxer e
+   * nunca fala com o Supabase (não há sessão no canvas).
+   */
+  liveNotifications?: boolean;
   /** 04 §1.5 — `"full"` só para o Mapa; tudo o resto fica no limite de 1600 px. */
   contentWidth?: "default" | "full";
   children: React.ReactNode;
@@ -55,12 +62,13 @@ export function AppChrome({
   onLocaleChange,
   counters = {},
   notifications = [],
+  liveNotifications = true,
   contentWidth = "default",
   children,
 }: AppChromeProps) {
   const t = useTranslations();
   const [search, setSearch] = useState("");
-  const [items, setItems] = useState<Notification[]>(notifications);
+  const { items, markAllRead } = useNotifications(notifications, liveNotifications);
 
   const { entries, groupKey } = navFor(role);
 
@@ -112,7 +120,7 @@ export function AppChrome({
         locales: LOCALES.map((value) => ({ value, label: t(`locale.${value}`) })),
         onLocaleChange: (next) => void onLocaleChange(next),
         notifications: items,
-        onMarkAllRead: () => setItems((current) => current.map((n) => ({ ...n, read: true }))),
+        onMarkAllRead: () => void markAllRead(),
       }}
     >
       {children}

@@ -249,9 +249,14 @@
 
   --h-xs: 32px;
   --h-sm: 36px;
+  /* Altura de campo e do botão por omissão (04 §1.8). Inputs, selects, tabs,
+     itens de navegação e o botão `md` partilham-na de propósito: um campo de
+     42 px ao lado de um botão de 40 px lia-se desalinhado. */
   --h-md: 40px;
   --h-lg: 42px;
   --h-xl: 44px;
+  /* CTA principal do site público (04 §1.8). */
+  --h-2xl: 48px;
 
   --sp-1: 4px;
   --sp-2: 6px;

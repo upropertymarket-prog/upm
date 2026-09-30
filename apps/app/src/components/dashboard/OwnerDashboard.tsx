@@ -1,30 +1,51 @@
 import { DashboardStats } from "./DashboardStats";
 import { QuickAccess } from "./QuickAccess";
+import { RecentActivity, type ActivityItem } from "./RecentActivity";
+import { UpcomingVisits } from "./UpcomingVisits";
 import { ViewsChart } from "./ViewsChart";
 import type { DashboardStat, ViewsSeries } from "./dashboardTypes";
+import type { VisitRow } from "../interaction/interactionTypes";
 
 export type OwnerDashboardProps = {
   stats: DashboardStat[];
   series: ViewsSeries[];
+  upcomingVisits: VisitRow[];
+  recentMessages: ActivityItem[];
+  recentMessagesMeta: string;
+  recentDocuments: ActivityItem[];
+  recentDocumentsMeta: string;
 };
 
 /**
- * Painel do proprietário (P4-06) — 04 §8.3
+ * Painel do proprietário — 04 §8.3
  * =========================================================================
- * Três dos cinco blocos do desenho. Os outros dois — "Próximas visitas" e
- * "Atividade recente" (mensagens e contratos) — dependem de tabelas que
- * nascem nas Fases 5 e 6; entram aqui quando P5-01/P5-02 e P6-01 aterrarem,
- * e não antes: um bloco permanentemente vazio vale menos do que bloco nenhum.
+ * Os cinco blocos do desenho, agora completos (fecha **D23**): "As suas
+ * estatísticas" → "Acesso rápido" → "Gráficos" → "Atividade recente".
+ *
+ * "Gráficos" é uma grelha de duas colunas, com o gráfico à esquerda e as
+ * próximas visitas à direita — na Fase 4 o gráfico ocupava a largura toda
+ * porque "Próximas visitas" dependia de `visit_requests`, que só existe agora.
+ * As colunas são fluidas (`auto-fit` com mínimo de 340 px): abaixo disso
+ * empilham sozinhas, sem ponto de quebra escrito à mão.
  *
  * Sem acesso ao Supabase de propósito: recebe tudo por prop, para o canvas de
  * demonstração poder montar o mesmo ecrã com dados fixos.
  */
-export function OwnerDashboard({ stats, series }: OwnerDashboardProps) {
+export function OwnerDashboard({
+  stats,
+  series,
+  upcomingVisits,
+  recentMessages,
+  recentMessagesMeta,
+  recentDocuments,
+  recentDocumentsMeta,
+}: OwnerDashboardProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
       <DashboardStats stats={stats} />
       <QuickAccess />
-      <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+      <section style={{ display: "flex", flexDirection: "column", gap: "var(--sp-6)" }}>
         <h2
           style={{
             fontSize: "var(--fs-subtitle)",
@@ -35,7 +56,36 @@ export function OwnerDashboard({ stats, series }: OwnerDashboardProps) {
         >
           Gráficos
         </h2>
-        <ViewsChart series={series} />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+            gap: "var(--sp-7)",
+            alignItems: "stretch",
+          }}
+        >
+          <ViewsChart series={series} />
+          <UpcomingVisits rows={upcomingVisits} />
+        </div>
+      </section>
+
+      <section style={{ display: "flex", flexDirection: "column", gap: "var(--sp-6)" }}>
+        <h2
+          style={{
+            fontSize: "var(--fs-subtitle)",
+            fontWeight: "var(--fw-bold)",
+            color: "var(--text)",
+            margin: 0,
+          }}
+        >
+          Atividade recente
+        </h2>
+        <RecentActivity
+          messages={recentMessages}
+          messagesMeta={recentMessagesMeta}
+          documents={recentDocuments}
+          documentsMeta={recentDocumentsMeta}
+        />
       </section>
     </div>
   );

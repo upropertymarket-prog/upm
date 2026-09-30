@@ -31,7 +31,9 @@
     ".next/tempo-mukzaij54ous/types/**/*.ts",
     ".next/tempo-mukzaij54ous/dev/types/**/*.ts",
     ".next/tempo-mulrl53gxr22/types/**/*.ts",
-    ".next/tempo-mulrl53gxr22/dev/types/**/*.ts"
+    ".next/tempo-mulrl53gxr22/dev/types/**/*.ts",
+    ".next/tempo-munqz7jt7cjj/types/**/*.ts",
+    ".next/tempo-munqz7jt7cjj/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

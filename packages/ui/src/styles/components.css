@@ -9,8 +9,11 @@
  *    no painel de estilo dos canvases do Tempo.
  *
  * Geometria e comportamento medidos nos protótipos `design/prototypes/*.dc.html`.
- * Todo o elemento interativo tem `min-height: var(--tap)` e `min-width:
- * var(--tap)` quando é quadrado — 07 §5.14, sem exceções.
+ * Alturas dos controlos em 04 §1.8: botões 32 / 40 / 48 px, campos e tabs a
+ * 40 px. O piso de `--tap` (40 px) aplica-se ao que é quadrado e sem rótulo —
+ * botões só de ícone — e não à altura de um botão com texto: 07 §5.14 fala de
+ * área clicável, e lê-la como altura mínima deixava a app sem nada abaixo de
+ * 40 px.
  * Nenhum tamanho de letra desce de `--fs-label` (13 px na app, 14 px no `www`)
  * — 07 §3.
  */
@@ -49,22 +52,29 @@
   cursor: not-allowed;
 }
 
-/* Tamanhos. O mínimo é `--tap` (40 px) e não menos, mesmo no tamanho `sm`. */
+/* Tamanhos — 04 §1.8. Sem `min-height: var(--tap)`: esse piso era a leitura
+   errada de 07 §5.14 ("área clicável ≥ 40 px" lido como "altura ≥ 40 px") e
+   deixava a app sem nenhum controlo abaixo de 40 px. O alvo de um botão com
+   texto é a sua própria área, e 32 px cumpre o 2.5.8 (AA), que pede 24 px.
+   O piso mantém-se onde faz falta: `.upm-btn--icon`, mais abaixo. */
 .upm-btn--sm {
-  height: var(--h-md);
-  min-height: var(--tap);
-  padding: 0 var(--sp-6);
+  height: var(--h-xs);
+  /* 13 px: o protótipo usa 12,5 px nestes botões e 04 §1.3 fixa o mínimo em
+     12 px — 13 px é o degrau da escala que lhe fica mais perto. */
+  font-size: var(--fs-label);
+  padding: 0 var(--sp-5);
 }
 
 .upm-btn--md {
-  height: var(--h-lg);
-  min-height: var(--tap);
+  height: var(--h-sm);
   padding: 0 var(--sp-7);
+  /* 64 px de largura mínima: um "OK" ou um "Não" isolado ficava um quadrado
+     estreito ao lado de um botão com rótulo longo. */
+  min-width: 64px;
 }
 
 .upm-btn--lg {
-  height: var(--h-xl);
-  min-height: var(--tap);
+  height: var(--h-2xl);
   padding: 0 var(--sp-8);
 }
 
@@ -160,7 +170,7 @@
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  height: var(--h-lg);
+  height: var(--h-md);
   min-height: var(--tap);
   padding: 0 var(--sp-5);
   border: 1px solid var(--border);
@@ -266,7 +276,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-3);
-  height: var(--h-lg);
+  height: var(--h-md);
   min-height: var(--tap);
   padding: 0 var(--sp-6);
   border: 1px solid var(--border);

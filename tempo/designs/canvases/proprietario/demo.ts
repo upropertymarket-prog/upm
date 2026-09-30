@@ -8,8 +8,26 @@ import type {
   DashboardStat,
   ViewsSeries,
 } from "../../../../apps/app/src/components/dashboard/dashboardTypes";
+import type { ActivityItem } from "../../../../apps/app/src/components/dashboard/RecentActivity";
+import type {
+  ConversationDetail,
+  ConversationSummary,
+  LeadRow,
+  VisitRow,
+} from "../../../../apps/app/src/components/interaction/interactionTypes";
 
 export const demoLocaleChange = () => undefined;
+
+/**
+ * Datas fixas, nunca `Date.now()`: uma data relativa ao relógio muda o texto
+ * ("há 2 horas") a cada montagem e faz a storyboard flutuar no VRT. Tudo é
+ * ancorado a 29 set 2026, o dia dos protótipos.
+ */
+const DIA = "2026-09-29T";
+
+/** As ações de escrita não fazem nada no canvas — não há sessão nem servidor. */
+export const demoOk = async () => ({});
+export const demoStartConversation = async () => ({ id: "c1" });
 
 export const demoDashboardStats: DashboardStat[] = [
   {
@@ -21,27 +39,28 @@ export const demoDashboardStats: DashboardStat[] = [
     deltaTone: "muted",
   },
   {
+    // 07 §5.8: "visualizações" são consultas da página, "visitas" são físicas.
     id: "views",
     icon: "eye",
-    label: "Visitas às propriedades",
+    label: "Visualizações dos imóveis",
     value: "1 245",
     delta: "+12% esta semana",
     deltaTone: "ok",
   },
   {
-    id: "saved",
-    icon: "saved",
-    label: "Guardados por compradores",
-    value: "17",
-    delta: "em listas de compradores",
+    id: "leads",
+    icon: "leads",
+    label: "Leads novas",
+    value: "9",
+    delta: "por contactar ou em conversa",
     deltaTone: "ok",
   },
   {
-    id: "drafts",
-    icon: "draft",
-    label: "Rascunhos",
-    value: "1",
-    delta: "a aguardar para publicar",
+    id: "visits",
+    icon: "visits",
+    label: "Visitas agendadas",
+    value: "3",
+    delta: "2 por confirmar",
     deltaTone: "warn",
   },
 ];
@@ -87,5 +106,282 @@ export const demoViewsSeries: ViewsSeries[] = [
       { label: "ago", value: 3180, srLabel: "agosto de 2026" },
       { label: "set", value: 4120, srLabel: "setembro de 2026" },
     ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Fase 5 — Interação. Os nomes e as frases são os da referência
+// (`design/prototypes/App Proprietario.dc.html`): Ana Silva é a proprietária,
+// João Costa, Marta Reis, Pedro Alves e Rita Bastos são os interessados.
+// ---------------------------------------------------------------------------
+
+export const demoUpcomingVisits: VisitRow[] = [
+  {
+    id: "v1",
+    propertyId: "p1",
+    propertyTitle: "Moradia T4 com jardim",
+    propertyLocation: "Cascais · Birre",
+    other: { id: "u2", name: "Marta Reis", initials: "MR" },
+    proposedAt: `${DIA}16:30:00Z`,
+    message: "Gostava de ver o anexo convertido.",
+    status: "pending",
+    rescheduleCount: 1,
+    proposedByMe: false,
+  },
+  {
+    id: "v2",
+    propertyId: "p2",
+    propertyTitle: "Loft industrial T1",
+    propertyLocation: "Lisboa · Marvila",
+    other: { id: "u3", name: "Pedro Alves", initials: "PA" },
+    proposedAt: "2026-10-01T18:00:00Z",
+    message: "",
+    status: "accepted",
+    rescheduleCount: 2,
+    proposedByMe: true,
+  },
+  {
+    id: "v3",
+    propertyId: "p3",
+    propertyTitle: "Apartamento T3 com varanda",
+    propertyLocation: "Lisboa · Campo de Ourique",
+    other: { id: "u1", name: "João Costa", initials: "JC" },
+    proposedAt: "2026-10-03T11:00:00Z",
+    message: "Seria possível visitar sábado de manhã?",
+    status: "pending",
+    rescheduleCount: 0,
+    proposedByMe: false,
+  },
+];
+
+/** A agenda mostra também o que já passou — daí as duas linhas fechadas. */
+export const demoVisits: VisitRow[] = [
+  ...demoUpcomingVisits,
+  {
+    id: "v4",
+    propertyId: "p3",
+    propertyTitle: "Apartamento T3 com varanda",
+    propertyLocation: "Lisboa · Campo de Ourique",
+    other: { id: "u4", name: "Rita Bastos", initials: "RB" },
+    proposedAt: "2026-09-12T15:00:00Z",
+    message: "Visita realizada, aguarda proposta.",
+    status: "completed",
+    rescheduleCount: 0,
+    proposedByMe: false,
+  },
+  {
+    id: "v5",
+    propertyId: "p1",
+    propertyTitle: "Moradia T4 com jardim",
+    propertyLocation: "Cascais · Birre",
+    other: { id: "u5", name: "Inês Faria", initials: "IF" },
+    proposedAt: "2026-09-09T10:30:00Z",
+    message: "",
+    status: "cancelled",
+    rescheduleCount: 3,
+    proposedByMe: true,
+  },
+];
+
+export const demoConversations: ConversationSummary[] = [
+  {
+    id: "c1",
+    propertyId: "p3",
+    propertyTitle: "T3 · Campo de Ourique",
+    propertyLocation: "Lisboa",
+    other: { id: "u1", name: "João Costa", initials: "JC" },
+    lastMessage: "Seria possível visitar sábado?",
+    lastMessageAt: `${DIA}09:12:00Z`,
+    unread: 2,
+  },
+  {
+    id: "c2",
+    propertyId: "p1",
+    propertyTitle: "Moradia T4 · Birre",
+    propertyLocation: "Cascais",
+    other: { id: "u2", name: "Marta Reis", initials: "MR" },
+    lastMessage: "A planta inclui o anexo?",
+    lastMessageAt: "2026-09-28T11:58:00Z",
+    unread: 1,
+  },
+  {
+    id: "c3",
+    propertyId: "p2",
+    propertyTitle: "Loft T1 · Marvila",
+    propertyLocation: "Lisboa",
+    other: { id: "u3", name: "Pedro Alves", initials: "PA" },
+    lastMessage: "Proposta de 310 000 €",
+    lastMessageAt: "2026-09-27T10:31:00Z",
+    unread: 0,
+  },
+  {
+    id: "c4",
+    propertyId: "p3",
+    propertyTitle: "T3 · Campo de Ourique",
+    propertyLocation: "Lisboa",
+    other: { id: "u4", name: "Rita Bastos", initials: "RB" },
+    lastMessage: "Obrigada pela visita!",
+    lastMessageAt: "2026-09-24T19:40:00Z",
+    unread: 0,
+  },
+];
+
+export const demoConversation: ConversationDetail = {
+  ...demoConversations[0]!,
+  buyerId: "u1",
+  canShareAddress: true,
+  addressShared: false,
+  messages: [
+    {
+      id: "m1",
+      body: "Boa tarde! Vi o anúncio do T3 e gostava de saber se a garagem é individual.",
+      createdAt: "2026-09-28T17:40:00Z",
+      mine: false,
+      read: true,
+    },
+    {
+      id: "m2",
+      body: "Boa tarde, João. É individual, com portão automático e arrecadação anexa.",
+      createdAt: "2026-09-28T18:02:00Z",
+      mine: true,
+      read: true,
+    },
+    {
+      id: "m3",
+      body: "Seria possível visitar sábado de manhã?",
+      createdAt: `${DIA}09:12:00Z`,
+      mine: false,
+      read: false,
+    },
+  ],
+};
+
+export const demoLeads: LeadRow[] = [
+  {
+    id: "l1",
+    propertyId: "p3",
+    propertyTitle: "Apartamento T3",
+    propertyLocation: "Campo de Ourique",
+    contact: { id: "u1", name: "João Costa", initials: "JC" },
+    stage: "contacted",
+    outcome: null,
+    lastMessage: "Seria possível visitar sábado de manhã?",
+    lastActivityAt: `${DIA}09:12:00Z`,
+    conversationId: "c1",
+  },
+  {
+    id: "l2",
+    propertyId: "p1",
+    propertyTitle: "Moradia T4",
+    propertyLocation: "Birre",
+    contact: { id: "u2", name: "Marta Reis", initials: "MR" },
+    stage: "new",
+    outcome: null,
+    lastMessage: "A planta inclui o anexo convertido?",
+    lastActivityAt: "2026-09-28T11:20:00Z",
+    conversationId: "c2",
+  },
+  {
+    id: "l3",
+    propertyId: "p2",
+    propertyTitle: "Loft T1",
+    propertyLocation: "Marvila",
+    contact: { id: "u3", name: "Pedro Alves", initials: "PA" },
+    stage: "visit",
+    outcome: null,
+    lastMessage: "Proposta de 310 000 € com escritura em 60 dias.",
+    lastActivityAt: "2026-09-27T10:04:00Z",
+    conversationId: "c3",
+  },
+  {
+    id: "l4",
+    propertyId: "p3",
+    propertyTitle: "Apartamento T3",
+    propertyLocation: "Campo de Ourique",
+    contact: { id: "u4", name: "Rita Bastos", initials: "RB" },
+    stage: "closed",
+    outcome: "won",
+    lastMessage: "Obrigada pela visita, gostei muito do apartamento.",
+    lastActivityAt: "2026-09-24T19:12:00Z",
+    conversationId: "c4",
+  },
+];
+
+export const demoRecentMessages: ActivityItem[] = [
+  {
+    id: "c1",
+    title: "João Costa · T3 Campo de Ourique",
+    subtitle: "«Seria possível visitar sábado?»",
+    href: "/mensagens?conversa=c1",
+    tag: "Novo",
+    tone: "new",
+  },
+  {
+    id: "c2",
+    title: "Marta Reis · Moradia T4",
+    subtitle: "«A planta inclui o anexo?»",
+    href: "/mensagens?conversa=c2",
+    tag: "Novo",
+    tone: "new",
+  },
+  {
+    id: "c3",
+    title: "Pedro Alves · Loft T1",
+    subtitle: "«Proposta de 310 000 €»",
+    href: "/mensagens?conversa=c3",
+    tag: "Lido",
+    tone: "archived",
+  },
+];
+
+export const demoRecentDocuments: ActivityItem[] = [
+  {
+    id: "d1",
+    title: "Certidão permanente · Apartamento T3",
+    subtitle: "anexado há 3 dias",
+    href: "/propriedades/p3/editar",
+    tag: "Documento",
+    tone: "archived",
+  },
+  {
+    id: "d2",
+    title: "Planta · Moradia T4",
+    subtitle: "anexado há 5 dias",
+    href: "/propriedades/p1/editar",
+    tag: "Documento",
+    tone: "archived",
+  },
+  {
+    id: "d3",
+    title: "Certificado energético · Loft T1",
+    subtitle: "anexado há 12 dias",
+    href: "/propriedades/p2/editar",
+    tag: "Documento",
+    tone: "archived",
+  },
+];
+
+/** O sino com o que a referência mostra no dropdown de notificações. */
+export const demoNotifications = [
+  {
+    id: "n1",
+    text: "Novo pedido de visita — João Costa pediu visita ao T3 Campo de Ourique para sábado, 3 out às 11h00.",
+    when: "há 12 minutos",
+    read: false,
+    href: "/agenda",
+  },
+  {
+    id: "n2",
+    text: "Nova mensagem de Marta Reis — «A planta inclui o anexo convertido?»",
+    when: "há 2 horas",
+    read: false,
+    href: "/mensagens",
+  },
+  {
+    id: "n3",
+    text: "Visita confirmada — Loft T1 Marvila, 1 out às 18h00.",
+    when: "há 2 dias",
+    read: true,
+    href: "/agenda",
   },
 ];

@@ -6,8 +6,11 @@ import { createClient } from "@upm/db/server";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { AppChrome } from "../../../components/AppChrome";
+import { ContactActions } from "../../../components/market/ContactActions";
 import { SaveButton } from "../../../components/market/SaveButton";
 import { PropertyLocationMap } from "../../../components/map/PropertyLocationMap";
+import { startConversation } from "../../actions/conversations";
+import { requestVisit } from "../../actions/visits";
 import { toggleSavedProperty } from "../../actions/saved-properties";
 import { setLocalePreference } from "../../actions/preferences";
 import { formatCents } from "../../../lib/money";
@@ -218,20 +221,15 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
                     action={toggleSavedProperty}
                   />
                 ) : null}
-                <a
-                  href="/mensagens"
-                  className="upm-btn upm-btn--primary upm-btn--md upm-btn--full"
-                  style={{ textDecoration: "none", textAlign: "center" }}
-                >
-                  Contactar
-                </a>
-                <a
-                  href="/visitas"
-                  className="upm-btn upm-btn--secondary upm-btn--md upm-btn--full"
-                  style={{ textDecoration: "none", textAlign: "center" }}
-                >
-                  Marcar visita
-                </a>
+                {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
+                    destino. O dono do imóvel não vê nenhum dos dois. */}
+                <ContactActions
+                  propertyId={id}
+                  propertyTitle={property.title ?? "Imóvel"}
+                  onContact={startConversation}
+                  onRequestVisit={requestVisit}
+                  disabled={property.owner_id === user.id}
+                />
               </CardBody>
             </Card>
           </aside>

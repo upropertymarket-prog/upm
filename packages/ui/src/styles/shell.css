@@ -145,7 +145,7 @@
   display: flex;
   align-items: center;
   gap: var(--sp-5);
-  height: var(--h-lg);
+  height: var(--h-md);
   min-height: var(--tap);
   padding: 0 var(--sp-5);
   border: none;
@@ -179,19 +179,19 @@
   color: var(--accent);
 }
 
-/* No rail os itens têm 42 px fixos: sem isto encostavam à parede esquerda do
-   rail de 84 px em vez de ficarem centrados sob o ícone da marca. */
+/* Sem isto os itens encostavam à parede esquerda do rail de 84 px em vez de
+   ficarem centrados sob o ícone da marca. */
 .upm-shell[data-collapsed="true"] .upm-nav {
   align-items: center;
 }
 
-/* Botão quadrado de 42 px: `--h-lg` é a altura que o item já tem, por isso
-   basta fixar a largura para ficar quadrado — e 42 px cumpre `--tap` (40 px,
-   07 §5.14) sem precisar de exceção. */
+/* Quadrado de 40 px: `--h-md` é a altura que o item já tem, por isso basta
+   fixar a largura. É um alvo sem rótulo visível no rail, logo cai na exceção
+   de 07 §5.14 que mantém os 40 px. */
 .upm-shell[data-collapsed="true"] .upm-nav__item {
   position: relative;
   justify-content: center;
-  width: var(--h-lg);
+  width: var(--h-md);
   padding: 0;
   column-gap: 0;
 }

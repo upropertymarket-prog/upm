@@ -1,15 +1,28 @@
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
+import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { Button } from "../../../../packages/ui/src/components/Button";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
 import { OwnerDashboard } from "../../../../apps/app/src/components/dashboard/OwnerDashboard";
 import ptMessages from "../../../../packages/config/messages/pt.json";
-import { demoDashboardStats, demoLocaleChange, demoViewsSeries } from "./demo";
+import {
+  demoDashboardStats,
+  demoLocaleChange,
+  demoNotifications,
+  demoRecentDocuments,
+  demoRecentMessages,
+  demoUpcomingVisits,
+  demoViewsSeries,
+} from "./demo";
 
 /**
- * `/painel` — Painel do proprietário (P4-06 · 04 §8.3).
+ * `/painel` — Painel do proprietário (04 §8.3).
+ *
+ * Os cinco blocos do desenho, completos desde a Fase 5 (fecha D23): o gráfico
+ * ocupa metade da largura, com "Próximas visitas" ao lado, e "Atividade
+ * recente" vem por baixo em duas colunas.
  *
  * O tema é fixado num `data-theme` próprio em vez de ser deixado ao
  * `ThemeProvider`: o provider, no primeiro efeito do cliente, lê o
@@ -25,33 +38,48 @@ import { demoDashboardStats, demoLocaleChange, demoViewsSeries } from "./demo";
  *
  * A saudação está fixa em "Boa tarde" em vez de `greetingKey()`: a chave
  * depende da hora do relógio e faria a storyboard render diferente conforme a
- * altura do dia. Ver `demo.ts` para a mesma razão nos baldes do gráfico.
+ * altura do dia. Ver `demo.ts` para a mesma razão nas datas e nos baldes.
+ *
+ * `liveNotifications={false}`: o sino da app lê `notifications` do Supabase em
+ * tempo real, e aqui não há sessão nenhuma — a lista fixa entra por prop.
  */
 function PainelDemo({ theme }: { theme: "light" | "dark" }) {
   return (
     <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
-          <AppChrome
-            role="owner"
-            userName="Ana Silva"
-            userMeta="Proprietária · Premium"
-            activeId="dashboard"
-            locale="pt"
-            onLocaleChange={demoLocaleChange}
-            counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-          >
-            <PageHeader
-              title="Boa tarde, Ana"
-              subtitle="Resumo da sua atividade e ativos"
-              actions={
-                <Button variant="secondary" disabled>
-                  Exportar
-                </Button>
-              }
-            />
-            <OwnerDashboard stats={demoDashboardStats} series={demoViewsSeries} />
-          </AppChrome>
+          <ToastProvider>
+            <AppChrome
+              role="owner"
+              userName="Ana Silva"
+              userMeta="Proprietária · Premium"
+              activeId="dashboard"
+              locale="pt"
+              onLocaleChange={demoLocaleChange}
+              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+              notifications={demoNotifications}
+              liveNotifications={false}
+            >
+              <PageHeader
+                title="Boa tarde, Ana"
+                subtitle="Resumo da sua atividade e ativos"
+                actions={
+                  <Button variant="secondary" disabled>
+                    Exportar
+                  </Button>
+                }
+              />
+              <OwnerDashboard
+                stats={demoDashboardStats}
+                series={demoViewsSeries}
+                upcomingVisits={demoUpcomingVisits}
+                recentMessages={demoRecentMessages}
+                recentMessagesMeta="2 por responder"
+                recentDocuments={demoRecentDocuments}
+                recentDocumentsMeta="3 recentes"
+              />
+            </AppChrome>
+          </ToastProvider>
         </ThemeProvider>
       </NextIntlClientProvider>
     </div>
