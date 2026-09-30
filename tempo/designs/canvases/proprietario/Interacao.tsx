@@ -70,10 +70,12 @@ function Shell({
   );
 }
 
-export default function Mensagens() {
+type Tema = { theme: "light" | "dark" };
+
+function MensagensDemo({ theme }: Tema) {
   return (
     <Shell
-      theme="light"
+      theme={theme}
       activeId="messages"
       title="Mensagens"
       subtitle="Conversas por imóvel, sem partilhar contactos"
@@ -89,10 +91,10 @@ export default function Mensagens() {
   );
 }
 
-export function Agenda() {
+function AgendaDemo({ theme }: Tema) {
   return (
     <Shell
-      theme="light"
+      theme={theme}
       activeId="visitSchedule"
       title="Agenda de visitas"
       subtitle="Gira as visitas agendadas para os seus imóveis"
@@ -110,10 +112,34 @@ export function Agenda() {
   );
 }
 
-export function Leads() {
+function LeadsDemo({ theme }: Tema) {
   return (
-    <Shell theme="light" activeId="leads" title="Leads" subtitle="4 contactos nos últimos 30 dias">
+    <Shell theme={theme} activeId="leads" title="Leads" subtitle="4 contactos nos últimos 30 dias">
       <LeadsScreen rows={demoLeads} onUpdateStage={demoOk} />
     </Shell>
   );
+}
+
+export default function Mensagens() {
+  return <MensagensDemo theme="light" />;
+}
+
+export function MensagensEscuro() {
+  return <MensagensDemo theme="dark" />;
+}
+
+export function Agenda() {
+  return <AgendaDemo theme="light" />;
+}
+
+export function AgendaEscuro() {
+  return <AgendaDemo theme="dark" />;
+}
+
+export function Leads() {
+  return <LeadsDemo theme="light" />;
+}
+
+export function LeadsEscuro() {
+  return <LeadsDemo theme="dark" />;
 }

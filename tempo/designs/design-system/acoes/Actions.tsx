@@ -46,11 +46,11 @@ export function Variantes() {
   );
 }
 
-/** Tamanhos e a regra dura dos 40 px (07 §5.14). */
+/** Tamanhos e o alvo de toque (04 §1.8). */
 export function Tamanhos() {
   return (
     <ThemePair>
-      <Row label="sm 40 · md 42 · lg 44">
+      <Row label="sm 32 · md 36 (padrão) · lg 48">
         <Button size="sm">Pequeno</Button>
         <Button size="md">Médio</Button>
         <Button size="lg">Grande</Button>
@@ -67,9 +67,11 @@ export function Tamanhos() {
         </Button>
       </Row>
       <Note>
-        Nenhum tamanho desce abaixo do alvo de 40 px, nem o `sm`: 07 §5.14 mede a área clicável, não
-        o desenho. É por isso que os ícones de hover das listas podem ter 14 px e continuar a
-        cumprir a regra.
+        36 px é o padrão: um botão que não declara tamanho tem 36 px, em todas as páginas de todas
+        as dashboards. O `sm` serve ações dentro de linhas de lista e o `lg` só o CTA do site
+        público. Altura e alvo de toque são coisas distintas — 04 §1.8 mede a área clicável, não o
+        desenho: 32 px cumpre o 2.5.8 (AA), que pede 24 px. A exceção são os botões só de ícone, que
+        ficam nos 40 × 40 px por não terem rótulo onde acertar.
       </Note>
     </ThemePair>
   );

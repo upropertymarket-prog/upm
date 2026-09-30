@@ -1,6 +1,6 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 import Painel, { PainelEscuro } from "./Painel";
-import Mensagens, { Agenda, Leads } from "./Interacao";
+import Mensagens, { Agenda, AgendaEscuro, Leads, LeadsEscuro, MensagensEscuro } from "./Interacao";
 
 /**
  * Canvas do Proprietário — Painel (Fase 4, completo na Fase 5) e os três ecrãs
@@ -14,10 +14,16 @@ import Mensagens, { Agenda, Leads } from "./Interacao";
  * Sem `intrinsicSizing`: o enquadramento é um viewport de monitor (1440 × 900)
  * e o conteúdo rola lá dentro, como num ecrã verdadeiro.
  *
- * O mesmo ecrã aparece duas vezes, lado a lado e alinhados, com 80 px entre
- * eles: claro e escuro. 04 §5.2 trata o modo escuro como requisito, não como
- * variante opcional — vê-los juntos é o que apanha um contraste mau antes de
- * chegar ao código.
+ * **Arrumação: duas colunas.** À esquerda (`x: 0`) o modo claro, à direita
+ * (`x: 1520`) o escuro — 80 px entre eles, 80 px entre linhas. As linhas seguem
+ * a **ordem da sidebar** de 07 §4.3, não a ordem em que os ecrãs foram
+ * construídos: Painel (1.º), Leads (4.º), Mensagens (5.º), Agenda de visitas
+ * (6.º). Os lugares vazios entre eles são as páginas que ainda não existem —
+ * Market, As minhas propriedades, Mapa, Cloud, Contratos, reports, Plano e
+ * Definições entram nas suas linhas quando forem construídas.
+ *
+ * 04 §5.2 trata o modo escuro como requisito, não como variante opcional —
+ * ver o par lado a lado é o que apanha um contraste mau antes do código.
  */
 export default function ProprietarioCanvas() {
   return (
@@ -35,22 +41,42 @@ export default function ProprietarioCanvas() {
         layout={{ x: 1520, y: 0, width: 1440, height: 900 }}
       />
       <Storyboard
-        id="Mensagens"
-        name="Mensagens (/mensagens)"
-        component={Mensagens}
+        id="Leads"
+        name="Leads · Claro (/leads)"
+        component={Leads}
         layout={{ x: 0, y: 980, width: 1440, height: 900 }}
       />
       <Storyboard
-        id="Agenda"
-        name="Agenda de visitas (/agenda)"
-        component={Agenda}
+        id="LeadsEscuro"
+        name="Leads · Escuro (/leads)"
+        component={LeadsEscuro}
         layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
       />
+
       <Storyboard
-        id="Leads"
-        name="Leads (/leads)"
-        component={Leads}
+        id="Mensagens"
+        name="Mensagens · Claro (/mensagens)"
+        component={Mensagens}
         layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="MensagensEscuro"
+        name="Mensagens · Escuro (/mensagens)"
+        component={MensagensEscuro}
+        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="Agenda"
+        name="Agenda de visitas · Claro (/agenda)"
+        component={Agenda}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="AgendaEscuro"
+        name="Agenda de visitas · Escuro (/agenda)"
+        component={AgendaEscuro}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
     </Canvas>
   );

@@ -145,8 +145,9 @@
   display: flex;
   align-items: center;
   gap: var(--sp-5);
-  height: var(--h-md);
-  min-height: var(--tap);
+  /* 36 px, como os campos e o botão `md` (04 §1.8). No rail colapsado volta a
+     40 px — ver a regra logo abaixo. */
+  height: var(--h-sm);
   padding: 0 var(--sp-5);
   border: none;
   border-radius: var(--r-lg);
@@ -185,13 +186,14 @@
   align-items: center;
 }
 
-/* Quadrado de 40 px: `--h-md` é a altura que o item já tem, por isso basta
-   fixar a largura. É um alvo sem rótulo visível no rail, logo cai na exceção
-   de 07 §5.14 que mantém os 40 px. */
+/* No rail o rótulo desaparece e o item fica a valer por um ícone — cai na
+   exceção de 04 §1.8 / 07 §5.14, que mantém 40 × 40 px para alvos sem texto.
+   Por isso sobe de 36 px para `--tap` e fica quadrado. */
 .upm-shell[data-collapsed="true"] .upm-nav__item {
   position: relative;
   justify-content: center;
-  width: var(--h-md);
+  width: var(--tap);
+  height: var(--tap);
   padding: 0;
   column-gap: 0;
 }

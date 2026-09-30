@@ -170,8 +170,9 @@
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  height: var(--h-md);
-  min-height: var(--tap);
+  /* 36 px, a alinhar com o botão `md` (04 §1.8). Sem piso de `--tap`: um campo
+     com rótulo é um alvo com área própria, e o 2.5.8 (AA) pede 24 px. */
+  height: var(--h-sm);
   padding: 0 var(--sp-5);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
@@ -276,8 +277,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-3);
-  height: var(--h-md);
-  min-height: var(--tap);
+  /* 36 px, como os campos e o botão `md` (04 §1.8). */
+  height: var(--h-sm);
   padding: 0 var(--sp-6);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
