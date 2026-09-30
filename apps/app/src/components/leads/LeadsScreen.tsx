@@ -138,7 +138,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     },
     {
       id: "property",
-      header: "Imóvel",
+      header: "Propriedades",
       cell: (row) => (
         <span style={{ color: "var(--muted)" }}>
           {row.propertyTitle} · {row.propertyLocation}
