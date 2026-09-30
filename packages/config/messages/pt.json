@@ -155,7 +155,7 @@
       "submit": "Enviar link",
       "sentTitle": "Verifique o seu e-mail",
       "sentBody": "Se existir uma conta com esse e-mail, enviámos um link de recuperação.",
-      "newPasswordTitle": "Defina uma nova palavra-passe",
+      "newPasswordTitle": "Defina a sua nova palavra-passe",
       "newPassword": "Nova palavra-passe",
       "submitNewPassword": "Guardar palavra-passe"
     },
