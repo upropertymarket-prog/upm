@@ -501,25 +501,27 @@ export function PlanScreen({
                     </span>
                   </li>
                 ))}
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    style={{
-                      display: "flex",
-                      gap: "var(--sp-3)",
-                      alignItems: "flex-start",
-                      fontSize: "var(--fs-body)",
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    <Check
-                      size={15}
-                      aria-hidden="true"
-                      style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
-                    />
-                    <span>{planFeatureLabel(feature)}</span>
-                  </li>
-                ))}
+                {plan.features
+                  .filter((feature) => !/\b(imóveis|imóvel|propriedades|propriedade)\b/i.test(feature))
+                  .map((feature) => (
+                    <li
+                      key={feature}
+                      style={{
+                        display: "flex",
+                        gap: "var(--sp-3)",
+                        alignItems: "flex-start",
+                        fontSize: "var(--fs-body)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      <Check
+                        size={15}
+                        aria-hidden="true"
+                        style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
+                      />
+                      <span>{planFeatureLabel(feature)}</span>
+                    </li>
+                  ))}
               </ul>
 
               <div style={{ marginTop: "auto" }}>
