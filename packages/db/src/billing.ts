@@ -38,10 +38,10 @@ export const LIMIT_KEYS = [
 export type LimitKey = (typeof LIMIT_KEYS)[number];
 
 export const LIMIT_LABELS: Record<LimitKey, string> = {
-  active_properties: "Imóveis ativos",
+  active_properties: "Propriedades ativas",
   visits: "Pedidos de visita por mês",
   active_chats: "Conversas ativas",
-  saved: "Imóveis guardados",
+  saved: "Propriedades guardadas",
   alerts: "Alertas de pesquisa",
   cloud_gb: "Cloud (GB)",
 };

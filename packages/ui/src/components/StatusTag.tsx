@@ -37,6 +37,7 @@ export const STATUS_TONES = {
 
   // Ciclo de vida genérico
   active: "var(--state-active)",
+  primary: "var(--accent)",
   pending: "var(--state-pending)",
   draft: "var(--state-draft)",
   archived: "var(--state-archived)",

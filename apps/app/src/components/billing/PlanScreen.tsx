@@ -78,6 +78,21 @@ const SUBSCRIPTION_LABEL: Record<string, string> = {
   incomplete: "Por concluir",
 };
 
+const PLAN_TONE: Record<string, StatusTone> = {
+  gratuito: "draft",
+  "essential-owner": "primary",
+  "smarter-owner": "dealSale",
+  "premium-owner": "dealRent",
+};
+
+function planFeatureLabel(feature: string) {
+  return feature
+    .replace(/\bImóveis\b/g, "Propriedades")
+    .replace(/\bimóveis\b/g, "propriedades")
+    .replace(/\bImóvel\b/g, "Propriedade")
+    .replace(/\bimóvel\b/g, "propriedade");
+}
+
 const INVOICE_TONE: Record<string, StatusTone> = {
   paid: "active",
   open: "pending",
@@ -441,8 +456,8 @@ export function PlanScreen({
                   current || plan.slug === highlightPlanSlug ? "var(--accent)" : "var(--border)",
               }}
             >
-              <StatusTag tone={current ? "active" : "draft"}>
-                {current ? `${plan.name} · atual` : plan.name}
+              <StatusTag className="upm-plan-tag" tone={PLAN_TONE[plan.slug] ?? "draft"}>
+                {plan.name}
               </StatusTag>
 
               <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-2)" }}>
@@ -502,7 +517,7 @@ export function PlanScreen({
                       aria-hidden="true"
                       style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
                     />
-                    <span>{feature}</span>
+                    <span>{planFeatureLabel(feature)}</span>
                   </li>
                 ))}
               </ul>
