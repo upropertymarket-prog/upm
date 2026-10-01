@@ -156,6 +156,43 @@ export function isEntitled(status: SubscriptionStatus): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Entradas validadas — P7-02, P7-04 e P7-05
+//
+// Os schemas vivem aqui e não nas apps, como os de `properties.ts` e
+// `cloud.ts`: é o que mantém a validação igual nos três sítios que a usam e
+// o `zod` como dependência de um pacote só.
+// ---------------------------------------------------------------------------
+
+/** O que o cliente pode pedir no Checkout. O PREÇO nunca vem daqui. */
+export const checkoutSchema = z.object({
+  kind: z.enum(["plan", "addon"]),
+  slug: z.string().min(1).max(64),
+  interval: z.enum(BILLING_INTERVALS),
+});
+export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+export const invoiceIdSchema = z.string().uuid();
+
+/** Modal de criar/editar plano do Admin (P7-05, 04 §8.5). */
+export const planFormSchema = z.object({
+  id: z.string().uuid().optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9-]+$/, "O slug usa só minúsculas, números e hífenes."),
+  name: z.string().trim().min(2).max(80),
+  audience: z.enum(["owner", "buyer", "both"]),
+  priceMonthCents: z.number().int().min(0).max(1_000_000),
+  priceYearCents: z.number().int().min(0).max(10_000_000),
+  features: z.array(z.string().trim().min(1).max(120)).max(12),
+  limits: limitsSchema,
+  visible: z.boolean(),
+});
+export type PlanFormInput = z.infer<typeof planFormSchema>;
+
+// ---------------------------------------------------------------------------
 // Tradução do que vem do Stripe — P7-03
 //
 // Puras de propósito: é a parte do webhook que mais vale a pena testar, e

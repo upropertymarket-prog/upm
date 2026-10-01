@@ -1,0 +1,102 @@
+import { cookies } from "next/headers";
+import { createClient } from "@upm/db/server";
+import { limitsSchema, type PlanLimits } from "@upm/db/billing";
+
+import { InternalChrome } from "../../../components/InternalChrome";
+import { setLocalePreference } from "../../actions/preferences";
+import { PlansManager, type AdminInvoiceRow, type PlanRow } from "./PlansManager";
+import { savePlan, syncStripe } from "./actions";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * Admin › Planos — `/admin/planos` (P7-05 · 04 §8.5)
+ * =========================================================================
+ * Três leituras agregadas em SQL (08 §4.5/§4.7): métricas por plano, resumo
+ * da receita e faturação recente. A página não conta nada por si; se contasse,
+ * uma plataforma com dez mil subscrições faria dez mil queries.
+ */
+export default async function PlansPage() {
+  const supabase = createClient(await cookies());
+
+  const [metrics, summary, invoices, catalog] = await Promise.all([
+    supabase.rpc("admin_plan_metrics"),
+    supabase.rpc("admin_billing_summary"),
+    supabase.rpc("admin_recent_invoices", { p_limit: 20 }),
+    supabase
+      .from("plans")
+      .select("id, features, limits, stripe_price_month_id, stripe_price_year_id"),
+  ]);
+
+  const extras = new Map(
+    (catalog.data ?? []).map((row) => [
+      row.id,
+      {
+        features: row.features ?? [],
+        limits: (limitsSchema.safeParse(row.limits ?? {}).data ?? {}) as PlanLimits,
+        synced: Boolean(row.stripe_price_month_id && row.stripe_price_year_id),
+      },
+    ]),
+  );
+
+  const plans: PlanRow[] = (metrics.data ?? []).map((row) => {
+    const extra = extras.get(row.plan_id);
+    return {
+      planId: row.plan_id,
+      slug: row.slug,
+      name: row.name,
+      audience: row.audience,
+      priceMonthCents: Number(row.price_month_cents),
+      priceYearCents: Number(row.price_year_cents),
+      visible: row.visible,
+      subscribers: Number(row.subscribers),
+      mrrCents: Number(row.mrr_cents),
+      features: extra?.features ?? [],
+      limits: extra?.limits ?? {},
+      // Um plano gratuito não vai ao Stripe e isso não é falta nenhuma.
+      syncedWithStripe:
+        (extra?.synced ?? false) ||
+        (Number(row.price_month_cents) === 0 && Number(row.price_year_cents) === 0),
+    };
+  });
+
+  const totals = summary.data?.[0];
+
+  const recent: AdminInvoiceRow[] = (invoices.data ?? []).map((row) => ({
+    id: row.id,
+    number: row.number,
+    totalCents: Number(row.total_cents),
+    status: row.status,
+    issuedAt: row.issued_at,
+    clientName: row.client_name,
+    planName: row.plan_name,
+  }));
+
+  return (
+    <InternalChrome
+      role="admin"
+      userName="Helena Matos"
+      userMeta="Administração · IT"
+      activeId="plans"
+      locale="pt"
+      onLocaleChange={setLocalePreference}
+      counters={{ propertyModeration: 4, siteLeads: 12 }}
+    >
+      <PlansManager
+        plans={plans}
+        summary={{
+          mrrCents: Number(totals?.mrr_cents ?? 0),
+          subscribers: Number(totals?.subscribers ?? 0),
+          trials: Number(totals?.trials ?? 0),
+          pastDue: Number(totals?.past_due ?? 0),
+          canceled30d: Number(totals?.canceled_30d ?? 0),
+          new30d: Number(totals?.new_30d ?? 0),
+          addonSubscribers: Number(totals?.addon_subscribers ?? 0),
+        }}
+        invoices={recent}
+        onSave={savePlan}
+        onSync={syncStripe}
+      />
+    </InternalChrome>
+  );
+}

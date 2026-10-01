@@ -364,6 +364,45 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Admin › Planos — P7-05
+  // -------------------------------------------------------------------------
+
+  it("as métricas de Admin › Planos são só para o staff", async () => {
+    for (const fn of ["admin_plan_metrics", "admin_billing_summary"] as const) {
+      expect((await clients.admin.rpc(fn)).error, `admin ${fn}`).toBeNull();
+      expect((await clients.support.rpc(fn)).error, `support ${fn}`).toBeNull();
+      expect((await clients.owner.rpc(fn)).error, `owner ${fn}`).not.toBeNull();
+      expect((await clients.anon.rpc(fn)).error, `anon ${fn}`).not.toBeNull();
+    }
+
+    const recent = await clients.admin.rpc("admin_recent_invoices", { p_limit: 5 });
+    expect(recent.error).toBeNull();
+    expect((await clients.buyer.rpc("admin_recent_invoices", { p_limit: 5 })).error).not.toBeNull();
+  });
+
+  it("só o admin escreve um plano — nem o suporte, nem um utilizador", async () => {
+    const change = { name: "Smarter (teste)" };
+
+    expect(
+      (await clients.support.from("plans").update(change).eq("id", paidPlanId)).error ?? {},
+    ).toBeTruthy();
+    expect(
+      (await clients.owner.from("plans").update(change).eq("id", paidPlanId)).error ?? {},
+    ).toBeTruthy();
+
+    const { data: untouched } = await service
+      .from("plans")
+      .select("name")
+      .eq("id", paidPlanId)
+      .single();
+    expect(untouched!.name).toBe("Smarter");
+
+    const byAdmin = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
+    expect(byAdmin.error).toBeNull();
+    await service.from("plans").update({ name: "Smarter" }).eq("id", paidPlanId);
+  });
+
+  // -------------------------------------------------------------------------
   // Enforcement — 08 §5.3, limites de 07 §19.2
   // -------------------------------------------------------------------------
 

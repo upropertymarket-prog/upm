@@ -2107,6 +2107,44 @@ export type Database = {
     };
     Functions: {
       accept_visit_request: { Args: { p_id: string }; Returns: undefined };
+      admin_billing_summary: {
+        Args: never;
+        Returns: {
+          addon_subscribers: number;
+          canceled_30d: number;
+          mrr_cents: number;
+          new_30d: number;
+          past_due: number;
+          subscribers: number;
+          trials: number;
+        }[];
+      };
+      admin_plan_metrics: {
+        Args: never;
+        Returns: {
+          audience: Database["public"]["Enums"]["plan_audience"];
+          mrr_cents: number;
+          name: string;
+          plan_id: string;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          subscribers: number;
+          visible: boolean;
+        }[];
+      };
+      admin_recent_invoices: {
+        Args: { p_limit?: number };
+        Returns: {
+          client_name: string;
+          id: string;
+          issued_at: string;
+          number: string;
+          plan_name: string;
+          status: string;
+          total_cents: number;
+        }[];
+      };
       apply_plan_downgrade: { Args: { p_profile_id: string }; Returns: number };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
       at_limit_ratio: {

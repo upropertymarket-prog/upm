@@ -5,6 +5,7 @@ import {
   isNearLimit,
   isUnlimited,
   limitsSchema,
+  planFormSchema,
   planLimitMessage,
   productIdFor,
   refId,
@@ -186,6 +187,32 @@ describe("recusa por limite de plano (P7-03)", () => {
     expect(planLimitMessage({ code: "23505", hint: "saved" })).toBeNull();
     expect(planLimitMessage({ code: "P0001", hint: "coisa_que_nao_existe" })).toBeNull();
     expect(planLimitMessage(null)).toBeNull();
+  });
+});
+
+describe("modal de plano do Admin (P7-05)", () => {
+  const base = {
+    slug: "smarter-owner",
+    name: "Smarter",
+    audience: "owner" as const,
+    priceMonthCents: 1299,
+    priceYearCents: 12990,
+    features: ["Destaque no Market"],
+    visible: true,
+  };
+
+  it("um limite vazio grava-se como ilimitado, nunca como um número grande", () => {
+    const parsed = planFormSchema.parse({
+      ...base,
+      limits: { active_properties: null, saved: 200, cloud_gb: 5 },
+    });
+    expect(parsed.limits.active_properties).toBeNull();
+    expect(parsed.limits.saved).toBe(200);
+  });
+
+  it("recusa slug com maiúsculas ou espaços, e preços negativos", () => {
+    expect(() => planFormSchema.parse({ ...base, slug: "Smarter Owner", limits: {} })).toThrow();
+    expect(() => planFormSchema.parse({ ...base, priceMonthCents: -1, limits: {} })).toThrow();
   });
 });
 

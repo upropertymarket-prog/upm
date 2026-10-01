@@ -3,9 +3,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { createClient } from "@upm/db/server";
-import { billingIntervalSchema } from "@upm/db/billing";
+import { checkoutSchema, invoiceIdSchema } from "@upm/db/billing";
 import { MAX_FILE_BYTES, sniffMime } from "@upm/db/cloud";
 import { getStripeClient } from "@upm/db/stripe";
 
@@ -24,12 +23,6 @@ import { getStripeClient } from "@upm/db/stripe";
  */
 
 export type CheckoutState = { url?: string; error?: string };
-
-const checkoutSchema = z.object({
-  kind: z.enum(["plan", "addon"]),
-  slug: z.string().min(1).max(64),
-  interval: billingIntervalSchema,
-});
 
 async function session() {
   const supabase = createClient(await cookies());
@@ -231,7 +224,7 @@ async function ownInvoice(invoiceId: string) {
   const { supabase, user } = await session();
   if (!user) return { error: "Sessão inválida." as const };
 
-  const parsed = z.string().uuid().safeParse(invoiceId);
+  const parsed = invoiceIdSchema.safeParse(invoiceId);
   if (!parsed.success) return { error: "Fatura inválida." as const };
 
   // A RLS já limita a leitura ao dono; o `eq` é o cinto a par dos suspensórios.
