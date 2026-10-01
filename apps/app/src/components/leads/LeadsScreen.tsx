@@ -102,7 +102,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     {
       id: "contact",
       header: "Interessado",
-      width: "304px",
+      width: "316px",
       cell: (row) => (
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", minWidth: 0 }}>
           <span
@@ -150,7 +150,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     {
       id: "when",
       header: "Recebido",
-      width: "179px",
+      width: "167px",
       cell: (row) => (
         <span style={{ color: "var(--muted)" }}>{formatRelative(row.lastActivityAt)}</span>
       ),
