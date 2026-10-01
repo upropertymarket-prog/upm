@@ -91,6 +91,39 @@ export function isNearLimit(used: number, limit: number | null | undefined): boo
   return used / limit >= NEAR_LIMIT_RATIO;
 }
 
+/**
+ * O que se diz a quem bate num limite. 07 §19.8 #1: nunca truncar em
+ * silêncio — a recusa explica-se, e aponta para onde se resolve.
+ *
+ * O gatilho `enforce_plan_limit` (migração `20261001120100`) devolve a chave
+ * no `hint`, por isso não é preciso analisar texto de erro para saber qual
+ * dos limites foi.
+ */
+export const LIMIT_REACHED_MESSAGE: Record<LimitKey, string> = {
+  active_properties:
+    "Chegou ao limite de imóveis publicados do seu plano. Veja os planos para publicar mais.",
+  visits: "Chegou ao limite de pedidos de visita deste mês. Veja os planos para pedir mais.",
+  active_chats:
+    "Chegou ao limite de conversas do seu plano. Veja os planos para falar com mais pessoas.",
+  saved: "Chegou ao limite de imóveis guardados do seu plano. Veja os planos para guardar mais.",
+  alerts: "Chegou ao limite de alertas do seu plano. Veja os planos para criar mais.",
+  cloud_gb: "Não há espaço na sua Cloud. Veja os planos para aumentar o armazenamento.",
+};
+
+/**
+ * Traduz um erro do Postgres em mensagem de limite, ou `null` se não for um.
+ * Serve para a Server Action não ter de distinguir "falhou porque o plano
+ * acabou" de "falhou porque alguma coisa correu mal" — são respostas
+ * diferentes para o utilizador.
+ */
+export function planLimitMessage(
+  error: { code?: string | null; hint?: string | null } | null | undefined,
+): string | null {
+  if (!error || error.code !== "P0001") return null;
+  const key = error.hint as LimitKey | undefined | null;
+  return key && key in LIMIT_REACHED_MESSAGE ? LIMIT_REACHED_MESSAGE[key] : null;
+}
+
 // ---------------------------------------------------------------------------
 // Intervalos e estados — 05 §6.6
 // ---------------------------------------------------------------------------
@@ -120,6 +153,63 @@ export const ENTITLED_STATUSES: readonly SubscriptionStatus[] = ["active", "tria
 
 export function isEntitled(status: SubscriptionStatus): boolean {
   return ENTITLED_STATUSES.includes(status);
+}
+
+// ---------------------------------------------------------------------------
+// Tradução do que vem do Stripe — P7-03
+//
+// Puras de propósito: é a parte do webhook que mais vale a pena testar, e
+// testá-la não devia obrigar a montar um servidor nem a assinar um evento.
+// ---------------------------------------------------------------------------
+
+/** Os estados do Stripe não são os de `subscriptions` (05 §6.6). */
+export function toSubscriptionStatus(status: string): SubscriptionStatus {
+  switch (status) {
+    case "active":
+    case "trialing":
+    case "past_due":
+    case "incomplete":
+      return status;
+    // `unpaid`, `incomplete_expired` e `paused` não dão direito a nada; para
+    // o produto são todos o mesmo: a subscrição deixou de valer.
+    case "canceled":
+    case "unpaid":
+    case "incomplete_expired":
+    case "paused":
+      return "canceled";
+    default:
+      return "incomplete";
+  }
+}
+
+/** O Stripe conta o tempo em segundos; a base de dados em `timestamptz`. */
+export function secondsToIso(value: number | null | undefined): string | null {
+  return value ? new Date(value * 1000).toISOString() : null;
+}
+
+type MaybeRef = string | { id: string } | null | undefined;
+
+export function refId(value: MaybeRef): string | null {
+  if (!value) return null;
+  return typeof value === "string" ? value : value.id;
+}
+
+/**
+ * `invoice.subscription` mudou de sítio entre versões da API (passou a viver
+ * nas linhas da fatura). Lê-se dos dois sítios, para uma atualização da
+ * biblioteca não partir a ligação fatura ↔ subscrição em silêncio.
+ */
+export function subscriptionIdFromInvoice(invoice: {
+  subscription?: MaybeRef;
+  lines?: { data?: { subscription?: MaybeRef }[] };
+}): string | null {
+  const direct = refId(invoice.subscription);
+  if (direct) return direct;
+  for (const line of invoice.lines?.data ?? []) {
+    const parent = refId(line.subscription);
+    if (parent) return parent;
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------

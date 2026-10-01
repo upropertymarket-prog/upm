@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { createClient } from "@upm/db/server";
+import { planLimitMessage } from "@upm/db/billing";
 import {
   characteristicsStepSchema,
   identificationStepSchema,
@@ -477,7 +478,7 @@ export async function publishProperty(propertyId: string): Promise<{ error?: str
     .eq("id", propertyId)
     .eq("owner_id", user.id);
 
-  if (error) return { error: "Não foi possível publicar o imóvel." };
+  if (error) return { error: planLimitMessage(error) ?? "Não foi possível publicar o imóvel." };
   return {};
 }
 

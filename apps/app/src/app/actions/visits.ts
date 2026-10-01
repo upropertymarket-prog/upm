@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
+import { planLimitMessage } from "@upm/db/billing";
 import {
   rescheduleSchema,
   toProposedAt,
@@ -56,7 +57,11 @@ export async function requestVisit(input: VisitRequestInput): Promise<VisitActio
     p_proposed_at: toProposedAt(parsed.data.date, parsed.data.time),
     p_message: parsed.data.message,
   });
-  if (error) return { error: toMessage(error, "Não foi possível pedir a visita.") };
+  if (error) {
+    return {
+      error: planLimitMessage(error) ?? toMessage(error, "Não foi possível pedir a visita."),
+    };
+  }
 
   paths();
   return { ok: true };

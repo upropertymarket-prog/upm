@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
+import { planLimitMessage } from "@upm/db/billing";
 
 import type { ToggleSavedResult } from "../../components/market/SavedPropertyActions";
 
@@ -43,7 +44,8 @@ export async function toggleSavedProperty(propertyId: string): Promise<ToggleSav
     property_id: propertyId,
     price_at_save_cents: property?.price_cents ?? property?.rent_cents ?? null,
   });
-  if (error) return { error: "Não foi possível guardar o imóvel." };
+  // P7-03: o limite do plano é do gatilho, e a recusa explica-se (07 §19.8 #1).
+  if (error) return { error: planLimitMessage(error) ?? "Não foi possível guardar o imóvel." };
 
   revalidatePath("/guardados");
   return { saved: true };

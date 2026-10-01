@@ -133,12 +133,31 @@ export async function selectPlan(
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  // Só grava o plano — sem Stripe/`subscriptions` nesta fase (decisão do
-  // cliente, Fase 3): liga-se na Fase 8 (07 §8.2).
-  const { error } = await supabase.from("profiles").update({ plan_id: planId }).eq("id", user.id);
+  const appUrl = process.env.APP_URL ?? "http://localhost:4301";
+
+  const { data: plan } = await supabase
+    .from("plans")
+    .select("slug, price_month_cents, price_year_cents")
+    .eq("id", planId)
+    .eq("visible", true)
+    .maybeSingle();
+
+  if (!plan) return { error: "Escolha um plano." };
+
+  // 03 F2: "Plano (Free por omissão) → se pago: Stripe Checkout". Um plano
+  // pago não se grava aqui — a subscrição nasce do webhook, depois do
+  // pagamento (P7-03). O ecrã `/plano` da app é que abre o Checkout.
+  if (plan.price_month_cents > 0 || plan.price_year_cents > 0) {
+    redirect(`${appUrl}/plano?plano=${encodeURIComponent(plan.slug)}` as Route);
+  }
+
+  // Fase 7: `profiles.plan_id` deixou de ser escrita diretamente — a sessão já
+  // não tem privilégio nessa coluna (migração `20261001120100`), senão
+  // qualquer um se dava a si próprio o plano de topo. A função só aceita
+  // planos gratuitos.
+  const { error } = await supabase.rpc("set_registration_plan", { p_plan_id: planId });
   if (error) return { error: "Não foi possível guardar o plano. Tente novamente." };
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:4301";
   // `redirect` com `typedRoutes` só aceita rotas internas conhecidas desta
   // app — um URL absoluto para `app.*` é, de propósito, outra coisa.
   redirect(`${appUrl}/painel` as Route);

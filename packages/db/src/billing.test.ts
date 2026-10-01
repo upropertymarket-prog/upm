@@ -5,9 +5,14 @@ import {
   isNearLimit,
   isUnlimited,
   limitsSchema,
+  planLimitMessage,
   productIdFor,
+  refId,
   remaining,
+  secondsToIso,
+  subscriptionIdFromInvoice,
   syncCatalog,
+  toSubscriptionStatus,
   type CatalogEntry,
   type CatalogPrice,
   type CatalogProduct,
@@ -135,6 +140,52 @@ describe("limites por plano (07 §19.2)", () => {
     // Um plano de comprador não tem a chave de imóveis — e isso é válido.
     expect(limitsSchema.parse({ saved: 100, alerts: 5 }).active_properties).toBeUndefined();
     expect(() => limitsSchema.parse({ saved: -1 })).toThrow();
+  });
+});
+
+describe("o que vem do Stripe (P7-03)", () => {
+  it("traduz os estados de subscrição para os de 05 §6.6", () => {
+    expect(toSubscriptionStatus("active")).toBe("active");
+    expect(toSubscriptionStatus("trialing")).toBe("trialing");
+    expect(toSubscriptionStatus("past_due")).toBe("past_due");
+    // Tudo o que deixou de dar direito a seja o que for é o mesmo estado.
+    expect(toSubscriptionStatus("unpaid")).toBe("canceled");
+    expect(toSubscriptionStatus("incomplete_expired")).toBe("canceled");
+    expect(toSubscriptionStatus("paused")).toBe("canceled");
+    // Um estado que o Stripe acrescente amanhã não vira "active" por engano.
+    expect(toSubscriptionStatus("qualquer_coisa_nova")).toBe("incomplete");
+  });
+
+  it("converte segundos em ISO e trata o nulo", () => {
+    expect(secondsToIso(0)).toBeNull();
+    expect(secondsToIso(null)).toBeNull();
+    expect(secondsToIso(1_790_000_000)).toBe(new Date(1_790_000_000_000).toISOString());
+  });
+
+  it("lê um id venha ele como string ou como objeto", () => {
+    expect(refId("cus_123")).toBe("cus_123");
+    expect(refId({ id: "cus_123" })).toBe("cus_123");
+    expect(refId(null)).toBeNull();
+  });
+
+  it("encontra a subscrição da fatura nos dois sítios onde o Stripe já a pôs", () => {
+    expect(subscriptionIdFromInvoice({ subscription: "sub_1" })).toBe("sub_1");
+    expect(subscriptionIdFromInvoice({ lines: { data: [{ subscription: "sub_2" }] } })).toBe(
+      "sub_2",
+    );
+    expect(subscriptionIdFromInvoice({ lines: { data: [{}] } })).toBeNull();
+    expect(subscriptionIdFromInvoice({})).toBeNull();
+  });
+});
+
+describe("recusa por limite de plano (P7-03)", () => {
+  it("traduz a chave do gatilho em mensagem, e só a do gatilho", () => {
+    expect(planLimitMessage({ code: "P0001", hint: "saved" })).toContain("guardados");
+    expect(planLimitMessage({ code: "P0001", hint: "active_properties" })).toContain("publicados");
+    // Um erro qualquer do Postgres não vira "chegou ao limite".
+    expect(planLimitMessage({ code: "23505", hint: "saved" })).toBeNull();
+    expect(planLimitMessage({ code: "P0001", hint: "coisa_que_nao_existe" })).toBeNull();
+    expect(planLimitMessage(null)).toBeNull();
   });
 });
 

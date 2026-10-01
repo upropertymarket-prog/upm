@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
+import { planLimitMessage } from "@upm/db/billing";
 import { propertyFiltersSchema, type PropertyFilters } from "@upm/db/properties";
 
 /**
@@ -25,7 +26,7 @@ export async function createSearchAlert(filters: PropertyFilters): Promise<Searc
   const { error } = await supabase
     .from("search_alerts")
     .insert({ user_id: user.id, filters: parsed.data });
-  if (error) return { error: "Não foi possível criar o alerta." };
+  if (error) return { error: planLimitMessage(error) ?? "Não foi possível criar o alerta." };
 
   revalidatePath("/guardados/alertas");
   return { ok: true };

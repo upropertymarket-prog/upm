@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
+import { planLimitMessage } from "@upm/db/billing";
 import { messageSchema, type MessageInput } from "@upm/db/interaction";
 
 /**
@@ -29,7 +30,9 @@ export async function startConversation(propertyId: string): Promise<StartConver
   const { data, error } = await supabase.rpc("start_conversation", {
     p_property_id: propertyId,
   });
-  if (error || !data) return { error: "Não foi possível abrir a conversa." };
+  if (error || !data) {
+    return { error: planLimitMessage(error) ?? "Não foi possível abrir a conversa." };
+  }
 
   revalidatePath("/mensagens");
   return { id: data };
