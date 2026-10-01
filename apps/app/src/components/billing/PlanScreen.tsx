@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState, useTransition } from "react";
 import {
-  Check,
+  CircleCheck,
   CloudUpload,
   CreditCard,
   Download,
@@ -503,7 +503,7 @@ export function PlanScreen({
                       lineHeight: 1.45,
                     }}
                   >
-                    <Check
+                    <CircleCheck
                       size={15}
                       aria-hidden="true"
                       style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
@@ -530,7 +530,7 @@ export function PlanScreen({
                         lineHeight: 1.45,
                       }}
                     >
-                      <Check
+                      <CircleCheck
                         size={15}
                         aria-hidden="true"
                         style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
