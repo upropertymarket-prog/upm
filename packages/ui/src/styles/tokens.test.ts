@@ -237,8 +237,8 @@ describe("04 §5.6 — as tags têm de ser legíveis", () => {
   }
 
   it("dá a cada tom de estado ≥ 4.5:1 contra --on-solid", () => {
-    // `.upm-tag` escreve --on-solid a 13 px / peso black sobre o tom sólido.
-    // 13 px a negrito não chega a "texto grande" da WCAG (18.66 px), por isso o
+    // `.upm-tag` escreve --on-solid a 12 px / peso 550 sobre o tom sólido.
+    // 12 px a peso 550 não chega a "texto grande" da WCAG (18.66 px), por isso o
     // critério é o AA normal de 4.5:1 e não o 3:1.
     const onSolid = rootTokens["--on-solid"]!;
     const offenders: string[] = [];
@@ -306,36 +306,66 @@ describe("07 §3 — mínimo 13 px na app, 14 px no site público", () => {
   });
 });
 
-describe("07 §5.14 — alvos de toque ≥ 40 px", () => {
-  it("define --tap a 40 px", () => {
+/**
+ * 04 §1.8, revisto a 30 set 2026
+ * =========================================================================
+ * A regra antiga — 07 §5.14, "alvos ≥ 40 px" — foi lida como "altura do botão
+ * ≥ 40 px", e o resultado era uma app sem um único controlo abaixo de 40 px.
+ * O cliente decidiu a 30 set 2026 separar as duas coisas:
+ *
+ *  - **altura visual**: 32 / 36 / 48 px, com 36 px por omissão;
+ *  - **alvo de toque**: o 2.5.8 (AA) exige 24 × 24 px, e um controlo de 32 px
+ *    passa pelo tamanho. Os 44 px são o 2.5.5, nível AAA, que este projeto não
+ *    persegue.
+ *
+ * A exceção que se mantém, e é a que 07 §5.14 tinha realmente em mente:
+ * **botões só de ícone nunca descem de 40 × 40 px** — sem rótulo não há onde
+ * acertar. Vale também para os alvos sem texto do shell.
+ *
+ * Este teste passou a verificar a regra nova. A anterior exigia `--tap` em
+ * todo o lado e falhava contra o CSS que já implementa 04 §1.8 — estava a
+ * defender uma decisão substituída.
+ */
+describe("04 §1.8 — alturas dos controlos e alvos de toque", () => {
+  it("define a escala 32 / 36 / 48 e o alvo mínimo de 40 px", () => {
     expect(rootTokens["--tap"]).toBe("40px");
+    expect(rootTokens["--h-xs"]).toBe("32px");
+    expect(rootTokens["--h-sm"]).toBe("36px");
+    expect(rootTokens["--h-2xl"]).toBe("48px");
   });
 
-  it("garante o alvo em todo o controlo interativo", () => {
-    // Cada uma destas classes é a raiz clicável de um componente; nenhuma pode
-    // ficar sem alvo garantido, por pequeno que seja o ícone desenhado.
-    const interactive = [
-      ".upm-btn--sm",
-      ".upm-btn--md",
-      ".upm-btn--lg",
-      ".upm-btn--icon",
-      ".upm-control",
-      ".upm-tab",
-      ".upm-toggle",
-      ".upm-check",
-      ".upm-page",
-      ".upm-menu__item",
-      ".upm-nav__item",
-      ".upm-sidebar__report",
-    ];
+  /** A altura que cada raiz clicável tem de declarar, e porquê. */
+  const EXPECTED: Record<string, { token: string; why: string }> = {
+    ".upm-btn--sm": { token: "--h-xs", why: "ações dentro de linhas e filtros" },
+    ".upm-btn--md": { token: "--h-sm", why: "o padrão de 04 §1.8" },
+    ".upm-btn--lg": { token: "--h-2xl", why: "CTA principal do site público" },
+    ".upm-btn--icon": { token: "--tap", why: "sem rótulo não há onde acertar" },
+    ".upm-control": { token: "--h-sm", why: "campo alinha com o botão md" },
+    ".upm-tab": { token: "--h-sm", why: "tab alinha com o botão md" },
+    ".upm-nav__item": { token: "--h-sm", why: "item de navegação com texto" },
+    ".upm-toggle": { token: "--tap", why: "alvo sem rótulo" },
+    ".upm-check": { token: "--tap", why: "alvo sem rótulo" },
+    ".upm-page": { token: "--tap", why: "número de página, só dígito" },
+    ".upm-menu__item": { token: "--tap", why: "alvo de menu" },
+    ".upm-sidebar__report": { token: "--tap", why: "alvo a toda a largura" },
+  };
+
+  it("declara em cada controlo a altura que 04 §1.8 lhe dá", () => {
     const css = componentsCss + shellCss;
 
-    for (const selector of interactive) {
+    for (const [selector, { token, why }] of Object.entries(EXPECTED)) {
       const found = bodies(css, selector);
       expect(found.length, `${selector} não declarado`).toBeGreaterThan(0);
-      expect(found.join("\n"), selector).toMatch(
-        /min-height:\s*var\(--tap\)|height:\s*var\(--tap\)/,
+      expect(found.join("\n"), `${selector} — ${why}`).toMatch(
+        new RegExp(`(?:min-)?height:\\s*var\\(${token}\\)`),
       );
+    }
+  });
+
+  it("nunca desce abaixo dos 24 px que o 2.5.8 (AA) exige", () => {
+    for (const { token } of Object.values(EXPECTED)) {
+      const value = Number.parseInt(rootTokens[token] ?? "0", 10);
+      expect(value, token).toBeGreaterThanOrEqual(24);
     }
   });
 });

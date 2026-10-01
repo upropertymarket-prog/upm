@@ -56,6 +56,16 @@
      conteúdo. */
   --on-solid: #ffffff;
 
+  /* Laranja da marca quando é **fundo** de texto `--on-solid` — a bolha de
+     mensagem própria, e o que lhe vier a seguir. Igual nos dois temas, pela
+     mesma razão que as cores de estado o são (04 §5.6): o `--accent` escuro
+     (#f97316) é mais claro de propósito, para acentuar *sobre* fundos escuros,
+     e com branco por cima fica em 2,80:1 — ilegível. Este fica no tom claro,
+     3,56:1, que é o que o produto já mostra em modo claro.
+     `--accent` continua a ser o tom de acento do tema; isto é só o sólido. */
+  --accent-solid: #ea580c;
+  --accent-solid-hover: #c2410c;
+
   /* Véu dos overlays de modal e drawer — protótipos: rgba(2,6,23,.6). */
   --overlay: rgb(2 6 23 / 60%);
 
@@ -85,6 +95,10 @@
   --accent-hover: #fb923c;
   --accent-ink: #fdba74;
   --accent-soft: #20130a;
+  /* Não acompanham o `--accent` escuro de propósito — ver o comentário na
+     paleta clara. São fundos sólidos, e o branco por cima tem de se ler. */
+  --accent-solid: #ea580c;
+  --accent-solid-hover: #c2410c;
   --ph1: #101a2c;
   --ph2: #152338;
   --ok: #34d399;
@@ -120,6 +134,8 @@
     --accent-hover: #fb923c;
     --accent-ink: #fdba74;
     --accent-soft: #20130a;
+    --accent-solid: #ea580c;
+    --accent-solid-hover: #c2410c;
     --ph1: #101a2c;
     --ph2: #152338;
     --ok: #34d399;
@@ -200,6 +216,7 @@
   --font-mono: var(--font-jetbrains, "JetBrains Mono"), ui-monospace, monospace;
 
   --fs-label: 13px;
+  --fs-pill: 12px;
   --fs-body: 13px;
   --fs-body-lg: 14px;
   --fs-subtitle: 15px;
@@ -210,6 +227,7 @@
 
   --fw-regular: 400;
   --fw-medium: 500;
+  --fw-pill: 550;
   --fw-semibold: 600;
   --fw-bold: 700;
   --fw-black: 800;

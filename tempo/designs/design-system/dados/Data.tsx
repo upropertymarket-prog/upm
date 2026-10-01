@@ -110,7 +110,7 @@ export function Cartoes() {
           </Card>
         </div>
       </Row>
-      <Row label="Tags de estado · fundo sólido, texto --on-solid (04 §5.6)">
+      <Row label="Tags de estado · 12 px / peso 550 · fundo sólido, texto --on-solid (04 §5.6)">
         <StatusTag tone="visitPending">Pendente</StatusTag>
         <StatusTag tone="visitAccepted">Aceite</StatusTag>
         <StatusTag tone="visitRescheduled">Reagendada</StatusTag>

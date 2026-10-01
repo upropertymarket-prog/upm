@@ -1,0 +1,154 @@
+/*
+ * Editor de contratos — 04 §8.3
+ * =========================================================================
+ * O TipTap precisa de seletores reais (`.ProseMirror`), que os estilos em linha
+ * do resto da app não alcançam. Tudo aqui vive debaixo de `.upm-contract`, e
+ * nenhuma cor é escrita à mão — só tokens, como 04 §1.2 exige.
+ *
+ * A folha de papel é A4 na proporção certa (1 : 1,414). Não é decoração: é a
+ * paginação de 04 §8.3 a existir de verdade — o que se vê numerado na
+ * pré-visualização é o que sai na impressão.
+ */
+
+.upm-contract__surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8) var(--sp-9);
+  min-height: 420px;
+}
+
+.upm-contract .ProseMirror {
+  outline: none;
+  color: var(--text);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+}
+
+.upm-contract .ProseMirror > * + * {
+  margin-top: var(--sp-5);
+}
+
+.upm-contract .ProseMirror h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.upm-contract .ProseMirror h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-subtitle-lg);
+  font-weight: var(--fw-semibold);
+  margin: 0;
+}
+
+.upm-contract .ProseMirror h3 {
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-semibold);
+  margin: 0;
+}
+
+.upm-contract .ProseMirror p {
+  margin: 0;
+}
+
+.upm-contract .ProseMirror ul,
+.upm-contract .ProseMirror ol {
+  margin: 0;
+  padding-left: var(--sp-7);
+}
+
+.upm-contract .ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.upm-contract .ProseMirror th,
+.upm-contract .ProseMirror td {
+  border: 1px solid var(--border2);
+  padding: var(--sp-3) var(--sp-4);
+  vertical-align: top;
+}
+
+.upm-contract .ProseMirror th {
+  background: var(--surface2);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+}
+
+/* O chip da variável — 04 §8.3, "variáveis como chips [ Proprietário ]". */
+.upm-contract .upm-chip {
+  display: inline-block;
+  padding: 1px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.upm-contract .ProseMirror-selectednode.upm-chip {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Paginação da pré-visualização (04 §8.3). */
+.upm-contract__pages {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+.upm-contract__pageview {
+  transition: transform 120ms ease-out;
+}
+
+/* Modo foco — o editor toma o ecrã e o resto da app sai da frente. */
+.upm-contract--focus {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: auto;
+  background: var(--bg);
+  padding: var(--sp-7);
+}
+
+/*
+ * Exportar PDF é o navegador a imprimir esta pré-visualização (04 §8.3). Só a
+ * folha vai para o papel: toolbar, barra de estado e painel de variáveis não
+ * são o contrato.
+ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .upm-contract__print,
+  .upm-contract__print * {
+    visibility: visible;
+  }
+
+  .upm-contract__print {
+    position: absolute;
+    inset: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .upm-contract__pages {
+    overflow: visible;
+    border: none;
+    height: auto !important;
+  }
+
+  .upm-contract__pageview {
+    transform: none !important;
+  }
+}

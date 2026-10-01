@@ -14,26 +14,32 @@ export type RecentActivityProps = {
   messages: ActivityItem[];
   /** Nota do painel de mensagens: "2 por responder". */
   messagesMeta: string;
-  documents: ActivityItem[];
-  documentsMeta: string;
+  contracts: ActivityItem[];
+  contractsMeta: string;
 };
 
 /**
  * "Atividade recente" (D23) — 04 §8.3, o bloco por baixo de "Gráficos"
  * =========================================================================
- * Duas colunas: "Mensagens recentes" e "Documentos e contratos", como a
- * referência (`App Proprietario.dc.html`, `panels`).
+ * Duas colunas: "Mensagens recentes" e "Contratos", como a referência
+ * (`App Proprietario.dc.html`, `panels`).
  *
- * O segundo painel só fica completo na Fase 6: `property_documents` existe
- * desde a Fase 2 e dá a metade dos documentos, mas os contratos nascem com
- * P6-03. Até lá o painel mostra documentos e diz que são só documentos — o que
- * não se faz é deixá-lo vazio a fingir que está pronto.
+ * O segundo painel chamou-se "Documentos e contratos" até à Fase 6, e mostrava
+ * só documentos — era metade do título a fingir (D29). Fecha por decisão do
+ * cliente a 30 set 2026: passa a **Contratos**, e passa a mostrar contratos.
+ * Os documentos do imóvel saem daqui — vivem no imóvel e na Cloud, na subpasta
+ * "Documentos do imóvel" (07 §19.5), e o que um painel de atividade recente
+ * tem para dizer é o que mudou: um contrato partilhado, por assinar, assinado.
+ *
+ * Os tons dos estados vêm da família genérica de ciclo de vida: 04 §5.6 não
+ * define cores para estados de contrato, e inventar uma família partiria a
+ * regra de "uma cor, um significado" que `StatusTag.test.ts` vigia.
  */
 export function RecentActivity({
   messages,
   messagesMeta,
-  documents,
-  documentsMeta,
+  contracts,
+  contractsMeta,
 }: RecentActivityProps) {
   return (
     <div
@@ -52,10 +58,10 @@ export function RecentActivity({
       />
       <ActivityPanel
         icon={<FileSignature size={16} aria-hidden="true" color="var(--accent)" />}
-        title="Documentos e contratos"
-        meta={documentsMeta}
-        items={documents}
-        empty="Ainda sem documentos anexados aos seus imóveis."
+        title="Contratos"
+        meta={contractsMeta}
+        items={contracts}
+        empty="Ainda sem contratos."
       />
     </div>
   );

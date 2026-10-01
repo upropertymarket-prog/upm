@@ -12,7 +12,8 @@
     "./auth": "./src/auth.ts",
     "./geocoding": "./src/geocoding.ts",
     "./properties": "./src/properties.ts",
-    "./interaction": "./src/interaction.ts"
+    "./interaction": "./src/interaction.ts",
+    "./cloud": "./src/cloud.ts"
   },
   "scripts": {
     "lint": "eslint src",

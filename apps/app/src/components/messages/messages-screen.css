@@ -1,0 +1,97 @@
+/*
+ * Mensagens — grelha do ecrã (P5-01 · 04 §8.3)
+ * =========================================================================
+ * Os estilos em linha do resto do ecrã não conseguem o que esta grelha precisa:
+ * um ponto de corte (duas colunas / uma coluna) e uma coluna de conversas com
+ * largura própria. Daí uma folha ao lado do componente, como o editor de
+ * contratos — e, como lá, sem uma única cor escrita à mão.
+ *
+ * Duas decisões, as duas vindas do mesmo problema:
+ *
+ * 1. A coluna das conversas é uma **faixa de 340 px**, não metade do ecrã.
+ *    Enquanto as colunas eram `repeat(auto-fit, minmax(280px, 1fr))` a lista
+ *    ficava com metade da largura e o cartão, limitado a 360 px, deixava o
+ *    resto em branco — era esse o vazio entre a lista e o chat.
+ * 2. A altura é a que sobra do shell (`fill`), não um valor em pixels. Os dois
+ *    painéis esticam juntos até ao fim da janela e quem rola é o interior de
+ *    cada um: a lista de conversas e o rolo de mensagens.
+ */
+
+.upm-messages {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--sp-7);
+  min-width: 0;
+}
+
+/* O mesmo limite do `fill` do shell: acima disto há espaço para as duas
+   colunas e para travar a altura; abaixo, empilha-se e a página rola. */
+@media (min-width: 900px) {
+  .upm-messages {
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    /* Ocupa a altura que sobra do `.upm-shell__content`. */
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* --- Coluna das conversas -------------------------------------------- */
+
+.upm-messages__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  padding: var(--sp-6);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* É a lista que rola, não o cartão: o título e a pesquisa ficam sempre à
+   vista, por mais conversas que haja. */
+.upm-messages__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* --- Coluna da conversa ---------------------------------------------- */
+
+.upm-messages__thread {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 899px) {
+  /* Sem altura herdada do shell, o chat precisa de um chão para não ficar do
+     tamanho das três mensagens que lá estão. */
+  .upm-messages__thread {
+    min-height: 480px;
+  }
+}
+
+.upm-messages__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-8);
+  background: var(--surface2);
+}

@@ -56,6 +56,29 @@
   margin-inline: auto;
 }
 
+/* Modo "ocupa o ecrã" (`fill`) — opt-in, nunca o comportamento por omissão.
+   Em ecrãs cuja área útil é a própria janela (Mensagens) o shell trava-se no
+   viewport e passa a ser o painel interior a rolar, não a página. É isto que
+   dá ao conteúdo uma altura *definida* de onde crescer: sem ela, um painel com
+   `height: 100%` não tem de que herdar e volta a ficar do tamanho do texto.
+   Só a partir de 900 px — abaixo disso as colunas empilham-se e a página tem
+   mesmo de rolar, pelo que travar a altura só cortaria conteúdo. */
+@media (min-width: 900px) {
+  .upm-shell[data-fill="true"] {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .upm-shell[data-fill="true"] .upm-shell__main,
+  .upm-shell[data-fill="true"] .upm-shell__content {
+    min-height: 0;
+  }
+
+  .upm-shell[data-fill="true"] .upm-shell__content {
+    flex: 1;
+  }
+}
+
 /* --- Sidebar --------------------------------------------------------- */
 
 .upm-sidebar {
@@ -292,7 +315,8 @@
   width: var(--tap);
   height: var(--tap);
   border-radius: var(--r-pill);
-  background: var(--accent);
+  /* Iniciais em `--on-solid` sobre sólido de marca — ver `--accent-solid`. */
+  background: var(--accent-solid);
   color: var(--on-solid);
   font-size: var(--fs-body-lg);
   font-weight: var(--fw-black);

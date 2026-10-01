@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { CONTRACT_STATUS_LABELS, CONTRACT_STATUS_TONES } from "@upm/db/cloud";
 import { createClient } from "@upm/db/server";
 import { Button, PageHeader, greetingKey } from "@upm/ui";
 
@@ -161,27 +162,27 @@ export default async function DashboardPage() {
 
   const unansweredCount = conversations.filter((item) => item.unread > 0).length;
 
-  // "Documentos e contratos": `property_documents` existe desde a Fase 2 e dá a
-  // metade dos documentos. Os contratos entram com P6-03 — por isso o painel
-  // diz "documentos" enquanto for só isso (07 §18 e D23).
-  const documents = ids.length
-    ? await supabase
-        .from("property_documents")
-        .select("id, name, kind, created_at, property_id")
-        .in("property_id", ids)
-        .order("created_at", { ascending: false })
-        .limit(ACTIVITY_ROWS)
-        .then(({ data }) => data ?? [])
-    : [];
+  // "Contratos" — fecha **D29**. O painel chamava-se "Documentos e contratos" e
+  // mostrava só `property_documents`; por decisão do cliente (30 set 2026)
+  // passa a mostrar contratos, que é o que P6-03 traz e o que faz de facto
+  // sentido num painel de atividade recente. Os documentos do imóvel saem
+  // daqui: vivem no imóvel e na Cloud (07 §19.5 e §19.12).
+  //
+  // `my_contracts()` e não um select: a RLS de `properties` e de `profiles` não
+  // deixa alcançar o título do imóvel nem o nome da contraparte por join — é o
+  // mesmo padrão de `my_conversations` (07 §19, nota de leitura da Fase 5).
+  const { data: contractRows } = await supabase.rpc("my_contracts");
+  const contracts = (contractRows ?? []).slice(0, ACTIVITY_ROWS);
 
-  const titleOf = new Map(owned.map((item) => [item.id, item.title || item.ref]));
-  const recentDocuments: ActivityItem[] = documents.map((doc) => ({
-    id: doc.id,
-    title: `${doc.name} · ${titleOf.get(doc.property_id) ?? "Imóvel"}`,
-    subtitle: `anexado ${formatRelative(doc.created_at)}`,
-    href: `/propriedades/${doc.property_id}/editar`,
-    tag: "Documento",
-    tone: "archived",
+  const recentContracts: ActivityItem[] = contracts.map((row) => ({
+    id: row.id,
+    title: row.property_title ? `${row.title} · ${row.property_title}` : row.title,
+    subtitle: row.counterparty_name
+      ? `com ${row.counterparty_name} · ${formatRelative(row.updated_at)}`
+      : formatRelative(row.updated_at),
+    href: `/contratos/${row.id}`,
+    tag: CONTRACT_STATUS_LABELS[row.status],
+    tone: CONTRACT_STATUS_TONES[row.status] as ActivityItem["tone"],
   }));
 
   const firstName = (profile.full_name || "").split(/\s+/)[0] || "";
@@ -214,9 +215,9 @@ export default async function DashboardPage() {
         recentMessagesMeta={
           unansweredCount === 0 ? "tudo respondido" : `${unansweredCount} por responder`
         }
-        recentDocuments={recentDocuments}
-        recentDocumentsMeta={
-          documents.length === 0 ? "sem documentos" : `${documents.length} recentes`
+        recentContracts={recentContracts}
+        recentContractsMeta={
+          contracts.length === 0 ? "sem contratos" : `${contracts.length} recentes`
         }
       />
     </AppChrome>

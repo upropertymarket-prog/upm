@@ -33,6 +33,54 @@ export type Database = {
   };
   public: {
     Tables: {
+      addons: {
+        Row: {
+          created_at: string;
+          grants: Json;
+          id: string;
+          name: string;
+          position: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          stripe_price_month_id: string | null;
+          stripe_price_year_id: string | null;
+          stripe_product_id: string | null;
+          updated_at: string;
+          visible: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          grants?: Json;
+          id?: string;
+          name: string;
+          position?: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          stripe_price_month_id?: string | null;
+          stripe_price_year_id?: string | null;
+          stripe_product_id?: string | null;
+          updated_at?: string;
+          visible?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          grants?: Json;
+          id?: string;
+          name?: string;
+          position?: number;
+          price_month_cents?: number;
+          price_year_cents?: number;
+          slug?: string;
+          stripe_price_month_id?: string | null;
+          stripe_price_year_id?: string | null;
+          stripe_product_id?: string | null;
+          updated_at?: string;
+          visible?: boolean;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -98,6 +146,280 @@ export type Database = {
         };
         Relationships: [];
       };
+      contract_shares: {
+        Row: {
+          access_code_hash: string | null;
+          contract_id: string;
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          permission: Database["public"]["Enums"]["share_permission"];
+          revoked_at: string | null;
+          shared_by: string;
+          shared_with_profile_id: string | null;
+          token: string | null;
+          updated_at: string;
+          version_id: string | null;
+        };
+        Insert: {
+          access_code_hash?: string | null;
+          contract_id: string;
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          permission?: Database["public"]["Enums"]["share_permission"];
+          revoked_at?: string | null;
+          shared_by: string;
+          shared_with_profile_id?: string | null;
+          token?: string | null;
+          updated_at?: string;
+          version_id?: string | null;
+        };
+        Update: {
+          access_code_hash?: string | null;
+          contract_id?: string;
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          permission?: Database["public"]["Enums"]["share_permission"];
+          revoked_at?: string | null;
+          shared_by?: string;
+          shared_with_profile_id?: string | null;
+          token?: string | null;
+          updated_at?: string;
+          version_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_shares_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_shares_shared_by_fkey";
+            columns: ["shared_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_shares_shared_with_profile_id_fkey";
+            columns: ["shared_with_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_shares_version_id_fkey";
+            columns: ["version_id"];
+            isOneToOne: false;
+            referencedRelation: "contract_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contract_templates: {
+        Row: {
+          body: Json;
+          created_at: string;
+          created_by: string | null;
+          family_id: string;
+          id: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          name: string;
+          status: Database["public"]["Enums"]["contract_template_status"];
+          updated_at: string;
+          variables: string[];
+          version: number;
+        };
+        Insert: {
+          body?: Json;
+          created_at?: string;
+          created_by?: string | null;
+          family_id: string;
+          id?: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          name: string;
+          status?: Database["public"]["Enums"]["contract_template_status"];
+          updated_at?: string;
+          variables?: string[];
+          version?: number;
+        };
+        Update: {
+          body?: Json;
+          created_at?: string;
+          created_by?: string | null;
+          family_id?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["contract_kind"];
+          name?: string;
+          status?: Database["public"]["Enums"]["contract_template_status"];
+          updated_at?: string;
+          variables?: string[];
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_templates_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contract_versions: {
+        Row: {
+          body: Json;
+          contract_id: string;
+          created_at: string;
+          created_by: string | null;
+          frozen: boolean;
+          id: string;
+          note: string | null;
+          status_at_save: Database["public"]["Enums"]["contract_status"];
+          values: Json;
+          version: number;
+        };
+        Insert: {
+          body: Json;
+          contract_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          frozen?: boolean;
+          id?: string;
+          note?: string | null;
+          status_at_save: Database["public"]["Enums"]["contract_status"];
+          values?: Json;
+          version: number;
+        };
+        Update: {
+          body?: Json;
+          contract_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          frozen?: boolean;
+          id?: string;
+          note?: string | null;
+          status_at_save?: Database["public"]["Enums"]["contract_status"];
+          values?: Json;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_versions_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "contracts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contract_versions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contracts: {
+        Row: {
+          body: Json;
+          completed_at: string | null;
+          counterparty_name: string;
+          counterparty_profile_id: string | null;
+          created_at: string;
+          current_version: number;
+          id: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          owner_id: string;
+          property_id: string | null;
+          shared_at: string | null;
+          status: Database["public"]["Enums"]["contract_status"];
+          template_id: string | null;
+          template_version: number | null;
+          title: string;
+          updated_at: string;
+          values: Json;
+        };
+        Insert: {
+          body?: Json;
+          completed_at?: string | null;
+          counterparty_name?: string;
+          counterparty_profile_id?: string | null;
+          created_at?: string;
+          current_version?: number;
+          id?: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          owner_id: string;
+          property_id?: string | null;
+          shared_at?: string | null;
+          status?: Database["public"]["Enums"]["contract_status"];
+          template_id?: string | null;
+          template_version?: number | null;
+          title: string;
+          updated_at?: string;
+          values?: Json;
+        };
+        Update: {
+          body?: Json;
+          completed_at?: string | null;
+          counterparty_name?: string;
+          counterparty_profile_id?: string | null;
+          created_at?: string;
+          current_version?: number;
+          id?: string;
+          kind?: Database["public"]["Enums"]["contract_kind"];
+          owner_id?: string;
+          property_id?: string | null;
+          shared_at?: string | null;
+          status?: Database["public"]["Enums"]["contract_status"];
+          template_id?: string | null;
+          template_version?: number | null;
+          title?: string;
+          updated_at?: string;
+          values?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contracts_counterparty_profile_id_fkey";
+            columns: ["counterparty_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contracts_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contracts_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contracts_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contracts_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "contract_templates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       conversations: {
         Row: {
           buyer_id: string;
@@ -157,6 +479,56 @@ export type Database = {
           },
         ];
       };
+      document_access_log: {
+        Row: {
+          action: Database["public"]["Enums"]["document_action"];
+          actor_profile_id: string | null;
+          bytes_sent: number | null;
+          id: number;
+          ip: unknown;
+          occurred_at: string;
+          share_id: string | null;
+          subject_id: string;
+          subject_type: Database["public"]["Enums"]["document_subject"];
+          user_agent: string | null;
+          version_id: string | null;
+        };
+        Insert: {
+          action: Database["public"]["Enums"]["document_action"];
+          actor_profile_id?: string | null;
+          bytes_sent?: number | null;
+          id?: never;
+          ip?: unknown;
+          occurred_at?: string;
+          share_id?: string | null;
+          subject_id: string;
+          subject_type: Database["public"]["Enums"]["document_subject"];
+          user_agent?: string | null;
+          version_id?: string | null;
+        };
+        Update: {
+          action?: Database["public"]["Enums"]["document_action"];
+          actor_profile_id?: string | null;
+          bytes_sent?: number | null;
+          id?: never;
+          ip?: unknown;
+          occurred_at?: string;
+          share_id?: string | null;
+          subject_id?: string;
+          subject_type?: Database["public"]["Enums"]["document_subject"];
+          user_agent?: string | null;
+          version_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "document_access_log_actor_profile_id_fkey";
+            columns: ["actor_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       feature_flags: {
         Row: {
           created_at: string;
@@ -180,6 +552,287 @@ export type Database = {
           value?: Json;
         };
         Relationships: [];
+      };
+      file_shares: {
+        Row: {
+          access_code_hash: string | null;
+          created_at: string;
+          expires_at: string | null;
+          file_id: string;
+          id: string;
+          permission: Database["public"]["Enums"]["share_permission"];
+          revoked_at: string | null;
+          shared_by: string;
+          shared_with: string | null;
+          token: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          access_code_hash?: string | null;
+          created_at?: string;
+          expires_at?: string | null;
+          file_id: string;
+          id?: string;
+          permission?: Database["public"]["Enums"]["share_permission"];
+          revoked_at?: string | null;
+          shared_by: string;
+          shared_with?: string | null;
+          token?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          access_code_hash?: string | null;
+          created_at?: string;
+          expires_at?: string | null;
+          file_id?: string;
+          id?: string;
+          permission?: Database["public"]["Enums"]["share_permission"];
+          revoked_at?: string | null;
+          shared_by?: string;
+          shared_with?: string | null;
+          token?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "file_shares_file_id_fkey";
+            columns: ["file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "file_shares_shared_by_fkey";
+            columns: ["shared_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "file_shares_shared_with_fkey";
+            columns: ["shared_with"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      file_versions: {
+        Row: {
+          bucket: string;
+          checksum: string;
+          created_at: string;
+          created_by: string | null;
+          file_id: string;
+          id: string;
+          mime: string;
+          name: string;
+          note: string | null;
+          size: number;
+          storage_path: string;
+          version: number;
+        };
+        Insert: {
+          bucket?: string;
+          checksum: string;
+          created_at?: string;
+          created_by?: string | null;
+          file_id: string;
+          id?: string;
+          mime: string;
+          name: string;
+          note?: string | null;
+          size: number;
+          storage_path: string;
+          version: number;
+        };
+        Update: {
+          bucket?: string;
+          checksum?: string;
+          created_at?: string;
+          created_by?: string | null;
+          file_id?: string;
+          id?: string;
+          mime?: string;
+          name?: string;
+          note?: string | null;
+          size?: number;
+          storage_path?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "file_versions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "file_versions_file_id_fkey";
+            columns: ["file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      files: {
+        Row: {
+          bucket: string;
+          checksum: string;
+          created_at: string;
+          current_version: number;
+          deleted_at: string | null;
+          folder_id: string | null;
+          id: string;
+          kind: string;
+          mime: string;
+          name: string;
+          owner_id: string;
+          property_id: string | null;
+          purge_after: string | null;
+          scope: Database["public"]["Enums"]["cloud_scope"];
+          size: number;
+          source: Database["public"]["Enums"]["file_source"];
+          storage_path: string;
+          updated_at: string;
+        };
+        Insert: {
+          bucket?: string;
+          checksum: string;
+          created_at?: string;
+          current_version?: number;
+          deleted_at?: string | null;
+          folder_id?: string | null;
+          id?: string;
+          kind?: string;
+          mime: string;
+          name: string;
+          owner_id: string;
+          property_id?: string | null;
+          purge_after?: string | null;
+          scope?: Database["public"]["Enums"]["cloud_scope"];
+          size: number;
+          source?: Database["public"]["Enums"]["file_source"];
+          storage_path: string;
+          updated_at?: string;
+        };
+        Update: {
+          bucket?: string;
+          checksum?: string;
+          created_at?: string;
+          current_version?: number;
+          deleted_at?: string | null;
+          folder_id?: string | null;
+          id?: string;
+          kind?: string;
+          mime?: string;
+          name?: string;
+          owner_id?: string;
+          property_id?: string | null;
+          purge_after?: string | null;
+          scope?: Database["public"]["Enums"]["cloud_scope"];
+          size?: number;
+          source?: Database["public"]["Enums"]["file_source"];
+          storage_path?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "files_folder_id_fkey";
+            columns: ["folder_id"];
+            isOneToOne: false;
+            referencedRelation: "folders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "files_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "files_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "files_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      folders: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: Database["public"]["Enums"]["folder_kind"];
+          name: string;
+          owner_id: string;
+          parent_id: string | null;
+          property_id: string | null;
+          scope: Database["public"]["Enums"]["cloud_scope"];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["folder_kind"];
+          name: string;
+          owner_id: string;
+          parent_id?: string | null;
+          property_id?: string | null;
+          scope?: Database["public"]["Enums"]["cloud_scope"];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["folder_kind"];
+          name?: string;
+          owner_id?: string;
+          parent_id?: string | null;
+          property_id?: string | null;
+          scope?: Database["public"]["Enums"]["cloud_scope"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "folders_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "folders_parent_id_fkey";
+            columns: ["parent_id"];
+            isOneToOne: false;
+            referencedRelation: "folders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "folders_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "folders_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       messages: {
         Row: {
@@ -720,6 +1373,7 @@ export type Database = {
       property_documents: {
         Row: {
           created_at: string;
+          file_id: string | null;
           id: string;
           kind: string;
           mime: string;
@@ -731,6 +1385,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          file_id?: string | null;
           id?: string;
           kind: string;
           mime: string;
@@ -742,6 +1397,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          file_id?: string | null;
           id?: string;
           kind?: string;
           mime?: string;
@@ -752,6 +1408,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "property_documents_file_id_fkey";
+            columns: ["file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "property_documents_property_id_fkey";
             columns: ["property_id"];
@@ -1017,6 +1680,60 @@ export type Database = {
             columns: ["profile_id"];
             isOneToOne: true;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      subscription_addons: {
+        Row: {
+          addon_id: string;
+          cancel_at_period_end: boolean;
+          created_at: string;
+          current_period_end: string | null;
+          id: string;
+          interval: string;
+          status: string;
+          stripe_subscription_item_id: string | null;
+          subscription_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          addon_id: string;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          interval?: string;
+          status?: string;
+          stripe_subscription_item_id?: string | null;
+          subscription_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          addon_id?: string;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          interval?: string;
+          status?: string;
+          stripe_subscription_item_id?: string | null;
+          subscription_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscription_addons_addon_id_fkey";
+            columns: ["addon_id"];
+            isOneToOne: false;
+            referencedRelation: "addons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_addons_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
             referencedColumns: ["id"];
           },
         ];
@@ -1291,12 +2008,130 @@ export type Database = {
     Functions: {
       accept_visit_request: { Args: { p_id: string }; Returns: undefined };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
+      at_limit_ratio: {
+        Args: { p_limit: Json; p_used: number };
+        Returns: boolean;
+      };
+      available_contract_templates: {
+        Args: never;
+        Returns: {
+          family_id: string;
+          id: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          name: string;
+          variables: string[];
+          version: number;
+        }[];
+      };
       cancel_visit_request: { Args: { p_id: string }; Returns: undefined };
       check_auth_rate_limit: {
         Args: { p_identifier: string; p_kind: string };
         Returns: Json;
       };
+      cloud_add_file_version: {
+        Args: {
+          p_checksum: string;
+          p_file_id: string;
+          p_mime: string;
+          p_name: string;
+          p_note?: string;
+          p_size: number;
+          p_storage_path: string;
+        };
+        Returns: number;
+      };
+      cloud_delete_file: { Args: { p_file_id: string }; Returns: undefined };
+      cloud_empty_recycle_bin: { Args: never; Returns: number };
+      cloud_limit_bytes: { Args: { p_profile_id: string }; Returns: number };
+      cloud_register_upload: {
+        Args: {
+          p_checksum: string;
+          p_folder_id: string;
+          p_mime: string;
+          p_name: string;
+          p_property_id?: string;
+          p_size: number;
+          p_source?: Database["public"]["Enums"]["file_source"];
+          p_storage_path: string;
+        };
+        Returns: string;
+      };
+      cloud_restore_file_version: {
+        Args: { p_file_id: string; p_version: number };
+        Returns: number;
+      };
+      cloud_status: {
+        Args: never;
+        Returns: {
+          has_cloud: boolean;
+          limit_bytes: number;
+          near_plan_limit: boolean;
+          used_bytes: number;
+        }[];
+      };
+      cloud_usage_bytes: { Args: { p_profile_id: string }; Returns: number };
       complete_due_visits: { Args: never; Returns: number };
+      contract_history: {
+        Args: { p_contract_id: string };
+        Returns: {
+          author_name: string;
+          created_at: string;
+          frozen: boolean;
+          note: string;
+          status_at_save: Database["public"]["Enums"]["contract_status"];
+          version: number;
+          version_id: string;
+        }[];
+      };
+      contract_status_rank: {
+        Args: { p_status: Database["public"]["Enums"]["contract_status"] };
+        Returns: number;
+      };
+      contracts_shared_with_me: {
+        Args: never;
+        Returns: {
+          body: Json;
+          contract_id: string;
+          expires_at: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          permission: Database["public"]["Enums"]["share_permission"];
+          share_id: string;
+          shared_at: string;
+          shared_by_name: string;
+          status: Database["public"]["Enums"]["contract_status"];
+          title: string;
+          values: Json;
+        }[];
+      };
+      create_contract_from_template: {
+        Args: {
+          p_counterparty_name?: string;
+          p_counterparty_profile_id?: string;
+          p_property_id?: string;
+          p_template_id: string;
+          p_title: string;
+        };
+        Returns: string;
+      };
+      draft_contract_template_version: {
+        Args: { p_family_id: string };
+        Returns: string;
+      };
+      effective_limits: { Args: { p_profile_id: string }; Returns: Json };
+      ensure_property_folders: {
+        Args: { p_profile_id: string };
+        Returns: number;
+      };
+      file_access_log: {
+        Args: { p_file_id: string };
+        Returns: {
+          action: Database["public"]["Enums"]["document_action"];
+          actor_name: string;
+          ip: unknown;
+          occurred_at: string;
+          via_link: boolean;
+        }[];
+      };
       format_eur_cents: { Args: { p_cents: number }; Returns: string };
       get_property_location: {
         Args: { p_property_id: string };
@@ -1304,9 +2139,68 @@ export type Database = {
       };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
+      log_document_access: {
+        Args: {
+          p_action: Database["public"]["Enums"]["document_action"];
+          p_bytes_sent?: number;
+          p_ip?: unknown;
+          p_share_id?: string;
+          p_subject_id: string;
+          p_subject_type: Database["public"]["Enums"]["document_subject"];
+          p_user_agent?: string;
+          p_version_id?: string;
+        };
+        Returns: number;
+      };
       mark_conversation_read: {
         Args: { p_conversation_id: string };
         Returns: undefined;
+      };
+      my_cloud_files: {
+        Args: { p_folder_id?: string };
+        Returns: {
+          created_at: string;
+          current_version: number;
+          deleted_at: string;
+          folder_id: string;
+          has_link: boolean;
+          id: string;
+          kind: string;
+          mime: string;
+          name: string;
+          readonly: boolean;
+          share_count: number;
+          shared_label: string;
+          size: number;
+          source: Database["public"]["Enums"]["file_source"];
+        }[];
+      };
+      my_cloud_folders: {
+        Args: never;
+        Returns: {
+          file_count: number;
+          id: string;
+          kind: Database["public"]["Enums"]["folder_kind"];
+          name: string;
+          parent_id: string;
+          property_id: string;
+        }[];
+      };
+      my_contracts: {
+        Args: never;
+        Returns: {
+          counterparty_name: string;
+          current_version: number;
+          id: string;
+          kind: Database["public"]["Enums"]["contract_kind"];
+          property_id: string;
+          property_title: string;
+          share_count: number;
+          shared_at: string;
+          status: Database["public"]["Enums"]["contract_status"];
+          title: string;
+          updated_at: string;
+        }[];
       };
       my_conversations: {
         Args: never;
@@ -1405,6 +2299,12 @@ export type Database = {
           radius_m: number;
         }[];
       };
+      publish_contract_template: {
+        Args: { p_template_id: string };
+        Returns: string;
+      };
+      purge_cloud_recycle_bin: { Args: never; Returns: number };
+      purge_document_access_log: { Args: never; Returns: number };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
@@ -1421,12 +2321,60 @@ export type Database = {
         Args: { p_id: string; p_proposed_at: string };
         Returns: undefined;
       };
+      resolve_contract_share: {
+        Args: { p_access_code_hash?: string; p_token: string };
+        Returns: {
+          body: Json;
+          contract_id: string;
+          invalid_code: boolean;
+          needs_code: boolean;
+          permission: Database["public"]["Enums"]["share_permission"];
+          share_id: string;
+          title: string;
+          values: Json;
+        }[];
+      };
+      resolve_file_share: {
+        Args: { p_access_code_hash?: string; p_token: string };
+        Returns: {
+          file_id: string;
+          file_name: string;
+          invalid_code: boolean;
+          mime: string;
+          needs_code: boolean;
+          permission: Database["public"]["Enums"]["share_permission"];
+          share_id: string;
+          size: number;
+        }[];
+      };
       revoke_address_grant: { Args: { p_grant_id: string }; Returns: undefined };
+      revoke_contract_share: {
+        Args: { p_share_id: string };
+        Returns: undefined;
+      };
+      revoke_file_share: { Args: { p_share_id: string }; Returns: undefined };
       role_of: {
         Args: { uid: string };
         Returns: Database["public"]["Enums"]["user_role"];
       };
       run_search_alerts: { Args: never; Returns: number };
+      save_contract_version: {
+        Args: {
+          p_body: Json;
+          p_contract_id: string;
+          p_freeze?: boolean;
+          p_note?: string;
+          p_values?: Json;
+        };
+        Returns: string;
+      };
+      set_contract_status: {
+        Args: {
+          p_contract_id: string;
+          p_status: Database["public"]["Enums"]["contract_status"];
+        };
+        Returns: undefined;
+      };
       set_lead_stage: {
         Args: {
           p_lead_id: string;
@@ -1435,9 +2383,45 @@ export type Database = {
         };
         Returns: undefined;
       };
+      share_contract: {
+        Args: {
+          p_access_code_hash?: string;
+          p_contract_id: string;
+          p_expires_at?: string;
+          p_permission?: Database["public"]["Enums"]["share_permission"];
+          p_shared_with?: string;
+          p_token?: string;
+        };
+        Returns: string;
+      };
       share_exact_address: {
         Args: { p_buyer_id: string; p_property_id: string };
         Returns: undefined;
+      };
+      share_file: {
+        Args: {
+          p_access_code_hash?: string;
+          p_expires_at?: string;
+          p_file_id: string;
+          p_permission?: Database["public"]["Enums"]["share_permission"];
+          p_shared_with?: string;
+          p_token?: string;
+        };
+        Returns: string;
+      };
+      shared_with_me: {
+        Args: never;
+        Returns: {
+          created_at: string;
+          expires_at: string;
+          file_id: string;
+          mime: string;
+          name: string;
+          permission: Database["public"]["Enums"]["share_permission"];
+          share_id: string;
+          shared_by_name: string;
+          size: number;
+        }[];
       };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       upsert_owner_lead: {
@@ -1452,7 +2436,16 @@ export type Database = {
       };
     };
     Enums: {
+      cloud_scope: "personal" | "staff";
+      contract_kind: "sale" | "rent";
+      contract_status: "draft" | "shared" | "awaiting_signature" | "signed" | "completed";
+      contract_template_status: "draft" | "published" | "archived";
       delivery_status: "queued" | "sent" | "failed" | "cancelled";
+      document_action:
+        "view" | "download" | "export_pdf" | "print" | "share_created" | "share_revoked";
+      document_subject: "file" | "contract" | "property_document" | "contract_template";
+      file_source: "upload" | "property_document" | "message_attachment" | "contract" | "invoice";
+      folder_kind: "user" | "property" | "property_documents";
       lead_outcome: "won" | "lost";
       lead_stage: "new" | "contacted" | "visit" | "closed";
       plan_audience: "owner" | "buyer" | "both";
@@ -1467,6 +2460,7 @@ export type Database = {
         | "sold"
         | "rejected"
         | "archived";
+      share_permission: "view" | "download";
       staff_department: "suporte" | "financeiro" | "moderacao" | "admin";
       user_role: "buyer" | "owner" | "admin" | "support";
       visit_status: "pending" | "accepted" | "rescheduled" | "cancelled" | "completed" | "archived";
@@ -2093,7 +3087,22 @@ export const Constants = {
   },
   public: {
     Enums: {
+      cloud_scope: ["personal", "staff"],
+      contract_kind: ["sale", "rent"],
+      contract_status: ["draft", "shared", "awaiting_signature", "signed", "completed"],
+      contract_template_status: ["draft", "published", "archived"],
       delivery_status: ["queued", "sent", "failed", "cancelled"],
+      document_action: [
+        "view",
+        "download",
+        "export_pdf",
+        "print",
+        "share_created",
+        "share_revoked",
+      ],
+      document_subject: ["file", "contract", "property_document", "contract_template"],
+      file_source: ["upload", "property_document", "message_attachment", "contract", "invoice"],
+      folder_kind: ["user", "property", "property_documents"],
       lead_outcome: ["won", "lost"],
       lead_stage: ["new", "contacted", "visit", "closed"],
       plan_audience: ["owner", "buyer", "both"],
@@ -2109,6 +3118,7 @@ export const Constants = {
         "rejected",
         "archived",
       ],
+      share_permission: ["view", "download"],
       staff_department: ["suporte", "financeiro", "moderacao", "admin"],
       user_role: ["buyer", "owner", "admin", "support"],
       visit_status: ["pending", "accepted", "rescheduled", "cancelled", "completed", "archived"],

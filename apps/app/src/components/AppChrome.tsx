@@ -29,6 +29,8 @@ export type AppChromeProps = {
   liveNotifications?: boolean;
   /** 04 §1.5 — `"full"` só para o Mapa; tudo o resto fica no limite de 1600 px. */
   contentWidth?: "default" | "full";
+  /** Trava o shell no viewport e dá ao conteúdo a altura que sobra (Mensagens). */
+  fill?: boolean;
   children: React.ReactNode;
 };
 
@@ -64,6 +66,7 @@ export function AppChrome({
   notifications = [],
   liveNotifications = true,
   contentWidth = "default",
+  fill = false,
   children,
 }: AppChromeProps) {
   const t = useTranslations();
@@ -83,6 +86,7 @@ export function AppChrome({
   return (
     <AppShell
       contentWidth={contentWidth}
+      fill={fill}
       sidebar={{
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,

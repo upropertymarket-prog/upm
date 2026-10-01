@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
-import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
@@ -57,12 +56,10 @@ export default async function AgendaPage() {
       counters={countersFor("owner", conversations, visits, leads)}
       notifications={notifications}
     >
-      <PageHeader
-        title="Agenda de visitas"
-        subtitle="Gira as visitas agendadas para os seus imóveis"
-      />
       <VisitsScreen
         rows={visits}
+        pageTitle="Agenda de visitas"
+        pageSubtitle="Gira as visitas agendadas para os seus imóveis"
         role="owner"
         month={currentMonth()}
         onAccept={acceptVisit}

@@ -59,6 +59,7 @@
    O piso mantém-se onde faz falta: `.upm-btn--icon`, mais abaixo. */
 .upm-btn--sm {
   height: var(--h-xs);
+  border-radius: var(--r-md);
   /* 13 px: o protótipo usa 12,5 px nestes botões e 04 §1.3 fixa o mínimo em
      12 px — 13 px é o degrau da escala que lhe fica mais perto. */
   font-size: var(--fs-label);
@@ -86,16 +87,18 @@
   min-width: var(--tap);
   height: var(--tap);
   min-height: var(--tap);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
 }
 
+/* `--accent-solid` e não `--accent`: o rótulo é `--on-solid` por cima, e o
+   acento do tema escuro é claro de mais para carregar texto branco (tokens.css). */
 .upm-btn--primary {
-  background: var(--accent);
+  background: var(--accent-solid);
   color: var(--on-solid);
 }
 
 .upm-btn--primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .upm-btn--secondary {
@@ -336,7 +339,8 @@
   height: 22px;
   padding: 0 var(--sp-2);
   border-radius: var(--r-pill);
-  background: var(--accent);
+  /* Contador: dígitos `--on-solid` sobre sólido de marca — ver `--accent-solid`. */
+  background: var(--accent-solid);
   color: var(--on-solid);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -359,8 +363,8 @@
   border-radius: var(--r-pill);
   background: var(--tag-bg, var(--state-draft));
   color: var(--on-solid);
-  font-size: var(--fs-label);
-  font-weight: var(--fw-black);
+  font-size: var(--fs-pill);
+  font-weight: var(--fw-pill);
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -902,8 +906,9 @@
 }
 
 .upm-page[aria-current="page"] {
-  background: var(--accent);
-  border-color: var(--accent);
+  /* O número da página atual é texto `--on-solid` — ver `--accent-solid`. */
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
   color: var(--on-solid);
   cursor: default;
 }

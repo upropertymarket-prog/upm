@@ -1242,4 +1242,840 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
       await serviceClient.from("search_alerts").delete().eq("id", alert!.id);
     });
   });
+
+  // ===========================================================================
+  // Fase 6 — Cloud e contratos (P6-01 a P6-04)
+  //
+  // Uma grelha por tabela nova, com `buyer2` sempre no papel de terceiro: é o
+  // caso que interessa aqui, porque a Cloud inteira se resume a "quem não é
+  // parte não vê". Mais os invariantes que vivem em funções e que uma grelha
+  // de policies não alcança — quota, versões, congelamento e registo.
+  // ===========================================================================
+
+  describe("Cloud e contratos — pastas, ficheiros, partilhas e contratos", () => {
+    let propertyId: string;
+    let subscriptionId: string;
+    let smarterPlanId: string;
+    let addonId: string;
+    let fileId: string;
+    let contractId: string;
+    let templateId: string;
+    let templateFamilyId: string;
+
+    const MB = 1024 * 1024;
+
+    /** Regista um ficheiro como o dono, pelo caminho normal (com quota). */
+    async function registerFile(sizeBytes: number, name = `f-${Date.now()}.pdf`) {
+      return clients.owner.rpc("cloud_register_upload", {
+        p_folder_id: null,
+        p_name: name,
+        p_mime: "application/pdf",
+        p_size: sizeBytes,
+        p_storage_path: `${userIds.owner}/${crypto.randomUUID()}/1`,
+        p_checksum: "0".repeat(64),
+      });
+    }
+
+    beforeAll(async () => {
+      const { data: plans } = await serviceClient.from("plans").select("id, slug");
+      smarterPlanId = plans!.find((p) => p.slug === "smarter-owner")!.id;
+
+      const { data: addon } = await serviceClient
+        .from("addons")
+        .select("id")
+        .eq("slug", "cloud-5gb")
+        .single();
+      addonId = addon!.id;
+
+      // O imóvel nasce ANTES da subscrição, de propósito: assim o trigger de
+      // publicação corre com o owner ainda no Gratuito, e o primeiro teste
+      // pode verificar que sem Cloud não nasce pasta nenhuma (07 §19.1).
+      const { data, error } = await serviceClient
+        .from("properties")
+        .insert({
+          owner_id: userIds.owner,
+          ref: `RLS-F6-${Date.now()}`,
+          title: "T3 de teste da Fase 6",
+          deal: "sale",
+          status: "active",
+          typology: "T3",
+          city: "Lisboa",
+          price_cents: 300_000_00,
+        })
+        .select("id")
+        .single();
+      if (error || !data) throw new Error(`Falha a semear imóvel da Fase 6: ${error?.message}`);
+      propertyId = data.id;
+    });
+
+    afterAll(async () => {
+      await serviceClient.from("contracts").delete().eq("owner_id", userIds.owner);
+      await serviceClient.from("contract_templates").delete().eq("created_by", userIds.admin);
+      await serviceClient.from("files").delete().eq("owner_id", userIds.owner);
+      await serviceClient.from("folders").delete().eq("owner_id", userIds.owner);
+      if (subscriptionId)
+        await serviceClient.from("subscriptions").delete().eq("id", subscriptionId);
+      await serviceClient.from("properties").delete().eq("id", propertyId);
+    });
+
+    // -----------------------------------------------------------------------
+    // A Cloud é funcionalidade de plano — 07 §19.1 e §19.2
+    // -----------------------------------------------------------------------
+
+    it("Gratuito: publicar um imóvel NÃO cria pasta, e o upload é recusado", async () => {
+      const { data: folders } = await serviceClient
+        .from("folders")
+        .select("id")
+        .eq("property_id", propertyId);
+      expect(folders?.length ?? 0).toBe(0);
+
+      const status = await clients.owner.rpc("cloud_status");
+      expect(status.error).toBeNull();
+      expect(status.data?.[0]?.has_cloud).toBe(false);
+      expect(Number(status.data?.[0]?.limit_bytes)).toBe(0);
+
+      const upload = await registerFile(1 * MB);
+      expect(upload.error).not.toBeNull();
+      expect(upload.error?.message).toContain("não inclui Cloud");
+    });
+
+    it("effective_limits: o extra de §19.3 soma-se ao que o plano dá", async () => {
+      const { data: sub, error } = await serviceClient
+        .from("subscriptions")
+        .insert({ profile_id: userIds.owner, plan_id: smarterPlanId, status: "active" })
+        .select("id")
+        .single();
+      expect(error).toBeNull();
+      subscriptionId = sub!.id;
+
+      const withPlan = await serviceClient.rpc("effective_limits", { p_profile_id: userIds.owner });
+      expect((withPlan.data as Record<string, number>).cloud_gb).toBe(5);
+
+      await serviceClient
+        .from("subscription_addons")
+        .insert({ subscription_id: subscriptionId, addon_id: addonId, status: "active" });
+
+      const withAddon = await serviceClient.rpc("effective_limits", {
+        p_profile_id: userIds.owner,
+      });
+      expect((withAddon.data as Record<string, number>).cloud_gb).toBe(10);
+
+      // Uma unidade por conta (07 §19.3): a segunda é recusada pelo índice único.
+      const twice = await serviceClient
+        .from("subscription_addons")
+        .insert({ subscription_id: subscriptionId, addon_id: addonId, status: "active" });
+      expect(twice.error).not.toBeNull();
+
+      await serviceClient
+        .from("subscription_addons")
+        .delete()
+        .eq("subscription_id", subscriptionId);
+
+      const back = await serviceClient.rpc("effective_limits", { p_profile_id: userIds.owner });
+      expect((back.data as Record<string, number>).cloud_gb).toBe(5);
+    });
+
+    it("ganhar Cloud cria as pastas de todas as propriedades e espelha os documentos (D34)", async () => {
+      // Um documento carregado na Fase 4, ainda sem `file_id`.
+      const { data: doc } = await serviceClient
+        .from("property_documents")
+        .insert({
+          property_id: propertyId,
+          storage_path: `${propertyId}/caderneta.pdf`,
+          name: "Caderneta predial.pdf",
+          mime: "application/pdf",
+          size: 410_000,
+          kind: "caderneta",
+        })
+        .select("id")
+        .single();
+
+      const { error } = await serviceClient.rpc("ensure_property_folders", {
+        p_profile_id: userIds.owner,
+      });
+      expect(error).toBeNull();
+
+      const { data: folders } = await serviceClient
+        .from("folders")
+        .select("id, name, kind, parent_id")
+        .eq("property_id", propertyId);
+      expect(folders?.length).toBe(2);
+
+      const propertyFolder = folders!.find((f) => f.kind === "property")!;
+      const docsFolder = folders!.find((f) => f.kind === "property_documents")!;
+      expect(propertyFolder.name).toBe("T3 de teste da Fase 6");
+      expect(docsFolder.name).toBe("Documentos do imóvel");
+      expect(docsFolder.parent_id).toBe(propertyFolder.id);
+
+      // D34 fechada: o documento passou a ter entrada em `files`, no MESMO
+      // objeto de storage — não numa cópia.
+      const { data: after } = await serviceClient
+        .from("property_documents")
+        .select("file_id")
+        .eq("id", doc!.id)
+        .single();
+      expect(after?.file_id).not.toBeNull();
+
+      const { data: mirrored } = await serviceClient
+        .from("files")
+        .select("bucket, storage_path, source, folder_id")
+        .eq("id", after!.file_id!)
+        .single();
+      expect(mirrored?.source).toBe("property_document");
+      expect(mirrored?.bucket).toBe("documents");
+      expect(mirrored?.storage_path).toBe(`${propertyId}/caderneta.pdf`);
+      expect(mirrored?.folder_id).toBe(docsFolder.id);
+
+      // Idempotente: correr outra vez não duplica nada.
+      await serviceClient.rpc("ensure_property_folders", { p_profile_id: userIds.owner });
+      const { data: again } = await serviceClient
+        .from("folders")
+        .select("id")
+        .eq("property_id", propertyId);
+      expect(again?.length).toBe(2);
+    });
+
+    // -----------------------------------------------------------------------
+    // Quota — 07 §19.8
+    // -----------------------------------------------------------------------
+
+    it("o documento do imóvel não conta para a quota (§19.8 #5)", async () => {
+      const { data: used } = await serviceClient.rpc("cloud_usage_bytes", {
+        p_profile_id: userIds.owner,
+      });
+      expect(Number(used)).toBe(0);
+    });
+
+    it("o documento do imóvel é só de leitura pelo lado da Cloud (§19.5)", async () => {
+      const { data: doc } = await serviceClient
+        .from("files")
+        .select("id")
+        .eq("owner_id", userIds.owner)
+        .eq("source", "property_document")
+        .single();
+
+      const renamed = await clients.owner
+        .from("files")
+        .update({ name: "renomeado.pdf" })
+        .eq("id", doc!.id)
+        .select("id");
+      expect(renamed.data?.length ?? 0).toBe(0);
+
+      const removed = await clients.owner.rpc("cloud_delete_file", { p_file_id: doc!.id });
+      expect(removed.error).not.toBeNull();
+    });
+
+    it("cloud_register_upload: aceita dentro da quota e recusa acima dela", async () => {
+      const ok = await registerFile(10 * MB, "dentro-da-quota.pdf");
+      expect(ok.error).toBeNull();
+      fileId = ok.data as string;
+
+      const { data: used } = await serviceClient.rpc("cloud_usage_bytes", {
+        p_profile_id: userIds.owner,
+      });
+      expect(Number(used)).toBe(10 * MB);
+
+      // Encher a quota com uploads reais levaria 200 ficheiros de 25 MB. Em
+      // vez disso, injeta-se uma versão grande por `service_role` — o que
+      // conta é `file_versions.size`, que é o que `cloud_usage_bytes` soma.
+      const { data: bulky } = await serviceClient
+        .from("files")
+        .insert({
+          owner_id: userIds.owner,
+          name: "quase-cheio.pdf",
+          mime: "application/pdf",
+          size: 1,
+          storage_path: `${userIds.owner}/bulk/1`,
+          checksum: "3".repeat(64),
+        })
+        .select("id")
+        .single();
+      await serviceClient.from("file_versions").insert({
+        file_id: bulky!.id,
+        version: 1,
+        storage_path: `${userIds.owner}/bulk/1`,
+        name: "quase-cheio.pdf",
+        mime: "application/pdf",
+        size: 5 * 1024 * MB - 5 * MB,
+        checksum: "3".repeat(64),
+      });
+
+      const noRoom = await registerFile(10 * MB, "sem-espaco.pdf");
+      expect(noRoom.error).not.toBeNull();
+      expect(noRoom.error?.message).toContain("Sem espaço");
+
+      await serviceClient.from("files").delete().eq("id", bulky!.id);
+    });
+
+    it("um ficheiro acima de 25 MB é recusado (§19.8 #2)", async () => {
+      const { error } = await registerFile(26 * MB, "acima-de-25mb.pdf");
+      expect(error).not.toBeNull();
+      expect(error?.message).toContain("25 MB");
+    });
+
+    it("as versões contam para a quota, e restaurar não duplica (§19.8 #3)", async () => {
+      const before = await serviceClient.rpc("cloud_usage_bytes", { p_profile_id: userIds.owner });
+
+      const v2 = await clients.owner.rpc("cloud_add_file_version", {
+        p_file_id: fileId,
+        p_name: "dentro-da-quota.pdf",
+        p_mime: "application/pdf",
+        p_size: 4 * MB,
+        p_storage_path: `${userIds.owner}/${fileId}/2`,
+        p_checksum: "1".repeat(64),
+        p_note: "revisto",
+      });
+      expect(v2.error).toBeNull();
+      expect(v2.data).toBe(2);
+
+      const after = await serviceClient.rpc("cloud_usage_bytes", { p_profile_id: userIds.owner });
+      expect(Number(after.data) - Number(before.data)).toBe(4 * MB);
+
+      // Restaurar a v1 cria a v3 com o conteúdo da v1 — o histórico nunca
+      // perde linhas (07 §13.1) — e reaponta ao mesmo objeto, por isso a
+      // quota não sobe outra vez.
+      const restored = await clients.owner.rpc("cloud_restore_file_version", {
+        p_file_id: fileId,
+        p_version: 1,
+      });
+      expect(restored.error).toBeNull();
+      expect(restored.data).toBe(3);
+
+      const { data: versions } = await serviceClient
+        .from("file_versions")
+        .select("version")
+        .eq("file_id", fileId);
+      expect(versions?.length).toBe(3);
+    });
+
+    it("a reciclagem continua a contar até à purga (§19.8 #4)", async () => {
+      const created = await registerFile(2 * MB, "para-a-reciclagem.pdf");
+      const doomedId = created.data as string;
+
+      const before = await serviceClient.rpc("cloud_usage_bytes", { p_profile_id: userIds.owner });
+      await clients.owner.rpc("cloud_delete_file", { p_file_id: doomedId });
+
+      const afterDelete = await serviceClient.rpc("cloud_usage_bytes", {
+        p_profile_id: userIds.owner,
+      });
+      expect(Number(afterDelete.data)).toBe(Number(before.data));
+
+      await clients.owner.rpc("cloud_empty_recycle_bin");
+      const purged = await serviceClient.rpc("purge_cloud_recycle_bin");
+      expect(purged.error).toBeNull();
+
+      const afterPurge = await serviceClient.rpc("cloud_usage_bytes", {
+        p_profile_id: userIds.owner,
+      });
+      expect(Number(afterPurge.data)).toBe(Number(before.data) - 2 * MB);
+    });
+
+    it("não há caminho de insert direto em `files` — a quota não se contorna", async () => {
+      const { error } = await clients.owner.from("files").insert({
+        owner_id: userIds.owner,
+        name: "à-socapa.pdf",
+        mime: "application/pdf",
+        size: 5 * MB,
+        storage_path: `${userIds.owner}/manual/1`,
+        checksum: "2".repeat(64),
+      });
+      expect(error).not.toBeNull();
+    });
+
+    // -----------------------------------------------------------------------
+    // Matriz de acesso — folders, files, file_versions
+    // -----------------------------------------------------------------------
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["buyer2", false],
+      ["owner", true],
+      ["admin", false],
+      ["support", false],
+    ])("folders: select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role]
+        .from("folders")
+        .select("id")
+        .eq("property_id", propertyId);
+      expect((data ?? []).length > 0).toBe(expected);
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["buyer2", false],
+      ["owner", true],
+      ["admin", false],
+      ["support", false],
+    ])("files: select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role].from("files").select("id").eq("id", fileId);
+      expect((data ?? []).length > 0).toBe(expected);
+    });
+
+    it("files: nem o admin nem o suporte veem a Cloud de um utilizador", async () => {
+      // Não é descuido: 07 §13.4 dá ao admin o HISTÓRICO, não o conteúdo, e o
+      // support não vê nada. É a mesma linha de D30 — sem caminho auditado,
+      // não se abre acesso ao que é dos utilizadores.
+      for (const role of ["admin", "support"] as Role[]) {
+        const { data } = await clients[role].from("files").select("id").eq("id", fileId);
+        expect(data?.length ?? 0).toBe(0);
+      }
+    });
+
+    it.each<[Role, boolean]>([
+      ["buyer", false],
+      ["buyer2", false],
+      ["owner", true],
+    ])("file_versions: select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role].from("file_versions").select("id").eq("file_id", fileId);
+      expect((data ?? []).length > 0).toBe(expected);
+    });
+
+    it("folders: ninguém escreve na pasta automática de outro, nem na sua", async () => {
+      const { data: folder } = await serviceClient
+        .from("folders")
+        .select("id")
+        .eq("property_id", propertyId)
+        .eq("kind", "property")
+        .single();
+
+      // Terceiro não apaga.
+      const byOther = await clients.buyer2
+        .from("folders")
+        .delete()
+        .eq("id", folder!.id)
+        .select("id");
+      expect(byOther.data?.length ?? 0).toBe(0);
+
+      // Nem o dono: a pasta automática não se apaga enquanto o imóvel existir.
+      const byOwner = await clients.owner
+        .from("folders")
+        .delete()
+        .eq("id", folder!.id)
+        .select("id");
+      expect(byOwner.data?.length ?? 0).toBe(0);
+    });
+
+    // -----------------------------------------------------------------------
+    // Partilhas — P6-02, 07 §19.7 e §19.11
+    // -----------------------------------------------------------------------
+
+    let shareId: string;
+
+    it("share_file: o comprador passa a ver; um terceiro continua sem ver", async () => {
+      const shared = await clients.owner.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "download",
+        p_shared_with: userIds.buyer,
+      });
+      expect(shared.error).toBeNull();
+      shareId = shared.data as string;
+
+      const buyerSees = await clients.buyer.from("files").select("id").eq("id", fileId);
+      expect(buyerSees.data?.length).toBe(1);
+
+      const thirdParty = await clients.buyer2.from("files").select("id").eq("id", fileId);
+      expect(thirdParty.data?.length ?? 0).toBe(0);
+
+      // E aparece na Cloud de quem recebeu (05 §6.4).
+      const mine = await clients.buyer.rpc("shared_with_me");
+      expect(mine.data?.some((r: { file_id: string }) => r.file_id === fileId)).toBe(true);
+    });
+
+    it("a permissão de partilha é só view|download — `edit` já não existe (§19.7)", async () => {
+      const { error } = await clients.owner.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "edit",
+        p_shared_with: userIds.buyer2,
+      });
+      expect(error).not.toBeNull();
+    });
+
+    it("quem recebeu não escreve no ficheiro de outro", async () => {
+      const { data } = await clients.buyer
+        .from("files")
+        .update({ name: "meu-agora.pdf" })
+        .eq("id", fileId)
+        .select("id");
+      expect(data?.length ?? 0).toBe(0);
+    });
+
+    it("um terceiro não partilha o ficheiro de outro", async () => {
+      const { error } = await clients.buyer2.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "view",
+        p_shared_with: userIds.buyer2,
+      });
+      expect(error).not.toBeNull();
+    });
+
+    it("revogar tira o acesso imediatamente", async () => {
+      const { error } = await clients.owner.rpc("revoke_file_share", { p_share_id: shareId });
+      expect(error).toBeNull();
+
+      const { data } = await clients.buyer.from("files").select("id").eq("id", fileId);
+      expect(data?.length ?? 0).toBe(0);
+    });
+
+    it("resolve_file_share: código errado falha e conta como tentativa (§19.8)", async () => {
+      const token = `tok-${crypto.randomUUID()}`;
+      await clients.owner.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "view",
+        p_token: token,
+        p_access_code_hash: "hash-correto",
+      });
+
+      // Sem código: devolve `needs_code`, não o ficheiro.
+      const asked = await clients.anon.rpc("resolve_file_share", { p_token: token });
+      expect(asked.error).toBeNull();
+      expect(asked.data?.[0]?.needs_code).toBe(true);
+      expect(asked.data?.[0]?.file_name).toBeNull();
+
+      // Código errado é RESULTADO, não exceção: uma exceção desfazia a
+      // transação e levava com ela o registo da tentativa — e sem tentativas
+      // registadas não há limite nenhum a aplicar.
+      const wrong = await clients.anon.rpc("resolve_file_share", {
+        p_token: token,
+        p_access_code_hash: "hash-errado",
+      });
+      expect(wrong.error).toBeNull();
+      expect(wrong.data?.[0]?.invalid_code).toBe(true);
+      expect(wrong.data?.[0]?.file_name).toBeNull();
+
+      const { data: attempts } = await serviceClient
+        .from("auth_attempts")
+        .select("succeeded")
+        .eq("identifier", token)
+        .eq("kind", "share_code");
+      expect(attempts?.some((a) => !a.succeeded)).toBe(true);
+
+      const right = await clients.anon.rpc("resolve_file_share", {
+        p_token: token,
+        p_access_code_hash: "hash-correto",
+      });
+      expect(right.error).toBeNull();
+      expect(right.data?.[0]?.invalid_code).toBe(false);
+      expect(right.data?.[0]?.file_name).toBe("dentro-da-quota.pdf");
+
+      await serviceClient.from("auth_attempts").delete().eq("identifier", token);
+    });
+
+    it("dez códigos errados bloqueiam a ligação (§19.8)", async () => {
+      const token = `tok-bf-${crypto.randomUUID()}`;
+      await clients.owner.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "view",
+        p_token: token,
+        p_access_code_hash: "hash-correto",
+      });
+
+      for (let i = 0; i < 10; i += 1) {
+        await serviceClient.rpc("record_auth_attempt", {
+          p_identifier: token,
+          p_kind: "share_code",
+          p_succeeded: false,
+        });
+      }
+
+      // Nem sequer com o código certo: a partir daqui é o limite que manda.
+      const blocked = await clients.anon.rpc("resolve_file_share", {
+        p_token: token,
+        p_access_code_hash: "hash-correto",
+      });
+      expect(blocked.error).not.toBeNull();
+      expect(blocked.error?.message).toContain("Demasiadas tentativas");
+
+      await serviceClient.from("auth_attempts").delete().eq("identifier", token);
+    });
+
+    // -----------------------------------------------------------------------
+    // Registo de acessos — 07 §13.3 e §13.4
+    // -----------------------------------------------------------------------
+
+    it("document_access_log: append-only, ninguém escreve a partir do cliente", async () => {
+      for (const role of ["owner", "admin", "buyer"] as Role[]) {
+        const { error } = await clients[role].from("document_access_log").insert({
+          subject_type: "file",
+          subject_id: fileId,
+          action: "download",
+        });
+        expect(error).not.toBeNull();
+      }
+    });
+
+    it("log_document_access: escreve uma linha, e só uma", async () => {
+      const before = await serviceClient
+        .from("document_access_log")
+        .select("id")
+        .eq("subject_id", fileId)
+        .eq("action", "download");
+
+      const { error } = await clients.owner.rpc("log_document_access", {
+        p_subject_type: "file",
+        p_subject_id: fileId,
+        p_action: "download",
+      });
+      expect(error).toBeNull();
+
+      const after = await serviceClient
+        .from("document_access_log")
+        .select("id")
+        .eq("subject_id", fileId)
+        .eq("action", "download");
+      expect((after.data?.length ?? 0) - (before.data?.length ?? 0)).toBe(1);
+    });
+
+    it("o registo é do dono do documento — a contraparte não o vê (§13.4)", async () => {
+      await clients.owner.rpc("share_file", {
+        p_file_id: fileId,
+        p_permission: "view",
+        p_shared_with: userIds.buyer,
+      });
+
+      const owner = await clients.owner.rpc("file_access_log", { p_file_id: fileId });
+      expect((owner.data?.length ?? 0) > 0).toBe(true);
+
+      const counterparty = await clients.buyer.rpc("file_access_log", { p_file_id: fileId });
+      expect(counterparty.data?.length ?? 0).toBe(0);
+
+      const thirdParty = await clients.buyer2.rpc("file_access_log", { p_file_id: fileId });
+      expect(thirdParty.data?.length ?? 0).toBe(0);
+
+      // O `support` não vê nada de nada (§13.4).
+      const support = await clients.support.from("document_access_log").select("id");
+      expect(support.data?.length ?? 0).toBe(0);
+    });
+
+    // -----------------------------------------------------------------------
+    // Modelos de contrato — P6-04
+    // -----------------------------------------------------------------------
+
+    it("contract_templates: só o admin escreve; o rascunho não sai do Admin", async () => {
+      const { data, error } = await clients.admin
+        .from("contract_templates")
+        .insert({
+          family_id: crypto.randomUUID(),
+          kind: "sale",
+          name: "Contrato de compra e venda (teste)",
+          body: { type: "doc", content: [] },
+          variables: ["proprietario", "comprador"],
+          created_by: userIds.admin,
+        })
+        .select("id, family_id")
+        .single();
+      expect(error).toBeNull();
+      templateId = data!.id;
+      templateFamilyId = data!.family_id;
+
+      // Em rascunho, o proprietário não o vê.
+      const draft = await clients.owner
+        .from("contract_templates")
+        .select("id")
+        .eq("id", templateId);
+      expect(draft.data?.length ?? 0).toBe(0);
+
+      const byOwner = await clients.owner.from("contract_templates").insert({
+        family_id: crypto.randomUUID(),
+        kind: "rent",
+        name: "Modelo à socapa",
+      });
+      expect(byOwner.error).not.toBeNull();
+    });
+
+    it("publicar torna-o visível e arquiva a versão anterior", async () => {
+      const published = await clients.admin.rpc("publish_contract_template", {
+        p_template_id: templateId,
+      });
+      expect(published.error).toBeNull();
+
+      const seen = await clients.owner.from("contract_templates").select("id").eq("id", templateId);
+      expect(seen.data?.length).toBe(1);
+
+      // Nova versão de rascunho não mexe na publicada.
+      const draft = await clients.admin.rpc("draft_contract_template_version", {
+        p_family_id: templateFamilyId,
+      });
+      expect(draft.error).toBeNull();
+
+      const stillPublished = await serviceClient
+        .from("contract_templates")
+        .select("version, status")
+        .eq("family_id", templateFamilyId)
+        .order("version");
+      expect(stillPublished.data?.[0]?.status).toBe("published");
+      expect(stillPublished.data?.[1]?.status).toBe("draft");
+
+      await clients.admin.rpc("publish_contract_template", { p_template_id: draft.data as string });
+
+      const after = await serviceClient
+        .from("contract_templates")
+        .select("version, status")
+        .eq("family_id", templateFamilyId)
+        .order("version");
+      expect(after.data?.[0]?.status).toBe("archived");
+      expect(after.data?.[1]?.status).toBe("published");
+    });
+
+    // -----------------------------------------------------------------------
+    // Contratos — P6-03, 07 §13.2
+    // -----------------------------------------------------------------------
+
+    it("create_contract_from_template: o proprietário gera; um terceiro não usa o imóvel alheio", async () => {
+      const { data: tpl } = await serviceClient
+        .from("contract_templates")
+        .select("id")
+        .eq("family_id", templateFamilyId)
+        .eq("status", "published")
+        .single();
+
+      const created = await clients.owner.rpc("create_contract_from_template", {
+        p_template_id: tpl!.id,
+        p_title: "Contrato de reserva · T3",
+        p_property_id: propertyId,
+        p_counterparty_profile_id: userIds.buyer,
+        p_counterparty_name: "",
+      });
+      expect(created.error).toBeNull();
+      contractId = created.data as string;
+
+      const byOther = await clients.buyer2.rpc("create_contract_from_template", {
+        p_template_id: tpl!.id,
+        p_title: "Contrato sobre imóvel alheio",
+        p_property_id: propertyId,
+      });
+      expect(byOther.error).not.toBeNull();
+    });
+
+    it.each<[Role, boolean]>([
+      ["anon", false],
+      ["buyer", false],
+      ["buyer2", false],
+      ["owner", true],
+      ["admin", true],
+      ["support", false],
+    ])("contracts: select como %s → permitido=%s", async (role, expected) => {
+      const { data } = await clients[role].from("contracts").select("id").eq("id", contractId);
+      expect((data ?? []).length > 0).toBe(expected);
+    });
+
+    it("o estado de um contrato não anda para trás", async () => {
+      const forward = await clients.owner.rpc("set_contract_status", {
+        p_contract_id: contractId,
+        p_status: "awaiting_signature",
+      });
+      expect(forward.error).toBeNull();
+
+      const backward = await clients.owner.rpc("set_contract_status", {
+        p_contract_id: contractId,
+        p_status: "draft",
+      });
+      expect(backward.error).not.toBeNull();
+
+      const sideways = await clients.buyer2.rpc("set_contract_status", {
+        p_contract_id: contractId,
+        p_status: "signed",
+      });
+      expect(sideways.error).not.toBeNull();
+    });
+
+    it("partilhar congela a versão, e a contraparte vê essa e não o que vier depois", async () => {
+      const shared = await clients.owner.rpc("share_contract", {
+        p_contract_id: contractId,
+        p_permission: "download",
+        p_shared_with: userIds.buyer,
+      });
+      expect(shared.error).toBeNull();
+
+      const { data: frozen } = await serviceClient
+        .from("contract_versions")
+        .select("id, version, frozen")
+        .eq("contract_id", contractId)
+        .eq("frozen", true)
+        .order("version", { ascending: false });
+      expect((frozen?.length ?? 0) > 0).toBe(true);
+
+      // O dono continua a editar: o corpo do contrato muda.
+      await clients.owner.rpc("save_contract_version", {
+        p_contract_id: contractId,
+        p_body: { type: "doc", content: [{ type: "paragraph", text: "depois da partilha" }] },
+        p_values: { preco: "300000" },
+        p_note: "edição posterior",
+      });
+
+      // A contraparte continua a ver a versão congelada (07 §13.2).
+      const seen = await clients.buyer.rpc("contracts_shared_with_me");
+      expect(seen.error).toBeNull();
+      const row = seen.data?.find((r: { contract_id: string }) => r.contract_id === contractId);
+      expect(row).toBeDefined();
+      expect(JSON.stringify(row.body)).not.toContain("depois da partilha");
+
+      // E um terceiro não vê nada.
+      const thirdParty = await clients.buyer2.rpc("contracts_shared_with_me");
+      expect(thirdParty.data?.length ?? 0).toBe(0);
+    });
+
+    it("a contraparte vê a versão partilhada e SÓ essa (§13.4)", async () => {
+      const { data: all } = await serviceClient
+        .from("contract_versions")
+        .select("id")
+        .eq("contract_id", contractId);
+      expect((all?.length ?? 0) > 1).toBe(true);
+
+      const { data: seen } = await clients.buyer
+        .from("contract_versions")
+        .select("id")
+        .eq("contract_id", contractId);
+      expect(seen?.length).toBe(1);
+
+      // E não vê o registo de acessos do contrato (§13.4).
+      const { data: log } = await clients.buyer
+        .from("document_access_log")
+        .select("id")
+        .eq("subject_id", contractId);
+      expect(log?.length ?? 0).toBe(0);
+    });
+
+    it("contract_history: o dono vê o histórico; a contraparte não", async () => {
+      const owner = await clients.owner.rpc("contract_history", { p_contract_id: contractId });
+      expect((owner.data?.length ?? 0) > 1).toBe(true);
+
+      const counterparty = await clients.buyer.rpc("contract_history", {
+        p_contract_id: contractId,
+      });
+      expect(counterparty.data?.length ?? 0).toBe(0);
+    });
+
+    it("addons: o catálogo é público, a escrita é só do admin", async () => {
+      for (const role of ["anon", "buyer", "owner"] as Role[]) {
+        const { data } = await clients[role].from("addons").select("id").eq("id", addonId);
+        expect(data?.length).toBe(1);
+      }
+
+      const byOwner = await clients.owner
+        .from("addons")
+        .update({ price_month_cents: 1 })
+        .eq("id", addonId)
+        .select("id");
+      expect(byOwner.data?.length ?? 0).toBe(0);
+    });
+
+    it("subscription_addons: cada um vê o seu, e mais nenhum", async () => {
+      await serviceClient
+        .from("subscription_addons")
+        .insert({ subscription_id: subscriptionId, addon_id: addonId, status: "active" });
+
+      const own = await clients.owner.from("subscription_addons").select("id");
+      expect(own.data?.length).toBe(1);
+
+      const other = await clients.buyer2.from("subscription_addons").select("id");
+      expect(other.data?.length ?? 0).toBe(0);
+
+      await serviceClient
+        .from("subscription_addons")
+        .delete()
+        .eq("subscription_id", subscriptionId);
+    });
+  });
 });

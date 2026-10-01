@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
-import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
@@ -56,9 +55,10 @@ export default async function MyRequestsPage() {
       counters={countersFor("buyer", conversations, visits, [])}
       notifications={notifications}
     >
-      <PageHeader title="Meus pedidos" subtitle="As visitas que pediu e o estado de cada uma" />
       <VisitsScreen
         rows={visits}
+        pageTitle="Meus pedidos"
+        pageSubtitle="As visitas que pediu e o estado de cada uma"
         role="buyer"
         month={currentMonth()}
         onAccept={acceptVisit}

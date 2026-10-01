@@ -69,6 +69,9 @@ export default async function MessagesPage({
       onLocaleChange={setLocalePreference}
       counters={countersFor(role, conversations, visits, leads)}
       notifications={notifications}
+      // A área útil deste ecrã é a janela: os dois painéis vão até ao fim e
+      // rolam por dentro, em vez de a página rolar por baixo deles.
+      fill
     >
       <PageHeader title="Mensagens" subtitle="Conversas por imóvel, sem partilhar contactos" />
       <MessagesPageClient

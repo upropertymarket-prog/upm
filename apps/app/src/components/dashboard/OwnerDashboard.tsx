@@ -12,8 +12,8 @@ export type OwnerDashboardProps = {
   upcomingVisits: VisitRow[];
   recentMessages: ActivityItem[];
   recentMessagesMeta: string;
-  recentDocuments: ActivityItem[];
-  recentDocumentsMeta: string;
+  recentContracts: ActivityItem[];
+  recentContractsMeta: string;
 };
 
 /**
@@ -37,8 +37,8 @@ export function OwnerDashboard({
   upcomingVisits,
   recentMessages,
   recentMessagesMeta,
-  recentDocuments,
-  recentDocumentsMeta,
+  recentContracts,
+  recentContractsMeta,
 }: OwnerDashboardProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
@@ -83,8 +83,8 @@ export function OwnerDashboard({
         <RecentActivity
           messages={recentMessages}
           messagesMeta={recentMessagesMeta}
-          documents={recentDocuments}
-          documentsMeta={recentDocumentsMeta}
+          contracts={recentContracts}
+          contractsMeta={recentContractsMeta}
         />
       </section>
     </div>

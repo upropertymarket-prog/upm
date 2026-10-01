@@ -36,12 +36,17 @@ function Shell({
   activeId,
   title,
   subtitle,
+  hideHeader = false,
+  fill = false,
   children,
 }: {
   theme: "light" | "dark";
   activeId: string;
   title: string;
   subtitle: string;
+  hideHeader?: boolean;
+  /** O mesmo `fill` que a rota usa — ver `AppShell`. */
+  fill?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -56,11 +61,12 @@ function Shell({
               activeId={activeId}
               locale="pt"
               onLocaleChange={demoLocaleChange}
+              fill={fill}
               counters={{ leads: 2, messages: 3, visitSchedule: 2, contracts: 1 }}
               notifications={demoNotifications}
               liveNotifications={false}
             >
-              <PageHeader title={title} subtitle={subtitle} />
+              {hideHeader ? null : <PageHeader title={title} subtitle={subtitle} />}
               {children}
             </AppChrome>
           </ToastProvider>
@@ -79,6 +85,7 @@ function MensagensDemo({ theme }: Tema) {
       activeId="messages"
       title="Mensagens"
       subtitle="Conversas por imóvel, sem partilhar contactos"
+      fill
     >
       <MessagesScreen
         conversations={demoConversations}
@@ -98,9 +105,12 @@ function AgendaDemo({ theme }: Tema) {
       activeId="visitSchedule"
       title="Agenda de visitas"
       subtitle="Gira as visitas agendadas para os seus imóveis"
+      hideHeader
     >
       <VisitsScreen
         rows={demoVisits}
+        pageTitle="Agenda de visitas"
+        pageSubtitle="Gira as visitas agendadas para os seus imóveis"
         role="owner"
         month="2026-09"
         onAccept={demoOk}

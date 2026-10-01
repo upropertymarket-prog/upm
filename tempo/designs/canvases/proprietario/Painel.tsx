@@ -11,7 +11,7 @@ import {
   demoDashboardStats,
   demoLocaleChange,
   demoNotifications,
-  demoRecentDocuments,
+  demoRecentContracts,
   demoRecentMessages,
   demoUpcomingVisits,
   demoViewsSeries,
@@ -75,8 +75,8 @@ function PainelDemo({ theme }: { theme: "light" | "dark" }) {
                 upcomingVisits={demoUpcomingVisits}
                 recentMessages={demoRecentMessages}
                 recentMessagesMeta="2 por responder"
-                recentDocuments={demoRecentDocuments}
-                recentDocumentsMeta="3 recentes"
+                recentContracts={demoRecentContracts}
+                recentContractsMeta="3 recentes"
               />
             </AppChrome>
           </ToastProvider>

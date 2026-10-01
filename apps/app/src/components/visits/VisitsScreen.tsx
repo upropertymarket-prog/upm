@@ -17,6 +17,7 @@ import {
   EmptyState,
   Input,
   Modal,
+  PageHeader,
   StatusTag,
   Tabs,
   useToast,
@@ -45,6 +46,8 @@ export type VisitActions = {
 
 export type VisitsScreenProps = VisitActions & {
   rows: VisitRow[];
+  pageTitle: string;
+  pageSubtitle: string;
   /** Muda os textos e para onde aponta "Abrir conversa" — não a lógica. */
   role: "owner" | "buyer";
   /** Mês mostrado no calendário, como `YYYY-MM`. A página decide qual é. */
@@ -74,6 +77,8 @@ const FILTERS: { id: "all" | VisitStatus; label: string }[] = [
  */
 export function VisitsScreen({
   rows,
+  pageTitle,
+  pageSubtitle,
   role,
   month,
   onAccept,
@@ -124,129 +129,137 @@ export function VisitsScreen({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-7)" }}>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: "var(--sp-5)",
-        }}
-      >
-        <div style={{ display: "inline-flex", gap: "var(--sp-2)" }}>
-          <Button
-            variant={view === "list" ? "primary" : "secondary"}
-            onClick={() => setView("list")}
-            leadingIcon={<List size={14} aria-hidden="true" />}
-          >
-            Lista
-          </Button>
-          <Button
-            variant={view === "calendar" ? "primary" : "secondary"}
-            onClick={() => setView("calendar")}
-            leadingIcon={<CalendarDays size={14} aria-hidden="true" />}
-          >
-            Calendário
-          </Button>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Tabs
-            label="Filtrar visitas por estado"
-            items={tabs}
-            value={filter}
-            onValueChange={(id) => setFilter(id as "all" | VisitStatus)}
-          />
-        </div>
-      </div>
-
-      {view === "list" ? (
-        <VisitList
-          rows={visible}
-          role={role}
-          pending={pending}
-          onAskAccept={setConfirming}
-          onAskReschedule={(row) => {
-            setRescheduling(row);
-            setDate("");
-            setTime("");
+    <>
+      <PageHeader
+        title={pageTitle}
+        subtitle={pageSubtitle}
+        actions={
+          <div style={{ display: "inline-flex", gap: "var(--sp-2)" }}>
+            <Button
+              variant={view === "list" ? "primary" : "secondary"}
+              onClick={() => setView("list")}
+              leadingIcon={<List size={14} aria-hidden="true" />}
+            >
+              Lista
+            </Button>
+            <Button
+              variant={view === "calendar" ? "primary" : "secondary"}
+              onClick={() => setView("calendar")}
+              leadingIcon={<CalendarDays size={14} aria-hidden="true" />}
+            >
+              Calendário
+            </Button>
+          </div>
+        }
+      />
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-7)" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "var(--sp-5)",
           }}
-          onCancel={(row) =>
-            run(() => onCancel(row.id), "Visita cancelada. O outro lado foi notificado.")
-          }
-          onArchive={(row) => run(() => onArchive(row.id), "Visita arquivada.")}
-        />
-      ) : (
-        <VisitCalendar rows={visible} month={month} />
-      )}
-
-      <Modal
-        open={confirming !== null}
-        onClose={() => setConfirming(null)}
-        title="Aceitar o pedido de visita"
-        size="sm"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setConfirming(null)}>
-              Voltar
-            </Button>
-            <Button onClick={confirmAccept} disabled={pending}>
-              Aceitar e partilhar morada
-            </Button>
-          </>
-        }
-      >
-        <p style={{ margin: 0, lineHeight: 1.6 }}>
-          Ao aceitar, a morada exata de <strong>{confirming?.propertyTitle}</strong> fica visível
-          para <strong>{confirming?.other.name}</strong>. Apenas para este comprador.
-        </p>
-        <p style={{ margin: "var(--sp-5) 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
-          Pode revogar esta permissão mais tarde, no detalhe do imóvel. Se preferir não partilhar,
-          cancele o pedido — não existe aceitar sem partilhar a morada.
-        </p>
-      </Modal>
-
-      <Modal
-        open={rescheduling !== null}
-        onClose={() => setRescheduling(null)}
-        title="Propor outra data"
-        size="sm"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setRescheduling(null)}>
-              Voltar
-            </Button>
-            <Button onClick={confirmReschedule} disabled={pending || !date || !time}>
-              Propor data
-            </Button>
-          </>
-        }
-      >
-        <div style={{ display: "grid", gap: "var(--sp-5)" }}>
-          <Input
-            label="Data"
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-          />
-          <Input
-            label="Hora"
-            type="time"
-            value={time}
-            onChange={(event) => setTime(event.target.value)}
-          />
-          {rescheduling && rescheduling.rescheduleCount === MAX_RESCHEDULES - 1 ? (
-            <p style={{ margin: 0, color: "var(--warn)", lineHeight: 1.6 }}>
-              Este é o último reagendamento possível. Depois disto, só resta aceitar a data ou
-              cancelar — e a visita pode perder-se.
-            </p>
-          ) : (
-            <p style={{ margin: 0, color: "var(--muted)" }}>
-              Reagendamentos usados: {rescheduling?.rescheduleCount ?? 0} de {MAX_RESCHEDULES}.
-            </p>
-          )}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Tabs
+              label="Filtrar visitas por estado"
+              items={tabs}
+              value={filter}
+              onValueChange={(id) => setFilter(id as "all" | VisitStatus)}
+            />
+          </div>
         </div>
-      </Modal>
-    </div>
+
+        {view === "list" ? (
+          <VisitList
+            rows={visible}
+            role={role}
+            pending={pending}
+            onAskAccept={setConfirming}
+            onAskReschedule={(row) => {
+              setRescheduling(row);
+              setDate("");
+              setTime("");
+            }}
+            onCancel={(row) =>
+              run(() => onCancel(row.id), "Visita cancelada. O outro lado foi notificado.")
+            }
+            onArchive={(row) => run(() => onArchive(row.id), "Visita arquivada.")}
+          />
+        ) : (
+          <VisitCalendar rows={visible} month={month} />
+        )}
+
+        <Modal
+          open={confirming !== null}
+          onClose={() => setConfirming(null)}
+          title="Aceitar o pedido de visita"
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setConfirming(null)}>
+                Voltar
+              </Button>
+              <Button onClick={confirmAccept} disabled={pending}>
+                Aceitar e partilhar morada
+              </Button>
+            </>
+          }
+        >
+          <p style={{ margin: 0, lineHeight: 1.6 }}>
+            Ao aceitar, a morada exata de <strong>{confirming?.propertyTitle}</strong> fica visível
+            para <strong>{confirming?.other.name}</strong>. Apenas para este comprador.
+          </p>
+          <p style={{ margin: "var(--sp-5) 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
+            Pode revogar esta permissão mais tarde, no detalhe do imóvel. Se preferir não partilhar,
+            cancele o pedido — não existe aceitar sem partilhar a morada.
+          </p>
+        </Modal>
+
+        <Modal
+          open={rescheduling !== null}
+          onClose={() => setRescheduling(null)}
+          title="Propor outra data"
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setRescheduling(null)}>
+                Voltar
+              </Button>
+              <Button onClick={confirmReschedule} disabled={pending || !date || !time}>
+                Propor data
+              </Button>
+            </>
+          }
+        >
+          <div style={{ display: "grid", gap: "var(--sp-5)" }}>
+            <Input
+              label="Data"
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+            <Input
+              label="Hora"
+              type="time"
+              value={time}
+              onChange={(event) => setTime(event.target.value)}
+            />
+            {rescheduling && rescheduling.rescheduleCount === MAX_RESCHEDULES - 1 ? (
+              <p style={{ margin: 0, color: "var(--warn)", lineHeight: 1.6 }}>
+                Este é o último reagendamento possível. Depois disto, só resta aceitar a data ou
+                cancelar — e a visita pode perder-se.
+              </p>
+            ) : (
+              <p style={{ margin: 0, color: "var(--muted)" }}>
+                Reagendamentos usados: {rescheduling?.rescheduleCount ?? 0} de {MAX_RESCHEDULES}.
+              </p>
+            )}
+          </div>
+        </Modal>
+      </div>
+    </>
   );
 }
 

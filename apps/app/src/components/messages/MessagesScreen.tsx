@@ -11,6 +11,8 @@ import {
   type ConversationSummary,
 } from "../interaction/interactionTypes";
 
+import "./messages-screen.css";
+
 export type MessagesScreenProps = {
   conversations: ConversationSummary[];
   /** A conversa aberta, já com as mensagens. `null` = ainda nenhuma escolhida. */
@@ -29,9 +31,11 @@ export type MessagesScreenProps = {
  * ecrã). Lista de conversas com não lidas à esquerda, chat à direita, como a
  * referência (`App Proprietario.dc.html`, bloco `sChat`).
  *
- * Sem alturas fixas: a coluna do chat ocupa o que sobra do shell e é o painel
- * de mensagens que rola, não a página. Foi a lição das cinco alturas em pixels
- * que tiveram de ser limpas do shell na Fase 4 (08 §9, adenda 2).
+ * Sem alturas fixas: os dois painéis ocupam o que sobra do shell — a rota e a
+ * storyboard pedem-lhe `fill` — e quem rola é o interior de cada um, não a
+ * página. Foi a lição das cinco alturas em pixels que tiveram de ser limpas do
+ * shell na Fase 4 (08 §9, adenda 2). A grelha vive em `messages-screen.css`:
+ * precisa de um ponto de corte, e isso não cabe num estilo em linha.
  */
 export function MessagesScreen({
   conversations,
@@ -89,28 +93,8 @@ export function MessagesScreen({
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        alignItems: "stretch",
-        gap: "var(--sp-7)",
-      }}
-    >
-      <section
-        aria-label="Conversas"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--sp-5)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--r-2xl)",
-          background: "var(--surface)",
-          padding: "var(--sp-6)",
-          maxWidth: 360,
-          minWidth: 0,
-        }}
-      >
+    <div className="upm-messages">
+      <section aria-label="Conversas" className="upm-messages__list">
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
           <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>Conversas</h2>
           {unreadTotal > 0 ? (
@@ -125,9 +109,7 @@ export function MessagesScreen({
           onChange={(event) => setQuery(event.target.value)}
           leadingIcon={<Search size={14} aria-hidden="true" />}
         />
-        <ul
-          style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-2)" }}
-        >
+        <ul className="upm-messages__items">
           {filtered.map((item) => {
             const open = item.id === active?.id;
             return (
@@ -216,19 +198,7 @@ export function MessagesScreen({
         ) : null}
       </section>
 
-      <section
-        aria-label="Conversa"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--r-2xl)",
-          background: "var(--surface)",
-          overflow: "hidden",
-          minWidth: 0,
-          minHeight: "clamp(420px, calc(100vh - 280px), 900px)",
-        }}
-      >
+      <section aria-label="Conversa" className="upm-messages__thread">
         {active ? (
           <>
             <header
@@ -246,7 +216,8 @@ export function MessagesScreen({
                   width: 38,
                   height: 38,
                   borderRadius: "999px",
-                  background: "var(--accent)",
+                  // Iniciais em branco: o mesmo sólido da bolha e do `.upm-avatar`.
+                  background: "var(--accent-solid)",
                   color: "var(--on-solid)",
                   display: "flex",
                   alignItems: "center",
@@ -278,17 +249,7 @@ export function MessagesScreen({
               ) : null}
             </header>
 
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--sp-3)",
-                padding: "var(--sp-8)",
-                background: "var(--surface2)",
-              }}
-            >
+            <div className="upm-messages__scroll">
               {active.messages.map((message) => (
                 <div
                   key={message.id}
@@ -304,8 +265,11 @@ export function MessagesScreen({
                       gap: "var(--sp-1)",
                       padding: "var(--sp-4) var(--sp-5)",
                       borderRadius: "var(--r-xl)",
-                      border: `1px solid ${message.mine ? "var(--accent)" : "var(--border)"}`,
-                      background: message.mine ? "var(--accent)" : "var(--surface)",
+                      // `--accent-solid`, não `--accent`: a bolha é um fundo
+                      // sólido com texto branco por cima, e o acento escuro é
+                      // claro de mais para isso (ver tokens.css).
+                      border: `1px solid ${message.mine ? "var(--accent-solid)" : "var(--border)"}`,
+                      background: message.mine ? "var(--accent-solid)" : "var(--surface)",
                       color: message.mine ? "var(--on-solid)" : "var(--text)",
                     }}
                   >
@@ -341,12 +305,12 @@ export function MessagesScreen({
                 borderTop: "1px solid var(--border)",
               }}
             >
-              {/* Anexos são da Fase 7 (Cloud): `messages.attachments` existe,
-                  o seletor de ficheiros vive lá. */}
+              {/* Anexos são da Fase 6 (Cloud e contratos): `messages.attachments`
+                  existe, o seletor de ficheiros vive lá. */}
               <Button
                 variant="ghost"
                 iconOnly
-                aria-label="Anexar ficheiro (Fase 7)"
+                aria-label="Anexar ficheiro (Fase 6)"
                 disabled
                 leadingIcon={<Paperclip size={18} aria-hidden="true" />}
               />

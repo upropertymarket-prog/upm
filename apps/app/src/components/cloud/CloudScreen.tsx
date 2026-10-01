@@ -1,0 +1,854 @@
+"use client";
+
+import { useMemo, useRef, useState, useTransition } from "react";
+import {
+  ArrowUpFromLine,
+  ChevronRight,
+  Cloud as CloudIcon,
+  Download,
+  FileText,
+  Folder,
+  FolderPlus,
+  History,
+  Image as ImageIcon,
+  Inbox,
+  Lock,
+  Share2,
+  Trash2,
+  Users,
+} from "lucide-react";
+import {
+  Button,
+  Card,
+  Drawer,
+  EmptyState,
+  Input,
+  Modal,
+  PageHeader,
+  StatusTag,
+  Table,
+  useToast,
+  type TableColumn,
+} from "@upm/ui";
+import { formatBytes, type CloudStatus, type SharePermission } from "@upm/db/cloud";
+
+import {
+  folderSubtreeIds,
+  formatDate,
+  mimeLabel,
+  type CloudFileRow,
+  type FileAccessRow,
+  type FileVersionRow,
+  type FolderNode,
+  type ShareContact,
+  type SharedWithMeRow,
+} from "./cloudTypes";
+import { ShareFileModal, type ShareState } from "./ShareFileModal";
+
+export type CloudFileDetails = {
+  versions: FileVersionRow[];
+  accesses: FileAccessRow[];
+  shares: ShareState[];
+};
+
+export type CloudScreenProps = {
+  subtitle: string;
+  status: CloudStatus;
+  folders: FolderNode[];
+  files: CloudFileRow[];
+  sharedWithMe: SharedWithMeRow[];
+  contacts: ShareContact[];
+  onCreateFolder: (name: string, parentId?: string) => Promise<{ error?: string }>;
+  onDeleteFolder: (folderId: string) => Promise<{ error?: string }>;
+  onUpload: (formData: FormData) => Promise<{ error?: string }>;
+  onReplace: (formData: FormData) => Promise<{ error?: string }>;
+  onDelete: (fileId: string) => Promise<{ error?: string }>;
+  onEmptyRecycleBin: () => Promise<{ error?: string }>;
+  onDownloadUrl: (
+    fileId: string,
+    action?: "view" | "download",
+  ) => Promise<{ url?: string; error?: string }>;
+  onShare: (input: {
+    fileId: string;
+    permission: SharePermission;
+    sharedWith?: string;
+    asLink?: boolean;
+    expiresInHours?: number | null;
+    accessCode?: string;
+  }) => Promise<{ ok?: boolean; url?: string; error?: string }>;
+  onRevokeShare: (shareId: string) => Promise<{ error?: string }>;
+  onLoadDetails: (fileId: string) => Promise<CloudFileDetails>;
+  onRestoreVersion: (fileId: string, version: number) => Promise<{ error?: string }>;
+};
+
+/** `null` = "Todos os ficheiros"; os dois literais são as vistas especiais. */
+type View =
+  { kind: "all" } | { kind: "folder"; id: string } | { kind: "recycle" } | { kind: "shared" };
+
+/**
+ * Cloud — `/cloud` (P6-01 · P6-02 · 07 §19)
+ * =========================================================================
+ * Três colunas de leitura: as pastas à esquerda, os ficheiros ao centro, o
+ * armazenamento em cima à direita.
+ *
+ * Duas coisas que este ecrã faz ao contrário da referência visual, ambas por
+ * decisão registada:
+ *
+ * 1. O cartão de armazenamento **não reparte o consumo por tipo** (07 §19.9).
+ *    Fica a barra e "2,1 GB de 5 GB". Repartir era o sistema a arrumar o que é
+ *    do utilizador — e uma das três fatias do protótipo, as fotografias, nem
+ *    sequer vive na Cloud.
+ * 2. Quem não tem Cloud no plano vê o convite de 07 §19.4 **no lugar do
+ *    conteúdo**, e o convite muda conforme o que falta: quem está a 80 % de
+ *    outro limite do plano é convidado a subir de plano, não a comprar o extra.
+ */
+export function CloudScreen(props: CloudScreenProps) {
+  const { status, folders, files, sharedWithMe, contacts } = props;
+  const [view, setView] = useState<View>({ kind: "all" });
+  const [newFolder, setNewFolder] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [detail, setDetail] = useState<CloudFileRow | null>(null);
+  const [details, setDetails] = useState<CloudFileDetails | null>(null);
+  const [share, setShare] = useState<CloudFileRow | null>(null);
+  const [pending, startTransition] = useTransition();
+  const uploadRef = useRef<HTMLInputElement | null>(null);
+  const replaceRef = useRef<HTMLInputElement | null>(null);
+  const { toast } = useToast();
+
+  const flatFolders = useMemo(() => folders.flatMap(flatten), [folders]);
+
+  const live = files.filter((file) => file.deletedAt === null);
+  const binned = files.filter((file) => file.deletedAt !== null);
+
+  const visible = useMemo(() => {
+    if (view.kind === "recycle") return binned;
+    if (view.kind === "all" || view.kind === "shared") return live;
+    const node = flatFolders.find((item) => item.id === view.id);
+    if (!node) return live;
+    const ids = new Set(folderSubtreeIds(node));
+    return live.filter((file) => file.folderId !== null && ids.has(file.folderId));
+  }, [view, live, binned, flatFolders]);
+
+  /** A pasta onde um upload cai — só quando há uma pasta escolhida e escrevível. */
+  const uploadFolderId =
+    view.kind === "folder" &&
+    flatFolders.find((item) => item.id === view.id)?.kind !== "property_documents"
+      ? view.id
+      : undefined;
+
+  function run(work: () => Promise<{ error?: string }>, done: string) {
+    startTransition(async () => {
+      const result = await work();
+      if (result.error) toast(result.error, "error");
+      else toast(done, "success");
+    });
+  }
+
+  function openFile(file: CloudFileRow) {
+    setDetail(file);
+    setDetails(null);
+    startTransition(async () => setDetails(await props.onLoadDetails(file.id)));
+  }
+
+  function download(file: CloudFileRow, action: "view" | "download") {
+    startTransition(async () => {
+      const result = await props.onDownloadUrl(file.id, action);
+      if (result.error || !result.url) {
+        toast(result.error ?? "Não foi possível abrir o ficheiro.", "error");
+        return;
+      }
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Sem Cloud no plano — 07 §19.1 e §19.4
+  // -------------------------------------------------------------------------
+  if (!status.hasCloud) {
+    const nearLimit = status.nearPlanLimit;
+    return (
+      <>
+        <PageHeader title="Cloud" subtitle={props.subtitle} />
+        <Card padded style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "start" }}>
+          <span
+            aria-hidden="true"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "var(--r-md)",
+              background: "var(--accent-soft)",
+              color: "var(--accent)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <CloudIcon size={22} />
+          </span>
+          <div style={{ display: "grid", gap: "var(--sp-3)", maxWidth: "62ch" }}>
+            <strong style={{ fontSize: "var(--fs-title-sm)" }}>
+              {nearLimit
+                ? "Está a chegar ao limite do seu plano"
+                : "A Cloud guarda os seus documentos"}
+            </strong>
+            <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
+              {nearLimit
+                ? "O Smarter dá-lhe mais imóveis ativos, mais conversas e 5 GB de Cloud."
+                : "Pretende guardar os seus ficheiros? A Cloud está incluída a partir do Essential, ou pode juntá-la ao plano que já tem."}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
+            <a
+              href="/plano"
+              className="upm-btn upm-btn--primary upm-btn--md"
+              style={{ textDecoration: "none" }}
+            >
+              Ver planos
+            </a>
+            {nearLimit ? null : (
+              <a
+                href="/plano?extra=cloud"
+                className="upm-btn upm-btn--secondary upm-btn--md"
+                style={{ textDecoration: "none" }}
+              >
+                Adicionar Cloud — 2,99 €/mês
+              </a>
+            )}
+          </div>
+        </Card>
+      </>
+    );
+  }
+
+  const columns: TableColumn<CloudFileRow>[] = [
+    {
+      id: "name",
+      header: "Ficheiro",
+      cell: (row) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", minWidth: 0 }}>
+          <span
+            aria-hidden="true"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "var(--r-sm)",
+              background: "var(--surface2)",
+              color: "var(--muted)",
+              display: "grid",
+              placeItems: "center",
+              flex: "none",
+            }}
+          >
+            {row.mime.startsWith("image/") ? <ImageIcon size={15} /> : <FileText size={15} />}
+          </span>
+          <div style={{ display: "grid", minWidth: 0 }}>
+            <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {row.name}
+            </strong>
+            <span style={{ color: "var(--muted)" }}>
+              {mimeLabel(row.mime)} · {formatBytes(row.size)}
+              {row.currentVersion > 1 ? ` · v${row.currentVersion}` : ""}
+            </span>
+          </div>
+          {row.readonly ? (
+            <span
+              title="Documento do imóvel — só de leitura aqui"
+              style={{ color: "var(--muted)" }}
+            >
+              <Lock size={13} aria-label="Só de leitura" />
+            </span>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      id: "share",
+      header: "Partilha",
+      cell: (row) => (
+        <span style={{ color: "var(--muted)" }}>
+          {row.sharedLabel}
+          {row.hasLink ? " · por ligação" : ""}
+        </span>
+      ),
+    },
+    {
+      id: "date",
+      header: "Adicionado",
+      cell: (row) => <span style={{ color: "var(--muted)" }}>{formatDate(row.createdAt)}</span>,
+    },
+    {
+      id: "actions",
+      header: "Ações",
+      width: "240px",
+      cell: (row) => (
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--sp-2)",
+            justifyContent: "flex-end",
+            flexWrap: "nowrap",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Button
+            variant="secondary"
+            size="sm"
+            iconOnly
+            aria-label={`Transferir ${row.name}`}
+            onClick={() => download(row, "download")}
+          >
+            <Download size={14} />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            iconOnly
+            aria-label={`Partilhar ${row.name}`}
+            onClick={() => setShare(row)}
+          >
+            <Share2 size={14} />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            iconOnly
+            disabled={row.readonly}
+            aria-label={`Eliminar ${row.name}`}
+            title={row.readonly ? "Este documento não pode ser eliminado aqui" : undefined}
+            onClick={() => run(() => props.onDelete(row.id), "Ficheiro movido para a reciclagem.")}
+          >
+            <Trash2 size={14} />
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => openFile(row)}>
+            Detalhes
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const usedRatio =
+    status.limitBytes && status.limitBytes > 0
+      ? Math.min(1, status.usedBytes / status.limitBytes)
+      : 0;
+
+  return (
+    <>
+      <PageHeader
+        title="Cloud"
+        subtitle={props.subtitle}
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              leadingIcon={<FolderPlus size={15} />}
+              onClick={() => setNewFolder(true)}
+            >
+              Nova pasta
+            </Button>
+            <Button
+              leadingIcon={<ArrowUpFromLine size={15} />}
+              disabled={pending}
+              onClick={() => uploadRef.current?.click()}
+            >
+              Carregar ficheiro
+            </Button>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="application/pdf,image/jpeg,image/png"
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (!file) return;
+                const form = new FormData();
+                form.set("file", file);
+                if (uploadFolderId) form.set("folderId", uploadFolderId);
+                run(() => props.onUpload(form), "Ficheiro carregado.");
+              }}
+            />
+          </>
+        }
+      />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(200px, 248px) 1fr",
+          gap: "var(--sp-7)",
+          alignItems: "stretch",
+        }}
+      >
+        {/* Coluna das pastas — sticky, como 04 §1.4 pede às colunas laterais. */}
+        <Card
+          padded
+          style={{
+            display: "grid",
+            gridTemplateRows: "1fr auto",
+            gap: "var(--sp-6)",
+            position: "sticky",
+            top: "var(--sp-7)",
+            height:
+              "calc(100vh - var(--topbar-h) - var(--sp-9) - var(--sp-7) - var(--sp-9) - 6rem)",
+          }}
+        >
+          <div style={{ display: "grid", alignContent: "start", gap: "var(--sp-3)" }}>
+            <NavRow
+              label="Todos os ficheiros"
+              icon={<CloudIcon size={15} />}
+              count={live.length}
+              active={view.kind === "all"}
+              onClick={() => setView({ kind: "all" })}
+            />
+            {folders.map((node) => (
+              <FolderRow key={node.id} node={node} view={view} onSelect={setView} depth={0} />
+            ))}
+            <NavRow
+              label="Partilhados comigo"
+              icon={<Inbox size={15} />}
+              count={sharedWithMe.length}
+              active={view.kind === "shared"}
+              onClick={() => setView({ kind: "shared" })}
+            />
+            <NavRow
+              label="Reciclagem"
+              icon={<Trash2 size={15} />}
+              count={binned.length}
+              active={view.kind === "recycle"}
+              onClick={() => setView({ kind: "recycle" })}
+            />
+          </div>
+
+          {/* 07 §19.9 — barra e total, sem repartição por tipo. */}
+          <div
+            style={{
+              display: "grid",
+              gap: "var(--sp-4)",
+              borderTop: "1px solid var(--border)",
+              paddingTop: "var(--sp-6)",
+            }}
+          >
+            <strong>Armazenamento</strong>
+            <div
+              aria-hidden="true"
+              style={{
+                height: 8,
+                borderRadius: "var(--r-pill)",
+                background: "var(--surface3)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.round(usedRatio * 100)}%`,
+                  height: "100%",
+                  background: usedRatio > 0.9 ? "var(--warn)" : "var(--accent)",
+                }}
+              />
+            </div>
+            <span style={{ color: "var(--muted)" }}>
+              {formatBytes(status.usedBytes)} de{" "}
+              {status.limitBytes === null ? "ilimitado" : formatBytes(status.limitBytes)}
+            </span>
+          </div>
+        </Card>
+
+        <div
+          style={{
+            display: "grid",
+            gap: "var(--sp-6)",
+            alignContent: "start",
+            minWidth: 0,
+          }}
+        >
+          <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
+            {view.kind === "recycle" && binned.length > 0 ? (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => run(props.onEmptyRecycleBin, "Reciclagem esvaziada.")}
+              >
+                Esvaziar reciclagem
+              </Button>
+            ) : null}
+          </div>
+
+          {view.kind === "shared" ? (
+            <SharedWithMeList
+              rows={sharedWithMe}
+              onOpen={(fileId) => download({ id: fileId } as CloudFileRow, "download")}
+            />
+          ) : visible.length === 0 ? (
+            <EmptyState
+              title={view.kind === "recycle" ? "Reciclagem vazia" : "Ainda sem ficheiros"}
+              description={
+                view.kind === "recycle"
+                  ? "O que eliminar fica aqui 30 dias antes de desaparecer — e continua a contar para o seu armazenamento até lá."
+                  : "Carregue certidões, plantas e contratos. Aceitam-se PDF, JPG e PNG até 25 MB."
+              }
+            />
+          ) : (
+            <Card>
+              <Table
+                caption="Ficheiros da Cloud"
+                columns={columns}
+                rows={visible}
+                rowKey={(row) => row.id}
+                empty="Nenhum ficheiro nesta pasta."
+              />
+            </Card>
+          )}
+        </div>
+
+        <Modal
+          open={newFolder}
+          onClose={() => setNewFolder(false)}
+          title="Nova pasta"
+          subtitle={view.kind === "folder" ? "Dentro da pasta selecionada" : undefined}
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setNewFolder(false)}>
+                Cancelar
+              </Button>
+              <Button
+                disabled={pending || folderName.trim().length === 0}
+                onClick={() => {
+                  const name = folderName.trim();
+                  const parent = view.kind === "folder" ? view.id : undefined;
+                  setNewFolder(false);
+                  setFolderName("");
+                  run(() => props.onCreateFolder(name, parent), "Pasta criada.");
+                }}
+              >
+                Criar
+              </Button>
+            </>
+          }
+        >
+          <Input
+            label="Nome"
+            value={folderName}
+            onChange={(event) => setFolderName(event.target.value)}
+            placeholder="Escrituras"
+            maxLength={120}
+          />
+        </Modal>
+
+        <ShareFileModal
+          file={share}
+          contacts={contacts}
+          shares={share && detail?.id === share.id ? (details?.shares ?? []) : []}
+          onClose={() => setShare(null)}
+          onShare={props.onShare}
+          onRevoke={props.onRevokeShare}
+        />
+
+        <Drawer
+          open={detail !== null}
+          onClose={() => setDetail(null)}
+          title={detail?.name ?? "Ficheiro"}
+          subtitle={detail ? `${mimeLabel(detail.mime)} · ${formatBytes(detail.size)}` : undefined}
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setDetail(null)}>
+                Fechar
+              </Button>
+              {detail && !detail.readonly ? (
+                <Button disabled={pending} onClick={() => replaceRef.current?.click()}>
+                  Substituir
+                </Button>
+              ) : null}
+            </>
+          }
+        >
+          <input
+            ref={replaceRef}
+            type="file"
+            accept="application/pdf,image/jpeg,image/png"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (!file || !detail) return;
+              const form = new FormData();
+              form.set("file", file);
+              form.set("fileId", detail.id);
+              run(() => props.onReplace(form), "Versão nova guardada.");
+              setDetail(null);
+            }}
+          />
+
+          <div style={{ display: "grid", gap: "var(--sp-7)" }}>
+            {detail?.readonly ? (
+              <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
+                Este é um documento do imóvel. Vê-se, transfere-se e partilha-se daqui — substituir
+                e eliminar fazem-se no formulário do imóvel, onde o aviso de nova moderação existe.
+              </p>
+            ) : null}
+
+            <section style={{ display: "grid", gap: "var(--sp-4)" }}>
+              <strong style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+                <History size={15} aria-hidden="true" /> Versões
+              </strong>
+              {details === null ? (
+                <span style={{ color: "var(--muted)" }}>A carregar…</span>
+              ) : details.versions.length === 0 ? (
+                <span style={{ color: "var(--muted)" }}>Sem histórico.</span>
+              ) : (
+                <ul
+                  style={{
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                    display: "grid",
+                    gap: "var(--sp-4)",
+                  }}
+                >
+                  {details.versions.map((version) => (
+                    <li
+                      key={version.version}
+                      style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}
+                    >
+                      <StatusTag
+                        tone={version.version === detail?.currentVersion ? "active" : "archived"}
+                      >
+                        v{version.version}
+                      </StatusTag>
+                      <div style={{ display: "grid", minWidth: 0, flex: 1 }}>
+                        <span
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {version.name}
+                        </span>
+                        <span style={{ color: "var(--muted)" }}>
+                          {formatDate(version.createdAt)} · {formatBytes(version.size)}
+                          {version.note ? ` · ${version.note}` : ""}
+                        </span>
+                      </div>
+                      {detail && !detail.readonly && version.version !== detail.currentVersion ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const id = detail.id;
+                            setDetail(null);
+                            run(
+                              () => props.onRestoreVersion(id, version.version),
+                              "Versão restaurada como versão nova.",
+                            );
+                          }}
+                        >
+                          Restaurar
+                        </Button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section style={{ display: "grid", gap: "var(--sp-4)" }}>
+              <strong style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+                <Users size={15} aria-hidden="true" /> Acessos
+              </strong>
+              {details === null ? (
+                <span style={{ color: "var(--muted)" }}>A carregar…</span>
+              ) : details.accesses.length === 0 ? (
+                <span style={{ color: "var(--muted)" }}>Ninguém abriu este ficheiro ainda.</span>
+              ) : (
+                <ul
+                  style={{
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                    display: "grid",
+                    gap: "var(--sp-3)",
+                  }}
+                >
+                  {details.accesses.slice(0, 20).map((access, index) => (
+                    <li key={index} style={{ display: "grid" }}>
+                      <span>
+                        {ACCESS_LABELS[access.action] ?? access.action} · {access.actorName}
+                        {access.viaLink ? " (ligação)" : ""}
+                      </span>
+                      <span style={{ color: "var(--muted)" }}>{formatDate(access.occurredAt)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        </Drawer>
+      </div>
+    </>
+  );
+}
+
+const ACCESS_LABELS: Record<string, string> = {
+  view: "Visto",
+  download: "Transferido",
+  export_pdf: "Exportado em PDF",
+  print: "Impresso",
+  share_created: "Partilha criada",
+  share_revoked: "Partilha revogada",
+};
+
+function flatten(node: FolderNode): FolderNode[] {
+  return [node, ...node.children.flatMap(flatten)];
+}
+
+function NavRow({
+  label,
+  icon,
+  count,
+  active,
+  depth = 0,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  count: number;
+  active: boolean;
+  depth?: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "var(--sp-3)",
+        width: "100%",
+        minHeight: 36,
+        padding: `0 var(--sp-3) 0 calc(var(--sp-3) + ${depth * 14}px)`,
+        border: "none",
+        borderRadius: "var(--r-sm)",
+        background: active ? "var(--accent-soft)" : "transparent",
+        color: active ? "var(--accent)" : "var(--text)",
+        font: "inherit",
+        cursor: "pointer",
+        textAlign: "left",
+      }}
+    >
+      <span aria-hidden="true" style={{ display: "grid", placeItems: "center", flex: "none" }}>
+        {icon}
+      </span>
+      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {label}
+      </span>
+      {count > 0 ? <span style={{ color: "var(--muted)" }}>{count}</span> : null}
+    </button>
+  );
+}
+
+function FolderRow({
+  node,
+  view,
+  onSelect,
+  depth,
+}: {
+  node: FolderNode;
+  view: View;
+  onSelect: (view: View) => void;
+  depth: number;
+}) {
+  return (
+    <>
+      <NavRow
+        label={node.name}
+        icon={node.kind === "user" ? <Folder size={15} /> : <ChevronRight size={15} />}
+        count={node.fileCount}
+        depth={depth}
+        active={view.kind === "folder" && view.id === node.id}
+        onClick={() => onSelect({ kind: "folder", id: node.id })}
+      />
+      {node.children.map((child) => (
+        <FolderRow key={child.id} node={child} view={view} onSelect={onSelect} depth={depth + 1} />
+      ))}
+    </>
+  );
+}
+
+/**
+ * 05 §6.4 — "um documento partilhado com um comprador aparece na Cloud do
+ * comprador". Lista separada de propósito: são ficheiros de outra pessoa, e o
+ * que se pode fazer com eles é outro (ver ou transferir, conforme a permissão).
+ */
+function SharedWithMeList({
+  rows,
+  onOpen,
+}: {
+  rows: SharedWithMeRow[];
+  onOpen: (fileId: string) => void;
+}) {
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        title="Nada partilhado consigo"
+        description="Os documentos que outra pessoa lhe partilhar aparecem aqui."
+      />
+    );
+  }
+
+  return (
+    <Card>
+      <Table
+        caption="Partilhados comigo"
+        rows={rows}
+        rowKey={(row) => row.shareId}
+        empty="Nada partilhado consigo."
+        columns={[
+          {
+            id: "name",
+            header: "Ficheiro",
+            cell: (row) => (
+              <div style={{ display: "grid", minWidth: 0 }}>
+                <strong>{row.name}</strong>
+                <span style={{ color: "var(--muted)" }}>
+                  {mimeLabel(row.mime)} · {formatBytes(row.size)}
+                </span>
+              </div>
+            ),
+          },
+          {
+            id: "by",
+            header: "De",
+            cell: (row) => <span style={{ color: "var(--muted)" }}>{row.sharedByName}</span>,
+          },
+          {
+            id: "expires",
+            header: "Expira",
+            cell: (row) => (
+              <span style={{ color: "var(--muted)" }}>
+                {row.expiresAt ? formatDate(row.expiresAt) : "Sem expirar"}
+              </span>
+            ),
+          },
+          {
+            id: "actions",
+            header: "Ações",
+            cell: (row) => (
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  leadingIcon={<Download size={14} />}
+                  onClick={() => onOpen(row.fileId)}
+                >
+                  {row.permission === "download" ? "Transferir" : "Ver"}
+                </Button>
+              </div>
+            ),
+          },
+        ]}
+      />
+    </Card>
+  );
+}

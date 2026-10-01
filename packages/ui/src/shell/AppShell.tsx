@@ -21,6 +21,15 @@ export type AppShellProps = {
    * formulários e tabelas ficam sempre no limite.
    */
   contentWidth?: "default" | "full";
+  /**
+   * `true` trava o shell no viewport (`100vh`) a partir de 900 px e deixa o
+   * conteúdo ocupar a altura que sobra — é o que ecrãs cuja área útil é a
+   * própria janela precisam (Mensagens, e amanhã o Mapa): sem isto, um painel
+   * que se queira do tamanho do ecrã não tem altura definida de onde crescer.
+   * Abaixo de 900 px volta tudo ao fluxo normal, que é onde as colunas se
+   * empilham e a página tem mesmo de rolar.
+   */
+  fill?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -57,6 +66,7 @@ export function AppShell({
   children,
   defaultCollapsed = false,
   contentWidth = "default",
+  fill = false,
   className,
   style,
 }: AppShellProps) {
@@ -87,6 +97,7 @@ export function AppShell({
       data-collapsed={collapsed ? "true" : "false"}
       data-mobile-open={mobileOpen ? "true" : "false"}
       data-content={contentWidth}
+      data-fill={fill ? "true" : "false"}
       style={style}
     >
       <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />

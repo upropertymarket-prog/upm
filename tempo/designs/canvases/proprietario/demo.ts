@@ -334,30 +334,39 @@ export const demoRecentMessages: ActivityItem[] = [
   },
 ];
 
-export const demoRecentDocuments: ActivityItem[] = [
+/**
+ * "Contratos" do bloco de atividade recente — 07 §19.12.
+ *
+ * Era `demoRecentDocuments` até à Fase 6, quando o painel se chamava
+ * "Documentos e contratos" e mostrava só documentos (D29). Passou a contratos
+ * com o painel, e os três estados escolhidos são de propósito diferentes: um
+ * painel de atividade recente só vale se mostrar coisas em pontos diferentes
+ * do ciclo.
+ */
+export const demoRecentContracts: ActivityItem[] = [
   {
-    id: "d1",
-    title: "Certidão permanente · Apartamento T3",
-    subtitle: "anexado há 3 dias",
-    href: "/propriedades/p3/editar",
-    tag: "Documento",
-    tone: "archived",
+    id: "c1",
+    title: "Contrato de reserva · Apartamento T3",
+    subtitle: "com João Costa · há 2 dias",
+    href: "/contratos/c1",
+    tag: "Por assinar",
+    tone: "pending",
   },
   {
-    id: "d2",
-    title: "Planta · Moradia T4",
-    subtitle: "anexado há 5 dias",
-    href: "/propriedades/p1/editar",
-    tag: "Documento",
-    tone: "archived",
+    id: "c2",
+    title: "Contrato de arrendamento · Loft T1",
+    subtitle: "com Marta Nunes · há 6 dias",
+    href: "/contratos/c2",
+    tag: "Assinado",
+    tone: "active",
   },
   {
-    id: "d3",
-    title: "Certificado energético · Loft T1",
-    subtitle: "anexado há 12 dias",
-    href: "/propriedades/p2/editar",
-    tag: "Documento",
-    tone: "archived",
+    id: "c3",
+    title: "Contrato de compra e venda · Moradia T4",
+    subtitle: "há 9 dias",
+    href: "/contratos/c3",
+    tag: "Rascunho",
+    tone: "draft",
   },
 ];
 

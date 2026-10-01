@@ -15,6 +15,20 @@ const OWNER_ONLY_PREFIXES = ["/painel", "/propriedades", "/leads", "/agenda"];
 /** 07 §4.2 — rotas só do comprador (rota renomeada: /pedidos-de-visita → /meus-pedidos). */
 const BUYER_ONLY_PREFIXES = ["/guardados", "/meus-pedidos"];
 
+/**
+ * Rotas sem sessão (P6-02 · 07 §13.3)
+ * =========================================================================
+ * A partilha por ligação existe para chegar a quem NÃO tem conta — é o caso
+ * que 07 §13.3 descreve ao falar de "ligação anónima" e de guardar o IP em vez
+ * do perfil. Mandar essa pessoa para o ecrã de entrar tornava a ligação
+ * inútil.
+ *
+ * O acesso continua fechado do lado do Postgres: `resolve_file_share` valida o
+ * token, a expiração, o código e o limite de tentativas de 07 §19.8. Não é o
+ * middleware que autoriza nada aqui — é ele que se afasta do caminho.
+ */
+const PUBLIC_PREFIXES = ["/partilha"];
+
 function webUrl(path: string, request: NextRequest): URL {
   const base = process.env.WEB_URL ?? "http://localhost:4300";
   return new URL(path, base.startsWith("http") ? base : request.nextUrl.origin);
@@ -31,6 +45,12 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set(NONCE_HEADER, nonce);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  if (PUBLIC_PREFIXES.some((prefix) => request.nextUrl.pathname.startsWith(prefix))) {
+    applySecurityHeaders(response.headers, nonce);
+    return response;
+  }
+
   const supabase = createMiddlewareClient(request, response);
 
   const {
