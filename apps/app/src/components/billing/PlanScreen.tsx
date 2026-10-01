@@ -456,6 +456,9 @@ export function PlanScreen({
           const current = plan.id === status.planId;
           const cents = interval === "month" ? plan.priceMonthCents : plan.priceYearCents;
           const free = plan.priceMonthCents === 0 && plan.priceYearCents === 0;
+          const features = plan.features.some((feature) => /suporte/i.test(feature))
+            ? plan.features
+            : [...plan.features, "Suporte normal"];
 
           return (
             <Card
@@ -514,7 +517,7 @@ export function PlanScreen({
                     </span>
                   </li>
                 ))}
-                {plan.features
+                {features
                   .filter((feature) => !/\b(imóveis|imóvel|propriedades|propriedade)\b/i.test(feature))
                   .map((feature) => (
                     <li
