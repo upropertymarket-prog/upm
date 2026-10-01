@@ -4,7 +4,12 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
 import { planFormSchema, syncCatalog } from "@upm/db/billing";
-import { createCatalogStore, createServiceClient, createStripeCatalogApi } from "@upm/db/stripe";
+import {
+  createCatalogStore,
+  createServiceClient,
+  createStripeCatalogApi,
+  getStripeClient,
+} from "@upm/db/stripe";
 
 /**
  * Admin › Planos — Server Actions (P7-05)
@@ -168,5 +173,66 @@ export async function syncStripe(): Promise<{ notice?: string; error?: string }>
     };
   } catch {
     return { error: "Guardado. A sincronização com o Stripe falhou — tente outra vez." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pedidos de trial — P7-06 (07 §8.1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Aprovar soma 7 dias; recusar deixa a data original. A decisão, a
+ * notificação e o `audit_log` acontecem na mesma transação, em SQL
+ * (`decide_trial_extension`).
+ *
+ * Aprovar tem um segundo passo: o Stripe também tem de saber, senão a conta
+ * fica com mais sete dias na nossa base de dados e a cobrança a cair na data
+ * antiga. Se o Stripe falhar, a resposta di-lo em vez de fingir que correu.
+ */
+export async function decideTrialExtension(
+  requestId: string,
+  approve: boolean,
+): Promise<PlanActionState> {
+  const { supabase, user, isAdmin } = await admin();
+  if (!user || !isAdmin) return { error: "Sem permissão." };
+
+  const { data: subscriptionId } = await supabase
+    .from("trial_extension_requests")
+    .select("subscription_id")
+    .eq("id", requestId)
+    .maybeSingle();
+
+  const { data: newEnd, error } = await supabase.rpc("decide_trial_extension", {
+    p_id: requestId,
+    p_approve: approve,
+  });
+  if (error) return { error: error.message ?? "Não foi possível decidir o pedido." };
+
+  revalidatePath("/admin/planos");
+
+  if (!approve || !newEnd || !subscriptionId?.subscription_id) return { ok: true };
+
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("stripe_subscription_id")
+    .eq("id", subscriptionId.subscription_id)
+    .maybeSingle();
+
+  if (!subscription?.stripe_subscription_id || !process.env.STRIPE_SECRET_KEY) {
+    return { ok: true, notice: "Aprovado. O Stripe não foi atualizado — confirme a subscrição." };
+  }
+
+  try {
+    const stripe = getStripeClient();
+    await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+      trial_end: Math.floor(new Date(newEnd).getTime() / 1000),
+      proration_behavior: "none",
+    });
+    return { ok: true, notice: "Aprovado — mais 7 dias, no Stripe e aqui." };
+  } catch {
+    return {
+      ok: true,
+      notice: "Aprovado aqui, mas o Stripe recusou a nova data. Verifique a subscrição.",
+    };
   }
 }

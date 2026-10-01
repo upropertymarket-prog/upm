@@ -4,7 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
-import { checkoutSchema, invoiceIdSchema } from "@upm/db/billing";
+import { TRIAL_DAYS, checkoutSchema, invoiceIdSchema, trialReasonSchema } from "@upm/db/billing";
 import { MAX_FILE_BYTES, sniffMime } from "@upm/db/cloud";
 import { getStripeClient } from "@upm/db/stripe";
 
@@ -116,7 +116,17 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
     if (typeof priceId !== "string" || priceId.length === 0) {
       return { error: "Este plano ainda não está disponível para subscrição." };
     }
-    return checkoutFor(supabase, user.id, user.email, priceId, { upm_plan_slug: slug });
+    // 07 §8.1 — trial de 7 dias, uma vez por perfil (vitalício). Quem decide
+    // é a base de dados (`trial_eligible`), e quem o conta é o Stripe.
+    const { data: eligible } = await supabase.rpc("trial_eligible", {});
+    return checkoutFor(
+      supabase,
+      user.id,
+      user.email,
+      priceId,
+      { upm_plan_slug: slug },
+      eligible === true,
+    );
   }
 
   const { data: addon } = await supabase
@@ -141,6 +151,7 @@ async function checkoutFor(
   email: string | undefined,
   priceId: string,
   metadata: Record<string, string>,
+  withTrial = false,
 ): Promise<CheckoutState> {
   try {
     const { customerId, error } = await ensureCustomer(supabase, userId, email);
@@ -158,7 +169,10 @@ async function checkoutFor(
       tax_id_collection: { enabled: true },
       billing_address_collection: "auto",
       metadata: { upm_profile_id: userId, ...metadata },
-      subscription_data: { metadata: { upm_profile_id: userId, ...metadata } },
+      subscription_data: {
+        metadata: { upm_profile_id: userId, ...metadata },
+        ...(withTrial ? { trial_period_days: TRIAL_DAYS } : {}),
+      },
     });
 
     if (!checkout.url) return { error: "Não foi possível abrir o pagamento." };
@@ -320,5 +334,42 @@ export async function saveInvoiceToCloud(invoiceId: string): Promise<InvoiceActi
 
   revalidatePath("/plano");
   revalidatePath("/cloud");
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Trial — P7-06 (07 §8.1)
+// ---------------------------------------------------------------------------
+
+export type TrialActionState = { ok?: boolean; error?: string };
+
+/**
+ * Pedir mais 7 dias, com justificação escrita. As regras — só durante o
+ * trial, só uma vez — vivem na função SQL; aqui valida-se o texto antes de
+ * incomodar a base de dados e traduz-se a recusa.
+ */
+export async function requestTrialExtension(
+  _prev: TrialActionState,
+  formData: FormData,
+): Promise<TrialActionState> {
+  const parsed = trialReasonSchema.safeParse(formData.get("reason"));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Justificação inválida." };
+  }
+
+  const { supabase, user } = await session();
+  if (!user) return { error: "Sessão inválida." };
+
+  const { error } = await supabase.rpc("request_trial_extension", { p_reason: parsed.data });
+  if (error) {
+    return {
+      error:
+        error.code === "23505"
+          ? "Já pediu uma extensão — é uma única vez."
+          : (error.message ?? "Não foi possível enviar o pedido."),
+    };
+  }
+
+  revalidatePath("/plano");
   return { ok: true };
 }

@@ -4,8 +4,13 @@ import { limitsSchema, type PlanLimits } from "@upm/db/billing";
 
 import { InternalChrome } from "../../../components/InternalChrome";
 import { setLocalePreference } from "../../actions/preferences";
-import { PlansManager, type AdminInvoiceRow, type PlanRow } from "./PlansManager";
-import { savePlan, syncStripe } from "./actions";
+import {
+  PlansManager,
+  type AdminInvoiceRow,
+  type PlanRow,
+  type TrialRequestRow,
+} from "./PlansManager";
+import { decideTrialExtension, savePlan, syncStripe } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +24,11 @@ export const dynamic = "force-dynamic";
 export default async function PlansPage() {
   const supabase = createClient(await cookies());
 
-  const [metrics, summary, invoices, catalog] = await Promise.all([
+  const [metrics, summary, invoices, trials, catalog] = await Promise.all([
     supabase.rpc("admin_plan_metrics"),
     supabase.rpc("admin_billing_summary"),
     supabase.rpc("admin_recent_invoices", { p_limit: 20 }),
+    supabase.rpc("admin_trial_requests"),
     supabase
       .from("plans")
       .select("id, features, limits, stripe_price_month_id, stripe_price_year_id"),
@@ -62,6 +68,15 @@ export default async function PlansPage() {
 
   const totals = summary.data?.[0];
 
+  const trialRequests: TrialRequestRow[] = (trials.data ?? []).map((row) => ({
+    id: row.id,
+    clientName: row.client_name,
+    reason: row.reason,
+    status: row.status as TrialRequestRow["status"],
+    trialEndsAt: row.trial_ends_at,
+    createdAt: row.created_at,
+  }));
+
   const recent: AdminInvoiceRow[] = (invoices.data ?? []).map((row) => ({
     id: row.id,
     number: row.number,
@@ -94,8 +109,10 @@ export default async function PlansPage() {
           addonSubscribers: Number(totals?.addon_subscribers ?? 0),
         }}
         invoices={recent}
+        trialRequests={trialRequests}
         onSave={savePlan}
         onSync={syncStripe}
+        onDecideTrial={decideTrialExtension}
       />
     </InternalChrome>
   );

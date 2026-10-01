@@ -403,6 +403,121 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Trial — P7-06 (07 §8.1)
+  // -------------------------------------------------------------------------
+
+  it("trial: 7 dias uma vez por perfil, extensão uma única vez, decisão só do admin", async () => {
+    await service.from("trial_extension_requests").delete().eq("profile_id", ids.buyer);
+    await service.from("subscriptions").delete().eq("profile_id", ids.buyer);
+
+    // Sem trial nenhum, tem direito. Pedir extensão fora do trial é recusado.
+    expect((await clients.buyer.rpc("trial_eligible", {})).data).toBe(true);
+    const tooSoon = await clients.buyer.rpc("request_trial_extension", {
+      p_reason: "Ainda estou a experimentar e preciso de mais tempo para decidir.",
+    });
+    expect(tooSoon.error).not.toBeNull();
+
+    // Uma subscrição em trial, como a deixaria o webhook do Stripe.
+    const { data: plan } = await service
+      .from("plans")
+      .select("id")
+      .eq("slug", "smarter-buyer")
+      .single();
+    const endsAt = new Date(Date.now() + 5 * 86_400_000).toISOString();
+    const { data: sub } = await service
+      .from("subscriptions")
+      .insert({
+        profile_id: ids.buyer,
+        plan_id: plan!.id,
+        status: "trialing",
+        trial_ends_at: endsAt,
+      })
+      .select("id")
+      .single();
+
+    // O direito está gasto: já houve um trial nesta conta.
+    expect((await clients.buyer.rpc("trial_eligible", {})).data).toBe(false);
+
+    const status = await clients.buyer.rpc("trial_status");
+    expect(status.data?.[0]?.trialing).toBe(true);
+
+    const short = await clients.buyer.rpc("request_trial_extension", { p_reason: "preciso" });
+    expect(short.error).not.toBeNull();
+
+    const asked = await clients.buyer.rpc("request_trial_extension", {
+      p_reason: "Estou à espera da resposta do banco para decidir a compra.",
+    });
+    expect(asked.error).toBeNull();
+
+    const twice = await clients.buyer.rpc("request_trial_extension", {
+      p_reason: "Juro que é mesmo a última vez que peço mais tempo.",
+    });
+    expect(twice.error).not.toBeNull();
+
+    const requestId = asked.data as string;
+
+    // Decidir é do admin — nem o próprio, nem o suporte.
+    expect(
+      (await clients.buyer.rpc("decide_trial_extension", { p_id: requestId, p_approve: true }))
+        .error,
+    ).not.toBeNull();
+    expect(
+      (await clients.support.rpc("decide_trial_extension", { p_id: requestId, p_approve: true }))
+        .error,
+    ).not.toBeNull();
+
+    const decided = await clients.admin.rpc("decide_trial_extension", {
+      p_id: requestId,
+      p_approve: true,
+    });
+    expect(decided.error).toBeNull();
+
+    const { data: after } = await service
+      .from("subscriptions")
+      .select("trial_ends_at")
+      .eq("id", sub!.id)
+      .single();
+    expect(new Date(after!.trial_ends_at!).getTime()).toBeGreaterThan(new Date(endsAt).getTime());
+
+    // Decidir duas vezes não volta a somar sete dias.
+    expect(
+      (await clients.admin.rpc("decide_trial_extension", { p_id: requestId, p_approve: true }))
+        .error,
+    ).not.toBeNull();
+
+    // Notificação e registo de auditoria (08 §6.7).
+    const { data: notice } = await service
+      .from("notifications")
+      .select("id")
+      .eq("profile_id", ids.buyer)
+      .eq("link", "/plano");
+    expect((notice ?? []).length).toBeGreaterThanOrEqual(1);
+
+    const { data: audit } = await service
+      .from("audit_log")
+      .select("id")
+      .eq("entity", "trial_extension_requests")
+      .eq("entity_id", requestId);
+    expect((audit ?? []).length).toBe(1);
+
+    // Um terceiro não vê o pedido de outro.
+    expect(
+      (await clients.owner.from("trial_extension_requests").select("id").eq("id", requestId)).data
+        ?.length ?? 0,
+    ).toBe(0);
+    expect(
+      (await clients.admin.from("trial_extension_requests").select("id").eq("id", requestId)).data
+        ?.length,
+    ).toBe(1);
+
+    await service.from("notifications").delete().eq("profile_id", ids.buyer);
+    await service.from("audit_log").delete().eq("entity_id", requestId);
+    await service.from("trial_extension_requests").delete().eq("profile_id", ids.buyer);
+    await service.from("subscriptions").delete().eq("id", sub!.id);
+    await setPlan(ids.buyer, "gratuito");
+  });
+
+  // -------------------------------------------------------------------------
   // Enforcement — 08 §5.3, limites de 07 §19.2
   // -------------------------------------------------------------------------
 

@@ -188,3 +188,27 @@ export async function loadInvoices(supabase: Client, limit = 24): Promise<Invoic
     savedToCloud: Boolean(row.saved_file_id),
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Trial — P7-06 (07 §8.1)
+// ---------------------------------------------------------------------------
+
+export type TrialStatus = {
+  eligible: boolean;
+  trialing: boolean;
+  trialEndsAt: string | null;
+  requestStatus: "pending" | "approved" | "rejected" | null;
+  requestReason: string | null;
+};
+
+export async function loadTrialStatus(supabase: Client): Promise<TrialStatus> {
+  const { data } = await supabase.rpc("trial_status");
+  const row = data?.[0];
+  return {
+    eligible: row?.eligible ?? false,
+    trialing: row?.trialing ?? false,
+    trialEndsAt: row?.trial_ends_at ?? null,
+    requestStatus: (row?.request_status as TrialStatus["requestStatus"]) ?? null,
+    requestReason: row?.request_reason ?? null,
+  };
+}

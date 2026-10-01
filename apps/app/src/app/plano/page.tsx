@@ -5,7 +5,13 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PlanScreen } from "../../components/billing/PlanScreen";
-import { loadAddonOptions, loadInvoices, loadPlanOptions, loadPlanStatus } from "../../lib/billing";
+import {
+  loadAddonOptions,
+  loadInvoices,
+  loadPlanOptions,
+  loadPlanStatus,
+  loadTrialStatus,
+} from "../../lib/billing";
 import {
   countersFor,
   loadConversations,
@@ -16,6 +22,7 @@ import {
 import {
   exportInvoice,
   openBillingPortal,
+  requestTrialExtension,
   saveInvoiceToCloud,
   startCheckout,
 } from "../actions/billing";
@@ -58,12 +65,13 @@ export default async function PlanoPage({
 
   const role = profile.role;
 
-  const [status, plans, addons, invoices, conversations, visits, leads, notifications] =
+  const [status, plans, addons, invoices, trial, conversations, visits, leads, notifications] =
     await Promise.all([
       loadPlanStatus(supabase),
       loadPlanOptions(supabase, role),
       loadAddonOptions(supabase),
       loadInvoices(supabase),
+      loadTrialStatus(supabase),
       loadConversations(supabase),
       loadVisits(supabase),
       role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
@@ -97,6 +105,8 @@ export default async function PlanoPage({
         onOpenPortal={openBillingPortal}
         onExportInvoice={exportInvoice}
         onSaveInvoice={saveInvoiceToCloud}
+        trial={trial}
+        onRequestExtension={requestTrialExtension}
       />
     </AppChrome>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useActionState, useMemo, useState, useTransition } from "react";
 import {
   Check,
   CloudUpload,
@@ -31,7 +31,13 @@ import {
 } from "@upm/db/billing";
 import { formatBytes } from "@upm/db/cloud";
 
-import type { AddonOption, InvoiceRow, PlanOption, PlanStatus } from "../../lib/billing";
+import type {
+  AddonOption,
+  InvoiceRow,
+  PlanOption,
+  PlanStatus,
+  TrialStatus,
+} from "../../lib/billing";
 
 /**
  * Plano e faturação — `/plano` (P7-02 · 04 §8.3)
@@ -108,6 +114,12 @@ export type PlanScreenProps = {
   onExportInvoice: (invoiceId: string) => Promise<{ url?: string; error?: string }>;
   /** P7-04 — copia o PDF para a Cloud do próprio. */
   onSaveInvoice: (invoiceId: string) => Promise<{ ok?: boolean; error?: string }>;
+  /** P7-06 — estado do período de experiência (07 §8.1). */
+  trial: TrialStatus;
+  onRequestExtension: (
+    prev: { ok?: boolean; error?: string },
+    formData: FormData,
+  ) => Promise<{ ok?: boolean; error?: string }>;
 };
 
 export function PlanScreen({
@@ -122,10 +134,16 @@ export function PlanScreen({
   onOpenPortal,
   onExportInvoice,
   onSaveInvoice,
+  trial,
+  onRequestExtension,
 }: PlanScreenProps) {
   const [interval, setInterval] = useState<BillingInterval>(status.interval ?? "year");
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
+  const [extensionState, requestExtension, requestingExtension] = useActionState(
+    onRequestExtension,
+    {},
+  );
 
   const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
 
@@ -325,6 +343,55 @@ export function PlanScreen({
       </Card>
 
       {/* ---------------------------------------------------------------- */}
+      {/* Período de experiência — 07 §8.1                                  */}
+      {/* ---------------------------------------------------------------- */}
+      {trial.trialing ? (
+        <Card padded style={{ display: "grid", gap: "var(--sp-5)", marginBottom: "var(--sp-7)" }}>
+          <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+            <strong style={{ fontSize: "var(--fs-body-lg)" }}>
+              Período de experiência até {day(trial.trialEndsAt)}
+            </strong>
+            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
+              {trial.requestStatus === "pending"
+                ? "O seu pedido de mais 7 dias está a ser analisado pela equipa."
+                : trial.requestStatus === "approved"
+                  ? "O pedido de extensão foi aprovado — a data acima já inclui os 7 dias extra."
+                  : trial.requestStatus === "rejected"
+                    ? "O pedido de extensão foi recusado; a experiência termina na data original."
+                    : "Pode pedir mais 7 dias, uma única vez, com uma justificação escrita."}
+            </span>
+          </div>
+
+          {trial.requestStatus ? null : (
+            <form action={requestExtension} style={{ display: "grid", gap: "var(--sp-4)" }}>
+              <label style={{ display: "grid", gap: "var(--sp-2)" }}>
+                <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>
+                  Porque precisa de mais tempo?
+                </span>
+                <textarea
+                  name="reason"
+                  rows={3}
+                  minLength={10}
+                  maxLength={1000}
+                  required
+                  className="upm-input"
+                  style={{ resize: "vertical", padding: "var(--sp-4)", fontSize: "var(--fs-body)" }}
+                />
+              </label>
+              {extensionState.error ? (
+                <p role="alert" style={{ margin: 0, color: "var(--danger)" }}>
+                  {extensionState.error}
+                </p>
+              ) : null}
+              <Button type="submit" variant="secondary" disabled={requestingExtension}>
+                {requestingExtension ? "A enviar…" : "Pedir mais 7 dias"}
+              </Button>
+            </form>
+          )}
+        </Card>
+      ) : null}
+
+      {/* ---------------------------------------------------------------- */}
       {/* Planos                                                            */}
       {/* ---------------------------------------------------------------- */}
       <div
@@ -455,7 +522,11 @@ export function PlanScreen({
                     onClick={() => checkout("plan", plan.slug)}
                     leadingIcon={<CreditCard size={16} />}
                   >
-                    {plan.purchasable ? "Mudar para este plano" : "Brevemente"}
+                    {!plan.purchasable
+                      ? "Brevemente"
+                      : trial.eligible
+                        ? "Experimentar 7 dias grátis"
+                        : "Mudar para este plano"}
                   </Button>
                 )}
               </div>

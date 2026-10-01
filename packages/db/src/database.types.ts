@@ -1895,6 +1895,61 @@ export type Database = {
           },
         ];
       };
+      trial_extension_requests: {
+        Row: {
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          id: string;
+          profile_id: string;
+          reason: string;
+          status: string;
+          subscription_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          profile_id: string;
+          reason: string;
+          status?: string;
+          subscription_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          profile_id?: string;
+          reason?: string;
+          status?: string;
+          subscription_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trial_extension_requests_decided_by_fkey";
+            columns: ["decided_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trial_extension_requests_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trial_extension_requests_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       visit_requests: {
         Row: {
           buyer_id: string;
@@ -2145,6 +2200,19 @@ export type Database = {
           total_cents: number;
         }[];
       };
+      admin_trial_requests: {
+        Args: never;
+        Returns: {
+          client_name: string;
+          created_at: string;
+          decided_at: string;
+          id: string;
+          profile_id: string;
+          reason: string;
+          status: string;
+          trial_ends_at: string;
+        }[];
+      };
       apply_plan_downgrade: { Args: { p_profile_id: string }; Returns: number };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
       at_limit_ratio: {
@@ -2254,6 +2322,10 @@ export type Database = {
           p_template_id: string;
           p_title: string;
         };
+        Returns: string;
+      };
+      decide_trial_extension: {
+        Args: { p_approve: boolean; p_id: string };
         Returns: string;
       };
       draft_contract_template_version: {
@@ -2491,6 +2563,7 @@ export type Database = {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
       };
+      request_trial_extension: { Args: { p_reason: string }; Returns: string };
       request_visit: {
         Args: {
           p_message?: string;
@@ -2607,6 +2680,17 @@ export type Database = {
         }[];
       };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
+      trial_eligible: { Args: { p_profile_id?: string }; Returns: boolean };
+      trial_status: {
+        Args: never;
+        Returns: {
+          eligible: boolean;
+          request_reason: string;
+          request_status: string;
+          trial_ends_at: string;
+          trialing: boolean;
+        }[];
+      };
       upsert_owner_lead: {
         Args: {
           p_contact_id: string;

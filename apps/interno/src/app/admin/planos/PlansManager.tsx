@@ -72,6 +72,16 @@ export type AdminInvoiceRow = {
 
 export type PlanActionState = { ok?: boolean; error?: string; notice?: string };
 
+/** P7-06 — 07 §8.1: o pedido cai em Admin › Planos › Pedidos de trial. */
+export type TrialRequestRow = {
+  id: string;
+  clientName: string;
+  reason: string;
+  status: "pending" | "approved" | "rejected";
+  trialEndsAt: string | null;
+  createdAt: string;
+};
+
 const AUDIENCE_LABEL: Record<PlanRow["audience"], string> = {
   owner: "Proprietário",
   buyer: "Comprador",
@@ -82,19 +92,25 @@ export function PlansManager({
   plans,
   summary,
   invoices,
+  trialRequests,
   onSave,
   onSync,
+  onDecideTrial,
 }: {
   plans: PlanRow[];
   summary: BillingSummary;
   invoices: AdminInvoiceRow[];
+  trialRequests: TrialRequestRow[];
   onSave: (prev: PlanActionState, formData: FormData) => Promise<PlanActionState>;
   onSync: () => Promise<{ notice?: string; error?: string }>;
+  onDecideTrial: (requestId: string, approve: boolean) => Promise<PlanActionState>;
 }) {
   const [editing, setEditing] = useState<PlanRow | "new" | null>(null);
   const [state, action, saving] = useActionState(onSave, {});
   const [syncState, setSyncState] = useState<{ notice?: string; error?: string }>({});
   const [syncing, startSync] = useTransition();
+  const [deciding, startDecide] = useTransition();
+  const [trialNotice, setTrialNotice] = useState<string | null>(null);
 
   // Fecha o modal quando a gravação passa; mantém-no aberto no erro, para a
   // pessoa não perder o que escreveu.
@@ -286,6 +302,88 @@ export function PlansManager({
           />
         </Card>
       </div>
+
+      <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>
+        Pedidos de trial
+      </h2>
+      <Card padded style={{ marginBottom: "var(--sp-8)" }}>
+        {trialNotice ? (
+          <p role="status" style={{ margin: "0 0 var(--sp-5)", fontSize: "var(--fs-body)" }}>
+            {trialNotice}
+          </p>
+        ) : null}
+
+        {trialRequests.length === 0 ? (
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: "var(--fs-body)" }}>
+            Nenhum pedido de extensão até agora.
+          </p>
+        ) : (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid" }}>
+            {trialRequests.map((request) => (
+              <li
+                key={request.id}
+                style={{
+                  display: "flex",
+                  gap: "var(--sp-5)",
+                  alignItems: "flex-start",
+                  flexWrap: "wrap",
+                  padding: "var(--sp-5) 0",
+                  borderTop: "1px solid var(--border)",
+                }}
+              >
+                <span
+                  style={{ display: "grid", gap: "var(--sp-2)", flex: "1 1 280px", minWidth: 0 }}
+                >
+                  <strong style={{ fontSize: "var(--fs-body)" }}>{request.clientName}</strong>
+                  <span
+                    style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}
+                  >
+                    {request.reason}
+                  </span>
+                  <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                    Experiência até{" "}
+                    {request.trialEndsAt ? dateFormat.format(new Date(request.trialEndsAt)) : "—"}
+                  </span>
+                </span>
+
+                {request.status === "pending" ? (
+                  <span style={{ display: "flex", gap: "var(--sp-4)" }}>
+                    <Button
+                      size="sm"
+                      disabled={deciding}
+                      onClick={() =>
+                        startDecide(async () => {
+                          const result = await onDecideTrial(request.id, true);
+                          setTrialNotice(result.error ?? result.notice ?? "Aprovado.");
+                        })
+                      }
+                    >
+                      Aprovar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={deciding}
+                      onClick={() =>
+                        startDecide(async () => {
+                          const result = await onDecideTrial(request.id, false);
+                          setTrialNotice(result.error ?? "Pedido recusado.");
+                        })
+                      }
+                    >
+                      Recusar
+                    </Button>
+                  </span>
+                ) : (
+                  <StatusTag tone={request.status === "approved" ? "active" : "rejected"}>
+                    {request.status === "approved" ? "Aprovado" : "Recusado"}
+                  </StatusTag>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>
         Faturação recente

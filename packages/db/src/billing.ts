@@ -173,6 +173,19 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
 export const invoiceIdSchema = z.string().uuid();
 
+/** 07 §8.1 — 7 dias, uma vez por perfil, e mais 7 se a extensão for aprovada. */
+export const TRIAL_DAYS = 7;
+
+/**
+ * A justificação do pedido de extensão. O mínimo não é capricho: "preciso de
+ * mais tempo" não dá a quem decide nada em que se apoiar, e é uma única vez.
+ */
+export const trialReasonSchema = z
+  .string()
+  .trim()
+  .min(10, "Escreva pelo menos uma frase a justificar o pedido.")
+  .max(1000);
+
 /** Modal de criar/editar plano do Admin (P7-05, 04 §8.5). */
 export const planFormSchema = z.object({
   id: z.string().uuid().optional(),
