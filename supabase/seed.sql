@@ -1,8 +1,14 @@
--- UProperty Market — seed da Fase 2, atualizado na Fase 6.
+-- UProperty Market — seed da Fase 2, atualizado nas Fases 6 e 7.
 --
--- PREÇOS: continuam PROVISÓRIOS (07 §8.3), decididos pelo agente a pedido do
--- cliente ("aplica o que achares melhor, depois alteramos"). Não comunicar ao
--- exterior sem confirmação — 07 §9 #2 mantém-se aberta.
+-- PREÇOS: DECIDIDOS pelo cliente a 1 out 2026 (07 §8.3, §20.9). Deixam de ser
+-- provisórios e a questão 07 §9 #2 fecha. A decisão nasceu de comparar a
+-- grelha que o agente tinha proposto com os preços de uma tentativa anterior
+-- encontrados na conta Stripe: o lado do proprietário subiu para perto desses
+-- (que eram realistas), o lado do comprador ficou baixo (14,99 €/mês para
+-- quem PROCURA casa punha portagem na procura), e os quatro degraus
+-- mantiveram-se para a grelha de limites de §19.2 não perder um.
+--
+-- Regra do anual: **anual = 10 × mensal** (dois meses grátis).
 --
 -- LIMITES: DECIDIDOS a 30 set 2026 (07 §19.2). Fecham a dívida D22 e a
 -- questão 07 §9 #1, e destravam o enforcement da Fase 7. `null` numa chave
@@ -19,13 +25,13 @@ insert into public.plans (slug, name, audience, price_year_cents, price_month_ce
     '{"active_properties": 1, "visits": 5, "active_chats": 3, "saved": 10, "alerts": 1, "cloud_gb": 0}'),
   ('essential-owner', 'Essential', 'owner', 5990, 599, 1,
     '{"active_properties": 3, "visits": 20, "active_chats": 15, "saved": 50, "alerts": 3, "cloud_gb": 2}'),
-  ('smarter-owner', 'Smarter', 'owner', 12990, 1299, 2,
+  ('smarter-owner', 'Smarter', 'owner', 14990, 1499, 2,
     '{"active_properties": 10, "visits": 60, "active_chats": 50, "saved": 200, "alerts": 10, "cloud_gb": 5}'),
-  ('premium-owner', 'Premium', 'owner', 24990, 2499, 3,
+  ('premium-owner', 'Premium', 'owner', 29990, 2999, 3,
     '{"active_properties": null, "visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 20}'),
-  ('smarter-buyer', 'Smarter', 'buyer', 2990, 299, 1,
+  ('smarter-buyer', 'Smarter', 'buyer', 3990, 399, 1,
     '{"visits": 15, "active_chats": 20, "saved": 100, "alerts": 5, "cloud_gb": 1}'),
-  ('premium-buyer', 'Premium', 'buyer', 4990, 499, 2,
+  ('premium-buyer', 'Premium', 'buyer', 6990, 699, 2,
     '{"visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 5}')
 on conflict (slug) do update set
   name = excluded.name,
