@@ -64,7 +64,7 @@ export function StatusTag({ tone, children, icon, className }: StatusTagProps) {
   return (
     <span
       className={cx("upm-tag", className)}
-      style={{ ["--tag-bg" as string]: STATUS_TONES[tone] }}
+      style={{ ["--tag-bg" as string]: STATUS_TONES[tone], width: "max-content" }}
     >
       {icon}
       {children}
