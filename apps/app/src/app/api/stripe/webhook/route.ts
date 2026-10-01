@@ -65,7 +65,22 @@ export async function POST(request: Request) {
     return new Response("Assinatura inválida.", { status: 400 });
   }
 
-  const db = createServiceClient();
+  // `createServiceClient` atira quando falta `SUPABASE_SERVICE_ROLE_KEY`, e
+  // isso tem de se ver: sem este `catch`, uma variável em falta saía como um
+  // 500 sem explicação nenhuma e o Stripe tentava durante dias. Aconteceu na
+  // primeira verificação com o `stripe listen` — foi por isso que passou a
+  // estar aqui.
+  let db: ServiceClient;
+  try {
+    db = createServiceClient();
+  } catch (error) {
+    console.error(
+      `[stripe-webhook] configuração incompleta: ${
+        error instanceof Error ? error.message : "erro desconhecido"
+      }`,
+    );
+    return new Response("Webhook mal configurado.", { status: 500 });
+  }
 
   // A chave primária é o `event.id`: se já lá estiver, este envio é repetido.
   const claim = await db
@@ -75,10 +90,27 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (claim.error) {
-    // Violação de chave primária = evento já recebido. Qualquer outro erro é
-    // problema nosso, e aí vale a pena o Stripe repetir.
-    if (claim.error.code === "23505") return Response.json({ received: true, duplicate: true });
-    return new Response("Erro a registar o evento.", { status: 500 });
+    if (claim.error.code !== "23505") {
+      return new Response("Erro a registar o evento.", { status: 500 });
+    }
+
+    // Já foi recebido. Se ficou em `failed`, o reenvio do Stripe é a segunda
+    // oportunidade e deixa-se passar; se já foi tratado, não se repete.
+    //
+    // A primeira versão apagava a linha ao falhar, para o reenvio poder voltar
+    // a entrar — e com ela apagava a razão da falha, que é precisamente o que
+    // se quer ler depois. Manter a linha dá as duas coisas.
+    const { data: seen } = await db
+      .from("stripe_events")
+      .select("status")
+      .eq("id", event.id)
+      .maybeSingle();
+
+    if (seen?.status !== "failed") {
+      return Response.json({ received: true, duplicate: true });
+    }
+
+    await db.from("stripe_events").update({ status: "received", error: null }).eq("id", event.id);
   }
 
   if (!HANDLED.has(event.type)) {
@@ -97,12 +129,14 @@ export async function POST(request: Request) {
       .eq("id", event.id);
     return Response.json({ received: true });
   } catch (error) {
-    // O evento fica marcado como falhado E a linha é apagada, para o reenvio
-    // do Stripe poder voltar a tentar. Guardar a falha e bloquear o reenvio
-    // seria perder a alteração para sempre.
+    // A linha FICA, com a razão da falha. O 500 faz o Stripe reenviar, e o
+    // reenvio é aceite porque o estado é `failed` (ver o `claim` acima). É o
+    // que dá, ao mesmo tempo, segunda oportunidade e diagnóstico.
     const message = error instanceof Error ? error.message : "erro desconhecido";
-    await db.from("stripe_events").update({ status: "failed", error: message }).eq("id", event.id);
-    await db.from("stripe_events").delete().eq("id", event.id);
+    await db
+      .from("stripe_events")
+      .update({ status: "failed", error: message.slice(0, 500) })
+      .eq("id", event.id);
     console.error(`[stripe-webhook] ${event.type} ${event.id}: ${message}`);
     return new Response("Erro a processar o evento.", { status: 500 });
   }

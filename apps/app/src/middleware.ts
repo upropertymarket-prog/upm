@@ -88,6 +88,19 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * O webhook do Stripe fica FORA do middleware (P7-03).
+ *
+ * Não é um ecrã: é uma máquina a falar com outra, e já se autentica sozinha —
+ * pela assinatura `stripe-signature`, verificada antes de o corpo ser lido.
+ * Deixá-lo no matcher fazia o guard de sessão redirecionar o POST para
+ * `/entrar` com um 307, e o Stripe tentava durante dias sem nunca entregar
+ * nada. Foi exatamente o que aconteceu na primeira verificação com o
+ * `stripe listen`.
+ *
+ * Também evita correr uma chamada de autenticação ao Supabase por cada evento
+ * recebido, que não serviria para nada — o webhook escreve com `service_role`.
+ */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook).*)"],
 };

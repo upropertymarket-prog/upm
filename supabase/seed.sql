@@ -29,7 +29,7 @@ insert into public.plans (slug, name, audience, price_year_cents, price_month_ce
     '{"active_properties": 10, "visits": 60, "active_chats": 50, "saved": 200, "alerts": 10, "cloud_gb": 5}'),
   ('premium-owner', 'Premium', 'owner', 29990, 2999, 3,
     '{"active_properties": null, "visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 20}'),
-  ('smarter-buyer', 'Smarter', 'buyer', 3990, 399, 1,
+  ('smarter-buyer', 'Smarter', 'buyer', 4990, 499, 1,
     '{"visits": 15, "active_chats": 20, "saved": 100, "alerts": 5, "cloud_gb": 1}'),
   ('premium-buyer', 'Premium', 'buyer', 6990, 699, 2,
     '{"visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 5}')

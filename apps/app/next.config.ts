@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
   // o loader de fontes do Next só corre em código que o Next compila.
   transpilePackages: ["@upm/ui", "@upm/db", "@upm/config"],
   typedRoutes: true,
+  // P7-03 — o SDK do Stripe fica FORA do bundle do servidor.
+  //
+  // Sem isto, o webpack empacota o pacote inteiro em cada compilação: em dev,
+  // a primeira resposta do webhook `/api/stripe/webhook` levou **695 segundos**,
+  // o que torna impossível verificar nada com o `stripe listen`. Como pacote
+  // externo, o Node faz `require` dele e a rota compila em segundos.
+  serverExternalPackages: ["stripe"],
 };
 
 // `tempo-sdk` tipa o config de entrada com um `NextConfigLike` propositadamente
