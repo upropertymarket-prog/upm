@@ -506,7 +506,7 @@ export function PlanScreen({
                     <CircleCheck
                       size={15}
                       aria-hidden="true"
-                      style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
+                      style={{ color: "var(--muted)", flex: "none", marginTop: 2 }}
                     />
                     <span>
                       {key === "cloud_gb" ? "Espaço em cloud" : LIMIT_LABELS[key]}:{" "}
@@ -533,7 +533,7 @@ export function PlanScreen({
                       <CircleCheck
                         size={15}
                         aria-hidden="true"
-                        style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
+                        style={{ color: "var(--muted)", flex: "none", marginTop: 2 }}
                       />
                       <span>{planFeatureLabel(feature)}</span>
                     </li>
