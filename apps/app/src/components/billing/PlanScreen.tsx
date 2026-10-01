@@ -599,10 +599,11 @@ export function PlanScreen({
         <Card
           padded
           style={{
-            display: "flex",
-            gap: "var(--sp-7)",
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) auto auto",
+            columnGap: "var(--sp-7)",
+            rowGap: "var(--sp-4)",
             alignItems: "center",
-            flexWrap: "wrap",
             marginBottom: "var(--sp-9)",
             borderColor: highlightAddon ? "var(--accent)" : "var(--border)",
           }}
