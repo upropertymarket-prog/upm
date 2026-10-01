@@ -284,6 +284,9 @@ export function CloudScreen(props: CloudScreenProps) {
           style={{
             display: "flex",
             gap: "var(--sp-2)",
+            /* Os ícones são 40 px (`--tap`, 04 §1.8) e o "Detalhes" 36 px: sem
+               `center` o flex alinhava-os pelo topo da célula. */
+            alignItems: "center",
             justifyContent: "flex-end",
             flexWrap: "nowrap",
             whiteSpace: "nowrap",
@@ -291,34 +294,38 @@ export function CloudScreen(props: CloudScreenProps) {
         >
           <Button
             variant="secondary"
-            size="sm"
             iconOnly
             aria-label={`Transferir ${row.name}`}
             onClick={() => download(row, "download")}
           >
-            <Download size={14} />
+            <Download size={16} />
           </Button>
           <Button
             variant="secondary"
-            size="sm"
             iconOnly
             aria-label={`Partilhar ${row.name}`}
             onClick={() => setShare(row)}
           >
-            <Share2 size={14} />
+            <Share2 size={16} />
           </Button>
           <Button
             variant="secondary"
-            size="sm"
             iconOnly
             disabled={row.readonly}
             aria-label={`Eliminar ${row.name}`}
             title={row.readonly ? "Este documento não pode ser eliminado aqui" : undefined}
             onClick={() => run(() => props.onDelete(row.id), "Ficheiro movido para a reciclagem.")}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => openFile(row)}>
+          {/* Afasta-se do trio de ícones: o `gap` que chega entre ícones deixa
+              o botão com rótulo demasiado colado a eles. */}
+          <Button
+            variant="secondary"
+            size="md"
+            style={{ marginLeft: "var(--sp-3)" }}
+            onClick={() => openFile(row)}
+          >
             Detalhes
           </Button>
         </div>

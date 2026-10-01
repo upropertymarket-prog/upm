@@ -176,27 +176,30 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
           style={{
             display: "flex",
             gap: "var(--sp-3)",
+            /* O atalho da agenda é 40 px (`--tap`, 04 §1.8) e os dois com
+               rótulo 36 px: sem `center` alinhavam pelo topo da célula. */
+            alignItems: "center",
             justifyContent: "flex-end",
             width: "max-content",
           }}
         >
           <a
             href={row.conversationId ? `/mensagens?conversa=${row.conversationId}` : "/mensagens"}
-            className="upm-btn upm-btn--secondary upm-btn--sm"
+            className="upm-btn upm-btn--secondary upm-btn--md"
             style={{ textDecoration: "none", width: 124, minWidth: 32, padding: 0 }}
           >
-            <MessageSquare size={14} aria-hidden="true" />
+            <MessageSquare size={16} aria-hidden="true" />
             Responder
           </a>
           <a
             href="/agenda"
-            className="upm-btn upm-btn--secondary upm-btn--sm"
+            className="upm-btn upm-btn--secondary upm-btn--icon"
             style={{ textDecoration: "none" }}
             aria-label={`Ver agenda de ${row.contact.name}`}
           >
-            <CalendarPlus size={14} aria-hidden="true" />
+            <CalendarPlus size={16} aria-hidden="true" />
           </a>
-          <Button variant="ghost" size="sm" onClick={() => openLead(row)}>
+          <Button variant="secondary" size="md" onClick={() => openLead(row)}>
             Detalhes
           </Button>
         </div>

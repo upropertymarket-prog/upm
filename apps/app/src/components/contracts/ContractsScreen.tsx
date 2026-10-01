@@ -142,8 +142,8 @@ export function ContractsScreen({
       id: "actions",
       header: "Ações",
       cell: (row) => (
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button variant="ghost" size="sm" onClick={() => open(row.id)}>
+        <div style={{ display: "flex", justifyContent: "flex-start" }}>
+          <Button variant="secondary" size="md" onClick={() => open(row.id)}>
             Abrir
           </Button>
         </div>
