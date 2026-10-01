@@ -21,13 +21,15 @@
     "gate:bundle": "node scripts/gate/check-client-bundle.mjs",
     "gate:db": "supabase db lint --linked --schema public --level warning --fail-on error",
     "gate:deps": "pnpm audit --audit-level high",
-    "create-staff-user": "node scripts/create-staff-user.mjs"
+    "create-staff-user": "node scripts/create-staff-user.mjs",
+    "stripe:sync": "tsx scripts/stripe/sync-catalog.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@supabase/supabase-js": "^2.47.10",
     "prettier": "^3.4.2",
     "supabase": "^2.118.0",
+    "tsx": "^4.23.15",
     "turbo": "^2.3.3",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.70.1",
