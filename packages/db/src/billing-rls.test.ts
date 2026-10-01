@@ -292,6 +292,36 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
     await service.from("subscriptions").delete().eq("id", sub!.id);
   });
 
+  it("ninguém escreve no registo de acessos de um documento que não é seu", async () => {
+    // Defeito da Fase 6 encontrado nesta fase: `log_document_access` é
+    // `security definer`, está concedida a anon e authenticated, e aceitava
+    // qualquer `subject_id`. Uma prova que qualquer um pode escrever não é
+    // prova (08 §6.9).
+    const forged = await clients.buyer.rpc("log_document_access", {
+      p_subject_type: "invoice",
+      p_subject_id: invoiceId,
+      p_action: "download",
+    });
+    expect(forged.error).not.toBeNull();
+
+    const anon = await clients.anon.rpc("log_document_access", {
+      p_subject_type: "invoice",
+      p_subject_id: invoiceId,
+      p_action: "download",
+    });
+    expect(anon.error).not.toBeNull();
+
+    // O dono continua a poder registar o acesso dele.
+    const own = await clients.owner.rpc("log_document_access", {
+      p_subject_type: "invoice",
+      p_subject_id: invoiceId,
+      p_action: "view",
+    });
+    expect(own.error).toBeNull();
+
+    await service.from("document_access_log").delete().eq("subject_id", invoiceId);
+  });
+
   // -------------------------------------------------------------------------
   // Escalada de privilégios no próprio perfil
   // -------------------------------------------------------------------------
