@@ -85,6 +85,13 @@ const PLAN_TONE: Record<string, StatusTone> = {
   "premium-owner": "dealRent",
 };
 
+const PLAN_COLOR: Record<string, string> = {
+  gratuito: "var(--state-draft)",
+  "essential-owner": "var(--accent)",
+  "smarter-owner": "var(--state-deal-sale)",
+  "premium-owner": "var(--state-deal-rent)",
+};
+
 function planFeatureLabel(feature: string) {
   return feature
     .replace(/\bImóveis\b/g, "Propriedades")
@@ -535,7 +542,12 @@ export function PlanScreen({
                   </Button>
                 ) : (
                   <Button
+                    variant="ghost"
                     fullWidth
+                    style={{
+                      borderColor: PLAN_COLOR[plan.slug] ?? "var(--border2)",
+                      color: PLAN_COLOR[plan.slug] ?? "var(--muted)",
+                    }}
                     disabled={pending || !plan.purchasable}
                     onClick={() => checkout("plan", plan.slug)}
                     leadingIcon={<CreditCard size={16} />}
