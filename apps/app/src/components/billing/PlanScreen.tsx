@@ -71,7 +71,7 @@ const SUBSCRIPTION_TONE: Record<string, StatusTone> = {
 };
 
 const SUBSCRIPTION_LABEL: Record<string, string> = {
-  active: "Ativa",
+  active: "Ativo",
   trialing: "Período de experiência",
   past_due: "Pagamento em atraso",
   canceled: "Cancelada",
