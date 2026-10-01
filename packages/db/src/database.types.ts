@@ -834,6 +834,79 @@ export type Database = {
           },
         ];
       };
+      invoices: {
+        Row: {
+          created_at: string;
+          currency: string;
+          hosted_url: string | null;
+          id: string;
+          issued_at: string | null;
+          number: string | null;
+          pdf_url: string | null;
+          profile_id: string;
+          saved_file_id: string | null;
+          status: string;
+          stripe_invoice_id: string;
+          subscription_id: string | null;
+          total_cents: number;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          currency?: string;
+          hosted_url?: string | null;
+          id?: string;
+          issued_at?: string | null;
+          number?: string | null;
+          pdf_url?: string | null;
+          profile_id: string;
+          saved_file_id?: string | null;
+          status: string;
+          stripe_invoice_id: string;
+          subscription_id?: string | null;
+          total_cents: number;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          currency?: string;
+          hosted_url?: string | null;
+          id?: string;
+          issued_at?: string | null;
+          number?: string | null;
+          pdf_url?: string | null;
+          profile_id?: string;
+          saved_file_id?: string | null;
+          status?: string;
+          stripe_invoice_id?: string;
+          subscription_id?: string | null;
+          total_cents?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoices_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_saved_file_id_fkey";
+            columns: ["saved_file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       messages: {
         Row: {
           attachments: Json;
@@ -1684,6 +1757,33 @@ export type Database = {
           },
         ];
       };
+      stripe_events: {
+        Row: {
+          error: string | null;
+          id: string;
+          processed_at: string | null;
+          received_at: string;
+          status: string;
+          type: string;
+        };
+        Insert: {
+          error?: string | null;
+          id: string;
+          processed_at?: string | null;
+          received_at?: string;
+          status?: string;
+          type: string;
+        };
+        Update: {
+          error?: string | null;
+          id?: string;
+          processed_at?: string | null;
+          received_at?: string;
+          status?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
       subscription_addons: {
         Row: {
           addon_id: string;
@@ -2007,10 +2107,15 @@ export type Database = {
     };
     Functions: {
       accept_visit_request: { Args: { p_id: string }; Returns: undefined };
+      apply_plan_downgrade: { Args: { p_profile_id: string }; Returns: number };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
       at_limit_ratio: {
         Args: { p_limit: Json; p_used: number };
         Returns: boolean;
+      };
+      attach_stripe_customer: {
+        Args: { p_customer_id: string };
+        Returns: undefined;
       };
       available_contract_templates: {
         Args: never;
@@ -2263,6 +2368,34 @@ export type Database = {
         };
         Returns: string;
       };
+      plan_limit_exceeded: {
+        Args: { p_key: string; p_profile_id: string };
+        Returns: boolean;
+      };
+      plan_status: {
+        Args: never;
+        Returns: {
+          billing_interval: string;
+          cancel_at_period_end: boolean;
+          cloud_limit_bytes: number;
+          cloud_used_bytes: number;
+          current_period_end: string;
+          has_cloud_addon: boolean;
+          limits: Json;
+          plan_audience: Database["public"]["Enums"]["plan_audience"];
+          plan_id: string;
+          plan_name: string;
+          plan_slug: string;
+          subscription_id: string;
+          subscription_status: string;
+          trial_ends_at: string;
+          usage: Json;
+        }[];
+      };
+      plan_usage: {
+        Args: { p_key: string; p_profile_id: string };
+        Returns: number;
+      };
       properties_for_map: {
         Args: {
           p_max_lat?: number;
@@ -2383,6 +2516,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      set_registration_plan: { Args: { p_plan_id: string }; Returns: undefined };
       share_contract: {
         Args: {
           p_access_code_hash?: string;

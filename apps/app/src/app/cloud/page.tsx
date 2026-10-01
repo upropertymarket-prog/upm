@@ -6,6 +6,7 @@ import { formatBytes } from "@upm/db/cloud";
 
 import { AppChrome } from "../../components/AppChrome";
 import { CloudScreen } from "../../components/cloud/CloudScreen";
+import { loadAddonOptions } from "../../lib/billing";
 import {
   loadCloudStatus,
   loadFiles,
@@ -69,17 +70,35 @@ export default async function CloudPage() {
   const role = profile.role;
   const status = await loadCloudStatus(supabase);
 
-  const [folders, files, sharedWithMe, contacts, conversations, visits, leads, notifications] =
-    await Promise.all([
-      status.hasCloud ? loadFolders(supabase) : Promise.resolve([]),
-      status.hasCloud ? loadFiles(supabase) : Promise.resolve([]),
-      loadSharedWithMe(supabase),
-      loadShareContacts(supabase),
-      loadConversations(supabase),
-      loadVisits(supabase),
-      role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-      loadNotifications(supabase),
-    ]);
+  const [
+    folders,
+    files,
+    sharedWithMe,
+    contacts,
+    conversations,
+    visits,
+    leads,
+    notifications,
+    addons,
+  ] = await Promise.all([
+    status.hasCloud ? loadFolders(supabase) : Promise.resolve([]),
+    status.hasCloud ? loadFiles(supabase) : Promise.resolve([]),
+    loadSharedWithMe(supabase),
+    loadShareContacts(supabase),
+    loadConversations(supabase),
+    loadVisits(supabase),
+    role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
+    loadNotifications(supabase),
+    status.hasCloud ? Promise.resolve([]) : loadAddonOptions(supabase),
+  ]);
+
+  // 07 §19.4 — o convite nomeia o preço do extra, e esse preço vem de `addons`.
+  const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
+  const cloudAddonPrice = cloudAddon
+    ? new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(
+        cloudAddon.priceMonthCents / 100,
+      )
+    : null;
 
   const subtitle = !status.hasCloud
     ? "A Cloud está incluída a partir do plano Essential"
@@ -101,6 +120,7 @@ export default async function CloudPage() {
       <CloudScreen
         subtitle={subtitle}
         status={status}
+        cloudAddonPrice={cloudAddonPrice}
         folders={folders}
         files={files}
         sharedWithMe={sharedWithMe}

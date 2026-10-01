@@ -54,6 +54,12 @@ export type CloudFileDetails = {
 export type CloudScreenProps = {
   subtitle: string;
   status: CloudStatus;
+  /**
+   * Preço do extra Cloud, já formatado, vindo de `addons` (P7-02). Nulo quando
+   * o extra não está visível. Nunca se escreve um valor em euros neste
+   * ficheiro: a grelha de 07 §8.3 é provisória (07 §9 #2).
+   */
+  cloudAddonPrice?: string | null;
   folders: FolderNode[];
   files: CloudFileRow[];
   sharedWithMe: SharedWithMeRow[];
@@ -204,13 +210,13 @@ export function CloudScreen(props: CloudScreenProps) {
             >
               Ver planos
             </a>
-            {nearLimit ? null : (
+            {nearLimit || !props.cloudAddonPrice ? null : (
               <a
                 href="/plano?extra=cloud"
                 className="upm-btn upm-btn--secondary upm-btn--md"
                 style={{ textDecoration: "none" }}
               >
-                Adicionar Cloud — 2,99 €/mês
+                {`Adicionar Cloud — ${props.cloudAddonPrice}/mês`}
               </a>
             )}
           </div>
