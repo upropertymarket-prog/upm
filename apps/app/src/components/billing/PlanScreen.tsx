@@ -478,9 +478,10 @@ export function PlanScreen({
                       style={{ color: "var(--accent)", flex: "none", marginTop: 2 }}
                     />
                     <span>
-                      {LIMIT_LABELS[key]}:{" "}
+                      {key === "cloud_gb" ? "Espaço em cloud" : LIMIT_LABELS[key]}:{" "}
                       <strong>
                         {isUnlimited(plan.limits[key]) ? "ilimitado" : plan.limits[key]}
+                        {key === "cloud_gb" && !isUnlimited(plan.limits[key]) ? "GB" : ""}
                       </strong>
                     </span>
                   </li>
