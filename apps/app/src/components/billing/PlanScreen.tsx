@@ -311,11 +311,13 @@ export function PlanScreen({
         padded
         style={{
           display: "grid",
-          gap: "var(--sp-8)",
-          gridTemplateColumns: "minmax(220px, 1fr) minmax(0, 2fr)",
+          gap: "var(--sp-7)",
+          gridTemplateColumns: "minmax(240px, 0.8fr) minmax(0, 2.2fr)",
           alignItems: "start",
-          borderColor: "var(--accent)",
-          background: "var(--accent-soft)",
+          borderColor: "var(--border)",
+          borderTopColor: "var(--accent)",
+          borderTopWidth: 3,
+          background: "var(--surface)",
           marginBottom: "var(--sp-7)",
         }}
       >
@@ -346,27 +348,43 @@ export function PlanScreen({
           ) : null}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: "var(--sp-6)",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          }}
-        >
-          {usageRows.map((key) => (
+        <div style={{ display: "grid", gap: "var(--sp-5)", minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: "var(--sp-4)",
+              flexWrap: "wrap",
+            }}
+          >
+            <strong style={{ fontSize: "var(--fs-body-lg)" }}>Utilização do plano</strong>
+            <span style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
+              Uso atual · limites incluídos
+            </span>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gap: "var(--sp-4)",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            }}
+          >
+            {usageRows.map((key) => (
+              <UsageMeter
+                key={key}
+                label={LIMIT_LABELS[key]}
+                used={status.usage[key]}
+                limit={status.limits[key]}
+              />
+            ))}
             <UsageMeter
-              key={key}
-              label={LIMIT_LABELS[key]}
-              used={status.usage[key]}
-              limit={status.limits[key]}
+              label={LIMIT_LABELS.cloud_gb}
+              used={status.cloudUsedBytes}
+              limit={status.cloudLimitBytes}
+              format={formatBytes}
             />
-          ))}
-          <UsageMeter
-            label={LIMIT_LABELS.cloud_gb}
-            used={status.cloudUsedBytes}
-            limit={status.cloudLimitBytes}
-            format={formatBytes}
-          />
+          </div>
         </div>
       </Card>
 
@@ -658,7 +676,17 @@ function UsageMeter({
   const ratio = unlimited || limit === 0 ? 0 : Math.min(1, used / limit);
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+    <div
+      style={{
+        display: "grid",
+        gap: "var(--sp-2)",
+        minWidth: 0,
+        padding: "var(--sp-4)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--r-lg)",
+        background: "var(--surface)",
+      }}
+    >
       <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>{label}</span>
       <strong style={{ fontSize: "var(--fs-subtitle)" }}>
         {format(used)}
