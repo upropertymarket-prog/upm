@@ -51,6 +51,9 @@ function fakeStripe() {
     async getPrice(id) {
       return prices.get(id) ?? null;
     },
+    async listPrices(product) {
+      return [...prices.values()].filter((price) => price.product === product);
+    },
     async createPrice({ product, unitAmount, interval }) {
       sequence += 1;
       const price: CatalogPrice = {
@@ -269,6 +272,29 @@ describe("syncCatalog (P7-01)", () => {
     expect(prices.get(oldMonthId)!.active).toBe(true);
     // O anual não mudou de preço: fica o mesmo objeto.
     expect(prices.get(row.stripePriceYearId!)!.unitAmount).toBe(5990);
+  });
+
+  it("voltar ao preço anterior reaproveita o Price antigo em vez de criar um gémeo", async () => {
+    const { api, prices } = fakeStripe();
+    const row = entry();
+    const { store } = fakeStore([row]);
+
+    await syncCatalog(api, store);
+    const original = row.stripePriceMonthId!;
+
+    row.priceMonthCents = 699;
+    await syncCatalog(api, store);
+    expect(prices.size).toBe(3);
+
+    // E agora de volta aos 5,99: o Price original continua lá, ativo e
+    // idêntico. Um Price do Stripe é imutável, por isso reaproveitá-lo é
+    // seguro — criar outro só enchia o catálogo.
+    row.priceMonthCents = 599;
+    const report = await syncCatalog(api, store);
+
+    expect(report.pricesReused).toBe(1);
+    expect(prices.size).toBe(3);
+    expect(row.stripePriceMonthId).toBe(original);
   });
 
   it("salta o Gratuito — não há o que cobrar", async () => {

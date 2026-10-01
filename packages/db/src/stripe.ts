@@ -116,6 +116,11 @@ export function createStripeCatalogApi(stripe: Stripe = getStripeClient()): Stri
       }
     },
 
+    async listPrices(product) {
+      const prices = await stripe.prices.list({ product, active: true, limit: 100 });
+      return prices.data.map(toCatalogPrice);
+    },
+
     async createPrice({ product, unitAmount, interval, metadata }) {
       return toCatalogPrice(
         await stripe.prices.create({

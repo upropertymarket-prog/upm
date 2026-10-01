@@ -312,6 +312,8 @@ export type StripeCatalogApi = {
   }): Promise<CatalogProduct>;
   updateProduct(id: string, input: { name: string }): Promise<CatalogProduct>;
   getPrice(id: string): Promise<CatalogPrice | null>;
+  /** Os preços ativos de um produto, para reaproveitar em vez de duplicar. */
+  listPrices(product: string): Promise<CatalogPrice[]>;
   createPrice(input: {
     product: string;
     unitAmount: number;
@@ -341,7 +343,8 @@ export function productIdFor(entry: Pick<CatalogEntry, "kind" | "slug">): string
   return `upm_${entry.kind}_${entry.slug}`;
 }
 
-export type SyncAction = "created" | "price_added" | "renamed" | "unchanged" | "skipped";
+export type SyncAction =
+  "created" | "price_added" | "price_reused" | "renamed" | "unchanged" | "skipped";
 
 export type SyncEntryResult = {
   slug: string;
@@ -357,6 +360,7 @@ export type SyncReport = {
   entries: SyncEntryResult[];
   created: number;
   pricesAdded: number;
+  pricesReused: number;
   unchanged: number;
   skipped: number;
 };
@@ -439,6 +443,19 @@ export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): P
         continue;
       }
 
+      // Antes de criar: já há um `Price` idêntico neste produto? Um `Price` do
+      // Stripe é imutável, por isso reaproveitar um igual é seguro — e evita
+      // encher o catálogo de gémeos quando um preço volta a um valor anterior.
+      const reusable = (await api.listPrices(product.id)).find((price) =>
+        priceMatches(price, cents, interval),
+      );
+
+      if (reusable) {
+        priceIds[interval] = reusable.id;
+        if (action === "unchanged") action = "price_reused";
+        continue;
+      }
+
       const created = await api.createPrice({
         product: product.id,
         unitAmount: cents,
@@ -446,7 +463,7 @@ export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): P
         metadata,
       });
       priceIds[interval] = created.id;
-      if (action === "unchanged") action = "price_added";
+      if (action === "unchanged" || action === "price_reused") action = "price_added";
     }
 
     const changed =
@@ -477,6 +494,7 @@ export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): P
     entries: results,
     created: results.filter((r) => r.action === "created").length,
     pricesAdded: results.filter((r) => r.action === "price_added").length,
+    pricesReused: results.filter((r) => r.action === "price_reused").length,
     unchanged: results.filter((r) => r.action === "unchanged").length,
     skipped: results.filter((r) => r.action === "skipped").length,
   };
