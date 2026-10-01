@@ -102,6 +102,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     {
       id: "contact",
       header: "Interessado",
+      width: "304px",
       cell: (row) => (
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", minWidth: 0 }}>
           <span
@@ -138,9 +139,10 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     },
     {
       id: "property",
-      header: "Propriedades",
+      header: "Propriedade",
+      width: "220px",
       cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>
+        <span style={{ color: "var(--text)", fontWeight: "var(--fw-medium)" }}>
           {row.propertyTitle} · {row.propertyLocation}
         </span>
       ),
@@ -148,6 +150,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     {
       id: "when",
       header: "Recebido",
+      width: "179px",
       cell: (row) => (
         <span style={{ color: "var(--muted)" }}>{formatRelative(row.lastActivityAt)}</span>
       ),
@@ -155,29 +158,39 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     {
       id: "stage",
       header: "Estado",
+      width: "158px",
       cell: (row) => (
         <StatusTag tone={LEAD_TONE[row.stage]}>
-          {LEAD_STAGE_LABELS[row.stage]}
-          {row.outcome ? ` · ${LEAD_OUTCOME_LABELS[row.outcome]}` : ""}
+          {row.stage === "closed" && row.outcome
+            ? LEAD_OUTCOME_LABELS[row.outcome]
+            : LEAD_STAGE_LABELS[row.stage]}
         </StatusTag>
       ),
     },
     {
       id: "actions",
       header: "Ações",
+      width: "310px",
       cell: (row) => (
-        <div style={{ display: "flex", gap: "var(--sp-2)", justifyContent: "flex-end" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--sp-3)",
+            justifyContent: "flex-end",
+            width: "max-content",
+          }}
+        >
           <a
             href={row.conversationId ? `/mensagens?conversa=${row.conversationId}` : "/mensagens"}
             className="upm-btn upm-btn--secondary upm-btn--sm"
-            style={{ textDecoration: "none" }}
+            style={{ textDecoration: "none", width: 124, minWidth: 32, padding: 0 }}
           >
             <MessageSquare size={14} aria-hidden="true" />
             Responder
           </a>
           <a
             href="/agenda"
-            className="upm-btn upm-btn--ghost upm-btn--sm"
+            className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
             aria-label={`Ver agenda de ${row.contact.name}`}
           >
