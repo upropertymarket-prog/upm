@@ -93,6 +93,12 @@ const PLAN_COLOR: Record<string, string> = {
 };
 
 function planFeatureLabel(feature: string) {
+  if (feature === "2 GB de Cloud" || feature === "5 GB de Cloud") {
+    return "Alertas avançados";
+  }
+  if (feature === "20 GB de Cloud") {
+    return "Alertas personalizados";
+  }
   return feature
     .replace(/\bImóveis\b/g, "Propriedades")
     .replace(/\bimóveis\b/g, "propriedades")
