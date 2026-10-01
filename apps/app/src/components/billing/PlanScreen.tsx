@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, CreditCard, ExternalLink, Minus, Receipt } from "lucide-react";
+import {
+  Check,
+  CloudUpload,
+  CreditCard,
+  Download,
+  ExternalLink,
+  Minus,
+  Receipt,
+} from "lucide-react";
 import {
   Button,
   Card,
@@ -96,6 +104,10 @@ export type PlanScreenProps = {
     interval: BillingInterval;
   }) => Promise<{ url?: string; error?: string }>;
   onOpenPortal: () => Promise<{ url?: string; error?: string }>;
+  /** P7-04 — abre o PDF do Stripe. */
+  onExportInvoice: (invoiceId: string) => Promise<{ url?: string; error?: string }>;
+  /** P7-04 — copia o PDF para a Cloud do próprio. */
+  onSaveInvoice: (invoiceId: string) => Promise<{ ok?: boolean; error?: string }>;
 };
 
 export function PlanScreen({
@@ -108,6 +120,8 @@ export function PlanScreen({
   checkoutResult,
   onCheckout,
   onOpenPortal,
+  onExportInvoice,
+  onSaveInvoice,
 }: PlanScreenProps) {
   const [interval, setInterval] = useState<BillingInterval>(status.interval ?? "year");
   const [pending, startTransition] = useTransition();
@@ -136,6 +150,27 @@ export function PlanScreen({
     startTransition(async () => go(await onOpenPortal()));
   }
 
+  function exportInvoice(id: string) {
+    startTransition(async () => {
+      const result = await onExportInvoice(id);
+      if (result.error) {
+        toast(result.error, "error");
+        return;
+      }
+      // Separador novo: a página fica onde está e o PDF abre ao lado.
+      if (result.url) window.open(result.url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function saveInvoice(id: string) {
+    startTransition(async () => {
+      const result = await onSaveInvoice(id);
+      // Sem Cloud no plano, a recusa vem do servidor com a razão (07 §19.4) —
+      // e o caminho para a resolver é esta mesma página.
+      toast(result.error ?? "Fatura guardada na Cloud.", result.error ? "error" : "success");
+    });
+  }
+
   const invoiceColumns: TableColumn<InvoiceRow>[] = [
     {
       id: "number",
@@ -156,6 +191,34 @@ export function PlanScreen({
         <StatusTag tone={INVOICE_TONE[row.status] ?? "draft"}>
           {INVOICE_LABEL[row.status] ?? row.status}
         </StatusTag>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      width: "220px",
+      cell: (row) => (
+        <span style={{ display: "flex", gap: "var(--sp-3)", justifyContent: "flex-end" }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pending || !row.hasPdf || row.savedToCloud}
+            onClick={() => saveInvoice(row.id)}
+            leadingIcon={<CloudUpload size={14} />}
+            title={row.savedToCloud ? "Já está na sua Cloud" : "Guardar na Cloud"}
+          >
+            {row.savedToCloud ? "Guardada" : "Guardar"}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pending || !row.hasPdf}
+            onClick={() => exportInvoice(row.id)}
+            leadingIcon={<Download size={14} />}
+          >
+            Exportar
+          </Button>
+        </span>
       ),
     },
   ];

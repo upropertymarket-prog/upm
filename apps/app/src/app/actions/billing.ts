@@ -1,13 +1,16 @@
 "use server";
 
+import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
 import { billingIntervalSchema } from "@upm/db/billing";
+import { MAX_FILE_BYTES, sniffMime } from "@upm/db/cloud";
 import { getStripeClient } from "@upm/db/stripe";
 
 /**
- * Faturação — Server Actions (P7-02)
+ * Faturação — Server Actions (P7-02 · P7-04)
  * =========================================================================
  * Duas regras que atravessam este ficheiro:
  *
@@ -199,4 +202,130 @@ export async function openBillingPortal(): Promise<CheckoutState> {
   } catch {
     return { error: "Não foi possível abrir o portal de faturação." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Faturas — P7-04 (04 §8.3 · 03 F8)
+// ---------------------------------------------------------------------------
+
+export type InvoiceActionState = { ok?: boolean; url?: string; error?: string };
+
+/**
+ * O PDF da fatura vive no Stripe. O URL que usamos foi escrito pelo webhook a
+ * partir da API — **nunca vem num parâmetro do cliente** — e ainda assim é
+ * validado contra a lista branca de 08 §7.4 antes de se lhe tocar.
+ */
+function isStripeUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "stripe.com" || url.hostname.endsWith(".stripe.com"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function ownInvoice(invoiceId: string) {
+  const { supabase, user } = await session();
+  if (!user) return { error: "Sessão inválida." as const };
+
+  const parsed = z.string().uuid().safeParse(invoiceId);
+  if (!parsed.success) return { error: "Fatura inválida." as const };
+
+  // A RLS já limita a leitura ao dono; o `eq` é o cinto a par dos suspensórios.
+  const { data } = await supabase
+    .from("invoices")
+    .select("id, number, pdf_url, hosted_url, saved_file_id")
+    .eq("id", parsed.data)
+    .eq("profile_id", user.id)
+    .maybeSingle();
+
+  if (!data) return { error: "Fatura inexistente." as const };
+  return { supabase, user, invoice: data };
+}
+
+/** Exportar: abre o PDF do Stripe e deixa a linha no registo (08 §6.9). */
+export async function exportInvoice(invoiceId: string): Promise<InvoiceActionState> {
+  const found = await ownInvoice(invoiceId);
+  if ("error" in found) return { error: found.error };
+  const { supabase, invoice } = found;
+
+  const url = invoice.pdf_url ?? invoice.hosted_url;
+  if (!url || !isStripeUrl(url)) return { error: "Esta fatura ainda não tem PDF." };
+
+  await supabase.rpc("log_invoice_access", { p_invoice_id: invoice.id, p_action: "download" });
+  return { url };
+}
+
+/**
+ * Guardar na Cloud: traz o PDF do Stripe e põe-no na Cloud do próprio, pelo
+ * mesmo caminho de um upload normal — `cloud_register_upload` verifica a quota
+ * antes de o ficheiro contar (07 §19.8 #1), e recusa a quem não tem Cloud com
+ * a mensagem que leva ao convite de 07 §19.4.
+ */
+export async function saveInvoiceToCloud(invoiceId: string): Promise<InvoiceActionState> {
+  const found = await ownInvoice(invoiceId);
+  if ("error" in found) return { error: found.error };
+  const { supabase, user, invoice } = found;
+
+  if (invoice.saved_file_id) return { error: "Esta fatura já está guardada na Cloud." };
+
+  const url = invoice.pdf_url;
+  if (!url || !isStripeUrl(url)) return { error: "Esta fatura ainda não tem PDF." };
+
+  let bytes: Uint8Array;
+  try {
+    const response = await fetch(url, { redirect: "error" });
+    if (!response.ok) return { error: "Não foi possível obter a fatura." };
+    bytes = new Uint8Array(await response.arrayBuffer());
+  } catch {
+    return { error: "Não foi possível obter a fatura." };
+  }
+
+  if (bytes.byteLength === 0 || bytes.byteLength > MAX_FILE_BYTES) {
+    return { error: "A fatura não pôde ser guardada." };
+  }
+  // O tipo decide-se pelos bytes, como em qualquer upload (07 §19.8 #2).
+  const mime = sniffMime(bytes);
+  if (mime !== "application/pdf") return { error: "A fatura não pôde ser guardada." };
+
+  const storagePath = `${user.id}/${randomUUID()}/1`;
+  const { error: uploadError } = await supabase.storage
+    .from("cloud")
+    .upload(storagePath, bytes, { contentType: mime, upsert: false });
+  if (uploadError) return { error: "Não foi possível guardar a fatura." };
+
+  const name = `Fatura ${invoice.number ?? invoice.id.slice(0, 8)}.pdf`;
+  const { data: fileId, error: registerError } = await supabase.rpc("cloud_register_upload", {
+    p_folder_id: null as unknown as string,
+    p_name: name,
+    p_mime: mime,
+    p_size: bytes.byteLength,
+    p_storage_path: storagePath,
+    p_checksum: createHash("sha256").update(bytes).digest("hex"),
+    p_source: "invoice",
+  });
+
+  if (registerError || !fileId) {
+    // Recusado (sem Cloud, sem espaço): o objeto não fica no bucket a ocupar
+    // espaço que ninguém contabiliza.
+    await supabase.storage.from("cloud").remove([storagePath]);
+    return { error: registerError?.message ?? "Não foi possível guardar a fatura." };
+  }
+
+  const { error: linkError } = await supabase.rpc("invoice_saved_to_cloud", {
+    p_invoice_id: invoice.id,
+    p_file_id: fileId,
+  });
+  if (linkError) {
+    await supabase.rpc("cloud_delete_file", { p_file_id: fileId });
+    await supabase.storage.from("cloud").remove([storagePath]);
+    return { error: "Esta fatura já está guardada na Cloud." };
+  }
+
+  revalidatePath("/plano");
+  revalidatePath("/cloud");
+  return { ok: true };
 }

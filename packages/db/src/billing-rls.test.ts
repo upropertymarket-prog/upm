@@ -220,6 +220,79 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Faturas na Cloud — P7-04
+  // -------------------------------------------------------------------------
+
+  it("a fatura só se guarda uma vez, e só pelo dono (P7-04)", async () => {
+    // Um ficheiro de fatura já na Cloud do owner, como o deixaria o upload.
+    await service.from("subscriptions").delete().eq("profile_id", ids.owner);
+    const { data: smarter } = await service
+      .from("plans")
+      .select("id")
+      .eq("slug", "smarter-owner")
+      .single();
+    const { data: sub } = await service
+      .from("subscriptions")
+      .insert({ profile_id: ids.owner, plan_id: smarter!.id, status: "active" })
+      .select("id")
+      .single();
+
+    const { data: file } = await service
+      .from("files")
+      .insert({
+        owner_id: ids.owner,
+        name: "Fatura UPM-TEST-0001.pdf",
+        mime: "application/pdf",
+        size: 24_000,
+        bucket: "cloud",
+        storage_path: `${ids.owner}/${crypto.randomUUID()}/1`,
+        checksum: "0".repeat(64),
+        source: "invoice",
+      })
+      .select("id")
+      .single();
+
+    const ok = await clients.owner.rpc("invoice_saved_to_cloud", {
+      p_invoice_id: invoiceId,
+      p_file_id: file!.id,
+    });
+    expect(ok.error).toBeNull();
+
+    // 08 §6.9: guardar deixa exatamente uma linha no registo de acessos.
+    const { data: log } = await service
+      .from("document_access_log")
+      .select("id, action")
+      .eq("subject_type", "invoice")
+      .eq("subject_id", invoiceId);
+    expect(log?.length).toBe(1);
+
+    // Segunda vez: recusado, para não ficarem duas cópias da mesma fatura.
+    const twice = await clients.owner.rpc("invoice_saved_to_cloud", {
+      p_invoice_id: invoiceId,
+      p_file_id: file!.id,
+    });
+    expect(twice.error).not.toBeNull();
+
+    // A fatura de outro não se guarda nem se regista.
+    const stranger = await clients.buyer.rpc("invoice_saved_to_cloud", {
+      p_invoice_id: invoiceId,
+      p_file_id: file!.id,
+    });
+    expect(stranger.error).not.toBeNull();
+
+    const peek = await clients.buyer.rpc("log_invoice_access", {
+      p_invoice_id: invoiceId,
+      p_action: "download",
+    });
+    expect(peek.error).not.toBeNull();
+
+    await service.from("invoices").update({ saved_file_id: null }).eq("id", invoiceId);
+    await service.from("document_access_log").delete().eq("subject_id", invoiceId);
+    await service.from("files").delete().eq("id", file!.id);
+    await service.from("subscriptions").delete().eq("id", sub!.id);
+  });
+
+  // -------------------------------------------------------------------------
   // Escalada de privilégios no próprio perfil
   // -------------------------------------------------------------------------
 

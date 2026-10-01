@@ -2242,6 +2242,10 @@ export type Database = {
         Args: { p_property_id: string };
         Returns: unknown;
       };
+      invoice_saved_to_cloud: {
+        Args: { p_file_id: string; p_invoice_id: string };
+        Returns: undefined;
+      };
       is_admin: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
       log_document_access: {
@@ -2256,6 +2260,13 @@ export type Database = {
           p_version_id?: string;
         };
         Returns: number;
+      };
+      log_invoice_access: {
+        Args: {
+          p_action?: Database["public"]["Enums"]["document_action"];
+          p_invoice_id: string;
+        };
+        Returns: undefined;
       };
       mark_conversation_read: {
         Args: { p_conversation_id: string };
@@ -2577,7 +2588,7 @@ export type Database = {
       delivery_status: "queued" | "sent" | "failed" | "cancelled";
       document_action:
         "view" | "download" | "export_pdf" | "print" | "share_created" | "share_revoked";
-      document_subject: "file" | "contract" | "property_document" | "contract_template";
+      document_subject: "file" | "contract" | "property_document" | "contract_template" | "invoice";
       file_source: "upload" | "property_document" | "message_attachment" | "contract" | "invoice";
       folder_kind: "user" | "property" | "property_documents";
       lead_outcome: "won" | "lost";
@@ -3234,7 +3245,7 @@ export const Constants = {
         "share_created",
         "share_revoked",
       ],
-      document_subject: ["file", "contract", "property_document", "contract_template"],
+      document_subject: ["file", "contract", "property_document", "contract_template", "invoice"],
       file_source: ["upload", "property_document", "message_attachment", "contract", "invoice"],
       folder_kind: ["user", "property", "property_documents"],
       lead_outcome: ["won", "lost"],

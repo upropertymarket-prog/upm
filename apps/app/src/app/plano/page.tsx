@@ -13,7 +13,12 @@ import {
   loadNotifications,
   loadVisits,
 } from "../../lib/interaction";
-import { openBillingPortal, startCheckout } from "../actions/billing";
+import {
+  exportInvoice,
+  openBillingPortal,
+  saveInvoiceToCloud,
+  startCheckout,
+} from "../actions/billing";
 import { setLocalePreference } from "../actions/preferences";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +95,8 @@ export default async function PlanoPage({
         checkoutResult={checkout === "sucesso" || checkout === "cancelado" ? checkout : undefined}
         onCheckout={startCheckout}
         onOpenPortal={openBillingPortal}
+        onExportInvoice={exportInvoice}
+        onSaveInvoice={saveInvoiceToCloud}
       />
     </AppChrome>
   );
