@@ -427,6 +427,20 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
       .single();
     expect(untouched!.name).toBe("Smarter");
 
+    // P8-07 (07 §6): desde a Fase 8, editar o catálogo exige step-up de PIN.
+    // Sem ele o admin é recusado como os outros — e com `step_up_required` no
+    // `hint`, para a UI saber abrir o modal em vez de mostrar um erro.
+    const withoutStepUp = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
+    expect(withoutStepUp.error).not.toBeNull();
+    expect(withoutStepUp.error?.hint).toBe("step_up_required");
+
+    await service
+      .from("staff_auth")
+      .upsert(
+        { profile_id: ids.admin, last_step_up_at: new Date().toISOString() },
+        { onConflict: "profile_id" },
+      );
+
     const byAdmin = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
     expect(byAdmin.error).toBeNull();
     await service.from("plans").update({ name: "Smarter" }).eq("id", paidPlanId);

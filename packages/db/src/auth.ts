@@ -126,11 +126,23 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
 
 // ---------------------------------------------------------------------------
 // Step-up (07 §6) — válido 15 min antes de uma ação sensível em `interno`.
-// Nenhuma ação sensível existe ainda nesta fase (chegam nas Fases 4, 8, 9…);
-// isto é a infraestrutura pronta para elas chamarem.
+// Em uso desde a Fase 8 (P8-07): suspender um utilizador, moderar um imóvel,
+// editar planos e flags, exportar dados pessoais.
+//
+// Quem decide é `require_step_up()` em SQL, não este ficheiro — 07 §20.5: uma
+// verificação em TypeScript vale enquanto a Server Action for o único caminho
+// até à tabela, e não é.
 // ---------------------------------------------------------------------------
 
-const STEP_UP_VALIDITY_MS = 15 * 60 * 1000;
+/**
+ * 15 min, de 07 §6. Tem de concordar com o intervalo de `step_up_valid()` na
+ * migração `20261002120000_step_up.sql`, que é onde a regra é aplicada; este
+ * valor serve a contagem na interface.
+ */
+export const STEP_UP_VALIDITY_MS = 15 * 60 * 1000;
+
+/** `hint` com que `require_step_up()` se distingue de uma falta de permissão. */
+export const STEP_UP_REQUIRED_HINT = "step_up_required";
 
 export async function hasValidStepUp(
   supabase: AnySupabaseClient,
@@ -146,11 +158,32 @@ export async function hasValidStepUp(
   return Date.now() - new Date(lastStepUpAt).getTime() < STEP_UP_VALIDITY_MS;
 }
 
-export async function markStepUp(supabase: AnySupabaseClient, profileId: string): Promise<void> {
-  await supabase
-    .from("staff_auth")
-    .update({ last_step_up_at: new Date().toISOString() })
-    .eq("profile_id", profileId);
+/**
+ * Concede os 15 min. **Exige um cliente `service_role`**: `last_step_up_at`
+ * deixou de ser escrevível por `authenticated` em P8-07 (privilégios de coluna),
+ * e `mark_step_up` só tem `execute` para `service_role`. Sem isso, qualquer
+ * sessão de staff concedia-se step-up a si mesma sem escrever o PIN.
+ *
+ * Chamar **apenas** depois de `verifyPin` dar verdadeiro. A função escreve o
+ * `audit_log` na mesma transação.
+ */
+export async function markStepUp(
+  service: AnySupabaseClient,
+  profileId: string,
+): Promise<string | null> {
+  const { data, error } = await service.rpc("mark_step_up", { p_profile_id: profileId });
+  if (error) throw new Error(error.message);
+  return (data as string | null) ?? null;
+}
+
+/**
+ * Distingue "falta o PIN" (abre o modal) de "não tens permissão" (mostra erro),
+ * sem depender da mensagem. Mesmo contrato dos gatilhos de limites de 07 §20.5:
+ * a razão vem no `hint`, não no texto.
+ */
+export function isStepUpRequiredError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  return (error as { hint?: unknown }).hint === STEP_UP_REQUIRED_HINT;
 }
 
 // ---------------------------------------------------------------------------

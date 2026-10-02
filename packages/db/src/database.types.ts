@@ -2382,6 +2382,7 @@ export type Database = {
         Args: { p_conversation_id: string };
         Returns: undefined;
       };
+      mark_step_up: { Args: { p_profile_id: string }; Returns: string };
       my_cloud_files: {
         Args: { p_folder_id?: string };
         Returns: {
@@ -2572,6 +2573,7 @@ export type Database = {
         };
         Returns: string;
       };
+      require_step_up: { Args: never; Returns: undefined };
       reschedule_visit_request: {
         Args: { p_id: string; p_proposed_at: string };
         Returns: undefined;
@@ -2680,6 +2682,7 @@ export type Database = {
         }[];
       };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
+      step_up_valid: { Args: never; Returns: boolean };
       trial_eligible: { Args: { p_profile_id?: string }; Returns: boolean };
       trial_status: {
         Args: never;
@@ -2700,6 +2703,15 @@ export type Database = {
           p_stage: Database["public"]["Enums"]["lead_stage"];
         };
         Returns: undefined;
+      };
+      write_audit_log: {
+        Args: {
+          p_action: string;
+          p_diff?: Json;
+          p_entity: string;
+          p_entity_id?: string;
+        };
+        Returns: string;
       };
     };
     Enums: {

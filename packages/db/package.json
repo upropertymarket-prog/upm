@@ -10,6 +10,7 @@
     "./server": "./src/server.ts",
     "./client": "./src/client.ts",
     "./auth": "./src/auth.ts",
+    "./audit": "./src/audit.ts",
     "./geocoding": "./src/geocoding.ts",
     "./properties": "./src/properties.ts",
     "./interaction": "./src/interaction.ts",

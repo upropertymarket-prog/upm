@@ -548,6 +548,22 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
       .select("id, name")
       .limit(1)
       .single();
+
+    // P8-07 (07 §6): o catálogo passou a exigir step-up de PIN. O que esta
+    // linha da matriz mede é a RLS — quem é que pode escrever — por isso o
+    // step-up concede-se antes, para a recusa, quando houver, ser a da policy e
+    // não a do gatilho. A ausência de step-up tem teste próprio em
+    // `step-up.test.ts`.
+    if (expected) {
+      await serviceClient.from("staff_auth").upsert(
+        {
+          profile_id: userIds[role as Exclude<Role, "anon">],
+          last_step_up_at: new Date().toISOString(),
+        },
+        { onConflict: "profile_id" },
+      );
+    }
+
     const { data } = await clients[role]
       .from("plans")
       .update({ name: anyPlan!.name })

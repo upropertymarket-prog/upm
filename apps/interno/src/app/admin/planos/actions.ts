@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
 import { planFormSchema, syncCatalog } from "@upm/db/billing";
+import { isStepUpRequiredError } from "@upm/db/auth";
+import { writeAuditLog } from "@upm/db/audit";
 import {
   createCatalogStore,
   createServiceClient,
@@ -14,7 +16,7 @@ import {
 /**
  * Admin › Planos — Server Actions (P7-05)
  * =========================================================================
- * Guardar um plano é a única escrita de preço de todo o produto. Duas regras:
+ * Guardar um plano é a única escrita de preço de todo o produto. Três regras:
  *
  * 1. **Só admin**, verificado no servidor. A policy `plans_admin_write` já o
  *    impõe na base de dados; isto é a segunda fechadura, e é a que dá uma
@@ -22,9 +24,19 @@ import {
  * 2. **Nunca se edita um `Price` do Stripe** (02 §9). Guardar um preço
  *    diferente dispara a sincronização de P7-01, que cria um `Price` novo e
  *    deixa o antigo a servir quem já o subscreveu.
+ * 3. **Exige step-up de PIN** (07 §6), desde P8-07. O guarda está no gatilho
+ *    `plans_require_step_up`, não aqui: a policy deixa qualquer sessão de admin
+ *    escrever em `plans` pelo PostgREST, e uma verificação nesta função não
+ *    cobria esse caminho (07 §20.5). Aqui só se traduz a recusa.
  */
 
-export type PlanActionState = { ok?: boolean; error?: string; notice?: string };
+export type PlanActionState = {
+  ok?: boolean;
+  error?: string;
+  notice?: string;
+  /** O servidor recusou por falta de PIN confirmado — a UI abre o modal. */
+  needsStepUp?: boolean;
+};
 
 async function admin() {
   const supabase = createClient(await cookies());
@@ -115,6 +127,7 @@ export async function savePlan(
     : await supabase.from("plans").insert(row).select("id").single();
 
   if (saved.error) {
+    if (isStepUpRequiredError(saved.error)) return { needsStepUp: true };
     return {
       error:
         saved.error.code === "23505"
@@ -124,13 +137,24 @@ export async function savePlan(
   }
 
   // 08 §6.7: alteração de plano ou preço fica no registo.
-  await supabase.from("audit_log").insert({
-    actor_id: user.id,
-    action: plan.id ? "plan.updated" : "plan.created",
-    entity: "plans",
-    entity_id: saved.data.id,
-    diff: { before, after: row },
-  });
+  //
+  // Passa por `write_audit_log` desde P8-07. A versão anterior inseria em
+  // `audit_log` com a sessão do utilizador, e a tabela não tem policy de insert
+  // de propósito — a RLS recusava, o erro era ignorado, e nenhuma alteração de
+  // preço desta fase deixou rasto. Ver 07 §21.7.
+  // O plano já está escrito, por isso uma falha aqui não desfaz nada — mas
+  // também não se cala: quem lê o registo tem de saber que ele está incompleto.
+  let auditWarning: string | undefined;
+  try {
+    await writeAuditLog(supabase, {
+      action: plan.id ? "plan.updated" : "plan.created",
+      entity: "plans",
+      entityId: saved.data.id,
+      diff: { before, after: row },
+    });
+  } catch {
+    auditWarning = "Guardado, mas o registo de auditoria falhou — avise a administração.";
+  }
 
   revalidatePath("/admin/planos");
 
@@ -140,11 +164,12 @@ export async function savePlan(
     Number(before.price_year_cents) !== plan.priceYearCents;
 
   if (!priceChanged || plan.priceMonthCents + plan.priceYearCents === 0) {
-    return { ok: true };
+    return { ok: true, notice: auditWarning };
   }
 
   const sync = await syncStripe();
-  return sync.error ? { ok: true, notice: sync.error } : { ok: true, notice: sync.notice };
+  const notice = [auditWarning, sync.error ?? sync.notice].filter(Boolean).join(" ");
+  return { ok: true, notice: notice || undefined };
 }
 
 /**

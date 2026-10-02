@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  STEP_UP_VALIDITY_MS,
   consumeRecoveryCode,
   emailSchema,
   generateRecoveryCodes,
   hashPin,
+  isStepUpRequiredError,
   passwordSchema,
   pinSchema,
   totpCodeSchema,
@@ -78,5 +80,30 @@ describe("Códigos de recuperação do 2FA (07 §6)", () => {
     const result = await consumeRecoveryCode("ZZZZ-ZZZZ", hashes);
     expect(result.matched).toBe(false);
     expect(result.remaining).toEqual(hashes);
+  });
+});
+
+describe("step-up do PIN (07 §6, P8-07)", () => {
+  it("reconhece a recusa por falta de PIN pelo hint, não pela mensagem", () => {
+    expect(
+      isStepUpRequiredError({
+        code: "42501",
+        message: "Confirmação por PIN necessária",
+        hint: "step_up_required",
+      }),
+    ).toBe(true);
+  });
+
+  it("não confunde falta de permissão com falta de PIN", () => {
+    // Mesmo `errcode`, outra causa: aqui a UI tem de mostrar erro, não abrir o
+    // modal do PIN.
+    expect(isStepUpRequiredError({ code: "42501", message: "permission denied" })).toBe(false);
+    expect(isStepUpRequiredError({ code: "23505", hint: null })).toBe(false);
+    expect(isStepUpRequiredError(null)).toBe(false);
+    expect(isStepUpRequiredError("step_up_required")).toBe(false);
+  });
+
+  it("a janela de validade é a de 07 §6", () => {
+    expect(STEP_UP_VALIDITY_MS).toBe(15 * 60 * 1000);
   });
 });

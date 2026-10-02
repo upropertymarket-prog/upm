@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Layers, RefreshCw, Wallet } from "lucide-react";
 import {
   Button,
@@ -16,6 +16,8 @@ import {
   type TableColumn,
 } from "@upm/ui";
 import { LIMIT_KEYS, LIMIT_LABELS, type LimitKey, type PlanLimits } from "@upm/db/billing";
+
+import { useStepUp } from "../../../components/StepUpModal";
 
 /**
  * Admin › Planos (P7-05 · 04 §8.5)
@@ -70,7 +72,14 @@ export type AdminInvoiceRow = {
   planName: string | null;
 };
 
-export type PlanActionState = { ok?: boolean; error?: string; notice?: string };
+/** Espelho de `PlanActionState` de `./actions` — manter os dois a par. */
+export type PlanActionState = {
+  ok?: boolean;
+  error?: string;
+  notice?: string;
+  /** P8-07: o servidor recusou por falta de PIN confirmado (07 §6). */
+  needsStepUp?: boolean;
+};
 
 /** P7-06 — 07 §8.1: o pedido cai em Admin › Planos › Pedidos de trial. */
 export type TrialRequestRow = {
@@ -106,17 +115,41 @@ export function PlansManager({
   onDecideTrial: (requestId: string, approve: boolean) => Promise<PlanActionState>;
 }) {
   const [editing, setEditing] = useState<PlanRow | "new" | null>(null);
-  const [state, action, saving] = useActionState(onSave, {});
+
+  // O formulário submetido fica guardado para a repetição depois do step-up
+  // (P8-07): confirmar o PIN não pode custar à pessoa reescrever o plano.
+  const lastSubmission = useRef<FormData | null>(null);
+  const [state, action, saving] = useActionState(
+    async (prev: PlanActionState, formData: FormData) => {
+      lastSubmission.current = formData;
+      return onSave(prev, formData);
+    },
+    {},
+  );
+
   const [syncState, setSyncState] = useState<{ notice?: string; error?: string }>({});
   const [syncing, startSync] = useTransition();
   const [deciding, startDecide] = useTransition();
+  const [retrying, startRetry] = useTransition();
   const [trialNotice, setTrialNotice] = useState<string | null>(null);
+  const { requestStepUp, stepUpModal } = useStepUp();
 
   // Fecha o modal quando a gravação passa; mantém-no aberto no erro, para a
   // pessoa não perder o que escreveu.
   useEffect(() => {
     if (state.ok) setEditing(null);
   }, [state.ok]);
+
+  // 07 §6 — o servidor recusou por falta de PIN confirmado. A dependência é o
+  // `state` inteiro e não `state.needsStepUp`: cada submissão devolve um objeto
+  // novo, e sem isso uma segunda tentativa depois de cancelar não reabria o
+  // modal.
+  useEffect(() => {
+    if (!state.needsStepUp) return;
+    const formData = lastSubmission.current;
+    if (!formData) return;
+    requestStepUp(() => startRetry(() => action(formData)));
+  }, [state, requestStepUp, action, startRetry]);
 
   const churn =
     summary.subscribers + summary.canceled30d > 0
@@ -405,11 +438,13 @@ export function PlansManager({
           <PlanForm
             plan={editing === "new" ? null : editing}
             action={action}
-            saving={saving}
+            saving={saving || retrying}
             state={state}
           />
         </Modal>
       ) : null}
+
+      {stepUpModal}
     </>
   );
 }

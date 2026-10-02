@@ -194,7 +194,13 @@
       },
       "stepUp": {
         "title": "Confirme com o seu PIN",
-        "submit": "Confirmar"
+        "submit": "Confirmar",
+        "body": "Esta ação fica registada. Escreva o PIN de operação para a confirmar — vale 15 minutos.",
+        "pinLabel": "PIN de operação",
+        "error": "Não foi possível confirmar o PIN.",
+        "throttled": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
+        "noPin": "Ainda não definiu um PIN de operação?",
+        "setPin": "Definir PIN"
       }
     },
     "errors": {

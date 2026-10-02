@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "./database.types";
 
@@ -33,4 +34,27 @@ export function createClient(cookies: CookieStore) {
       ...(domain ? { cookieOptions: { domain } } : {}),
     },
   );
+}
+
+export type ServiceClient = SupabaseClient<Database>;
+
+/**
+ * Cliente com `service_role`, para o que nenhuma sessão de utilizador pode
+ * escrever: webhooks, jobs, e as funções `security definer` que só o servidor
+ * chama (ex. `mark_step_up` de P8-07).
+ *
+ * Não passa por RLS — por isso só existe em contextos de servidor e nunca se
+ * importa a partir de um ficheiro que o cliente possa carregar. Atira quando
+ * falta a chave, em vez de devolver um cliente anónimo que falharia mais à
+ * frente com uma mensagem que não explica nada (Fase 7, Adenda 2).
+ */
+export function createServiceClient(): ServiceClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Faltam NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.");
+  }
+  return createSupabaseClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }

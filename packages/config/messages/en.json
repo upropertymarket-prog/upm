@@ -194,7 +194,13 @@
       },
       "stepUp": {
         "title": "Confirm with your PIN",
-        "submit": "Confirm"
+        "submit": "Confirm",
+        "body": "This action is logged. Enter your operation PIN to confirm it — valid for 15 minutes.",
+        "pinLabel": "Operation PIN",
+        "error": "Could not confirm the PIN.",
+        "throttled": "Too many attempts. Try again in {seconds}s.",
+        "noPin": "Haven't set an operation PIN yet?",
+        "setPin": "Set PIN"
       }
     },
     "errors": {

@@ -1,7 +1,6 @@
 import Stripe from "stripe";
-import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import type { Database } from "./database.types";
+import type { ServiceClient } from "./server";
 import {
   CATALOG_CURRENCY,
   type BillingInterval,
@@ -139,23 +138,13 @@ export function createStripeCatalogApi(stripe: Stripe = getStripeClient()): Stri
 // O lado da base de dados
 // ---------------------------------------------------------------------------
 
-type ServiceClient = SupabaseClient<Database>;
-
 /**
- * Cliente com `service_role`, para o script de sincronização e para o webhook.
- * Não passa por RLS — por isso só existe em contextos de servidor e nunca se
- * exporta a partir de um ficheiro que o cliente possa importar.
+ * O cliente `service_role` passou a viver em `server.ts` na Fase 8 (P8-07),
+ * porque deixou de ser só do Stripe: o step-up do PIN também precisa dele.
+ * Continua a exportar-se daqui — `@upm/db/stripe` é por onde o script de
+ * sincronização e o webhook o importam desde a Fase 7.
  */
-export function createServiceClient(): ServiceClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("Faltam NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.");
-  }
-  return createSupabaseClient<Database>(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
+export { createServiceClient, type ServiceClient } from "./server";
 
 export function createCatalogStore(client: ServiceClient): CatalogStore {
   return {
