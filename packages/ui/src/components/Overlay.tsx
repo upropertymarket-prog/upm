@@ -62,6 +62,7 @@ export type DrawerProps = PanelChrome & {
   /** Etiqueta do botão de fechar — traduzida por quem usa (i18n). */
   closeLabel?: string;
   className?: string;
+  footerStyle?: React.CSSProperties;
 };
 
 /**
@@ -86,6 +87,7 @@ export function Drawer({
   children,
   closeLabel = "Fechar",
   className,
+  footerStyle,
 }: DrawerProps) {
   const ref = useDismissable({ open, onClose });
   const target = usePortalTarget();
@@ -113,7 +115,11 @@ export function Drawer({
           closeLabel={closeLabel}
         />
         <div className="upm-panel__body">{children}</div>
-        {footer ? <div className="upm-panel__footer">{footer}</div> : null}
+        {footer ? (
+          <div className="upm-panel__footer" style={footerStyle}>
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>,
     target,

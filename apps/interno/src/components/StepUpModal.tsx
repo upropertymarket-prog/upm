@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { ShieldCheck } from "lucide-react";
 import { Button, Input, Modal } from "@upm/ui";
 
-import { verifyOperationPin, type StepUpState } from "../app/actions/step-up";
+import type { StepUpState, VerifyPinAction } from "./stepUpTypes";
 
 /**
  * Modal de step-up do PIN — P8-07 (07 §6, decisão em 07 §21.1)
@@ -25,12 +25,18 @@ export type StepUpModalProps = {
   open: boolean;
   onClose: () => void;
   onConfirmed: () => void;
+  /**
+   * `verifyOperationPin` em produção. Entra por prop para este ficheiro não
+   * importar a Server Action: o módulo dela usa `next/headers`, e isso arrasta
+   * um módulo só-de-servidor para o bundle do canvas.
+   */
+  onVerify: VerifyPinAction;
 };
 
-export function StepUpModal({ open, onClose, onConfirmed }: StepUpModalProps) {
+export function StepUpModal({ open, onClose, onConfirmed, onVerify }: StepUpModalProps) {
   const t = useTranslations("auth.pin.stepUp");
   const tc = useTranslations("common");
-  const [state, formAction, pending] = useActionState(verifyOperationPin, initialState);
+  const [state, formAction, pending] = useActionState(onVerify, initialState);
 
   // `onConfirmed` reabre a ação de negócio; o efeito corre uma vez por
   // confirmação, não a cada render em que o estado continua `ok`.
@@ -98,7 +104,7 @@ export function StepUpModal({ open, onClose, onConfirmed }: StepUpModalProps) {
  * Encapsula o par "ação recusada → pedir PIN → repetir a ação".
  *
  * ```tsx
- * const { requestStepUp, stepUpModal } = useStepUp();
+ * const { requestStepUp, stepUpModal } = useStepUp(verifyOperationPin);
  * // …
  * const result = await savePlan(formData);
  * if (result.needsStepUp) requestStepUp(() => void savePlan(formData));
@@ -110,7 +116,7 @@ export function StepUpModal({ open, onClose, onConfirmed }: StepUpModalProps) {
  * utilizador não ter de preencher o formulário outra vez — perder o trabalho
  * por causa de uma confirmação de segurança ensina a evitar a segurança.
  */
-export function useStepUp() {
+export function useStepUp(onVerify: VerifyPinAction) {
   // A função de repetição vive numa ref, não no estado: chamá-la dentro de um
   // `setState` fá-la correr duas vezes em modo estrito.
   const retryRef = useRef<(() => void) | null>(null);
@@ -136,6 +142,8 @@ export function useStepUp() {
   return {
     requestStepUp,
     stepUpOpen: open,
-    stepUpModal: <StepUpModal open={open} onClose={close} onConfirmed={confirmed} />,
+    stepUpModal: (
+      <StepUpModal open={open} onClose={close} onConfirmed={confirmed} onVerify={onVerify} />
+    ),
   };
 }
