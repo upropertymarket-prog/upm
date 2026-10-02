@@ -2,6 +2,7 @@ import { Canvas, Storyboard } from "tempo-sdk/canvas";
 import Painel, { PainelEscuro } from "./Painel";
 import Mensagens, { Agenda, AgendaEscuro, Leads, LeadsEscuro, MensagensEscuro } from "./Interacao";
 import { CloudClaro, CloudEscuro, ContratosClaro, ContratosEscuro } from "./CloudContracts";
+import { PlanoClaro, PlanoEscuro } from "./Billing";
 
 /**
  * Canvas do Proprietário — Painel (Fase 4, completo na Fase 5) e os três ecrãs
@@ -102,6 +103,18 @@ export default function ProprietarioCanvas() {
         name="Contratos · Escuro (/contratos)"
         component={ContratosEscuro}
         layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="Plano"
+        name="Plano e faturação · Claro (/plano)"
+        component={PlanoClaro}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="PlanoEscuro"
+        name="Plano e faturação · Escuro (/plano)"
+        component={PlanoEscuro}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
     </Canvas>
   );
