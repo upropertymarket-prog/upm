@@ -14,7 +14,8 @@ export default async function SetupTwoFactorPage() {
   // Limpa fatores TOTP por verificar de tentativas anteriores (ex. QR expirado
   // sem terminar o enrolment) — nunca há mais de um fator ativo por staff.
   const { data: existing } = await supabase.auth.mfa.listFactors();
-  for (const factor of existing?.totp ?? []) {
+  const staleFactors = (existing?.all ?? []).filter((factor) => factor.factor_type === "totp");
+  for (const factor of staleFactors) {
     await supabase.auth.mfa.unenroll({ factorId: factor.id });
   }
 
