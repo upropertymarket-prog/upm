@@ -103,6 +103,8 @@
      paleta clara. São fundos sólidos, e o branco por cima tem de se ler. */
   --accent-solid: #ea580c;
   --accent-solid-hover: #c2410c;
+  --variable-action: #7c3aed;
+  --variable-action-hover: #6d28d9;
   --ph1: #101a2c;
   --ph2: #152338;
   --ok: #34d399;
@@ -140,6 +142,8 @@
     --accent-soft: #20130a;
     --accent-solid: #ea580c;
     --accent-solid-hover: #c2410c;
+    --variable-action: #7c3aed;
+    --variable-action-hover: #6d28d9;
     --ph1: #101a2c;
     --ph2: #152338;
     --ok: #34d399;
