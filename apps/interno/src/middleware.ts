@@ -23,8 +23,10 @@ function appUrl(request: NextRequest): URL {
   return new URL("/", base.startsWith("http") ? base : request.nextUrl.origin);
 }
 
-async function signOutAndRedirectToLogin(request: NextRequest) {
-  const redirectResponse = NextResponse.redirect(new URL("/entrar", request.url));
+async function signOutAndRedirectToLogin(request: NextRequest, suspended = false) {
+  const loginUrl = new URL("/entrar", request.url);
+  if (suspended) loginUrl.searchParams.set("suspended", "1");
+  const redirectResponse = NextResponse.redirect(loginUrl);
   const supabase = createMiddlewareClient(request, redirectResponse);
   await supabase.auth.signOut();
   redirectResponse.cookies.delete(SESSION_STARTED_COOKIE);
@@ -70,11 +72,14 @@ export async function middleware(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, status")
     .eq("id", user.id)
     .single();
 
   const role = profile?.role;
+  if (profile?.status === "suspended") {
+    return signOutAndRedirectToLogin(request, true);
+  }
   if (role !== "admin" && role !== "support") {
     // Sessão de comprador/proprietário chegou aqui via cookie partilhado — não pertence.
     return NextResponse.redirect(appUrl(request));

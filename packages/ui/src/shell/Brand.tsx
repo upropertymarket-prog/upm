@@ -1,4 +1,17 @@
+/// <reference path="../svg-assets.d.ts" />
+
 import { cx } from "../lib/cx";
+import bundledLightLogo from "./brand/logo-light.svg";
+import bundledDarkLogo from "./brand/logo-dark.svg";
+
+type ImportedAsset = string | { src: string };
+
+function assetUrl(asset: ImportedAsset): string {
+  return typeof asset === "string" ? asset : asset.src;
+}
+
+const bundledLightSrc = assetUrl(bundledLightLogo);
+const bundledDarkSrc = assetUrl(bundledDarkLogo);
 
 export type BrandProps = {
   /** `true` quando a sidebar está em rail (84 px) e o wordmark não cabe. */
@@ -35,8 +48,8 @@ export type BrandProps = {
 export function Brand({
   collapsed = false,
   alt = "UProperty Market",
-  lightSrc = "/brand/logo-light.svg",
-  darkSrc = "/brand/logo-dark.svg",
+  lightSrc = bundledLightSrc,
+  darkSrc = bundledDarkSrc,
   className,
 }: BrandProps) {
   if (collapsed) {
@@ -61,8 +74,16 @@ export function Brand({
       {/* `<img>` e não `next/image`: SVG estático de tamanho fixo servido do
           próprio domínio, onde a otimização do Next não traz nada — e usá-la
           obrigaria `packages/ui` a importar o Next em runtime. */}
-      <img className="upm-brand__logo upm-brand__logo--light" src={lightSrc} alt="" />
-      <img className="upm-brand__logo upm-brand__logo--dark" src={darkSrc} alt="" />
+      <img
+        className="upm-brand__logo upm-brand__logo--light"
+        src={lightSrc}
+        alt=""
+      />
+      <img
+        className="upm-brand__logo upm-brand__logo--dark"
+        src={darkSrc}
+        alt=""
+      />
     </span>
   );
 }

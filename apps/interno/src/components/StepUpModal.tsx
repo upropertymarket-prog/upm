@@ -87,7 +87,7 @@ export function StepUpModal({ open, onClose, onConfirmed, onVerify }: StepUpModa
             {t("setPin")}
           </a>
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-start gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
             {tc("cancel")}
           </Button>

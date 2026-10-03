@@ -11,6 +11,8 @@ import {
   verifyPin,
 } from "@upm/db/auth";
 
+import type { StepUpState } from "../../components/stepUpTypes";
+
 /**
  * Step-up do PIN de operação — P8-07 (07 §6, decisão em 07 §21.1)
  * =========================================================================
@@ -31,7 +33,7 @@ import {
  *    a verificação corre contra uma hash chamariz, com o mesmo custo de Argon2.
  */
 
-export type StepUpState = { ok?: boolean; error?: string; retryAfterSeconds?: number };
+export type { StepUpState } from "../../components/stepUpTypes";
 
 /** Uma só mensagem para todos os caminhos de falha — ver nota 1. */
 const GENERIC_ERROR = "Não foi possível confirmar o PIN.";

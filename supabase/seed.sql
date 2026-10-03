@@ -149,3 +149,21 @@ on conflict (family_id, version) do update set
   status = excluded.status,
   variables = excluded.variables,
   body = excluded.body;
+
+-- ---------------------------------------------------------------------------
+-- Tráfego do site — dados de demonstração (Fase 8, P8-06)
+-- ---------------------------------------------------------------------------
+-- A lógica vive em `seed_demo_site_analytics()` (migração 20261002120500) e não
+-- aqui: o `seed.sql` só corre num ambiente novo, e em staging não se faz reset.
+-- Com a lógica na função, os dois caminhos usam a mesma definição.
+
+select public.seed_demo_site_analytics(45);
+
+-- Leads fictícias para rever a CRM antes de P2-02 ligar os formulários públicos.
+insert into public.site_leads (
+  id, source, form, name, email, phone, profile_type, reason, message,
+  utm, status, consent_marketing, consent_at, created_at
+) values
+  ('a8000000-0000-4000-8000-000000000001','pre_launch','preinscricao','Ana Demonstração','ana@example.invalid',null,'buyer','Procura casa','Procuro um T2 na zona de Lisboa.','{"utm_source":"demo"}'::jsonb,'new',false,null,now()-interval '2 days'),
+  ('a8000000-0000-4000-8000-000000000002','pre_launch','empresas','Equipa Exemplo','contacto@example.invalid','+351 210 000 000','empresa','Parceria','Gostávamos de conhecer a solução para a nossa equipa.','{}'::jsonb,'contacted',false,null,now()-interval '5 days')
+on conflict (id) do nothing;

@@ -1,0 +1,161 @@
+import { cookies } from "next/headers";
+import { getTranslations } from "next-intl/server";
+import { z } from "zod";
+import type { Database } from "@upm/db";
+import { createClient } from "@upm/db/server";
+
+import { InternalChrome } from "../../../components/InternalChrome";
+import { setLocalePreference } from "../../actions/preferences";
+import { verifyOperationPin } from "../../actions/step-up";
+import { recordProfileAccess, setProfileStatus } from "./actions";
+import { UsersManager, type UserCursor, type UserDirectoryRow } from "./UsersManager";
+import { getAdminSidebarCounters } from "../../../lib/admin-shell";
+
+export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 25;
+const roleSchema = z.enum(["buyer", "owner", "admin", "support"]);
+const statusSchema = z.enum(["pending", "active", "suspended"]);
+const uuidSchema = z.string().uuid();
+const dateSchema = z.string().datetime({ offset: true });
+
+type Role = Database["public"]["Enums"]["user_role"];
+type ProfileStatus = Database["public"]["Enums"]["profile_status"];
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function parseQuery(params: Record<string, string | string[] | undefined>) {
+  const rawRole = first(params.role) ?? "";
+  const rawStatus = first(params.status) ?? "";
+  const rawPlan = first(params.plan) ?? "";
+  const rawSearch = first(params.search) ?? "";
+  const rawCursorDate = first(params.cursor_created_at) ?? "";
+  const rawCursorId = first(params.cursor_id) ?? "";
+  const rawDirection = first(params.direction) ?? "next";
+  const rawPage = Number(first(params.page) ?? "1");
+
+  const role = roleSchema.safeParse(rawRole);
+  const status = statusSchema.safeParse(rawStatus);
+  const plan = uuidSchema.safeParse(rawPlan);
+  const cursorDate = dateSchema.safeParse(rawCursorDate);
+  const cursorId = uuidSchema.safeParse(rawCursorId);
+  const hasValidCursor = cursorDate.success && cursorId.success;
+  const direction = rawDirection === "prev" ? "prev" : "next";
+
+  return {
+    filters: {
+      search: rawSearch.trim().slice(0, 120),
+      role: role.success ? role.data : "",
+      status: status.success ? status.data : "",
+      planId: plan.success ? plan.data : "",
+    },
+    cursor: hasValidCursor ? { createdAt: cursorDate.data, id: cursorId.data } : null,
+    direction: hasValidCursor ? direction : "next",
+    page: hasValidCursor && Number.isInteger(rawPage) && rawPage > 1 ? Math.min(rawPage, 5000) : 1,
+  };
+}
+
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const parsed = parseQuery(params);
+  const supabase = createClient(await cookies());
+
+  const [authResult, listResult, plansResult, counters] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.rpc("admin_list_profiles", {
+      p_search: parsed.filters.search || null,
+      p_role: parsed.filters.role ? (parsed.filters.role as Role) : null,
+      p_status: parsed.filters.status ? (parsed.filters.status as ProfileStatus) : null,
+      p_plan_id: parsed.filters.planId || null,
+      p_cursor_created_at: parsed.cursor?.createdAt ?? null,
+      p_cursor_id: parsed.cursor?.id ?? null,
+      p_direction: parsed.direction,
+      p_limit: PAGE_SIZE + 1,
+    }),
+    supabase.from("plans").select("id, name").order("position"),
+    getAdminSidebarCounters(supabase),
+  ]);
+
+  // The selected drawer query runs separately only when there is a validated id.
+  const selectedIdRaw = first(params.id);
+  const selectedId =
+    selectedIdRaw && uuidSchema.safeParse(selectedIdRaw).success ? selectedIdRaw : null;
+  const selectedResult = selectedId
+    ? await supabase.rpc("admin_profile_detail", { p_profile_id: selectedId })
+    : null;
+
+  const profileId = authResult.data.user?.id ?? null;
+  const { data: chromeProfile } = profileId
+    ? await supabase.from("profiles").select("full_name, locale").eq("id", profileId).maybeSingle()
+    : { data: null };
+  const { data: staff } = profileId
+    ? await supabase
+        .from("staff_members")
+        .select("department")
+        .eq("profile_id", profileId)
+        .maybeSingle()
+    : { data: null };
+
+  const rawRows = listResult.data ?? [];
+  const hasMoreForward = parsed.direction === "next" && rawRows.length > PAGE_SIZE;
+  const users = rawRows.slice(0, PAGE_SIZE) as UserDirectoryRow[];
+  const selectedProfile = selectedResult?.data?.[0] ?? null;
+  const firstRow = users[0];
+  const lastRow = users[users.length - 1];
+  const firstCursor: UserCursor | null = firstRow
+    ? { createdAt: firstRow.created_at, id: firstRow.id }
+    : null;
+  const lastCursor: UserCursor | null = lastRow
+    ? { createdAt: lastRow.created_at, id: lastRow.id }
+    : null;
+  const hasNext = parsed.direction === "prev" ? parsed.page > 1 : hasMoreForward;
+  const pageInfo = {
+    page: parsed.page,
+    pageCount: parsed.page + Number(hasNext),
+    hasNext,
+    hasPrevious: parsed.page > 1,
+    firstCursor,
+    lastCursor,
+  };
+
+  const t = await getTranslations();
+  const locale = chromeProfile?.locale ?? "pt";
+  const department = staff?.department ? String(staff.department) : null;
+  const userName = chromeProfile?.full_name?.trim() || authResult.data.user?.email || "—";
+  const userMeta = department
+    ? t("sidebar.groups.admin") + " · " + department
+    : t("sidebar.groups.admin");
+
+  return (
+    <InternalChrome
+      role="admin"
+      userName={userName}
+      userMeta={userMeta}
+      activeId="users"
+      locale={locale}
+      onLocaleChange={setLocalePreference}
+      counters={counters}
+    >
+      <UsersManager
+        users={users}
+        plans={(plansResult.data ?? []).map((plan) => ({ id: plan.id, name: plan.name }))}
+        filters={parsed.filters}
+        pageInfo={pageInfo}
+        selectedProfile={selectedProfile}
+        selectedProfileError={Boolean(selectedId && (selectedResult?.error || !selectedProfile))}
+        loadError={Boolean(listResult.error || plansResult.error)}
+        locale={locale}
+        currentAdminId={profileId}
+        onChangeStatus={setProfileStatus}
+        onLogAccess={recordProfileAccess}
+        onVerifyPin={verifyOperationPin}
+      />
+    </InternalChrome>
+  );
+}

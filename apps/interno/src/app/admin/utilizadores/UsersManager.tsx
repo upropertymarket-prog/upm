@@ -71,9 +71,12 @@ function statusTone(status: UserDirectoryRow["status"]): "active" | "pending" | 
 
 const PLAN_TONE: Record<string, StatusTone> = {
   gratuito: "draft",
+  "gratuito-buyer": "draft",
   "essential-owner": "primary",
   "smarter-owner": "dealSale",
+  "smarter-buyer": "dealSale",
   "premium-owner": "dealRent",
+  "premium-buyer": "dealRent",
 };
 
 function roleLabel(role: UserDirectoryRow["role"], t: (key: RoleLabelKey) => string) {
@@ -185,7 +188,16 @@ export function UsersManager({
       ),
     },
     { id: "role", header: t("role"), cell: (row) => roleLabel(row.role, t) },
-    { id: "plan", header: t("plan"), cell: (row) => row.plan_name ?? t("noPlan") },
+    {
+      id: "plan",
+      header: t("plan"),
+      cell: (row) =>
+        row.plan_name ? (
+          <StatusTag tone={PLAN_TONE[row.plan_slug ?? ""] ?? "draft"}>{row.plan_name}</StatusTag>
+        ) : (
+          t("noPlan")
+        ),
+    },
     {
       id: "status",
       header: t("status"),
@@ -227,7 +239,7 @@ export function UsersManager({
         </header>
 
         <Card padded>
-          <form action="/admin/utilizadores" method="get" className="grid gap-4 md:grid-cols-4">
+          <form action="/admin/utilizadores" method="get" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]">
             <Input
               name="search"
               label={t("search")}
@@ -264,7 +276,7 @@ export function UsersManager({
               placeholder={t("allPlans")}
               options={plans.map((plan) => ({ value: plan.id, label: plan.name }))}
             />
-            <div className="md:col-span-4 flex justify-end">
+            <div className="flex items-end justify-end sm:col-span-2 xl:col-span-1">
               <Button type="submit">{t("applyFilters")}</Button>
             </div>
           </form>

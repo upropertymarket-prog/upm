@@ -66,6 +66,10 @@
   --accent-solid: #ea580c;
   --accent-solid-hover: #c2410c;
 
+  /* Ação de inserir variáveis nos templates de contrato. */
+  --variable-action: #7c3aed;
+  --variable-action-hover: #6d28d9;
+
   /* Véu dos overlays de modal e drawer — protótipos: rgba(2,6,23,.6). */
   --overlay: rgb(2 6 23 / 60%);
 

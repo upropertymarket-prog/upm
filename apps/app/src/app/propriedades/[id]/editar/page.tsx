@@ -47,7 +47,7 @@ export default async function EditarPropriedadePage({
   const { data: property } = await supabase
     .from("properties")
     .select(
-      "id, owner_id, ref, title, description, deal, status, property_type, typology, condition, gross_area, net_area, bedrooms, bathrooms, floor, year_built, energy_cert, price_cents, rent_cents, condo_fee_cents, imi_cents, accepts_offers, amenities, address_line, postal_code, city, parish, district, location_approx, approx_radius_m, show_exact, views_count, rejection_reason, published_at, created_at, updated_at",
+      "id, owner_id, ref, title, description, deal, status, property_type, typology, condition, gross_area, net_area, bedrooms, bathrooms, floor, year_built, energy_cert, price_cents, rent_cents, condo_fee_cents, imi_cents, accepts_offers, amenities, address_line, postal_code, city, parish, district, location_approx, approx_radius_m, show_exact, views_count, rejection_reason, published_at, submitted_at, created_at, updated_at",
     )
     .eq("id", id)
     .eq("owner_id", user.id)

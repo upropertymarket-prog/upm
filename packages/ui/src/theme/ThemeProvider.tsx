@@ -73,11 +73,14 @@ export function ThemeProvider({
     } catch {
       // Modo privado ou storage bloqueado: o tema funciona, só não persiste.
     }
-    const next = isThemeChoice(domChoice)
-      ? domChoice
-      : isThemeChoice(stored)
-        ? stored
-        : initialChoice;
+    const next =
+      initialChoice !== "system"
+        ? initialChoice
+        : isThemeChoice(domChoice)
+          ? domChoice
+          : isThemeChoice(stored)
+            ? stored
+            : initialChoice;
     setChoiceState(next);
     setResolved(resolve(next));
   }, [initialChoice]);
@@ -126,4 +129,8 @@ export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error("useTheme tem de ser usado dentro de <ThemeProvider>.");
   return ctx;
+}
+
+export function useOptionalTheme(): ThemeContextValue | null {
+  return useContext(ThemeContext);
 }

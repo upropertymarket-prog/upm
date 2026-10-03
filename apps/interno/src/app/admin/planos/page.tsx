@@ -11,6 +11,8 @@ import {
   type TrialRequestRow,
 } from "./PlansManager";
 import { decideTrialExtension, savePlan, syncStripe } from "./actions";
+import { verifyOperationPin } from "../../actions/step-up";
+import { getAdminShellData } from "../../../lib/admin-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,8 @@ export const dynamic = "force-dynamic";
 export default async function PlansPage() {
   const supabase = createClient(await cookies());
 
-  const [metrics, summary, invoices, trials, catalog] = await Promise.all([
+  const [shell, metrics, summary, invoices, trials, catalog] = await Promise.all([
+    getAdminShellData(supabase),
     supabase.rpc("admin_plan_metrics"),
     supabase.rpc("admin_billing_summary"),
     supabase.rpc("admin_recent_invoices", { p_limit: 20 }),
@@ -90,12 +93,12 @@ export default async function PlansPage() {
   return (
     <InternalChrome
       role="admin"
-      userName="Helena Matos"
-      userMeta="Administração · IT"
+      userName={shell.userName}
+      userMeta={shell.userMeta}
       activeId="plans"
-      locale="pt"
+      locale={shell.locale}
       onLocaleChange={setLocalePreference}
-      counters={{ propertyModeration: 4, siteLeads: 12 }}
+      counters={shell.counters}
     >
       <PlansManager
         plans={plans}
@@ -113,6 +116,7 @@ export default async function PlansPage() {
         onSave={savePlan}
         onSync={syncStripe}
         onDecideTrial={decideTrialExtension}
+        onVerifyPin={verifyOperationPin}
       />
     </InternalChrome>
   );

@@ -1,0 +1,234 @@
+.field {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.label {
+  color: var(--text);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+}
+
+.editor {
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.editor:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.editor[data-readonly="true"] {
+  background: var(--surface2);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+  padding: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.styleSelect {
+  width: 145px;
+  margin-right: var(--sp-1);
+}
+
+.separator {
+  width: 1px;
+  height: 25px;
+  margin: 0 var(--sp-1);
+  background: var(--border2);
+}
+
+.content {
+  min-height: 300px;
+  padding: var(--sp-5) 64px var(--sp-5) var(--sp-5);
+}
+
+.contentArea {
+  position: relative;
+}
+
+.variableInsert {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  z-index: 2;
+  display: grid;
+  justify-items: end;
+  gap: var(--sp-2);
+}
+
+.addVariableButton.addVariableButton {
+  position: relative;
+  display: grid;
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--variable-action);
+  color: var(--on-solid);
+  opacity: 0.68;
+  box-shadow: var(--shadow);
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.addVariableButton.addVariableButton::before {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  content: "";
+}
+
+.addVariableButton.addVariableButton:hover,
+.addVariableButton.addVariableButton:focus-visible {
+  background: var(--variable-action-hover);
+  opacity: 1;
+}
+
+.addVariableButton.addVariableButton:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.variablePopover {
+  display: grid;
+  width: 230px;
+  max-width: calc(100vw - 48px);
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.variablePopoverTitle {
+  padding: 0 var(--sp-2);
+  color: var(--muted);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+}
+
+.variableOptions {
+  display: grid;
+  gap: var(--sp-1);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.variableOption.variableOption {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.emptyVariables {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-body);
+}
+
+.content :global(.ProseMirror) {
+  min-height: 260px;
+  outline: none;
+  color: var(--text);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+}
+
+.content :global(.ProseMirror > * + *) {
+  margin-top: var(--sp-4);
+}
+
+.content :global(.ProseMirror h1),
+.content :global(.ProseMirror h2),
+.content :global(.ProseMirror h3),
+.content :global(.ProseMirror p) {
+  margin-bottom: 0;
+}
+
+.content :global(.ProseMirror h1) {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+}
+
+.content :global(.ProseMirror h2) {
+  font-family: var(--font-display);
+  font-size: var(--fs-subtitle-lg);
+  font-weight: var(--fw-semibold);
+}
+
+.content :global(.ProseMirror h3) {
+  font-size: var(--fs-subtitle);
+  font-weight: var(--fw-semibold);
+}
+
+.content :global(.ProseMirror ul),
+.content :global(.ProseMirror ol) {
+  padding-left: var(--sp-7);
+}
+
+.content :global(.ProseMirror table) {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.content :global(.ProseMirror th),
+.content :global(.ProseMirror td) {
+  min-width: 1em;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border2);
+  vertical-align: top;
+}
+
+.content :global(.ProseMirror th) {
+  background: var(--surface2);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+}
+
+.content :global(.upm-chip) {
+  display: inline-block;
+  padding: 1px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.content :global(.ProseMirror-selectednode.upm-chip) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.hint {
+  margin: 0;
+  padding: 0 var(--sp-5) var(--sp-4);
+  color: var(--muted);
+  font-size: var(--fs-pill);
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: var(--sp-4) 60px var(--sp-4) var(--sp-4);
+  }
+}

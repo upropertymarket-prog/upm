@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { cx } from "../lib/cx";
 import { useDismissable } from "../lib/useDismissable";
+import { useOptionalTheme } from "../theme/ThemeProvider";
 import { Button } from "./Button";
 
 /** Só monta o portal depois de haver `document` — os overlays são client-only. */
@@ -91,12 +92,13 @@ export function Drawer({
 }: DrawerProps) {
   const ref = useDismissable({ open, onClose });
   const target = usePortalTarget();
+  const theme = useOptionalTheme()?.resolved;
   const titleId = `upm-drawer-${title.replace(/\W+/g, "-").toLowerCase()}`;
 
   if (!open || !target) return null;
 
   return createPortal(
-    <div className="upm-overlay upm-overlay--right" onClick={onClose}>
+    <div className="upm-overlay upm-overlay--right" data-theme={theme} onClick={onClose}>
       <div
         ref={ref}
         role="dialog"
@@ -158,12 +160,13 @@ export function Modal({
 }: ModalProps) {
   const ref = useDismissable({ open, onClose });
   const target = usePortalTarget();
+  const theme = useOptionalTheme()?.resolved;
   const titleId = `upm-modal-${title.replace(/\W+/g, "-").toLowerCase()}`;
 
   if (!open || !target) return null;
 
   return createPortal(
-    <div className="upm-overlay upm-overlay--center" onClick={onClose}>
+    <div className="upm-overlay upm-overlay--center" data-theme={theme} onClick={onClose}>
       <div
         ref={ref}
         role="dialog"

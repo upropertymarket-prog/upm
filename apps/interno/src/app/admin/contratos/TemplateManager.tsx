@@ -10,8 +10,8 @@ import {
   Input,
   PageHeader,
   Select,
-  Textarea,
 } from "@upm/ui";
+import { TemplateBodyEditor } from "./TemplateBodyEditor";
 export type TemplateActionState = { ok?: boolean; error?: string; id?: string };
 
 type Template = {
@@ -25,16 +25,18 @@ type Template = {
   variables: string[];
   updated_at: string;
 };
-const starter = JSON.stringify(
-  {
-    type: "doc",
-    content: [
-      { type: "paragraph", content: [{ type: "text", text: "Escreva aqui o texto do modelo." }] },
-    ],
-  },
-  null,
-  2,
-);
+const emptyBody = { type: "doc", content: [{ type: "paragraph" }] };
+
+function parseVariables(value: string) {
+  return [
+    ...new Set(
+      value
+        .split(/[,\n]/)
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+}
 
 function ActionMessage({ state }: { state: TemplateActionState }) {
   return state.error ? (
@@ -62,10 +64,13 @@ export function TemplateManager({
   templates: Template[];
   actions: TemplateManagerActions;
 }) {
-  const [selected, setSelected] = useState(templates[0]?.id ?? "");
+  const [selected, setSelected] = useState(
+    templates.find((template) => template.status === "draft")?.id ?? templates[0]?.id ?? "",
+  );
   const current = templates.find((template) => template.id === selected) ?? templates[0];
   const [createState, createAction] = useActionState(actions.createTemplate, {});
   const [createOpen, setCreateOpen] = useState(false);
+  const [createVariables, setCreateVariables] = useState("");
   const [versionState, setVersionState] = useState<TemplateActionState>({});
   const [publishState, setPublishState] = useState<TemplateActionState>({});
 
@@ -75,7 +80,13 @@ export function TemplateManager({
         title="Templates de contrato"
         subtitle="Modelos publicados e versões em preparação"
         actions={
-          <Button type="button" onClick={() => setCreateOpen(true)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setCreateVariables("");
+              setCreateOpen(true);
+            }}
+          >
             Novo modelo
           </Button>
         }
@@ -99,13 +110,16 @@ export function TemplateManager({
               <Input
                 label="Variáveis"
                 name="variables"
-                hint="Separe por vírgulas: proprietário, imóvel, preço"
+                value={createVariables}
+                onChange={(event) => setCreateVariables(event.target.value)}
+                placeholder="proprietario, comprador, imovel, preco"
+                hint="Separe por vírgulas; depois insira-as no texto a partir da toolbar."
               />
-              <Textarea
-                label="Conteúdo (JSON TipTap)"
+              <TemplateBodyEditor
+                label="Conteúdo do contrato"
                 name="body"
-                defaultValue={starter}
-                className="min-h-64 font-mono text-xs md:col-span-2"
+                initialContent={emptyBody}
+                variables={parseVariables(createVariables)}
               />
               <div className="flex gap-3 md:col-span-2">
                 <Button type="submit">Criar rascunho</Button>
@@ -156,6 +170,7 @@ export function TemplateManager({
         </Card>
         {current && (
           <Editor
+            key={current.id}
             template={current}
             actions={actions}
             onVersion={async () => {
@@ -188,6 +203,7 @@ function Editor({
   publishState: TemplateActionState;
   onPublish: () => Promise<void>;
 }) {
+  const [variablesText, setVariablesText] = useState(template.variables.join(", "));
   const [saveState, saveAction] = useActionState(
     (_prev: TemplateActionState, formData: FormData) => actions.saveTemplate(template.id, formData),
     {},
@@ -208,14 +224,16 @@ function Editor({
           <Input
             label="Variáveis"
             name="variables"
-            defaultValue={template.variables.join(", ")}
-            hint="Aparecem como chips no editor do contrato."
+            value={variablesText}
+            onChange={(event) => setVariablesText(event.target.value)}
+            hint="Separe por vírgulas e insira-as no texto a partir da toolbar."
           />
-          <Textarea
-            label="Conteúdo (JSON TipTap)"
+          <TemplateBodyEditor
+            label="Conteúdo do contrato"
             name="body"
-            defaultValue={JSON.stringify(template.body, null, 2)}
-            className="min-h-96 font-mono text-xs"
+            initialContent={template.body}
+            variables={parseVariables(variablesText)}
+            editable={template.status === "draft"}
           />
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={template.status !== "draft"}>

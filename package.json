@@ -22,7 +22,8 @@
     "gate:db": "supabase db lint --linked --schema public --level warning --fail-on error",
     "gate:deps": "pnpm audit --audit-level high",
     "create-staff-user": "node scripts/create-staff-user.mjs",
-    "stripe:sync": "tsx scripts/stripe/sync-catalog.ts"
+    "stripe:sync": "tsx scripts/stripe/sync-catalog.ts",
+    "analytics:import": "tsx scripts/analytics/import-daily.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

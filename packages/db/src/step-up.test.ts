@@ -133,16 +133,14 @@ describe.skipIf(!hasEnv)("Step-up do PIN (Fase 8, P8-07)", () => {
   });
 
   it("o staff continua a poder definir o seu PIN", async () => {
-    const { error } = await clients.admin
-      .from("staff_auth")
-      .upsert(
-        {
-          profile_id: ids.admin,
-          pin_hash: "$argon2id$v=19$fake",
-          pin_updated_at: new Date().toISOString(),
-        },
-        { onConflict: "profile_id" },
-      );
+    const { error } = await clients.admin.from("staff_auth").upsert(
+      {
+        profile_id: ids.admin,
+        pin_hash: "$argon2id$v=19$fake",
+        pin_updated_at: new Date().toISOString(),
+      },
+      { onConflict: "profile_id" },
+    );
     expect(error).toBeNull();
   });
 

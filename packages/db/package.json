@@ -11,6 +11,7 @@
     "./client": "./src/client.ts",
     "./auth": "./src/auth.ts",
     "./audit": "./src/audit.ts",
+    "./analytics": "./src/analytics.ts",
     "./geocoding": "./src/geocoding.ts",
     "./properties": "./src/properties.ts",
     "./interaction": "./src/interaction.ts",

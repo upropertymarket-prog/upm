@@ -18,6 +18,7 @@ import {
 import { LIMIT_KEYS, LIMIT_LABELS, type LimitKey, type PlanLimits } from "@upm/db/billing";
 
 import { useStepUp } from "../../../components/StepUpModal";
+import type { VerifyPinAction } from "../../../components/stepUpTypes";
 
 /**
  * Admin › Planos (P7-05 · 04 §8.5)
@@ -32,6 +33,12 @@ import { useStepUp } from "../../../components/StepUpModal";
 
 const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
 const dateFormat = new Intl.DateTimeFormat("pt-PT", { dateStyle: "short" });
+const PLAN_TONE: Record<string, "draft" | "primary" | "dealSale" | "dealRent"> = {
+  gratuito: "draft",
+  "essential-owner": "primary",
+  "smarter-owner": "dealSale",
+  "premium-owner": "dealRent",
+};
 
 function money(cents: number) {
   return currency.format(cents / 100);
@@ -105,6 +112,7 @@ export function PlansManager({
   onSave,
   onSync,
   onDecideTrial,
+  onVerifyPin,
 }: {
   plans: PlanRow[];
   summary: BillingSummary;
@@ -113,6 +121,8 @@ export function PlansManager({
   onSave: (prev: PlanActionState, formData: FormData) => Promise<PlanActionState>;
   onSync: () => Promise<{ notice?: string; error?: string }>;
   onDecideTrial: (requestId: string, approve: boolean) => Promise<PlanActionState>;
+  /** `verifyOperationPin` — por prop, para o canvas poder passar um substituto. */
+  onVerifyPin: VerifyPinAction;
 }) {
   const [editing, setEditing] = useState<PlanRow | "new" | null>(null);
 
@@ -132,7 +142,7 @@ export function PlansManager({
   const [deciding, startDecide] = useTransition();
   const [retrying, startRetry] = useTransition();
   const [trialNotice, setTrialNotice] = useState<string | null>(null);
-  const { requestStepUp, stepUpModal } = useStepUp();
+  const { requestStepUp, stepUpModal } = useStepUp(onVerifyPin);
 
   // Fecha o modal quando a gravação passa; mantém-no aberto no erro, para a
   // pessoa não perder o que escreveu.
@@ -276,7 +286,7 @@ export function PlansManager({
                 }}
               >
                 <span style={{ display: "grid", flex: "1 1 160px", minWidth: 0 }}>
-                  <strong style={{ fontSize: "var(--fs-body)" }}>{plan.name}</strong>
+                  <StatusTag tone={PLAN_TONE[plan.slug] ?? "draft"}>{plan.name}</StatusTag>
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                     {AUDIENCE_LABEL[plan.audience]} · {money(plan.priceMonthCents)}/mês
                   </span>

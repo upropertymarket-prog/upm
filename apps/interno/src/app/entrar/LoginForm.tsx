@@ -8,7 +8,7 @@ import { signIn, type LoginState } from "./actions";
 
 const initialState: LoginState = {};
 
-export function LoginForm() {
+export function LoginForm({ suspended = false }: { suspended?: boolean }) {
   const t = useTranslations("auth.login");
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
@@ -25,6 +25,11 @@ export function LoginForm() {
       {state.error ? (
         <p className="text-sm text-danger" role="alert">
           {state.error}
+        </p>
+      ) : null}
+      {suspended || state.suspended ? (
+        <p className="text-sm text-danger" role="alert">
+          {t("suspended")}
         </p>
       ) : null}
       <Button type="submit" disabled={pending} fullWidth>

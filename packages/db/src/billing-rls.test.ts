@@ -411,7 +411,17 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   });
 
   it("só o admin escreve um plano — nem o suporte, nem um utilizador", async () => {
-    const change = { name: "Smarter (teste)" };
+    // O nome de partida lê-se, não se assume. A versão anterior comparava com o
+    // literal "Smarter", e uma corrida que falhasse a meio — antes do restauro
+    // no fim — deixava "Smarter (teste)" em staging e fazia este teste falhar
+    // em todas as corridas seguintes, por resíduo e não por regressão.
+    const { data: before } = await service
+      .from("plans")
+      .select("name")
+      .eq("id", paidPlanId)
+      .single();
+    const originalName = before!.name as string;
+    const change = { name: `${originalName} (teste)` };
 
     expect(
       (await clients.support.from("plans").update(change).eq("id", paidPlanId)).error ?? {},
@@ -425,25 +435,53 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
       .select("name")
       .eq("id", paidPlanId)
       .single();
-    expect(untouched!.name).toBe("Smarter");
+    expect(untouched!.name).toBe(originalName);
 
     // P8-07 (07 §6): desde a Fase 8, editar o catálogo exige step-up de PIN.
-    // Sem ele o admin é recusado como os outros — e com `step_up_required` no
-    // `hint`, para a UI saber abrir o modal em vez de mostrar um erro.
-    const withoutStepUp = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
-    expect(withoutStepUp.error).not.toBeNull();
-    expect(withoutStepUp.error?.hint).toBe("step_up_required");
-
-    await service
+    // Guardamos e limpamos o estado anterior: uma corrida passada pode ter
+    // concedido step-up e deixado os 15 min válidos, fazendo este teste passar
+    // indevidamente na corrida seguinte.
+    const { data: previousStepUp } = await service
       .from("staff_auth")
-      .upsert(
-        { profile_id: ids.admin, last_step_up_at: new Date().toISOString() },
-        { onConflict: "profile_id" },
-      );
+      .select("last_step_up_at")
+      .eq("profile_id", ids.admin)
+      .maybeSingle();
+    const previousStepUpAt = previousStepUp?.last_step_up_at ?? null;
 
-    const byAdmin = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
-    expect(byAdmin.error).toBeNull();
-    await service.from("plans").update({ name: "Smarter" }).eq("id", paidPlanId);
+    try {
+      const cleared = await service
+        .from("staff_auth")
+        .upsert({ profile_id: ids.admin, last_step_up_at: null }, { onConflict: "profile_id" });
+      expect(cleared.error).toBeNull();
+
+      // Sem PIN o admin deve receber o hint que abre o modal na UI.
+      const withoutStepUp = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
+      expect(withoutStepUp.error).not.toBeNull();
+      expect(withoutStepUp.error?.hint).toBe("step_up_required");
+
+      await service
+        .from("staff_auth")
+        .upsert(
+          { profile_id: ids.admin, last_step_up_at: new Date().toISOString() },
+          { onConflict: "profile_id" },
+        );
+
+      // O restauro vai num `finally`: uma falha não deixa alterações de teste
+      // coladas no plano nem muda o step-up preexistente do utilizador.
+      try {
+        const byAdmin = await clients.admin.from("plans").update(change).eq("id", paidPlanId);
+        expect(byAdmin.error).toBeNull();
+      } finally {
+        await service.from("plans").update({ name: originalName }).eq("id", paidPlanId);
+      }
+    } finally {
+      await service
+        .from("staff_auth")
+        .upsert(
+          { profile_id: ids.admin, last_step_up_at: previousStepUpAt },
+          { onConflict: "profile_id" },
+        );
+    }
   });
 
   // -------------------------------------------------------------------------
@@ -795,13 +833,15 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
     expect(blocked.error).not.toBeNull();
     expect(blocked.error?.hint).toBe("active_properties");
 
-    // A moderação continua a poder aprovar o que já está na fila: o limite é
-    // de quem submete, não de quem aprova.
+    // P8-03 removes direct PostgREST staff writes. RLS reports a zero-row
+    // update without an error, so assert the returned row count, not error.
     const moderation = await clients.admin
       .from("properties")
       .update({ status: "active" })
-      .eq("id", first!.id);
+      .eq("id", first!.id)
+      .select("id");
     expect(moderation.error).toBeNull();
+    expect(moderation.data).toHaveLength(0);
   });
 
   it("downgrade: os excedentes passam a rascunho e nada é apagado (02 §9)", async () => {

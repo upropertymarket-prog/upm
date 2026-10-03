@@ -536,7 +536,9 @@ export function PlanScreen({
                   </li>
                 ))}
                 {features
-                  .filter((feature) => !/\b(imóveis|imóvel|propriedades|propriedade)\b/i.test(feature))
+                  .filter(
+                    (feature) => !/\b(imóveis|imóvel|propriedades|propriedade)\b/i.test(feature),
+                  )
                   .map((feature) => (
                     <li
                       key={feature}

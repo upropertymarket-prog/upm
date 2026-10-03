@@ -4,25 +4,29 @@ import { InternalChrome } from "../../../components/InternalChrome";
 import { setLocalePreference } from "../../actions/preferences";
 import { TemplateManager } from "./TemplateManager";
 import { createTemplate, publishTemplate, saveTemplate, startTemplateVersion } from "./actions";
+import { getAdminShellData } from "../../../lib/admin-shell";
 
 export default async function ContractTemplatesPage() {
   const supabase = createClient(await cookies());
-  const { data } = await supabase
-    .from("contract_templates")
-    .select("id, family_id, name, kind, version, status, body, variables, updated_at")
-    .order("updated_at", { ascending: false });
+  const [shell, templates] = await Promise.all([
+    getAdminShellData(supabase),
+    supabase
+      .from("contract_templates")
+      .select("id, family_id, name, kind, version, status, body, variables, updated_at")
+      .order("updated_at", { ascending: false }),
+  ]);
   return (
     <InternalChrome
       role="admin"
-      userName="Helena Matos"
-      userMeta="Administração · IT"
+      userName={shell.userName}
+      userMeta={shell.userMeta}
       activeId="contractTemplates"
-      locale="pt"
+      locale={shell.locale}
       onLocaleChange={setLocalePreference}
-      counters={{ propertyModeration: 4, siteLeads: 12 }}
+      counters={shell.counters}
     >
       <TemplateManager
-        templates={(data ?? []) as never}
+        templates={(templates.data ?? []) as never}
         actions={{ createTemplate, saveTemplate, startTemplateVersion, publishTemplate }}
       />
     </InternalChrome>

@@ -156,8 +156,10 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
     ["anon", false],
     ["buyer", false],
     ["owner", true],
-    ["admin", true],
-    ["support", true],
+    // P8-03 moves staff moderation to moderate_property(); PostgREST cannot
+    // update property rows directly for either staff role.
+    ["admin", false],
+    ["support", false],
   ])("properties: update (título) como %s → permitido=%s", async (role, expected) => {
     const marker = `rls-test-${role}-${Date.now()}`;
     const { data } = await clients[role]

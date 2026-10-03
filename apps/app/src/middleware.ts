@@ -27,7 +27,7 @@ const BUYER_ONLY_PREFIXES = ["/guardados", "/meus-pedidos"];
  * token, a expiração, o código e o limite de tentativas de 07 §19.8. Não é o
  * middleware que autoriza nada aqui — é ele que se afasta do caminho.
  */
-const PUBLIC_PREFIXES = ["/partilha"];
+const PUBLIC_PREFIXES = ["/partilha", "/conta-suspensa"];
 
 function webUrl(path: string, request: NextRequest): URL {
   const base = process.env.WEB_URL ?? "http://localhost:4300";
@@ -37,6 +37,13 @@ function webUrl(path: string, request: NextRequest): URL {
 function internoUrl(request: NextRequest): URL {
   const base = process.env.INTERNO_URL ?? "http://localhost:4302";
   return new URL("/", base.startsWith("http") ? base : request.nextUrl.origin);
+}
+
+async function signOutToSuspendedPage(request: NextRequest) {
+  const redirectResponse = NextResponse.redirect(webUrl("/conta-suspensa", request));
+  const supabase = createMiddlewareClient(request, redirectResponse);
+  await supabase.auth.signOut();
+  return redirectResponse;
 }
 
 export async function middleware(request: NextRequest) {
@@ -65,11 +72,15 @@ export async function middleware(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, status")
     .eq("id", user.id)
     .single();
 
   const role = profile?.role;
+
+  if (profile?.status === "suspended") {
+    return signOutToSuspendedPage(request);
+  }
 
   // Equipa (admin|support) nunca acede aqui (07 §6) — só interno.*.
   if (role === "admin" || role === "support") {

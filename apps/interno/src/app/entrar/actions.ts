@@ -12,7 +12,7 @@ import { checkAuthRateLimit, emailSchema, recordAuthAttempt } from "@upm/db/auth
  * decidir para onde redirecionar depois deste login.
  */
 
-export type LoginState = { error?: string };
+export type LoginState = { error?: string; suspended?: boolean };
 
 function clientIp(headerList: Headers): string {
   const forwardedFor = headerList.get("x-forwarded-for");
@@ -52,9 +52,14 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, status")
     .eq("id", data.user.id)
     .single();
+
+  if (profile?.status === "suspended") {
+    await supabase.auth.signOut();
+    return { suspended: true };
+  }
 
   if (profile?.role !== "admin" && profile?.role !== "support") {
     await supabase.auth.signOut();
