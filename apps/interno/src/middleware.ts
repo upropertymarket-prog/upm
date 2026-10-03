@@ -90,10 +90,11 @@ export async function middleware(request: NextRequest) {
   // Supabase — aceita-se em alternativa o cookie que essa via assina.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const recoveryVerified = request.cookies.get("interno_recovery_verified")?.value === "1";
-  if (aal?.nextLevel === "aal1") {
+  const onEnrollPage = pathname === "/configurar-2fa" || pathname.startsWith("/configurar-2fa/");
+  if (aal?.nextLevel === "aal1" && !onEnrollPage) {
     return NextResponse.redirect(new URL("/configurar-2fa", request.url));
   }
-  if (aal && aal.currentLevel !== aal.nextLevel && !recoveryVerified) {
+  if (aal && aal.currentLevel !== aal.nextLevel && !recoveryVerified && !onEnrollPage) {
     return NextResponse.redirect(new URL("/verificar-2fa", request.url));
   }
 
