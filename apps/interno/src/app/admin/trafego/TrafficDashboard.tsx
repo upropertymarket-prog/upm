@@ -84,7 +84,7 @@ export function TrafficDashboard({
             gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
           }}
         >
-          <div style={{ display: "grid", gap: "var(--sp-2)", minWidth: 0 }}>
+          <div style={{ display: "grid", gap: "var(--sp-2)", rowGap: "var(--sp-5)", minWidth: 0 }}>
             <span className="upm-field__label" aria-hidden="true">
               {t("scope.label")}
             </span>

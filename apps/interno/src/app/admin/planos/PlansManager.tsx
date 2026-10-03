@@ -285,7 +285,9 @@ export function PlansManager({
                   borderTop: "1px solid var(--border)",
                 }}
               >
-                <span style={{ display: "grid", flex: "1 1 160px", minWidth: 0 }}>
+                <span
+                  style={{ display: "grid", rowGap: "var(--sp-1)", flex: "1 1 160px", minWidth: 0 }}
+                >
                   <StatusTag tone={PLAN_TONE[plan.slug] ?? "draft"}>{plan.name}</StatusTag>
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                     {AUDIENCE_LABEL[plan.audience]} · {money(plan.priceMonthCents)}/mês
