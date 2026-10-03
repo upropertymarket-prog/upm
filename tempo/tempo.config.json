@@ -8,7 +8,7 @@
   },
   "apps": [
     {
-      "start": "pnpm --filter @upm/app exec next dev -p ${APP_PORT}",
+      "start": "pnpm --filter @upm/interno exec next dev --port ${APP_PORT}",
       "url": "http://localhost:${APP_PORT}"
     }
   ]
