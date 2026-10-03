@@ -1,3 +1,5 @@
+/// <reference path="../svg-assets.d.ts" />
+
 import { cx } from "../lib/cx";
 import bundledLightLogo from "./brand/logo-light.svg";
 import bundledDarkLogo from "./brand/logo-dark.svg";
