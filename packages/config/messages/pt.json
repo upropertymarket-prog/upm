@@ -545,17 +545,17 @@
         "tableCaption": "Visitas e conversões por dia",
         "note": "As conversões são parte das visitas, por isso partilham a mesma escala."
       },
-        "cards": {
-          "path": "Páginas",
-          "source": "Origem",
-          "device": "Dispositivos",
-          "city": "Cidades"
-        },
-        "breakdown": {
-          "title": "Visitas por dimensão",
-          "subtitle": "Principais páginas, origens, dispositivos e cidades no intervalo selecionado."
-        },
-        "empty": {
+      "cards": {
+        "path": "Páginas",
+        "source": "Origem",
+        "device": "Dispositivos",
+        "city": "Cidades"
+      },
+      "breakdown": {
+        "title": "Visitas por dimensão",
+        "subtitle": "Principais páginas, origens, dispositivos e cidades no intervalo selecionado."
+      },
+      "empty": {
         "title": "Ainda não há tráfego",
         "body": "O site público entra numa fase posterior. A página enche-se sozinha quando houver visitas para importar."
       },

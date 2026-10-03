@@ -41,6 +41,14 @@
       "postcss": ">=8.5.18",
       "rollup": ">=3.30.0",
       "vite": ">=6.4.3"
+    },
+    "patchedDependencies": {
+      "braces@3.0.3": "patches/braces@3.0.3.patch"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-93687"
+      ]
     }
   }
 }

@@ -1,0 +1,46 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 3a6988e629f52aee6609dc5ec290a5e9ff47cecb..e638ec2b1627d822cf1718deb5cf7b0c12019398 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -24,6 +24,9 @@ const {
+   CHAR_ZERO_WIDTH_NOBREAK_SPACE
+ } = require('./constants');
+ 
++// Bound recursive AST walkers against deeply nested input (GHSA-vfj7-8cjw-p6xm).
++const MAX_DEPTH = 100;
++
+ /**
+  * parse
+  */
+@@ -71,6 +74,13 @@ const parse = (input, options = {}) => {
+     return node;
+   };
+ 
++  const pushBlock = node => {
++    if (stack.length > MAX_DEPTH) {
++      throw new SyntaxError(`Input nesting depth exceeds max depth (${MAX_DEPTH})`);
++    }
++    stack.push(node);
++  };
++
+   push({ type: 'bos' });
+ 
+   while (index < length) {
+@@ -144,7 +154,7 @@ const parse = (input, options = {}) => {
+ 
+     if (value === CHAR_LEFT_PARENTHESES) {
+       block = push({ type: 'paren', nodes: [] });
+-      stack.push(block);
++      pushBlock(block);
+       push({ type: 'text', value });
+       continue;
+     }
+@@ -210,7 +220,7 @@ const parse = (input, options = {}) => {
+       };
+ 
+       block = push(brace);
+-      stack.push(block);
++      pushBlock(block);
+       push({ type: 'open', value });
+       continue;
+     }

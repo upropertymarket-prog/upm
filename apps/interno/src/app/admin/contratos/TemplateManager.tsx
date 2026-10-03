@@ -1,16 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-  Select,
-} from "@upm/ui";
+import { Button, Card, CardBody, CardHeader, CardTitle, Input, PageHeader, Select } from "@upm/ui";
 import { TemplateBodyEditor } from "./TemplateBodyEditor";
 export type TemplateActionState = { ok?: boolean; error?: string; id?: string };
 

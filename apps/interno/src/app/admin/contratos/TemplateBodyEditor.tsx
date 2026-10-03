@@ -102,7 +102,9 @@ export function TemplateBodyEditor({
   variables,
   editable = true,
 }: Props) {
-  const [document, setDocument] = useState(isDocument(initialContent) ? initialContent : EMPTY_DOCUMENT);
+  const [document, setDocument] = useState(
+    isDocument(initialContent) ? initialContent : EMPTY_DOCUMENT,
+  );
   const [, setSelectionVersion] = useState(0);
   const [variableMenuOpen, setVariableMenuOpen] = useState(false);
   const variablePopoverId = useId();
@@ -125,7 +127,8 @@ export function TemplateBodyEditor({
     content: document as never,
     editable,
     immediatelyRender: false,
-    onUpdate: ({ editor: currentEditor }) => setDocument(currentEditor.getJSON() as typeof document),
+    onUpdate: ({ editor: currentEditor }) =>
+      setDocument(currentEditor.getJSON() as typeof document),
     onSelectionUpdate: () => setSelectionVersion((version) => version + 1),
   });
   useEffect(() => {
@@ -152,13 +155,25 @@ export function TemplateBodyEditor({
             <Select
               label="Estilo de texto"
               labelHidden
-              value={editor?.isActive("heading", { level: 1 }) ? "h1" : editor?.isActive("heading", { level: 2 }) ? "h2" : editor?.isActive("heading", { level: 3 }) ? "h3" : "p"}
+              value={
+                editor?.isActive("heading", { level: 1 })
+                  ? "h1"
+                  : editor?.isActive("heading", { level: 2 })
+                    ? "h2"
+                    : editor?.isActive("heading", { level: 3 })
+                      ? "h3"
+                      : "p"
+              }
               disabled={!editor || !editable}
               onChange={(event) => {
                 const value = event.target.value;
                 if (value === "p") editor?.chain().focus().setParagraph().run();
                 else if (value.startsWith("h")) {
-                  editor?.chain().focus().setHeading({ level: Number(value.slice(1)) as 1 | 2 | 3 }).run();
+                  editor
+                    ?.chain()
+                    .focus()
+                    .setHeading({ level: Number(value.slice(1)) as 1 | 2 | 3 })
+                    .run();
                 }
               }}
               options={[
@@ -169,33 +184,80 @@ export function TemplateBodyEditor({
               ]}
             />
           </div>
-          <ToolButton label="Negrito" active={Boolean(editor?.isActive("bold"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().toggleBold().run()}>
+          <ToolButton
+            label="Negrito"
+            active={Boolean(editor?.isActive("bold"))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+          >
             <Bold size={15} />
           </ToolButton>
-          <ToolButton label="Itálico" active={Boolean(editor?.isActive("italic"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().toggleItalic().run()}>
+          <ToolButton
+            label="Itálico"
+            active={Boolean(editor?.isActive("italic"))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().toggleItalic().run()}
+          >
             <Italic size={15} />
           </ToolButton>
-          <ToolButton label="Sublinhado" active={Boolean(editor?.isActive("underline"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().toggleUnderline().run()}>
+          <ToolButton
+            label="Sublinhado"
+            active={Boolean(editor?.isActive("underline"))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().toggleUnderline().run()}
+          >
             <UnderlineIcon size={15} />
           </ToolButton>
           <span className={styles.separator} aria-hidden="true" />
-          <ToolButton label="Alinhar à esquerda" active={Boolean(editor?.isActive({ textAlign: "left" }))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().setTextAlign("left").run()}>
+          <ToolButton
+            label="Alinhar à esquerda"
+            active={Boolean(editor?.isActive({ textAlign: "left" }))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+          >
             <AlignLeft size={15} />
           </ToolButton>
-          <ToolButton label="Centrar" active={Boolean(editor?.isActive({ textAlign: "center" }))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().setTextAlign("center").run()}>
+          <ToolButton
+            label="Centrar"
+            active={Boolean(editor?.isActive({ textAlign: "center" }))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().setTextAlign("center").run()}
+          >
             <AlignCenter size={15} />
           </ToolButton>
-          <ToolButton label="Alinhar à direita" active={Boolean(editor?.isActive({ textAlign: "right" }))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().setTextAlign("right").run()}>
+          <ToolButton
+            label="Alinhar à direita"
+            active={Boolean(editor?.isActive({ textAlign: "right" }))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().setTextAlign("right").run()}
+          >
             <AlignRight size={15} />
           </ToolButton>
           <span className={styles.separator} aria-hidden="true" />
-          <ToolButton label="Lista com marcas" active={Boolean(editor?.isActive("bulletList"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+          <ToolButton
+            label="Lista com marcas"
+            active={Boolean(editor?.isActive("bulletList"))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+          >
             <List size={15} />
           </ToolButton>
-          <ToolButton label="Lista numerada" active={Boolean(editor?.isActive("orderedList"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+          <ToolButton
+            label="Lista numerada"
+            active={Boolean(editor?.isActive("orderedList"))}
+            disabled={!editor || !editable}
+            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+          >
             <ListOrdered size={15} />
           </ToolButton>
-          <ToolButton label="Inserir tabela" active={Boolean(editor?.isActive("table"))} disabled={!editor || !editable} onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+          <ToolButton
+            label="Inserir tabela"
+            active={Boolean(editor?.isActive("table"))}
+            disabled={!editor || !editable}
+            onClick={() =>
+              editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+            }
+          >
             <TableIcon size={15} />
           </ToolButton>
         </div>
@@ -216,7 +278,12 @@ export function TemplateBodyEditor({
               <Plus size={16} strokeWidth={2.5} />
             </Button>
             {variableMenuOpen && editable && (
-              <div id={variablePopoverId} className={styles.variablePopover} aria-label="Inserir variável" role="group">
+              <div
+                id={variablePopoverId}
+                className={styles.variablePopover}
+                aria-label="Inserir variável"
+                role="group"
+              >
                 <span className={styles.variablePopoverTitle}>Inserir variável</span>
                 {variables.length === 0 ? (
                   <p className={styles.emptyVariables}>
@@ -232,10 +299,14 @@ export function TemplateBodyEditor({
                         className={styles.variableOption}
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => {
-                          editor?.chain().focus().insertContent({
-                            type: "variable",
-                            attrs: { name: variable, label: variableLabel(variable) },
-                          }).run();
+                          editor
+                            ?.chain()
+                            .focus()
+                            .insertContent({
+                              type: "variable",
+                              attrs: { name: variable, label: variableLabel(variable) },
+                            })
+                            .run();
                           setVariableMenuOpen(false);
                         }}
                       >

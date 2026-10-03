@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
@@ -110,11 +111,24 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
               }}
             >
               {validPhotos[0] ? (
-                <img
-                  src={validPhotos[0]}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 16 }}
-                />
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    overflow: "hidden",
+                    borderRadius: 16,
+                  }}
+                >
+                  <Image
+                    src={validPhotos[0]}
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="(max-width: 900px) 100vw, 70vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
               ) : (
                 <div
                   style={{
@@ -127,18 +141,25 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "hidden" }}>
                 {validPhotos.slice(1, 4).map((url) => (
-                  <img
+                  <div
                     key={url}
-                    src={url}
-                    alt=""
                     style={{
-                      width: "100%",
+                      position: "relative",
                       flex: 1,
                       minHeight: 0,
-                      objectFit: "cover",
+                      overflow: "hidden",
                       borderRadius: 10,
                     }}
-                  />
+                  >
+                    <Image
+                      src={url}
+                      alt=""
+                      fill
+                      unoptimized
+                      sizes="120px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
                 ))}
               </div>
             </div>

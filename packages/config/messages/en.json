@@ -549,17 +549,17 @@
         "tableCaption": "Visits and conversions per day",
         "note": "Conversions are a subset of visits, so they share one scale."
       },
-        "cards": {
-          "path": "Pages",
-          "source": "Source",
-          "device": "Devices",
-          "city": "Cities"
-        },
-        "breakdown": {
-          "title": "Visits by dimension",
-          "subtitle": "Top pages, sources, devices, and cities for the selected range."
-        },
-        "empty": {
+      "cards": {
+        "path": "Pages",
+        "source": "Source",
+        "device": "Devices",
+        "city": "Cities"
+      },
+      "breakdown": {
+        "title": "Visits by dimension",
+        "subtitle": "Top pages, sources, devices, and cities for the selected range."
+      },
+      "empty": {
         "title": "No traffic yet",
         "body": "The public site comes in a later phase. This page fills itself once there are visits to import."
       },

@@ -15,7 +15,9 @@
   border: 1px solid var(--border2);
   border-radius: var(--r-lg);
   background: var(--surface);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .editor:focus-within {
@@ -83,7 +85,9 @@
   color: var(--on-solid);
   opacity: 0.68;
   box-shadow: var(--shadow);
-  transition: opacity 120ms ease, background-color 120ms ease;
+  transition:
+    opacity 120ms ease,
+    background-color 120ms ease;
 }
 
 .addVariableButton.addVariableButton::before {

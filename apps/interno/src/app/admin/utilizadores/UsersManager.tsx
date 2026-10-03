@@ -239,7 +239,11 @@ export function UsersManager({
         </header>
 
         <Card padded>
-          <form action="/admin/utilizadores" method="get" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]">
+          <form
+            action="/admin/utilizadores"
+            method="get"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]"
+          >
             <Input
               name="search"
               label={t("search")}

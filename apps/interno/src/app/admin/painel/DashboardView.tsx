@@ -25,16 +25,21 @@ function LineChart({
       x: data.length < 2 ? 50 : 4 + (index / (data.length - 1)) * 92,
       y: 92 - (point[key] / max) * 82,
     }));
-    if (points.length === 0) return "";
-    if (points.length === 1) return `M${points[0].x},${points[0].y}`;
+    const firstPoint = points[0];
+    if (!firstPoint) return "";
+    if (points.length === 1) return `M${firstPoint.x},${firstPoint.y}`;
 
-    const slopes = points.slice(1).map((point, index) => point.y - points[index].y);
+    const slopes = points.slice(1).map((point, index) => {
+      const previous = points[index];
+      return previous ? point.y - previous.y : 0;
+    });
     const tangents = points.map((_, index) => {
-      if (index === 0) return slopes[0];
-      if (index === points.length - 1) return slopes[slopes.length - 1];
+      if (index === 0) return slopes[0] ?? 0;
+      if (index === points.length - 1) return slopes[slopes.length - 1] ?? 0;
 
       const incoming = slopes[index - 1];
       const outgoing = slopes[index];
+      if (incoming === undefined || outgoing === undefined) return 0;
       if (incoming * outgoing <= 0) return 0;
       return (2 * incoming * outgoing) / (incoming + outgoing);
     });
@@ -44,11 +49,12 @@ function LineChart({
         if (index === 0) return `M${point.x},${point.y}`;
 
         const previous = points[index - 1];
+        if (!previous) return "";
         const step = point.x - previous.x;
         const firstControlX = previous.x + step / 3;
         const secondControlX = point.x - step / 3;
-        const firstControlY = previous.y + tangents[index - 1] / 3;
-        const secondControlY = point.y - tangents[index] / 3;
+        const firstControlY = previous.y + (tangents[index - 1] ?? 0) / 3;
+        const secondControlY = point.y - (tangents[index] ?? 0) / 3;
         return `C${firstControlX},${firstControlY} ${secondControlX},${secondControlY} ${point.x},${point.y}`;
       })
       .join(" ");

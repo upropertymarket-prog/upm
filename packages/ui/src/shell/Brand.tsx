@@ -1,5 +1,3 @@
-/// <reference path="../svg-assets.d.ts" />
-
 import { cx } from "../lib/cx";
 import bundledLightLogo from "./brand/logo-light.svg";
 import bundledDarkLogo from "./brand/logo-dark.svg";
@@ -74,16 +72,8 @@ export function Brand({
       {/* `<img>` e não `next/image`: SVG estático de tamanho fixo servido do
           próprio domínio, onde a otimização do Next não traz nada — e usá-la
           obrigaria `packages/ui` a importar o Next em runtime. */}
-      <img
-        className="upm-brand__logo upm-brand__logo--light"
-        src={lightSrc}
-        alt=""
-      />
-      <img
-        className="upm-brand__logo upm-brand__logo--dark"
-        src={darkSrc}
-        alt=""
-      />
+      <img className="upm-brand__logo upm-brand__logo--light" src={lightSrc} alt="" />
+      <img className="upm-brand__logo upm-brand__logo--dark" src={darkSrc} alt="" />
     </span>
   );
 }
