@@ -290,6 +290,20 @@ describe("07 §3 — mínimo 13 px na app, 14 px no site público", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("só o contador (.upm-badge) usa o tamanho de 11 px", () => {
+    expect(rootTokens["--fs-badge"]).toBe("11px");
+    const users: string[] = [];
+    for (const file of walk(srcRoot)) {
+      if (/\.test\.tsx?$/.test(file)) continue;
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/([^{}]+)\{([^{}]*var\(--fs-badge\)[^{}]*)\}/g)) {
+        const selector = match[1]!.trim().split("\n").pop()!.trim();
+        if (selector !== ".upm-badge") users.push(`${file}: ${selector}`);
+      }
+    }
+    expect(users).toEqual([]);
+  });
+
   it("fixa a escala de 07 §3 nos tokens", () => {
     expect(rootTokens["--fs-label"]).toBe("13px");
     expect(rootTokens["--fs-body"]).toBe("13px");

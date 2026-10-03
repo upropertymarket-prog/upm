@@ -225,6 +225,8 @@
 
   --fs-label: 13px;
   --fs-pill: 12px;
+  /* Única exceção ao mínimo de 13 px (07 §3): dígitos do contador (`.upm-badge`), 20 × 20 px. */
+  --fs-badge: 11px;
   --fs-body: 13px;
   --fs-body-lg: 14px;
   --fs-subtitle: 15px;
