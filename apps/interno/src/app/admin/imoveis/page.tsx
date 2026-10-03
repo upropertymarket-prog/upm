@@ -21,7 +21,8 @@ const cursorDateSchema = z.string().datetime({ offset: true });
 
 type PropertyStatus = Database["public"]["Enums"]["property_status"];
 type ListRow = Database["public"]["Functions"]["admin_list_moderation"]["Returns"][number];
-type DetailRow = Database["public"]["Functions"]["admin_moderation_detail"]["Returns"][number];
+type RawDetailRow = Database["public"]["Functions"]["admin_moderation_detail"]["Returns"][number];
+type DetailRow = Omit<RawDetailRow, "owner_id">;
 type HistoryRow =
   Database["public"]["Functions"]["admin_property_moderation_history"]["Returns"][number];
 
@@ -77,7 +78,7 @@ export default async function ModerationPage({
     getAdminSidebarCounters(supabase),
   ]);
 
-  let detailResult: { data: DetailRow[] | null; error: unknown } | null = null;
+  let detailResult: { data: RawDetailRow[] | null; error: unknown } | null = null;
   let mediaResult: {
     data: Array<{
       id: string;
@@ -122,7 +123,13 @@ export default async function ModerationPage({
     );
   }
 
-  const details = detailResult?.data?.[0] ?? null;
+  const rawDetails = detailResult?.data?.[0] ?? null;
+  const details: DetailRow | null = rawDetails
+    ? (({ owner_id, ...detail }) => {
+        void owner_id;
+        return detail;
+      })(rawDetails)
+    : null;
   const mediaRows = mediaResult?.data ?? [];
   const documentRows = documentsResult?.data ?? [];
   const [signedMediaResult, signedDocumentsResult] = await Promise.all([
@@ -164,10 +171,13 @@ export default async function ModerationPage({
     ? await supabase.storage.from("property-media").createSignedUrls(coverPaths, 600)
     : { data: [], error: null };
   let coverIndex = 0;
-  const properties = pageRows.map((row) => ({
-    ...row,
-    coverUrl: row.cover_path ? (coverResult.data?.[coverIndex++]?.signedUrl ?? null) : null,
-  }));
+  const properties = pageRows.map((row) => {
+    const { cover_path, ...property } = row;
+    return {
+      ...property,
+      coverUrl: cover_path ? (coverResult.data?.[coverIndex++]?.signedUrl ?? null) : null,
+    };
+  });
   const firstRow = properties[0];
   const lastRow = properties[properties.length - 1];
   const firstCursor = firstRow ? { createdAt: firstRow.created_at, id: firstRow.id } : null;

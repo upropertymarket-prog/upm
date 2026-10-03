@@ -371,8 +371,8 @@ describe("04 §1.8 — alturas dos controlos e alvos de toque", () => {
 });
 
 describe("04 §5.5 — geometria do shell", () => {
-  it("usa 248 px de sidebar, 84 px de rail, 68 px de topbar e 460 px de drawer", () => {
-    expect(rootTokens["--sidebar-w"]).toBe("248px");
+  it("usa 256 px de sidebar, 84 px de rail, 68 px de topbar e 460 px de drawer", () => {
+    expect(rootTokens["--sidebar-w"]).toBe("256px");
     // 04 §5.5 diz 84 px; os protótipos tinham 86 px. A doc ganha.
     expect(rootTokens["--sidebar-rail-w"]).toBe("84px");
     expect(rootTokens["--topbar-h"]).toBe("68px");

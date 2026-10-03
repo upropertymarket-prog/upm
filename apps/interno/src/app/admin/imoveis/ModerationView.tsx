@@ -22,10 +22,14 @@ import type { VerifyPinAction } from "../../../components/stepUpTypes";
 import type { ModerationActionResult } from "./actions";
 
 type PropertyStatus = Database["public"]["Enums"]["property_status"];
-type ListRow = Database["public"]["Functions"]["admin_list_moderation"]["Returns"][number] & {
-  coverUrl: string | null;
-};
-type DetailRow = Database["public"]["Functions"]["admin_moderation_detail"]["Returns"][number];
+type ListRow = Omit<
+  Database["public"]["Functions"]["admin_list_moderation"]["Returns"][number],
+  "cover_path"
+> & { coverUrl: string | null };
+type DetailRow = Omit<
+  Database["public"]["Functions"]["admin_moderation_detail"]["Returns"][number],
+  "owner_id"
+>;
 type HistoryRow =
   Database["public"]["Functions"]["admin_property_moderation_history"]["Returns"][number];
 type ActionName = "approve" | "reject" | "feature" | "unfeature" | "reopen";

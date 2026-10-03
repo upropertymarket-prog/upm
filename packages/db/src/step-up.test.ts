@@ -24,10 +24,11 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const hasEnv = Boolean(SUPABASE_URL && ANON_KEY && SERVICE_ROLE_KEY);
 
 const PASSWORD = "stepup-rls-test-P@ss1";
+const RUN_ID = crypto.randomUUID().replaceAll("-", "");
 const USERS = {
-  admin: { email: "stepup-admin@upropertymarket.test", role: "admin" },
-  support: { email: "stepup-support@upropertymarket.test", role: "support" },
-  owner: { email: "stepup-owner@upropertymarket.test", role: "owner" },
+  admin: { email: `stepup-${RUN_ID}-admin@upropertymarket.test`, role: "admin" },
+  support: { email: `stepup-${RUN_ID}-support@upropertymarket.test`, role: "support" },
+  owner: { email: `stepup-${RUN_ID}-owner@upropertymarket.test`, role: "owner" },
 } as const;
 
 type Who = keyof typeof USERS;
@@ -86,8 +87,10 @@ describe.skipIf(!hasEnv)("Step-up do PIN (Fase 8, P8-07)", () => {
 
   afterAll(async () => {
     for (const key of Object.keys(USERS) as Who[]) {
+      if (!ids[key]) continue;
       await service.from("audit_log").delete().eq("actor_id", ids[key]);
       await service.from("staff_auth").delete().eq("profile_id", ids[key]);
+      await service.auth.admin.deleteUser(ids[key]);
     }
   });
 

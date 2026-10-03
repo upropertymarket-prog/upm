@@ -198,7 +198,7 @@ function Shell({
   );
 }
 
-/** Proprietário, tema claro, sidebar a 248 px. */
+/** Proprietário, tema claro, sidebar a 256 px. */
 export function Proprietario() {
   return (
     <ThemeProvider initialChoice="light">

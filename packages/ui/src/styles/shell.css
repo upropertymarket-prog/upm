@@ -5,7 +5,7 @@
  * Suporte`. O shell é **idêntico nos 4 perfis**: o que muda é só a lista de
  * navegação e a etiqueta de grupo, passadas por props.
  *
- * Larguras: sidebar 248 px, rail 84 px (04 §5.5 — os protótipos tinham 86 px),
+ * Larguras: sidebar 256 px, rail 84 px (04 §5.5 — os protótipos tinham 86 px),
  * topbar 68 px (a doc admite 64–68).
  *
  * Responsivo (02 §13): < 1024 px a sidebar fica sempre em rail; < 768 px sai
