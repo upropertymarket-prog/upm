@@ -59,7 +59,7 @@ export function OwnerDashboard({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
             gap: "var(--sp-7)",
             alignItems: "stretch",
           }}

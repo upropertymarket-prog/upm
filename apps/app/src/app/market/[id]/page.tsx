@@ -93,21 +93,27 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
         >
           ← Voltar ao Market
         </Link>
+        {/* Ficha + barra de contacto. Abaixo de 900 px empilham (`.upm-split`),
+            com a barra a seguir às fotografias em vez de espremida ao lado. */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 360px)",
-            gap: 28,
-            alignItems: "start",
-          }}
+          className="upm-split"
+          style={
+            {
+              "--split-cols": "minmax(0, 1fr) minmax(280px, 360px)",
+              "--split-gap": "28px",
+            } as React.CSSProperties
+          }
         >
           <main style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(0, 3fr) minmax(110px, 1fr)",
+                gridTemplateColumns: "minmax(0, 3fr) minmax(84px, 1fr)",
                 gap: 8,
-                height: 360,
+                /* Altura fluida: 360 px é a medida do desenho em ecrã largo,
+                   mas no telemóvel deixava a foto principal quase quadrada e
+                   as miniaturas com 110 px a comerem um terço da largura. */
+                height: "clamp(220px, 46vw, 360px)",
               }}
             >
               {validPhotos[0] ? (
@@ -174,7 +180,7 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
             <dl
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 150px), 1fr))",
                 gap: 12,
                 margin: 0,
               }}
@@ -214,10 +220,11 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
               </Card>
             ) : null}
           </main>
+          {/* `--sticky` só cola acima de 900 px: empilhada, uma barra presa ao
+              topo tapava o conteúdo que devia vir a seguir. */}
           <aside
+            className="upm-split__aside upm-split__aside--sticky"
             style={{
-              position: "sticky",
-              top: 88,
               display: "flex",
               flexDirection: "column",
               gap: 16,

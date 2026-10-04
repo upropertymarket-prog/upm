@@ -95,7 +95,7 @@ export function PropertyFilters({
       style={{
         display: "grid",
         gap: 12,
-        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 140px), 1fr))",
       }}
     >
       <Select

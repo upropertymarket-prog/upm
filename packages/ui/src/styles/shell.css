@@ -588,6 +588,14 @@
 
   .upm-topbar__inner {
     padding: 0 var(--sp-7);
+    /* Com o botão de menu, a pesquisa e as três ações a dividirem 328 px, os
+       14 px entre blocos eram a diferença entre o campo mostrar "Pesquisar" e
+       cortar-lhe a última letra. */
+    gap: var(--sp-4);
+  }
+
+  .upm-topbar__actions {
+    gap: var(--sp-2);
   }
 }
 

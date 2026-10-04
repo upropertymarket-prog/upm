@@ -134,7 +134,7 @@ export function VisitsScreen({
         title={pageTitle}
         subtitle={pageSubtitle}
         actions={
-          <div style={{ display: "inline-flex", gap: "var(--sp-2)" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sp-2)" }}>
             <Button
               variant={view === "list" ? "primary" : "secondary"}
               onClick={() => setView("list")}
@@ -313,7 +313,7 @@ function VisitList({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
                 gap: "var(--sp-7)",
               }}
             >
@@ -489,50 +489,62 @@ function VisitCalendar({ rows, month }: { rows: VisitRow[]; month: string }) {
           {title}
         </strong>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
-        {WEEKDAYS.map((label) => (
-          <span
-            key={label}
-            style={{
-              padding: "var(--sp-4)",
-              textAlign: "center",
-              fontSize: "var(--fs-label)",
-              fontWeight: "var(--fw-black)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: "var(--muted)",
-              background: "var(--surface2)",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
-            {label}
-          </span>
-        ))}
-        {cells.map((cell, index) => (
-          <div
-            key={index}
-            style={{
-              minHeight: 96,
-              padding: "var(--sp-3)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--sp-2)",
-              borderRight: "1px solid var(--border)",
-              borderBottom: "1px solid var(--border)",
-              background: cell.day ? "var(--surface)" : "var(--surface2)",
-              minWidth: 0,
-            }}
-          >
-            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-              {cell.day ?? ""}
+      {/* Uma semana tem sempre sete dias: não há como empilhar um calendário.
+          Em vez de espremer as colunas até a etiqueta da visita deixar de se
+          ler, dá-se-lhes um mínimo de 92 px e é a grelha que rola de lado —
+          dentro do cartão, nunca a página (02 §13). */}
+      <div style={{ overflowX: "auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(7, minmax(92px, 1fr))",
+            minWidth: "100%",
+          }}
+        >
+          {WEEKDAYS.map((label) => (
+            <span
+              key={label}
+              style={{
+                padding: "var(--sp-4)",
+                textAlign: "center",
+                fontSize: "var(--fs-label)",
+                fontWeight: "var(--fw-black)",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--muted)",
+                background: "var(--surface2)",
+                borderBottom: "1px solid var(--border)",
+              }}
+            >
+              {label}
             </span>
-            {cell.events.map((event) => (
-              <StatusTag key={event.id} tone={VISIT_TONE[event.status]}>
-                {formatTime(event.proposedAt)} {event.other.name.split(" ")[0]}
-              </StatusTag>
-            ))}
-          </div>
-        ))}
+          ))}
+          {cells.map((cell, index) => (
+            <div
+              key={index}
+              style={{
+                minHeight: 96,
+                padding: "var(--sp-3)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--sp-2)",
+                borderRight: "1px solid var(--border)",
+                borderBottom: "1px solid var(--border)",
+                background: cell.day ? "var(--surface)" : "var(--surface2)",
+                minWidth: 0,
+              }}
+            >
+              <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                {cell.day ?? ""}
+              </span>
+              {cell.events.map((event) => (
+                <StatusTag key={event.id} tone={VISIT_TONE[event.status]}>
+                  {formatTime(event.proposedAt)} {event.other.name.split(" ")[0]}
+                </StatusTag>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </Card>
   );

@@ -25,28 +25,33 @@ export function PublicHeader({
   const t = useTranslations();
 
   return (
+    /* `__inner` é o que dá à barra o flex, a altura e as margens que acompanham
+       o conteúdo da página — sem ele a marca e as ações ficavam encostadas às
+       paredes do ecrã e sobrepostas em telemóvel. */
     <header className="upm-topbar">
-      <Brand />
-      <div className="upm-topbar__actions">
-        {LOCALES.map((value) => (
-          <Button
-            key={value}
-            variant={value === locale ? "primary" : "ghost"}
-            size="sm"
-            aria-pressed={value === locale}
-            onClick={() => void onLocaleChange(value)}
-          >
-            {t(`locale.${value}`)}
-          </Button>
-        ))}
-        <ThemeToggle
-          labels={{
-            title: t("theme.title"),
-            light: t("theme.light"),
-            dark: t("theme.dark"),
-            system: t("theme.system"),
-          }}
-        />
+      <div className="upm-topbar__inner">
+        <Brand />
+        <div className="upm-topbar__actions">
+          {LOCALES.map((value) => (
+            <Button
+              key={value}
+              variant={value === locale ? "primary" : "ghost"}
+              size="sm"
+              aria-pressed={value === locale}
+              onClick={() => void onLocaleChange(value)}
+            >
+              {t(`locale.${value}`)}
+            </Button>
+          ))}
+          <ThemeToggle
+            labels={{
+              title: t("theme.title"),
+              light: t("theme.light"),
+              dark: t("theme.dark"),
+              system: t("theme.system"),
+            }}
+          />
+        </div>
       </div>
     </header>
   );

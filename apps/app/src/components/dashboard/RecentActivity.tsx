@@ -45,7 +45,7 @@ export function RecentActivity({
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 330px), 1fr))",
         gap: "var(--sp-7)",
       }}
     >

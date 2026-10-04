@@ -309,17 +309,17 @@ export function PlanScreen({
       {/* ---------------------------------------------------------------- */}
       <Card
         padded
-        style={{
-          display: "grid",
-          gap: "var(--sp-7)",
-          gridTemplateColumns: "minmax(240px, 0.8fr) minmax(0, 2.2fr)",
-          alignItems: "start",
-          borderColor: "var(--border)",
-          borderTopColor: "var(--accent)",
-          borderTopWidth: 3,
-          background: "var(--surface)",
-          marginBottom: "var(--sp-7)",
-        }}
+        className="upm-split"
+        style={
+          {
+            "--split-cols": "minmax(240px, 0.8fr) minmax(0, 2.2fr)",
+            borderColor: "var(--border)",
+            borderTopColor: "var(--accent)",
+            borderTopWidth: 3,
+            background: "var(--surface)",
+            marginBottom: "var(--sp-7)",
+          } as React.CSSProperties
+        }
       >
         <div style={{ display: "grid", gap: "var(--sp-2)" }}>
           <span
@@ -367,7 +367,11 @@ export function PlanScreen({
             style={{
               display: "grid",
               gap: "var(--sp-4)",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              /* Seis medidores. Em três colunas fixas ficavam com 60 px cada no
+                 telemóvel e a barra deixava de se ler. Os 240 px mantêm as três
+                 colunas do desenho em ecrã largo (3 + 3) e descem sozinhos a
+                 duas e a uma à medida que o espaço aperta. */
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
             }}
           >
             {usageRows.map((key) => (
@@ -466,7 +470,7 @@ export function PlanScreen({
         style={{
           display: "grid",
           gap: "var(--sp-7)",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))",
           marginBottom: "var(--sp-9)",
         }}
       >
@@ -601,8 +605,12 @@ export function PlanScreen({
         <Card
           padded
           style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) auto auto",
+            /* Texto · preço · botão. Em três colunas de grelha o preço e o
+               botão não encolhiam e empurravam o cartão para fora do ecrã;
+               em flex com `wrap` descem para a linha de baixo. O `flex` do
+               primeiro filho já contava com isto. */
+            display: "flex",
+            flexWrap: "wrap",
             columnGap: "var(--sp-7)",
             rowGap: "var(--sp-4)",
             alignItems: "center",

@@ -265,66 +265,79 @@ function TrafficChart({ series, locale }: { series: TrafficPoint[]; locale: stri
           </div>
         </div>
 
-        <div
-          aria-hidden="true"
-          style={{ display: "flex", alignItems: "flex-end", gap: 3, height: PLOT_HEIGHT }}
-        >
-          {series.map((point, index) => {
-            const total = Math.max(1, Math.round((point.visits / max) * PLOT_HEIGHT));
-            const converted = point.visits > 0 ? (point.conversions / point.visits) * total : 0;
-            return (
-              <div
-                key={point.date}
-                title={`${point.date} · ${number.format(point.visits)} / ${number.format(point.conversions)}`}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 6,
-                  height: "100%",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <span
+        {/* Trinta barras não cabem em 360 px sem deixarem de ser um gráfico, e
+            como item de grelha a fila impunha ao cartão a sua largura mínima
+            (≈440 px) — era isto que fazia a página do Tráfego rolar de lado.
+            Com rolo próprio, a fila deixa de mandar na largura do cartão
+            (um contentor que rola tem mínimo automático zero) e as barras
+            mantêm-se legíveis. */}
+        <div aria-hidden="true" style={{ overflowX: "auto", minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 3,
+              height: PLOT_HEIGHT,
+              minWidth: "100%",
+            }}
+          >
+            {series.map((point, index) => {
+              const total = Math.max(1, Math.round((point.visits / max) * PLOT_HEIGHT));
+              const converted = point.visits > 0 ? (point.conversions / point.visits) * total : 0;
+              return (
+                <div
+                  key={point.date}
+                  title={`${point.date} · ${number.format(point.visits)} / ${number.format(point.conversions)}`}
                   style={{
+                    flex: 1,
+                    minWidth: 0,
                     display: "flex",
                     flexDirection: "column",
+                    alignItems: "center",
+                    gap: 6,
+                    height: "100%",
                     justifyContent: "flex-end",
-                    width: "100%",
-                    maxWidth: 28,
-                    height: total,
-                    borderRadius: "6px 6px 4px 4px",
-                    overflow: "hidden",
-                    background: "var(--surface3)",
                   }}
                 >
-                  {/* 2 px de folga da superfície entre as duas áreas, para a
-                      fronteira ser visível mesmo com pouca conversão. */}
                   <span
                     style={{
-                      height: Math.max(converted > 0 ? 3 : 0, Math.round(converted)),
-                      background: "var(--accent)",
-                      borderTop: converted > 0 ? "2px solid var(--surface)" : "none",
-                      borderRadius: "4px 4px 4px 4px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "flex-end",
+                      width: "100%",
+                      maxWidth: 28,
+                      height: total,
+                      borderRadius: "6px 6px 4px 4px",
+                      overflow: "hidden",
+                      background: "var(--surface3)",
                     }}
-                  />
-                </span>
-                <span
-                  style={{
-                    fontSize: "var(--fs-label)",
-                    color: "var(--muted)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {index % labelEvery === 0
-                    ? dayLabel.format(new Date(`${point.date}T00:00:00Z`))
-                    : ""}
-                </span>
-              </div>
-            );
-          })}
+                  >
+                    {/* 2 px de folga da superfície entre as duas áreas, para a
+                      fronteira ser visível mesmo com pouca conversão. */}
+                    <span
+                      style={{
+                        height: Math.max(converted > 0 ? 3 : 0, Math.round(converted)),
+                        background: "var(--accent)",
+                        borderTop: converted > 0 ? "2px solid var(--surface)" : "none",
+                        borderRadius: "4px 4px 4px 4px",
+                      }}
+                    />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "var(--fs-label)",
+                      color: "var(--muted)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {index % labelEvery === 0
+                      ? dayLabel.format(new Date(`${point.date}T00:00:00Z`))
+                      : ""}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <p style={{ margin: 0, fontSize: "var(--fs-label)", color: "var(--muted)" }}>
@@ -398,6 +411,11 @@ function BreakdownCard({
               <div style={{ display: "flex", gap: "var(--sp-3)", fontSize: "var(--fs-body)" }}>
                 <span
                   style={{
+                    /* Sem `minWidth: 0` o `…` nunca chega a acontecer: um item
+                       flex vale por omissão o tamanho do seu conteúdo, e um
+                       `nowrap` com um referrer comprido lá dentro esticava a
+                       linha, o cartão e a página inteira. */
+                    minWidth: 0,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",

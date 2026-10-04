@@ -188,6 +188,22 @@
     background var(--transition);
 }
 
+/**
+ * Ecrã táctil: o campo sobe para 16 px e para `--tap`.
+ *
+ * Os 13 px e os 36 px são medida de rato (04 §1.8) e ficam intactos aí. Num
+ * telemóvel custam duas coisas: o Safari do iOS dá zoom sozinho a qualquer
+ * campo com menos de 16 px assim que lhe tocam — a página salta, e sair dali
+ * é a pinça do utilizador — e 36 px fica abaixo dos 40 px que 07 §5.14 pede a
+ * um alvo de dedo. `pointer: coarse` apanha o dedo e deixa o rato em paz.
+ */
+@media (pointer: coarse) {
+  .upm-control {
+    height: var(--tap);
+    font-size: 16px;
+  }
+}
+
 .upm-control:hover:not([data-disabled="true"]) {
   border-color: var(--border2);
 }
@@ -930,4 +946,54 @@
   height: var(--tap);
   color: var(--muted);
   font-size: var(--fs-body);
+}
+
+/* =========================================================================
+ * Layout — duas colunas que empilham (02 §13)
+ * ====================================================================== */
+
+/**
+ * Os estilos em linha do produto não têm pontos de quebra, e metade dos ecrãs
+ * precisa de um: conteúdo + coluna lateral que, no telemóvel, tem de passar a
+ * uma coluna só. Daí este utilitário.
+ *
+ * O **desenho** das colunas continua junto ao componente, em `--split-cols`,
+ * que é onde se lê; o **ponto de quebra** vive aqui, igual para todos — os
+ * mesmos 900 px do `fill` do shell e da grelha das Mensagens, para os três
+ * ecrãs mudarem de forma ao mesmo tempo.
+ *
+ * Abaixo dos 900 px é uma coluna de `minmax(0, 1fr)`: o `0` é o que impede uma
+ * tabela ou uma imagem larga de esticar a grelha e fazer a página rolar de
+ * lado — 02 §13 pede 360 px sem scroll horizontal.
+ */
+.upm-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--split-gap, var(--sp-7));
+  align-items: var(--split-align, start);
+  min-width: 0;
+}
+
+@media (width >= 900px) {
+  .upm-split {
+    grid-template-columns: var(--split-cols, minmax(0, 1fr) minmax(280px, 360px));
+  }
+}
+
+/* A coluna lateral só se cola ao topo quando *é* uma coluna. Empilhada, um
+   `position: sticky` prendia-a por cima do conteúdo que devia vir a seguir. */
+.upm-split__aside {
+  min-width: 0;
+}
+
+@media (width >= 900px) {
+  .upm-split__aside--sticky {
+    position: sticky;
+    /* A topbar é `sticky` e tem 68 px: sem a somar aqui, a coluna lateral
+       colava-se ao topo do viewport e desaparecia por baixo dela. */
+    top: var(--split-aside-top, calc(var(--topbar-h) + var(--sp-7)));
+    /* A altura só se trava quando há coluna: empilhada, o painel cresce com o
+       que tem dentro em vez de ficar com uma janela de 100vh vazia. */
+    height: var(--split-aside-h, auto);
+  }
 }

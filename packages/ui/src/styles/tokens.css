@@ -341,6 +341,11 @@ body {
   line-height: var(--lh-normal);
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+  /* 02 §13 pede 360 px sem rolo horizontal, e o que o parte mais depressa não
+     é uma grelha — é uma palavra que não cabe: um email de remetente, um URL
+     de partilha, uma referência de imóvel. Sem isto, uma dessas estica o
+     cartão que a contém e leva a página inteira atrás. */
+  overflow-wrap: break-word;
 }
 
 a {

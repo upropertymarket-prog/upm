@@ -384,25 +384,30 @@ export function CloudScreen(props: CloudScreenProps) {
         }
       />
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(200px, 248px) 1fr",
-          gap: "var(--sp-7)",
-          alignItems: "stretch",
-        }}
+        className="upm-split"
+        style={
+          {
+            "--split-cols": "minmax(200px, 248px) minmax(0, 1fr)",
+            "--split-align": "stretch",
+          } as React.CSSProperties
+        }
       >
-        {/* Coluna das pastas — sticky, como 04 §1.4 pede às colunas laterais. */}
+        {/* Coluna das pastas — sticky, como 04 §1.4 pede às colunas laterais,
+            mas só enquanto *for* uma coluna: abaixo de 900 px passa para cima
+            da lista de ficheiros, com a altura do que tem dentro em vez de uma
+            janela de 100vh que deixava meio ecrã em branco. */}
         <Card
           padded
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr auto",
-            gap: "var(--sp-6)",
-            position: "sticky",
-            top: "var(--sp-7)",
-            height:
-              "calc(100vh - var(--topbar-h) - var(--sp-9) - var(--sp-7) - var(--sp-9) - 6rem)",
-          }}
+          className="upm-split__aside upm-split__aside--sticky"
+          style={
+            {
+              "--split-aside-h":
+                "calc(100vh - var(--topbar-h) - var(--sp-9) - var(--sp-7) - var(--sp-9) - 6rem)",
+              display: "grid",
+              gridTemplateRows: "1fr auto",
+              gap: "var(--sp-6)",
+            } as React.CSSProperties
+          }
         >
           <div style={{ display: "grid", alignContent: "start", gap: "var(--sp-3)" }}>
             <NavRow
@@ -753,7 +758,18 @@ function NavRow({
       <span aria-hidden="true" style={{ display: "grid", placeItems: "center", flex: "none" }}>
         {icon}
       </span>
-      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      {/* `minWidth: 0`: `flex: 1` dá-lhe uma base de 0 mas não lhe tira o
+          mínimo de conteúdo, e sem isso o nome de uma pasta comprida alargava
+          o botão em vez de ganhar o `…`. */}
+      <span
+        style={{
+          flex: 1,
+          minWidth: 0,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
         {label}
       </span>
       {count > 0 ? <span style={{ color: "var(--muted)" }}>{count}</span> : null}

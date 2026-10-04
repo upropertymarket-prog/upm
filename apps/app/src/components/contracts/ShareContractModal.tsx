@@ -219,7 +219,13 @@ export function ShareContractModal({
 
         <section style={{ display: "grid", gap: "var(--sp-4)" }}>
           <strong>Ligação</strong>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--sp-4)" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 136px), 1fr))",
+              gap: "var(--sp-4)",
+            }}
+          >
             <Select
               label="Expira"
               value={expiryIndex}
@@ -244,6 +250,7 @@ export function ShareContractModal({
               <code
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   padding: "var(--sp-3)",
                   borderRadius: "var(--r-sm)",
                   background: "var(--surface2)",

@@ -267,13 +267,16 @@ export function ContractEditor(props: ContractEditorProps) {
         </div>
       </Card>
 
+      {/* Folha + painel de variáveis. Abaixo de 900 px o painel passa para
+          baixo da folha: ao lado, sobrava-lhe menos de 100 px de largura. */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(240px, 300px)",
-          gap: "var(--sp-6)",
-          alignItems: "start",
-        }}
+        className="upm-split"
+        style={
+          {
+            "--split-cols": "minmax(0, 1fr) minmax(240px, 300px)",
+            "--split-gap": "var(--sp-6)",
+          } as React.CSSProperties
+        }
       >
         <div style={{ display: "grid", gap: "var(--sp-4)", minWidth: 0 }}>
           {mode === "edit" ? (

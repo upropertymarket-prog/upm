@@ -201,7 +201,7 @@ export function PlansManager({
         title="Planos"
         subtitle="Receita, planos e faturação da plataforma"
         actions={
-          <div style={{ display: "flex", gap: "var(--sp-4)" }}>
+          <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
             <Button
               variant="secondary"
               disabled={syncing}
@@ -227,7 +227,7 @@ export function PlansManager({
         style={{
           display: "grid",
           gap: "var(--sp-6)",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
           marginBottom: "var(--sp-8)",
         }}
       >
@@ -253,7 +253,7 @@ export function PlansManager({
         style={{
           display: "grid",
           gap: "var(--sp-7)",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
           alignItems: "start",
           marginBottom: "var(--sp-8)",
         }}
@@ -549,7 +549,7 @@ function PlanForm({
         style={{
           display: "grid",
           gap: "var(--sp-5)",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
         }}
       >
         <Input label="Nome" name="name" defaultValue={plan?.name ?? ""} required maxLength={80} />
@@ -599,7 +599,7 @@ function PlanForm({
           style={{
             display: "grid",
             gap: "var(--sp-5)",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
           }}
         >
           {LIMIT_KEYS.map((key: LimitKey) => (
