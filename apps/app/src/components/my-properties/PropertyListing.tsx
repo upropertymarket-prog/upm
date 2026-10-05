@@ -109,7 +109,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 className="upm-card__title">As minhas propriedades</h1>
         <div style={{ maxWidth: 220, width: "100%" }}>
           <PropertyStatusFilter value={statusValue} options={PROPERTY_STATUS_OPTIONS} />
