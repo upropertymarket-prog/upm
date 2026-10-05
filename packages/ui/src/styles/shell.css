@@ -476,7 +476,7 @@
 
 .upm-pagehead {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--sp-7);
   flex-wrap: wrap;
   padding-bottom: var(--sp-7);
