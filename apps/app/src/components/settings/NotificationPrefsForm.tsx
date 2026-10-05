@@ -67,6 +67,8 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
+              // Ajuste de canvas pedido só para a linha dos alertas de pesquisa.
+              justifyContent: type === "search_alert" ? "center" : undefined,
               gap: "var(--sp-7)",
               paddingBottom: "var(--sp-5)",
               borderBottom: "1px solid var(--border)",
