@@ -18,6 +18,9 @@ export type ArchivePropertyButtonProps = {
    * propriedade e do wizard de autenticação da Fase 3).
    */
   onArchive: ArchivePropertyAction;
+  /** Imóvel já arquivado: o botão fica visível mas inerte, para a linha não
+   *  perder uma coluna de ações a meio da tabela. */
+  disabled?: boolean;
 };
 
 /**
@@ -29,6 +32,7 @@ export function ArchivePropertyButton({
   propertyId,
   title,
   onArchive,
+  disabled = false,
 }: ArchivePropertyButtonProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,8 @@ export function ArchivePropertyButton({
       <Button
         variant="danger"
         size="sm"
+        disabled={disabled}
+        title={disabled ? "Este imóvel já está arquivado." : undefined}
         leadingIcon={<Archive size={15} />}
         onClick={() => setOpen(true)}
       >

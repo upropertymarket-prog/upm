@@ -509,10 +509,27 @@
   background: var(--accent-soft);
 }
 
-.upm-table__num {
-  text-align: right;
+/* Só a forma dos algarismos, e só no corpo: o cabeçalho é texto, não número, e
+   em monoespaçada destacava-se dos outros títulos de coluna. O alinhamento vive
+   em `__start` / `__end`, senão uma coluna numérica não poderia alinhar à
+   esquerda sem perder os numerais tabulares. */
+.upm-table tbody td.upm-table__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Cabeçalho e células na mesma regra: o `text-align: left` de
+   `.upm-table thead th` tem mais especificidade do que uma classe sozinha, e
+   era por isso que o título de uma coluna numérica ficava à esquerda enquanto
+   os valores iam para a direita. */
+.upm-table thead th.upm-table__start,
+.upm-table tbody td.upm-table__start {
+  text-align: left;
+}
+
+.upm-table thead th.upm-table__end,
+.upm-table tbody td.upm-table__end {
+  text-align: right;
 }
 
 .upm-table__empty td {

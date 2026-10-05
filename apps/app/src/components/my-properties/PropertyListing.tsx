@@ -75,10 +75,20 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
           />
         ),
     },
-    { id: "title", header: "Título", cell: (row) => row.title || "(sem título)" },
+    // Larguras medidas no canvas. Somam a largura útil da tabela, por isso a
+    // folga fica repartida em vez de abrir um buraco numa coluna só.
+    {
+      id: "title",
+      header: "Título",
+      width: "314px",
+      cell: (row) => (
+        <span style={{ fontWeight: "var(--fw-medium)" }}>{row.title || "(sem título)"}</span>
+      ),
+    },
     {
       id: "status",
       header: "Estado",
+      width: "138px",
       cell: (row) => (
         <StatusTag tone={PROPERTY_STATUS_TONE[row.status]}>
           {PROPERTY_STATUS_LABEL[row.status]}
@@ -89,19 +99,52 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
       id: "price",
       header: "Preço",
       numeric: true,
+      align: "left",
+      width: "162px",
       cell: (row) => formatCents(row.price_cents ?? row.rent_cents),
     },
-    { id: "views", header: "Visitas", numeric: true, cell: (row) => row.views_count },
+    {
+      id: "views",
+      header: "Visitas",
+      numeric: true,
+      align: "left",
+      width: "139px",
+      cell: (row) => row.views_count,
+    },
     {
       id: "actions",
       header: "Ações",
+      align: "left",
+      width: "290px",
       cell: (row) => (
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center" }}>
-          <a href={`/propriedades/${row.id}/estatisticas`}>Estatísticas</a>
-          <a href={`/propriedades/${row.id}/editar`}>Editar</a>
-          {row.status !== "archived" ? (
-            <ArchivePropertyButton propertyId={row.id} title={row.title} onArchive={onArchive} />
-          ) : null}
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--sp-4)",
+            alignItems: "center",
+            justifyContent: "flex-start",
+          }}
+        >
+          <a
+            href={`/propriedades/${row.id}/estatisticas`}
+            className="upm-btn upm-btn--secondary upm-btn--sm"
+            style={{ textDecoration: "none" }}
+          >
+            Estatísticas
+          </a>
+          <a
+            href={`/propriedades/${row.id}/editar`}
+            className="upm-btn upm-btn--secondary upm-btn--sm"
+            style={{ textDecoration: "none" }}
+          >
+            Editar
+          </a>
+          <ArchivePropertyButton
+            propertyId={row.id}
+            title={row.title}
+            onArchive={onArchive}
+            disabled={row.status === "archived"}
+          />
         </div>
       ),
     },

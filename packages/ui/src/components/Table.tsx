@@ -5,11 +5,19 @@ export type TableColumn<Row> = {
   id: string;
   header: React.ReactNode;
   cell: (row: Row) => React.ReactNode;
-  /** Alinha à direita e usa numerais tabulares (preços, contagens). */
+  /** Numerais tabulares e, por omissão, alinhamento à direita. */
   numeric?: boolean;
+  /** Força o alinhamento da coluna — cabeçalho e células — ignorando `numeric`. */
+  align?: "left" | "right";
   /** Largura CSS da coluna (`160px`, `2fr` não se aplica — é `<table>`). */
   width?: string;
 };
+
+/** Classe de alinhamento da coluna; `numeric` sem `align` continua à direita. */
+function alignClass<Row>(column: TableColumn<Row>) {
+  if (column.align) return column.align === "left" ? "upm-table__start" : "upm-table__end";
+  return column.numeric ? "upm-table__end" : undefined;
+}
 
 export type TableProps<Row> = {
   /** Descreve a tabela para leitores de ecrã (`<caption>` escondido). */
@@ -61,7 +69,7 @@ export function Table<Row>({
               <th
                 key={column.id}
                 scope="col"
-                className={cx(column.numeric && "upm-table__num")}
+                className={cx(column.numeric && "upm-table__num", alignClass(column))}
                 style={column.width ? { width: column.width } : undefined}
               >
                 {column.header}
@@ -96,7 +104,10 @@ export function Table<Row>({
                   }
                 >
                   {columns.map((column) => (
-                    <td key={column.id} className={cx(column.numeric && "upm-table__num")}>
+                    <td
+                      key={column.id}
+                      className={cx(column.numeric && "upm-table__num", alignClass(column))}
+                    >
                       {column.cell(row)}
                     </td>
                   ))}
