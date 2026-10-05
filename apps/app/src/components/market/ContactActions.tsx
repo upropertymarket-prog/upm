@@ -85,7 +85,7 @@ export function ContactActions({
         Contactar proprietário
       </Button>
       <Button variant="secondary" fullWidth onClick={() => setOpen(true)} disabled={pending}>
-        Pedir visita
+        Solicitar visita
       </Button>
 
       <Modal
