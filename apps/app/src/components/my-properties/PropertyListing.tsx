@@ -80,7 +80,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
     {
       id: "title",
       header: "Título",
-      width: "314px",
+      width: "328px",
       cell: (row) => (
         <span style={{ fontWeight: "var(--fw-medium)" }}>{row.title || "(sem título)"}</span>
       ),
@@ -100,7 +100,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
       header: "Preço",
       numeric: true,
       align: "left",
-      width: "162px",
+      width: "164px",
       cell: (row) => formatCents(row.price_cents ?? row.rent_cents),
     },
     {
@@ -108,7 +108,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
       header: "Visitas",
       numeric: true,
       align: "left",
-      width: "139px",
+      width: "138px",
       cell: (row) => row.views_count,
     },
     {
