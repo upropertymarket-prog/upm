@@ -116,9 +116,10 @@ defineAsset(Brand, {
 defineAsset(ThemeToggle, {
   libraries: ["upm-base"],
   usageInstructions:
-    "Alternador Claro / Escuro / Sistema (04 §5.2). Três opções e não duas: sem 'Sistema' explícito não há como voltar a seguir o sistema operativo depois de uma escolha manual. `variant='menu'` na topbar (botão com menu); `variant='inline'` em Definições › Aparência, onde a escolha é o conteúdo da secção. Tem de viver dentro de um <ThemeProvider>; a persistência em profiles.theme é injetada por uma Server Action da app.",
+    "Alternador de tema (04 §5.2). `variant='segmented'` na topbar: só Claro e Escuro, a troca do dia a dia a um clique — com 'Sistema' escolhido marca o tema aplicado. `variant='inline'` em Definições › Aparência: as três opções, incluindo 'Sistema', porque sem ela não há como voltar a seguir o sistema operativo depois de uma escolha manual — não remover de lá. `variant='menu'` (botão com menu) onde a largura não chegar para rótulos. Tem de viver dentro de um <ThemeProvider>; a persistência em profiles.theme é injetada por uma Server Action da app.",
   variants: {
-    NaTopbar: { props: {} },
-    EmDefinicoes: { props: { variant: "inline" } },
+    NaTopbar: { props: { variant: "segmented" as const } },
+    EmDefinicoes: { props: { variant: "inline" as const } },
+    ComoMenu: { props: {} },
   },
 });

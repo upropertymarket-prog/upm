@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
+import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
 import { PropertyFilters } from "../../../../apps/app/src/components/market/PropertyFilters";
@@ -78,7 +79,7 @@ function MarketDemo({ theme }: Tema) {
   return (
     <Shell theme={theme} activeId="market">
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <h1 className="upm-card__title">Market</h1>
+        <PageHeader title="Market" subtitle={`${demoMarketCards.length} imóveis publicados`} />
         <PropertyFilters />
         <MarketResults properties={demoMarketCards} page={1} pageCount={3} query="" />
       </div>

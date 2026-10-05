@@ -69,23 +69,25 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
               alignItems: "center",
               gap: "var(--sp-7)",
               padding: "var(--sp-3) 0",
-              // Ajuste de canvas: a linha de label mais longa iguala a altura
-              // das restantes em vez de crescer quando o texto quebra.
-              height: type === "price_drop" ? "54px" : undefined,
               borderBottom: "1px solid var(--border)",
             }}
           >
             <span style={{ flex: "1 1 240px", minWidth: 0 }}>{NOTIFICATION_TYPE_LABELS[type]}</span>
-            <Toggle
-              label="Na aplicação"
-              checked={prefEnabled(draft, type, "inapp")}
-              onCheckedChange={(value) => set(type, "inapp", value)}
-            />
-            <Toggle
-              label="Por e-mail"
-              checked={prefEnabled(draft, type, "email")}
-              onCheckedChange={(value) => set(type, "email", value)}
-            />
+            {/* Os dois canais empilhados: lado a lado, "Na aplicação" e "Por
+                e-mail" liam-se como um par de opções da mesma pergunta em vez
+                de dois interruptores independentes. */}
+            <span style={{ display: "grid", gap: "var(--sp-3)", justifyItems: "start" }}>
+              <Toggle
+                label="Na aplicação"
+                checked={prefEnabled(draft, type, "inapp")}
+                onCheckedChange={(value) => set(type, "inapp", value)}
+              />
+              <Toggle
+                label="Por e-mail"
+                checked={prefEnabled(draft, type, "email")}
+                onCheckedChange={(value) => set(type, "email", value)}
+              />
+            </span>
           </li>
         ))}
       </ul>

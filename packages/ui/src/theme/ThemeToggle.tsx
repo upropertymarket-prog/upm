@@ -5,15 +5,24 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { cx } from "../lib/cx";
 import { useClickOutside } from "../lib/useDismissable";
 import { Button } from "../components/Button";
-import { THEME_CHOICES, type ThemeChoice } from "./theme";
+import { THEME_CHOICES, type ResolvedTheme, type ThemeChoice } from "./theme";
 import { useTheme } from "./ThemeProvider";
 import { useState } from "react";
 
-const ICON: Record<ThemeChoice, React.ReactNode> = {
-  light: <Sun size={17} />,
-  dark: <Moon size={17} />,
-  system: <Monitor size={17} />,
+const ICON: Record<ThemeChoice, React.ComponentType<{ size?: number }>> = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
 };
+
+/** O segmentado da topbar não oferece "Sistema" — ver a nota no componente. */
+const SEGMENTED_CHOICES = ["light", "dark"] as const satisfies readonly ResolvedTheme[];
+
+/** O segmentado é mais baixo do que o botão da topbar e pede ícone menor. */
+function icon(choice: ThemeChoice, size = 17) {
+  const Glyph = ICON[choice];
+  return <Glyph size={size} />;
+}
 
 export type ThemeToggleLabels = {
   /** Nome do controlo, para leitores de ecrã. */
@@ -36,9 +45,11 @@ const DEFAULT_LABELS: ThemeToggleLabels = {
  * Três opções e não duas: sem "Sistema" explícito não há como voltar a seguir o
  * sistema operativo depois de uma escolha manual.
  *
- * Na topbar é um botão com menu (o espaço é o que é); em Definições › Aparência
- * o mesmo componente rende-se em três botões lado a lado (`variant="inline"`),
- * porque aí a escolha é o conteúdo da secção.
+ * Na topbar é um controlo segmentado (`variant="segmented"`) com **duas**
+ * opções, Claro e Escuro: é a troca do dia a dia e tem de estar a um clique.
+ * "Sistema" fica em Definições › Aparência, onde o `variant="inline"` mostra as
+ * três — é lá que a escolha volta atrás. O `variant="menu"` continua disponível
+ * para onde a largura não chegar para rótulos.
  *
  * O ícone mostrado é o da **escolha**, não o do tema resolvido: com "Sistema"
  * selecionado tem de aparecer o monitor, senão o utilizador não distingue
@@ -52,11 +63,11 @@ export function ThemeToggle({
   labels = DEFAULT_LABELS,
   className,
 }: {
-  variant?: "menu" | "inline";
+  variant?: "menu" | "inline" | "segmented";
   labels?: ThemeToggleLabels;
   className?: string;
 }) {
-  const { choice, setChoice } = useTheme();
+  const { choice, resolved, setChoice } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useClickOutside<HTMLDivElement>(open, () => setOpen(false));
 
@@ -65,6 +76,37 @@ export function ThemeToggle({
     dark: labels.dark,
     system: labels.system,
   };
+
+  if (variant === "segmented") {
+    // Só Claro e Escuro: "Sistema" continua a existir, em Definições ›
+    // Aparência, que é onde 04 §5.2 pede que a escolha seja reversível. Com
+    // `system` escolhido marca-se o tema que está mesmo aplicado — um
+    // segmentado sem nenhuma opção ativa não diria nada ao utilizador.
+    const active: ResolvedTheme = choice === "system" ? resolved : choice;
+
+    return (
+      <div
+        className={cx("upm-segmented", className)}
+        role="radiogroup"
+        aria-label={labels.title}
+        data-testid="upm-theme-segmented"
+      >
+        {SEGMENTED_CHOICES.map((option) => (
+          <button
+            key={option}
+            type="button"
+            role="radio"
+            aria-checked={active === option}
+            className="upm-segmented__option"
+            onClick={() => setChoice(option)}
+          >
+            {icon(option, 15)}
+            {text[option]}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (variant === "inline") {
     return (
@@ -84,7 +126,7 @@ export function ThemeToggle({
             className="upm-tab"
             onClick={() => setChoice(option)}
           >
-            {ICON[option]}
+            {icon(option)}
             {text[option]}
           </button>
         ))}
@@ -103,7 +145,7 @@ export function ThemeToggle({
         title={`${labels.title}: ${text[choice]}`}
         onClick={() => setOpen((value) => !value)}
       >
-        {ICON[choice]}
+        {icon(choice)}
       </Button>
       {open ? (
         <div className="upm-menu__panel" role="menu" aria-label={labels.title}>
@@ -119,7 +161,7 @@ export function ThemeToggle({
                 setOpen(false);
               }}
             >
-              {ICON[option]}
+              {icon(option)}
               {text[option]}
             </button>
           ))}

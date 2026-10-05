@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PropertyFilters } from "../../components/market/PropertyFilters";
@@ -116,7 +117,14 @@ export default async function MarketPage({
       onLocaleChange={setLocalePreference}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <h1 className="upm-card__title">Market</h1>
+        <PageHeader
+          title="Market"
+          subtitle={
+            (count ?? 0) === 0
+              ? "Sem imóveis publicados para estes filtros"
+              : `${count} ${count === 1 ? "imóvel publicado" : "imóveis publicados"}`
+          }
+        />
         <PropertyFilters
           initial={{
             deal: params.negocio,

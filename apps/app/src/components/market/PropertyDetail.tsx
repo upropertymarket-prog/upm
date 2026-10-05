@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Bath, BedDouble, CalendarDays, Layers, Ruler, Zap } from "lucide-react";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { PropertyLocationMap } from "../map/PropertyLocationMap";
@@ -169,15 +170,32 @@ export function PropertyDetail({
               margin: 0,
             }}
           >
-            <Detail label="Tipologia" value={property.typology} />
             <Detail
+              icon={<BedDouble {...DETAIL_ICON} />}
+              label="Tipologia"
+              value={property.typology}
+            />
+            <Detail
+              icon={<Ruler {...DETAIL_ICON} />}
               label="Área bruta"
               value={property.grossArea ? `${property.grossArea} m²` : null}
             />
-            <Detail label="Casas de banho" value={property.bathrooms?.toString() ?? null} />
-            <Detail label="Piso" value={property.floor} />
-            <Detail label="Ano de construção" value={property.yearBuilt?.toString() ?? null} />
-            <Detail label="Certificado energético" value={property.energyCert} />
+            <Detail
+              icon={<Bath {...DETAIL_ICON} />}
+              label="Casas de banho"
+              value={property.bathrooms?.toString() ?? null}
+            />
+            <Detail icon={<Layers {...DETAIL_ICON} />} label="Piso" value={property.floor} />
+            <Detail
+              icon={<CalendarDays {...DETAIL_ICON} />}
+              label="Ano de construção"
+              value={property.yearBuilt?.toString() ?? null}
+            />
+            <Detail
+              icon={<Zap {...DETAIL_ICON} />}
+              label="Certificado energético"
+              value={property.energyCert}
+            />
           </dl>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <h2 style={{ margin: 0, fontSize: 17 }}>Descrição do proprietário</h2>
@@ -231,7 +249,18 @@ export function PropertyDetail({
   );
 }
 
-function Detail({ label, value }: { label: string; value: string | null | undefined }) {
+/** Os ícones dos factos são todos iguais: neutros, do tamanho do rótulo. */
+const DETAIL_ICON = { size: 15, "aria-hidden": true, style: { flexShrink: 0 } } as const;
+
+function Detail({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | null | undefined;
+}) {
   if (!value) return null;
   return (
     <div
@@ -242,7 +271,18 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
         background: "var(--surface)",
       }}
     >
-      <dt style={{ color: "var(--muted)", fontSize: 12 }}>{label}</dt>
+      <dt
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          color: "var(--muted)",
+          fontSize: 12,
+        }}
+      >
+        {icon}
+        {label}
+      </dt>
       <dd style={{ margin: "4px 0 0", fontWeight: 700 }}>{value}</dd>
     </div>
   );

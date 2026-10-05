@@ -1,6 +1,6 @@
 "use client";
 
-import { LifeBuoy, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LifeBuoy, LogOut, PanelLeftClose } from "lucide-react";
 
 import { cx } from "../lib/cx";
 import { Badge } from "../components/StatusTag";
@@ -81,18 +81,37 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="upm-sidebar" style={{ justifyContent: "space-between" }}>
+      {/* No rail não há botão próprio de expandir: no espaço de 84 px, duas
+          caixas empilhadas liam-se como dois controlos sem relação. É o ícone
+          da marca que expande — continua a ser um `<button>`, por isso mantém
+          teclado, foco visível e `aria-expanded`. */}
       <div className="upm-sidebar__brand" style={{ justifyContent: "space-between" }}>
-        <Brand collapsed={collapsed} />
-        <button
-          type="button"
-          className="upm-btn upm-btn--secondary upm-btn--icon"
-          aria-label={collapsed ? labels.expand : labels.collapse}
-          title={collapsed ? labels.expand : labels.collapse}
-          aria-expanded={!collapsed}
-          onClick={() => onCollapsedChange(!collapsed)}
-        >
-          {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
-        </button>
+        {collapsed ? (
+          <button
+            type="button"
+            className="upm-sidebar__brand-toggle"
+            aria-label={labels.expand}
+            title={labels.expand}
+            aria-expanded={false}
+            onClick={() => onCollapsedChange(false)}
+          >
+            <Brand collapsed />
+          </button>
+        ) : (
+          <>
+            <Brand />
+            <button
+              type="button"
+              className="upm-btn upm-btn--secondary upm-btn--icon"
+              aria-label={labels.collapse}
+              title={labels.collapse}
+              aria-expanded
+              onClick={() => onCollapsedChange(true)}
+            >
+              <PanelLeftClose size={15} />
+            </button>
+          </>
+        )}
       </div>
 
       {groups.map((group) => (

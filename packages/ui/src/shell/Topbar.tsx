@@ -143,7 +143,7 @@ export function Topbar({
             ) : null}
           </div>
 
-          <ThemeToggle labels={labels.theme} />
+          <ThemeToggle variant="segmented" labels={labels.theme} />
 
           <div className="upm-menu" ref={notifRef}>
             <Button
