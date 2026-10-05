@@ -67,10 +67,10 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
-              // Ajuste de canvas pedido só para a linha dos alertas de pesquisa.
-              justifyContent: type === "search_alert" ? "center" : undefined,
               gap: "var(--sp-7)",
-              paddingBottom: "var(--sp-5)",
+              // Ajuste de canvas: a linha de label mais longa iguala a altura
+              // das restantes em vez de crescer quando o texto quebra.
+              height: type === "price_drop" ? "54px" : undefined,
               borderBottom: "1px solid var(--border)",
             }}
           >
