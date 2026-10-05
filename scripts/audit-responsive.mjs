@@ -22,13 +22,20 @@ const PORT = 9333;
 
 /** Storyboard por ecrã — a lista cobre as três apps. */
 const SCREENS = [
+  // Proprietário, pela ordem da sidebar (07 §4.3) — a mesma do canvas.
   ["canvases/proprietario", "Painel"],
+  ["canvases/proprietario", "MarketClaro"],
+  ["canvases/proprietario", "DetalheClaro"],
+  ["canvases/proprietario", "PropriedadesClaro"],
+  ["canvases/proprietario", "NovaPropriedadeClaro"],
   ["canvases/proprietario", "Leads"],
   ["canvases/proprietario", "Mensagens"],
   ["canvases/proprietario", "Agenda"],
+  ["canvases/proprietario", "MapaClaro"],
   ["canvases/proprietario", "CloudClaro"],
   ["canvases/proprietario", "ContratosClaro"],
   ["canvases/proprietario", "Plano"],
+  ["canvases/proprietario", "DefinicoesClaro"],
   ["canvases/admin", "AdminDashboardClaro"],
   ["canvases/admin", "AdminUtilizadoresClaro"],
   ["canvases/admin", "AdminModeracaoClaro"],

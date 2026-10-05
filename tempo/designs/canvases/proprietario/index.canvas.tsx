@@ -1,31 +1,50 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 import Painel, { PainelEscuro } from "./Painel";
 import Mensagens, { Agenda, AgendaEscuro, Leads, LeadsEscuro, MensagensEscuro } from "./Interacao";
+import {
+  DetalheClaro,
+  DetalheEscuro,
+  MarketClaro,
+  MarketEscuro,
+  NovaPropriedadeClaro,
+  NovaPropriedadeEscuro,
+  PropriedadesClaro,
+  PropriedadesEscuro,
+} from "./Imoveis";
+import { DefinicoesClaro, DefinicoesEscuro, MapaClaro, MapaEscuro } from "./MapaDefinicoes";
 import { CloudClaro, CloudEscuro, ContratosClaro, ContratosEscuro } from "./CloudContracts";
 import { PlanoClaro, PlanoEscuro } from "./Billing";
 
 /**
- * Canvas do Proprietário — Painel (Fase 4, completo na Fase 5) e os três ecrãs
- * da Fase 5: Mensagens, Agenda de visitas e Leads.
+ * Canvas do Proprietário — o perfil completo, ecrã a ecrã.
  *
- * As storyboards de Market, Mapa, As minhas propriedades, Nova propriedade e
- * Detalhe foram removidas na Fase 4 em favor de as reconstruir a partir de
- * componentes reais da app; o registo do que existia está no doc "Registo —
- * storyboards do Proprietário removidas (Fase 4)" e o código em `174b63f`.
+ * As storyboards de Market, Detalhe, As minhas propriedades, Nova propriedade e
+ * Mapa tinham sido removidas na Fase 4: eram UI escrita dentro da pasta do
+ * canvas, com pixels e cores próprios, e não uma projeção dos componentes da
+ * app (registo no doc "Registo — storyboards do Proprietário removidas (Fase
+ * 4)", código em `174b63f`). Voltam agora reconstruídas como deviam — um
+ * invólucro fino à volta dos componentes que as rotas usam — junto com
+ * Definições, que nunca chegou a ter storyboard.
+ *
+ * O Detalhe foi o último a poder voltar: só depois de `/market/[id]` deixar de
+ * ter a ficha escrita dentro da própria página, hoje no `PropertyDetail`.
  *
  * Sem `intrinsicSizing`: o enquadramento é um viewport de monitor (1440 × 900)
  * e o conteúdo rola lá dentro, como num ecrã verdadeiro.
  *
  * **Arrumação: duas colunas.** À esquerda (`x: 0`) o modo claro, à direita
- * (`x: 1520`) o escuro — 80 px entre eles, 80 px entre linhas. As linhas seguem
- * a **ordem da sidebar** de 07 §4.3, não a ordem em que os ecrãs foram
- * construídos: Painel (1.º), Leads (4.º), Mensagens (5.º), Agenda de visitas
- * (6.º). Os lugares vazios entre eles são as páginas que ainda não existem —
- * Market, As minhas propriedades, Mapa, Cloud, Contratos, reports, Plano e
- * Definições entram nas suas linhas quando forem construídas.
+ * (`x: 1520`) o escuro — 80 px entre eles, 80 px entre linhas. 04 §5.2 trata o
+ * modo escuro como requisito, não como variante opcional: ver o par lado a lado
+ * é o que apanha um contraste mau antes do código.
  *
- * 04 §5.2 trata o modo escuro como requisito, não como variante opcional —
- * ver o par lado a lado é o que apanha um contraste mau antes do código.
+ * **As linhas seguem a ordem da sidebar** de 07 §4.3, para percorrer o canvas
+ * de cima a baixo ser percorrer o menu de cima a baixo: Painel, Market,
+ * As minhas propriedades, Leads, Mensagens, Agenda, Mapa, Cloud, Contratos,
+ * Plano, Definições. Os dois ecrãs que não são itens de menu ficam logo a
+ * seguir ao item de onde se chega a eles — Detalhe depois do Market, Nova
+ * propriedade depois de As minhas propriedades.
+ *
+ * Falta "Os meus reports" (10.º): a rota `/reports` ainda não existe.
  */
 export default function ProprietarioCanvas() {
   return (
@@ -43,78 +62,159 @@ export default function ProprietarioCanvas() {
         layout={{ x: 1520, y: 0, width: 1440, height: 900 }}
       />
       <Storyboard
+        id="MarketClaro"
+        name="Market · Claro (/market)"
+        component={MarketClaro}
+        layout={{ x: 0, y: 980, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="MarketEscuro"
+        name="Market · Escuro (/market)"
+        component={MarketEscuro}
+        layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="DetalheClaro"
+        name="Detalhe do imóvel · Claro (/market/[id])"
+        component={DetalheClaro}
+        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="DetalheEscuro"
+        name="Detalhe do imóvel · Escuro (/market/[id])"
+        component={DetalheEscuro}
+        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="PropriedadesClaro"
+        name="As minhas propriedades · Claro (/propriedades)"
+        component={PropriedadesClaro}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="PropriedadesEscuro"
+        name="As minhas propriedades · Escuro (/propriedades)"
+        component={PropriedadesEscuro}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="NovaPropriedadeClaro"
+        name="Nova propriedade · Claro (/propriedades/nova)"
+        component={NovaPropriedadeClaro}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="NovaPropriedadeEscuro"
+        name="Nova propriedade · Escuro (/propriedades/nova)"
+        component={NovaPropriedadeEscuro}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
         id="Leads"
         name="Leads · Claro (/leads)"
         component={Leads}
-        layout={{ x: 0, y: 980, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="LeadsEscuro"
         name="Leads · Escuro (/leads)"
         component={LeadsEscuro}
-        layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Mensagens"
         name="Mensagens · Claro (/mensagens)"
         component={Mensagens}
-        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MensagensEscuro"
         name="Mensagens · Escuro (/mensagens)"
         component={MensagensEscuro}
-        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Agenda"
         name="Agenda de visitas · Claro (/agenda)"
         component={Agenda}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AgendaEscuro"
         name="Agenda de visitas · Escuro (/agenda)"
         component={AgendaEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
       />
+
+      <Storyboard
+        id="MapaClaro"
+        name="Mapa · Claro (/mapa)"
+        component={MapaClaro}
+        layout={{ x: 0, y: 7840, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="MapaEscuro"
+        name="Mapa · Escuro (/mapa)"
+        component={MapaEscuro}
+        layout={{ x: 1520, y: 7840, width: 1440, height: 900 }}
+      />
+
       <Storyboard
         id="CloudClaro"
         name="Cloud · Claro (/cloud)"
         component={CloudClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 8820, width: 1440, height: 900 }}
       />
       <Storyboard
         id="CloudEscuro"
         name="Cloud · Escuro (/cloud)"
         component={CloudEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 8820, width: 1440, height: 900 }}
       />
+
       <Storyboard
         id="ContratosClaro"
         name="Contratos · Claro (/contratos)"
         component={ContratosClaro}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 9800, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ContratosEscuro"
         name="Contratos · Escuro (/contratos)"
         component={ContratosEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 9800, width: 1440, height: 900 }}
       />
+
       <Storyboard
         id="Plano"
         name="Plano e faturação · Claro (/plano)"
         component={PlanoClaro}
-        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 10780, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PlanoEscuro"
         name="Plano e faturação · Escuro (/plano)"
         component={PlanoEscuro}
-        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 10780, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="DefinicoesClaro"
+        name="Definições · Claro (/definicoes)"
+        component={DefinicoesClaro}
+        layout={{ x: 0, y: 11760, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="DefinicoesEscuro"
+        name="Definições · Escuro (/definicoes)"
+        component={DefinicoesEscuro}
+        layout={{ x: 1520, y: 11760, width: 1440, height: 900 }}
       />
     </Canvas>
   );

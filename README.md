@@ -43,16 +43,17 @@ Arranca as três apps em paralelo, cada uma na sua porta.
 
 ## Comandos
 
-| Comando                                      | O que faz                                    |
-| -------------------------------------------- | -------------------------------------------- |
-| `pnpm dev`                                   | As 3 apps em modo de desenvolvimento         |
-| `pnpm build`                                 | Build de produção das 3 apps                 |
-| `pnpm lint` · `pnpm typecheck` · `pnpm test` | Verificação                                  |
-| `pnpm format`                                | Prettier sobre o monorepo                    |
-| `pnpm gate`                                  | Portão de segurança (doc 08)                 |
-| `pnpm db:push`                               | Aplica migrações ao projeto ligado           |
-| `pnpm db:types`                              | Regenera `packages/db/src/database.types.ts` |
-| `pnpm db:diff`                               | Diferenças entre o schema local e o remoto   |
+| Comando                                      | O que faz                                     |
+| -------------------------------------------- | --------------------------------------------- |
+| `pnpm dev`                                   | As 3 apps em modo de desenvolvimento          |
+| `pnpm build`                                 | Build de produção das 3 apps                  |
+| `pnpm lint` · `pnpm typecheck` · `pnpm test` | Verificação                                   |
+| `pnpm format`                                | Prettier sobre o monorepo                     |
+| `pnpm gate`                                  | Portão de segurança (doc 08)                  |
+| `pnpm audit:responsive [largura]`            | Mede rolo horizontal nas storyboards (02 §13) |
+| `pnpm db:push`                               | Aplica migrações ao projeto ligado            |
+| `pnpm db:types`                              | Regenera `packages/db/src/database.types.ts`  |
+| `pnpm db:diff`                               | Diferenças entre o schema local e o remoto    |
 
 ## Regras que não se negoceiam
 
@@ -61,6 +62,7 @@ Arranca as três apps em paralelo, cada uma na sua porta.
 - **RLS ativa em todas as tabelas.** Toda a leitura sensível passa por RLS; a `service_role` vive apenas em Edge Functions, webhooks e no `mail-worker` (02 §3.3).
 - **Toda a mutação** é Server Action com validação `zod` e verificação de papel no servidor.
 - **Nenhum segredo com prefixo `NEXT_PUBLIC_`.** O `pnpm gate` falha se aparecer um.
+- **360 px → 1920 px sem rolo horizontal** (02 §13). Os ecrãs estilizam-se com `style={{}}` inline, que não tem media queries: a responsividade vem de CSS intrínseca — `minmax(min(100%, Npx), 1fr)`, `clamp()`, `flexWrap`, `minWidth: 0` em quem leva `ellipsis` — e, quando é mesmo preciso um ponto de quebra, de `.upm-split`. O `pnpm gate` falha nas duas armadilhas mecânicas; o que só se vê depois de desenhado mede-se com `pnpm audit:responsive`, que precisa do host dos canvases a correr.
 - **Nenhuma fase fecha** sem o portão do doc 08 passado e o relatório escrito.
 
 ## Ambientes

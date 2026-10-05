@@ -1,15 +1,12 @@
 import { cookies } from "next/headers";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
-import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { AppChrome } from "../../../components/AppChrome";
 import { ContactActions } from "../../../components/market/ContactActions";
+import { PropertyDetail } from "../../../components/market/PropertyDetail";
 import { SaveButton } from "../../../components/market/SaveButton";
-import { PropertyLocationMap } from "../../../components/map/PropertyLocationMap";
 import { startConversation } from "../../actions/conversations";
 import { requestVisit } from "../../actions/visits";
 import { toggleSavedProperty } from "../../actions/saved-properties";
@@ -85,201 +82,55 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
       locale={locale}
       onLocaleChange={setLocalePreference}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-        <Link
-          href="/market"
-          className="upm-btn upm-btn--secondary upm-btn--sm"
-          style={{ alignSelf: "flex-start", textDecoration: "none" }}
-        >
-          ← Voltar ao Market
-        </Link>
-        {/* Ficha + barra de contacto. Abaixo de 900 px empilham (`.upm-split`),
-            com a barra a seguir às fotografias em vez de espremida ao lado. */}
-        <div
-          className="upm-split"
-          style={
-            {
-              "--split-cols": "minmax(0, 1fr) minmax(280px, 360px)",
-              "--split-gap": "28px",
-            } as React.CSSProperties
-          }
-        >
-          <main style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 3fr) minmax(84px, 1fr)",
-                gap: 8,
-                /* Altura fluida: 360 px é a medida do desenho em ecrã largo,
-                   mas no telemóvel deixava a foto principal quase quadrada e
-                   as miniaturas com 110 px a comerem um terço da largura. */
-                height: "clamp(220px, 46vw, 360px)",
-              }}
-            >
-              {validPhotos[0] ? (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    overflow: "hidden",
-                    borderRadius: 16,
-                  }}
-                >
-                  <Image
-                    src={validPhotos[0]}
-                    alt=""
-                    fill
-                    unoptimized
-                    sizes="(max-width: 900px) 100vw, 70vw"
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 16,
-                    background: "var(--surface-muted, #eee)",
-                  }}
-                />
-              )}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "hidden" }}>
-                {validPhotos.slice(1, 4).map((url) => (
-                  <div
-                    key={url}
-                    style={{
-                      position: "relative",
-                      flex: 1,
-                      minHeight: 0,
-                      overflow: "hidden",
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Image
-                      src={url}
-                      alt=""
-                      fill
-                      unoptimized
-                      sizes="120px"
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <span style={{ color: "var(--muted)", fontSize: 12 }}>Ref. {property.ref}</span>
-              <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>{property.title}</h1>
-              <p style={{ margin: 0, color: "var(--muted)" }}>
-                ⌖{" "}
-                {[property.typology, property.city, property.district].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-            <dl
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 150px), 1fr))",
-                gap: 12,
-                margin: 0,
-              }}
-            >
-              <Detail label="Tipologia" value={property.typology} />
-              <Detail
-                label="Área bruta"
-                value={property.gross_area ? `${property.gross_area} m²` : null}
+      <PropertyDetail
+        property={{
+          ref: property.ref,
+          title: property.title,
+          typology: property.typology,
+          city: property.city,
+          district: property.district,
+          description: property.description,
+          grossArea: property.gross_area,
+          bathrooms: property.bathrooms,
+          floor: property.floor,
+          yearBuilt: property.year_built,
+          energyCert: property.energy_cert,
+          deal: property.deal,
+        }}
+        photos={validPhotos}
+        location={
+          location
+            ? {
+                lon: location.lon,
+                lat: location.lat,
+                isExact: location.is_exact,
+                radiusM: location.radius_m,
+              }
+            : null
+        }
+        price={price}
+        ownerName={ownerProfile?.full_name || "Proprietário"}
+        actions={
+          <>
+            {role === "buyer" ? (
+              <SaveButton
+                propertyId={id}
+                initialSaved={initialSaved}
+                action={toggleSavedProperty}
               />
-              <Detail label="Casas de banho" value={property.bathrooms?.toString() ?? null} />
-              <Detail label="Piso" value={property.floor} />
-              <Detail label="Ano de construção" value={property.year_built?.toString() ?? null} />
-              <Detail label="Certificado energético" value={property.energy_cert} />
-            </dl>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <h2 style={{ margin: 0, fontSize: 17 }}>Descrição do proprietário</h2>
-              <p style={{ margin: 0, lineHeight: 1.75, color: "var(--muted)" }}>
-                {property.description}
-              </p>
-            </div>
-            {location ? (
-              <Card>
-                <CardBody style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <strong>Localização aproximada</strong>
-                    <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>
-                      morada exata após contacto
-                    </span>
-                  </div>
-                  <PropertyLocationMap
-                    lon={location.lon}
-                    lat={location.lat}
-                    isExact={location.is_exact}
-                    radiusM={location.radius_m}
-                  />
-                </CardBody>
-              </Card>
             ) : null}
-          </main>
-          {/* `--sticky` só cola acima de 900 px: empilhada, uma barra presa ao
-              topo tapava o conteúdo que devia vir a seguir. */}
-          <aside
-            className="upm-split__aside upm-split__aside--sticky"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            <Card>
-              <CardBody style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                {property.deal ? (
-                  <StatusTag tone={property.deal === "sale" ? "dealSale" : "dealRent"}>
-                    {property.deal === "sale" ? "Venda" : "Arrendamento"}
-                  </StatusTag>
-                ) : null}
-                <strong style={{ fontSize: 30 }}>{price}</strong>
-                <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-                  <strong>{ownerProfile?.full_name || "Proprietário"}</strong>
-                  <div style={{ color: "var(--muted)", fontSize: 12 }}>Responde em ~2 h</div>
-                </div>
-                {role === "buyer" ? (
-                  <SaveButton
-                    propertyId={id}
-                    initialSaved={initialSaved}
-                    action={toggleSavedProperty}
-                  />
-                ) : null}
-                {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
-                    destino. O dono do imóvel não vê nenhum dos dois. */}
-                <ContactActions
-                  propertyId={id}
-                  propertyTitle={property.title ?? "Imóvel"}
-                  onContact={startConversation}
-                  onRequestVisit={requestVisit}
-                  disabled={property.owner_id === user.id}
-                />
-              </CardBody>
-            </Card>
-          </aside>
-        </div>
-      </div>
+            {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
+                destino. O dono do imóvel não vê nenhum dos dois. */}
+            <ContactActions
+              propertyId={id}
+              propertyTitle={property.title ?? "Imóvel"}
+              onContact={startConversation}
+              onRequestVisit={requestVisit}
+              disabled={property.owner_id === user.id}
+            />
+          </>
+        }
+      />
     </AppChrome>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) return null;
-  return (
-    <div
-      style={{
-        border: "1px solid var(--border)",
-        borderRadius: 12,
-        padding: 14,
-        background: "var(--surface)",
-      }}
-    >
-      <dt style={{ color: "var(--muted)", fontSize: 12 }}>{label}</dt>
-      <dd style={{ margin: "4px 0 0", fontWeight: 700 }}>{value}</dd>
-    </div>
   );
 }

@@ -53,6 +53,12 @@ jobs:
       - name: Portão · segredos no bundle do cliente
         run: pnpm gate:bundle
 
+      # 02 §13 (360 px → 1920 px). Só a parte estática: o medidor que abre as
+      # storyboards num browser (`pnpm audit:responsive`) precisa do host dos
+      # canvases, que é gerado pela app Tempo e não existe num checkout limpo.
+      - name: Portão · grelhas e ellipsis responsivos
+        run: pnpm gate:responsive
+
       - name: Portão · dependências vulneráveis
         run: pnpm gate:deps
 
