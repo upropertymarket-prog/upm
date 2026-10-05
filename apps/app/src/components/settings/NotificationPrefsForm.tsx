@@ -59,7 +59,7 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
         </p>
       </div>
 
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}>
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid" }}>
         {ACTIVE_NOTIFICATION_TYPES.map((type) => (
           <li
             key={type}
@@ -68,6 +68,7 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
               flexWrap: "wrap",
               alignItems: "center",
               gap: "var(--sp-7)",
+              padding: "var(--sp-3) 0",
               // Ajuste de canvas: a linha de label mais longa iguala a altura
               // das restantes em vez de crescer quando o texto quebra.
               height: type === "price_drop" ? "54px" : undefined,
