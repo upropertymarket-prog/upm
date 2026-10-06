@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  GENERIC_IDENTITY_ERROR,
   STEP_UP_VALIDITY_MS,
   consumeRecoveryCode,
   emailSchema,
   generateRecoveryCodes,
   hashPin,
   isStepUpRequiredError,
+  isValidPtNif,
+  normalizePhone,
   passwordSchema,
   pinSchema,
+  taxIdSchema,
   totpCodeSchema,
   verifyPin,
 } from "./auth";
@@ -105,5 +109,50 @@ describe("step-up do PIN (07 §6, P8-07)", () => {
 
   it("a janela de validade é a de 07 §6", () => {
     expect(STEP_UP_VALIDITY_MS).toBe(15 * 60 * 1000);
+  });
+});
+
+describe("identidade da conta (Fase 9, P9-01)", () => {
+  it("aceita NIF de pessoa singular com dígito de controlo certo", () => {
+    expect(isValidPtNif("123456789")).toBe(true);
+    expect(isValidPtNif("287689670")).toBe(true);
+    // Com espaços e pontos, como as pessoas escrevem.
+    expect(isValidPtNif("123 456 789")).toBe(true);
+  });
+
+  it("recusa NIF de pessoa coletiva e de entidade pública", () => {
+    // A conta é SEMPRE da pessoa (decisão do cliente, 7 out 2026): um NIPC não
+    // entra, mesmo com o dígito de controlo correto.
+    expect(isValidPtNif("500000000")).toBe(false);
+    expect(isValidPtNif("600000005")).toBe(false);
+  });
+
+  it("recusa dígito de controlo errado e comprimento errado", () => {
+    expect(isValidPtNif("123456788")).toBe(false);
+    expect(isValidPtNif("12345678")).toBe(false);
+    expect(isValidPtNif("1234567890")).toBe(false);
+    expect(isValidPtNif("")).toBe(false);
+  });
+
+  it("o schema devolve só os dígitos", () => {
+    expect(taxIdSchema.parse(" 123 456 789 ")).toBe("123456789");
+    expect(taxIdSchema.safeParse("500000000").success).toBe(false);
+  });
+
+  it("normaliza o telefone para E.164 — nove dígitos leem-se como PT", () => {
+    expect(normalizePhone("912345678")).toBe("+351912345678");
+    expect(normalizePhone("+351 912 345 678")).toBe("+351912345678");
+    expect(normalizePhone("00351912345678")).toBe("+351912345678");
+    expect(normalizePhone("+34 600 000 000")).toBe("+34600000000");
+    expect(normalizePhone("91234")).toBeNull();
+    expect(normalizePhone("não é um número")).toBeNull();
+  });
+
+  it("a mensagem de recusa de identidade é uma só", () => {
+    // P9-01: distinguir "NIF já usado" de "NIF inválido" seria confirmar a
+    // terceiros que uma pessoa concreta tem conta aqui.
+    expect(GENERIC_IDENTITY_ERROR).toBe(
+      "Não foi possível utilizar estes dados para criar uma nova conta.",
+    );
   });
 });

@@ -108,7 +108,8 @@
         "profile": "Perfil",
         "account": "Conta",
         "verification": "Verificação",
-        "plan": "Plano"
+        "plan": "Plano",
+        "contract": "Contratação"
       },
       "profile": {
         "title": "Como pretende usar a UProperty Market?",
@@ -125,22 +126,54 @@
         "passwordHint": "Mínimo 10 caracteres.",
         "passwordPwned": "Esta palavra-passe apareceu em fugas de dados conhecidas. Escolha outra.",
         "emailInUse": "Já existe uma conta com este e-mail.",
-        "submit": "Criar conta"
+        "submit": "Criar conta",
+        "taxId": "NIF",
+        "taxIdHint": "Número de identificação fiscal de pessoa singular, nove dígitos.",
+        "phone": "Telefone",
+        "phoneHint": "Nove dígitos, ou com indicativo (+351…)."
       },
       "verification": {
         "title": "Verifique o seu e-mail",
         "body": "Enviámos um link de confirmação para {email}.",
         "resend": "Reenviar e-mail",
         "resendSuccess": "E-mail reenviado.",
-        "changeEmail": "Alterar e-mail"
+        "changeEmail": "Alterar e-mail",
+        "paidTitle": "Pagamento recebido",
+        "paidBody": "A subscrição ficou ativa. Falta confirmar o e-mail para entrar na sua conta.",
+        "unpaidBody": "A conta foi criada, mas o pagamento não foi concluído. Pode entrar e concluir a subscrição em Plano."
       },
       "plan": {
         "title": "Escolha um plano",
-        "hint": "Pode mudar de plano mais tarde em Definições.",
-        "free": "Gratuito",
+        "hint": "A subscrição começa no momento da inscrição. Pode mudar de plano mais tarde em Plano.",
         "perMonth": "/mês",
         "perYear": "/ano",
-        "submit": "Concluir registo"
+        "submit": "Concluir registo",
+        "intervalLabel": "Periodicidade",
+        "monthly": "Mensal",
+        "yearly": "Anual (dois meses grátis)"
+      },
+      "contract": {
+        "title": "Confirme o que vai contratar",
+        "pendingReview": "Os Termos e Condições estão em MINUTA PARA REVISÃO JURÍDICA. O texto será substituído pela versão revista antes do lançamento; a versão que aceitar agora fica registada.",
+        "plan": "Plano",
+        "price": "Preço",
+        "interval": "Periodicidade",
+        "intervalMonth": "Mensal",
+        "intervalYear": "Anual",
+        "commitment": "Período mínimo",
+        "commitmentNone": "Sem período mínimo",
+        "renewal": "Renovação",
+        "renewalMonth": "Renova automaticamente todos os meses",
+        "renewalYear": "Renova automaticamente todos os anos",
+        "cancellation": "Cancelamento",
+        "cancellationRule": "A qualquer momento; produz efeitos no fim do período pago",
+        "withdrawal": "Tem 14 dias para resolver o contrato sem indicar motivo. Como o acesso é dado logo após o pagamento, se exercer esse direito paga a parte proporcional ao que já usou.",
+        "acceptPrefix": "Li e aceito os",
+        "acceptLink": "Termos e Condições",
+        "version": "versão {version}",
+        "submit": "Aceitar e pagar",
+        "submitting": "A abrir o pagamento…",
+        "noTerms": "Não há uma versão dos Termos publicada. A inscrição não pode continuar — contacte o suporte."
       }
     },
     "login": {
@@ -228,14 +261,6 @@
     "usageHint": "Uso atual · limites incluídos",
     "meterOfUnlimited": " de ilimitado",
     "meterOf": " de ",
-    "trialUntil": "Período de experiência até {date}",
-    "trialPending": "O seu pedido de mais 7 dias está a ser analisado pela equipa.",
-    "trialApproved": "O pedido de extensão foi aprovado — a data acima já inclui os 7 dias extra.",
-    "trialRejected": "O pedido de extensão foi recusado; a experiência termina na data original.",
-    "trialCanAsk": "Pode pedir mais 7 dias, uma única vez, com uma justificação escrita.",
-    "trialReasonLabel": "Porque precisa de mais tempo?",
-    "trialSubmitting": "A enviar…",
-    "trialSubmit": "Pedir mais 7 dias",
     "plansTitle": "Planos",
     "intervalLabel": "Periodicidade",
     "intervalYearBonus": "{label} · 2 meses grátis",
@@ -245,9 +270,7 @@
     "unlimited": "ilimitado",
     "supportStandard": "Suporte normal",
     "currentPlanButton": "Plano atual",
-    "includedFree": "Incluído sem custo",
     "comingSoon": "Brevemente",
-    "tryFree": "Experimentar 7 dias grátis",
     "switchPlan": "Mudar para este plano",
     "addonHint": "Soma-se ao que o seu plano já dá. Uma unidade por conta — quem precisa de mais capacidade sobe de plano.",
     "addonAdd": "Adicionar",
@@ -291,7 +314,43 @@
       "void": "Anulada"
     },
     "featureAdvancedAlerts": "Alertas avançados",
-    "featureCustomAlerts": "Alertas personalizados"
+    "featureCustomAlerts": "Alertas personalizados",
+    "contract": {
+      "title": "Condições da subscrição",
+      "pendingReview": "Os Termos e Condições estão em MINUTA PARA REVISÃO JURÍDICA. O texto será substituído pela versão revista antes do lançamento; a versão que aceitar fica registada.",
+      "interval": "Periodicidade",
+      "commitment": "Período mínimo",
+      "commitmentNone": "Sem período mínimo",
+      "commitmentMonths": "{months} meses",
+      "renewal": "Renovação",
+      "renewalMonth": "Automática, todos os meses",
+      "renewalYear": "Automática, todos os anos",
+      "cancellation": "Cancelamento",
+      "cancellationRule": "A qualquer momento, com efeito no fim do período pago",
+      "withdrawal": "Tem 14 dias para resolver o contrato sem indicar motivo. Como o acesso é dado logo após o pagamento, se exercer esse direito paga a parte proporcional ao que já usou.",
+      "acceptPrefix": "Li e aceito os",
+      "acceptLink": "Termos e Condições",
+      "version": "versão {version}",
+      "mustAccept": "Tem de aceitar os Termos e Condições para continuar.",
+      "noTerms": "Não há uma versão dos Termos publicada. A subscrição não pode continuar — contacte o suporte."
+    },
+    "cancel": {
+      "title": "Cancelar a subscrição",
+      "allowedHint": "Pode cancelar a qualquer momento. O acesso mantém-se até {date}.",
+      "action": "Cancelar subscrição",
+      "modalTitle": "Cancelar a subscrição",
+      "modalBody": "A subscrição deixa de renovar e o acesso mantém-se até {date}. Não há reembolso do período já pago.",
+      "reasonLabel": "Motivo (opcional)",
+      "confirm": "Confirmar cancelamento",
+      "submitting": "A cancelar…",
+      "done": "Cancelamento registado. O acesso mantém-se até {date}.",
+      "already_requested": "O cancelamento já está pedido para o fim do período.",
+      "already_canceled": "Esta subscrição já está cancelada.",
+      "after_commitment": "O cancelamento produz efeitos depois do fim do período mínimo.",
+      "blocked": "O cancelamento não está disponível neste momento.",
+      "end_of_period": "Produz efeitos no fim do período pago.",
+      "immediate": "Produz efeitos imediatamente."
+    }
   },
   "admin": {
     "users": {
@@ -721,6 +780,36 @@
         "cloud_gb": "Cloud (GB)"
       },
       "saveAnyway": "Guardar mesmo assim"
+    }
+  },
+  "legal": {
+    "termsTitle": "Termos e Condições",
+    "unavailable": "Não há uma versão publicada deste documento.",
+    "versionLine": "Versão {version} · em vigor desde {date}",
+    "pendingReview": "MINUTA PARA REVISÃO JURÍDICA. Este texto não foi revisto por advogado e não substitui aconselhamento jurídico. Contém lacunas assinaladas no próprio documento."
+  },
+  "settings": {
+    "danger": {
+      "title": "Zona de perigo",
+      "subtitle": "Exportar os seus dados ou eliminar a conta. A eliminação não se desfaz.",
+      "export": "Exportar os meus dados",
+      "exporting": "A preparar o ficheiro…",
+      "exportDone": "Ficheiro transferido.",
+      "exportFailed": "Não foi possível exportar os dados.",
+      "delete": "Eliminar a conta",
+      "deleting": "A eliminar…",
+      "modalTitle": "Eliminar a conta",
+      "modalBody": "A conta deixa de ser acessível e os seus dados de perfil são anonimizados. Isto não se desfaz.",
+      "keepsSubscriptions": "O histórico de subscrições é conservado, por ser necessário a obrigações legais e contabilísticas.",
+      "keepsInvoices": "As faturas emitidas são conservadas, pela mesma razão.",
+      "keepsTerms": "Fica registado que versão dos Termos aceitou e quando — é a prova do contrato.",
+      "anonymizes": "Nome, telefone, NIF, fotografia e preferências são anonimizados.",
+      "archivesListings": "Os anúncios publicados saem do ar como arquivados; não são apagados.",
+      "legalNote": "São também conservados identificadores em forma irreversível, para impedir que a mesma pessoa beneficie repetidamente de ofertas limitadas. A base legal e o prazo desta conservação constam dos Termos e Condições.",
+      "reasonLabel": "Motivo (opcional)",
+      "confirmLabel": "Escreva ELIMINAR para confirmar",
+      "confirmHint": "Em maiúsculas, sem acentos.",
+      "confirmDelete": "Eliminar definitivamente"
     }
   }
 }

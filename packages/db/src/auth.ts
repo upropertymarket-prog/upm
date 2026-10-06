@@ -43,6 +43,70 @@ export const fullNameSchema = z.string().trim().min(1).max(160);
 export const roleAtRegistrationSchema = z.enum(["buyer", "owner"]);
 
 // ---------------------------------------------------------------------------
+// Identidade da conta — P9-01 (Fase 9)
+//
+// A conta é SEMPRE de uma pessoa (decisão do cliente, 7 out 2026): o NIF é de
+// pessoa singular e nunca de empresa. As mesmas regras existem em SQL
+// (`is_valid_pt_nif`, `normalize_phone`), e é a SQL que manda — isto é a
+// conveniência do formulário. Quando divergirem, é este ficheiro que está
+// errado, e `auth.test.ts` vigia-o.
+// ---------------------------------------------------------------------------
+
+/** Prefixos de pessoa singular. `5` (coletiva) e os restantes ficam de fora. */
+const SINGULAR_NIF_PREFIXES = ["1", "2", "3"] as const;
+
+export function isValidPtNif(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 9) return false;
+
+  const singular =
+    SINGULAR_NIF_PREFIXES.includes(digits[0] as (typeof SINGULAR_NIF_PREFIXES)[number]) ||
+    digits.startsWith("45");
+  if (!singular) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 8; i++) sum += Number(digits[i]) * (9 - i);
+  const check = 11 - (sum % 11);
+  return (check >= 10 ? 0 : check) === Number(digits[8]);
+}
+
+/** Guarda-se só os dígitos: é a forma em que o NIF entra em `profiles`. */
+export const taxIdSchema = z
+  .string()
+  .trim()
+  .transform((value) => value.replace(/\D/g, ""))
+  .refine(isValidPtNif, "NIF inválido");
+
+/**
+ * E.164. Nove dígitos sem indicativo leem-se como portugueses — é o mercado da
+ * plataforma, e um número estrangeiro escreve-se sempre com `+`.
+ */
+export function normalizePhone(value: string): string | null {
+  let v = value.replace(/[\s\-.()]/g, "");
+  if (v.startsWith("00")) v = `+${v.slice(2)}`;
+  if (/^[0-9]{9}$/.test(v)) v = `+351${v}`;
+  return /^\+[0-9]{8,15}$/.test(v) ? v : null;
+}
+
+export const phoneSchema = z
+  .string()
+  .trim()
+  .transform((value) => normalizePhone(value))
+  .refine((value): value is string => value !== null, "Número de telefone inválido");
+
+/**
+ * A ÚNICA mensagem que o registo devolve quando a identidade não serve — NIF
+ * inválido, NIF já em uso, telefone impossível, e-mail já registado.
+ *
+ * P9-01: "Mensagens genéricas. Nunca revelar dados de outra conta." Distinguir
+ * "este NIF já existe" de "este NIF é inválido" é confirmar a terceiros que uma
+ * pessoa concreta tem conta nesta plataforma — enumeração de contas por outro
+ * campo (08 §7.6).
+ */
+export const GENERIC_IDENTITY_ERROR =
+  "Não foi possível utilizar estes dados para criar uma nova conta.";
+
+// ---------------------------------------------------------------------------
 // Rate limiting (fallback em Postgres — 07 §9.1)
 // ---------------------------------------------------------------------------
 

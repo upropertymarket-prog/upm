@@ -6,7 +6,9 @@ import { Card, PageHeader, ThemeToggle } from "@upm/ui";
 import { notificationPrefsSchema, type NotificationPrefs } from "@upm/db/interaction";
 
 import { AppChrome } from "../../components/AppChrome";
+import { DangerZone } from "../../components/settings/DangerZone";
 import { NotificationPrefsForm } from "../../components/settings/NotificationPrefsForm";
+import { deleteOwnAccount, exportAccountData } from "../actions/account";
 import {
   countersFor,
   loadConversations,
@@ -23,13 +25,13 @@ export const dynamic = "force-dynamic";
  * Definições — `/definicoes` (P5-04 · 04 §8.3)
  * =========================================================================
  * 04 §8.3 dá a esta página cinco secções, por esta ordem: Perfil, Preferências,
- * Notificações, Aparência e Zona de perigo. Só duas existem hoje — Notificações
- * (esta fase) e Aparência (Fase 1, `ThemeToggle`) — e são só essas que aparecem.
+ * Notificações, Aparência e Zona de perigo. Três existem: Notificações (Fase 5),
+ * Aparência (Fase 1, `ThemeToggle`) e **Zona de perigo (Fase 9, P9-06)** —
+ * exportação e eliminação da conta, que 02 §7.3 exige.
  *
- * As outras três não ficam como caixas vazias: Perfil e Zona de perigo são
- * Fase 3 (exportação e eliminação de conta, 02 §7.3), Preferências de procura
- * dependem de `profiles.preferences`. Registado como dívida no relatório da
- * fase, com o resto por construir.
+ * As outras duas continuam a não ficar como caixas vazias: Perfil, e
+ * Preferências de procura, que dependem de `profiles.preferences`. D25 mantém-se
+ * aberta por essas duas.
  */
 export default async function SettingsPage() {
   const supabase = createClient(await cookies());
@@ -94,6 +96,17 @@ export default async function SettingsPage() {
             }}
           />
         </Card>
+
+        {/*
+          Zona de perigo — Fase 9, P9-06. Fecha a metade de D25 que faltava.
+          Continuam a faltar as secções Perfil e Preferências de procura, que
+          D25 mantém abertas: `profiles.preferences` existe mas o ecrã não.
+        */}
+        <DangerZone
+          onExport={exportAccountData}
+          onDelete={deleteOwnAccount}
+          afterDeleteUrl={process.env.WEB_URL ?? "http://localhost:4300"}
+        />
       </div>
     </AppChrome>
   );

@@ -108,7 +108,8 @@
         "profile": "Profile",
         "account": "Account",
         "verification": "Verification",
-        "plan": "Plan"
+        "plan": "Plan",
+        "contract": "Contracting"
       },
       "profile": {
         "title": "How do you plan to use UProperty Market?",
@@ -125,22 +126,54 @@
         "passwordHint": "Minimum 10 characters.",
         "passwordPwned": "This password has appeared in known data breaches. Please choose another one.",
         "emailInUse": "An account with this email already exists.",
-        "submit": "Create account"
+        "submit": "Create account",
+        "taxId": "Tax number (NIF)",
+        "taxIdHint": "Portuguese personal tax number, nine digits.",
+        "phone": "Phone",
+        "phoneHint": "Nine digits, or with country code (+351…)."
       },
       "verification": {
         "title": "Verify your email",
         "body": "We sent a confirmation link to {email}.",
         "resend": "Resend email",
         "resendSuccess": "Email resent.",
-        "changeEmail": "Change email"
+        "changeEmail": "Change email",
+        "paidTitle": "Payment received",
+        "paidBody": "Your subscription is active. Confirm your email to sign in.",
+        "unpaidBody": "The account was created but payment was not completed. You can sign in and finish subscribing under Plan."
       },
       "plan": {
         "title": "Choose a plan",
-        "hint": "You can change your plan later in Settings.",
-        "free": "Free",
+        "hint": "The subscription starts when you sign up. You can change plan later under Plan.",
         "perMonth": "/month",
         "perYear": "/year",
-        "submit": "Finish registration"
+        "submit": "Finish registration",
+        "intervalLabel": "Billing period",
+        "monthly": "Monthly",
+        "yearly": "Yearly (two months free)"
+      },
+      "contract": {
+        "title": "Confirm what you are subscribing to",
+        "pendingReview": "These Terms and Conditions are a DRAFT PENDING LEGAL REVIEW. The text will be replaced by the reviewed version before launch; the version you accept now is recorded.",
+        "plan": "Plan",
+        "price": "Price",
+        "interval": "Billing period",
+        "intervalMonth": "Monthly",
+        "intervalYear": "Yearly",
+        "commitment": "Minimum period",
+        "commitmentNone": "No minimum period",
+        "renewal": "Renewal",
+        "renewalMonth": "Renews automatically every month",
+        "renewalYear": "Renews automatically every year",
+        "cancellation": "Cancellation",
+        "cancellationRule": "Any time; takes effect at the end of the paid period",
+        "withdrawal": "You have 14 days to withdraw without giving a reason. As access is granted right after payment, if you withdraw you pay the part proportionate to what you have used.",
+        "acceptPrefix": "I have read and accept the",
+        "acceptLink": "Terms and Conditions",
+        "version": "version {version}",
+        "submit": "Accept and pay",
+        "submitting": "Opening payment…",
+        "noTerms": "No published version of the Terms is available. Sign-up cannot continue — please contact support."
       }
     },
     "login": {
@@ -228,14 +261,6 @@
     "usageHint": "Current usage · included limits",
     "meterOfUnlimited": " of unlimited",
     "meterOf": " of ",
-    "trialUntil": "Trial period until {date}",
-    "trialPending": "Your request for 7 more days is being reviewed by the team.",
-    "trialApproved": "The extension request was approved — the date above already includes the 7 extra days.",
-    "trialRejected": "The extension request was declined; the trial ends on the original date.",
-    "trialCanAsk": "You can ask for 7 more days, once only, with a written reason.",
-    "trialReasonLabel": "Why do you need more time?",
-    "trialSubmitting": "Sending…",
-    "trialSubmit": "Ask for 7 more days",
     "plansTitle": "Plans",
     "intervalLabel": "Billing period",
     "intervalYearBonus": "{label} · 2 months free",
@@ -245,9 +270,7 @@
     "unlimited": "unlimited",
     "supportStandard": "Standard support",
     "currentPlanButton": "Current plan",
-    "includedFree": "Included at no cost",
     "comingSoon": "Coming soon",
-    "tryFree": "Try 7 days free",
     "switchPlan": "Switch to this plan",
     "addonHint": "Adds to what your plan already gives you. One unit per account — if you need more capacity, move up a plan.",
     "addonAdd": "Add",
@@ -291,7 +314,43 @@
       "void": "Voided"
     },
     "featureAdvancedAlerts": "Advanced alerts",
-    "featureCustomAlerts": "Custom alerts"
+    "featureCustomAlerts": "Custom alerts",
+    "contract": {
+      "title": "Subscription conditions",
+      "pendingReview": "The Terms and Conditions are a DRAFT PENDING LEGAL REVIEW. The text will be replaced by the reviewed version before launch; the version you accept is recorded.",
+      "interval": "Billing period",
+      "commitment": "Minimum period",
+      "commitmentNone": "No minimum period",
+      "commitmentMonths": "{months} months",
+      "renewal": "Renewal",
+      "renewalMonth": "Automatic, every month",
+      "renewalYear": "Automatic, every year",
+      "cancellation": "Cancellation",
+      "cancellationRule": "Any time, effective at the end of the paid period",
+      "withdrawal": "You have 14 days to withdraw without giving a reason. As access is granted right after payment, if you withdraw you pay the part proportionate to what you have used.",
+      "acceptPrefix": "I have read and accept the",
+      "acceptLink": "Terms and Conditions",
+      "version": "version {version}",
+      "mustAccept": "You must accept the Terms and Conditions to continue.",
+      "noTerms": "No published version of the Terms is available. The subscription cannot continue — please contact support."
+    },
+    "cancel": {
+      "title": "Cancel the subscription",
+      "allowedHint": "You can cancel at any time. Access continues until {date}.",
+      "action": "Cancel subscription",
+      "modalTitle": "Cancel the subscription",
+      "modalBody": "The subscription stops renewing and access continues until {date}. There is no refund of the period already paid.",
+      "reasonLabel": "Reason (optional)",
+      "confirm": "Confirm cancellation",
+      "submitting": "Cancelling…",
+      "done": "Cancellation recorded. Access continues until {date}.",
+      "already_requested": "Cancellation is already requested for the end of the period.",
+      "already_canceled": "This subscription is already cancelled.",
+      "after_commitment": "Cancellation takes effect after the minimum period ends.",
+      "blocked": "Cancellation is not available right now.",
+      "end_of_period": "Takes effect at the end of the paid period.",
+      "immediate": "Takes effect immediately."
+    }
   },
   "admin": {
     "users": {
@@ -721,6 +780,36 @@
         "cloud_gb": "Cloud (GB)"
       },
       "saveAnyway": "Save anyway"
+    }
+  },
+  "legal": {
+    "termsTitle": "Terms and Conditions",
+    "unavailable": "There is no published version of this document.",
+    "versionLine": "Version {version} · in force since {date}",
+    "pendingReview": "DRAFT PENDING LEGAL REVIEW. This text has not been reviewed by a lawyer and does not replace legal advice. It contains gaps flagged within the document itself."
+  },
+  "settings": {
+    "danger": {
+      "title": "Danger zone",
+      "subtitle": "Export your data or delete your account. Deletion cannot be undone.",
+      "export": "Export my data",
+      "exporting": "Preparing the file…",
+      "exportDone": "File downloaded.",
+      "exportFailed": "Could not export your data.",
+      "delete": "Delete account",
+      "deleting": "Deleting…",
+      "modalTitle": "Delete account",
+      "modalBody": "The account becomes inaccessible and your profile data is anonymised. This cannot be undone.",
+      "keepsSubscriptions": "The subscription history is retained, as required by legal and accounting obligations.",
+      "keepsInvoices": "Issued invoices are retained, for the same reason.",
+      "keepsTerms": "The record of which version of the Terms you accepted, and when, is kept — it is the proof of the contract.",
+      "anonymizes": "Name, phone, tax number, photo and preferences are anonymised.",
+      "archivesListings": "Published listings are taken down as archived; they are not deleted.",
+      "legalNote": "Identifiers are also retained in irreversible form, to prevent the same person from repeatedly benefiting from limited offers. The legal basis and the retention period are set out in the Terms and Conditions.",
+      "reasonLabel": "Reason (optional)",
+      "confirmLabel": "Type ELIMINAR to confirm",
+      "confirmHint": "In capitals.",
+      "confirmDelete": "Delete permanently"
     }
   }
 }

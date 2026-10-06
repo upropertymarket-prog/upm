@@ -234,14 +234,19 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
   );
 
   // Sem linha de plano, isto é uma subscrição só de extras — o plano fica o
-  // que já estava, e só os extras se atualizam.
+  // que já estava e, se nunca houve nenhum, fica a `null`.
+  //
+  // Fase 9 (P9-05): antes disto, uma subscrição sem plano caía no Gratuito,
+  // porque `plan_id` era `not null` e tinha de apontar para algum lado. O
+  // Gratuito deixou de existir na escada e `plan_id` passou a aceitar `null`,
+  // que é o que isto realmente é: extras sem plano.
   const { data: existing } = await db
     .from("subscriptions")
     .select("id, plan_id")
     .eq("stripe_subscription_id", subscription.id)
     .maybeSingle();
 
-  const planId = plan?.id ?? existing?.plan_id ?? (await freePlanId(db));
+  const planId = plan?.id ?? existing?.plan_id ?? null;
 
   const row = {
     profile_id: profileId,
@@ -252,11 +257,23 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
     current_period_end: periodEnd,
     cancel_at_period_end: subscription.cancel_at_period_end ?? false,
     trial_ends_at: secondsToIso(subscription.trial_end),
+    // P9-03 — a subscrição guarda a versão dos Termos com que foi contratada.
+    // Os metadados são escritos por nós no Checkout (registo e `/plano`), por
+    // isso são de confiança; o `??` cobre as subscrições criadas no Stripe à
+    // mão, que não os trazem.
+    ...(subscription.metadata?.upm_terms_document_id
+      ? { terms_document_id: subscription.metadata.upm_terms_document_id }
+      : {}),
+    ...(subscription.metadata?.upm_terms_version
+      ? { terms_version: subscription.metadata.upm_terms_version }
+      : {}),
   };
 
   const { data: saved, error } = await db
     .from("subscriptions")
-    .upsert(row, { onConflict: "stripe_subscription_id" })
+    // `as never`: `plan_id` nullable e as colunas de P9-03 só entram nos tipos
+    // depois de `pnpm db:types` correr sobre as migrações desta fase.
+    .upsert(row as never, { onConflict: "stripe_subscription_id" })
     .select("id")
     .single();
   if (error) throw new Error(`subscriptions: ${error.message}`);
@@ -283,12 +300,6 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
     entity_id: saved.id,
     diff: { plan_id: planId, status, interval },
   });
-}
-
-async function freePlanId(db: ServiceClient) {
-  const { data } = await db.from("plans").select("id").eq("slug", "gratuito").single();
-  if (!data) throw new Error("Plano Gratuito em falta no catálogo");
-  return data.id;
 }
 
 async function applyAddons(

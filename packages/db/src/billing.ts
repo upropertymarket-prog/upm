@@ -163,11 +163,24 @@ export function isEntitled(status: SubscriptionStatus): boolean {
 // o `zod` como dependência de um pacote só.
 // ---------------------------------------------------------------------------
 
-/** O que o cliente pode pedir no Checkout. O PREÇO nunca vem daqui. */
+/**
+ * O que o cliente pode pedir no Checkout. O PREÇO nunca vem daqui.
+ *
+ * Fase 9 (P9-02/P9-09): contratar um plano leva a versão dos Termos que foi
+ * mostrada. Não é o cliente a escolher o que aceita — o servidor compara com o
+ * documento publicado e recusa se não for o mesmo; o que estes dois campos
+ * fazem é provar QUAL foi mostrado. Para um extra ficam vazios: um extra soma-se
+ * a uma subscrição que já tem contrato (07 §19.3).
+ */
 export const checkoutSchema = z.object({
   kind: z.enum(["plan", "addon"]),
   slug: z.string().min(1).max(64),
   interval: z.enum(BILLING_INTERVALS),
+  termsDocumentId: z.string().uuid().optional(),
+  termsContentHash: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/)
+    .optional(),
 });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 

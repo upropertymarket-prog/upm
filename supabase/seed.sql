@@ -14,15 +14,15 @@
 -- questão 07 §9 #1, e destravam o enforcement da Fase 7. `null` numa chave
 -- significa ILIMITADO — nunca um número grande a fingir de infinito.
 --
--- Nota sobre o Gratuito: é UMA linha com `audience = 'both'`, por isso serve
--- proprietários e compradores ao mesmo tempo. A grelha de 07 §19.2 dava-lhe
--- `visits` 5 do lado do proprietário e 3 do lado do comprador; com uma linha
--- só, fica o valor mais generoso (5). Separar em dois planos obrigaria a
--- mudar slugs já sedeados e referenciados — não compensa por um valor.
+-- FIM DO GRATUITO — P9-05, decisão do cliente de 7 out 2026. O degrau
+-- gratuito saiu da escada e não volta ao seed: quem se inscreve paga no
+-- momento da inscrição, e não há trial gratuito. A linha `gratuito` continua a
+-- existir nas bases onde já existia (as contas antigas apontavam para ela),
+-- mas invisível — ver a migração `20261007120500_end_free_plan.sql`, que
+-- também acrescenta o `check` que impede um plano a 0 € de voltar à escada.
+-- Numa base nova, o plano simplesmente não nasce.
 
 insert into public.plans (slug, name, audience, price_year_cents, price_month_cents, "position", limits) values
-  ('gratuito', 'Gratuito', 'both', 0, 0, 0,
-    '{"active_properties": 1, "visits": 5, "active_chats": 3, "saved": 10, "alerts": 1, "cloud_gb": 0}'),
   ('essential-owner', 'Essential', 'owner', 5990, 599, 1,
     '{"active_properties": 3, "visits": 20, "active_chats": 15, "saved": 50, "alerts": 3, "cloud_gb": 2}'),
   ('smarter-owner', 'Smarter', 'owner', 14990, 1499, 2,

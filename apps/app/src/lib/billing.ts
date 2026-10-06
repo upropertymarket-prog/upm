@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@upm/db";
+import { currentLegalDocument, isPendingLegalReview } from "@upm/db/legal";
 import {
   LIMIT_KEYS,
   limitsSchema,
@@ -23,6 +24,14 @@ import {
 
 type Client = SupabaseClient<Database>;
 
+/** Colunas que `plan_status()` já devolve e os tipos gerados ainda não conhecem. */
+type PendingPlanStatusColumns = {
+  minimum_commitment_months: number | null;
+  commitment_ends_at: string | null;
+  started_at: string | null;
+  terms_version: string | null;
+};
+
 export type PlanStatus = {
   planId: string | null;
   planSlug: string | null;
@@ -39,6 +48,16 @@ export type PlanStatus = {
   usage: Record<LimitKey, number>;
   cloudUsedBytes: number;
   cloudLimitBytes: number | null;
+  /**
+   * P9-03 — `null` é "nenhum período mínimo DEFINIDO", que é o estado de hoje;
+   * `0` é "definido como nenhum". Os dois mostram a ausência ao utilizador, e
+   * significam coisas diferentes para quem configurar isto depois.
+   */
+  minimumCommitmentMonths: number | null;
+  commitmentEndsAt: string | null;
+  startedAt: string | null;
+  /** Versão dos Termos com que esta subscrição foi contratada (P9-02). */
+  termsVersion: string | null;
 };
 
 export type PlanOption = {
@@ -86,7 +105,10 @@ function parseLimits(value: unknown): PlanLimits {
 
 export async function loadPlanStatus(supabase: Client): Promise<PlanStatus> {
   const { data } = await supabase.rpc("plan_status");
-  const row = data?.[0];
+  // As quatro colunas novas de P9-03 só entram nos tipos gerados depois de
+  // `pnpm db:types` — ver `pending-types.ts`.
+  const row = data?.[0] as
+    (NonNullable<typeof data>[number] & PendingPlanStatusColumns) | undefined;
 
   const usage = { ...EMPTY_USAGE };
   const rawUsage = (row?.usage ?? {}) as Record<string, unknown>;
@@ -114,13 +136,33 @@ export async function loadPlanStatus(supabase: Client): Promise<PlanStatus> {
       row?.cloud_limit_bytes === null || row?.cloud_limit_bytes === undefined
         ? null
         : Number(row.cloud_limit_bytes),
+    minimumCommitmentMonths: row?.minimum_commitment_months ?? null,
+    commitmentEndsAt: row?.commitment_ends_at ?? null,
+    startedAt: row?.started_at ?? null,
+    termsVersion: row?.terms_version ?? null,
+  };
+}
+
+/**
+ * A versão publicada dos Termos (P9-02). Devolve `null` quando não há nenhuma —
+ * e nesse caso o ecrã de contratação diz-o em vez de deixar subscrever sem
+ * contrato.
+ */
+export async function loadCurrentTerms(supabase: Client, locale = "pt") {
+  const document = await currentLegalDocument(supabase, "terms", locale);
+  if (!document) return null;
+  return {
+    documentId: document.id,
+    version: document.version,
+    contentHash: document.contentHash,
+    pendingLegalReview: isPendingLegalReview(document),
   };
 }
 
 /**
  * Os planos que ESTE perfil pode comprar. Um proprietário não vê os planos de
- * comprador e vice-versa (05 §6.6, `plans.audience`); `both` serve os dois e é
- * o caso do Gratuito.
+ * comprador e vice-versa (05 §6.6, `plans.audience`); `both` serve os dois — era
+ * o caso do Gratuito, que saiu da escada em P9-05.
  */
 export async function loadPlanOptions(
   supabase: Client,

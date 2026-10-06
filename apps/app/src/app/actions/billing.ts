@@ -1,11 +1,13 @@
 "use server";
 
 import { createHash, randomUUID } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
-import { TRIAL_DAYS, checkoutSchema, invoiceIdSchema, trialReasonSchema } from "@upm/db/billing";
+import { checkoutSchema, invoiceIdSchema, trialReasonSchema } from "@upm/db/billing";
 import { MAX_FILE_BYTES, sniffMime } from "@upm/db/cloud";
+import { cancelReasonSchema } from "@upm/db/subscription";
+import { pendingRpc, pendingSelectOne } from "@upm/db/pending-types";
 import { getStripeClient } from "@upm/db/stripe";
 
 /**
@@ -78,10 +80,51 @@ async function ensureCustomer(
 export async function startCheckout(input: unknown): Promise<CheckoutState> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
-  const { kind, slug, interval } = parsed.data;
+  const { kind, slug, interval, termsDocumentId, termsContentHash } = parsed.data;
 
   const { supabase, user } = await session();
   if (!user) return { error: "Sessão inválida." };
+
+  // P9-02/P9-09 — contratar exige aceitação explícita dos Termos, com a versão
+  // concreta que foi mostrada. O hash é a prova de que o texto não mudou entre o
+  // ecrã abrir e o botão ser premido; se mudou, a contratação para.
+  //
+  // Os extras não abrem contrato novo: somam-se a uma subscrição que já tem uma
+  // aceitação registada (07 §19.3).
+  let acceptedTerms: { id: string; version: string } | null = null;
+  if (kind === "plan") {
+    if (!termsDocumentId || !termsContentHash) {
+      return { error: "Tem de aceitar os Termos e Condições para continuar." };
+    }
+
+    // Pelo id, não pelo idioma: a página carrega os Termos no idioma da sessão.
+    const { data: terms } = await pendingSelectOne<{
+      id: string;
+      version: string;
+      content_hash: string;
+    }>(supabase, "legal_documents", "id, version, content_hash", {
+      id: termsDocumentId,
+      kind: "terms",
+      status: "published",
+    });
+
+    if (!terms) return { error: "Não há Termos publicados. Contacte o suporte." };
+    if (terms.content_hash !== termsContentHash) {
+      return { error: "Os Termos foram atualizados. Recarregue a página e leia a versão nova." };
+    }
+
+    const headerList = await headers();
+    const forwarded = headerList.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const { error: acceptError } = await pendingRpc(supabase, "record_terms_acceptance", {
+      p_document_id: terms.id,
+      p_context: "subscription",
+      p_ip: forwarded || headerList.get("x-real-ip") || null,
+      p_user_agent: headerList.get("user-agent"),
+    });
+    if (acceptError) return { error: "Não foi possível registar a aceitação dos Termos." };
+
+    acceptedTerms = { id: terms.id, version: terms.version };
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -108,25 +151,29 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
     if (plan.audience !== "both" && plan.audience !== profile.role) {
       return { error: "Esse plano não é do seu perfil." };
     }
+    // P9-05 — nenhum plano a 0 € pode estar visível (o `check` de
+    // `plans_no_free_visible` impede-o). Esta guarda fica como rede: se algum
+    // dia voltar a existir, não entra em Checkout por acidente.
     if (plan.price_month_cents === 0 && plan.price_year_cents === 0) {
-      return { error: "O plano Gratuito não passa por pagamento." };
+      return { error: "Este plano não passa por pagamento." };
     }
 
     const priceId = (plan as Record<string, unknown>)[column];
     if (typeof priceId !== "string" || priceId.length === 0) {
       return { error: "Este plano ainda não está disponível para subscrição." };
     }
-    // 07 §8.1 — trial de 7 dias, uma vez por perfil (vitalício). Quem decide
-    // é a base de dados (`trial_eligible`), e quem o conta é o Stripe.
-    const { data: eligible } = await supabase.rpc("trial_eligible", {});
-    return checkoutFor(
-      supabase,
-      user.id,
-      user.email,
-      priceId,
-      { upm_plan_slug: slug },
-      eligible === true,
-    );
+    // P9-05 — não há trial. O `trial_period_days` saiu daqui: a decisão do
+    // cliente de 7 out 2026 é que quem se inscreve paga no momento da
+    // inscrição. `trial_eligible()` continua a existir e devolve sempre false.
+    return checkoutFor(supabase, user.id, user.email, priceId, {
+      upm_plan_slug: slug,
+      ...(acceptedTerms
+        ? {
+            upm_terms_document_id: acceptedTerms.id,
+            upm_terms_version: acceptedTerms.version,
+          }
+        : {}),
+    });
   }
 
   const { data: addon } = await supabase
@@ -151,7 +198,6 @@ async function checkoutFor(
   email: string | undefined,
   priceId: string,
   metadata: Record<string, string>,
-  withTrial = false,
 ): Promise<CheckoutState> {
   try {
     const { customerId, error } = await ensureCustomer(supabase, userId, email);
@@ -170,8 +216,9 @@ async function checkoutFor(
       billing_address_collection: "auto",
       metadata: { upm_profile_id: userId, ...metadata },
       subscription_data: {
+        // O webhook lê daqui a versão dos Termos e grava-a na subscrição
+        // (P9-03). Sem `trial_period_days`: não há trial (P9-05).
         metadata: { upm_profile_id: userId, ...metadata },
-        ...(withTrial ? { trial_period_days: TRIAL_DAYS } : {}),
       },
     });
 
@@ -181,6 +228,79 @@ async function checkoutFor(
     // 08 §3.6: nada de detalhes internos na resposta ao cliente.
     return { error: "Não foi possível abrir o pagamento. Tente novamente." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Cancelamento — P9-04
+//
+// **A decisão é da base de dados, a execução é daqui.**
+// `request_subscription_cancellation()` chama `can_cancel_subscription()`, a
+// única porta, e só depois de ela aceitar é que o Stripe é tocado. Nenhuma
+// condição de cancelamento vive neste ficheiro — se vivesse, passavam a existir
+// duas respostas possíveis à mesma pergunta (07 §20.5).
+//
+// Nenhum bloqueio é implementado nesta fase: hoje a porta permite sempre,
+// porque não há período mínimo definido (decisão do cliente, 7 out 2026).
+// ---------------------------------------------------------------------------
+
+export type CancelState = { ok?: boolean; effectiveAt?: string | null; error?: string };
+
+export async function cancelSubscription(
+  _prev: CancelState,
+  formData: FormData,
+): Promise<CancelState> {
+  const subscriptionId = formData.get("subscriptionId");
+  if (typeof subscriptionId !== "string" || subscriptionId.length === 0) {
+    return { error: "Subscrição inválida." };
+  }
+
+  const reasonResult = cancelReasonSchema.safeParse(formData.get("reason") ?? undefined);
+  if (!reasonResult.success) return { error: "Motivo demasiado longo." };
+
+  const { supabase, user } = await session();
+  if (!user) return { error: "Sessão inválida." };
+
+  const { data: decision, error } = await pendingRpc<{ effective_at?: string | null }>(
+    supabase,
+    "request_subscription_cancellation",
+    { p_subscription_id: subscriptionId, p_reason: reasonResult.data ?? null },
+  );
+
+  if (error) {
+    // O `hint` traz a razão, não o texto (mesmo contrato dos limites de plano).
+    const hint = (error as { hint?: string | null }).hint;
+    if (hint === "already_requested") return { error: "O cancelamento já estava pedido." };
+    if (hint === "already_canceled") return { error: "Esta subscrição já está cancelada." };
+    return { error: "Não foi possível cancelar a subscrição. Tente novamente." };
+  }
+
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("stripe_subscription_id")
+    .eq("id", subscriptionId)
+    .maybeSingle();
+
+  if (subscription?.stripe_subscription_id) {
+    try {
+      const stripe = getStripeClient();
+      // `cancel_at_period_end`: o acesso mantém-se até ao fim do período pago,
+      // como manda 02 §9. O estado final volta por webhook — não se escreve aqui.
+      await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      });
+    } catch {
+      // O pedido ficou registado e auditado; o que falhou foi o Stripe. Dizê-lo
+      // é melhor do que deixar a pessoa a achar que cancelou.
+      return {
+        error:
+          "O pedido ficou registado, mas não foi possível confirmá-lo junto do pagamento. Contacte o suporte.",
+      };
+    }
+  }
+
+  revalidatePath("/plano");
+  const effectiveAt = decision?.effective_at ?? null;
+  return { ok: true, effectiveAt };
 }
 
 /** Customer Portal: cartão, cancelamento e histórico (02 §9). */

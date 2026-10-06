@@ -14,7 +14,9 @@ import {
 import {
   Button,
   Card,
+  Checkbox,
   EmptyState,
+  Modal,
   PageHeader,
   StatusTag,
   Table,
@@ -25,14 +27,9 @@ import {
 } from "@upm/ui";
 import { LIMIT_KEYS, isUnlimited, type BillingInterval } from "@upm/db/billing";
 import { formatBytes } from "@upm/db/cloud";
+import { commitmentMonths, type CancelDecision } from "@upm/db/subscription";
 
-import type {
-  AddonOption,
-  InvoiceRow,
-  PlanOption,
-  PlanStatus,
-  TrialStatus,
-} from "../../lib/billing";
+import type { AddonOption, InvoiceRow, PlanOption, PlanStatus } from "../../lib/billing";
 
 /**
  * Plano e faturação — `/plano` (P7-02 · 04 §8.3)
@@ -62,15 +59,15 @@ const SUBSCRIPTION_TONE: Record<string, StatusTone> = {
   incomplete: "pending",
 };
 
+// O `gratuito` saiu das duas tabelas em P9-05: o degrau deixou de existir na
+// escada e um plano invisível nunca chega a desenhar cartão.
 const PLAN_TONE: Record<string, StatusTone> = {
-  gratuito: "draft",
   "essential-owner": "primary",
   "smarter-owner": "dealSale",
   "premium-owner": "dealRent",
 };
 
 const PLAN_COLOR: Record<string, string> = {
-  gratuito: "var(--state-draft)",
   "essential-owner": "var(--accent)",
   "smarter-owner": "var(--state-deal-sale)",
   "premium-owner": "var(--state-deal-rent)",
@@ -119,18 +116,41 @@ export type PlanScreenProps = {
     kind: "plan" | "addon";
     slug: string;
     interval: BillingInterval;
+    termsDocumentId?: string;
+    termsContentHash?: string;
   }) => Promise<{ url?: string; error?: string }>;
   onOpenPortal: () => Promise<{ url?: string; error?: string }>;
   /** P7-04 — abre o PDF do Stripe. */
   onExportInvoice: (invoiceId: string) => Promise<{ url?: string; error?: string }>;
   /** P7-04 — copia o PDF para a Cloud do próprio. */
   onSaveInvoice: (invoiceId: string) => Promise<{ ok?: boolean; error?: string }>;
-  /** P7-06 — estado do período de experiência (07 §8.1). */
-  trial: TrialStatus;
-  onRequestExtension: (
-    prev: { ok?: boolean; error?: string },
+  /**
+   * P9-02/P9-09 — a versão publicada dos Termos. `null` impede a contratação:
+   * sem documento não há aceitação possível, e sem aceitação não há contrato.
+   */
+  terms: {
+    documentId: string;
+    version: string;
+    contentHash: string;
+    pendingLegalReview: boolean;
+  } | null;
+  /**
+   * URL da página dos Termos, no site público. Vem por prop, do servidor, porque
+   * sai de `WEB_URL` — variável de servidor. Expô-la ao cliente obrigaria a uma
+   * variável pública nova, e a lista branca de 08 §6.1 é para ser respeitada
+   * mesmo quando o valor não é segredo.
+   */
+  termsHref: string;
+  /**
+   * P9-04 — a decisão de `can_cancel_subscription()`, lida no servidor. `null`
+   * quando não há subscrição ou a resposta não pôde ser obtida: nesse caso o
+   * botão não aparece. Falha fechado, de propósito.
+   */
+  cancelDecision: CancelDecision | null;
+  onCancelSubscription: (
+    prev: { ok?: boolean; effectiveAt?: string | null; error?: string },
     formData: FormData,
-  ) => Promise<{ ok?: boolean; error?: string }>;
+  ) => Promise<{ ok?: boolean; effectiveAt?: string | null; error?: string }>;
 };
 
 export function PlanScreen({
@@ -145,8 +165,10 @@ export function PlanScreen({
   onOpenPortal,
   onExportInvoice,
   onSaveInvoice,
-  trial,
-  onRequestExtension,
+  terms,
+  termsHref,
+  cancelDecision,
+  onCancelSubscription,
 }: PlanScreenProps) {
   const t = useTranslations("plan");
   const tc = useTranslations("common");
@@ -164,10 +186,14 @@ export function PlanScreen({
   const [interval, setInterval] = useState<BillingInterval>(status.interval ?? "year");
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
-  const [extensionState, requestExtension, requestingExtension] = useActionState(
-    onRequestExtension,
-    {},
-  );
+  /** P9-09 — a caixa nasce desmarcada. Nada a pré-marca. */
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelState, cancel, canceling] = useActionState(onCancelSubscription, {});
+
+  // P9-03 — `null` é "não há período mínimo definido"; `0` é "definido como
+  // nenhum". Os dois mostram a mesma coisa ao utilizador: a ausência.
+  const commitment = commitmentMonths(status.minimumCommitmentMonths);
 
   const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
 
@@ -185,7 +211,33 @@ export function PlanScreen({
   }
 
   function checkout(kind: "plan" | "addon", slug: string) {
-    startTransition(async () => go(await onCheckout({ kind, slug, interval })));
+    // P9-02/P9-09 — contratar um plano exige a aceitação explícita. O servidor
+    // volta a verificar (`record_terms_acceptance` recusa um documento que não
+    // seja o publicado); isto é só para não mandar a pessoa ao Stripe para
+    // depois a trazer de volta.
+    if (kind === "plan") {
+      if (!terms) {
+        toast(t("contract.noTerms"), "error");
+        return;
+      }
+      if (!acceptedTerms) {
+        toast(t("contract.mustAccept"), "error");
+        return;
+      }
+    }
+
+    startTransition(async () =>
+      go(
+        await onCheckout({
+          kind,
+          slug,
+          interval,
+          ...(kind === "plan" && terms
+            ? { termsDocumentId: terms.documentId, termsContentHash: terms.contentHash }
+            : {}),
+        }),
+      ),
+    );
   }
 
   function portal() {
@@ -392,53 +444,182 @@ export function PlanScreen({
       </Card>
 
       {/* ---------------------------------------------------------------- */}
-      {/* Período de experiência — 07 §8.1                                  */}
+      {/* Contratação — P9-09                                               */}
       {/* ---------------------------------------------------------------- */}
-      {trial.trialing ? (
-        <Card padded style={{ display: "grid", gap: "var(--sp-5)", marginBottom: "var(--sp-7)" }}>
-          <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-            <strong style={{ fontSize: "var(--fs-body-lg)" }}>
-              {t("trialUntil", { date: day(trial.trialEndsAt) })}
-            </strong>
-            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
-              {trial.requestStatus === "pending"
-                ? t("trialPending")
-                : trial.requestStatus === "approved"
-                  ? t("trialApproved")
-                  : trial.requestStatus === "rejected"
-                    ? t("trialRejected")
-                    : t("trialCanAsk")}
-            </span>
-          </div>
+      {/*
+        O bloco do período de experiência estava aqui. Saiu em P9-05: o cliente
+        decidiu a 7 out 2026 que não há trial gratuito, de todo. `trial_status`
+        e `trial_extension_requests` continuam na base de dados, como história
+        da Fase 7; o que deixou de existir é o direito, e por isso também o ecrã.
 
-          {trial.requestStatus ? null : (
-            <form action={requestExtension} style={{ display: "grid", gap: "var(--sp-4)" }}>
-              <label style={{ display: "grid", gap: "var(--sp-2)" }}>
-                <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>
-                  {t("trialReasonLabel")}
-                </span>
-                <textarea
-                  name="reason"
-                  rows={3}
-                  minLength={10}
-                  maxLength={1000}
-                  required
-                  className="upm-input"
-                  style={{ resize: "vertical", padding: "var(--sp-4)", fontSize: "var(--fs-body)" }}
-                />
-              </label>
-              {extensionState.error ? (
-                <p role="alert" style={{ margin: 0, color: "var(--danger)" }}>
-                  {extensionState.error}
-                </p>
-              ) : null}
-              <Button type="submit" variant="secondary" disabled={requestingExtension}>
-                {requestingExtension ? t("trialSubmitting") : t("trialSubmit")}
+        O que ficou no lugar é o que P9-09 manda mostrar ANTES de subscrever:
+        periodicidade, período mínimo (ou a ausência dele), renovação,
+        cancelamento e a aceitação explícita dos Termos. O preço está no cartão
+        de cada plano, logo abaixo, e é de lá que vem — nunca escrito aqui.
+      */}
+      <Card padded style={{ display: "grid", gap: "var(--sp-5)", marginBottom: "var(--sp-7)" }}>
+        <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("contract.title")}</strong>
+
+        {terms?.pendingLegalReview ? (
+          <p
+            role="note"
+            style={{
+              margin: 0,
+              padding: "var(--sp-4)",
+              borderRadius: "var(--radius-md, 8px)",
+              border: "1px solid var(--border)",
+              background: "var(--warn-soft, var(--surface-2))",
+              fontSize: "var(--fs-body)",
+              lineHeight: 1.5,
+            }}
+          >
+            {t("contract.pendingReview")}
+          </p>
+        ) : null}
+
+        <dl
+          style={{
+            display: "grid",
+            gap: "var(--sp-3)",
+            margin: 0,
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+          }}
+        >
+          <div style={{ display: "grid", gap: 2 }}>
+            <dt style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
+              {t("contract.interval")}
+            </dt>
+            <dd style={{ margin: 0, fontSize: "var(--fs-body)" }}>{t(`interval.${interval}`)}</dd>
+          </div>
+          <div style={{ display: "grid", gap: 2 }}>
+            <dt style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
+              {t("contract.commitment")}
+            </dt>
+            {/* P9-09: sem período mínimo decidido, mostra-se a AUSÊNCIA dele —
+                nunca um número, nunca um travessão a fingir de valor. */}
+            <dd style={{ margin: 0, fontSize: "var(--fs-body)" }}>
+              {commitment === null
+                ? t("contract.commitmentNone")
+                : t("contract.commitmentMonths", { months: commitment })}
+            </dd>
+          </div>
+          <div style={{ display: "grid", gap: 2 }}>
+            <dt style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
+              {t("contract.renewal")}
+            </dt>
+            <dd style={{ margin: 0, fontSize: "var(--fs-body)" }}>
+              {t(interval === "month" ? "contract.renewalMonth" : "contract.renewalYear")}
+            </dd>
+          </div>
+          <div style={{ display: "grid", gap: 2 }}>
+            <dt style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
+              {t("contract.cancellation")}
+            </dt>
+            <dd style={{ margin: 0, fontSize: "var(--fs-body)" }}>
+              {t("contract.cancellationRule")}
+            </dd>
+          </div>
+        </dl>
+
+        <p
+          style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}
+        >
+          {t("contract.withdrawal")}
+        </p>
+
+        <Checkbox
+          name="acceptTerms"
+          checked={acceptedTerms}
+          onChange={(event) => setAcceptedTerms(event.target.checked)}
+          disabled={!terms}
+          label={
+            <span>
+              {t("contract.acceptPrefix")}{" "}
+              <a
+                href={termsHref}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--accent)", textDecoration: "underline" }}
+              >
+                {t("contract.acceptLink")}
+              </a>
+              {terms ? ` (${t("contract.version", { version: terms.version })})` : null}
+            </span>
+          }
+        />
+
+        {!terms ? (
+          <p role="alert" style={{ margin: 0, color: "var(--danger)", fontSize: "var(--fs-body)" }}>
+            {t("contract.noTerms")}
+          </p>
+        ) : null}
+      </Card>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Cancelamento — P9-04                                              */}
+      {/* ---------------------------------------------------------------- */}
+      {/*
+        O botão só existe quando a PORTA diz que sim. `cancelDecision` vem de
+        `can_cancel_subscription()`, lido no servidor; este ecrã não recalcula
+        nada e não conhece a regra. Quando a porta recusa, mostra-se o que ela
+        devolveu — "já pedido", "já cancelada" — e não uma interpretação nossa.
+      */}
+      {status.subscriptionId && cancelDecision ? (
+        <Card padded style={{ display: "grid", gap: "var(--sp-4)", marginBottom: "var(--sp-7)" }}>
+          <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("cancel.title")}</strong>
+          <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
+            {cancelDecision.allowed
+              ? t("cancel.allowedHint", { date: day(cancelDecision.effectiveAt) })
+              : t(`cancel.${cancelDecision.mode}`)}
+          </span>
+          {cancelDecision.allowed ? (
+            <div>
+              <Button variant="secondary" onClick={() => setCancelOpen(true)} disabled={canceling}>
+                {t("cancel.action")}
               </Button>
-            </form>
-          )}
+            </div>
+          ) : null}
         </Card>
       ) : null}
+
+      <Modal open={cancelOpen} onClose={() => setCancelOpen(false)} title={t("cancel.modalTitle")}>
+        <form action={cancel} style={{ display: "grid", gap: "var(--sp-5)" }}>
+          <input type="hidden" name="subscriptionId" value={status.subscriptionId ?? ""} />
+          <p style={{ margin: 0, fontSize: "var(--fs-body)", lineHeight: 1.5 }}>
+            {t("cancel.modalBody", { date: day(cancelDecision?.effectiveAt ?? null) })}
+          </p>
+          <label style={{ display: "grid", gap: "var(--sp-2)" }}>
+            <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>
+              {t("cancel.reasonLabel")}
+            </span>
+            <textarea
+              name="reason"
+              rows={3}
+              maxLength={1000}
+              className="upm-input"
+              style={{ resize: "vertical", padding: "var(--sp-4)", fontSize: "var(--fs-body)" }}
+            />
+          </label>
+          {cancelState.error ? (
+            <p role="alert" style={{ margin: 0, color: "var(--danger)" }}>
+              {cancelState.error}
+            </p>
+          ) : null}
+          {cancelState.ok ? (
+            <p style={{ margin: 0, color: "var(--state-active)" }}>
+              {t("cancel.done", { date: day(cancelState.effectiveAt ?? null) })}
+            </p>
+          ) : null}
+          <div style={{ display: "flex", gap: "var(--sp-4)", justifyContent: "flex-end" }}>
+            <Button type="button" variant="secondary" onClick={() => setCancelOpen(false)}>
+              {tc("close")}
+            </Button>
+            <Button type="submit" disabled={canceling}>
+              {canceling ? t("cancel.submitting") : t("cancel.confirm")}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* ---------------------------------------------------------------- */}
       {/* Planos                                                            */}
@@ -476,7 +657,6 @@ export function PlanScreen({
         {plans.map((plan) => {
           const current = plan.id === status.planId;
           const cents = interval === "month" ? plan.priceMonthCents : plan.priceYearCents;
-          const free = plan.priceMonthCents === 0 && plan.priceYearCents === 0;
           const features = plan.features.some((feature) => /suporte/i.test(feature))
             ? plan.features
             : [...plan.features, t("supportStandard")];
@@ -568,10 +748,6 @@ export function PlanScreen({
                   <Button variant="secondary" fullWidth disabled>
                     {t("currentPlanButton")}
                   </Button>
-                ) : free ? (
-                  <Button variant="ghost" fullWidth disabled>
-                    {t("includedFree")}
-                  </Button>
                 ) : (
                   <Button
                     variant="ghost"
@@ -584,11 +760,8 @@ export function PlanScreen({
                     onClick={() => checkout("plan", plan.slug)}
                     leadingIcon={<CreditCard size={16} />}
                   >
-                    {!plan.purchasable
-                      ? t("comingSoon")
-                      : trial.eligible
-                        ? t("tryFree")
-                        : t("switchPlan")}
+                    {/* P9-05: o "experimentar grátis" saiu com o trial. */}
+                    {!plan.purchasable ? t("comingSoon") : t("switchPlan")}
                   </Button>
                 )}
               </div>

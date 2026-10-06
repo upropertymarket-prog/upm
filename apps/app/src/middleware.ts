@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
+import { pendingRpc } from "@upm/db/pending-types";
 
 import { createMiddlewareClient } from "./lib/supabase-middleware";
 
@@ -28,6 +29,23 @@ const BUYER_ONLY_PREFIXES = ["/guardados", "/meus-pedidos"];
  * middleware que autoriza nada aqui — é ele que se afasta do caminho.
  */
 const PUBLIC_PREFIXES = ["/partilha", "/conta-suspensa"];
+
+/**
+ * Rotas alcançáveis SEM subscrição ativa (Fase 9 — P9-05)
+ * =========================================================================
+ * **Decisão do cliente, 7 out 2026:** não há plano gratuito nem trial, e uma
+ * conta sem subscrição ativa só chega à contratação e às definições.
+ *
+ * Porque é que `/definicoes` está aqui: é onde vive a Zona de perigo — exportar
+ * os dados e eliminar a conta (P9-06). Fechá-la deixava quem desistiu sem
+ * caminho para sair, o que seria um problema de RGPD a troco de nada.
+ *
+ * Isto é o guard de navegação, não a autorização. Quem a aplica é o Postgres:
+ * sem subscrição, `effective_limits()` devolve zero em todas as chaves e os
+ * gatilhos de 07 §20.5 recusam publicar, guardar, criar alertas e abrir
+ * conversas. Se este ficheiro desaparecesse, nada ficava escrito.
+ */
+const NO_SUBSCRIPTION_PREFIXES = ["/plano", "/definicoes", "/api"];
 
 function webUrl(path: string, request: NextRequest): URL {
   const base = process.env.WEB_URL ?? "http://localhost:4300";
@@ -78,7 +96,12 @@ export async function middleware(request: NextRequest) {
 
   const role = profile?.role;
 
-  if (profile?.status === "suspended") {
+  // Uma conta eliminada (P9-06) não tem sessão, pela mesma porta das suspensas:
+  // o perfil ficou anonimizado e deixar entrar era tornar a eliminação
+  // cosmética.
+  // `as string`: `deleted` entra nos tipos com `pnpm db:types` (P9-06).
+  const status = profile?.status as string | undefined;
+  if (status === "suspended" || status === "deleted") {
     return signOutToSuspendedPage(request);
   }
 
@@ -93,6 +116,18 @@ export async function middleware(request: NextRequest) {
 
   if ((isOwnerOnly && role !== "owner") || (isBuyerOnly && role !== "buyer")) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // P9-05 — sem subscrição ativa, tudo encaminha para a contratação.
+  //
+  // Uma chamada a mais por pedido, e é a troca certa: a alternativa era o
+  // middleware decidir isto a partir de `profiles.plan_id`, e ficariam duas
+  // respostas possíveis à mesma pergunta. `subscription_entitled()` é a única.
+  if (!NO_SUBSCRIPTION_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    const { data: entitled } = await pendingRpc<boolean>(supabase, "subscription_entitled");
+    if (entitled !== true) {
+      return NextResponse.redirect(new URL("/plano?subscrever=1", request.url));
+    }
   }
 
   applySecurityHeaders(response.headers, nonce);

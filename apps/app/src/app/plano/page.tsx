@@ -5,12 +5,14 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PlanScreen } from "../../components/billing/PlanScreen";
+import { canCancelSubscription } from "@upm/db/subscription";
+
 import {
   loadAddonOptions,
+  loadCurrentTerms,
   loadInvoices,
   loadPlanOptions,
   loadPlanStatus,
-  loadTrialStatus,
 } from "../../lib/billing";
 import {
   countersFor,
@@ -20,9 +22,9 @@ import {
   loadVisits,
 } from "../../lib/interaction";
 import {
+  cancelSubscription,
   exportInvoice,
   openBillingPortal,
-  requestTrialExtension,
   saveInvoiceToCloud,
   startCheckout,
 } from "../actions/billing";
@@ -65,18 +67,24 @@ export default async function PlanoPage({
 
   const role = profile.role;
 
-  const [status, plans, addons, invoices, trial, conversations, visits, leads, notifications] =
+  const [status, plans, addons, invoices, terms, conversations, visits, leads, notifications] =
     await Promise.all([
       loadPlanStatus(supabase),
       loadPlanOptions(supabase, role),
       loadAddonOptions(supabase),
       loadInvoices(supabase),
-      loadTrialStatus(supabase),
+      loadCurrentTerms(supabase, locale),
       loadConversations(supabase),
       loadVisits(supabase),
       role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
       loadNotifications(supabase),
     ]);
+
+  // P9-04 — a decisão vem da porta única, lida aqui e passada ao ecrã. O
+  // componente não a recalcula e não conhece a regra.
+  const cancelDecision = status.subscriptionId
+    ? await canCancelSubscription(supabase, status.subscriptionId)
+    : null;
 
   const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
@@ -105,8 +113,10 @@ export default async function PlanoPage({
         onOpenPortal={openBillingPortal}
         onExportInvoice={exportInvoice}
         onSaveInvoice={saveInvoiceToCloud}
-        trial={trial}
-        onRequestExtension={requestTrialExtension}
+        terms={terms}
+        termsHref={`${process.env.WEB_URL ?? "http://localhost:4300"}/termos`}
+        cancelDecision={cancelDecision}
+        onCancelSubscription={cancelSubscription}
       />
     </AppChrome>
   );

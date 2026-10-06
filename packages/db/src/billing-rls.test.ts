@@ -361,12 +361,18 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
     expect(own.error).toBeNull();
   });
 
-  it("set_registration_plan só aceita planos gratuitos", async () => {
-    const paid = await clients.buyer.rpc("set_registration_plan", { p_plan_id: paidPlanId });
-    expect(paid.error).not.toBeNull();
-
-    const free = await clients.buyer.rpc("set_registration_plan", { p_plan_id: freePlanId });
-    expect(free.error).toBeNull();
+  /**
+   * `set_registration_plan` existia para gravar o plano GRATUITO escolhido no
+   * registo. P9-05 retirou o degrau gratuito e a função foi removida com ele —
+   * quem se inscreve paga, e o plano passa a nascer da subscrição, por webhook.
+   *
+   * O teste fica, invertido: o que se verifica agora é que o caminho **já não
+   * existe**. Um teste apagado não impede ninguém de o ressuscitar.
+   */
+  it("set_registration_plan deixou de existir (P9-05)", async () => {
+    const attempt = await clients.buyer.rpc("set_registration_plan", { p_plan_id: freePlanId });
+    expect(attempt.error).not.toBeNull();
+    expect(JSON.stringify(attempt.error)).toMatch(/set_registration_plan|schema cache|function/i);
   });
 
   it("attach_stripe_customer preenche uma vez e recusa a troca", async () => {

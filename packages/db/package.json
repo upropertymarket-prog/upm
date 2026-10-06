@@ -17,6 +17,9 @@
     "./interaction": "./src/interaction.ts",
     "./cloud": "./src/cloud.ts",
     "./billing": "./src/billing.ts",
+    "./legal": "./src/legal.ts",
+    "./pending-types": "./src/pending-types.ts",
+    "./subscription": "./src/subscription.ts",
     "./stripe": "./src/stripe.ts"
   },
   "scripts": {
