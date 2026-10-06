@@ -590,6 +590,39 @@
 }
 
 /* =========================================================================
+ * Faixa de anúncios — "Anúncios semelhantes", "Mais anúncios de…"
+ * ======================================================================
+ * 1, 2 ou 4 colunas, **nunca 3**. Com quatro cartões, qualquer contagem de
+ * colunas que não divida 4 deixa um sozinho numa linha nova — e é esse órfão
+ * que torna a secção feia. Saltar o 3 é o que o evita sem precisar de rolo
+ * horizontal nem de esconder cartões.
+ *
+ * `@container` e não `@media`: o que decide quantos cartões cabem é a largura
+ * desta faixa, não a da janela. A mesma faixa vive em colunas de larguras
+ * diferentes consoante a página, e a janela não sabe disso. */
+.upm-listing-section {
+  container-type: inline-size;
+}
+
+.upm-listing-grid {
+  display: grid;
+  gap: var(--sp-7);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 520px) {
+  .upm-listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 920px) {
+  .upm-listing-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================================
  * Overlay · Drawer · Modal
  * ====================================================================== */
 

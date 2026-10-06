@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
+import { NoNavigation } from "./NoNavigation";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
@@ -174,25 +175,27 @@ function Shell({
 }) {
   return (
     <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Premium"
-              activeId={activeId}
-              locale="pt"
-              onLocaleChange={async () => undefined}
-              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-              notifications={[]}
-              liveNotifications={false}
-            >
-              {children}
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Premium"
+                activeId={activeId}
+                locale="pt"
+                onLocaleChange={async () => undefined}
+                counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+                notifications={[]}
+                liveNotifications={false}
+              >
+                {children}
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

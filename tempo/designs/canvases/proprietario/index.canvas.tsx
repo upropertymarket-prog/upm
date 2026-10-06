@@ -88,149 +88,149 @@ export default function ProprietarioCanvas() {
         component={DetalheEscuro}
         layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
       />
-      {/* A mesma rota vista pelo dono do anúncio: a ficha é a mesma, o que
-          muda é a barra de gestão por cima (07 §4.3). */}
+      {/* A mesma rota vista pelo dono do anúncio: linha própria, para o canvas
+          se manter em duas colunas (07 §22). */}
       <Storyboard
         id="MeuAnuncioClaro"
         name="O meu anúncio · Claro (/market/[id])"
         component={MeuAnuncioClaro}
-        layout={{ x: 3040, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MeuAnuncioEscuro"
         name="O meu anúncio · Escuro (/market/[id])"
         component={MeuAnuncioEscuro}
-        layout={{ x: 4560, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="PropriedadesClaro"
         name="As minhas propriedades · Claro (/propriedades)"
         component={PropriedadesClaro}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PropriedadesEscuro"
         name="As minhas propriedades · Escuro (/propriedades)"
         component={PropriedadesEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="NovaPropriedadeClaro"
         name="Nova propriedade · Claro (/propriedades/nova)"
         component={NovaPropriedadeClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="NovaPropriedadeEscuro"
         name="Nova propriedade · Escuro (/propriedades/nova)"
         component={NovaPropriedadeEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Leads"
         name="Leads · Claro (/leads)"
         component={Leads}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
         id="LeadsEscuro"
         name="Leads · Escuro (/leads)"
         component={LeadsEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Mensagens"
         name="Mensagens · Claro (/mensagens)"
         component={Mensagens}
-        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MensagensEscuro"
         name="Mensagens · Escuro (/mensagens)"
         component={MensagensEscuro}
-        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Agenda"
         name="Agenda de visitas · Claro (/agenda)"
         component={Agenda}
-        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 7840, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AgendaEscuro"
         name="Agenda de visitas · Escuro (/agenda)"
         component={AgendaEscuro}
-        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 7840, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="MapaClaro"
         name="Mapa · Claro (/mapa)"
         component={MapaClaro}
-        layout={{ x: 0, y: 7840, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 8820, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MapaEscuro"
         name="Mapa · Escuro (/mapa)"
         component={MapaEscuro}
-        layout={{ x: 1520, y: 7840, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 8820, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="CloudClaro"
         name="Cloud · Claro (/cloud)"
         component={CloudClaro}
-        layout={{ x: 0, y: 8820, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 9800, width: 1440, height: 900 }}
       />
       <Storyboard
         id="CloudEscuro"
         name="Cloud · Escuro (/cloud)"
         component={CloudEscuro}
-        layout={{ x: 1520, y: 8820, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 9800, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ContratosClaro"
         name="Contratos · Claro (/contratos)"
         component={ContratosClaro}
-        layout={{ x: 0, y: 9800, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 10780, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ContratosEscuro"
         name="Contratos · Escuro (/contratos)"
         component={ContratosEscuro}
-        layout={{ x: 1520, y: 9800, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 10780, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="Plano"
         name="Plano e faturação · Claro (/plano)"
         component={PlanoClaro}
-        layout={{ x: 0, y: 10780, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 11760, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PlanoEscuro"
         name="Plano e faturação · Escuro (/plano)"
         component={PlanoEscuro}
-        layout={{ x: 1520, y: 10780, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 11760, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="DefinicoesClaro"
         name="Definições · Claro (/definicoes)"
         component={DefinicoesClaro}
-        layout={{ x: 0, y: 11760, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 12740, width: 1440, height: 900 }}
       />
       <Storyboard
         id="DefinicoesEscuro"
         name="Definições · Escuro (/definicoes)"
         component={DefinicoesEscuro}
-        layout={{ x: 1520, y: 11760, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 12740, width: 1440, height: 900 }}
       />
     </Canvas>
   );

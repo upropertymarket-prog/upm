@@ -13,6 +13,7 @@ import { requestVisit } from "../../actions/visits";
 import { toggleSavedProperty } from "../../actions/saved-properties";
 import { setLocalePreference } from "../../actions/preferences";
 import { formatCents } from "../../../lib/money";
+import { resolvePropertyCards } from "../../../lib/propertyCards";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,33 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
   }
   const price = formatCents(property.price_cents ?? property.rent_cents);
 
+  // As duas faixas abaixo do mapa. `properties_public` já filtra por
+  // `active`/`featured`, por isso nenhuma delas pode revelar um rascunho ou um
+  // anúncio em moderação — nem sequer ao próprio dono.
+  const [{ data: similarRows }, { data: ownerRows }] = await Promise.all([
+    supabase
+      .from("properties_public")
+      .select("id, title, deal, typology, city, price_cents, rent_cents")
+      .eq("deal", property.deal ?? "sale")
+      .eq("city", property.city ?? "")
+      .neq("id", id)
+      .order("published_at", { ascending: false })
+      .limit(4),
+    property.owner_id
+      ? supabase
+          .from("properties_public")
+          .select("id, title, deal, typology, city, price_cents, rent_cents")
+          .eq("owner_id", property.owner_id)
+          .neq("id", id)
+          .order("published_at", { ascending: false })
+          .limit(4)
+      : Promise.resolve({ data: null }),
+  ]);
+  const [similar, fromOwner] = await Promise.all([
+    resolvePropertyCards(supabase, similarRows ?? []),
+    resolvePropertyCards(supabase, ownerRows ?? []),
+  ]);
+
   return (
     <AppChrome
       role={role}
@@ -116,6 +144,8 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
         }
         price={price}
         ownerName={ownerProfile?.full_name || "Proprietário"}
+        similar={similar}
+        fromOwner={fromOwner}
         management={
           isOwnProperty ? (
             <OwnerListingBar
@@ -131,11 +161,6 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
         actions={
           isOwnProperty ? null : (
             <>
-              <SaveButton
-                propertyId={id}
-                initialSaved={initialSaved}
-                action={toggleSavedProperty}
-              />
               {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
                   destino. No próprio anúncio nem sequer entram na árvore: a
                   decisão passou do `disabled` do componente para quem o usa,
@@ -145,6 +170,13 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
                 propertyTitle={property.title ?? "Imóvel"}
                 onContact={startConversation}
                 onRequestVisit={requestVisit}
+              />
+              {/* Depois das duas ações de contacto: guardar é o passo que fica
+                  para quem ainda não vai contactar (04 §8.4). */}
+              <SaveButton
+                propertyId={id}
+                initialSaved={initialSaved}
+                action={toggleSavedProperty}
               />
             </>
           )

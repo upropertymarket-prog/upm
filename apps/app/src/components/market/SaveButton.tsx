@@ -31,8 +31,13 @@ export function SaveButton({ propertyId, initialSaved, action }: SaveButtonProps
   };
 
   return (
+    // Sempre secundário: a ação primária do detalhe é contactar o proprietário
+    // (04 §8.4). Guardar em primário punha dois botões de acento seguidos na
+    // coluna e as duas ações passavam a disputar a mesma atenção. O estado
+    // guardado/por guardar lê-se no ícone e no rótulo, que chegam para isso.
     <Button
-      variant={saved ? "secondary" : "primary"}
+      variant="secondary"
+      fullWidth
       leadingIcon={saved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
       onClick={toggle}
       disabled={isPending}

@@ -4,6 +4,7 @@ import { Bath, BedDouble, CalendarDays, Layers, Ruler, Zap } from "lucide-react"
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { PropertyLocationMap } from "../map/PropertyLocationMap";
+import { PropertyCard, type PropertyCardData } from "./PropertyCard";
 
 /**
  * Detalhe de imóvel — `/market/[id]` (04 §8.2)
@@ -62,6 +63,10 @@ export type PropertyDetailProps = {
    * à letra, o que um comprador vê (04 §2.3).
    */
   management?: React.ReactNode;
+  /** Mesmo negócio e mesma cidade, sem este imóvel. Vazio esconde a secção. */
+  similar?: PropertyCardData[];
+  /** Outros anúncios do mesmo proprietário. Vazio esconde a secção. */
+  fromOwner?: PropertyCardData[];
 };
 
 export function PropertyDetail({
@@ -72,6 +77,8 @@ export function PropertyDetail({
   ownerName,
   actions,
   management,
+  similar = [],
+  fromOwner = [],
 }: PropertyDetailProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
@@ -225,6 +232,9 @@ export function PropertyDetail({
                   lat={location.lat}
                   isExact={location.isExact}
                   radiusM={location.radiusM}
+                  /* O mapa é o que situa o imóvel; a 220 px mal se via a rua.
+                     `clamp` em vez de uma altura fixa para não repetir D32. */
+                  style={{ height: "clamp(280px, 38vw, 460px)" }}
                 />
               </CardBody>
             </Card>
@@ -237,7 +247,16 @@ export function PropertyDetail({
           style={{ display: "flex", flexDirection: "column", gap: 16 }}
         >
           <Card>
-            <CardBody style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <CardBody
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+                // As ações encostam à base com 16 px, não com os 20 px do
+                // enchimento geral do cartão.
+                paddingBottom: 16,
+              }}
+            >
               {property.deal ? (
                 <StatusTag tone={property.deal === "sale" ? "dealSale" : "dealRent"}>
                   {property.deal === "sale" ? "Venda" : "Arrendamento"}
@@ -248,12 +267,42 @@ export function PropertyDetail({
                 <strong>{ownerName}</strong>
                 <div style={{ color: "var(--muted)", fontSize: 12 }}>Responde em ~2 h</div>
               </div>
-              {actions}
+              {/* As ações num bloco só, encostado à base do cartão: 16 px entre
+                  elas e 16 px até à borda, em vez do espaçamento geral do
+                  `CardBody`. O resto do cartão mantém o seu ritmo. */}
+              {actions ? <div style={{ display: "grid", gap: 16 }}>{actions}</div> : null}
             </CardBody>
           </Card>
         </aside>
       </div>
+
+      {/* Fora do `.upm-split`, e não dentro da coluna da ficha: estas faixas
+          são o rodapé da página, não parte do imóvel. Ganham a largura toda,
+          que é o que deixa caber quatro cartões sem os espremer. */}
+      <ListingSection title="Anúncios semelhantes" items={similar} />
+      <ListingSection title={`Mais anúncios de ${ownerName}`} items={fromOwner} />
     </div>
+  );
+}
+
+/**
+ * Uma faixa de cartões do Market com título. Sem itens não se desenha nada —
+ * um "Anúncios semelhantes" vazio é pior do que a secção não existir.
+ */
+function ListingSection({ title, items }: { title: string; items: PropertyCardData[] }) {
+  if (items.length === 0) return null;
+  return (
+    <section
+      className="upm-listing-section"
+      style={{ display: "flex", flexDirection: "column", gap: 12 }}
+    >
+      <h2 style={{ margin: 0, fontSize: 17 }}>{title}</h2>
+      <div className="upm-listing-grid">
+        {items.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+    </section>
   );
 }
 

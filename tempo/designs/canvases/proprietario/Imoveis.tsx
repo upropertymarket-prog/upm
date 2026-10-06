@@ -14,13 +14,16 @@ import { PropertyListing } from "../../../../apps/app/src/components/my-properti
 import { PropertyFormWizard } from "../../../../apps/app/src/components/properties/PropertyFormWizard";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import { demoLocaleChange, demoNotifications, demoOk, demoStartConversation } from "./demo";
+import { NoNavigation } from "./NoNavigation";
 import {
   demoDetail,
   demoDetailLocation,
   demoFormActions,
   demoListingRows,
   demoMarketCards,
+  demoOwnerCards,
   demoPhotos,
+  demoSimilarCards,
 } from "./demoMarket";
 
 /**
@@ -51,25 +54,27 @@ function Shell({
 }) {
   return (
     <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Premium"
-              activeId={activeId}
-              locale="pt"
-              onLocaleChange={demoLocaleChange}
-              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-              notifications={demoNotifications}
-              liveNotifications={false}
-            >
-              {children}
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Premium"
+                activeId={activeId}
+                locale="pt"
+                onLocaleChange={demoLocaleChange}
+                counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+                notifications={demoNotifications}
+                liveNotifications={false}
+              >
+                {children}
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }
@@ -103,17 +108,21 @@ function DetalheDemo({ theme }: Tema) {
         property={demoDetail}
         photos={demoPhotos}
         location={demoDetailLocation}
+        similar={demoSimilarCards}
+        fromOwner={demoOwnerCards}
         price="485 000 €"
         ownerName="Miguel Antunes"
         actions={
           <>
-            <SaveButton propertyId="p1" initialSaved={false} action={demoOk} />
             <ContactActions
               propertyId="p1"
               propertyTitle={demoDetail.title ?? "Imóvel"}
               onContact={demoStartConversation}
               onRequestVisit={demoOk}
+              /* A storyboard não navega: ver a nota em ContactActions. */
+              onOpenConversation={() => {}}
             />
+            <SaveButton propertyId="p1" initialSaved={false} action={demoOk} />
           </>
         }
       />
@@ -136,6 +145,8 @@ function MeuAnuncioDemo({ theme }: Tema) {
         property={demoDetail}
         photos={demoPhotos}
         location={demoDetailLocation}
+        similar={demoSimilarCards}
+        fromOwner={demoOwnerCards}
         price="485 000 €"
         ownerName="Ana Silva"
         management={

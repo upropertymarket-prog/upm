@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
+import { NoNavigation } from "./NoNavigation";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
@@ -46,42 +47,44 @@ import {
 function PainelDemo({ theme }: { theme: "light" | "dark" }) {
   return (
     <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Premium"
-              activeId="dashboard"
-              locale="pt"
-              onLocaleChange={demoLocaleChange}
-              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-              notifications={demoNotifications}
-              liveNotifications={false}
-            >
-              <PageHeader
-                title="Boa tarde, Ana"
-                subtitle="Resumo da sua atividade e ativos"
-                actions={
-                  <Button variant="secondary" disabled>
-                    Exportar
-                  </Button>
-                }
-              />
-              <OwnerDashboard
-                stats={demoDashboardStats}
-                series={demoViewsSeries}
-                upcomingVisits={demoUpcomingVisits}
-                recentMessages={demoRecentMessages}
-                recentMessagesMeta="2 por responder"
-                recentContracts={demoRecentContracts}
-                recentContractsMeta="3 recentes"
-              />
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Premium"
+                activeId="dashboard"
+                locale="pt"
+                onLocaleChange={demoLocaleChange}
+                counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+                notifications={demoNotifications}
+                liveNotifications={false}
+              >
+                <PageHeader
+                  title="Boa tarde, Ana"
+                  subtitle="Resumo da sua atividade e ativos"
+                  actions={
+                    <Button variant="secondary" disabled>
+                      Exportar
+                    </Button>
+                  }
+                />
+                <OwnerDashboard
+                  stats={demoDashboardStats}
+                  series={demoViewsSeries}
+                  upcomingVisits={demoUpcomingVisits}
+                  recentMessages={demoRecentMessages}
+                  recentMessagesMeta="2 por responder"
+                  recentContracts={demoRecentContracts}
+                  recentContractsMeta="3 recentes"
+                />
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

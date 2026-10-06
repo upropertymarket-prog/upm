@@ -17,6 +17,13 @@ export type ContactActionsProps = {
   }) => Promise<{ error?: string }>;
   /** O dono não se contacta a si próprio — os botões não aparecem. */
   disabled?: boolean;
+  /**
+   * Para onde ir depois de a conversa abrir. Por omissão é `/mensagens`, que é
+   * o que a app faz. As storyboards passam um no-op: navegar a partir de uma
+   * maqueta leva o iframe do canvas para uma rota que o devserver não serve, e
+   * a storyboard fica presa num 404.
+   */
+  onOpenConversation?: (conversationId: string) => void;
 };
 
 /**
@@ -37,6 +44,7 @@ export function ContactActions({
   onContact,
   onRequestVisit,
   disabled = false,
+  onOpenConversation,
 }: ContactActionsProps) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState("");
@@ -53,6 +61,10 @@ export function ContactActions({
       const result = await onContact(propertyId);
       if (result.error || !result.id) {
         toast(result.error ?? "Não foi possível abrir a conversa.", "error");
+        return;
+      }
+      if (onOpenConversation) {
+        onOpenConversation(result.id);
         return;
       }
       router.push(`/mensagens?conversa=${result.id}`);

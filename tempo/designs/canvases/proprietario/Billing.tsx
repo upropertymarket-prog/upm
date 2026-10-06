@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
+import { NoNavigation } from "./NoNavigation";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
@@ -139,36 +140,38 @@ const trial: TrialStatus = {
 function BillingDemo({ theme }: { theme: "light" | "dark" }) {
   return (
     <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Smarter"
-              activeId="plan"
-              locale="pt"
-              onLocaleChange={async () => undefined}
-              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-              notifications={[]}
-              liveNotifications={false}
-            >
-              <PlanScreen
-                status={status}
-                plans={plans}
-                addons={addons}
-                invoices={invoices}
-                onCheckout={async () => ({ url: "#" })}
-                onOpenPortal={async () => ({ url: "#" })}
-                onExportInvoice={async () => ({ url: "#" })}
-                onSaveInvoice={async () => ({ ok: true })}
-                trial={trial}
-                onRequestExtension={async () => ({ ok: true })}
-              />
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Smarter"
+                activeId="plan"
+                locale="pt"
+                onLocaleChange={async () => undefined}
+                counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+                notifications={[]}
+                liveNotifications={false}
+              >
+                <PlanScreen
+                  status={status}
+                  plans={plans}
+                  addons={addons}
+                  invoices={invoices}
+                  onCheckout={async () => ({ url: "#" })}
+                  onOpenPortal={async () => ({ url: "#" })}
+                  onExportInvoice={async () => ({ url: "#" })}
+                  onSaveInvoice={async () => ({ ok: true })}
+                  trial={trial}
+                  onRequestExtension={async () => ({ ok: true })}
+                />
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

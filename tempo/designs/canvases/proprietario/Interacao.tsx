@@ -1,4 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
+import { NoNavigation } from "./NoNavigation";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
@@ -51,27 +52,29 @@ function Shell({
 }) {
   return (
     <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Premium"
-              activeId={activeId}
-              locale="pt"
-              onLocaleChange={demoLocaleChange}
-              fill={fill}
-              counters={{ leads: 2, messages: 3, visitSchedule: 2, contracts: 1 }}
-              notifications={demoNotifications}
-              liveNotifications={false}
-            >
-              {hideHeader ? null : <PageHeader title={title} subtitle={subtitle} />}
-              {children}
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Premium"
+                activeId={activeId}
+                locale="pt"
+                onLocaleChange={demoLocaleChange}
+                fill={fill}
+                counters={{ leads: 2, messages: 3, visitSchedule: 2, contracts: 1 }}
+                notifications={demoNotifications}
+                liveNotifications={false}
+              >
+                {hideHeader ? null : <PageHeader title={title} subtitle={subtitle} />}
+                {children}
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

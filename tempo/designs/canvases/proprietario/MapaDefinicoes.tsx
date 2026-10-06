@@ -10,6 +10,7 @@ import { PropertyMap } from "../../../../apps/app/src/components/map/PropertyMap
 import { NotificationPrefsForm } from "../../../../apps/app/src/components/settings/NotificationPrefsForm";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import { demoLocaleChange, demoNotifications } from "./demo";
+import { NoNavigation } from "./NoNavigation";
 import {
   demoDrawPolygon,
   demoMapProperties,
@@ -43,26 +44,28 @@ function Shell({
 }) {
   return (
     <div data-theme={theme} style={{ background: "var(--bg)", height: "900px" }}>
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <ThemeProvider initialChoice={theme}>
-          <ToastProvider>
-            <AppChrome
-              role="owner"
-              userName="Ana Silva"
-              userMeta="Proprietária · Premium"
-              activeId={activeId}
-              locale="pt"
-              onLocaleChange={demoLocaleChange}
-              contentWidth={contentWidth}
-              counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-              notifications={demoNotifications}
-              liveNotifications={false}
-            >
-              {children}
-            </AppChrome>
-          </ToastProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AppChrome
+                role="owner"
+                userName="Ana Silva"
+                userMeta="Proprietária · Premium"
+                activeId={activeId}
+                locale="pt"
+                onLocaleChange={demoLocaleChange}
+                contentWidth={contentWidth}
+                counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+                notifications={demoNotifications}
+                liveNotifications={false}
+              >
+                {children}
+              </AppChrome>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

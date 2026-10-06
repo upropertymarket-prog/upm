@@ -313,3 +313,14 @@ export const demoNotificationPrefs: NotificationPrefs = {
 };
 
 export const demoSavePrefs = async () => ({});
+
+/**
+ * As duas faixas abaixo do mapa no detalhe. Derivadas de `demoMarketCards`
+ * para a storyboard não inventar imóveis que o Market não mostra.
+ */
+export const demoSimilarCards: PropertyCardData[] = demoMarketCards
+  .filter((c) => c.id !== "p1")
+  .slice(0, 4);
+export const demoOwnerCards: PropertyCardData[] = demoMarketCards
+  .filter((c) => c.id !== "p1")
+  .slice(-4);
