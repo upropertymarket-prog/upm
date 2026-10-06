@@ -73,10 +73,10 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
             }}
           >
             <span style={{ flex: "1 1 240px", minWidth: 0 }}>{NOTIFICATION_TYPE_LABELS[type]}</span>
-            {/* Os dois canais empilhados: lado a lado, "Na aplicação" e "Por
-                e-mail" liam-se como um par de opções da mesma pergunta em vez
-                de dois interruptores independentes. */}
-            <span style={{ display: "grid", gap: "var(--sp-3)", justifyItems: "start" }}>
+            {/* Os dois canais lado a lado, com folga grande entre eles: a
+                separação é que os mantém a ler-se como dois interruptores
+                independentes e não como um par de opções da mesma pergunta. */}
+            <span style={{ display: "flex", flexDirection: "row", gap: "48px" }}>
               <Toggle
                 label="Na aplicação"
                 checked={prefEnabled(draft, type, "inapp")}
