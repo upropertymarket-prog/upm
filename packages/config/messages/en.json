@@ -261,7 +261,7 @@
     "saveToCloud": "Save to Cloud",
     "savedShort": "Saved",
     "saveShort": "Save",
-    "invoiceSaved": "Invoice saved to your Cloud.",
+    "invoiceSaved": "Invoice saved to your Cloud, in the «Faturas» folder. You can rename it or move it like any other folder.",
     "invoicesEmptyTitle": "No invoices yet",
     "invoicesEmptyBody": "Invoices show up here as soon as there is a paid subscription.",
     "interval": {
@@ -719,7 +719,8 @@
         "saved": "Saved properties",
         "alerts": "Search alerts",
         "cloud_gb": "Cloud (GB)"
-      }
+      },
+      "saveAnyway": "Save anyway"
     }
   }
 }

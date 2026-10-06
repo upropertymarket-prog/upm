@@ -22,7 +22,17 @@ const MIN_BAR = 18;
  * Alternativa não visual: a tabela em `.upm-sr-only` a seguir ao gráfico, para
  * quem não lê as barras.
  */
-export function ViewsChart({ series }: { series: ViewsSeries[] }) {
+export function ViewsChart({
+  series,
+  /**
+   * O título nomeia a série, por isso muda com quem olha: o proprietário vê as
+   * visitas aos imóveis dele, o comprador vê os imóveis que viu (04 §2.4).
+   */
+  title = "Visitas às propriedades",
+}: {
+  series: ViewsSeries[];
+  title?: string;
+}) {
   const [rangeId, setRangeId] = useState(series[0]?.id ?? "");
   const active = series.find((s) => s.id === rangeId) ?? series[0];
   const buckets = active?.buckets ?? [];
@@ -33,7 +43,7 @@ export function ViewsChart({ series }: { series: ViewsSeries[] }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <h3 className="upm-card__title" style={{ margin: 0 }}>
-            Visitas às propriedades
+            {title}
           </h3>
           <div style={{ marginLeft: "auto" }}>
             <Tabs
@@ -93,7 +103,9 @@ export function ViewsChart({ series }: { series: ViewsSeries[] }) {
         </div>
 
         <table className="upm-sr-only">
-          <caption>Visitas às propriedades por período ({active?.label})</caption>
+          <caption>
+            {title} por período ({active?.label})
+          </caption>
           <tbody>
             {buckets.map((bucket) => (
               <tr key={bucket.label}>

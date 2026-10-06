@@ -15,8 +15,12 @@ import {
   loadNotifications,
   loadVisits,
 } from "../../lib/interaction";
+import { buildViewsSeries, type ViewRow } from "../../lib/dashboard";
 import { setLocalePreference } from "../actions/preferences";
 import { ACTIVITY_ROWS } from "./panelShared";
+
+/** Um ano de histórico cobre os três intervalos do gráfico (a retenção corta aos 90 dias). */
+const HISTORY_DAYS = 365;
 
 /**
  * Painel do comprador — `/painel` com `role = buyer` (04 §2.4 · fecha D33)
@@ -31,8 +35,10 @@ import { ACTIVITY_ROWS } from "./panelShared";
  * imóvel vivem no imóvel e na Cloud (07 §19.5), e o que um painel de atividade
  * tem para dizer é o contrato que mudou de estado.
  *
- * O gráfico "Imóveis vistos" não entra, e o `BuyerDashboard` explica porquê:
- * não há registo por utilizador de que imóveis foram vistos.
+ * O gráfico "Imóveis vistos" entra com `my_property_views_daily` (D45): o
+ * registo por utilizador nasceu na migração `20261006120100`, com retenção de
+ * 90 dias por decisão do cliente. Antes disso não existia maneira de saber que
+ * imóveis uma pessoa tinha visto — `property_views` é agregado por imóvel.
  */
 export async function BuyerPanel({
   userId,
@@ -46,18 +52,32 @@ export async function BuyerPanel({
   const supabase = createClient(await cookies());
   const t = await getTranslations();
 
-  const [savedCount, visits, conversations, notifications, { data: contractRows }] =
-    await Promise.all([
-      supabase
-        .from("saved_properties")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .then(({ count }) => count ?? 0),
-      loadVisits(supabase),
-      loadConversations(supabase),
-      loadNotifications(supabase),
-      supabase.rpc("my_contracts"),
-    ]);
+  // O `cast` sai com o próximo `pnpm db:types`: a função nasce na migração
+  // `20261006120100`, que ainda não foi aplicada em staging.
+  const viewsRpc = supabase.rpc as unknown as (
+    fn: "my_property_views_daily",
+    args: { p_days: number },
+  ) => Promise<{ data: ViewRow[] | null }>;
+
+  const [
+    savedCount,
+    visits,
+    conversations,
+    notifications,
+    { data: contractRows },
+    { data: views },
+  ] = await Promise.all([
+    supabase
+      .from("saved_properties")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .then(({ count }) => count ?? 0),
+    loadVisits(supabase),
+    loadConversations(supabase),
+    loadNotifications(supabase),
+    supabase.rpc("my_contracts"),
+    viewsRpc("my_property_views_daily", { p_days: HISTORY_DAYS }),
+  ]);
 
   const contractsAll = contractRows ?? [];
   const contracts = contractsAll.slice(0, ACTIVITY_ROWS);
@@ -152,6 +172,7 @@ export async function BuyerPanel({
       />
       <BuyerDashboard
         stats={stats}
+        series={buildViewsSeries(views ?? [], new Date())}
         recentMessages={recentMessages}
         recentMessagesMeta={unansweredCount === 0 ? "tudo lido" : `${unansweredCount} por ler`}
         recentContracts={recentContracts}

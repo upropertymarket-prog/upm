@@ -261,7 +261,7 @@
     "saveToCloud": "Guardar na Cloud",
     "savedShort": "Guardada",
     "saveShort": "Guardar",
-    "invoiceSaved": "Fatura guardada na Cloud.",
+    "invoiceSaved": "Fatura guardada na Cloud, na pasta «Faturas». Pode mudar-lhe o nome ou movê-la como a qualquer outra pasta.",
     "invoicesEmptyTitle": "Ainda não há faturas",
     "invoicesEmptyBody": "As faturas aparecem aqui assim que houver uma subscrição paga.",
     "interval": {
@@ -719,7 +719,8 @@
         "saved": "Propriedades guardadas",
         "alerts": "Alertas de pesquisa",
         "cloud_gb": "Cloud (GB)"
-      }
+      },
+      "saveAnyway": "Guardar mesmo assim"
     }
   }
 }

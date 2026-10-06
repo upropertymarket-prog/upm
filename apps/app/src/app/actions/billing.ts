@@ -267,6 +267,47 @@ export async function exportInvoice(invoiceId: string): Promise<InvoiceActionSta
 }
 
 /**
+ * O nome da pasta na primeira vez. Depois disso é o utilizador que manda.
+ *
+ * Sem `export`: num ficheiro `"use server"` só funções `async` podem ser
+ * exportadas — tudo o que daqui sai é um endpoint.
+ */
+const INVOICE_FOLDER_NAME = "Faturas";
+
+/**
+ * A pasta das faturas (D41): procura uma pasta de utilizador com este nome na
+ * raiz da Cloud e cria-a se não existir. Procura pelo nome — e não por uma
+ * marca na tabela — justamente para que renomear ou mover a pasta não a
+ * "roube" ao utilizador: se ele lhe mudar o nome, a fatura seguinte cria uma
+ * "Faturas" nova e ele arruma como quiser. O que não acontece é a app insistir.
+ *
+ * Devolve `null` quando a criação falha: a fatura vai para a raiz, que é onde
+ * ia antes, em vez de não ser guardada.
+ */
+async function invoiceFolderId(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<string | null> {
+  const { data: existing } = await supabase
+    .from("folders")
+    .select("id")
+    .eq("owner_id", userId)
+    .is("parent_id", null)
+    .eq("kind", "user")
+    .eq("name", INVOICE_FOLDER_NAME)
+    .limit(1)
+    .maybeSingle();
+  if (existing?.id) return existing.id;
+
+  const { data: created } = await supabase
+    .from("folders")
+    .insert({ owner_id: userId, parent_id: null, name: INVOICE_FOLDER_NAME, kind: "user" })
+    .select("id")
+    .maybeSingle();
+  return created?.id ?? null;
+}
+
+/**
  * Guardar na Cloud: traz o PDF do Stripe e põe-no na Cloud do próprio, pelo
  * mesmo caminho de um upload normal — `cloud_register_upload` verifica a quota
  * antes de o ficheiro contar (07 §19.8 #1), e recusa a quem não tem Cloud com
@@ -304,9 +345,17 @@ export async function saveInvoiceToCloud(invoiceId: string): Promise<InvoiceActi
     .upload(storagePath, bytes, { contentType: mime, upsert: false });
   if (uploadError) return { error: "Não foi possível guardar a fatura." };
 
+  // D41 — decisão do cliente a 6 out 2026: a pasta "Faturas" nasce na primeira
+  // vez que se guarda uma fatura, e só então. É `kind: "user"`, de propósito:
+  // uma pasta de utilizador renomeia-se, move-se e apaga-se como qualquer
+  // outra, ao contrário das pastas de sistema de 07 §19.1. É isso que a torna
+  // compatível com 07 §19.9 ("a app não arruma o que é do utilizador") — ela
+  // arruma a primeira, e a partir daí a pasta é de quem a tem.
+  const folderId = await invoiceFolderId(supabase, user.id);
+
   const name = `Fatura ${invoice.number ?? invoice.id.slice(0, 8)}.pdf`;
   const { data: fileId, error: registerError } = await supabase.rpc("cloud_register_upload", {
-    p_folder_id: null as unknown as string,
+    p_folder_id: folderId as unknown as string,
     p_name: name,
     p_mime: mime,
     p_size: bytes.byteLength,

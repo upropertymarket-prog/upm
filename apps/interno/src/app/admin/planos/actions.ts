@@ -36,6 +36,21 @@ export type PlanActionState = {
   notice?: string;
   /** O servidor recusou por falta de PIN confirmado — a UI abre o modal. */
   needsStepUp?: boolean;
+  /**
+   * D40 — baixar um limite abaixo do que subscritores já usam. Nada foi
+   * gravado: a UI mostra este aviso e pede confirmação, que volta no campo
+   * `confirmOverage`.
+   */
+  overageWarning?: string;
+};
+
+/** Rótulos dos limites para o aviso de D40 — PT, como o resto do interno. */
+const LIMIT_WARNING_LABELS: Record<string, string> = {
+  active_properties: "propriedades ativas",
+  visits: "pedidos de visita por mês",
+  active_chats: "conversas ativas",
+  saved: "propriedades guardadas",
+  alerts: "alertas de pesquisa",
 };
 
 async function admin() {
@@ -121,6 +136,37 @@ export async function savePlan(
           .maybeSingle()
       ).data
     : null;
+
+  // D40 — antes de gravar: há subscritores a usar mais do que o limite novo?
+  // Só faz sentido num plano que já existe, e só até à confirmação. O cast sai
+  // com o próximo `pnpm db:types` (função nova em `20261006120200`).
+  if (plan.id && formData.get("confirmOverage") !== "on") {
+    const overageRpc = supabase.rpc as unknown as (
+      fn: "plan_limit_overage",
+      args: { p_plan_id: string; p_limits: typeof plan.limits },
+    ) => Promise<{
+      data: { limit_key: string; affected: number; max_used: number }[] | null;
+      error: unknown;
+    }>;
+    const { data: overage } = await overageRpc("plan_limit_overage", {
+      p_plan_id: plan.id,
+      p_limits: plan.limits,
+    });
+
+    if (overage && overage.length > 0) {
+      const lines = overage.map((entry) => {
+        const label = LIMIT_WARNING_LABELS[entry.limit_key] ?? entry.limit_key;
+        const accounts = entry.affected === 1 ? "1 conta" : `${entry.affected} contas`;
+        return `${accounts} acima do limite de ${label} (máximo em uso: ${entry.max_used})`;
+      });
+      return {
+        overageWarning:
+          `Este limite fica abaixo do que já está em uso: ${lines.join("; ")}. ` +
+          "Ao guardar, essas contas ficam em excedente até à renovação — continuam " +
+          "a ver e a usar o que têm, e nada é apagado (02 §5). Nada foi gravado ainda.",
+      };
+    }
+  }
 
   const saved = plan.id
     ? await supabase.from("plans").update(row).eq("id", plan.id).select("id").single()

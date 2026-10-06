@@ -81,6 +81,8 @@ export type PlanActionState = {
   notice?: string;
   /** P8-07: o servidor recusou por falta de PIN confirmado (07 §6). */
   needsStepUp?: boolean;
+  /** D40: o limite novo fica abaixo do uso de alguns subscritores. */
+  overageWarning?: string;
 };
 
 /** P7-06 — 07 §8.1: o pedido cai em Admin › Planos › Pedidos de trial. */
@@ -543,10 +545,37 @@ function PlanForm({
   const t = useTranslations("admin.plans");
   const [visible, setVisible] = useState(plan?.visible ?? true);
 
+  // D40 — a confirmação dos excedentes dura uma submissão: mexer num campo
+  // depois do aviso volta a pedi-la, porque os números do aviso deixam de
+  // corresponder ao que está no formulário.
+  //
+  // O campo é escrito por `ref` e não por estado: o `onClick` do botão corre
+  // imediatamente antes de o React serializar o `FormData`, e um `setState`
+  // nesse instante só se veria no render seguinte — ou seja, nunca a tempo
+  // desta submissão. O estado serve apenas para trocar o texto do botão.
+  const confirmField = useRef<HTMLInputElement>(null);
+  const [confirmOverage, setConfirmOverage] = useState(false);
+  const warning = state.overageWarning;
+
+  function resetConfirmation() {
+    if (confirmField.current) confirmField.current.value = "off";
+    setConfirmOverage(false);
+  }
+
+  function confirmOverageNow() {
+    if (confirmField.current) confirmField.current.value = "on";
+    setConfirmOverage(true);
+  }
+
   return (
-    <form action={action} style={{ display: "grid", gap: "var(--sp-6)" }}>
+    <form
+      action={action}
+      onChange={resetConfirmation}
+      style={{ display: "grid", gap: "var(--sp-6)" }}
+    >
       {plan ? <input type="hidden" name="id" value={plan.planId} /> : null}
       <input type="hidden" name="visible" value={visible ? "on" : "off"} />
+      <input ref={confirmField} type="hidden" name="confirmOverage" defaultValue="off" />
 
       <p
         style={{
@@ -660,9 +689,26 @@ function PlanForm({
           {state.notice}
         </p>
       ) : null}
+      {/* D40 — o aviso dos excedentes. Nada foi gravado quando isto aparece. */}
+      {warning ? (
+        <p
+          role="alert"
+          style={{ margin: 0, color: "var(--warn)", fontSize: "var(--fs-body)", lineHeight: 1.5 }}
+        >
+          {warning}
+        </p>
+      ) : null}
 
-      <Button type="submit" disabled={saving}>
-        {saving ? t("saving") : t("savePlan")}
+      <Button
+        type="submit"
+        disabled={saving}
+        /* Um aviso por confirmar muda o botão, em vez de acrescentar um
+           segundo: guardar continua a ser um só gesto, com o texto a dizer o
+           que esse gesto passou a significar. */
+        variant={warning && !confirmOverage ? "secondary" : "primary"}
+        onClick={warning && !confirmOverage ? confirmOverageNow : undefined}
+      >
+        {saving ? t("saving") : warning && !confirmOverage ? t("saveAnyway") : t("savePlan")}
       </Button>
     </form>
   );
