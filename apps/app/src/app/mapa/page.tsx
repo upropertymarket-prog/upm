@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PropertyMap } from "../../components/map/PropertyMap";
@@ -43,7 +44,7 @@ export default async function MapPage() {
       contentWidth="full"
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h1 className="upm-card__title">Mapa</h1>
+        <PageHeader title="Mapa" subtitle="Imóveis publicados na sua zona" />
         <PropertyMap initialProperties={properties ?? []} onDrawPolygon={propertiesWithinPolygon} />
       </div>
     </AppChrome>

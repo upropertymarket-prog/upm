@@ -56,6 +56,12 @@ export type PropertyDetailProps = {
   ownerName: string;
   /** Guardar + contactar. A página passa os Server Actions; o canvas, fixos. */
   actions?: React.ReactNode;
+  /**
+   * Barra de gestão, só quando quem vê é o dono do anúncio (`OwnerListingBar`).
+   * Fica por cima da ficha e não lhe toca: o que está por baixo continua a ser,
+   * à letra, o que um comprador vê (04 §2.3).
+   */
+  management?: React.ReactNode;
 };
 
 export function PropertyDetail({
@@ -65,6 +71,7 @@ export function PropertyDetail({
   price,
   ownerName,
   actions,
+  management,
 }: PropertyDetailProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
@@ -75,6 +82,7 @@ export function PropertyDetail({
       >
         ← Voltar ao Market
       </Link>
+      {management}
       {/* Ficha + barra de contacto. Abaixo de 900 px empilham (`.upm-split`),
           com a barra a seguir às fotografias em vez de espremida ao lado. */}
       <div

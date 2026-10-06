@@ -4,6 +4,8 @@ import Mensagens, { Agenda, AgendaEscuro, Leads, LeadsEscuro, MensagensEscuro } 
 import {
   DetalheClaro,
   DetalheEscuro,
+  MeuAnuncioClaro,
+  MeuAnuncioEscuro,
   MarketClaro,
   MarketEscuro,
   NovaPropriedadeClaro,
@@ -85,6 +87,20 @@ export default function ProprietarioCanvas() {
         name="Detalhe do imóvel · Escuro (/market/[id])"
         component={DetalheEscuro}
         layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+      />
+      {/* A mesma rota vista pelo dono do anúncio: a ficha é a mesma, o que
+          muda é a barra de gestão por cima (07 §4.3). */}
+      <Storyboard
+        id="MeuAnuncioClaro"
+        name="O meu anúncio · Claro (/market/[id])"
+        component={MeuAnuncioClaro}
+        layout={{ x: 3040, y: 1960, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="MeuAnuncioEscuro"
+        name="O meu anúncio · Escuro (/market/[id])"
+        component={MeuAnuncioEscuro}
+        layout={{ x: 4560, y: 1960, width: 1440, height: 900 }}
       />
 
       <Storyboard

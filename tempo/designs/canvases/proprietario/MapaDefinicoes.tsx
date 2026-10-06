@@ -74,7 +74,7 @@ function MapaDemo({ theme }: Tema) {
   return (
     <Shell theme={theme} activeId="map" contentWidth="full">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h1 className="upm-card__title">Mapa</h1>
+        <PageHeader title="Mapa" subtitle="Imóveis publicados na sua zona" />
         <PropertyMap initialProperties={demoMapProperties} onDrawPolygon={demoDrawPolygon} />
       </div>
     </Shell>

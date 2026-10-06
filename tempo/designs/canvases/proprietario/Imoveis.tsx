@@ -8,6 +8,8 @@ import { PropertyFilters } from "../../../../apps/app/src/components/market/Prop
 import { MarketResults } from "../../../../apps/app/src/components/market/MarketResults";
 import { PropertyDetail } from "../../../../apps/app/src/components/market/PropertyDetail";
 import { ContactActions } from "../../../../apps/app/src/components/market/ContactActions";
+import { SaveButton } from "../../../../apps/app/src/components/market/SaveButton";
+import { OwnerListingBar } from "../../../../apps/app/src/components/market/OwnerListingBar";
 import { PropertyListing } from "../../../../apps/app/src/components/my-properties/PropertyListing";
 import { PropertyFormWizard } from "../../../../apps/app/src/components/properties/PropertyFormWizard";
 import ptMessages from "../../../../packages/config/messages/pt.json";
@@ -88,11 +90,11 @@ function MarketDemo({ theme }: Tema) {
 }
 
 /**
- * `/market/[id]` — a ficha do imóvel.
+ * `/market/[id]` — a ficha do imóvel de **outra pessoa**.
  *
- * Sem `SaveButton`: guardar é do comprador, e quem está aqui é a proprietária.
- * `ContactActions` fica ativo — uma proprietária que vê o imóvel de outra
- * pessoa contacta como qualquer outro utilizador.
+ * Guardar e contactar estão os dois ativos: o que manda nesta página é de quem
+ * é o imóvel, não o papel da conta, e uma proprietária a ver o anúncio de outra
+ * pessoa é, nesse momento, uma interessada como qualquer outra (04 §2.3).
  */
 function DetalheDemo({ theme }: Tema) {
   return (
@@ -104,11 +106,44 @@ function DetalheDemo({ theme }: Tema) {
         price="485 000 €"
         ownerName="Miguel Antunes"
         actions={
-          <ContactActions
-            propertyId="p1"
-            propertyTitle={demoDetail.title ?? "Imóvel"}
-            onContact={demoStartConversation}
-            onRequestVisit={demoOk}
+          <>
+            <SaveButton propertyId="p1" initialSaved={false} action={demoOk} />
+            <ContactActions
+              propertyId="p1"
+              propertyTitle={demoDetail.title ?? "Imóvel"}
+              onContact={demoStartConversation}
+              onRequestVisit={demoOk}
+            />
+          </>
+        }
+      />
+    </Shell>
+  );
+}
+
+/**
+ * `/market/[id]` — a ficha do **próprio** anúncio.
+ *
+ * A ficha por baixo da barra é, à letra, a que o comprador vê: é isso que
+ * dispensa um modo "ver como comprador". O que muda é a barra de gestão por
+ * cima e o desaparecimento de guardar/contactar — ninguém se contacta a si
+ * próprio.
+ */
+function MeuAnuncioDemo({ theme }: Tema) {
+  return (
+    <Shell theme={theme} activeId="market">
+      <PropertyDetail
+        property={demoDetail}
+        photos={demoPhotos}
+        location={demoDetailLocation}
+        price="485 000 €"
+        ownerName="Ana Silva"
+        management={
+          <OwnerListingBar
+            status="active"
+            viewsCount={1245}
+            editHref="/propriedades/p1/editar"
+            statsHref="/propriedades/p1/estatisticas"
           />
         }
       />
@@ -150,6 +185,12 @@ export function DetalheClaro() {
 }
 export function DetalheEscuro() {
   return <DetalheDemo theme="dark" />;
+}
+export function MeuAnuncioClaro() {
+  return <MeuAnuncioDemo theme="light" />;
+}
+export function MeuAnuncioEscuro() {
+  return <MeuAnuncioDemo theme="dark" />;
 }
 export function PropriedadesClaro() {
   return <PropriedadesDemo theme="light" />;

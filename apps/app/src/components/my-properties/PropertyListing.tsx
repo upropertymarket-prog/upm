@@ -1,5 +1,5 @@
 import type { Tables } from "@upm/db";
-import { Card, StatusTag, Table, type StatusTone, type TableColumn } from "@upm/ui";
+import { Card, PageHeader, StatusTag, Table, type StatusTone, type TableColumn } from "@upm/ui";
 
 import { ArchivePropertyButton, type ArchivePropertyAction } from "./ArchivePropertyButton";
 import { PropertyStatusFilter } from "./PropertyStatusFilter";
@@ -152,12 +152,18 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 className="upm-card__title">As minhas propriedades</h1>
-        <div style={{ maxWidth: 220, width: "100%" }}>
-          <PropertyStatusFilter value={statusValue} options={PROPERTY_STATUS_OPTIONS} />
-        </div>
-      </div>
+      {/* O filtro de estado entra pelo `actions` do `PageHeader` — é a ação
+          contextual desta página (04 §5.5), e assim o título fica igual ao das
+          restantes em vez de ser um título de cartão. */}
+      <PageHeader
+        title="As minhas propriedades"
+        subtitle={`${rows.length} ${rows.length === 1 ? "imóvel" : "imóveis"} no seu portefólio`}
+        actions={
+          <div style={{ minWidth: 220 }}>
+            <PropertyStatusFilter value={statusValue} options={PROPERTY_STATUS_OPTIONS} />
+          </div>
+        }
+      />
       <Card>
         <Table
           caption="As minhas propriedades"

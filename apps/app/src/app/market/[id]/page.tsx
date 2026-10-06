@@ -5,6 +5,7 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../../components/AppChrome";
 import { ContactActions } from "../../../components/market/ContactActions";
+import { OwnerListingBar } from "../../../components/market/OwnerListingBar";
 import { PropertyDetail } from "../../../components/market/PropertyDetail";
 import { SaveButton } from "../../../components/market/SaveButton";
 import { startConversation } from "../../actions/conversations";
@@ -61,8 +62,13 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
   );
   const validPhotos = photos.filter((url): url is string => Boolean(url));
 
+  // O que decide o que esta página mostra é **de quem é o imóvel**, não o papel
+  // da conta: uma proprietária a ver o anúncio de outra pessoa é, nesse
+  // momento, uma interessada como qualquer outra (04 §2.3).
+  const isOwnProperty = property.owner_id === user.id;
+
   let initialSaved = false;
-  if (role === "buyer") {
+  if (!isOwnProperty) {
     const { data: saved } = await supabase
       .from("saved_properties")
       .select("id")
@@ -110,25 +116,38 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
         }
         price={price}
         ownerName={ownerProfile?.full_name || "Proprietário"}
+        management={
+          isOwnProperty ? (
+            <OwnerListingBar
+              // A view só devolve `active` e `featured`; o `null` do tipo
+              // gerado não acontece nesta rota.
+              status={property.status ?? "active"}
+              viewsCount={property.views_count}
+              editHref={`/propriedades/${id}/editar`}
+              statsHref={`/propriedades/${id}/estatisticas`}
+            />
+          ) : null
+        }
         actions={
-          <>
-            {role === "buyer" ? (
+          isOwnProperty ? null : (
+            <>
               <SaveButton
                 propertyId={id}
                 initialSaved={initialSaved}
                 action={toggleSavedProperty}
               />
-            ) : null}
-            {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
-                destino. O dono do imóvel não vê nenhum dos dois. */}
-            <ContactActions
-              propertyId={id}
-              propertyTitle={property.title ?? "Imóvel"}
-              onContact={startConversation}
-              onRequestVisit={requestVisit}
-              disabled={property.owner_id === user.id}
-            />
-          </>
+              {/* D20 — deixaram de estar desativados: P5-01 e P5-02 deram-lhes
+                  destino. No próprio anúncio nem sequer entram na árvore: a
+                  decisão passou do `disabled` do componente para quem o usa,
+                  que é onde se sabe de quem é o imóvel. */}
+              <ContactActions
+                propertyId={id}
+                propertyTitle={property.title ?? "Imóvel"}
+                onContact={startConversation}
+                onRequestVisit={requestVisit}
+              />
+            </>
+          )
         }
       />
     </AppChrome>
