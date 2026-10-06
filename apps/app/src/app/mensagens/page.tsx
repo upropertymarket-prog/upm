@@ -14,7 +14,14 @@ import {
   loadNotifications,
   loadVisits,
 } from "../../lib/interaction";
-import { markConversationRead, sendMessage, shareExactAddress } from "../actions/conversations";
+import {
+  attachmentUrl,
+  markConversationRead,
+  saveAttachmentToCloud,
+  sendAttachment,
+  sendMessage,
+  shareExactAddress,
+} from "../actions/conversations";
 import { setLocalePreference } from "../actions/preferences";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +86,9 @@ export default async function MessagesPage({
         active={active}
         onSend={sendMessage}
         onShareAddress={shareExactAddress}
+        onSendAttachment={sendAttachment}
+        onOpenAttachment={attachmentUrl}
+        onSaveAttachmentToCloud={saveAttachmentToCloud}
         onMarkRead={markConversationRead}
       />
     </AppChrome>

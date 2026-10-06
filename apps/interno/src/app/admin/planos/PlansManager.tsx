@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Layers, RefreshCw, Wallet } from "lucide-react";
 import {
   Button,
@@ -15,7 +16,7 @@ import {
   Toggle,
   type TableColumn,
 } from "@upm/ui";
-import { LIMIT_KEYS, LIMIT_LABELS, type LimitKey, type PlanLimits } from "@upm/db/billing";
+import { LIMIT_KEYS, type LimitKey, type PlanLimits } from "@upm/db/billing";
 
 import { useStepUp } from "../../../components/StepUpModal";
 import type { VerifyPinAction } from "../../../components/stepUpTypes";
@@ -31,18 +32,12 @@ import type { VerifyPinAction } from "../../../components/stepUpTypes";
  * 07 §9 #2 continua aberta e o aviso no topo do modal diz isso em voz alta.
  */
 
-const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
-const dateFormat = new Intl.DateTimeFormat("pt-PT", { dateStyle: "short" });
 const PLAN_TONE: Record<string, "draft" | "primary" | "dealSale" | "dealRent"> = {
   gratuito: "draft",
   "essential-owner": "primary",
   "smarter-owner": "dealSale",
   "premium-owner": "dealRent",
 };
-
-function money(cents: number) {
-  return currency.format(cents / 100);
-}
 
 export type PlanRow = {
   planId: string;
@@ -98,10 +93,11 @@ export type TrialRequestRow = {
   createdAt: string;
 };
 
-const AUDIENCE_LABEL: Record<PlanRow["audience"], string> = {
-  owner: "Proprietário",
-  buyer: "Comprador",
-  both: "Ambos",
+/** Chave de tradução por público — o texto vive em `admin.plans`. */
+const AUDIENCE_KEY: Record<PlanRow["audience"], string> = {
+  owner: "audienceOwner",
+  buyer: "audienceBuyer",
+  both: "audienceBoth",
 };
 
 export function PlansManager({
@@ -124,6 +120,18 @@ export function PlansManager({
   /** `verifyOperationPin` — por prop, para o canvas poder passar um substituto. */
   onVerifyPin: VerifyPinAction;
 }) {
+  const t = useTranslations("admin.plans");
+  const locale = useLocale();
+  // Moeda e data no idioma da sessão (07 §5.13 · fecha D39): o valor é o
+  // mesmo, a forma de o escrever não.
+  const { money, shortDate } = useMemo(() => {
+    const currency = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
+    const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: "short" });
+    return {
+      money: (cents: number) => currency.format(cents / 100),
+      shortDate: (value: string | null) => (value ? dateFormat.format(new Date(value)) : "—"),
+    };
+  }, [locale]);
   const [editing, setEditing] = useState<PlanRow | "new" | null>(null);
 
   // O formulário submetido fica guardado para a repetição depois do step-up
@@ -169,7 +177,7 @@ export function PlansManager({
   const invoiceColumns: TableColumn<AdminInvoiceRow>[] = [
     {
       id: "client",
-      header: "Cliente",
+      header: t("client"),
       cell: (row) => (
         <span style={{ display: "grid" }}>
           <strong>{row.clientName}</strong>
@@ -177,29 +185,33 @@ export function PlansManager({
         </span>
       ),
     },
-    { id: "plan", header: "Plano", cell: (row) => row.planName ?? "—" },
-    { id: "total", header: "Valor", numeric: true, cell: (row) => money(row.totalCents) },
+    { id: "plan", header: t("plan"), cell: (row) => row.planName ?? "—" },
+    { id: "total", header: t("amount"), numeric: true, cell: (row) => money(row.totalCents) },
     {
       id: "status",
-      header: "Estado",
+      header: t("status"),
       cell: (row) => (
         <StatusTag tone={row.status === "paid" ? "active" : "pending"}>
-          {row.status === "paid" ? "Paga" : row.status === "open" ? "Por pagar" : row.status}
+          {row.status === "paid"
+            ? t("invoicePaid")
+            : row.status === "open"
+              ? t("invoiceOpen")
+              : row.status}
         </StatusTag>
       ),
     },
     {
       id: "issued",
-      header: "Data",
-      cell: (row) => (row.issuedAt ? dateFormat.format(new Date(row.issuedAt)) : "—"),
+      header: t("date"),
+      cell: (row) => shortDate(row.issuedAt),
     },
   ];
 
   return (
     <>
       <PageHeader
-        title="Planos"
-        subtitle="Receita, planos e faturação da plataforma"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
             <Button
@@ -208,9 +220,9 @@ export function PlansManager({
               leadingIcon={<RefreshCw size={16} />}
               onClick={() => startSync(async () => setSyncState(await onSync()))}
             >
-              Sincronizar com o Stripe
+              {t("syncStripe")}
             </Button>
-            <Button onClick={() => setEditing("new")}>Novo plano</Button>
+            <Button onClick={() => setEditing("new")}>{t("newPlan")}</Button>
           </div>
         }
       />
@@ -231,21 +243,21 @@ export function PlansManager({
           marginBottom: "var(--sp-8)",
         }}
       >
-        <Metric label="MRR" value={money(summary.mrrCents)} hint="Anual mensalizado" />
+        <Metric label={t("mrr")} value={money(summary.mrrCents)} hint={t("mrrHint")} />
         <Metric
-          label="Subscritores"
+          label={t("subscribers")}
           value={String(summary.subscribers)}
-          hint={`${summary.trials} em experiência`}
+          hint={t("subscribersHint", { count: summary.trials })}
         />
         <Metric
-          label="Novos (30 dias)"
+          label={t("new30d")}
           value={String(summary.new30d)}
-          hint={`${summary.canceled30d} cancelaram`}
+          hint={t("new30dHint", { count: summary.canceled30d })}
         />
         <Metric
-          label="Extras ativos"
+          label={t("addons")}
           value={String(summary.addonSubscribers)}
-          hint="Cloud 5 GB e afins"
+          hint={t("addonsHint")}
         />
       </div>
 
@@ -269,7 +281,7 @@ export function PlansManager({
             }}
           >
             <Layers size={17} aria-hidden="true" style={{ color: "var(--accent)" }} />
-            Planos ativos
+            {t("activePlans")}
           </h2>
 
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid" }}>
@@ -290,13 +302,14 @@ export function PlansManager({
                 >
                   <StatusTag tone={PLAN_TONE[plan.slug] ?? "draft"}>{plan.name}</StatusTag>
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-                    {AUDIENCE_LABEL[plan.audience]} · {money(plan.priceMonthCents)}/mês
+                    {t(AUDIENCE_KEY[plan.audience])} · {money(plan.priceMonthCents)}
+                    {t("perMonth")}
                   </span>
                 </span>
                 <span style={{ display: "grid", textAlign: "right" }}>
                   <strong style={{ fontSize: "var(--fs-body)" }}>{plan.subscribers}</strong>
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-                    subscritores
+                    {t("subscribersLabel")}
                   </span>
                 </span>
                 <span style={{ display: "grid", textAlign: "right", minWidth: 88 }}>
@@ -304,10 +317,10 @@ export function PlansManager({
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>MRR</span>
                 </span>
                 {plan.syncedWithStripe ? null : (
-                  <StatusTag tone="pending">Fora do Stripe</StatusTag>
+                  <StatusTag tone="pending">{t("outOfStripe")}</StatusTag>
                 )}
                 <Button variant="secondary" size="sm" onClick={() => setEditing(plan)}>
-                  Editar
+                  {t("edit")}
                 </Button>
               </li>
             ))}
@@ -325,31 +338,34 @@ export function PlansManager({
             }}
           >
             <Wallet size={17} aria-hidden="true" style={{ color: "var(--accent)" }} />
-            Saúde da receita
+            {t("revenueHealth")}
           </h2>
           <Health
-            label="Churn (30 dias)"
+            label={t("churn")}
             value={`${(churn * 100).toFixed(1)} %`}
             ratio={churn}
-            hint={`${summary.canceled30d} cancelamentos sobre ${summary.subscribers + summary.canceled30d} contas`}
+            hint={t("churnHint", {
+              canceled: summary.canceled30d,
+              total: summary.subscribers + summary.canceled30d,
+            })}
           />
           <Health
-            label="Pagamentos em atraso"
+            label={t("pastDue")}
             value={String(summary.pastDue)}
             ratio={summary.subscribers > 0 ? summary.pastDue / summary.subscribers : 0}
-            hint="Subscrições com cobrança falhada"
+            hint={t("pastDueHint")}
           />
           <Health
-            label="Em período de experiência"
+            label={t("trialing")}
             value={String(summary.trials)}
             ratio={summary.subscribers > 0 ? summary.trials / summary.subscribers : 0}
-            hint="Contas por converter"
+            hint={t("trialingHint")}
           />
         </Card>
       </div>
 
       <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>
-        Pedidos de trial
+        {t("trialRequests")}
       </h2>
       <Card padded style={{ marginBottom: "var(--sp-8)" }}>
         {trialNotice ? (
@@ -360,7 +376,7 @@ export function PlansManager({
 
         {trialRequests.length === 0 ? (
           <p style={{ margin: 0, color: "var(--muted)", fontSize: "var(--fs-body)" }}>
-            Nenhum pedido de extensão até agora.
+            {t("noTrialRequests")}
           </p>
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid" }}>
@@ -386,8 +402,7 @@ export function PlansManager({
                     {request.reason}
                   </span>
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-                    Experiência até{" "}
-                    {request.trialEndsAt ? dateFormat.format(new Date(request.trialEndsAt)) : "—"}
+                    {t("trialUntil", { date: shortDate(request.trialEndsAt) })}
                   </span>
                 </span>
 
@@ -399,11 +414,11 @@ export function PlansManager({
                       onClick={() =>
                         startDecide(async () => {
                           const result = await onDecideTrial(request.id, true);
-                          setTrialNotice(result.error ?? result.notice ?? "Aprovado.");
+                          setTrialNotice(result.error ?? result.notice ?? t("approvedNotice"));
                         })
                       }
                     >
-                      Aprovar
+                      {t("approve")}
                     </Button>
                     <Button
                       size="sm"
@@ -412,16 +427,16 @@ export function PlansManager({
                       onClick={() =>
                         startDecide(async () => {
                           const result = await onDecideTrial(request.id, false);
-                          setTrialNotice(result.error ?? "Pedido recusado.");
+                          setTrialNotice(result.error ?? t("rejectedNotice"));
                         })
                       }
                     >
-                      Recusar
+                      {t("reject")}
                     </Button>
                   </span>
                 ) : (
                   <StatusTag tone={request.status === "approved" ? "active" : "rejected"}>
-                    {request.status === "approved" ? "Aprovado" : "Recusado"}
+                    {request.status === "approved" ? t("approved") : t("rejected")}
                   </StatusTag>
                 )}
               </li>
@@ -431,21 +446,21 @@ export function PlansManager({
       </Card>
 
       <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>
-        Faturação recente
+        {t("recentBilling")}
       </h2>
       <Table
-        caption="Faturas mais recentes da plataforma"
+        caption={t("invoicesCaption")}
         columns={invoiceColumns}
         rows={invoices}
         rowKey={(row) => row.id}
-        empty={<p style={{ margin: 0, color: "var(--muted)" }}>Ainda não há faturas.</p>}
+        empty={<p style={{ margin: 0, color: "var(--muted)" }}>{t("noInvoices")}</p>}
       />
 
       {editing ? (
         <Modal
           open
           onClose={() => setEditing(null)}
-          title={editing === "new" ? "Novo plano" : `Editar ${editing.name}`}
+          title={editing === "new" ? t("newPlan") : t("editPlan", { name: editing.name })}
         >
           <PlanForm
             plan={editing === "new" ? null : editing}
@@ -525,6 +540,7 @@ function PlanForm({
   saving: boolean;
   state: PlanActionState;
 }) {
+  const t = useTranslations("admin.plans");
   const [visible, setVisible] = useState(plan?.visible ?? true);
 
   return (
@@ -540,9 +556,7 @@ function PlanForm({
           lineHeight: 1.5,
         }}
       >
-        Os preços da grelha atual são <strong>provisórios</strong> (07 §8.3) e esperam decisão do
-        cliente. Guardar um preço diferente cria um <code>Price</code> novo no Stripe — o anterior
-        nunca é alterado e continua a servir quem já o subscreveu.
+        {t("provisionalWarning")}
       </p>
 
       <div
@@ -552,27 +566,33 @@ function PlanForm({
           gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
         }}
       >
-        <Input label="Nome" name="name" defaultValue={plan?.name ?? ""} required maxLength={80} />
         <Input
-          label="Slug"
-          hint="Minúsculas, números e hífenes."
+          label={t("name")}
+          name="name"
+          defaultValue={plan?.name ?? ""}
+          required
+          maxLength={80}
+        />
+        <Input
+          label={t("slug")}
+          hint={t("slugHint")}
           name="slug"
           defaultValue={plan?.slug ?? ""}
           required
           maxLength={64}
         />
         <Select
-          label="Público"
+          label={t("audience")}
           name="audience"
           defaultValue={plan?.audience ?? "owner"}
           options={[
-            { value: "owner", label: "Proprietário" },
-            { value: "buyer", label: "Comprador" },
-            { value: "both", label: "Ambos" },
+            { value: "owner", label: t("audienceOwner") },
+            { value: "buyer", label: t("audienceBuyer") },
+            { value: "both", label: t("audienceBoth") },
           ]}
         />
         <Input
-          label="Preço mensal (€)"
+          label={t("priceMonth")}
           name="priceMonth"
           type="number"
           step="0.01"
@@ -580,7 +600,7 @@ function PlanForm({
           defaultValue={((plan?.priceMonthCents ?? 0) / 100).toFixed(2)}
         />
         <Input
-          label="Preço anual (€)"
+          label={t("priceYear")}
           name="priceYear"
           type="number"
           step="0.01"
@@ -593,7 +613,7 @@ function PlanForm({
         style={{ border: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}
       >
         <legend style={{ fontSize: "var(--fs-body)", fontWeight: 700, padding: 0 }}>
-          Limites — deixar vazio significa ilimitado
+          {t("limitsLegend")}
         </legend>
         <div
           style={{
@@ -605,7 +625,7 @@ function PlanForm({
           {LIMIT_KEYS.map((key: LimitKey) => (
             <Input
               key={key}
-              label={LIMIT_LABELS[key]}
+              label={t(`limits.${key}`)}
               name={`limit_${key}`}
               type="number"
               min="0"
@@ -621,14 +641,14 @@ function PlanForm({
       </fieldset>
 
       <Textarea
-        label="Funcionalidades"
-        hint="Uma por linha. Aparecem no cartão do plano."
+        label={t("features")}
+        hint={t("featuresHint")}
         name="features"
         rows={4}
         defaultValue={(plan?.features ?? []).join("\n")}
       />
 
-      <Toggle checked={visible} onCheckedChange={setVisible} label="Visível na página de preços" />
+      <Toggle checked={visible} onCheckedChange={setVisible} label={t("visible")} />
 
       {state.error ? (
         <p role="alert" style={{ margin: 0, color: "var(--danger)", fontSize: "var(--fs-body)" }}>
@@ -642,7 +662,7 @@ function PlanForm({
       ) : null}
 
       <Button type="submit" disabled={saving}>
-        {saving ? "A guardar…" : "Guardar plano"}
+        {saving ? t("saving") : t("savePlan")}
       </Button>
     </form>
   );

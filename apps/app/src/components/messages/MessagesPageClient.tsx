@@ -8,7 +8,13 @@ import { MessagesScreen, type MessagesScreenProps } from "./MessagesScreen";
 
 export type MessagesPageClientProps = Pick<
   MessagesScreenProps,
-  "conversations" | "active" | "onSend" | "onShareAddress"
+  | "conversations"
+  | "active"
+  | "onSend"
+  | "onShareAddress"
+  | "onSendAttachment"
+  | "onOpenAttachment"
+  | "onSaveAttachmentToCloud"
 > & {
   onMarkRead: (conversationId: string) => Promise<{ error?: string }>;
 };
@@ -29,6 +35,9 @@ export function MessagesPageClient({
   active,
   onSend,
   onShareAddress,
+  onSendAttachment,
+  onOpenAttachment,
+  onSaveAttachmentToCloud,
   onMarkRead,
 }: MessagesPageClientProps) {
   const router = useRouter();
@@ -60,6 +69,9 @@ export function MessagesPageClient({
       active={active}
       onSend={onSend}
       onShareAddress={onShareAddress}
+      onSendAttachment={onSendAttachment}
+      onOpenAttachment={onOpenAttachment}
+      onSaveAttachmentToCloud={onSaveAttachmentToCloud}
       onSelect={(id) => router.push(`/mensagens?conversa=${id}`)}
       onRefresh={() => router.refresh()}
     />

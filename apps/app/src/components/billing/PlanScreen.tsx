@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CircleCheck,
   CloudUpload,
@@ -22,13 +23,7 @@ import {
   type StatusTone,
   type TableColumn,
 } from "@upm/ui";
-import {
-  BILLING_INTERVAL_LABELS,
-  LIMIT_KEYS,
-  LIMIT_LABELS,
-  isUnlimited,
-  type BillingInterval,
-} from "@upm/db/billing";
+import { LIMIT_KEYS, isUnlimited, type BillingInterval } from "@upm/db/billing";
 import { formatBytes } from "@upm/db/cloud";
 
 import type {
@@ -49,18 +44,15 @@ import type {
  * de `plans`/`addons` — a grelha de 07 §8.3 é provisória e a questão 07 §9 #2
  * continua aberta. Um número aqui dentro tornava-a definitiva sem ninguém
  * decidir nada.
+ *
+ * **Nem há texto escrito aqui** (07 §5.13 · fecha metade de D39): tudo passa
+ * por `plan.*` em `packages/config/messages`. As etiquetas dos estados e dos
+ * limites também: `LIMIT_LABELS` e `BILLING_INTERVAL_LABELS` de `@upm/db` são
+ * PT, e servem o lado do servidor e os e-mails — num ecrã, quem manda é o
+ * idioma da sessão. O que **não** se traduz é o que vem da base de dados:
+ * nomes de planos e `plans.features` são dados, e traduzi-los é uma coluna
+ * nova, não uma chave de tradução.
  */
-
-const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
-const dateFormat = new Intl.DateTimeFormat("pt-PT", { dateStyle: "long" });
-
-function price(cents: number) {
-  return currency.format(cents / 100);
-}
-
-function day(value: string | null) {
-  return value ? dateFormat.format(new Date(value)) : "—";
-}
 
 const SUBSCRIPTION_TONE: Record<string, StatusTone> = {
   active: "active",
@@ -68,14 +60,6 @@ const SUBSCRIPTION_TONE: Record<string, StatusTone> = {
   past_due: "pending",
   canceled: "archived",
   incomplete: "pending",
-};
-
-const SUBSCRIPTION_LABEL: Record<string, string> = {
-  active: "Ativo",
-  trialing: "Período de experiência",
-  past_due: "Pagamento em atraso",
-  canceled: "Cancelada",
-  incomplete: "Por concluir",
 };
 
 const PLAN_TONE: Record<string, StatusTone> = {
@@ -92,12 +76,19 @@ const PLAN_COLOR: Record<string, string> = {
   "premium-owner": "var(--state-deal-rent)",
 };
 
-function planFeatureLabel(feature: string) {
+/**
+ * `plans.features` é **dado**, não texto de interface: vem do seed em PT e é
+ * isso que a base de dados tem. O que esta função faz é corrigir duas linhas
+ * que o seed escreve como "GB de Cloud" e que no cartão significam outra coisa
+ * — e essas duas, sendo texto nosso, passam pelas traduções. O resto é a
+ * normalização de "imóvel" para "propriedade" do vocabulário de 04 §5.
+ */
+function planFeatureLabel(feature: string, t: (key: string) => string) {
   if (feature === "2 GB de Cloud" || feature === "5 GB de Cloud") {
-    return "Alertas avançados";
+    return t("featureAdvancedAlerts");
   }
   if (feature === "20 GB de Cloud") {
-    return "Alertas personalizados";
+    return t("featureCustomAlerts");
   }
   return feature
     .replace(/\bImóveis\b/g, "Propriedades")
@@ -112,14 +103,6 @@ const INVOICE_TONE: Record<string, StatusTone> = {
   draft: "draft",
   uncollectible: "rejected",
   void: "archived",
-};
-
-const INVOICE_LABEL: Record<string, string> = {
-  paid: "Paga",
-  open: "Por pagar",
-  draft: "Rascunho",
-  uncollectible: "Incobrável",
-  void: "Anulada",
 };
 
 export type PlanScreenProps = {
@@ -165,6 +148,19 @@ export function PlanScreen({
   trial,
   onRequestExtension,
 }: PlanScreenProps) {
+  const t = useTranslations("plan");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  // Moeda e data seguem o idioma da sessão: o euro é o mesmo, a forma de o
+  // escrever não (1.234,56 € vs €1,234.56).
+  const { price, day } = useMemo(() => {
+    const currency = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
+    const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
+    return {
+      price: (cents: number) => currency.format(cents / 100),
+      day: (value: string | null) => (value ? dateFormat.format(new Date(value)) : "—"),
+    };
+  }, [locale]);
   const [interval, setInterval] = useState<BillingInterval>(status.interval ?? "year");
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -213,14 +209,14 @@ export function PlanScreen({
       const result = await onSaveInvoice(id);
       // Sem Cloud no plano, a recusa vem do servidor com a razão (07 §19.4) —
       // e o caminho para a resolver é esta mesma página.
-      toast(result.error ?? "Fatura guardada na Cloud.", result.error ? "error" : "success");
+      toast(result.error ?? t("invoiceSaved"), result.error ? "error" : "success");
     });
   }
 
   const invoiceColumns: TableColumn<InvoiceRow>[] = [
     {
       id: "number",
-      header: "Fatura",
+      header: t("invoiceNumber"),
       cell: (row) => (
         <span style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
           <Receipt size={16} aria-hidden="true" style={{ color: "var(--muted)", flex: "none" }} />
@@ -228,14 +224,16 @@ export function PlanScreen({
         </span>
       ),
     },
-    { id: "issued", header: "Data", cell: (row) => day(row.issuedAt) },
-    { id: "total", header: "Total", numeric: true, cell: (row) => price(row.totalCents) },
+    { id: "issued", header: t("invoiceDate"), cell: (row) => day(row.issuedAt) },
+    { id: "total", header: t("invoiceTotal"), numeric: true, cell: (row) => price(row.totalCents) },
     {
       id: "status",
-      header: "Estado",
+      header: t("invoiceStatusHeader"),
       cell: (row) => (
         <StatusTag tone={INVOICE_TONE[row.status] ?? "draft"}>
-          {INVOICE_LABEL[row.status] ?? row.status}
+          {/* Um estado que o Stripe acrescente no futuro mostra-se como vem,
+              em vez de rebentar à procura de uma chave que não existe. */}
+          {row.status in INVOICE_TONE ? t(`invoiceStatus.${row.status}`) : row.status}
         </StatusTag>
       ),
     },
@@ -251,9 +249,9 @@ export function PlanScreen({
             disabled={pending || !row.hasPdf || row.savedToCloud}
             onClick={() => saveInvoice(row.id)}
             leadingIcon={<CloudUpload size={14} />}
-            title={row.savedToCloud ? "Já está na sua Cloud" : "Guardar na Cloud"}
+            title={row.savedToCloud ? t("alreadyInCloud") : t("saveToCloud")}
           >
-            {row.savedToCloud ? "Guardada" : "Guardar"}
+            {row.savedToCloud ? t("savedShort") : t("saveShort")}
           </Button>
           <Button
             variant="secondary"
@@ -262,7 +260,7 @@ export function PlanScreen({
             onClick={() => exportInvoice(row.id)}
             leadingIcon={<Download size={14} />}
           >
-            Exportar
+            {tc("export")}
           </Button>
         </span>
       ),
@@ -272,8 +270,8 @@ export function PlanScreen({
   return (
     <>
       <PageHeader
-        title="Plano"
-        subtitle="O seu plano, o que está a usar e as suas faturas"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           status.subscriptionId ? (
             <Button
@@ -282,7 +280,7 @@ export function PlanScreen({
               disabled={pending}
               leadingIcon={<ExternalLink size={16} />}
             >
-              Gerir faturação
+              {t("managePortal")}
             </Button>
           ) : undefined
         }
@@ -297,9 +295,7 @@ export function PlanScreen({
           }}
         >
           <p style={{ margin: 0, fontSize: "var(--fs-body)" }}>
-            {checkoutResult === "sucesso"
-              ? "Pagamento recebido. A subscrição fica ativa assim que o Stripe confirmar — normalmente em segundos."
-              : "Pagamento cancelado. Nada foi cobrado."}
+            {checkoutResult === "sucesso" ? t("checkoutSuccess") : t("checkoutCanceled")}
           </p>
         </Card>
       ) : null}
@@ -331,19 +327,22 @@ export function PlanScreen({
               color: "var(--accent)",
             }}
           >
-            Plano atual
+            {t("currentPlanLabel")}
           </span>
           <strong style={{ fontSize: "var(--fs-title-sm)" }}>{status.planName ?? "—"}</strong>
           <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
             {status.subscriptionStatus
-              ? `${BILLING_INTERVAL_LABELS[status.interval ?? "year"]} · ${
-                  status.cancelAtPeriodEnd ? "termina" : "renova"
-                } a ${day(status.currentPeriodEnd)}`
-              : "Sem subscrição paga"}
+              ? t(status.cancelAtPeriodEnd ? "endsOn" : "renewsOn", {
+                  interval: t(`interval.${status.interval ?? "year"}`),
+                  date: day(status.currentPeriodEnd),
+                })
+              : t("noPaidSubscription")}
           </span>
           {status.subscriptionStatus ? (
             <StatusTag tone={SUBSCRIPTION_TONE[status.subscriptionStatus] ?? "draft"}>
-              {SUBSCRIPTION_LABEL[status.subscriptionStatus] ?? status.subscriptionStatus}
+              {status.subscriptionStatus in SUBSCRIPTION_TONE
+                ? t(`subscriptionStatus.${status.subscriptionStatus}`)
+                : status.subscriptionStatus}
             </StatusTag>
           ) : null}
         </div>
@@ -358,9 +357,9 @@ export function PlanScreen({
               flexWrap: "wrap",
             }}
           >
-            <strong style={{ fontSize: "var(--fs-body-lg)" }}>Utilização do plano</strong>
+            <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("usageTitle")}</strong>
             <span style={{ fontSize: "var(--fs-caption)", color: "var(--muted)" }}>
-              Uso atual · limites incluídos
+              {t("usageHint")}
             </span>
           </div>
           <div
@@ -377,13 +376,13 @@ export function PlanScreen({
             {usageRows.map((key) => (
               <UsageMeter
                 key={key}
-                label={LIMIT_LABELS[key]}
+                label={t(`limits.${key}`)}
                 used={status.usage[key]}
                 limit={status.limits[key]}
               />
             ))}
             <UsageMeter
-              label={LIMIT_LABELS.cloud_gb}
+              label={t("limits.cloud_gb")}
               used={status.cloudUsedBytes}
               limit={status.cloudLimitBytes}
               format={formatBytes}
@@ -399,16 +398,16 @@ export function PlanScreen({
         <Card padded style={{ display: "grid", gap: "var(--sp-5)", marginBottom: "var(--sp-7)" }}>
           <div style={{ display: "grid", gap: "var(--sp-2)" }}>
             <strong style={{ fontSize: "var(--fs-body-lg)" }}>
-              Período de experiência até {day(trial.trialEndsAt)}
+              {t("trialUntil", { date: day(trial.trialEndsAt) })}
             </strong>
             <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
               {trial.requestStatus === "pending"
-                ? "O seu pedido de mais 7 dias está a ser analisado pela equipa."
+                ? t("trialPending")
                 : trial.requestStatus === "approved"
-                  ? "O pedido de extensão foi aprovado — a data acima já inclui os 7 dias extra."
+                  ? t("trialApproved")
                   : trial.requestStatus === "rejected"
-                    ? "O pedido de extensão foi recusado; a experiência termina na data original."
-                    : "Pode pedir mais 7 dias, uma única vez, com uma justificação escrita."}
+                    ? t("trialRejected")
+                    : t("trialCanAsk")}
             </span>
           </div>
 
@@ -416,7 +415,7 @@ export function PlanScreen({
             <form action={requestExtension} style={{ display: "grid", gap: "var(--sp-4)" }}>
               <label style={{ display: "grid", gap: "var(--sp-2)" }}>
                 <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>
-                  Porque precisa de mais tempo?
+                  {t("trialReasonLabel")}
                 </span>
                 <textarea
                   name="reason"
@@ -434,7 +433,7 @@ export function PlanScreen({
                 </p>
               ) : null}
               <Button type="submit" variant="secondary" disabled={requestingExtension}>
-                {requestingExtension ? "A enviar…" : "Pedir mais 7 dias"}
+                {requestingExtension ? t("trialSubmitting") : t("trialSubmit")}
               </Button>
             </form>
           )}
@@ -454,14 +453,14 @@ export function PlanScreen({
           marginBottom: "var(--sp-6)",
         }}
       >
-        <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>Planos</h2>
+        <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>{t("plansTitle")}</h2>
         <Tabs
-          label="Periodicidade"
+          label={t("intervalLabel")}
           value={interval}
           onValueChange={(id) => setInterval(id as BillingInterval)}
           items={[
-            { id: "month", label: BILLING_INTERVAL_LABELS.month },
-            { id: "year", label: `${BILLING_INTERVAL_LABELS.year} · 2 meses grátis` },
+            { id: "month", label: t("interval.month") },
+            { id: "year", label: t("intervalYearBonus", { label: t("interval.year") }) },
           ]}
         />
       </div>
@@ -480,7 +479,7 @@ export function PlanScreen({
           const free = plan.priceMonthCents === 0 && plan.priceYearCents === 0;
           const features = plan.features.some((feature) => /suporte/i.test(feature))
             ? plan.features
-            : [...plan.features, "Suporte normal"];
+            : [...plan.features, t("supportStandard")];
 
           return (
             <Card
@@ -501,7 +500,7 @@ export function PlanScreen({
               <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-2)" }}>
                 <strong style={{ fontSize: "var(--fs-title-sm)" }}>{price(cents)}</strong>
                 <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-                  {interval === "month" ? "/mês" : "/ano"}
+                  {interval === "month" ? t("perMonth") : t("perYear")}
                 </span>
               </div>
 
@@ -531,9 +530,9 @@ export function PlanScreen({
                       style={{ color: "var(--muted)", flex: "none", marginTop: 2 }}
                     />
                     <span>
-                      {key === "cloud_gb" ? "Espaço em cloud" : LIMIT_LABELS[key]}:{" "}
+                      {key === "cloud_gb" ? t("cloudSpace") : t(`limits.${key}`)}:{" "}
                       <strong>
-                        {isUnlimited(plan.limits[key]) ? "ilimitado" : plan.limits[key]}
+                        {isUnlimited(plan.limits[key]) ? t("unlimited") : plan.limits[key]}
                         {key === "cloud_gb" && !isUnlimited(plan.limits[key]) ? "GB" : ""}
                       </strong>
                     </span>
@@ -559,7 +558,7 @@ export function PlanScreen({
                         aria-hidden="true"
                         style={{ color: "var(--muted)", flex: "none", marginTop: 2 }}
                       />
-                      <span>{planFeatureLabel(feature)}</span>
+                      <span>{planFeatureLabel(feature, t)}</span>
                     </li>
                   ))}
               </ul>
@@ -567,11 +566,11 @@ export function PlanScreen({
               <div style={{ marginTop: "auto" }}>
                 {current ? (
                   <Button variant="secondary" fullWidth disabled>
-                    Plano atual
+                    {t("currentPlanButton")}
                   </Button>
                 ) : free ? (
                   <Button variant="ghost" fullWidth disabled>
-                    Incluído sem custo
+                    {t("includedFree")}
                   </Button>
                 ) : (
                   <Button
@@ -586,10 +585,10 @@ export function PlanScreen({
                     leadingIcon={<CreditCard size={16} />}
                   >
                     {!plan.purchasable
-                      ? "Brevemente"
+                      ? t("comingSoon")
                       : trial.eligible
-                        ? "Experimentar 7 dias grátis"
-                        : "Mudar para este plano"}
+                        ? t("tryFree")
+                        : t("switchPlan")}
                   </Button>
                 )}
               </div>
@@ -621,8 +620,7 @@ export function PlanScreen({
           <div style={{ display: "grid", gap: "var(--sp-2)", flex: "1 1 320px", minWidth: 0 }}>
             <strong style={{ fontSize: "var(--fs-body-lg)" }}>{cloudAddon.name}</strong>
             <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
-              Soma-se ao que o seu plano já dá. Uma unidade por conta — quem precisa de mais
-              capacidade sobe de plano.
+              {t("addonHint")}
             </span>
           </div>
           <strong style={{ fontSize: "var(--fs-subtitle-lg)" }}>
@@ -634,7 +632,7 @@ export function PlanScreen({
                 fontWeight: 600,
               }}
             >
-              {interval === "month" ? "/mês" : "/ano"}
+              {interval === "month" ? t("perMonth") : t("perYear")}
             </span>
           </strong>
           <Button
@@ -642,7 +640,7 @@ export function PlanScreen({
             disabled={pending || !cloudAddon.purchasable}
             onClick={() => checkout("addon", cloudAddon.slug)}
           >
-            {cloudAddon.purchasable ? "Adicionar" : "Brevemente"}
+            {cloudAddon.purchasable ? t("addonAdd") : t("comingSoon")}
           </Button>
         </Card>
       ) : null}
@@ -650,17 +648,19 @@ export function PlanScreen({
       {/* ---------------------------------------------------------------- */}
       {/* Faturas                                                           */}
       {/* ---------------------------------------------------------------- */}
-      <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>Faturas</h2>
+      <h2 style={{ margin: "0 0 var(--sp-6)", fontSize: "var(--fs-subtitle-lg)" }}>
+        {t("invoicesTitle")}
+      </h2>
       <Table
-        caption="Faturas da conta"
+        caption={t("invoicesCaption")}
         columns={invoiceColumns}
         rows={invoices}
         rowKey={(row) => row.id}
         empty={
           <EmptyState
             icon={<Receipt size={22} />}
-            title="Ainda não há faturas"
-            description="As faturas aparecem aqui assim que houver uma subscrição paga."
+            title={t("invoicesEmptyTitle")}
+            description={t("invoicesEmptyBody")}
           />
         }
       />
@@ -683,6 +683,7 @@ function UsageMeter({
   limit: number | null | undefined;
   format?: (value: number) => string;
 }) {
+  const t = useTranslations("plan");
   const unlimited = isUnlimited(limit);
   const ratio = unlimited || limit === 0 ? 0 : Math.min(1, used / limit);
 
@@ -703,10 +704,10 @@ function UsageMeter({
         {format(used)}
         <span style={{ color: "var(--muted)", fontWeight: 600 }}>
           {unlimited ? (
-            " de ilimitado"
+            t("meterOfUnlimited")
           ) : (
             <>
-              {" de "}
+              {t("meterOf")}
               {format(limit)}
             </>
           )}
@@ -722,7 +723,7 @@ function UsageMeter({
       ) : (
         <span
           role="img"
-          aria-label={`${format(used)} de ${format(limit)}`}
+          aria-label={`${format(used)}${t("meterOf")}${format(limit)}`}
           style={{
             height: 6,
             borderRadius: "var(--r-pill)",

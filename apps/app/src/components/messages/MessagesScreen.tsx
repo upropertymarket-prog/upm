@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { MapPin, Paperclip, Search, Send } from "lucide-react";
 import { Badge, Button, EmptyState, Input, useToast } from "@upm/ui";
+import { formatBytes } from "@upm/db/cloud";
 
 import {
   formatRelative,
@@ -20,6 +21,14 @@ export type MessagesScreenProps = {
   /** Server Actions injetadas por prop — ver `interactionTypes.ts`. */
   onSend: (input: { conversation_id: string; body: string }) => Promise<{ error?: string }>;
   onShareAddress: (propertyId: string, buyerId: string) => Promise<{ error?: string }>;
+  /** Anexos (07 §19.6 · D28): enviar, abrir e guardar na Cloud. */
+  onSendAttachment?: (formData: FormData) => Promise<{ error?: string }>;
+  onOpenAttachment?: (
+    messageId: string,
+    path: string,
+    action?: "view" | "download",
+  ) => Promise<{ url?: string; error?: string }>;
+  onSaveAttachmentToCloud?: (messageId: string, path: string) => Promise<{ error?: string }>;
   /** Navegação para outra conversa. A página decide se é rota ou estado. */
   onSelect: (conversationId: string) => void;
   /** Chamada quando chega uma mensagem nova por realtime (02 §10). */
@@ -42,6 +51,9 @@ export function MessagesScreen({
   active,
   onSend,
   onShareAddress,
+  onSendAttachment,
+  onOpenAttachment,
+  onSaveAttachmentToCloud,
   onSelect,
   onRefresh,
 }: MessagesScreenProps) {
@@ -50,6 +62,7 @@ export function MessagesScreen({
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
   const listEnd = useRef<HTMLDivElement>(null);
+  const filePicker = useRef<HTMLInputElement>(null);
 
   // O chat abre sempre no fim, como qualquer aplicação de mensagens.
   useEffect(() => {
@@ -77,6 +90,46 @@ export function MessagesScreen({
       }
       setDraft("");
       onRefresh?.();
+    });
+  }
+
+  /**
+   * Escolher um ficheiro envia-o (07 §19.6): não há rascunho de anexo à espera
+   * do botão de enviar, que é onde um anexo se perde com um refresh.
+   */
+  function attach(file: File | undefined) {
+    if (!file || !active || !onSendAttachment) return;
+    const formData = new FormData();
+    formData.set("conversationId", active.id);
+    formData.set("file", file);
+    startTransition(async () => {
+      const result = await onSendAttachment(formData);
+      if (result.error) {
+        toast(result.error, "error");
+        return;
+      }
+      onRefresh?.();
+    });
+  }
+
+  function openAttachment(messageId: string, path: string) {
+    if (!onOpenAttachment) return;
+    startTransition(async () => {
+      const result = await onOpenAttachment(messageId, path, "download");
+      if (result.error || !result.url) {
+        toast(result.error ?? "Não foi possível abrir o anexo.", "error");
+        return;
+      }
+      // Ligação assinada de 60 s: abre-se já, e não se guarda em nenhum sítio.
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function saveToCloud(messageId: string, path: string) {
+    if (!onSaveAttachmentToCloud) return;
+    startTransition(async () => {
+      const result = await onSaveAttachmentToCloud(messageId, path);
+      toast(result.error ?? "Anexo guardado na Cloud.", result.error ? "error" : "success");
     });
   }
 
@@ -273,9 +326,70 @@ export function MessagesScreen({
                       color: message.mine ? "var(--on-solid)" : "var(--text)",
                     }}
                   >
-                    <span style={{ fontSize: "var(--fs-body-lg)", lineHeight: 1.5 }}>
-                      {message.body}
-                    </span>
+                    {message.body ? (
+                      <span style={{ fontSize: "var(--fs-body-lg)", lineHeight: 1.5 }}>
+                        {message.body}
+                      </span>
+                    ) : null}
+                    {message.attachments.map((attachment) => (
+                      <span
+                        key={attachment.path}
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          alignItems: "center",
+                          gap: "var(--sp-3)",
+                          padding: "var(--sp-3) var(--sp-4)",
+                          borderRadius: "var(--r-lg)",
+                          border: `1px solid ${message.mine ? "var(--on-solid)" : "var(--border)"}`,
+                        }}
+                      >
+                        <Paperclip size={14} aria-hidden="true" />
+                        <button
+                          type="button"
+                          onClick={() => openAttachment(message.id, attachment.path)}
+                          disabled={pending}
+                          /* Botão e não ligação: a URL assinada só existe
+                             depois de o servidor a emitir e registar (§13.3). */
+                          style={{
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            color: "inherit",
+                            font: "inherit",
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            minWidth: 0,
+                          }}
+                        >
+                          {attachment.name}
+                        </button>
+                        <span style={{ opacity: 0.75, fontSize: "var(--fs-body)" }}>
+                          {formatBytes(attachment.size)}
+                        </span>
+                        {/* "Guardar na Cloud" — nunca automático, e para os dois
+                            lados da conversa (07 §19.6). Sem Cloud no plano, a
+                            função SQL recusa e a mensagem que volta é o convite
+                            de §19.4. */}
+                        <button
+                          type="button"
+                          onClick={() => saveToCloud(message.id, attachment.path)}
+                          disabled={pending}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            color: "inherit",
+                            font: "inherit",
+                            opacity: 0.85,
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Guardar na Cloud
+                        </button>
+                      </span>
+                    ))}
                     <span
                       style={{
                         fontSize: "var(--fs-body)",
@@ -305,13 +419,26 @@ export function MessagesScreen({
                 borderTop: "1px solid var(--border)",
               }}
             >
-              {/* Anexos são da Fase 6 (Cloud e contratos): `messages.attachments`
-                  existe, o seletor de ficheiros vive lá. */}
+              {/* Anexos (07 §19.6 · fecha D28): 25 MB, PDF/JPG/PNG, validados
+                  pela assinatura de conteúdo no servidor. O `accept` é só
+                  conveniência do seletor — quem decide é o servidor. */}
+              <input
+                ref={filePicker}
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                hidden
+                onChange={(event) => {
+                  attach(event.target.files?.[0]);
+                  // Limpar o input deixa reenviar o mesmo ficheiro a seguir.
+                  event.target.value = "";
+                }}
+              />
               <Button
                 variant="ghost"
                 iconOnly
-                aria-label="Anexar ficheiro (Fase 6)"
-                disabled
+                aria-label="Anexar ficheiro"
+                disabled={pending || !onSendAttachment}
+                onClick={() => filePicker.current?.click()}
                 leadingIcon={<Paperclip size={18} aria-hidden="true" />}
               />
               <div style={{ flex: 1, minWidth: 0 }}>

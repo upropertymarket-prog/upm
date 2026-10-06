@@ -67,6 +67,11 @@ export type PropertyDetailProps = {
   similar?: PropertyCardData[];
   /** Outros anúncios do mesmo proprietário. Vazio esconde a secção. */
   fromOwner?: PropertyCardData[];
+  /**
+   * O anúncio seguinte na ordem do Market (04 §8.4 · D44). `null` no último da
+   * lista — e então o bloco não se desenha, em vez de ficar uma seta morta.
+   */
+  nextListing?: { id: string; title: string } | null;
 };
 
 export function PropertyDetail({
@@ -79,6 +84,7 @@ export function PropertyDetail({
   management,
   similar = [],
   fromOwner = [],
+  nextListing = null,
 }: PropertyDetailProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
@@ -273,6 +279,31 @@ export function PropertyDetail({
               {actions ? <div style={{ display: "grid", gap: 16 }}>{actions}</div> : null}
             </CardBody>
           </Card>
+          {/* "Anúncio seguinte" (04 §8.4 · fecha D44): continuar a ver sem
+              voltar à lista. Segue a ordem do Market — o mais recente primeiro
+              — e no último anúncio não aparece. */}
+          {nextListing ? (
+            <Card>
+              <CardBody style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span style={{ color: "var(--muted)", fontSize: 12 }}>Anúncio seguinte</span>
+                <Link
+                  href={`/market/${nextListing.id}`}
+                  style={{
+                    color: "var(--text)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ minWidth: 0 }}>{nextListing.title}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </CardBody>
+            </Card>
+          ) : null}
         </aside>
       </div>
 

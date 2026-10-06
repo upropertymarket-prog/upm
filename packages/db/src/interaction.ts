@@ -81,6 +81,38 @@ export const messageSchema = z.object({
 });
 export type MessageInput = z.infer<typeof messageSchema>;
 
+/**
+ * Anexos do chat (07 §19.6 · D28)
+ * -------------------------------------------------------------------------
+ * `messages.attachments` é `jsonb` e nasceu vazia na Fase 5. Esta é a forma
+ * das suas entradas — uma só por mensagem, que é o que a UI envia: escolher
+ * um ficheiro envia-o, em vez de o acumular num rascunho que se pode perder.
+ *
+ * `path` é o caminho no bucket `chat-attachments`, com a convenção que a
+ * Fase 6 escreveu: `{conversation_id}/{message_id}/{nome}`. Não é URL: as
+ * ligações são assinadas e curtas, pedidas uma a uma (08 §7.3).
+ *
+ * Os limites são os mesmos da Cloud (07 §19.8 #2 e §19.6): 25 MB, PDF/JPG/PNG
+ * validados pela assinatura de conteúdo. Vêm de `@upm/db/cloud` — um limite
+ * escrito duas vezes é um limite que vai divergir.
+ */
+export const messageAttachmentSchema = z.object({
+  path: z.string().min(1),
+  name: z.string().min(1).max(200),
+  mime: z.enum(["application/pdf", "image/jpeg", "image/png"]),
+  size: z.number().int().positive(),
+});
+export type MessageAttachment = z.infer<typeof messageAttachmentSchema>;
+
+/** Lê a coluna `jsonb` com desconfiança: o que não tem a forma certa cai. */
+export function parseAttachments(value: unknown): MessageAttachment[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    const parsed = messageAttachmentSchema.safeParse(entry);
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Leads — 07 §18.2
 // ---------------------------------------------------------------------------

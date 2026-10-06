@@ -24,7 +24,13 @@ export const dynamic = "force-dynamic";
  * `/pedidos-de-visita` → `/meus-pedidos`). Aqui "Aceitar" aparece quando foi o
  * proprietário a propor a data — o passo 3′ de 03 F6.
  */
-export default async function MyRequestsPage() {
+export default async function MyRequestsPage({
+  searchParams,
+}: {
+  // `?visita=` vem dos links das notificações de visita (D31).
+  searchParams: Promise<{ visita?: string }>;
+}) {
+  const { visita } = await searchParams;
   const supabase = createClient(await cookies());
   const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
 
@@ -61,6 +67,7 @@ export default async function MyRequestsPage() {
         pageSubtitle="As visitas que pediu e o estado de cada uma"
         role="buyer"
         month={currentMonth()}
+        highlightId={visita ?? null}
         onAccept={acceptVisit}
         onReschedule={rescheduleVisit}
         onCancel={cancelVisit}

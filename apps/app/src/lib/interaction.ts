@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@upm/db";
+import { parseAttachments } from "@upm/db/interaction";
 import type { Notification } from "@upm/ui";
 
 import {
@@ -61,7 +62,7 @@ export async function loadConversationDetail(
   const [{ data: messages }, { data: rows }] = await Promise.all([
     supabase
       .from("messages")
-      .select("id, body, created_at, sender_id, read_at")
+      .select("id, body, created_at, sender_id, read_at, attachments")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true }),
     supabase.rpc("my_conversations"),
@@ -77,6 +78,7 @@ export async function loadConversationDetail(
       createdAt: message.created_at,
       mine: message.sender_id === userId,
       read: message.read_at !== null,
+      attachments: parseAttachments(message.attachments),
     })),
     canShareAddress: meta?.is_owner ?? false,
     addressShared: meta?.address_shared ?? false,

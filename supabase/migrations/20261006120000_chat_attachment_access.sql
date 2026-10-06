@@ -1,0 +1,24 @@
+-- ---------------------------------------------------------------------------
+-- Anexos do chat: o acesso passa a ser registável (07 §19.6 · fecha D28)
+-- ===========================================================================
+-- 07 §19.6 fecha a decisão dos anexos com uma frase que obriga a isto: "o
+-- registo de acessos de §13.3 aplica-se na mesma aos anexos". O bucket
+-- `chat-attachments`, as suas policies e o limite de 25 MB já nasceram na
+-- Fase 6 (`20260930120000_cloud.sql`); o que faltava era o enum do registo
+-- conhecer este tipo de assunto — sem isto, abrir um anexo não tem onde ficar
+-- escrito, e a única alternativa seria não registar nada.
+--
+-- `subject_id` de uma linha `chat_attachment` é o **id da mensagem**: é o que
+-- identifica o anexo de forma estável (um anexo vive em
+-- `{conversation_id}/{message_id}/{nome}`) e é o que permite, mais tarde,
+-- responder a "quem abriu este anexo".
+--
+-- Migração própria e não reescrita da original, pelo critério de 07 §20.7: a
+-- de Fase 6 está aplicada em staging desde 30 set 2026.
+--
+-- `alter type ... add value` não pode ser usado na mesma transação em que o
+-- valor novo é escrito — por isso esta migração só o acrescenta, e é o código
+-- da aplicação que o usa depois.
+-- ---------------------------------------------------------------------------
+
+alter type public.document_subject add value if not exists 'chat_attachment';

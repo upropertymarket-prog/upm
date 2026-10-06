@@ -24,7 +24,13 @@ export const dynamic = "force-dynamic";
  * Owner-only, com a mesma defesa em profundidade das outras rotas do
  * proprietário: o middleware já filtra, confirma-se aqui na mesma (08 §7.3).
  */
-export default async function AgendaPage() {
+export default async function AgendaPage({
+  searchParams,
+}: {
+  // `?visita=` vem dos links das notificações de visita (D31).
+  searchParams: Promise<{ visita?: string }>;
+}) {
+  const { visita } = await searchParams;
   const supabase = createClient(await cookies());
   const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
 
@@ -62,6 +68,7 @@ export default async function AgendaPage() {
         pageSubtitle="Gira as visitas agendadas para os seus imóveis"
         role="owner"
         month={currentMonth()}
+        highlightId={visita ?? null}
         onAccept={acceptVisit}
         onReschedule={rescheduleVisit}
         onCancel={cancelVisit}

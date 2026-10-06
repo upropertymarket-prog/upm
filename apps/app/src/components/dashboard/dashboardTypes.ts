@@ -13,7 +13,7 @@ export type StatTone = "ok" | "warn" | "muted";
 export type DashboardStat = {
   id: string;
   /** Nome do ícone `lucide-react` resolvido em `DashboardStats`. */
-  icon: "building" | "eye" | "draft" | "saved" | "leads" | "visits";
+  icon: "building" | "eye" | "draft" | "saved" | "leads" | "visits" | "messages" | "contracts";
   label: string;
   value: string;
   /** Linha de contexto: "+1 este mês", "a aguardar fotografias". */

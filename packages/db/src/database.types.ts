@@ -3142,7 +3142,13 @@ export type Database = {
       delivery_status: "queued" | "sent" | "failed" | "cancelled";
       document_action:
         "view" | "download" | "export_pdf" | "print" | "share_created" | "share_revoked";
-      document_subject: "file" | "contract" | "property_document" | "contract_template" | "invoice";
+      document_subject:
+        | "file"
+        | "contract"
+        | "property_document"
+        | "contract_template"
+        | "invoice"
+        | "chat_attachment";
       file_source: "upload" | "property_document" | "message_attachment" | "contract" | "invoice";
       folder_kind: "user" | "property" | "property_documents";
       lead_outcome: "won" | "lost";
@@ -3799,7 +3805,14 @@ export const Constants = {
         "share_created",
         "share_revoked",
       ],
-      document_subject: ["file", "contract", "property_document", "contract_template", "invoice"],
+      document_subject: [
+        "file",
+        "contract",
+        "property_document",
+        "contract_template",
+        "invoice",
+        "chat_attachment",
+      ],
       file_source: ["upload", "property_document", "message_attachment", "contract", "invoice"],
       folder_kind: ["user", "property", "property_documents"],
       lead_outcome: ["won", "lost"],

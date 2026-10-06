@@ -107,6 +107,21 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
     resolvePropertyCards(supabase, ownerRows ?? []),
   ]);
 
+  // "Anúncio seguinte" (04 §8.4 · D44): o que vem depois deste na ordem do
+  // Market — `published_at` descendente, a mesma de `/market`. Sem anel: no
+  // último anúncio devolve nada, e a coluna não mostra o bloco.
+  const { data: nextRows } = property.published_at
+    ? await supabase
+        .from("properties_public")
+        .select("id, title")
+        .lt("published_at", property.published_at)
+        .neq("id", id)
+        .order("published_at", { ascending: false })
+        .limit(1)
+    : { data: null };
+  const nextRow = nextRows?.[0];
+  const nextListing = nextRow?.id ? { id: nextRow.id, title: nextRow.title ?? "Imóvel" } : null;
+
   return (
     <AppChrome
       role={role}
@@ -146,6 +161,7 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
         ownerName={ownerProfile?.full_name || "Proprietário"}
         similar={similar}
         fromOwner={fromOwner}
+        nextListing={nextListing}
         management={
           isOwnProperty ? (
             <OwnerListingBar

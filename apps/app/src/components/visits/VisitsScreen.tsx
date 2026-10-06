@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   CalendarClock,
   CalendarDays,
@@ -52,6 +52,13 @@ export type VisitsScreenProps = VisitActions & {
   role: "owner" | "buyer";
   /** Mês mostrado no calendário, como `YYYY-MM`. A página decide qual é. */
   month: string;
+  /**
+   * Visita a destacar, vinda do `?visita=` dos links das notificações
+   * (D31 · `20260929120100_notifications.sql`). Um id que não esteja nas linhas
+   * carregadas é ignorado: a lista abre normal, em vez de prometer um destaque
+   * que não existe.
+   */
+  highlightId?: string | null;
 };
 
 const FILTERS: { id: "all" | VisitStatus; label: string }[] = [
@@ -81,11 +88,14 @@ export function VisitsScreen({
   pageSubtitle,
   role,
   month,
+  highlightId = null,
   onAccept,
   onReschedule,
   onCancel,
   onArchive,
 }: VisitsScreenProps) {
+  const highlighted =
+    highlightId && rows.some((row) => row.id === highlightId) ? highlightId : null;
   const [filter, setFilter] = useState<"all" | VisitStatus>("all");
   const [view, setView] = useState<"list" | "calendar">("list");
   const [confirming, setConfirming] = useState<VisitRow | null>(null);
@@ -176,6 +186,7 @@ export function VisitsScreen({
             rows={visible}
             role={role}
             pending={pending}
+            highlightId={highlighted}
             onAskAccept={setConfirming}
             onAskReschedule={(row) => {
               setRescheduling(row);
@@ -267,6 +278,7 @@ type ListProps = {
   rows: VisitRow[];
   role: "owner" | "buyer";
   pending: boolean;
+  highlightId: string | null;
   onAskAccept: (row: VisitRow) => void;
   onAskReschedule: (row: VisitRow) => void;
   onCancel: (row: VisitRow) => void;
@@ -277,11 +289,20 @@ function VisitList({
   rows,
   role,
   pending,
+  highlightId,
   onAskAccept,
   onAskReschedule,
   onCancel,
   onArchive,
 }: ListProps) {
+  // Chegar à lista pela notificação e ter de procurar a visita com os olhos é
+  // o mesmo que não ter link. O destaque leva o ecrã até ela (D31).
+  useEffect(() => {
+    if (!highlightId) return;
+    const node = document.getElementById(`visita-${highlightId}`);
+    node?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [highlightId]);
+
   if (rows.length === 0) {
     return (
       <EmptyState
@@ -308,8 +329,22 @@ function VisitList({
         const canCancel = open || row.status === "accepted";
         const canArchive = row.status === "completed" || row.status === "cancelled";
 
+        const isHighlighted = row.id === highlightId;
+
         return (
-          <Card key={row.id} padded>
+          <Card
+            key={row.id}
+            padded
+            id={`visita-${row.id}`}
+            /* O destaque é a borda de foco do sistema, não uma cor nova: é a
+               mesma pista visual que o teclado já usa para dizer "é aqui". */
+            style={
+              isHighlighted
+                ? { borderColor: "var(--accent)", boxShadow: "0 0 0 1px var(--accent)" }
+                : undefined
+            }
+            aria-current={isHighlighted ? "true" : undefined}
+          >
             <div
               style={{
                 display: "grid",

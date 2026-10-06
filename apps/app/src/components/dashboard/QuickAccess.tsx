@@ -1,4 +1,12 @@
-import { Building2, Map, PlusCircle, Store } from "lucide-react";
+import {
+  Bookmark,
+  Building2,
+  CalendarDays,
+  Map,
+  MessageSquare,
+  PlusCircle,
+  Store,
+} from "lucide-react";
 
 /**
  * "Acesso rápido" (P4-06) — os quatro atalhos do Painel, 04 §8.3.
@@ -10,7 +18,7 @@ import { Building2, Map, PlusCircle, Store } from "lucide-react";
  * `<a>` e não `next/link`: com `typedRoutes` ligado, um `Link` para uma rota
  * que ainda não existe falha o typecheck — a mesma razão do `AppChrome`.
  */
-const SHORTCUTS = [
+const OWNER_SHORTCUTS = [
   {
     href: "/market",
     icon: Store,
@@ -37,7 +45,40 @@ const SHORTCUTS = [
   },
 ] as const;
 
-export function QuickAccess() {
+/**
+ * Os quatro atalhos do comprador — 04 §2.4 (Painel: "Market, Guardados,
+ * Pedidos de visitas, Mensagens"). Todas as rotas existem desde a Fase 5, por
+ * isso nenhum destes é um beco como os da nota acima.
+ */
+const BUYER_SHORTCUTS = [
+  {
+    href: "/market",
+    icon: Store,
+    title: "Market",
+    body: "Veja todas as propriedades publicadas na plataforma.",
+  },
+  {
+    href: "/guardados",
+    icon: Bookmark,
+    title: "Guardados",
+    body: "Os imóveis que guardou e os seus alertas de pesquisa.",
+  },
+  {
+    href: "/meus-pedidos",
+    icon: CalendarDays,
+    title: "Pedidos de visitas",
+    body: "As visitas que pediu e o estado de cada uma.",
+  },
+  {
+    href: "/mensagens",
+    icon: MessageSquare,
+    title: "Mensagens",
+    body: "As suas conversas com os proprietários.",
+  },
+] as const;
+
+export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
+  const shortcuts = role === "buyer" ? BUYER_SHORTCUTS : OWNER_SHORTCUTS;
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <h2
@@ -57,7 +98,7 @@ export function QuickAccess() {
           gap: 14,
         }}
       >
-        {SHORTCUTS.map((shortcut) => {
+        {shortcuts.map((shortcut) => {
           const Icon = shortcut.icon;
           return (
             <a

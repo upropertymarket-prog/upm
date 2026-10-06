@@ -7,11 +7,11 @@ import { createMiddlewareClient } from "./lib/supabase-middleware";
 /**
  * 07 §4.3 — rotas só do proprietário.
  *
- * `/painel` está aqui enquanto só existir o Painel do proprietário (P4-06). O
- * comprador tem o seu próprio Painel em 04 §8.2; quando existir, esta rota
- * deixa de ser owner-only e passa a escolher o painel pelo papel.
+ * `/painel` saiu desta lista quando o Painel do comprador passou a existir
+ * (04 §2.4 · D33): a rota escolhe o painel pelo papel, lido do servidor em
+ * `painel/page.tsx`, e cada papel só vê o seu.
  */
-const OWNER_ONLY_PREFIXES = ["/painel", "/propriedades", "/leads", "/agenda"];
+const OWNER_ONLY_PREFIXES = ["/propriedades", "/leads", "/agenda"];
 /** 07 §4.2 — rotas só do comprador (rota renomeada: /pedidos-de-visita → /meus-pedidos). */
 const BUYER_ONLY_PREFIXES = ["/guardados", "/meus-pedidos"];
 

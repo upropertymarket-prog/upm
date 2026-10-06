@@ -1,4 +1,13 @@
-import { Bookmark, Building2, CalendarCheck, Eye, PencilLine, Users } from "lucide-react";
+import {
+  Bookmark,
+  Building2,
+  CalendarCheck,
+  Eye,
+  FileSignature,
+  MessageSquare,
+  PencilLine,
+  Users,
+} from "lucide-react";
 import { Card } from "@upm/ui";
 
 import type { DashboardStat, StatTone } from "./dashboardTypes";
@@ -10,6 +19,9 @@ const ICONS = {
   saved: Bookmark,
   leads: Users,
   visits: CalendarCheck,
+  // Os dois últimos entram com o Painel do comprador (04 §2.4 · D33).
+  messages: MessageSquare,
+  contracts: FileSignature,
 } as const;
 
 const TONE: Record<StatTone, string> = {

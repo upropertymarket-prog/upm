@@ -1,4 +1,4 @@
-import type { LeadOutcome, LeadStage, VisitStatus } from "@upm/db/interaction";
+import type { LeadOutcome, LeadStage, MessageAttachment, VisitStatus } from "@upm/db/interaction";
 
 /**
  * Modelos de vista da Fase 5 (P5-01 a P5-04)
@@ -32,6 +32,8 @@ export type ChatMessage = {
   /** `true` quando fui eu que escrevi — decide o lado e a cor da bolha. */
   mine: boolean;
   read: boolean;
+  /** Anexos da mensagem (07 §19.6 · D28). Vazio na esmagadora maioria. */
+  attachments: MessageAttachment[];
 };
 
 export type ConversationSummary = {
