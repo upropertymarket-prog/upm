@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { AuthCard, AuthPage, AuthTitle } from "../../components/auth/AuthLayout";
+import { AuthShell } from "../../components/auth/AuthLayout";
 import { LoginForm } from "./LoginForm";
 import { signIn } from "./actions";
 
@@ -15,14 +15,18 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  const t = await getTranslations("auth.login");
+  const [t, ts] = await Promise.all([getTranslations("auth.login"), getTranslations("auth.shell")]);
 
   return (
-    <AuthPage>
-      <AuthCard>
-        <AuthTitle>{t("title")}</AuthTitle>
-        <LoginForm next={next} action={signIn} />
-      </AuthCard>
-    </AuthPage>
+    <AuthShell
+      title={t("title")}
+      subtitle={t("subtitle")}
+      switchPrompt={ts("noAccount")}
+      switchHref="/criar-conta"
+      switchLabel={ts("createAccount")}
+      legalLabel={ts("legal")}
+    >
+      <LoginForm next={next} action={signIn} />
+    </AuthShell>
   );
 }

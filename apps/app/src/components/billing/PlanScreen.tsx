@@ -142,6 +142,13 @@ export type PlanScreenProps = {
    */
   termsHref: string;
   /**
+   * P9-03 — o período mínimo que se aplica a quem subscrever AGORA, lido da
+   * configuração. É diferente de `status.minimumCommitmentMonths`, que é o
+   * compromisso já gravado numa subscrição existente: mudar a configuração não
+   * muda o que alguém já contratou, e o ecrã tem de dizer a verdade aos dois.
+   */
+  defaultCommitmentMonths: number | null;
+  /**
    * P9-04 — a decisão de `can_cancel_subscription()`, lida no servidor. `null`
    * quando não há subscrição ou a resposta não pôde ser obtida: nesse caso o
    * botão não aparece. Falha fechado, de propósito.
@@ -167,6 +174,7 @@ export function PlanScreen({
   onSaveInvoice,
   terms,
   termsHref,
+  defaultCommitmentMonths,
   cancelDecision,
   onCancelSubscription,
 }: PlanScreenProps) {
@@ -191,9 +199,11 @@ export function PlanScreen({
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelState, cancel, canceling] = useActionState(onCancelSubscription, {});
 
-  // P9-03 — `null` é "não há período mínimo definido"; `0` é "definido como
-  // nenhum". Os dois mostram a mesma coisa ao utilizador: a ausência.
-  const commitment = commitmentMonths(status.minimumCommitmentMonths);
+  // Com subscrição, manda o que lá está gravado; sem ela, o que se vai aplicar
+  // a quem subscrever agora. `null` e `0` mostram ambos a ausência (P9-09).
+  const commitment = commitmentMonths(
+    status.subscriptionId ? status.minimumCommitmentMonths : defaultCommitmentMonths,
+  );
 
   const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
 
@@ -568,9 +578,13 @@ export function PlanScreen({
         <Card padded style={{ display: "grid", gap: "var(--sp-4)", marginBottom: "var(--sp-7)" }}>
           <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("cancel.title")}</strong>
           <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", lineHeight: 1.5 }}>
-            {cancelDecision.allowed
-              ? t("cancel.allowedHint", { date: day(cancelDecision.effectiveAt) })
-              : t(`cancel.${cancelDecision.mode}`)}
+            {!cancelDecision.allowed
+              ? t(`cancel.${cancelDecision.mode}`)
+              : cancelDecision.mode === "after_commitment"
+                ? t("cancel.afterCommitmentHint", {
+                    date: day(cancelDecision.effectiveAt ?? cancelDecision.blockedUntil),
+                  })
+                : t("cancel.allowedHint", { date: day(cancelDecision.effectiveAt) })}
           </span>
           {cancelDecision.allowed ? (
             <div>
@@ -586,7 +600,12 @@ export function PlanScreen({
         <form action={cancel} style={{ display: "grid", gap: "var(--sp-5)" }}>
           <input type="hidden" name="subscriptionId" value={status.subscriptionId ?? ""} />
           <p style={{ margin: 0, fontSize: "var(--fs-body)", lineHeight: 1.5 }}>
-            {t("cancel.modalBody", { date: day(cancelDecision?.effectiveAt ?? null) })}
+            {t(
+              cancelDecision?.mode === "after_commitment"
+                ? "cancel.modalBodyCommitment"
+                : "cancel.modalBody",
+              { date: day(cancelDecision?.effectiveAt ?? null) },
+            )}
           </p>
           <label style={{ display: "grid", gap: "var(--sp-2)" }}>
             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>

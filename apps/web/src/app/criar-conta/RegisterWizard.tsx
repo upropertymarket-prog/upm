@@ -30,6 +30,11 @@ export type RegisterPlan = {
   priceYearCents: number;
   features: string[];
   audience: "owner" | "buyer" | "both";
+  /**
+   * Período mínimo que se aplica a este plano, em meses. `null` = nenhum.
+   * Resolvido no servidor a partir da configuração — nunca escrito aqui.
+   */
+  commitmentMonths: number | null;
 };
 
 export type RegisterTerms = {
@@ -66,8 +71,9 @@ function money(cents: number, locale: string) {
  * Não há degrau gratuito e não há trial (decisão do cliente, 7 out 2026): o
  * botão final diz o que faz — leva ao pagamento.
  *
- * O compromisso mínimo **não está decidido**, por isso o ecrã mostra a sua
- * ausência em texto e nunca um número (P9-09).
+ * O **período mínimo** aparece no passo da contratação, antes do pagamento,
+ * com o valor que vem da configuração (12 meses desde 7 out 2026). Quando não
+ * houver nenhum, mostra-se a ausência dele — nunca um zero (P9-09).
  */
 export function RegisterWizard({ action, plans, terms }: RegisterWizardProps) {
   const t = useTranslations("auth");
@@ -311,7 +317,11 @@ export function RegisterWizard({ action, plans, terms }: RegisterWizardProps) {
               */}
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">{tc("commitment")}</dt>
-                <dd className="text-text">{tc("commitmentNone")}</dd>
+                <dd className="text-text">
+                  {chosen?.commitmentMonths
+                    ? tc("commitmentMonths", { months: chosen.commitmentMonths })
+                    : tc("commitmentNone")}
+                </dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">{tc("renewal")}</dt>
@@ -321,7 +331,11 @@ export function RegisterWizard({ action, plans, terms }: RegisterWizardProps) {
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">{tc("cancellation")}</dt>
-                <dd className="text-text">{tc("cancellationRule")}</dd>
+                <dd className="text-text">
+                  {chosen?.commitmentMonths
+                    ? tc("cancellationWithCommitment")
+                    : tc("cancellationRule")}
+                </dd>
               </div>
             </dl>
 

@@ -8,10 +8,19 @@
 -- a app mostrar o aviso em cima do documento e em cima da caixa de aceitação.
 -- A publicação como páginas próprias, já revistas, é P11-07.
 --
--- As lacunas estão assinaladas DENTRO do texto, em §19, e são três:
--- período mínimo de subscrição, penalizações por cessação antecipada e
--- prazos de conservação de dados. Nenhuma foi inventada: o cliente decidiu a
--- 7 out 2026 que o prazo mínimo se decide depois.
+-- As lacunas estão assinaladas DENTRO do texto, em §19. **O período mínimo já
+-- não é uma delas:** o cliente fixou-o em 12 meses a 7 out 2026, e §6 passou a
+-- dizê-lo. Ficam a contrapartida por cessação antecipada, os prazos de
+-- conservação, a base legal da retenção de identificadores, a entidade de RAL e
+-- os dados da empresa. Nenhuma foi inventada.
+--
+-- §6 e §8 levam **notas para a revisão jurídica**, marcadas como tal e
+-- explicitamente fora do corpo contratual. Saem da pesquisa em fontes públicas:
+-- o limite de 24 meses é do regime das comunicações eletrónicas e não se aplica
+-- aqui (Lei 16/2022); o dever de informar o regime de contrapartidas antes da
+-- contratação é do DL 24/2014 art. 4.º; e uma cláusula penal desproporcionada é
+-- NULA, não reduzida (DL 446/85 art. 19.º c)). O agente não afirma que o texto
+-- cumpre nenhum destes regimes — dá o enquadramento a quem o vai validar.
 --
 -- Os dados da empresa aparecem como marcadores em maiúsculas. Não são
 -- esquecimento: `app_settings` (P8-05) tem `company_name`, `company_tax_id`,
@@ -108,11 +117,20 @@ a alteração produzir efeitos.
 A subscrição tem a periodicidade escolhida na contratação (mensal ou anual) e **renova-se
 automaticamente** por períodos iguais, salvo cessação nos termos de §8.
 
-**[LACUNA — A DECIDIR] Período mínimo de permanência.** À data desta minuta **não está fixado
-qualquer período mínimo de subscrição**. A plataforma está preparada para o aplicar quando for
-decidido e comunicado, caso em que o período mínimo aplicável a cada subscrição será apresentado
-no ecrã de contratação, antes do pagamento, e ficará registado na subscrição. Enquanto nada for
-decidido, **não existe período mínimo** e a cessação segue §8.
+**Período mínimo: 12 meses.** A subscrição tem um período mínimo de permanência de **um ano**,
+contado desde a data em que é celebrada. O período mínimo aplicável é apresentado no ecrã de
+contratação, antes do pagamento, e fica registado na subscrição; uma alteração futura do período
+mínimo **não se aplica** a subscrições já celebradas.
+
+**O período mínimo não afeta o direito de livre resolução de 14 dias** previsto em §7.
+
+> **[NOTA PARA A REVISÃO JURÍDICA — não é cláusula.]** O limite de 24 meses e a obrigação de
+> oferecer períodos de 6, 12 e 24 meses pertencem ao regime das **comunicações eletrónicas**
+> (Lei n.º 16/2022) e **não se aplicam** a este serviço. Os 12 meses são, por isso, uma escolha
+> comercial e não um valor imposto por lei. Fica para a revisão confirmar: (a) se se justifica
+> oferecer também uma modalidade sem período mínimo, e (b) qual a **contrapartida** identificável
+> que justifica o compromisso — a existência de uma contrapartida é o que sustenta a
+> proporcionalidade de qualquer encargo por cessação antecipada.
 
 ## 7. Direito de livre resolução
 
@@ -130,11 +148,15 @@ A resolução pode ser comunicada por qualquer meio inequívoco, nomeadamente pa
 
 ## 8. Cessação da subscrição
 
-O Utilizador pode cessar a subscrição a qualquer momento, a partir da área de cliente.
+O Utilizador pode **pedir a cessação a qualquer momento**, a partir da área de cliente. O que varia
+é a data em que a cessação produz efeitos:
 
-Salvo o disposto em §6 quanto a um eventual período mínimo, a cessação produz efeitos **no fim do
-período já pago**, mantendo-se o acesso até lá. Não há reembolso de períodos já decorridos, sem
-prejuízo do disposto em §7.
+1. **Depois do período mínimo** — produz efeitos no fim do período já pago, mantendo-se o acesso
+   até lá.
+2. **Durante o período mínimo de §6** — produz efeitos no fim desse período, mantendo-se o acesso
+   e a obrigação de pagamento até lá. A subscrição deixa de renovar.
+
+Não há reembolso de períodos já decorridos, sem prejuízo do disposto em §7.
 
 Cessada a subscrição e terminado o período pago:
 
@@ -145,9 +167,21 @@ Cessada a subscrição e terminado o período pago:
 3. o Utilizador continua a poder aceder à conta para subscrever de novo, exportar os seus dados ou
    eliminar a conta.
 
-**[LACUNA — A DECIDIR] Penalizações.** Não está fixada qualquer penalização por cessação
-antecipada. Se vier a existir período mínimo, as consequências da cessação antes do seu termo terão
-de ser definidas e comunicadas antes da contratação.
+**[LACUNA — A DECIDIR] Contrapartida por cessação antecipada.** Não está fixado qualquer encargo
+por cessação antes do fim do período mínimo. **Enquanto não estiver definido e comunicado no ecrã
+de contratação, a UProperty não cobra qualquer encargo por cessação antecipada** — o que acontece é
+o descrito no ponto 2 acima: o serviço continua devido até ao fim do período mínimo.
+
+> **[NOTA PARA A REVISÃO JURÍDICA — não é cláusula.]** Dois limites a respeitar quando esse valor
+> for definido:
+>
+> - **Informação prévia.** O Decreto-Lei n.º 24/2014 (art. 4.º) obriga a informar, antes da
+>   celebração, a duração do contrato, os requisitos de denúncia e — quando exista período mínimo —
+>   o regime de contrapartidas pela cessação antecipada. A falta dessa informação alarga o prazo de
+>   livre resolução.
+> - **Proporcionalidade.** Uma cláusula penal desproporcionada face aos danos a ressarcir é
+>   **nula**, e não apenas reduzida (Decreto-Lei n.º 446/85, art. 19.º c)). Um encargo construído
+>   como sanção, e não como contrapartida de um benefício identificado, é por isso um risco real.
 
 ## 9. Obrigações do Utilizador
 
@@ -271,8 +305,8 @@ do foro que a lei lhe reserva.
 
 | # | Assunto | Onde |
 | - | ------- | ---- |
-| 1 | Período mínimo de subscrição — não fixado | §6 |
-| 2 | Penalizações por cessação antecipada — não fixadas | §8 |
+| 1 | ✅ Período mínimo — **fixado em 12 meses** a 7 out 2026. Falta confirmar a contrapartida que o justifica e se há modalidade sem período mínimo | §6 |
+| 2 | Contrapartida por cessação antecipada — não fixada; enquanto não o for, nada é cobrado | §8 |
 | 3 | Prazos de conservação de dados — não fixados | §12 e §16 |
 | 4 | Base legal da retenção de identificadores após apagamento | §16 |
 | 5 | Entidade de resolução alternativa de litígios | §17 |
@@ -375,11 +409,19 @@ affect periods already paid and the User may terminate the subscription before i
 The subscription runs for the billing period chosen at contracting (monthly or yearly) and
 **renews automatically** for equal periods, unless terminated under §8.
 
-**[GAP — TO BE DECIDED] Minimum commitment period.** As at the date of this draft **no minimum
-subscription period is set**. The platform is prepared to apply one once it is decided and
-communicated, in which case the minimum period applicable to each subscription will be shown on the
-contracting screen, before payment, and recorded on the subscription. While nothing is decided,
-**there is no minimum period** and termination follows §8.
+**Minimum period: 12 months.** The subscription has a minimum commitment period of **one year**,
+counted from the date it is concluded. The applicable minimum period is shown on the contracting
+screen, before payment, and recorded on the subscription; a future change to the minimum period
+**does not apply** to subscriptions already concluded.
+
+**The minimum period does not affect the 14-day right of withdrawal** set out in §7.
+
+> **[NOTE FOR THE LEGAL REVIEW — not a clause.]** The 24-month cap and the duty to offer 6, 12 and
+> 24-month terms belong to the **electronic communications** regime (Law no. 16/2022) and **do not
+> apply** to this service. The 12 months are therefore a commercial choice, not a statutory figure.
+> The review should confirm: (a) whether a no-commitment option should also be offered, and (b) what
+> identifiable **counterpart** justifies the commitment — the existence of a counterpart is what
+> supports the proportionality of any early-termination charge.
 
 ## 7. Right of withdrawal
 
@@ -396,11 +438,15 @@ Withdrawal may be communicated by any unequivocal means, namely to **[CONTACT EM
 
 ## 8. Termination of the subscription
 
-The User may terminate the subscription at any time from the customer area.
+The User may **request termination at any time** from the customer area. What varies is the date on
+which termination takes effect:
 
-Save as provided in §6 regarding any minimum period, termination takes effect **at the end of the
-period already paid**, access being maintained until then. There is no refund of periods already
-elapsed, without prejudice to §7.
+1. **After the minimum period** — it takes effect at the end of the period already paid, access
+   being maintained until then.
+2. **During the minimum period of §6** — it takes effect at the end of that period, access and the
+   payment obligation being maintained until then. The subscription stops renewing.
+
+There is no refund of periods already elapsed, without prejudice to §7.
 
 Once the subscription ends and the paid period has elapsed:
 
@@ -410,9 +456,20 @@ Once the subscription ends and the paid period has elapsed:
 3. the User may still access the account to subscribe again, export their data or delete the
    account.
 
-**[GAP — TO BE DECIDED] Penalties.** No penalty for early termination is set. Should a minimum
-period come to exist, the consequences of terminating before its end must be defined and
-communicated before contracting.
+**[GAP — TO BE DECIDED] Early-termination counterpart.** No charge for terminating before the end of
+the minimum period is set. **While none is defined and shown on the contracting screen, UProperty
+charges nothing for early termination** — what happens is point 2 above: the service remains due
+until the end of the minimum period.
+
+> **[NOTE FOR THE LEGAL REVIEW — not a clause.]** Two limits to respect when that figure is set:
+>
+> - **Prior information.** Decree-Law no. 24/2014 (art. 4) requires informing, before conclusion,
+>   the contract duration, the termination requirements and — where a minimum period exists — the
+>   regime of counterparts for early termination. Failing to give that information extends the
+>   withdrawal period.
+> - **Proportionality.** A penalty clause disproportionate to the damage to be compensated is
+>   **null**, not merely reduced (Decree-Law no. 446/85, art. 19 c)). A charge built as a sanction,
+>   rather than as the counterpart of an identified benefit, is therefore a real risk.
 
 ## 9. User obligations
 
@@ -531,8 +588,8 @@ to them by law continues to apply.
 
 | # | Subject | Where |
 | - | ------- | ----- |
-| 1 | Minimum subscription period — not set | §6 |
-| 2 | Early termination penalties — not set | §8 |
+| 1 | ✅ Minimum period — **set at 12 months** on 7 Oct 2026. The justifying counterpart and whether a no-commitment option exists are still to be confirmed | §6 |
+| 2 | Early-termination counterpart — not set; while it is not, nothing is charged | §8 |
 | 3 | Data retention periods — not set | §12 and §16 |
 | 4 | Legal basis for retaining identifiers after erasure | §16 |
 | 5 | Alternative dispute resolution body | §17 |

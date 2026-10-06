@@ -9,14 +9,14 @@ import {
   NovaPalavraPasseEscuro,
   PedirRecuperacaoClaro,
   PedirRecuperacaoEscuro,
-  PlanoClaro,
-  PlanoEscuro,
+  TermosClaro,
+  TermosEscuro,
   VerificacaoClaro,
   VerificacaoEscuro,
 } from "./Ecrans";
 
 /**
- * Ecrãs de autenticação — Fase 3 (03 F2, F3).
+ * Ecrãs de autenticação — Fase 3 (03 F2, F3) e Fase 9.
  *
  * As seis rotas de auth de `apps/web`, cada uma em claro e escuro, aos pares:
  * o par lado a lado com 80 px entre si, e 80 px entre linhas. Viewport de
@@ -68,15 +68,15 @@ export default function AutenticacaoCanvas() {
       />
 
       <Storyboard
-        id="PlanoClaro"
-        name="Escolher plano · Claro (/criar-conta/plano)"
-        component={PlanoClaro}
+        id="TermosClaro"
+        name="Termos e Condições · Claro (/termos)"
+        component={TermosClaro}
         layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
-        id="PlanoEscuro"
-        name="Escolher plano · Escuro (/criar-conta/plano)"
-        component={PlanoEscuro}
+        id="TermosEscuro"
+        name="Termos e Condições · Escuro (/termos)"
+        component={TermosEscuro}
         layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
 

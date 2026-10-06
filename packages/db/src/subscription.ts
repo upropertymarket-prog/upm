@@ -107,10 +107,27 @@ export function hasCommitment(months: number | null | undefined): boolean {
 }
 
 /**
- * P9-09: "enquanto o compromisso não estiver decidido, não se mostra número
- * nenhum — mostra-se a ausência dele". Esta função devolve `null` quando não
- * há, e é a ausência que o ecrã rende — nunca um `0` nem um `—` a fingir.
+ * P9-09: quando não há compromisso definido, mostra-se a **ausência** dele —
+ * nunca um `0` nem um `—` a fingir de valor. Quando há, mostra-se o número.
  */
 export function commitmentMonths(months: number | null | undefined): number | null {
   return hasCommitment(months) ? (months as number) : null;
+}
+
+/**
+ * A mesma precedência de `commitment_months_for_plan()` em SQL: o valor do
+ * plano primeiro, o global depois. Existe porque o ecrã de contratação do
+ * **registo** corre sem sessão e precisa de resolver isto para cada plano da
+ * lista sem uma ida à base de dados por cartão.
+ *
+ * Quando as duas respostas divergirem, a de SQL é que vale: é ela que fica
+ * gravada na subscrição. Esta serve para mostrar o número antes de cobrar, que o
+ * DL 24/2014 (art. 4.º) exige que seja mostrado.
+ */
+export function resolveCommitmentMonths(
+  planDefault: number | null | undefined,
+  globalDefault: number | null | undefined,
+): number | null {
+  const resolved = planDefault ?? globalDefault ?? null;
+  return typeof resolved === "number" ? resolved : null;
 }

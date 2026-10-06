@@ -58,8 +58,9 @@ export async function pendingRpcRow<T = unknown>(
 type QueryBuilder<T> = {
   select: (columns: string) => QueryBuilder<T>;
   eq: (column: string, value: unknown) => QueryBuilder<T>;
+  order: (column: string) => QueryBuilder<T>;
   maybeSingle: () => Promise<PendingResult<T>>;
-};
+} & Promise<PendingResult<T[]>>;
 
 type FromCall<T> = (table: string) => QueryBuilder<T>;
 
@@ -75,4 +76,23 @@ export async function pendingSelectOne<T = unknown>(
     query = query.eq(column, value);
   }
   return query.maybeSingle();
+}
+
+/**
+ * Várias linhas, para quando a coluna nova vive numa tabela que já existe nos
+ * tipos mas com uma coluna que ainda não — o caso de
+ * `plans.default_commitment_months`.
+ */
+export async function pendingSelectMany<T = unknown>(
+  client: { from: unknown },
+  table: string,
+  columns: string,
+  options: { filters?: Record<string, unknown>; orderBy?: string } = {},
+): Promise<PendingResult<T[]>> {
+  let query = (client.from as FromCall<T>).call(client, table).select(columns);
+  for (const [column, value] of Object.entries(options.filters ?? {})) {
+    query = query.eq(column, value);
+  }
+  if (options.orderBy) query = query.order(options.orderBy);
+  return query;
 }

@@ -173,7 +173,9 @@
         "version": "version {version}",
         "submit": "Accept and pay",
         "submitting": "Opening payment…",
-        "noTerms": "No published version of the Terms is available. Sign-up cannot continue — please contact support."
+        "noTerms": "No published version of the Terms is available. Sign-up cannot continue — please contact support.",
+        "commitmentMonths": "{months} months",
+        "cancellationWithCommitment": "Any time; takes effect at the end of the minimum period"
       }
     },
     "login": {
@@ -186,7 +188,8 @@
       "invalidCredentials": "Incorrect email or password.",
       "suspended": "This account is suspended. Contact support for help.",
       "staffBlocked": "Staff accounts sign in at interno.upropertymarket.pt, not here.",
-      "rateLimited": "Too many attempts. Try again in {seconds}s."
+      "rateLimited": "Too many attempts. Try again in {seconds}s.",
+      "subtitle": "Sign in to manage your properties, viewings and messages."
     },
     "recovery": {
       "title": "Recover password",
@@ -196,7 +199,9 @@
       "sentBody": "If an account exists with that email, we sent a recovery link.",
       "newPasswordTitle": "Set a new password",
       "newPassword": "New password",
-      "submitNewPassword": "Save password"
+      "submitNewPassword": "Save password",
+      "subtitle": "Enter your account email and we will send a link to set a new password.",
+      "newPasswordSubtitle": "Choose a new password. It must be at least 10 characters long."
     },
     "pendingGate": {
       "bannerTitle": "Verify your email to activate your account — {days} days left",
@@ -245,6 +250,14 @@
     "errors": {
       "genericTitle": "Something went wrong",
       "tryAgain": "Please try again."
+    },
+    "shell": {
+      "legal": "Terms and Conditions",
+      "noAccount": "Don't have an account yet?",
+      "createAccount": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "rememberedPassword": "Remembered your password?"
     }
   },
   "plan": {
@@ -349,7 +362,9 @@
       "after_commitment": "Cancellation takes effect after the minimum period ends.",
       "blocked": "Cancellation is not available right now.",
       "end_of_period": "Takes effect at the end of the paid period.",
-      "immediate": "Takes effect immediately."
+      "immediate": "Takes effect immediately.",
+      "afterCommitmentHint": "You can cancel at any time. With the minimum period running, cancellation takes effect on {date}.",
+      "modalBodyCommitment": "The subscription stops renewing. As the minimum period is still running, access and payment continue until {date}. There is no refund of the period already paid."
     }
   },
   "admin": {

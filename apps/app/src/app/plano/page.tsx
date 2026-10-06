@@ -5,7 +5,8 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PlanScreen } from "../../components/billing/PlanScreen";
-import { canCancelSubscription } from "@upm/db/subscription";
+import { pendingSelectOne } from "@upm/db/pending-types";
+import { canCancelSubscription, resolveCommitmentMonths } from "@upm/db/subscription";
 
 import {
   loadAddonOptions,
@@ -86,6 +87,16 @@ export default async function PlanoPage({
     ? await canCancelSubscription(supabase, status.subscriptionId)
     : null;
 
+  // P9-03 — o período mínimo que se aplica a quem subscrever agora (12 meses
+  // desde 7 out 2026). Vem da configuração, nunca de código; `pendingSelectOne`
+  // até `pnpm db:types` correr (D52).
+  const { data: globalCommitment } = await pendingSelectOne<{ value: number | null }>(
+    supabase,
+    "app_settings",
+    "value",
+    { key: "subscription_default_commitment_months" },
+  );
+
   const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
   const checkout = one(params.checkout);
@@ -115,6 +126,7 @@ export default async function PlanoPage({
         onSaveInvoice={saveInvoiceToCloud}
         terms={terms}
         termsHref={`${process.env.WEB_URL ?? "http://localhost:4300"}/termos`}
+        defaultCommitmentMonths={resolveCommitmentMonths(null, globalCommitment?.value ?? null)}
         cancelDecision={cancelDecision}
         onCancelSubscription={cancelSubscription}
       />

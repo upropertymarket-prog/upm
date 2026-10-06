@@ -53,12 +53,12 @@ export function LoginForm({ next, action }: LoginFormProps) {
       <Button type="submit" disabled={pending} fullWidth>
         {t("submit")}
       </Button>
-      <div className="flex justify-between text-sm">
+      {/* Só a recuperação fica no formulário. A troca para "criar conta" vive
+          no `AuthShell`, abaixo do cartão (7 out 2026) — tê-la nos dois sítios
+          era repetir o mesmo link a dois centímetros de distância. */}
+      <div className="text-sm">
         <Link href="/recuperar-palavra-passe" className="text-accent hover:underline">
           {t("forgotPassword")}
-        </Link>
-        <Link href="/criar-conta" className="text-accent hover:underline">
-          {t("createAccount")}
         </Link>
       </div>
     </form>

@@ -173,7 +173,9 @@
         "version": "versão {version}",
         "submit": "Aceitar e pagar",
         "submitting": "A abrir o pagamento…",
-        "noTerms": "Não há uma versão dos Termos publicada. A inscrição não pode continuar — contacte o suporte."
+        "noTerms": "Não há uma versão dos Termos publicada. A inscrição não pode continuar — contacte o suporte.",
+        "commitmentMonths": "{months} meses",
+        "cancellationWithCommitment": "A qualquer momento; produz efeitos no fim do período mínimo"
       }
     },
     "login": {
@@ -186,7 +188,8 @@
       "invalidCredentials": "E-mail ou palavra-passe incorretos.",
       "suspended": "Esta conta está suspensa. Contacte o suporte para pedir ajuda.",
       "staffBlocked": "Contas de equipa acedem em interno.upropertymarket.pt, não aqui.",
-      "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s."
+      "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
+      "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens."
     },
     "recovery": {
       "title": "Recuperar palavra-passe",
@@ -196,7 +199,9 @@
       "sentBody": "Se existir uma conta com esse e-mail, enviámos um link de recuperação.",
       "newPasswordTitle": "Defina a sua nova palavra-passe",
       "newPassword": "Nova palavra-passe",
-      "submitNewPassword": "Guardar palavra-passe"
+      "submitNewPassword": "Guardar palavra-passe",
+      "subtitle": "Indique o e-mail da conta e enviamos um link para definir uma nova palavra-passe.",
+      "newPasswordSubtitle": "Escolha uma palavra-passe nova. Tem de ter pelo menos 10 caracteres."
     },
     "pendingGate": {
       "bannerTitle": "Verifique o seu e-mail para ativar a conta — faltam {days} dias",
@@ -245,6 +250,14 @@
     "errors": {
       "genericTitle": "Algo correu mal",
       "tryAgain": "Tente novamente."
+    },
+    "shell": {
+      "legal": "Termos e Condições",
+      "noAccount": "Ainda não tem conta?",
+      "createAccount": "Criar conta",
+      "haveAccount": "Já tem conta?",
+      "signIn": "Entrar",
+      "rememberedPassword": "Lembrou-se da palavra-passe?"
     }
   },
   "plan": {
@@ -349,7 +362,9 @@
       "after_commitment": "O cancelamento produz efeitos depois do fim do período mínimo.",
       "blocked": "O cancelamento não está disponível neste momento.",
       "end_of_period": "Produz efeitos no fim do período pago.",
-      "immediate": "Produz efeitos imediatamente."
+      "immediate": "Produz efeitos imediatamente.",
+      "afterCommitmentHint": "Pode cancelar a qualquer momento. Com período mínimo em curso, o cancelamento produz efeitos a {date}.",
+      "modalBodyCommitment": "A subscrição deixa de renovar. Como o período mínimo ainda decorre, o acesso e o pagamento mantêm-se até {date}. Não há reembolso do período já pago."
     }
   },
   "admin": {

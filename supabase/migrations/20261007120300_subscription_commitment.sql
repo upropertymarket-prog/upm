@@ -5,13 +5,17 @@
 --
 -- Três regras que este ficheiro cumpre à letra:
 --
--- 1. **Nenhum período mínimo é definido nesta fase.** `minimum_commitment_months`
---    nasce a `null` em todos os sítios e o sistema tem de funcionar com `null`,
---    `0` e `> 0`. Não há valor por omissão escondido num `default`.
+-- 1. **O período mínimo é CONFIGURAÇÃO, não código.** O cliente decidiu a 7 out
+--    2026 que é de **1 ano (12 meses)**, e disse na mesma frase que *"poderemos
+--    ter necessidade de alterar"*. Por isso o valor vive numa linha de
+--    `app_settings` (e, se for preciso, numa coluna por plano), e o sistema
+--    continua a ter de funcionar com `null`, `0` e `> 0` — os três têm teste.
+--    Mudar de 12 para 6, ou para nenhum, é um `update`; não se mexe em código.
 -- 2. **Toda a decisão de "pode ou não cancelar" vive numa função única**,
---    `can_cancel_subscription()`. Os ramos do compromisso estão escritos mas
---    inertes: com `null` ou `0` a resposta é sempre "pode". Nenhum bloqueio é
---    implementado nesta fase.
+--    `can_cancel_subscription()`. Com o compromisso definido, o ramo
+--    `after_commitment` passa a ser o caminho normal — e continua a **não
+--    bloquear** o cancelamento: adia o efeito para o fim do compromisso, que é
+--    o que P9-04 permite nesta fase.
 -- 3. **O histórico não é um registo paralelo.** `subscription_events` é
 --    append-only e escrito por gatilho, e `account_history()` junta-o ao
 --    `audit_log` e a `terms_acceptances` que já existem — não duplica nada.
@@ -42,18 +46,23 @@ create index subscriptions_commitment_idx on public.subscriptions (commitment_en
 create index subscriptions_terms_idx on public.subscriptions (terms_document_id);
 
 comment on column public.subscriptions.minimum_commitment_months is
-  'Compromisso mínimo em meses. null = não definido (estado de 7 out 2026), 0 = nenhum, >0 = meses (P9-03).';
+  'Compromisso mínimo em meses. null = não definido, 0 = nenhum, >0 = meses (P9-03). '
+  'Valor em vigor desde 7 out 2026: 12. Fica GRAVADO na subscrição, por isso uma '
+  'alteração da configuração não muda o que já foi contratado.';
 comment on column public.subscriptions.commitment_ends_at is
   'Fim do compromisso mínimo, calculado de started_at + minimum_commitment_months. null quando não há.';
 comment on column public.subscriptions.terms_document_id is
   'Versão dos Termos aceite ao contratar esta subscrição (P9-02/P9-03).';
 
 -- ---------------------------------------------------------------------------
--- Onde o compromisso se configura DEPOIS, sem tocar em código
+-- Onde o compromisso se configura, sem tocar em código
 --
--- Dois níveis, por esta ordem de precedência: o do plano, e o global. Ambos
--- nascem a null — é o que torna verdade "nenhum período mínimo é definido
--- nesta fase".
+-- Dois níveis, por esta ordem de precedência: o do plano, e o global.
+--
+-- O do plano nasce a `null` (nenhum plano tem exceção); o global nasce a **12**,
+-- a decisão do cliente de 7 out 2026. Mudar o período mínimo é mudar uma destas
+-- duas linhas — e o valor fica gravado em cada subscrição no momento em que ela
+-- nasce, por isso quem já contratou não é afetado por uma alteração futura.
 -- ---------------------------------------------------------------------------
 
 alter table public.plans
@@ -66,9 +75,10 @@ comment on column public.plans.default_commitment_months is
 insert into public.app_settings (key, value, public, description)
 values (
   'subscription_default_commitment_months',
-  'null'::jsonb,
+  '12'::jsonb,
   true,
-  'Compromisso mínimo global, em meses. null = nenhum (POR DECIDIR — P9-03)'
+  'Compromisso mínimo global, em meses. 12 por decisão do cliente de 7 out 2026; '
+  'null = nenhum. Alterável a qualquer momento — não afeta subscrições já criadas (P9-03)'
 )
 on conflict (key) do nothing;
 
@@ -76,6 +86,8 @@ on conflict (key) do nothing;
  * O compromisso que se aplica a um plano, hoje. Plano primeiro, global depois.
  * Devolve null quando nada está definido — e null significa "sem compromisso",
  * nunca "zero meses por omissão".
+ *
+ * Hoje devolve 12 para todos os planos, porque é isso que o global diz.
  */
 create or replace function public.commitment_months_for_plan(p_plan_id uuid)
 returns integer
@@ -103,7 +115,11 @@ begin
 end;
 $$;
 
-grant execute on function public.commitment_months_for_plan(uuid) to authenticated;
+-- `anon` também: o ecrã de contratação do REGISTO corre sem sessão e tem de
+-- mostrar o período mínimo antes de cobrar (P9-09 e o dever de informação
+-- pré-contratual do DL 24/2014, art. 4.º). A função só lê configuração — não
+-- toca em dados pessoais nem revela nada de nenhuma conta.
+grant execute on function public.commitment_months_for_plan(uuid) to anon, authenticated;
 
 /**
  * Preenche o compromisso ao nascer a subscrição e recalcula o seu fim quando o
@@ -157,16 +173,23 @@ create trigger subscriptions_fill_commitment
 -- quando. Um booleano obrigaria a recalcular a data noutro sítio, que é
 -- exatamente como as regras se espalham.
 --
--- `mode` é o que esta função está preparada para suportar depois:
---   immediate        — termina já
---   end_of_period    — termina no fim do período pago  (a regra de hoje)
---   after_commitment — só depois do fim do compromisso
---   blocked          — impedido até uma data
+-- `mode` diz COMO o cancelamento produz efeitos:
+--   immediate        — termina já                       (não usado hoje)
+--   end_of_period    — termina no fim do período pago   (depois do compromisso)
+--   after_commitment — no fim do compromisso            (o caminho normal hoje)
+--   blocked          — impedido até uma data            (não usado hoje)
 --
--- **Hoje devolve sempre `allowed = true`**, porque não há compromisso definido
--- (P9-04: nenhum bloqueio é implementado nesta fase). Os ramos ficam escritos
--- para que, no dia em que o cliente fixar um período mínimo, mude um valor em
--- `app_settings` — e não este código.
+-- **`allowed` é sempre `true`.** Com o compromisso de 12 meses decidido a 7 out
+-- 2026, o que muda é a DATA em que o cancelamento produz efeitos, não o direito
+-- de o pedir: dentro do compromisso a resposta é `after_commitment`, com
+-- `blocked_until` a dizer até quando o serviço continua a ser devido. P9-04 é
+-- explícito — **nenhum bloqueio é implementado nesta fase**, e `blocked` fica
+-- escrito mas sem caminho que o devolva.
+--
+-- O que esta função NÃO decide, de propósito: quanto se paga por sair antes do
+-- fim do compromisso. Essa é a lacuna de §8 dos Termos e tem de ser definida por
+-- quem os revê — uma cláusula penal desproporcionada é **nula** (DL 446/85,
+-- art. 19.º c)), não reduzida, por isso não se inventa aqui um valor.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.can_cancel_subscription(p_subscription_id uuid)
@@ -245,8 +268,9 @@ $$;
 grant execute on function public.can_cancel_subscription(uuid) to authenticated;
 
 comment on function public.can_cancel_subscription(uuid) is
-  'Única porta da decisão de cancelamento (P9-04). Hoje permite sempre: nenhum '
-  'compromisso mínimo está definido. Nenhuma condição de cancelamento vive fora daqui.';
+  'Única porta da decisão de cancelamento (P9-04). Permite sempre; o que varia é a '
+  'data em que produz efeitos — no fim do compromisso de 12 meses, se ainda decorrer. '
+  'Nenhuma condição de cancelamento vive fora daqui.';
 
 /**
  * Registar o pedido de cancelamento e o seu motivo. Não cancela no Stripe —

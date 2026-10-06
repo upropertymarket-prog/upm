@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { AuthCard, AuthPage, AuthTitle } from "../../../components/auth/AuthLayout";
+import { AuthShell } from "../../../components/auth/AuthLayout";
 import { ResendVerificationForm } from "./ResendVerificationForm";
 import { resendVerificationEmail } from "../actions";
 
@@ -23,22 +23,28 @@ export default async function VerificationPendingPage({
   searchParams: Promise<{ email?: string; pago?: string }>;
 }) {
   const { email = "", pago } = await searchParams;
-  const t = await getTranslations("auth.register.verification");
+  const [t, ts] = await Promise.all([
+    getTranslations("auth.register.verification"),
+    getTranslations("auth.shell"),
+  ]);
 
   return (
-    <AuthPage>
-      <AuthCard width="md" centered>
-        <AuthTitle>{pago === "1" ? t("paidTitle") : t("title")}</AuthTitle>
+    <AuthShell
+      width="md"
+      title={pago === "1" ? t("paidTitle") : t("title")}
+      switchPrompt={ts("haveAccount")}
+      switchHref="/entrar"
+      switchLabel={ts("signIn")}
+      legalLabel={ts("legal")}
+    >
+      {pago === "1" ? (
+        <p className="text-sm text-text">{t("paidBody")}</p>
+      ) : pago === "0" ? (
+        <p className="text-sm text-text">{t("unpaidBody")}</p>
+      ) : null}
 
-        {pago === "1" ? (
-          <p className="text-sm text-text">{t("paidBody")}</p>
-        ) : pago === "0" ? (
-          <p className="text-sm text-text">{t("unpaidBody")}</p>
-        ) : null}
-
-        <p className="text-sm text-muted">{t("body", { email })}</p>
-        <ResendVerificationForm email={email} action={resendVerificationEmail} />
-      </AuthCard>
-    </AuthPage>
+      <p className="text-sm text-muted">{t("body", { email })}</p>
+      <ResendVerificationForm email={email} action={resendVerificationEmail} />
+    </AuthShell>
   );
 }
