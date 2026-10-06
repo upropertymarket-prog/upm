@@ -46,7 +46,11 @@ export async function updateLead(input: unknown): Promise<LeadActionResult> {
   const { error } = await supabase.rpc("admin_update_site_lead", {
     p_lead_id: parsed.data.leadId,
     p_status: parsed.data.status,
-    p_assigned_to: parsed.data.assignedTo,
+    // `p_assigned_to` não tem DEFAULT na função, por isso os tipos gerados
+    // pedem `string` — mas o corpo SQL trata `null` como "desatribuir"
+    // (`20261002130200_site_leads.sql`), e é isso que o cast diz. Mesmo padrão
+    // do `p_folder_id` da Cloud.
+    p_assigned_to: (parsed.data.assignedTo ?? null) as unknown as string,
   });
   if (error) return { error: "Could not update the lead." };
   revalidatePath("/admin/leads-site");
@@ -86,10 +90,10 @@ export async function exportLeads(input: unknown): Promise<LeadActionResult & { 
       : { error: "PIN confirmation failed." };
   const filters = parsed.data;
   const { data, error } = await supabase.rpc("admin_export_site_leads", {
-    p_status: filters.status,
-    p_source: filters.source,
-    p_form: filters.form,
-    p_assigned_to: filters.assignedTo,
+    p_status: filters.status ?? undefined,
+    p_source: filters.source ?? undefined,
+    p_form: filters.form ?? undefined,
+    p_assigned_to: filters.assignedTo ?? undefined,
     p_search: filters.search || undefined,
   });
   if (error || !data) return { error: "Could not export leads." };

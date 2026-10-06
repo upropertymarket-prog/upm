@@ -52,13 +52,6 @@ export async function BuyerPanel({
   const supabase = createClient(await cookies());
   const t = await getTranslations();
 
-  // O `cast` sai com o próximo `pnpm db:types`: a função nasce na migração
-  // `20261006120100`, que ainda não foi aplicada em staging.
-  const viewsRpc = supabase.rpc as unknown as (
-    fn: "my_property_views_daily",
-    args: { p_days: number },
-  ) => Promise<{ data: ViewRow[] | null }>;
-
   const [
     savedCount,
     visits,
@@ -76,7 +69,7 @@ export async function BuyerPanel({
     loadConversations(supabase),
     loadNotifications(supabase),
     supabase.rpc("my_contracts"),
-    viewsRpc("my_property_views_daily", { p_days: HISTORY_DAYS }),
+    supabase.rpc("my_property_views_daily", { p_days: HISTORY_DAYS }),
   ]);
 
   const contractsAll = contractRows ?? [];

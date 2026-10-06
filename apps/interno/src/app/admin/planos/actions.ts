@@ -138,17 +138,9 @@ export async function savePlan(
     : null;
 
   // D40 — antes de gravar: há subscritores a usar mais do que o limite novo?
-  // Só faz sentido num plano que já existe, e só até à confirmação. O cast sai
-  // com o próximo `pnpm db:types` (função nova em `20261006120200`).
+  // Só faz sentido num plano que já existe, e só até à confirmação.
   if (plan.id && formData.get("confirmOverage") !== "on") {
-    const overageRpc = supabase.rpc as unknown as (
-      fn: "plan_limit_overage",
-      args: { p_plan_id: string; p_limits: typeof plan.limits },
-    ) => Promise<{
-      data: { limit_key: string; affected: number; max_used: number }[] | null;
-      error: unknown;
-    }>;
-    const { data: overage } = await overageRpc("plan_limit_overage", {
+    const { data: overage } = await supabase.rpc("plan_limit_overage", {
       p_plan_id: plan.id,
       p_limits: plan.limits,
     });

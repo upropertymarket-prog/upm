@@ -126,14 +126,7 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
   // visita do próprio dono, dedupe de 30 minutos, e numa só chamada escreve o
   // evento, o agregado diário e a cache de `properties.views_count` — que era
   // lida desde a Fase 4 sem nunca ninguém a escrever.
-  //
-  // O `cast` sai com o próximo `pnpm db:types`: a função nasce na migração
-  // `20261006120100`, que ainda não foi aplicada em staging.
-  const recordView = supabase.rpc as unknown as (
-    fn: "record_property_view",
-    args: { p_property_id: string },
-  ) => Promise<{ error: unknown }>;
-  await recordView("record_property_view", { p_property_id: id });
+  await supabase.rpc("record_property_view", { p_property_id: id });
 
   return (
     <AppChrome

@@ -69,12 +69,12 @@ export default async function UsersPage({
   const [authResult, listResult, plansResult, counters] = await Promise.all([
     supabase.auth.getUser(),
     supabase.rpc("admin_list_profiles", {
-      p_search: parsed.filters.search || null,
-      p_role: parsed.filters.role ? (parsed.filters.role as Role) : null,
-      p_status: parsed.filters.status ? (parsed.filters.status as ProfileStatus) : null,
-      p_plan_id: parsed.filters.planId || null,
-      p_cursor_created_at: parsed.cursor?.createdAt ?? null,
-      p_cursor_id: parsed.cursor?.id ?? null,
+      p_search: parsed.filters.search || undefined,
+      p_role: parsed.filters.role ? (parsed.filters.role as Role) : undefined,
+      p_status: parsed.filters.status ? (parsed.filters.status as ProfileStatus) : undefined,
+      p_plan_id: parsed.filters.planId || undefined,
+      p_cursor_created_at: parsed.cursor?.createdAt,
+      p_cursor_id: parsed.cursor?.id,
       p_direction: parsed.direction,
       p_limit: PAGE_SIZE + 1,
     }),

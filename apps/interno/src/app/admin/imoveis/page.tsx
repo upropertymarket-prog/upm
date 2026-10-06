@@ -69,8 +69,8 @@ export default async function ModerationPage({
     supabase.auth.getUser(),
     supabase.rpc("admin_list_moderation", {
       p_status: status as PropertyStatus,
-      p_cursor_created_at: cursor?.createdAt ?? null,
-      p_cursor_id: cursor?.id ?? null,
+      p_cursor_created_at: cursor?.createdAt,
+      p_cursor_id: cursor?.id,
       p_direction: cursor ? direction : "next",
       p_limit: PAGE_SIZE + 1,
     }),

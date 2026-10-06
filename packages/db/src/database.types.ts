@@ -81,6 +81,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      app_settings: {
+        Row: {
+          description: string;
+          key: string;
+          public: boolean;
+          updated_at: string;
+          value: Json;
+        };
+        Insert: {
+          description?: string;
+          key: string;
+          public?: boolean;
+          updated_at?: string;
+          value: Json;
+        };
+        Update: {
+          description?: string;
+          key?: string;
+          public?: boolean;
+          updated_at?: string;
+          value?: Json;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -1130,6 +1154,41 @@ export type Database = {
           },
         ];
       };
+      personal_data_access_log: {
+        Row: {
+          action: string;
+          actor_profile_id: string;
+          id: number;
+          occurred_at: string;
+          subject_id: string;
+          subject_type: string;
+        };
+        Insert: {
+          action: string;
+          actor_profile_id: string;
+          id?: never;
+          occurred_at?: string;
+          subject_id: string;
+          subject_type: string;
+        };
+        Update: {
+          action?: string;
+          actor_profile_id?: string;
+          id?: never;
+          occurred_at?: string;
+          subject_id?: string;
+          subject_type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "personal_data_access_log_actor_profile_id_fkey";
+            columns: ["actor_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       plans: {
         Row: {
           audience: Database["public"]["Enums"]["plan_audience"];
@@ -1183,41 +1242,6 @@ export type Database = {
           visible?: boolean;
         };
         Relationships: [];
-      };
-      personal_data_access_log: {
-        Row: {
-          action: string;
-          actor_profile_id: string;
-          id: number;
-          occurred_at: string;
-          subject_id: string;
-          subject_type: string;
-        };
-        Insert: {
-          action: string;
-          actor_profile_id: string;
-          id?: number;
-          occurred_at?: string;
-          subject_id: string;
-          subject_type: string;
-        };
-        Update: {
-          action?: string;
-          actor_profile_id?: string;
-          id?: number;
-          occurred_at?: string;
-          subject_id?: string;
-          subject_type?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "personal_data_access_log_actor_profile_id_fkey";
-            columns: ["actor_profile_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       profiles: {
         Row: {
@@ -1542,54 +1566,6 @@ export type Database = {
           },
         ];
       };
-      property_moderation_events: {
-        Row: {
-          action: string;
-          actor_id: string;
-          created_at: string;
-          id: number;
-          property_id: string;
-          reason: string | null;
-          status_from: Database["public"]["Enums"]["property_status"];
-          status_to: Database["public"]["Enums"]["property_status"];
-        };
-        Insert: {
-          action: string;
-          actor_id: string;
-          created_at?: string;
-          id?: number;
-          property_id: string;
-          reason?: string | null;
-          status_from: Database["public"]["Enums"]["property_status"];
-          status_to: Database["public"]["Enums"]["property_status"];
-        };
-        Update: {
-          action?: string;
-          actor_id?: string;
-          created_at?: string;
-          id?: number;
-          property_id?: string;
-          reason?: string | null;
-          status_from?: Database["public"]["Enums"]["property_status"];
-          status_to?: Database["public"]["Enums"]["property_status"];
-        };
-        Relationships: [
-          {
-            foreignKeyName: "property_moderation_events_actor_id_fkey";
-            columns: ["actor_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "property_moderation_events_property_id_fkey";
-            columns: ["property_id"];
-            isOneToOne: false;
-            referencedRelation: "properties";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       property_media: {
         Row: {
           created_at: string;
@@ -1640,6 +1616,104 @@ export type Database = {
             columns: ["property_id"];
             isOneToOne: false;
             referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_moderation_events: {
+        Row: {
+          action: string;
+          actor_id: string;
+          created_at: string;
+          id: number;
+          property_id: string;
+          reason: string | null;
+          status_from: Database["public"]["Enums"]["property_status"];
+          status_to: Database["public"]["Enums"]["property_status"];
+        };
+        Insert: {
+          action: string;
+          actor_id: string;
+          created_at?: string;
+          id?: never;
+          property_id: string;
+          reason?: string | null;
+          status_from: Database["public"]["Enums"]["property_status"];
+          status_to: Database["public"]["Enums"]["property_status"];
+        };
+        Update: {
+          action?: string;
+          actor_id?: string;
+          created_at?: string;
+          id?: never;
+          property_id?: string;
+          reason?: string | null;
+          status_from?: Database["public"]["Enums"]["property_status"];
+          status_to?: Database["public"]["Enums"]["property_status"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_moderation_events_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_moderation_events_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_moderation_events_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_view_events: {
+        Row: {
+          id: number;
+          property_id: string;
+          viewed_at: string;
+          viewer_id: string | null;
+        };
+        Insert: {
+          id?: never;
+          property_id: string;
+          viewed_at?: string;
+          viewer_id?: string | null;
+        };
+        Update: {
+          id?: never;
+          property_id?: string;
+          viewed_at?: string;
+          viewer_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_view_events_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_view_events_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_view_events_viewer_id_fkey";
+            columns: ["viewer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -1814,6 +1888,113 @@ export type Database = {
           visits?: number;
         };
         Relationships: [];
+      };
+      site_lead_events: {
+        Row: {
+          actor_id: string;
+          body: string;
+          created_at: string;
+          id: number;
+          kind: string;
+          lead_id: string;
+        };
+        Insert: {
+          actor_id: string;
+          body: string;
+          created_at?: string;
+          id?: never;
+          kind: string;
+          lead_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          body?: string;
+          created_at?: string;
+          id?: never;
+          kind?: string;
+          lead_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "site_lead_events_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "site_lead_events_lead_id_fkey";
+            columns: ["lead_id"];
+            isOneToOne: false;
+            referencedRelation: "site_leads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      site_leads: {
+        Row: {
+          assigned_to: string | null;
+          consent_at: string | null;
+          consent_marketing: boolean;
+          created_at: string;
+          email: string;
+          form: string;
+          id: string;
+          message: string | null;
+          name: string;
+          phone: string | null;
+          profile_type: string;
+          reason: string | null;
+          source: string;
+          status: string;
+          updated_at: string;
+          utm: Json;
+        };
+        Insert: {
+          assigned_to?: string | null;
+          consent_at?: string | null;
+          consent_marketing?: boolean;
+          created_at?: string;
+          email: string;
+          form: string;
+          id?: string;
+          message?: string | null;
+          name: string;
+          phone?: string | null;
+          profile_type: string;
+          reason?: string | null;
+          source: string;
+          status?: string;
+          updated_at?: string;
+          utm?: Json;
+        };
+        Update: {
+          assigned_to?: string | null;
+          consent_at?: string | null;
+          consent_marketing?: boolean;
+          created_at?: string;
+          email?: string;
+          form?: string;
+          id?: string;
+          message?: string | null;
+          name?: string;
+          phone?: string | null;
+          profile_type?: string;
+          reason?: string | null;
+          source?: string;
+          status?: string;
+          updated_at?: string;
+          utm?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "site_leads_assigned_to_fkey";
+            columns: ["assigned_to"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       staff_auth: {
         Row: {
@@ -2299,6 +2480,19 @@ export type Database = {
     };
     Functions: {
       accept_visit_request: { Args: { p_id: string }; Returns: undefined };
+      admin_add_site_lead_note: {
+        Args: { p_lead_id: string; p_note: string };
+        Returns: undefined;
+      };
+      admin_app_settings: {
+        Args: never;
+        Returns: {
+          description: string;
+          key: string;
+          public: boolean;
+          value: Json;
+        }[];
+      };
       admin_billing_summary: {
         Args: never;
         Returns: {
@@ -2311,50 +2505,236 @@ export type Database = {
           trials: number;
         }[];
       };
-      admin_list_site_leads: {
+      admin_dashboard_metrics: { Args: never; Returns: Json };
+      admin_export_site_leads: {
         Args: {
-          p_assigned_to?: string | null;
-          p_cursor_created_at?: string | null;
-          p_cursor_id?: string | null;
-          p_direction?: string;
-          p_form?: string | null;
-          p_limit?: number;
-          p_search?: string | null;
-          p_source?: string | null;
-          p_status?: string | null;
+          p_assigned_to?: string;
+          p_form?: string;
+          p_search?: string;
+          p_source?: string;
+          p_status?: string;
         };
         Returns: {
-          assigned_name: string | null;
-          assigned_to: string | null;
+          assigned_name: string;
+          consent_at: string;
+          consent_marketing: boolean;
+          created_at: string;
+          email: string;
+          form: string;
+          message: string;
+          name: string;
+          phone: string;
+          profile_type: string;
+          reason: string;
+          source: string;
+          status: string;
+          utm: Json;
+        }[];
+      };
+      admin_feature_flags: {
+        Args: never;
+        Returns: {
+          description: string;
+          key: string;
+          value: Json;
+        }[];
+      };
+      admin_list_moderation: {
+        Args: {
+          p_cursor_created_at?: string;
+          p_cursor_id?: string;
+          p_direction?: string;
+          p_limit?: number;
+          p_status: Database["public"]["Enums"]["property_status"];
+        };
+        Returns: {
+          city: string;
+          cover_path: string;
+          created_at: string;
+          deal: Database["public"]["Enums"]["property_deal"];
+          id: string;
+          owner_name: string;
+          price_cents: number;
+          ref: string;
+          rent_cents: number;
+          status: Database["public"]["Enums"]["property_status"];
+          title: string;
+        }[];
+      };
+      admin_list_profiles: {
+        Args: {
+          p_cursor_created_at?: string;
+          p_cursor_id?: string;
+          p_direction?: string;
+          p_limit?: number;
+          p_plan_id?: string;
+          p_role?: Database["public"]["Enums"]["user_role"];
+          p_search?: string;
+          p_status?: Database["public"]["Enums"]["profile_status"];
+        };
+        Returns: {
+          created_at: string;
+          email: string;
+          full_name: string;
+          id: string;
+          plan_name: string;
+          plan_slug: string;
+          role: Database["public"]["Enums"]["user_role"];
+          status: Database["public"]["Enums"]["profile_status"];
+          subscription_status: string;
+          trial_ends_at: string;
+        }[];
+      };
+      admin_list_site_leads: {
+        Args: {
+          p_assigned_to?: string;
+          p_cursor_created_at?: string;
+          p_cursor_id?: string;
+          p_direction?: string;
+          p_form?: string;
+          p_limit?: number;
+          p_search?: string;
+          p_source?: string;
+          p_status?: string;
+        };
+        Returns: {
+          assigned_name: string;
+          assigned_to: string;
           consent_marketing: boolean;
           created_at: string;
           email: string;
           form: string;
           id: string;
           name: string;
-          phone: string | null;
+          phone: string;
           profile_type: string;
-          reason: string | null;
+          reason: string;
           source: string;
           status: string;
         }[];
       };
+      admin_moderation_counts: {
+        Args: never;
+        Returns: {
+          status: Database["public"]["Enums"]["property_status"];
+          total: number;
+        }[];
+      };
+      admin_moderation_detail: {
+        Args: { p_property_id: string };
+        Returns: {
+          address_line: string;
+          amenities: string[];
+          bathrooms: number;
+          bedrooms: number;
+          city: string;
+          condition: string;
+          condo_fee_cents: number;
+          created_at: string;
+          deal: Database["public"]["Enums"]["property_deal"];
+          description: string;
+          district: string;
+          energy_cert: string;
+          floor: string;
+          gross_area: number;
+          id: string;
+          imi_cents: number;
+          net_area: number;
+          owner_id: string;
+          owner_name: string;
+          parish: string;
+          postal_code: string;
+          price_cents: number;
+          property_type: string;
+          published_at: string;
+          ref: string;
+          rejection_reason: string;
+          rent_cents: number;
+          status: Database["public"]["Enums"]["property_status"];
+          title: string;
+          typology: string;
+          year_built: number;
+        }[];
+      };
+      admin_plan_metrics: {
+        Args: never;
+        Returns: {
+          audience: Database["public"]["Enums"]["plan_audience"];
+          mrr_cents: number;
+          name: string;
+          plan_id: string;
+          price_month_cents: number;
+          price_year_cents: number;
+          slug: string;
+          subscribers: number;
+          visible: boolean;
+        }[];
+      };
+      admin_profile_detail: {
+        Args: { p_profile_id: string };
+        Returns: {
+          created_at: string;
+          current_period_end: string;
+          email: string;
+          full_name: string;
+          id: string;
+          plan_name: string;
+          plan_slug: string;
+          role: Database["public"]["Enums"]["user_role"];
+          status: Database["public"]["Enums"]["profile_status"];
+          subscription_status: string;
+          trial_ends_at: string;
+          updated_at: string;
+        }[];
+      };
+      admin_property_moderation_history: {
+        Args: { p_property_id: string };
+        Returns: {
+          action: string;
+          actor_name: string;
+          created_at: string;
+          id: number;
+          reason: string;
+          status_from: Database["public"]["Enums"]["property_status"];
+          status_to: Database["public"]["Enums"]["property_status"];
+        }[];
+      };
+      admin_recent_invoices: {
+        Args: { p_limit?: number };
+        Returns: {
+          client_name: string;
+          id: string;
+          issued_at: string;
+          number: string;
+          plan_name: string;
+          status: string;
+          total_cents: number;
+        }[];
+      };
+      admin_set_profile_status: {
+        Args: {
+          p_profile_id: string;
+          p_reason: string;
+          p_status: Database["public"]["Enums"]["profile_status"];
+        };
+        Returns: Database["public"]["Enums"]["profile_status"];
+      };
       admin_site_lead_detail: {
         Args: { p_lead_id: string };
         Returns: {
-          assigned_name: string | null;
-          assigned_to: string | null;
-          consent_at: string | null;
+          assigned_name: string;
+          assigned_to: string;
+          consent_at: string;
           consent_marketing: boolean;
           created_at: string;
           email: string;
           form: string;
           id: string;
-          message: string | null;
+          message: string;
           name: string;
-          phone: string | null;
+          phone: string;
           profile_type: string;
-          reason: string | null;
+          reason: string;
           source: string;
           status: string;
           updated_at: string;
@@ -2373,206 +2753,9 @@ export type Database = {
       };
       admin_site_lead_staff: {
         Args: never;
-        Returns: { full_name: string; id: string }[];
-      };
-      admin_update_site_lead: {
-        Args: { p_assigned_to: string | null; p_lead_id: string; p_status: string | null };
-        Returns: undefined;
-      };
-      admin_add_site_lead_note: {
-        Args: { p_lead_id: string; p_note: string };
-        Returns: undefined;
-      };
-      admin_export_site_leads: {
-        Args: {
-          p_assigned_to?: string | null;
-          p_form?: string | null;
-          p_search?: string | null;
-          p_source?: string | null;
-          p_status?: string | null;
-        };
         Returns: {
-          assigned_name: string | null;
-          consent_at: string | null;
-          consent_marketing: boolean;
-          created_at: string;
-          email: string;
-          form: string;
-          message: string | null;
-          name: string;
-          phone: string | null;
-          profile_type: string;
-          reason: string | null;
-          source: string;
-          status: string;
-          utm: Json;
-        }[];
-      };
-      admin_dashboard_metrics: { Args: never; Returns: Json };
-      admin_feature_flags: {
-        Args: never;
-        Returns: { description: string; key: string; value: Json }[];
-      };
-      admin_app_settings: {
-        Args: never;
-        Returns: { description: string; key: string; public: boolean; value: Json }[];
-      };
-      set_feature_flag: { Args: { p_key: string; p_value: Json }; Returns: undefined };
-      set_app_setting: { Args: { p_key: string; p_value: Json }; Returns: undefined };
-      admin_list_profiles: {
-        Args: {
-          p_cursor_created_at?: string | null;
-          p_cursor_id?: string | null;
-          p_direction?: string;
-          p_limit?: number;
-          p_plan_id?: string | null;
-          p_role?: Database["public"]["Enums"]["user_role"] | null;
-          p_search?: string | null;
-          p_status?: Database["public"]["Enums"]["profile_status"] | null;
-        };
-        Returns: {
-          created_at: string;
-          email: string;
           full_name: string;
           id: string;
-          plan_name: string | null;
-          plan_slug: string | null;
-          role: Database["public"]["Enums"]["user_role"];
-          status: Database["public"]["Enums"]["profile_status"];
-          subscription_status: string | null;
-          trial_ends_at: string | null;
-        }[];
-      };
-      admin_profile_detail: {
-        Args: { p_profile_id: string };
-        Returns: {
-          created_at: string;
-          current_period_end: string | null;
-          email: string;
-          full_name: string;
-          id: string;
-          plan_name: string | null;
-          plan_slug: string | null;
-          role: Database["public"]["Enums"]["user_role"];
-          status: Database["public"]["Enums"]["profile_status"];
-          subscription_status: string | null;
-          trial_ends_at: string | null;
-          updated_at: string;
-        }[];
-      };
-      admin_set_profile_status: {
-        Args: {
-          p_profile_id: string;
-          p_reason: string;
-          p_status: Database["public"]["Enums"]["profile_status"];
-        };
-        Returns: Database["public"]["Enums"]["profile_status"];
-      };
-      admin_list_moderation: {
-        Args: {
-          p_cursor_created_at?: string | null;
-          p_cursor_id?: string | null;
-          p_direction?: string;
-          p_limit?: number;
-          p_status: Database["public"]["Enums"]["property_status"];
-        };
-        Returns: {
-          city: string | null;
-          created_at: string;
-          cover_path: string | null;
-          deal: Database["public"]["Enums"]["property_deal"];
-          id: string;
-          owner_name: string;
-          price_cents: number | null;
-          ref: string;
-          rent_cents: number | null;
-          status: Database["public"]["Enums"]["property_status"];
-          title: string;
-        }[];
-      };
-      admin_moderation_counts: {
-        Args: never;
-        Returns: {
-          status: Database["public"]["Enums"]["property_status"];
-          total: number;
-        }[];
-      };
-      admin_moderation_detail: {
-        Args: { p_property_id: string };
-        Returns: {
-          address_line: string | null;
-          amenities: string[];
-          bathrooms: number | null;
-          bedrooms: number | null;
-          city: string | null;
-          condo_fee_cents: number | null;
-          condition: string;
-          created_at: string;
-          deal: Database["public"]["Enums"]["property_deal"];
-          description: string;
-          district: string | null;
-          energy_cert: string | null;
-          floor: string | null;
-          gross_area: number | null;
-          id: string;
-          imi_cents: number | null;
-          net_area: number | null;
-          owner_id: string;
-          owner_name: string;
-          parish: string | null;
-          postal_code: string | null;
-          price_cents: number | null;
-          property_type: string;
-          published_at: string | null;
-          ref: string;
-          rejection_reason: string | null;
-          rent_cents: number | null;
-          status: Database["public"]["Enums"]["property_status"];
-          title: string;
-          typology: string;
-          year_built: number | null;
-        }[];
-      };
-      admin_property_moderation_history: {
-        Args: { p_property_id: string };
-        Returns: {
-          action: string;
-          actor_name: string;
-          created_at: string;
-          id: number;
-          reason: string | null;
-          status_from: Database["public"]["Enums"]["property_status"];
-          status_to: Database["public"]["Enums"]["property_status"];
-        }[];
-      };
-      moderate_property: {
-        Args: { p_action: string; p_property_id: string; p_reason?: string | null };
-        Returns: Database["public"]["Enums"]["property_status"];
-      };
-      admin_plan_metrics: {
-        Args: never;
-        Returns: {
-          audience: Database["public"]["Enums"]["plan_audience"];
-          mrr_cents: number;
-          name: string;
-          plan_id: string;
-          price_month_cents: number;
-          price_year_cents: number;
-          slug: string;
-          subscribers: number;
-          visible: boolean;
-        }[];
-      };
-      admin_recent_invoices: {
-        Args: { p_limit?: number };
-        Returns: {
-          client_name: string;
-          id: string;
-          issued_at: string;
-          number: string;
-          plan_name: string;
-          status: string;
-          total_cents: number;
         }[];
       };
       admin_site_traffic_breakdown: {
@@ -2619,6 +2802,10 @@ export type Database = {
           status: string;
           trial_ends_at: string;
         }[];
+      };
+      admin_update_site_lead: {
+        Args: { p_assigned_to: string; p_lead_id: string; p_status: string };
+        Returns: undefined;
       };
       apply_plan_downgrade: { Args: { p_profile_id: string }; Returns: number };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
@@ -2764,6 +2951,15 @@ export type Database = {
         Returns: undefined;
       };
       is_admin: { Args: never; Returns: boolean };
+      is_analytics_total_row: {
+        Args: {
+          p_city: string;
+          p_device: string;
+          p_path: string;
+          p_source: string;
+        };
+        Returns: boolean;
+      };
       is_staff: { Args: never; Returns: boolean };
       log_document_access: {
         Args: {
@@ -2790,6 +2986,10 @@ export type Database = {
         Returns: undefined;
       };
       mark_step_up: { Args: { p_profile_id: string }; Returns: string };
+      moderate_property: {
+        Args: { p_action: string; p_property_id: string; p_reason?: string };
+        Returns: Database["public"]["Enums"]["property_status"];
+      };
       my_cloud_files: {
         Args: { p_folder_id?: string };
         Returns: {
@@ -2869,6 +3069,13 @@ export type Database = {
           stage: Database["public"]["Enums"]["lead_stage"];
         }[];
       };
+      my_property_views_daily: {
+        Args: { p_days?: number };
+        Returns: {
+          day: string;
+          views_count: number;
+        }[];
+      };
       my_visit_requests: {
         Args: never;
         Returns: {
@@ -2900,6 +3107,14 @@ export type Database = {
       plan_limit_exceeded: {
         Args: { p_key: string; p_profile_id: string };
         Returns: boolean;
+      };
+      plan_limit_overage: {
+        Args: { p_limits: Json; p_plan_id: string };
+        Returns: {
+          affected: number;
+          limit_key: string;
+          max_used: number;
+        }[];
       };
       plan_status: {
         Args: never;
@@ -2967,13 +3182,22 @@ export type Database = {
       };
       purge_cloud_recycle_bin: { Args: never; Returns: number };
       purge_document_access_log: { Args: never; Returns: number };
+      purge_property_view_events: { Args: never; Returns: number };
       purge_site_analytics: { Args: never; Returns: number };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
       };
       record_personal_data_access: {
-        Args: { p_action?: string; p_subject_id: string; p_subject_type: string };
+        Args: {
+          p_action?: string;
+          p_subject_id: string;
+          p_subject_type: string;
+        };
+        Returns: boolean;
+      };
+      record_property_view: {
+        Args: { p_property_id: string };
         Returns: boolean;
       };
       request_trial_extension: { Args: { p_reason: string }; Returns: string };
@@ -3037,11 +3261,20 @@ export type Database = {
         };
         Returns: string;
       };
+      seed_demo_site_analytics: { Args: { p_days?: number }; Returns: number };
+      set_app_setting: {
+        Args: { p_key: string; p_value: Json };
+        Returns: undefined;
+      };
       set_contract_status: {
         Args: {
           p_contract_id: string;
           p_status: Database["public"]["Enums"]["contract_status"];
         };
+        Returns: undefined;
+      };
+      set_feature_flag: {
+        Args: { p_key: string; p_value: Json };
         Returns: undefined;
       };
       set_lead_stage: {
