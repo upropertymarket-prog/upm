@@ -22,6 +22,8 @@ export default async function ConfirmNewPasswordPage() {
       switchHref="/entrar"
       switchLabel={ts("signIn")}
       legalLabel={ts("legal")}
+      privacyLabel={ts("privacy")}
+      cookiesLabel={ts("cookies")}
     >
       <NewPasswordForm action={setNewPassword} />
     </AuthShell>

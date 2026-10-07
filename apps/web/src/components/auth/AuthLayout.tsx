@@ -86,18 +86,22 @@ export type AuthShellProps = {
   /** `typedRoutes` do Next: uma rota conhecida, não uma string qualquer. */
   switchHref?: Route;
   switchLabel?: React.ReactNode;
-  /** Texto do link legal no rodapé — os Termos, que já existem em `/termos`. */
+  /** Texto do link para os Termos no rodapé. */
   legalLabel: React.ReactNode;
+  /** Política de Privacidade — opcional só porque nem todos os ecrãs a passam. */
+  privacyLabel?: React.ReactNode;
+  /** Política de Cookies — idem. */
+  cookiesLabel?: React.ReactNode;
   children: React.ReactNode;
 };
 
 /**
  * A página de autenticação completa: marca, cartão, troca e rodapé.
  *
- * O rodapé liga **só ao que existe**. A Política de Privacidade, a de Cookies e
- * a de Proteção de Dados são P11-07 e ainda não têm página — pôr links mortos
- * aqui era pior do que não os pôr. Quando essas páginas existirem, entram nesta
- * lista e em mais nenhum sítio.
+ * O rodapé liga **só ao que existe** — a regra mantém-se. A 6 out 2026
+ * entraram a Política de Privacidade e a de Cookies, porque passaram a ter
+ * página (`/privacidade`, `/cookies`). A de Proteção de Dados continua de fora:
+ * é P11-07 e ainda não existe, e um link morto é pior do que link nenhum.
  */
 export function AuthShell({
   width = "sm",
@@ -107,6 +111,8 @@ export function AuthShell({
   switchHref,
   switchLabel,
   legalLabel,
+  privacyLabel,
+  cookiesLabel,
   children,
 }: AuthShellProps) {
   return (
@@ -134,10 +140,28 @@ export function AuthShell({
           </p>
         ) : null}
 
-        <footer className="text-center text-sm text-muted">
+        {/* Separadores como elementos próprios, e não `gap-x` com `·` no texto,
+            para o leitor de ecrã anunciar três links e não uma frase só. */}
+        <footer className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm text-muted">
           <Link href="/termos" className="hover:underline">
             {legalLabel}
           </Link>
+          {privacyLabel ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <Link href="/privacidade" className="hover:underline">
+                {privacyLabel}
+              </Link>
+            </>
+          ) : null}
+          {cookiesLabel ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <Link href="/cookies" className="hover:underline">
+                {cookiesLabel}
+              </Link>
+            </>
+          ) : null}
         </footer>
       </div>
     </AuthPage>

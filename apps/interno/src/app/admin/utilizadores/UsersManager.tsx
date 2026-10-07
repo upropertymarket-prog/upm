@@ -28,7 +28,11 @@ export type UserDirectoryRow = {
   full_name: string;
   email: string;
   role: "buyer" | "owner" | "admin" | "support";
-  status: "pending" | "active" | "suspended";
+  // `deleted` entrou com P9-06: a conta eliminada não some de `profiles` —
+  // esvazia-se, para o histórico de subscrições e de aceitações não ficar
+  // órfão. Este tipo era escrito à mão com três estados e só divergiu quando a
+  // regeneração dos tipos trouxe o quarto.
+  status: "pending" | "active" | "suspended" | "deleted";
   plan_name: string | null;
   plan_slug: string | null;
   subscription_status: string | null;
@@ -65,8 +69,13 @@ export type UserPageInfo = {
 type RoleLabelKey = "adminRole" | "buyer" | "owner" | "support";
 const PAGE_SIZE = 25;
 
-function statusTone(status: UserDirectoryRow["status"]): "active" | "pending" | "rejected" {
-  return status === "active" ? "active" : status === "pending" ? "pending" : "rejected";
+function statusTone(status: UserDirectoryRow["status"]): StatusTone {
+  if (status === "active") return "active";
+  if (status === "pending") return "pending";
+  // Eliminada não é sancionada: o tom neutro distingue-a da suspensa, que é uma
+  // decisão nossa sobre uma conta viva.
+  if (status === "deleted") return "draft";
+  return "rejected";
 }
 
 const PLAN_TONE: Record<string, StatusTone> = {

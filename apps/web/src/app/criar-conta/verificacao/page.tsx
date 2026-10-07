@@ -36,6 +36,8 @@ export default async function VerificationPendingPage({
       switchHref="/entrar"
       switchLabel={ts("signIn")}
       legalLabel={ts("legal")}
+      privacyLabel={ts("privacy")}
+      cookiesLabel={ts("cookies")}
     >
       {pago === "1" ? (
         <p className="text-sm text-text">{t("paidBody")}</p>

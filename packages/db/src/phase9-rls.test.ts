@@ -276,6 +276,84 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
   });
 
   // -------------------------------------------------------------------------
+  // D58 / doc 13 — contrato de adesão
+  // -------------------------------------------------------------------------
+
+  it("subscription_agreements: leitura própria, escrita nenhuma pela sessão", async () => {
+    // Append-only de verdade: a sessão não insere, nem com os seus próprios ids.
+    const { error: insert } = await clients.buyer.from("subscription_agreements").insert({
+      subscription_id: crypto.randomUUID(),
+      profile_id: ids.buyer,
+      reference: "UPM-2026-999999",
+      plan_name: "Smarter",
+      price_cents: 14990,
+      interval: "year",
+    } as never);
+    expect(insert).not.toBeNull();
+
+    // E não lê os dos outros: a policy filtra por `profile_id = auth.uid()`.
+    const { data: alheios } = await clients.buyer
+      .from("subscription_agreements")
+      .select("id")
+      .eq("profile_id", ids.owner);
+    expect(alheios ?? []).toHaveLength(0);
+  });
+
+  it("record_subscription_agreement congela o preço e não se repete em vão", async () => {
+    const { data: plan } = await service
+      .from("plans")
+      .select("id, price_year_cents")
+      .eq("slug", "essential-owner")
+      .single();
+    const { id: planId, price_year_cents: precoContratado } = plan as {
+      id: string;
+      price_year_cents: number;
+    };
+
+    const { data: sub } = await service
+      .from("subscriptions")
+      .insert({
+        profile_id: ids.owner,
+        plan_id: planId,
+        status: "active",
+        interval: "year",
+        started_at: new Date().toISOString(),
+      } as never)
+      .select("id")
+      .single();
+    const subscriptionId = (sub as { id: string }).id;
+
+    const { data: first } = await service.rpc("record_subscription_agreement" as never, {
+      p_subscription_id: subscriptionId,
+    } as never);
+    expect(first).toBeTruthy();
+
+    // Repetir não cria um contrato novo: o Stripe reenvia eventos.
+    const { data: again } = await service.rpc("record_subscription_agreement" as never, {
+      p_subscription_id: subscriptionId,
+    } as never);
+    expect(again).toBe(first);
+
+    // O preço do plano muda no Admin — e o contrato NÃO muda com ele. É a
+    // razão de existir desta tabela.
+    await service
+      .from("plans")
+      .update({ price_year_cents: precoContratado + 2000 } as never)
+      .eq("id", planId);
+
+    const { data: agreement } = await service
+      .from("subscription_agreements")
+      .select("price_cents, plan_name")
+      .eq("id", first as string)
+      .single();
+    expect((agreement as { price_cents: number }).price_cents).toBe(precoContratado);
+
+    await service.from("plans").update({ price_year_cents: precoContratado } as never).eq("id", planId);
+    await service.from("subscription_agreements").delete().eq("subscription_id", subscriptionId);
+    await service.from("subscriptions").delete().eq("id", subscriptionId);
+  });
+
+  // -------------------------------------------------------------------------
   // P9-03 / P9-04 — compromisso e porta única do cancelamento
   // -------------------------------------------------------------------------
 

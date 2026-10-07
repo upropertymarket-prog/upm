@@ -9,8 +9,6 @@ import {
   NovaPalavraPasseEscuro,
   PedirRecuperacaoClaro,
   PedirRecuperacaoEscuro,
-  TermosClaro,
-  TermosEscuro,
   VerificacaoClaro,
   VerificacaoEscuro,
 } from "./Ecrans";
@@ -18,7 +16,7 @@ import {
 /**
  * Ecrãs de autenticação — Fase 3 (03 F2, F3) e Fase 9.
  *
- * As seis rotas de auth de `apps/web`, cada uma em claro e escuro, aos pares:
+ * As cinco rotas de auth de `apps/web`, cada uma em claro e escuro, aos pares:
  * o par lado a lado com 80 px entre si, e 80 px entre linhas. Viewport de
  * monitor 1440 × 900, sem `intrinsicSizing` — as páginas têm `min-h-screen`,
  * e é a essa altura que elas se desenham.
@@ -68,42 +66,29 @@ export default function AutenticacaoCanvas() {
       />
 
       <Storyboard
-        id="TermosClaro"
-        name="Termos e Condições · Claro (/termos)"
-        component={TermosClaro}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="TermosEscuro"
-        name="Termos e Condições · Escuro (/termos)"
-        component={TermosEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
-      />
-
-      <Storyboard
         id="PedirRecuperacaoClaro"
         name="Pedir recuperação · Claro (/recuperar-palavra-passe)"
         component={PedirRecuperacaoClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PedirRecuperacaoEscuro"
         name="Pedir recuperação · Escuro (/recuperar-palavra-passe)"
         component={PedirRecuperacaoEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="NovaPalavraPasseClaro"
         name="Nova palavra-passe · Claro (/recuperar-palavra-passe/confirmar)"
         component={NovaPalavraPasseClaro}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="NovaPalavraPasseEscuro"
         name="Nova palavra-passe · Escuro (/recuperar-palavra-passe/confirmar)"
         component={NovaPalavraPasseEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
     </Canvas>
   );

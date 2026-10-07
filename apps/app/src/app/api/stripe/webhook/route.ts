@@ -284,6 +284,24 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
   // uma vez. Chamar isto quando não há Cloud é inofensivo — a função verifica.
   if (status === "active" || status === "trialing") {
     await db.rpc("ensure_property_folders", { p_profile_id: profileId });
+
+    // D58 / doc 13 — o contrato de adesão escreve-se quando a subscrição fica
+    // ativa, não no ecrã de contratação: antes do pagamento há proposta, depois
+    // há contrato. A função é idempotente, o que importa porque o Stripe repete
+    // eventos; e congela preço, plano e limites, em vez de os ler de `plans`,
+    // que o Admin edita.
+    //
+    // `as never`: a função só entra em `database.types.ts` depois de
+    // `pnpm db:types` correr sobre esta migração (D52).
+    const { error: agreementError } = await db.rpc(
+      "record_subscription_agreement" as never,
+      { p_subscription_id: saved.id } as never,
+    );
+    // Não deita o webhook abaixo: a subscrição já está gravada e o Stripe não
+    // deve reenviar por causa disto. Fica o rasto para se poder recuperar.
+    if (agreementError) {
+      console.error("record_subscription_agreement", agreementError.message);
+    }
   }
 
   // 02 §9: o downgrade é efetivo no fim do período e os excedentes passam a

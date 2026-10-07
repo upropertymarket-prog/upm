@@ -25,6 +25,8 @@ export default async function LoginPage({
       switchHref="/criar-conta"
       switchLabel={ts("createAccount")}
       legalLabel={ts("legal")}
+      privacyLabel={ts("privacy")}
+      cookiesLabel={ts("cookies")}
     >
       <LoginForm next={next} action={signIn} />
     </AuthShell>

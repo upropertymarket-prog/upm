@@ -82,6 +82,8 @@ export default async function RegisterPage() {
       switchHref="/entrar"
       switchLabel={ts("signIn")}
       legalLabel={ts("legal")}
+      privacyLabel={ts("privacy")}
+      cookiesLabel={ts("cookies")}
     >
       <RegisterWizard
         action={registerAccount}

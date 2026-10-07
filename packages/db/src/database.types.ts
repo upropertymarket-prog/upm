@@ -33,6 +33,57 @@ export type Database = {
   };
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          anonymized: Json;
+          completed_at: string | null;
+          id: number;
+          person_identity_id: string | null;
+          profile_id: string | null;
+          reason: string | null;
+          requested_at: string;
+          retained: Json;
+          retention_until: string | null;
+        };
+        Insert: {
+          anonymized?: Json;
+          completed_at?: string | null;
+          id?: never;
+          person_identity_id?: string | null;
+          profile_id?: string | null;
+          reason?: string | null;
+          requested_at?: string;
+          retained?: Json;
+          retention_until?: string | null;
+        };
+        Update: {
+          anonymized?: Json;
+          completed_at?: string | null;
+          id?: never;
+          person_identity_id?: string | null;
+          profile_id?: string | null;
+          reason?: string | null;
+          requested_at?: string;
+          retained?: Json;
+          retention_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "account_deletions_person_identity_id_fkey";
+            columns: ["person_identity_id"];
+            isOneToOne: false;
+            referencedRelation: "person_identities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "account_deletions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       addons: {
         Row: {
           created_at: string;
@@ -858,6 +909,24 @@ export type Database = {
           },
         ];
       };
+      identity_secrets: {
+        Row: {
+          created_at: string;
+          key: string;
+          secret: string;
+        };
+        Insert: {
+          created_at?: string;
+          key: string;
+          secret: string;
+        };
+        Update: {
+          created_at?: string;
+          key?: string;
+          secret?: string;
+        };
+        Relationships: [];
+      };
       invoices: {
         Row: {
           created_at: string;
@@ -927,6 +996,65 @@ export type Database = {
             columns: ["subscription_id"];
             isOneToOne: false;
             referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      legal_documents: {
+        Row: {
+          body_md: string;
+          content_hash: string;
+          created_at: string;
+          created_by: string | null;
+          effective_from: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["legal_document_kind"];
+          locale: string;
+          published_at: string | null;
+          review_state: Database["public"]["Enums"]["legal_review_state"];
+          status: string;
+          title: string;
+          updated_at: string;
+          version: string;
+        };
+        Insert: {
+          body_md: string;
+          content_hash?: string;
+          created_at?: string;
+          created_by?: string | null;
+          effective_from?: string | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["legal_document_kind"];
+          locale: string;
+          published_at?: string | null;
+          review_state?: Database["public"]["Enums"]["legal_review_state"];
+          status?: string;
+          title: string;
+          updated_at?: string;
+          version: string;
+        };
+        Update: {
+          body_md?: string;
+          content_hash?: string;
+          created_at?: string;
+          created_by?: string | null;
+          effective_from?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["legal_document_kind"];
+          locale?: string;
+          published_at?: string | null;
+          review_state?: Database["public"]["Enums"]["legal_review_state"];
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          version?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "legal_documents_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -1083,6 +1211,48 @@ export type Database = {
           },
         ];
       };
+      offer_redemptions: {
+        Row: {
+          granted_at: string;
+          id: number;
+          metadata: Json;
+          offer_kind: string;
+          person_identity_id: string;
+          subscription_id: string | null;
+        };
+        Insert: {
+          granted_at?: string;
+          id?: never;
+          metadata?: Json;
+          offer_kind: string;
+          person_identity_id: string;
+          subscription_id?: string | null;
+        };
+        Update: {
+          granted_at?: string;
+          id?: never;
+          metadata?: Json;
+          offer_kind?: string;
+          person_identity_id?: string;
+          subscription_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "offer_redemptions_person_identity_id_fkey";
+            columns: ["person_identity_id"];
+            isOneToOne: false;
+            referencedRelation: "person_identities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "offer_redemptions_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       owner_leads: {
         Row: {
           contact_profile_id: string;
@@ -1154,6 +1324,45 @@ export type Database = {
           },
         ];
       };
+      person_identities: {
+        Row: {
+          created_at: string;
+          email_hash: string | null;
+          first_seen_at: string;
+          id: string;
+          last_account_deleted_at: string | null;
+          last_seen_at: string;
+          phone_hash: string | null;
+          retention_until: string | null;
+          tax_id_hash: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          email_hash?: string | null;
+          first_seen_at?: string;
+          id?: string;
+          last_account_deleted_at?: string | null;
+          last_seen_at?: string;
+          phone_hash?: string | null;
+          retention_until?: string | null;
+          tax_id_hash: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          email_hash?: string | null;
+          first_seen_at?: string;
+          id?: string;
+          last_account_deleted_at?: string | null;
+          last_seen_at?: string;
+          phone_hash?: string | null;
+          retention_until?: string | null;
+          tax_id_hash?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       personal_data_access_log: {
         Row: {
           action: string;
@@ -1193,6 +1402,7 @@ export type Database = {
         Row: {
           audience: Database["public"]["Enums"]["plan_audience"];
           created_at: string;
+          default_commitment_months: number | null;
           features: string[];
           id: string;
           limits: Json | null;
@@ -1210,6 +1420,7 @@ export type Database = {
         Insert: {
           audience: Database["public"]["Enums"]["plan_audience"];
           created_at?: string;
+          default_commitment_months?: number | null;
           features?: string[];
           id?: string;
           limits?: Json | null;
@@ -1227,6 +1438,7 @@ export type Database = {
         Update: {
           audience?: Database["public"]["Enums"]["plan_audience"];
           created_at?: string;
+          default_commitment_months?: number | null;
           features?: string[];
           id?: string;
           limits?: Json | null;
@@ -1251,12 +1463,15 @@ export type Database = {
           id: string;
           locale: string;
           notification_prefs: Json;
+          person_identity_id: string | null;
           phone: string | null;
           plan_id: string | null;
           preferences: Json;
           role: Database["public"]["Enums"]["user_role"];
           status: Database["public"]["Enums"]["profile_status"];
           stripe_customer_id: string | null;
+          tax_id: string | null;
+          tax_id_set_at: string | null;
           theme: string;
           updated_at: string;
           verification_grace_until: string;
@@ -1268,12 +1483,15 @@ export type Database = {
           id: string;
           locale?: string;
           notification_prefs?: Json;
+          person_identity_id?: string | null;
           phone?: string | null;
           plan_id?: string | null;
           preferences?: Json;
           role?: Database["public"]["Enums"]["user_role"];
           status?: Database["public"]["Enums"]["profile_status"];
           stripe_customer_id?: string | null;
+          tax_id?: string | null;
+          tax_id_set_at?: string | null;
           theme?: string;
           updated_at?: string;
           verification_grace_until?: string;
@@ -1285,17 +1503,27 @@ export type Database = {
           id?: string;
           locale?: string;
           notification_prefs?: Json;
+          person_identity_id?: string | null;
           phone?: string | null;
           plan_id?: string | null;
           preferences?: Json;
           role?: Database["public"]["Enums"]["user_role"];
           status?: Database["public"]["Enums"]["profile_status"];
           stripe_customer_id?: string | null;
+          tax_id?: string | null;
+          tax_id_set_at?: string | null;
           theme?: string;
           updated_at?: string;
           verification_grace_until?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "profiles_person_identity_id_fkey";
+            columns: ["person_identity_id"];
+            isOneToOne: false;
+            referencedRelation: "person_identities";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "profiles_plan_id_fkey";
             columns: ["plan_id"];
@@ -2156,43 +2384,268 @@ export type Database = {
           },
         ];
       };
+      subscription_agreements: {
+        Row: {
+          addons: Json;
+          celebrated_at: string;
+          commitment_ends_at: string | null;
+          created_at: string;
+          currency: string;
+          id: string;
+          interval: string;
+          minimum_commitment_months: number | null;
+          plan_features: string[];
+          plan_id: string | null;
+          plan_limits: Json | null;
+          plan_name: string;
+          price_cents: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          profile_id: string | null;
+          provider: Json;
+          reference: string;
+          subscription_id: string;
+          supersedes_id: string | null;
+          terms_accepted_at: string | null;
+          terms_accepted_ip: unknown;
+          terms_content_hash: string | null;
+          terms_document_id: string | null;
+          terms_version: string | null;
+        };
+        Insert: {
+          addons?: Json;
+          celebrated_at?: string;
+          commitment_ends_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          interval: string;
+          minimum_commitment_months?: number | null;
+          plan_features?: string[];
+          plan_id?: string | null;
+          plan_limits?: Json | null;
+          plan_name: string;
+          price_cents: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          profile_id?: string | null;
+          provider?: Json;
+          reference: string;
+          subscription_id: string;
+          supersedes_id?: string | null;
+          terms_accepted_at?: string | null;
+          terms_accepted_ip?: unknown;
+          terms_content_hash?: string | null;
+          terms_document_id?: string | null;
+          terms_version?: string | null;
+        };
+        Update: {
+          addons?: Json;
+          celebrated_at?: string;
+          commitment_ends_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          interval?: string;
+          minimum_commitment_months?: number | null;
+          plan_features?: string[];
+          plan_id?: string | null;
+          plan_limits?: Json | null;
+          plan_name?: string;
+          price_cents?: number;
+          price_month_cents?: number;
+          price_year_cents?: number;
+          profile_id?: string | null;
+          provider?: Json;
+          reference?: string;
+          subscription_id?: string;
+          supersedes_id?: string | null;
+          terms_accepted_at?: string | null;
+          terms_accepted_ip?: unknown;
+          terms_content_hash?: string | null;
+          terms_document_id?: string | null;
+          terms_version?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscription_agreements_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_agreements_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_agreements_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_agreements_supersedes_id_fkey";
+            columns: ["supersedes_id"];
+            isOneToOne: false;
+            referencedRelation: "subscription_agreements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_agreements_terms_document_id_fkey";
+            columns: ["terms_document_id"];
+            isOneToOne: false;
+            referencedRelation: "legal_documents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      subscription_events: {
+        Row: {
+          event: string;
+          id: number;
+          metadata: Json;
+          occurred_at: string;
+          person_identity_id: string | null;
+          plan_id_from: string | null;
+          plan_id_to: string | null;
+          profile_id: string | null;
+          reason: string | null;
+          status_from: string | null;
+          status_to: string | null;
+          subscription_id: string;
+        };
+        Insert: {
+          event: string;
+          id?: never;
+          metadata?: Json;
+          occurred_at?: string;
+          person_identity_id?: string | null;
+          plan_id_from?: string | null;
+          plan_id_to?: string | null;
+          profile_id?: string | null;
+          reason?: string | null;
+          status_from?: string | null;
+          status_to?: string | null;
+          subscription_id: string;
+        };
+        Update: {
+          event?: string;
+          id?: never;
+          metadata?: Json;
+          occurred_at?: string;
+          person_identity_id?: string | null;
+          plan_id_from?: string | null;
+          plan_id_to?: string | null;
+          profile_id?: string | null;
+          reason?: string | null;
+          status_from?: string | null;
+          status_to?: string | null;
+          subscription_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_person_identity_id_fkey";
+            columns: ["person_identity_id"];
+            isOneToOne: false;
+            referencedRelation: "person_identities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_events_plan_id_from_fkey";
+            columns: ["plan_id_from"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_events_plan_id_to_fkey";
+            columns: ["plan_id_to"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_events_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean;
+          cancel_reason: string | null;
+          cancel_requested_at: string | null;
+          canceled_at: string | null;
+          commitment_ends_at: string | null;
           created_at: string;
           current_period_end: string | null;
           id: string;
           interval: string;
-          plan_id: string;
+          minimum_commitment_months: number | null;
+          plan_id: string | null;
           profile_id: string;
+          started_at: string | null;
           status: string;
           stripe_subscription_id: string | null;
+          terms_document_id: string | null;
+          terms_version: string | null;
           trial_ends_at: string | null;
           updated_at: string;
         };
         Insert: {
           cancel_at_period_end?: boolean;
+          cancel_reason?: string | null;
+          cancel_requested_at?: string | null;
+          canceled_at?: string | null;
+          commitment_ends_at?: string | null;
           created_at?: string;
           current_period_end?: string | null;
           id?: string;
           interval?: string;
-          plan_id: string;
+          minimum_commitment_months?: number | null;
+          plan_id?: string | null;
           profile_id: string;
+          started_at?: string | null;
           status?: string;
           stripe_subscription_id?: string | null;
+          terms_document_id?: string | null;
+          terms_version?: string | null;
           trial_ends_at?: string | null;
           updated_at?: string;
         };
         Update: {
           cancel_at_period_end?: boolean;
+          cancel_reason?: string | null;
+          cancel_requested_at?: string | null;
+          canceled_at?: string | null;
+          commitment_ends_at?: string | null;
           created_at?: string;
           current_period_end?: string | null;
           id?: string;
           interval?: string;
-          plan_id?: string;
+          minimum_commitment_months?: number | null;
+          plan_id?: string | null;
           profile_id?: string;
+          started_at?: string | null;
           status?: string;
           stripe_subscription_id?: string | null;
+          terms_document_id?: string | null;
+          terms_version?: string | null;
           trial_ends_at?: string | null;
           updated_at?: string;
         };
@@ -2206,6 +2659,77 @@ export type Database = {
           },
           {
             foreignKeyName: "subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscriptions_terms_document_id_fkey";
+            columns: ["terms_document_id"];
+            isOneToOne: false;
+            referencedRelation: "legal_documents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      terms_acceptances: {
+        Row: {
+          accepted_at: string;
+          content_hash: string;
+          context: string;
+          document_id: string;
+          document_kind: Database["public"]["Enums"]["legal_document_kind"];
+          id: number;
+          ip: unknown;
+          person_identity_id: string | null;
+          profile_id: string | null;
+          user_agent: string | null;
+          version: string;
+        };
+        Insert: {
+          accepted_at?: string;
+          content_hash: string;
+          context: string;
+          document_id: string;
+          document_kind: Database["public"]["Enums"]["legal_document_kind"];
+          id?: never;
+          ip?: unknown;
+          person_identity_id?: string | null;
+          profile_id?: string | null;
+          user_agent?: string | null;
+          version: string;
+        };
+        Update: {
+          accepted_at?: string;
+          content_hash?: string;
+          context?: string;
+          document_id?: string;
+          document_kind?: Database["public"]["Enums"]["legal_document_kind"];
+          id?: never;
+          ip?: unknown;
+          person_identity_id?: string | null;
+          profile_id?: string | null;
+          user_agent?: string | null;
+          version?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "terms_acceptances_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "legal_documents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "terms_acceptances_person_identity_id_fkey";
+            columns: ["person_identity_id"];
+            isOneToOne: false;
+            referencedRelation: "person_identities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "terms_acceptances_profile_id_fkey";
             columns: ["profile_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -2480,6 +3004,16 @@ export type Database = {
     };
     Functions: {
       accept_visit_request: { Args: { p_id: string }; Returns: undefined };
+      account_blocked: { Args: { p_profile_id: string }; Returns: boolean };
+      account_history: {
+        Args: { p_profile_id?: string };
+        Returns: {
+          detail: Json;
+          event: string;
+          occurred_at: string;
+          source: string;
+        }[];
+      };
       admin_add_site_lead_note: {
         Args: { p_lead_id: string; p_note: string };
         Returns: undefined;
@@ -2828,6 +3362,10 @@ export type Database = {
           version: number;
         }[];
       };
+      can_cancel_subscription: {
+        Args: { p_subscription_id: string };
+        Returns: Json;
+      };
       cancel_visit_request: { Args: { p_id: string }; Returns: undefined };
       check_auth_rate_limit: {
         Args: { p_identifier: string; p_kind: string };
@@ -2875,6 +3413,10 @@ export type Database = {
         }[];
       };
       cloud_usage_bytes: { Args: { p_profile_id: string }; Returns: number };
+      commitment_months_for_plan: {
+        Args: { p_plan_id: string };
+        Returns: number;
+      };
       complete_due_visits: { Args: never; Returns: number };
       contract_history: {
         Args: { p_contract_id: string };
@@ -2918,10 +3460,28 @@ export type Database = {
         };
         Returns: string;
       };
+      current_legal_document: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["legal_document_kind"];
+          p_locale?: string;
+        };
+        Returns: {
+          body_md: string;
+          content_hash: string;
+          effective_from: string;
+          id: string;
+          kind: Database["public"]["Enums"]["legal_document_kind"];
+          locale: string;
+          review_state: Database["public"]["Enums"]["legal_review_state"];
+          title: string;
+          version: string;
+        }[];
+      };
       decide_trial_extension: {
         Args: { p_approve: boolean; p_id: string };
         Returns: string;
       };
+      delete_own_account: { Args: { p_reason?: string }; Returns: Json };
       draft_contract_template_version: {
         Args: { p_family_id: string };
         Returns: string;
@@ -2931,6 +3491,7 @@ export type Database = {
         Args: { p_profile_id: string };
         Returns: number;
       };
+      export_own_account_data: { Args: never; Returns: Json };
       file_access_log: {
         Args: { p_file_id: string };
         Returns: {
@@ -2945,6 +3506,10 @@ export type Database = {
       get_property_location: {
         Args: { p_property_id: string };
         Returns: unknown;
+      };
+      hash_identity: {
+        Args: { p_kind: string; p_value: string };
+        Returns: string;
       };
       invoice_saved_to_cloud: {
         Args: { p_file_id: string; p_invoice_id: string };
@@ -2961,6 +3526,7 @@ export type Database = {
         Returns: boolean;
       };
       is_staff: { Args: never; Returns: boolean };
+      is_valid_pt_nif: { Args: { p_value: string }; Returns: boolean };
       log_document_access: {
         Args: {
           p_action: Database["public"]["Enums"]["document_action"];
@@ -3093,6 +3659,10 @@ export type Database = {
           status: Database["public"]["Enums"]["visit_status"];
         }[];
       };
+      next_agreement_reference: { Args: never; Returns: string };
+      no_plan_limits: { Args: never; Returns: Json };
+      normalize_email: { Args: { p_value: string }; Returns: string };
+      normalize_phone: { Args: { p_value: string }; Returns: string };
       notify: {
         Args: {
           p_body?: string;
@@ -3123,15 +3693,19 @@ export type Database = {
           cancel_at_period_end: boolean;
           cloud_limit_bytes: number;
           cloud_used_bytes: number;
+          commitment_ends_at: string;
           current_period_end: string;
           has_cloud_addon: boolean;
           limits: Json;
+          minimum_commitment_months: number;
           plan_audience: Database["public"]["Enums"]["plan_audience"];
           plan_id: string;
           plan_name: string;
           plan_slug: string;
+          started_at: string;
           subscription_id: string;
           subscription_status: string;
+          terms_version: string;
           trial_ends_at: string;
           usage: Json;
         }[];
@@ -3199,6 +3773,33 @@ export type Database = {
       record_property_view: {
         Args: { p_property_id: string };
         Returns: boolean;
+      };
+      record_subscription_agreement: {
+        Args: { p_subscription_id: string };
+        Returns: string;
+      };
+      record_terms_acceptance: {
+        Args: {
+          p_context: string;
+          p_document_id: string;
+          p_ip?: unknown;
+          p_profile_id?: string;
+          p_user_agent?: string;
+        };
+        Returns: number;
+      };
+      register_account_identity: {
+        Args: {
+          p_email: string;
+          p_phone: string;
+          p_profile_id: string;
+          p_tax_id: string;
+        };
+        Returns: string;
+      };
+      request_subscription_cancellation: {
+        Args: { p_reason?: string; p_subscription_id: string };
+        Returns: Json;
       };
       request_trial_extension: { Args: { p_reason: string }; Returns: string };
       request_visit: {
@@ -3285,7 +3886,6 @@ export type Database = {
         };
         Returns: undefined;
       };
-      set_registration_plan: { Args: { p_plan_id: string }; Returns: undefined };
       share_contract: {
         Args: {
           p_access_code_hash?: string;
@@ -3326,6 +3926,10 @@ export type Database = {
           size: number;
         }[];
       };
+      signup_eligibility: {
+        Args: { p_email: string; p_phone: string; p_tax_id: string };
+        Returns: Json;
+      };
       site_conversions_daily: {
         Args: { p_from: string; p_to: string };
         Returns: {
@@ -3336,6 +3940,58 @@ export type Database = {
       };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
+      subscription_agreements_for_me: {
+        Args: never;
+        Returns: {
+          addons: Json;
+          celebrated_at: string;
+          commitment_ends_at: string | null;
+          created_at: string;
+          currency: string;
+          id: string;
+          interval: string;
+          minimum_commitment_months: number | null;
+          plan_features: string[];
+          plan_id: string | null;
+          plan_limits: Json | null;
+          plan_name: string;
+          price_cents: number;
+          price_month_cents: number;
+          price_year_cents: number;
+          profile_id: string | null;
+          provider: Json;
+          reference: string;
+          subscription_id: string;
+          supersedes_id: string | null;
+          terms_accepted_at: string | null;
+          terms_accepted_ip: unknown;
+          terms_content_hash: string | null;
+          terms_document_id: string | null;
+          terms_version: string | null;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "subscription_agreements";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      subscription_entitled: {
+        Args: { p_profile_id?: string };
+        Returns: boolean;
+      };
+      terms_acceptance_status: {
+        Args: { p_locale?: string };
+        Returns: {
+          accepted_at: string;
+          accepted_version: string;
+          content_hash: string;
+          document_id: string;
+          needs_acceptance: boolean;
+          review_state: Database["public"]["Enums"]["legal_review_state"];
+          version: string;
+        }[];
+      };
       trial_eligible: { Args: { p_profile_id?: string }; Returns: boolean };
       trial_status: {
         Args: never;
@@ -3386,8 +4042,10 @@ export type Database = {
       folder_kind: "user" | "property" | "property_documents";
       lead_outcome: "won" | "lost";
       lead_stage: "new" | "contacted" | "visit" | "closed";
+      legal_document_kind: "terms" | "privacy" | "cookies" | "data_protection";
+      legal_review_state: "draft_pending_legal_review" | "legally_reviewed";
       plan_audience: "owner" | "buyer" | "both";
-      profile_status: "pending" | "active" | "suspended";
+      profile_status: "pending" | "active" | "suspended" | "deleted";
       property_deal: "sale" | "rent";
       property_status:
         | "draft"
@@ -4050,8 +4708,10 @@ export const Constants = {
       folder_kind: ["user", "property", "property_documents"],
       lead_outcome: ["won", "lost"],
       lead_stage: ["new", "contacted", "visit", "closed"],
+      legal_document_kind: ["terms", "privacy", "cookies", "data_protection"],
+      legal_review_state: ["draft_pending_legal_review", "legally_reviewed"],
       plan_audience: ["owner", "buyer", "both"],
-      profile_status: ["pending", "active", "suspended"],
+      profile_status: ["pending", "active", "suspended", "deleted"],
       property_deal: ["sale", "rent"],
       property_status: [
         "draft",

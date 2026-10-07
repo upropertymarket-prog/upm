@@ -407,6 +407,17 @@ export function PlanScreen({
                 : status.subscriptionStatus}
             </StatusTag>
           ) : null}
+          {/* D58 — a saída para o contrato de adesão. Só aparece com subscrição:
+              sem ela não houve celebração, e um link para uma página que diria
+              "ainda não há contrato" era um beco. */}
+          {status.subscriptionStatus ? (
+            <a
+              href="/plano/contrato"
+              style={{ fontSize: "var(--fs-body)", color: "var(--accent)" }}
+            >
+              {t("agreement.link")}
+            </a>
+          ) : null}
         </div>
 
         <div style={{ display: "grid", gap: "var(--sp-5)", minWidth: 0 }}>

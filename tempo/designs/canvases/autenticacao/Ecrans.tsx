@@ -6,7 +6,6 @@ import { RegisterWizard } from "../../../../apps/web/src/app/criar-conta/Registe
 import { ResendVerificationForm } from "../../../../apps/web/src/app/criar-conta/verificacao/ResendVerificationForm";
 import { RequestForm } from "../../../../apps/web/src/app/recuperar-palavra-passe/RequestForm";
 import { NewPasswordForm } from "../../../../apps/web/src/app/recuperar-palavra-passe/confirmar/NewPasswordForm";
-import { LegalDocumentBody } from "../../../../apps/web/src/components/legal/LegalDocumentBody";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 
 /**
@@ -38,8 +37,12 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  *
  * **7 out 2026:** a storyboard "Escolher plano" desapareceu — a rota
  * `/criar-conta/plano` deixou de existir quando o plano passou a ser um passo do
- * próprio wizard (P9-05). No lugar dela entrou `/termos`, que é a página que a
- * caixa de aceitação abre.
+ * próprio wizard (P9-05).
+ *
+ * **6 out 2026:** `/termos` saiu daqui para `canvases/legal`. Entrou no lugar
+ * do plano por ser a página que a caixa de aceitação abre, mas não é um ecrã de
+ * autenticação — só partilhava o ficheiro. Os Termos continuam a ser aceites
+ * aqui, no `RegisterWizard`, através de `demoTerms`.
  */
 async function demoAction<State>(state: State) {
   return state;
@@ -88,35 +91,6 @@ const demoTerms = {
   pendingLegalReview: true,
 };
 
-/** Um excerto da minuta, só para a página `/termos` ter corpo real para medir. */
-const demoTermsBody = `> **MINUTA PARA REVISÃO JURÍDICA — NÃO É UM DOCUMENTO DEFINITIVO.**
-> Este texto foi redigido como estrutura de trabalho e **tem de ser revisto e
-> aprovado por advogado** antes de a plataforma entrar em produção.
-
-## 1. Quem somos e o que este documento é
-
-A plataforma **UProperty Market** é explorada por **[NOME LEGAL DA EMPRESA]**, com sede em
-**[MORADA]**, NIPC **[NIPC]**.
-
-## 5. Subscrição, preços e pagamento
-
-O acesso à plataforma **depende de subscrição paga**. Não existe plano gratuito.
-
-## 6. Duração, renovação e período mínimo
-
-**Período mínimo: 12 meses.** A subscrição tem um período mínimo de permanência de **um ano**,
-contado desde a data em que é celebrada.
-
-**O período mínimo não afeta o direito de livre resolução de 14 dias** previsto em §7.
-
-## 19. Lacunas assinaladas nesta minuta
-
-| # | Assunto | Onde |
-| - | ------- | ---- |
-| 2 | Contrapartida por cessação antecipada — não fixada | §8 |
-| 3 | Prazos de conservação de dados — não fixados | §12 e §16 |
-`;
-
 function Ecra({ theme, children }: { theme: "light" | "dark"; children: React.ReactNode }) {
   return (
     <div data-theme={theme}>
@@ -137,6 +111,8 @@ function Entrar({ theme }: { theme: "light" | "dark" }) {
         switchHref="/criar-conta"
         switchLabel="Criar conta"
         legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
       >
         <LoginForm action={demoAction} />
       </AuthShell>
@@ -153,6 +129,8 @@ function CriarConta({ theme }: { theme: "light" | "dark" }) {
         switchHref="/entrar"
         switchLabel="Entrar"
         legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
       >
         <RegisterWizard action={demoAction} plans={demoPlans} terms={demoTerms} />
       </AuthShell>
@@ -170,6 +148,8 @@ function Verificacao({ theme }: { theme: "light" | "dark" }) {
         switchHref="/entrar"
         switchLabel="Entrar"
         legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
       >
         <p className="text-sm text-text">
           A subscrição ficou ativa. Falta confirmar o e-mail para entrar na sua conta.
@@ -192,6 +172,8 @@ function PedirRecuperacao({ theme }: { theme: "light" | "dark" }) {
         switchHref="/entrar"
         switchLabel="Entrar"
         legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
       >
         <RequestForm action={demoAction} />
       </AuthShell>
@@ -208,40 +190,11 @@ function NovaPalavraPasse({ theme }: { theme: "light" | "dark" }) {
         switchHref="/entrar"
         switchLabel="Entrar"
         legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
       >
         <NewPasswordForm action={demoAction} />
       </AuthShell>
-    </Ecra>
-  );
-}
-
-/**
- * `/termos` — a página que a caixa de aceitação abre. Mesma composição da
- * página real; o corpo é um excerto, porque a minuta inteira não cabe numa
- * storyboard e o que se revê aqui é o enquadramento, não o texto legal.
- */
-function Termos({ theme }: { theme: "light" | "dark" }) {
-  return (
-    <Ecra theme={theme}>
-      <main className="mx-auto w-full max-w-3xl px-4 py-16">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-xl font-semibold text-text">
-            Termos e Condições de Utilização — UProperty Market
-          </h1>
-          <p className="text-sm text-muted">Versão 2026.10-draft1 · em vigor desde 07/10/2026</p>
-          <p
-            role="note"
-            className="rounded-xl border border-border px-4 py-3 text-sm"
-            style={{ background: "var(--warn-soft, var(--surface-2))" }}
-          >
-            MINUTA PARA REVISÃO JURÍDICA. Este texto não foi revisto por advogado e não substitui
-            aconselhamento jurídico. Contém lacunas assinaladas no próprio documento.
-          </p>
-        </header>
-        <article className="mt-8 text-sm text-text">
-          <LegalDocumentBody markdown={demoTermsBody} />
-        </article>
-      </main>
     </Ecra>
   );
 }
@@ -256,5 +209,3 @@ export const PedirRecuperacaoClaro = () => <PedirRecuperacao theme="light" />;
 export const PedirRecuperacaoEscuro = () => <PedirRecuperacao theme="dark" />;
 export const NovaPalavraPasseClaro = () => <NovaPalavraPasse theme="light" />;
 export const NovaPalavraPasseEscuro = () => <NovaPalavraPasse theme="dark" />;
-export const TermosClaro = () => <Termos theme="light" />;
-export const TermosEscuro = () => <Termos theme="dark" />;

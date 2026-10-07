@@ -20,7 +20,8 @@
     "./legal": "./src/legal.ts",
     "./pending-types": "./src/pending-types.ts",
     "./subscription": "./src/subscription.ts",
-    "./stripe": "./src/stripe.ts"
+    "./stripe": "./src/stripe.ts",
+    "./agreement": "./src/agreement.ts"
   },
   "scripts": {
     "lint": "eslint src",

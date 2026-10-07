@@ -22,6 +22,8 @@ export default async function RequestPasswordResetPage() {
       switchHref="/entrar"
       switchLabel={ts("signIn")}
       legalLabel={ts("legal")}
+      privacyLabel={ts("privacy")}
+      cookiesLabel={ts("cookies")}
     >
       <RequestForm action={requestPasswordReset} />
     </AuthShell>

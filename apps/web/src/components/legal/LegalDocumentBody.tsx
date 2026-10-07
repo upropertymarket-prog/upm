@@ -6,30 +6,55 @@
  * versão é o hash desse texto, não de HTML gerado.
  *
  * Este renderizador cobre o subconjunto que o documento usa: títulos `##`,
- * citação `>`, listas numeradas e por pontos, tabelas e `**negrito**`. Não é um
+ * citação `>`, listas numeradas e por pontos, tabelas, `**negrito**` e
+ * `` `código` ``. Não é um
  * Markdown completo e não quer ser: nenhuma biblioteca de Markdown entra no
  * bundle por causa de um documento, e `dangerouslySetInnerHTML` está proibido
  * fora dos três sítios de 08 §7.2 — este não é um deles. Todo o texto passa
  * pelo escape do React.
  */
 
-/** `**negrito**` é o único inline que o documento usa. */
+/**
+ * Os dois inlines que os documentos usam: `**negrito**` e `` `código` ``.
+ *
+ * O código entrou a 7 out 2026, com as minutas v2: a Política de Cookies nomeia
+ * cookies (`upm-locale`) e rotas (`/privacidade`) entre crases, e sem isto as
+ * crases apareciam no ecrã. A alternativa — tirar as crases do texto — era pior:
+ * o corpo é Markdown porque é assim que um advogado o devolve revisto.
+ */
 function inline(text: string, keyPrefix: string): React.ReactNode[] {
-  return text
-    .split(/(\*\*[^*]+\*\*)/g)
-    .map((part, index) =>
-      part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={`${keyPrefix}-${index}`}>{part.slice(2, -2)}</strong>
-      ) : (
-        <span key={`${keyPrefix}-${index}`}>{part}</span>
-      ),
-    );
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, index) => {
+    const key = `${keyPrefix}-${index}`;
+
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={key}>{part.slice(2, -2)}</strong>;
+    }
+
+    if (part.length > 2 && part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code
+          key={key}
+          style={{
+            fontFamily: "var(--font-mono, ui-monospace, monospace)",
+            fontSize: "0.9em",
+            background: "var(--surface-2)",
+            borderRadius: "var(--radius-sm, 4px)",
+            padding: "0.1em 0.35em",
+          }}
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+
+    return <span key={key}>{part}</span>;
+  });
 }
 
 type Block =
   | { kind: "heading"; level: 2 | 3; text: string }
   | { kind: "paragraph"; text: string }
-  | { kind: "quote"; lines: string[] }
+  | { kind: "quote"; paragraphs: string[] }
   | { kind: "list"; ordered: boolean; items: string[] }
   | { kind: "table"; rows: string[][] }
   | { kind: "rule" };
@@ -40,6 +65,34 @@ function tableCells(line: string): string[] {
     .replace(/\|$/, "")
     .split("|")
     .map((cell) => cell.trim());
+}
+
+/**
+ * Junta as linhas de uma citação em parágrafos, como o corpo já fazia com
+ * `flushParagraph`. Uma linha vazia separa parágrafos.
+ *
+ * Sem isto cada linha era avaliada sozinha, e um `**negrito**` partido por uma
+ * quebra de linha ficava com os asteriscos à vista — precisamente o caso da
+ * abertura das quatro minutas ("**tem de ser revisto e / aprovado por
+ * advogado**"). O corpo não sofria do mesmo porque já juntava as linhas.
+ */
+function quoteParagraphs(lines: string[]): string[] {
+  const paragraphs: string[] = [];
+  let current: string[] = [];
+
+  for (const line of lines) {
+    if (line.trim() === "") {
+      if (current.length > 0) {
+        paragraphs.push(current.join(" "));
+        current = [];
+      }
+      continue;
+    }
+    current.push(line.trim());
+  }
+  if (current.length > 0) paragraphs.push(current.join(" "));
+
+  return paragraphs;
 }
 
 /** Separador de tabela do Markdown: `| --- | --- |`. */
@@ -93,7 +146,7 @@ function parse(markdown: string): Block[] {
         i++;
       }
       i--;
-      blocks.push({ kind: "quote", lines: quoted });
+      blocks.push({ kind: "quote", paragraphs: quoteParagraphs(quoted) });
       continue;
     }
 
@@ -180,9 +233,9 @@ export function LegalDocumentBody({ markdown }: { markdown: string }) {
                   gap: "var(--sp-2)",
                 }}
               >
-                {block.lines.map((line, lineIndex) => (
-                  <p key={`${key}-${lineIndex}`} style={{ margin: 0 }}>
-                    {inline(line, `${key}-${lineIndex}`)}
+                {block.paragraphs.map((paragraph, pIndex) => (
+                  <p key={`${key}-${pIndex}`} style={{ margin: 0 }}>
+                    {inline(paragraph, `${key}-${pIndex}`)}
                   </p>
                 ))}
               </blockquote>
@@ -194,12 +247,26 @@ export function LegalDocumentBody({ markdown }: { markdown: string }) {
                 {inline(item, `${key}-${itemIndex}`)}
               </li>
             ));
+            // `listStyle` explícito: o preflight do Tailwind põe `list-style:
+            // none` em `ol`/`ul`, e sem isto as alíneas ficavam sem número —
+            // num documento legal que remete para "§9 ponto 2", perder os
+            // números é perder a remissão. Apanhado no canvas a 7 out 2026.
             return block.ordered ? (
-              <ol key={key} style={{ margin: 0, paddingInlineStart: "var(--sp-6)" }}>
+              <ol
+                key={key}
+                style={{
+                  margin: 0,
+                  paddingInlineStart: "var(--sp-6)",
+                  listStyle: "decimal outside",
+                }}
+              >
                 {items}
               </ol>
             ) : (
-              <ul key={key} style={{ margin: 0, paddingInlineStart: "var(--sp-6)" }}>
+              <ul
+                key={key}
+                style={{ margin: 0, paddingInlineStart: "var(--sp-6)", listStyle: "disc outside" }}
+              >
                 {items}
               </ul>
             );
