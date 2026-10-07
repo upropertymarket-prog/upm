@@ -4,6 +4,10 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { createAnonClient } from "@upm/db/server";
 
+import type { LeadFormState } from "./leadFormState";
+
+export type { LeadFormState };
+
 /**
  * Submissão de formulários públicos (P2-02 · paga D49)
  * =========================================================================
@@ -43,13 +47,6 @@ const contactSchema = baseSchema.extend({
   reason: z.enum(["vender", "comprar", "planos", "suporte"]).optional(),
   message: z.string().trim().max(5000).optional(),
 });
-
-export type LeadFormState = {
-  ok?: boolean;
-  alreadyConfirmed?: boolean;
-  error?: string;
-  fieldErrors?: Record<string, string>;
-};
 
 async function clientIp(): Promise<string | null> {
   const list = await headers();

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button, Field, Input, Select } from "@upm/ui";
 
-import { submitPreRegistration, type LeadFormState } from "./actions";
+import type { LeadFormState } from "./leadFormState";
 
 /**
  * Formulário de pré-inscrição (P2-02 · 04 §2.1)
@@ -23,11 +23,15 @@ import { submitPreRegistration, type LeadFormState } from "./actions";
  * leitores de ecrã por `aria-hidden`, e com `tabIndex={-1}` para o teclado
  * não lá cair. Um humano nunca o preenche.
  */
-export function PreRegistrationForm() {
-  const [state, action, pending] = useActionState<LeadFormState, FormData>(
-    submitPreRegistration,
-    {},
-  );
+export type PreRegistrationFormProps = {
+  /** A Server Action, injetada. Importá-la aqui arrastava `next/headers`
+   *  para dentro do componente e tornava-o irrenderizável no canvas — foi o
+   *  `canvas_validate` que o apanhou (server_component_import). */
+  onSubmit: (previous: LeadFormState, formData: FormData) => Promise<LeadFormState>;
+};
+
+export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
+  const [state, action, pending] = useActionState<LeadFormState, FormData>(onSubmit, {});
 
   if (state.ok) {
     return (
