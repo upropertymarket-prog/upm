@@ -12,6 +12,10 @@ export type AdminDashboardPayload = {
     featured_properties: number;
     pending_moderation: number;
     new_leads: number;
+    /** Tickets por fechar. Entrou com P10-02 e fecha D48 — até existir
+     *  `tickets`, 07 §21.2 mandou omitir o KPI, porque um zero seria
+     *  indistinguível de "nenhum bug aberto". */
+    open_bugs: number;
   };
   daily: Array<{ date: string; registrations: number; properties_submitted: number }>;
   activity: Array<{ action: string; entity: string; created_at: string }>;
@@ -57,6 +61,7 @@ function parseDashboard(value: Json | null | undefined): AdminDashboardPayload |
       featured_properties: numberValue("featured_properties"),
       pending_moderation: numberValue("pending_moderation"),
       new_leads: numberValue("new_leads"),
+      open_bugs: numberValue("open_bugs"),
     },
     daily,
     activity,

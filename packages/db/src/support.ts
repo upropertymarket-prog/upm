@@ -305,3 +305,165 @@ export async function openBugsCount(client: AnySupabaseClient): Promise<number |
   if (error || typeof data !== "number") return null;
   return data;
 }
+
+// ---------------------------------------------------------------------------
+// Leituras (P10-02)
+// ---------------------------------------------------------------------------
+
+export type SupportTicketRow =
+  Database["public"]["Functions"]["support_list_tickets"]["Returns"][number];
+export type SupportTicketDetail =
+  Database["public"]["Functions"]["support_ticket_detail"]["Returns"][number];
+export type TicketHistoryRow = Database["public"]["Functions"]["ticket_history"]["Returns"][number];
+export type MyReportRow = Database["public"]["Functions"]["my_reports"]["Returns"][number];
+
+export type TicketCounts = Record<TicketTab, number>;
+
+const EMPTY_COUNTS: TicketCounts = {
+  pending: 0,
+  inProgress: 0,
+  awaitingConfirmation: 0,
+  closed: 0,
+};
+
+export async function listTickets(
+  client: AnySupabaseClient,
+  options: { tab?: TicketTab; search?: string; limit?: number } = {},
+): Promise<SupportTicketRow[]> {
+  const { data } = await client.rpc("support_list_tickets", {
+    p_tab: options.tab ?? "pending",
+    p_search: options.search || undefined,
+    p_limit: options.limit ?? 50,
+  });
+  return data ?? [];
+}
+
+/**
+ * Os contadores das tabs. Falha devolve zeros e não `null`: o ecrã mostra-se
+ * na mesma, e um badge vazio é melhor do que um ecrã que não abre.
+ */
+export async function ticketCounts(client: AnySupabaseClient): Promise<TicketCounts> {
+  const { data, error } = await client.rpc("support_ticket_counts");
+  if (error || !data || typeof data !== "object" || Array.isArray(data)) return EMPTY_COUNTS;
+  const raw = data as Record<string, unknown>;
+  const read = (key: TicketTab) => (typeof raw[key] === "number" ? (raw[key] as number) : 0);
+  return {
+    pending: read("pending"),
+    inProgress: read("inProgress"),
+    awaitingConfirmation: read("awaitingConfirmation"),
+    closed: read("closed"),
+  };
+}
+
+export async function ticketDetail(
+  client: AnySupabaseClient,
+  ticketId: string,
+): Promise<SupportTicketDetail | null> {
+  const { data } = await client.rpc("support_ticket_detail", { p_ticket_id: ticketId });
+  return data?.[0] ?? null;
+}
+
+export async function ticketHistory(
+  client: AnySupabaseClient,
+  ticketId: string,
+): Promise<TicketHistoryRow[]> {
+  const { data } = await client.rpc("ticket_history", { p_ticket_id: ticketId });
+  return data ?? [];
+}
+
+export async function myReports(client: AnySupabaseClient): Promise<MyReportRow[]> {
+  const { data } = await client.rpc("my_reports");
+  return data ?? [];
+}
+
+/**
+ * "Copiar p/ agente" (04 §2.6) — o ticket em Markdown, pronto a colar num
+ * agente de código.
+ *
+ * O formato não é decorativo: é o que 06 §Tempo Labs prevê como ponte entre o
+ * suporte e a Software Factory — "ligue os tickets do suporte (Copiar p/
+ * agente / export) como fonte de issues". Por isso termina num **pedido
+ * explícito de correção** e não num despejo de dados: um agente que recebe
+ * factos sem instrução responde com um resumo dos factos.
+ *
+ * O que **não** vai: o nome de quem reportou e o `session_id`. O agente que
+ * recebe isto pode ser de terceiros, e nada aqui precisa de identificar a
+ * pessoa para o bug ser corrigido.
+ */
+export function ticketToMarkdown(
+  ticket: SupportTicketDetail,
+  history: TicketHistoryRow[] = [],
+): string {
+  const lines: string[] = [
+    `# Bug ${ticket.ref} — ${ticket.title}`,
+    "",
+    `**Gravidade:** ${ticket.severity} · **Estado:** ${ticket.status} · **Origem:** ${ticket.origin}`,
+    `**Ocorrências:** ${ticket.occurrences} · **Pessoas afetadas:** ${ticket.affected_users}`,
+    `**Primeira vez:** ${ticket.first_seen_at} · **Última:** ${ticket.last_seen_at}`,
+    "",
+    "## Relato",
+    "",
+    ticket.description || "_(sem descrição)_",
+    "",
+    "## Contexto técnico",
+    "",
+  ];
+
+  const facts: [string, string | null][] = [
+    ["Rota", ticket.route],
+    ["Build", ticket.build_sha],
+    ["Navegador", ticket.browser],
+    ["Sistema", ticket.os],
+    ["Viewport", ticket.viewport],
+    ["Rede", ticket.network],
+  ];
+  for (const [label, value] of facts) {
+    if (value) lines.push(`- **${label}:** ${value}`);
+  }
+
+  if (ticket.technical_purged_at) {
+    lines.push(
+      "",
+      `_As últimas ações e os erros de consola foram apagados em ${ticket.technical_purged_at} ` +
+        "pela retenção de 90 dias — não foram perdidos por falha de captura._",
+    );
+  }
+
+  const errors = Array.isArray(ticket.console_errors) ? ticket.console_errors : [];
+  if (errors.length > 0) {
+    lines.push("", "## Erros de consola", "", "```", ...errors.map(String), "```");
+  }
+
+  const trail = Array.isArray(ticket.breadcrumbs) ? ticket.breadcrumbs : [];
+  if (trail.length > 0) {
+    lines.push("", "## Últimas ações", "");
+    for (const step of trail) {
+      const entry = step as { at?: string; kind?: string; label?: string };
+      lines.push(`- \`${entry.at ?? "?"}\` ${entry.kind ?? "?"} — ${entry.label ?? "?"}`);
+    }
+  }
+
+  if (history.length > 0) {
+    lines.push("", "## Histórico", "");
+    for (const event of history) {
+      const from = event.status_from ? `${event.status_from} → ` : "";
+      lines.push(
+        `- \`${event.occurred_at}\` ${from}${event.status_to}${event.note ? ` — ${event.note}` : ""}`,
+      );
+    }
+  }
+
+  lines.push(
+    "",
+    "## Pedido",
+    "",
+    "Corrige este problema no repositório. Antes de alterar código: reproduz o",
+    "erro pela rota e pelas últimas ações acima, e confirma a causa — não",
+    "assumas a partir da descrição, que é o que o utilizador viu e não",
+    "necessariamente o que aconteceu. No fim, escreve numa frase o que foi",
+    "corrigido, em linguagem para quem reportou: esse texto vai para o campo",
+    '"O que foi corrigido" do ticket e é o que a pessoa lê.',
+  );
+
+  return lines.join("\n");
+}

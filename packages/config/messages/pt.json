@@ -731,7 +731,9 @@
         "lead": "Lead",
         "plan": "Plano",
         "settings": "Definições"
-      }
+      },
+      "openBugs": "Bugs abertos",
+      "openBugsHint": "Tickets por fechar no Suporte"
     },
     "traffic": {
       "title": "Tráfego do site",
@@ -906,6 +908,71 @@
       "tooShort": "Descreva o problema com um pouco mais de detalhe.",
       "fileTooLarge": "A imagem não pode passar de 5 MB.",
       "fileWrongType": "Só aceitamos PNG, JPG ou WebP."
+    },
+    "tickets": {
+      "tabsLabel": "Estado dos tickets",
+      "tabs": {
+        "pending": "Por tratar",
+        "inProgress": "Em curso",
+        "awaitingConfirmation": "Por confirmar",
+        "closed": "Fechados"
+      },
+      "status": {
+        "new": "Por tratar",
+        "triage": "Em análise",
+        "in_progress": "Em curso",
+        "awaiting_confirmation": "Por confirmar",
+        "closed": "Fechado"
+      },
+      "severity": {
+        "critical": "Crítica",
+        "high": "Alta",
+        "medium": "Média",
+        "low": "Baixa"
+      },
+      "origin": {
+        "auto": "Automático",
+        "report": "Relato",
+        "both": "Ambos"
+      },
+      "searchLabel": "Procurar ticket",
+      "searchPlaceholder": "Referência ou título…",
+      "emptyTitle": "Nada nesta tab",
+      "emptyBody": "Quando chegar um relato neste estado, aparece aqui.",
+      "pickTitle": "Escolha um ticket",
+      "pickBody": "Selecione um ticket da lista para ver o detalhe e os factos técnicos.",
+      "occurrences": "{count} ocorrências",
+      "affected": "{count} pessoas afetadas",
+      "reportedBy": "Reportado por {name}",
+      "noDescription": "Sem descrição.",
+      "technicalTitle": "Factos técnicos",
+      "purged": "As últimas ações e os erros de consola foram apagados pela retenção de 90 dias — não foram perdidos por falha de captura.",
+      "trail": "Últimas ações ({count})",
+      "historyTitle": "Histórico",
+      "copyForAgent": "Copiar p/ agente",
+      "copied": "Ticket copiado em Markdown.",
+      "copyFailed": "Não foi possível copiar.",
+      "statusLabel": "Estado",
+      "fixNoteLabel": "O que foi corrigido",
+      "fixNoteHint": "Este texto é lido por quem reportou. Escreva em linguagem simples. Obrigatório para fechar.",
+      "saveAndNotify": "Guardar e notificar",
+      "saving": "A guardar…",
+      "saved": "Guardado. Quem reportou foi notificado."
+    },
+    "myReports": {
+      "title": "Os meus reports",
+      "subtitle": "Os problemas que reportou e em que ponto estão.",
+      "emptyTitle": "Ainda não reportou nada",
+      "emptyBody": "Se encontrar um problema, use o botão Reportar problema no fundo do menu.",
+      "progressLabel": "Progresso do relato",
+      "fixNoteTitle": "O que foi corrigido",
+      "steps": {
+        "received": "Recebido",
+        "analysing": "Em análise",
+        "fixing": "A corrigir",
+        "testing": "Em teste",
+        "resolved": "Resolvido"
+      }
     }
   }
 }

@@ -3786,6 +3786,19 @@ export type Database = {
           views_count: number;
         }[];
       };
+      my_reports: {
+        Args: never;
+        Returns: {
+          created_at: string;
+          fix_note: string;
+          id: string;
+          last_seen_at: string;
+          ref: string;
+          severity: Database["public"]["Enums"]["ticket_severity"];
+          status: Database["public"]["Enums"]["ticket_status"];
+          title: string;
+        }[];
+      };
       my_visit_requests: {
         Args: never;
         Returns: {
@@ -4162,6 +4175,53 @@ export type Database = {
         Args: { p_affected_users?: number; p_route: string };
         Returns: Database["public"]["Enums"]["ticket_severity"];
       };
+      support_list_tickets: {
+        Args: { p_limit?: number; p_search?: string; p_tab?: string };
+        Returns: {
+          affected_users: number;
+          id: string;
+          last_seen_at: string;
+          occurrences: number;
+          origin: Database["public"]["Enums"]["ticket_origin"];
+          ref: string;
+          reporter_name: string;
+          route: string;
+          severity: Database["public"]["Enums"]["ticket_severity"];
+          status: Database["public"]["Enums"]["ticket_status"];
+          title: string;
+        }[];
+      };
+      support_ticket_counts: { Args: never; Returns: Json };
+      support_ticket_detail: {
+        Args: { p_ticket_id: string };
+        Returns: {
+          affected_users: number;
+          breadcrumbs: Json;
+          browser: string;
+          build_sha: string;
+          console_errors: Json;
+          description: string;
+          first_seen_at: string;
+          fix_note: string;
+          id: string;
+          last_seen_at: string;
+          network: string;
+          occurrences: number;
+          origin: Database["public"]["Enums"]["ticket_origin"];
+          os: string;
+          ref: string;
+          reporter_name: string;
+          reporter_role: string;
+          route: string;
+          screenshot_path: string;
+          session_id: string;
+          severity: Database["public"]["Enums"]["ticket_severity"];
+          status: Database["public"]["Enums"]["ticket_status"];
+          technical_purged_at: string;
+          title: string;
+          viewport: string;
+        }[];
+      };
       terms_acceptance_status: {
         Args: { p_locale?: string };
         Returns: {
@@ -4172,6 +4232,16 @@ export type Database = {
           needs_acceptance: boolean;
           review_state: Database["public"]["Enums"]["legal_review_state"];
           version: string;
+        }[];
+      };
+      ticket_history: {
+        Args: { p_ticket_id: string };
+        Returns: {
+          actor_name: string;
+          note: string;
+          occurred_at: string;
+          status_from: Database["public"]["Enums"]["ticket_status"];
+          status_to: Database["public"]["Enums"]["ticket_status"];
         }[];
       };
       trial_eligible: { Args: { p_profile_id?: string }; Returns: boolean };

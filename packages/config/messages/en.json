@@ -731,7 +731,9 @@
         "lead": "Lead",
         "plan": "Plan",
         "settings": "Settings"
-      }
+      },
+      "openBugs": "Open bugs",
+      "openBugsHint": "Tickets not yet closed in Support"
     },
     "traffic": {
       "title": "Site traffic",
@@ -906,6 +908,71 @@
       "tooShort": "Please describe the problem in a little more detail.",
       "fileTooLarge": "The image cannot be larger than 5 MB.",
       "fileWrongType": "Only PNG, JPG or WebP are accepted."
+    },
+    "tickets": {
+      "tabsLabel": "Ticket status",
+      "tabs": {
+        "pending": "To triage",
+        "inProgress": "In progress",
+        "awaitingConfirmation": "Awaiting confirmation",
+        "closed": "Closed"
+      },
+      "status": {
+        "new": "To triage",
+        "triage": "Under analysis",
+        "in_progress": "In progress",
+        "awaiting_confirmation": "Awaiting confirmation",
+        "closed": "Closed"
+      },
+      "severity": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "origin": {
+        "auto": "Automatic",
+        "report": "Reported",
+        "both": "Both"
+      },
+      "searchLabel": "Search ticket",
+      "searchPlaceholder": "Reference or title…",
+      "emptyTitle": "Nothing in this tab",
+      "emptyBody": "Reports in this state will show up here.",
+      "pickTitle": "Pick a ticket",
+      "pickBody": "Select a ticket from the list to see its detail and technical facts.",
+      "occurrences": "{count} occurrences",
+      "affected": "{count} people affected",
+      "reportedBy": "Reported by {name}",
+      "noDescription": "No description.",
+      "technicalTitle": "Technical facts",
+      "purged": "The action trail and console errors were cleared by the 90-day retention — they were not lost to a failed capture.",
+      "trail": "Recent actions ({count})",
+      "historyTitle": "History",
+      "copyForAgent": "Copy for agent",
+      "copied": "Ticket copied as Markdown.",
+      "copyFailed": "Could not copy.",
+      "statusLabel": "Status",
+      "fixNoteLabel": "What was fixed",
+      "fixNoteHint": "This text is read by the person who reported it. Use plain language. Required to close.",
+      "saveAndNotify": "Save and notify",
+      "saving": "Saving…",
+      "saved": "Saved. The reporter has been notified."
+    },
+    "myReports": {
+      "title": "My reports",
+      "subtitle": "The problems you reported and where they stand.",
+      "emptyTitle": "You have not reported anything yet",
+      "emptyBody": "If you run into a problem, use the Report a problem button at the bottom of the menu.",
+      "progressLabel": "Report progress",
+      "fixNoteTitle": "What was fixed",
+      "steps": {
+        "received": "Received",
+        "analysing": "Under analysis",
+        "fixing": "Being fixed",
+        "testing": "In testing",
+        "resolved": "Resolved"
+      }
     }
   }
 }

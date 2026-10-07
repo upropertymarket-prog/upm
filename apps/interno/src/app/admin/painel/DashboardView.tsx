@@ -220,14 +220,16 @@ export function DashboardView({
               value={money.format(mrrCents / 100)}
               hint={t("monthlyRecurringRevenue")}
             />
+            {/* 04 §2.5 dá ao Painel quatro KPIs, e o quarto é "bugs abertos".
+                Esteve ocupado por "Precisa de atenção" desde a Fase 8 porque
+                `tickets` não existia (D48, 07 §21.2). Os dois números que esse
+                KPI somava não se perderam: continuam no cartão "Trabalho
+                pendente", aqui ao lado, e nos contadores da sidebar. */}
             <Metric
               icon={<ClipboardList size={18} />}
-              label={t("attentionNeeded")}
-              value={(summary.pending_moderation + summary.new_leads).toLocaleString()}
-              hint={t("attentionCounts", {
-                properties: summary.pending_moderation,
-                leads: summary.new_leads,
-              })}
+              label={t("openBugs")}
+              value={summary.open_bugs.toLocaleString()}
+              hint={t("openBugsHint")}
             />
           </section>
           <Card padded>
@@ -269,10 +271,16 @@ export function DashboardView({
                     {summary.pending_moderation}
                   </StatusTag>
                 </div>
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
                   <span>{t("newSiteLeads")}</span>
                   <StatusTag tone={summary.new_leads ? "primary" : "active"}>
                     {summary.new_leads}
+                  </StatusTag>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span>{t("openBugs")}</span>
+                  <StatusTag tone={summary.open_bugs ? "ticketNew" : "active"}>
+                    {summary.open_bugs}
                   </StatusTag>
                 </div>
               </section>

@@ -500,3 +500,181 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 1 — tickets: matriz RLS e regras", 
     expect(purged?.technical_purged_at).not.toBeNull();
   });
 });
+
+/**
+ * P10-02 — as leituras por papel e a notificação ao reporter.
+ *
+ * Separado do bloco acima por ser outra tarefa, e com fixtures próprios: o
+ * `FP` daquele bloco é limpo no seu `afterAll`.
+ */
+describe.skipIf(!hasEnv)("Fase 10 · Parte 1 — leituras e notificação (P10-02)", () => {
+  let service: SupabaseClient;
+  const clients = {} as Record<Role, SupabaseClient>;
+  const ids = {} as Record<keyof typeof USERS, string>;
+  const FP2 = `test:phase10b:${Date.now()}`;
+
+  beforeAll(async () => {
+    service = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!);
+    clients.anon = createClient(SUPABASE_URL!, ANON_KEY!);
+
+    const { data: users } = await service.auth.admin.listUsers();
+    for (const role of Object.keys(USERS) as (keyof typeof USERS)[]) {
+      const fixture = USERS[role];
+      const found = users?.users.find((user) => user.email === fixture.email);
+      if (!found) throw new Error(`Fixture ${fixture.email} não existe — corra o bloco anterior.`);
+      ids[role] = found.id;
+      const client = createClient(SUPABASE_URL!, ANON_KEY!);
+      await client.auth.signInWithPassword({ email: fixture.email, password: PASSWORD });
+      clients[role] = client;
+    }
+  });
+
+  afterAll(async () => {
+    if (!service) return;
+    await service
+      .from("notifications")
+      .delete()
+      .eq("profile_id", ids.buyer)
+      .eq("type", "ticket_update");
+    await service.from("tickets").delete().like("fingerprint", `${FP2}%`);
+  });
+
+  it("support_list_tickets recusa quem não é staff", async () => {
+    const { error } = await clients.buyer.rpc("support_list_tickets", { p_tab: "pending" });
+    expect(error?.hint).toBe("not_staff");
+  });
+
+  it("support_ticket_detail recusa quem reportou — os factos técnicos são do staff", async () => {
+    const { data } = await clients.buyer.rpc("report_problem", {
+      p_fingerprint: `${FP2}:detail`,
+      p_title: "Detalhe técnico",
+    });
+    const { error } = await clients.buyer.rpc("support_ticket_detail", {
+      p_ticket_id: data?.[0]?.id as string,
+    });
+    expect(error?.hint).toBe("not_staff");
+  });
+
+  it("my_reports devolve só os do titular e nenhuma coluna técnica", async () => {
+    await clients.buyer.rpc("report_problem", {
+      p_fingerprint: `${FP2}:mine`,
+      p_title: "O meu relato",
+      p_breadcrumbs: [{ at: "2026-10-07T00:00:00Z", kind: "click", label: "Guardar" }],
+      p_console_errors: ["TypeError"],
+    });
+    await clients.other.rpc("report_problem", {
+      p_fingerprint: `${FP2}:theirs`,
+      p_title: "O relato dela",
+    });
+
+    const { data: mine } = await clients.buyer.rpc("my_reports");
+    const titles = (mine ?? []).map((row: { title: string }) => row.title);
+    expect(titles).toContain("O meu relato");
+    expect(titles).not.toContain("O relato dela");
+
+    // A garantia está no contrato da função, não no `select` de um ecrã.
+    const row = (mine ?? [])[0] as Record<string, unknown> | undefined;
+    for (const forbidden of [
+      "breadcrumbs",
+      "console_errors",
+      "session_id",
+      "fingerprint",
+      "affected_users",
+      "route",
+    ]) {
+      expect(row && forbidden in row).toBeFalsy();
+    }
+  });
+
+  it("ticket_history esconde o nome de quem mexeu, a quem reportou", async () => {
+    const { data } = await clients.buyer.rpc("report_problem", {
+      p_fingerprint: `${FP2}:history`,
+      p_title: "Histórico",
+    });
+    const ticketId = data?.[0]?.id as string;
+    await clients.support.rpc("set_ticket_status", {
+      p_ticket_id: ticketId,
+      p_status: "in_progress",
+    });
+
+    const { data: forReporter } = await clients.buyer.rpc("ticket_history", {
+      p_ticket_id: ticketId,
+    });
+    expect(
+      (forReporter ?? []).every(
+        (event: { actor_name: string | null }) => event.actor_name === null,
+      ),
+    ).toBe(true);
+
+    const { data: forStaff } = await clients.support.rpc("ticket_history", {
+      p_ticket_id: ticketId,
+    });
+    expect(
+      (forStaff ?? []).some((event: { actor_name: string | null }) => Boolean(event.actor_name)),
+    ).toBe(true);
+
+    // Quem não é nem uma coisa nem outra não lê nada.
+    const { error } = await clients.other.rpc("ticket_history", { p_ticket_id: ticketId });
+    expect(error?.hint).toBe("not_allowed");
+  });
+
+  it("notifica quem reportou a cada mudança de estado, e não a si próprio", async () => {
+    const { data } = await clients.buyer.rpc("report_problem", {
+      p_fingerprint: `${FP2}:notify`,
+      p_title: "Para notificar",
+    });
+    const ticketId = data?.[0]?.id as string;
+
+    await clients.support.rpc("set_ticket_status", {
+      p_ticket_id: ticketId,
+      p_status: "in_progress",
+    });
+
+    const { data: notifications } = await service
+      .from("notifications")
+      .select("type, link, title")
+      .eq("profile_id", ids.buyer)
+      .eq("type", "ticket_update")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const notification = notifications?.[0];
+    expect(notification).toBeTruthy();
+    // A rota é `/reports` — `/meus-reports` era o 404 que `20261007140100` corrigiu.
+    expect(notification?.link).toBe(`/reports?ticket=${ticketId}`);
+
+    // Guardar o MESMO estado outra vez não é um passo novo: não notifica.
+    const before = (
+      await service
+        .from("notifications")
+        .select("id")
+        .eq("profile_id", ids.buyer)
+        .eq("type", "ticket_update")
+    ).data?.length;
+    await clients.support.rpc("set_ticket_status", {
+      p_ticket_id: ticketId,
+      p_status: "in_progress",
+      p_fix_note: "A acrescentar uma nota, sem mudar o estado.",
+    });
+    const after = (
+      await service
+        .from("notifications")
+        .select("id")
+        .eq("profile_id", ids.buyer)
+        .eq("type", "ticket_update")
+    ).data?.length;
+    expect(after).toBe(before);
+  });
+
+  it("admin_dashboard_metrics inclui open_bugs — fecha D48", async () => {
+    await clients.buyer.rpc("report_problem", {
+      p_fingerprint: `${FP2}:kpi`,
+      p_title: "Para o KPI",
+    });
+    const { data } = await clients.admin.rpc("admin_dashboard_metrics");
+    const summary = (data as { summary?: Record<string, number> } | null)?.summary;
+    expect(summary).toBeTruthy();
+    expect(typeof summary?.open_bugs).toBe("number");
+    expect(summary?.open_bugs as number).toBeGreaterThan(0);
+  });
+});
