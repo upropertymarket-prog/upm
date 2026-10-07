@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
-import { pendingRpc } from "./pending-types";
 
 /**
  * Subscrição: compromisso e cancelamento (Fase 9, P9-03 e P9-04)
@@ -75,14 +74,14 @@ export async function canCancelSubscription(
   supabase: AnySupabaseClient,
   subscriptionId: string,
 ): Promise<CancelDecision | null> {
-  // `pendingRpc` enquanto os tipos não forem regenerados — ver pending-types.ts.
-  const { data, error } = await pendingRpc<Record<string, unknown>>(
-    supabase,
-    "can_cancel_subscription",
-    { p_subscription_id: subscriptionId },
-  );
-  if (error || !data || typeof data !== "object") return null;
-  return toDecision(data);
+  const { data, error } = await supabase.rpc("can_cancel_subscription", {
+    p_subscription_id: subscriptionId,
+  });
+  // `Returns: Json` — a porta é SQL e devolve um objeto; qualquer outra coisa
+  // (null, escalar, array) é tratada como "não sei", e quem chama não mostra
+  // o botão.
+  if (error || !data || typeof data !== "object" || Array.isArray(data)) return null;
+  return toDecision(data as Record<string, unknown>);
 }
 
 /**
@@ -123,10 +122,15 @@ export function commitmentMonths(months: number | null | undefined): number | nu
  * Quando as duas respostas divergirem, a de SQL é que vale: é ela que fica
  * gravada na subscrição. Esta serve para mostrar o número antes de cobrar, que o
  * DL 24/2014 (art. 4.º) exige que seja mostrado.
+ *
+ * Os dois argumentos são `unknown` de propósito: o global vive em
+ * `app_settings.value`, que é `jsonb`, e o do plano em `plans`. A guarda de
+ * `typeof` no fim é a única conversão — qualquer coisa que não seja número é
+ * ausência de compromisso, não um zero.
  */
 export function resolveCommitmentMonths(
-  planDefault: number | null | undefined,
-  globalDefault: number | null | undefined,
+  planDefault: unknown,
+  globalDefault: unknown,
 ): number | null {
   const resolved = planDefault ?? globalDefault ?? null;
   return typeof resolved === "number" ? resolved : null;

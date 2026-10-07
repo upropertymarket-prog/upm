@@ -1,4 +1,5 @@
-import { pendingRpc } from "./pending-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 /**
  * Contrato de adesão (doc 13, D58)
@@ -12,30 +13,19 @@ import { pendingRpc } from "./pending-types";
  * o contrato em vez de o ler.
  */
 
-/** A forma em que a tabela devolve a linha. */
-type AgreementRow = {
-  id: string;
-  subscription_id: string;
-  reference: string;
-  celebrated_at: string;
-  plan_name: string;
-  plan_features: string[] | null;
-  plan_limits: Record<string, number> | null;
-  addons: { slug: string; name: string; priceCents: number }[] | null;
-  price_cents: number;
-  price_month_cents: number;
-  price_year_cents: number;
-  currency: string;
-  interval: "month" | "year";
-  minimum_commitment_months: number | null;
-  commitment_ends_at: string | null;
-  terms_version: string | null;
-  terms_content_hash: string | null;
-  terms_accepted_at: string | null;
-  terms_accepted_ip: string | null;
-  provider: Record<string, string> | null;
-  supersedes_id: string | null;
-};
+type AnySupabaseClient = SupabaseClient<Database>;
+
+/**
+ * A forma em que a tabela devolve a linha — **derivada dos tipos gerados**, não
+ * escrita à mão. Até 7 out 2026 era uma cópia manual, por os tipos não terem
+ * ainda esta função; uma cópia que concordasse com o SQL por coincidência é
+ * exatamente o que D52 veio apagar.
+ *
+ * O que fica por fazer à mão é só o estreitamento: `jsonb` chega como `Json` e
+ * `inet` como `unknown`, e é aqui — não na página — que isso ganha forma.
+ */
+type AgreementRow =
+  Database["public"]["Functions"]["subscription_agreements_for_me"]["Returns"][number];
 
 export type SubscriptionAgreement = {
   id: string;
@@ -66,12 +56,24 @@ export type SubscriptionAgreement = {
  * porque a coluna é `jsonb`. Desembrulha-se aqui e não na página: um contrato
  * com aspas à volta do nome da empresa seria um erro visível ao cliente.
  */
-function unwrap(provider: Record<string, unknown> | null): Record<string, string> {
+function unwrap(provider: unknown): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const [key, value] of Object.entries(provider ?? {})) {
+  if (!provider || typeof provider !== "object" || Array.isArray(provider)) return out;
+  for (const [key, value] of Object.entries(provider)) {
     out[key] = typeof value === "string" ? value : String(value ?? "");
   }
   return out;
+}
+
+/** `addons` é `jsonb` e pode vir `null`, `[]` ou a lista. Nada mais é aceite. */
+function toAddons(raw: unknown): SubscriptionAgreement["addons"] {
+  if (!Array.isArray(raw)) return [];
+  return raw as SubscriptionAgreement["addons"];
+}
+
+/** A coluna `interval` é texto no SQL; aqui só existem dois valores. */
+function toInterval(raw: string): "month" | "year" {
+  return raw === "month" ? "month" : "year";
 }
 
 function toAgreement(row: AgreementRow): SubscriptionAgreement {
@@ -80,20 +82,21 @@ function toAgreement(row: AgreementRow): SubscriptionAgreement {
     reference: row.reference,
     celebratedAt: row.celebrated_at,
     planName: row.plan_name,
-    planFeatures: row.plan_features ?? [],
-    addons: row.addons ?? [],
+    planFeatures: row.plan_features,
+    addons: toAddons(row.addons),
     priceCents: row.price_cents,
     priceMonthCents: row.price_month_cents,
     priceYearCents: row.price_year_cents,
     currency: row.currency,
-    interval: row.interval,
+    interval: toInterval(row.interval),
     commitmentMonths: row.minimum_commitment_months,
     commitmentEndsAt: row.commitment_ends_at,
     terms: {
       version: row.terms_version,
       contentHash: row.terms_content_hash,
       acceptedAt: row.terms_accepted_at,
-      ip: row.terms_accepted_ip,
+      // `inet` chega como `unknown` dos tipos gerados.
+      ip: typeof row.terms_accepted_ip === "string" ? row.terms_accepted_ip : null,
     },
     provider: unwrap(row.provider),
     supersedesId: row.supersedes_id,
@@ -107,7 +110,7 @@ function toAgreement(row: AgreementRow): SubscriptionAgreement {
  * subscrição é anterior a esta funcionalidade, caso em que não há contrato a
  * mostrar e a página diz isso.
  */
-export async function myAgreements(client: { rpc: unknown }): Promise<SubscriptionAgreement[]> {
-  const { data } = await pendingRpc<AgreementRow[]>(client, "subscription_agreements_for_me");
+export async function myAgreements(client: AnySupabaseClient): Promise<SubscriptionAgreement[]> {
+  const { data } = await client.rpc("subscription_agreements_for_me");
   return (data ?? []).map(toAgreement);
 }

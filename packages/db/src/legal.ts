@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { pendingRpcRow } from "./pending-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 /**
  * Documentos legais e aceitação registada (Fase 9, P9-02)
@@ -47,17 +48,11 @@ export function isPendingLegalReview(document: Pick<LegalDocument, "reviewState"
 }
 
 /** A forma em que `current_legal_document()` devolve a linha. */
-type LegalDocumentRow = {
-  id: string;
-  kind: LegalDocumentKind;
-  version: string;
-  locale: string;
-  title: string;
-  body_md: string;
-  content_hash: string;
-  review_state: LegalReviewState;
-  effective_from: string | null;
-};
+type AnySupabaseClient = SupabaseClient<Database>;
+
+/** Derivada dos tipos gerados desde que D52 foi paga (7 out 2026). */
+type LegalDocumentRow =
+  Database["public"]["Functions"]["current_legal_document"]["Returns"][number];
 
 export function toLegalDocument(row: LegalDocumentRow): LegalDocument {
   return {
@@ -100,15 +95,18 @@ export const acceptedCheckboxSchema = z.literal("on", {
  * ecrã `/plano` lerem o MESMO documento pela mesma via.
  */
 export async function currentLegalDocument(
-  client: { rpc: unknown },
+  client: AnySupabaseClient,
   kind: LegalDocumentKind = "terms",
   locale = "pt",
 ): Promise<LegalDocument | null> {
-  const { data } = await pendingRpcRow<LegalDocumentRow>(client, "current_legal_document", {
+  // `returns table` — o cliente devolve sempre um array; zero linhas significa
+  // "não há versão publicada", que não é erro.
+  const { data } = await client.rpc("current_legal_document", {
     p_kind: kind,
     p_locale: locale,
   });
-  return data ? toLegalDocument(data) : null;
+  const row = data?.[0];
+  return row ? toLegalDocument(row) : null;
 }
 
 export type TermsAcceptanceStatus = {

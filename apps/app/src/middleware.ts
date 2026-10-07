@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
-import { pendingRpc } from "@upm/db/pending-types";
 
 import { createMiddlewareClient } from "./lib/supabase-middleware";
 
@@ -124,7 +123,7 @@ export async function middleware(request: NextRequest) {
   // middleware decidir isto a partir de `profiles.plan_id`, e ficariam duas
   // respostas possíveis à mesma pergunta. `subscription_entitled()` é a única.
   if (!NO_SUBSCRIPTION_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    const { data: entitled } = await pendingRpc<boolean>(supabase, "subscription_entitled");
+    const { data: entitled } = await supabase.rpc("subscription_entitled");
     if (entitled !== true) {
       return NextResponse.redirect(new URL("/plano?subscrever=1", request.url));
     }

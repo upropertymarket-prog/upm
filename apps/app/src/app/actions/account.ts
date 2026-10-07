@@ -3,7 +3,6 @@
 import { cookies } from "next/headers";
 import { createClient, createServiceClient } from "@upm/db/server";
 import { cancelReasonSchema } from "@upm/db/subscription";
-import { pendingRpc } from "@upm/db/pending-types";
 import { getStripeClient } from "@upm/db/stripe";
 
 /**
@@ -44,8 +43,7 @@ export async function exportAccountData(): Promise<ExportState> {
   const { supabase, user } = await session();
   if (!user) return { error: "Sessão inválida." };
 
-  // `pendingRpc` até `pnpm db:types` correr sobre esta fase — ver pending-types.ts.
-  const { data, error } = await pendingRpc(supabase, "export_own_account_data");
+  const { data, error } = await supabase.rpc("export_own_account_data");
   if (error || !data) return { error: "Não foi possível exportar os dados. Tente novamente." };
 
   // O download é do lado do cliente, a partir desta string: o ficheiro nunca
@@ -80,8 +78,10 @@ export async function deleteOwnAccount(
     .limit(1)
     .maybeSingle();
 
-  const { error } = await pendingRpc(supabase, "delete_own_account", {
-    p_reason: reasonResult.data ?? null,
+  // `p_reason` é opcional nos tipos gerados (`p_reason?: string`), não
+  // anulável — a mudança de forma do CLI 2.118 que o doc 10 §1.7 avisou.
+  const { error } = await supabase.rpc("delete_own_account", {
+    p_reason: reasonResult.data,
   });
   if (error) return { error: "Não foi possível eliminar a conta. Tente novamente." };
 

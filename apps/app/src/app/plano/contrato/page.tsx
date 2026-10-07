@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { myAgreements } from "@upm/db/agreement";
-import { pendingSelectOne } from "@upm/db/pending-types";
 import { isPendingLegalReview, currentLegalDocument } from "@upm/db/legal";
 
 import { AppChrome } from "../../../components/AppChrome";
@@ -53,15 +52,13 @@ export default async function ContratoPage({
 
   const role = profile.role;
 
-  // `tax_id` entrou em P9-01 e só aparece nos tipos depois de `pnpm db:types`
-  // correr sobre as migrações desta fase (D52) — por isso a ponte, e não um
-  // `select` tipado. Sai com o resto dos casts.
-  const { data: identity } = await pendingSelectOne<{ tax_id: string | null }>(
-    supabase,
-    "profiles",
-    "tax_id",
-    { id: user.id },
-  );
+  // `tax_id` entrou em P9-01. É dado pessoal: lê-se só a linha da sessão e não
+  // sai daqui para props de cliente além do contrato do próprio titular.
+  const { data: identity } = await supabase
+    .from("profiles")
+    .select("tax_id")
+    .eq("id", user.id)
+    .maybeSingle();
 
   const [agreements, t, conversations, visits, leads, notifications] = await Promise.all([
     myAgreements(supabase),

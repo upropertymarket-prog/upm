@@ -16,7 +16,6 @@ import {
   taxIdSchema,
 } from "@upm/db/auth";
 import { billingIntervalSchema } from "@upm/db/billing";
-import { pendingRpc, pendingSelectOne } from "@upm/db/pending-types";
 
 import type { RegisterState } from "./RegisterWizard";
 import type { ResendState } from "./verificacao/ResendVerificationForm";
@@ -140,14 +139,18 @@ export async function registerAccount(
 
   // P9-07 — a elegibilidade decide-se no servidor, a partir de NIF, telefone e
   // e-mail. O código que vem de lá NÃO é mostrado: serve para o log.
-  const { data: eligibilityRaw, error: eligibilityError } = await pendingRpc<EligibilityResult>(
-    service,
+  const { data: eligibilityRaw, error: eligibilityError } = await service.rpc(
     "signup_eligibility",
     { p_tax_id: taxId, p_phone: phone, p_email: email },
   );
   if (eligibilityError) return { error: "Não foi possível criar a conta. Tente novamente." };
 
-  const eligibility = eligibilityRaw ?? { allowed: false };
+  // `Returns: Json`. Tudo o que não seja um objeto com `allowed: true` é
+  // recusa — falhar fechado é o lado certo num portão de elegibilidade.
+  const eligibility: EligibilityResult =
+    eligibilityRaw && typeof eligibilityRaw === "object" && !Array.isArray(eligibilityRaw)
+      ? (eligibilityRaw as EligibilityResult)
+      : { allowed: false };
   if (!eligibility.allowed) {
     await recordAuthAttempt(supabase, email, "register", false);
     return { fieldErrors: { taxId: GENERIC_IDENTITY_ERROR }, step: "account" };
@@ -182,15 +185,13 @@ export async function registerAccount(
   // mesmo corpo. Procura-se pelo id, não pelo idioma: a página carrega os Termos
   // no idioma da sessão, e comparar contra um idioma fixo rejeitava quem está em
   // inglês.
-  const { data: terms } = await pendingSelectOne<{
-    id: string;
-    version: string;
-    content_hash: string;
-  }>(service, "legal_documents", "id, version, content_hash", {
-    id: documentId,
-    kind: "terms",
-    status: "published",
-  });
+  const { data: terms } = await service
+    .from("legal_documents")
+    .select("id, version, content_hash")
+    .eq("id", documentId)
+    .eq("kind", "terms")
+    .eq("status", "published")
+    .maybeSingle();
 
   if (!terms || terms.content_hash !== contentHash) {
     return {
@@ -221,7 +222,7 @@ export async function registerAccount(
   const ip = await clientIp();
 
   // P9-01 — o NIF entra em `profiles` por aqui, e só por aqui.
-  const { error: identityError } = await pendingRpc(service, "register_account_identity", {
+  const { error: identityError } = await service.rpc("register_account_identity", {
     p_profile_id: profileId,
     p_tax_id: taxId,
     p_phone: phone,
@@ -234,11 +235,11 @@ export async function registerAccount(
   // P9-02 — a aceitação fica registada ANTES do pagamento: é a aceitação que
   // autoriza o contrato, não o contrário.
   const userAgent = (await headers()).get("user-agent");
-  const { error: acceptError } = await pendingRpc(service, "record_terms_acceptance", {
+  const { error: acceptError } = await service.rpc("record_terms_acceptance", {
     p_document_id: documentId,
     p_context: "registration",
     p_ip: ip,
-    p_user_agent: userAgent,
+    p_user_agent: userAgent ?? undefined,
     p_profile_id: profileId,
   });
   if (acceptError) {

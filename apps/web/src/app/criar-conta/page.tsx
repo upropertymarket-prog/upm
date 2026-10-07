@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { currentLegalDocument, isPendingLegalReview } from "@upm/db/legal";
-import { pendingSelectMany, pendingSelectOne } from "@upm/db/pending-types";
 import { resolveCommitmentMonths } from "@upm/db/subscription";
 
 import { AuthShell } from "../../components/auth/AuthLayout";
@@ -15,17 +14,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-/** A forma das linhas de `plans` que esta página precisa, com a coluna nova. */
-type PlanRow = {
-  slug: string;
-  name: string;
-  audience: "owner" | "buyer" | "both";
-  price_month_cents: number;
-  price_year_cents: number;
-  features: string[] | null;
-  default_commitment_months: number | null;
-};
 
 /**
  * Criar conta — `/criar-conta` (Fase 9: P9-01, P9-02, P9-05, P9-09)
@@ -49,17 +37,18 @@ export default async function RegisterPage() {
   const [locale, ts] = await Promise.all([getLocale(), getTranslations("auth.shell")]);
 
   const [plans, globalCommitment, terms] = await Promise.all([
-    // `pendingSelectMany` porque `default_commitment_months` só entra nos tipos
-    // gerados depois de `pnpm db:types` (D52).
-    pendingSelectMany<PlanRow>(
-      supabase,
-      "plans",
-      "slug, name, audience, price_month_cents, price_year_cents, features, default_commitment_months",
-      { filters: { visible: true }, orderBy: "position" },
-    ),
-    pendingSelectOne<{ value: number | null }>(supabase, "app_settings", "value", {
-      key: "subscription_default_commitment_months",
-    }),
+    supabase
+      .from("plans")
+      .select(
+        "slug, name, audience, price_month_cents, price_year_cents, features, default_commitment_months",
+      )
+      .eq("visible", true)
+      .order("position"),
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "subscription_default_commitment_months")
+      .maybeSingle(),
     currentLegalDocument(supabase, "terms", locale),
   ]);
 

@@ -24,14 +24,6 @@ import {
 
 type Client = SupabaseClient<Database>;
 
-/** Colunas que `plan_status()` já devolve e os tipos gerados ainda não conhecem. */
-type PendingPlanStatusColumns = {
-  minimum_commitment_months: number | null;
-  commitment_ends_at: string | null;
-  started_at: string | null;
-  terms_version: string | null;
-};
-
 export type PlanStatus = {
   planId: string | null;
   planSlug: string | null;
@@ -105,10 +97,7 @@ function parseLimits(value: unknown): PlanLimits {
 
 export async function loadPlanStatus(supabase: Client): Promise<PlanStatus> {
   const { data } = await supabase.rpc("plan_status");
-  // As quatro colunas novas de P9-03 só entram nos tipos gerados depois de
-  // `pnpm db:types` — ver `pending-types.ts`.
-  const row = data?.[0] as
-    (NonNullable<typeof data>[number] & PendingPlanStatusColumns) | undefined;
+  const row = data?.[0];
 
   const usage = { ...EMPTY_USAGE };
   const rawUsage = (row?.usage ?? {}) as Record<string, unknown>;

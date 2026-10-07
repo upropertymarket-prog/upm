@@ -7,7 +7,6 @@ import { createClient } from "@upm/db/server";
 import { checkoutSchema, invoiceIdSchema, trialReasonSchema } from "@upm/db/billing";
 import { MAX_FILE_BYTES, sniffMime } from "@upm/db/cloud";
 import { cancelReasonSchema } from "@upm/db/subscription";
-import { pendingRpc, pendingSelectOne } from "@upm/db/pending-types";
 import { getStripeClient } from "@upm/db/stripe";
 
 /**
@@ -98,15 +97,13 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
     }
 
     // Pelo id, não pelo idioma: a página carrega os Termos no idioma da sessão.
-    const { data: terms } = await pendingSelectOne<{
-      id: string;
-      version: string;
-      content_hash: string;
-    }>(supabase, "legal_documents", "id, version, content_hash", {
-      id: termsDocumentId,
-      kind: "terms",
-      status: "published",
-    });
+    const { data: terms } = await supabase
+      .from("legal_documents")
+      .select("id, version, content_hash")
+      .eq("id", termsDocumentId)
+      .eq("kind", "terms")
+      .eq("status", "published")
+      .maybeSingle();
 
     if (!terms) return { error: "Não há Termos publicados. Contacte o suporte." };
     if (terms.content_hash !== termsContentHash) {
@@ -115,11 +112,11 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
 
     const headerList = await headers();
     const forwarded = headerList.get("x-forwarded-for")?.split(",")[0]?.trim();
-    const { error: acceptError } = await pendingRpc(supabase, "record_terms_acceptance", {
+    const { error: acceptError } = await supabase.rpc("record_terms_acceptance", {
       p_document_id: terms.id,
       p_context: "subscription",
       p_ip: forwarded || headerList.get("x-real-ip") || null,
-      p_user_agent: headerList.get("user-agent"),
+      p_user_agent: headerList.get("user-agent") ?? undefined,
     });
     if (acceptError) return { error: "Não foi possível registar a aceitação dos Termos." };
 
@@ -260,15 +257,14 @@ export async function cancelSubscription(
   const { supabase, user } = await session();
   if (!user) return { error: "Sessão inválida." };
 
-  const { data: decision, error } = await pendingRpc<{ effective_at?: string | null }>(
-    supabase,
-    "request_subscription_cancellation",
-    { p_subscription_id: subscriptionId, p_reason: reasonResult.data ?? null },
-  );
+  const { data: decision, error } = await supabase.rpc("request_subscription_cancellation", {
+    p_subscription_id: subscriptionId,
+    p_reason: reasonResult.data,
+  });
 
   if (error) {
     // O `hint` traz a razão, não o texto (mesmo contrato dos limites de plano).
-    const hint = (error as { hint?: string | null }).hint;
+    const hint = error.hint;
     if (hint === "already_requested") return { error: "O cancelamento já estava pedido." };
     if (hint === "already_canceled") return { error: "Esta subscrição já está cancelada." };
     return { error: "Não foi possível cancelar a subscrição. Tente novamente." };
@@ -299,7 +295,11 @@ export async function cancelSubscription(
   }
 
   revalidatePath("/plano");
-  const effectiveAt = decision?.effective_at ?? null;
+  // `Returns: Json` — a data efetiva é lida do objeto, se vier um objeto.
+  const effectiveAt =
+    decision && typeof decision === "object" && !Array.isArray(decision)
+      ? ((decision as { effective_at?: string | null }).effective_at ?? null)
+      : null;
   return { ok: true, effectiveAt };
 }
 
