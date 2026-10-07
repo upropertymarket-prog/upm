@@ -9,12 +9,12 @@
 
 /** A versão de cada minuta, lida da respetiva migração. */
 export const VERSOES = {
-  TERMOS: "2026.10-draft2",
+  TERMOS: "2026.10-draft3",
   PRIVACIDADE: "2026.10-draft3",
   COOKIES: "2026.10-draft2",
 } as const;
 
-/** Termos e Condições de Utilização — UProperty Market — de `20261007120700_terms_v2_draft.sql`. */
+/** Termos e Condições de Utilização — UProperty Market — de `20261007121300_terms_v3_draft.sql`. */
 export const TERMOS = `> **MINUTA PARA REVISÃO JURÍDICA — NÃO É UM DOCUMENTO DEFINITIVO.**
 > Este texto foi redigido como estrutura de trabalho e **tem de ser revisto e
 > aprovado por advogado** antes de a plataforma entrar em produção. Contém
@@ -480,8 +480,20 @@ o que foi contratado serão comunicadas com antecedência razoável.
 ## 23. Dados pessoais
 
 O responsável pelo tratamento é **[NOME LEGAL DA EMPRESA]**. Os dados pessoais recolhidos são tratados
-para a execução do contrato, cumprimento de obrigações legais, prevenção de fraude e, mediante
-consentimento, comunicações de marketing.
+para a execução do contrato, cumprimento de obrigações legais e prevenção de fraude.
+
+**Comunicações promocionais.** A UProperty envia ao Utilizador com conta comunicações promocionais,
+periódicas, de informações importantes e de atualizações da plataforma e de produtos, com base no
+**interesse legítimo** em manter a relação e em dar a conhecer novidades. **O Utilizador pode cancelar
+estas comunicações a qualquer momento**, nas preferências de notificação da sua conta ou pela ligação
+de cancelamento que cada mensagem leva.
+
+O cancelamento não abrange as comunicações que fazem parte do serviço — avisos de segurança,
+alterações a estes Termos, faturas, respostas do suporte e notificações de mensagens, visitas ou
+moderação —, que continuam a ser enviadas.
+
+A quem não tem conta e apenas se pré-inscreveu, as comunicações promocionais dependem de
+**consentimento** prestado no próprio formulário.
 
 O acesso de colaboradores da UProperty a dados pessoais de Utilizadores é **limitado ao necessário** e
 fica **registado**.
@@ -581,10 +593,11 @@ foro que a lei lhe reserva.
 | 6 | Dados de identificação da empresa | §1 |
 | 7 | Momento a partir do qual a troca de contactos diretos passa a ser admitida | §12 |
 | 8 | Inexistência de mecanismo de denúncia na aplicação; canal é o e-mail | §20 |
+| 9 | Marketing a clientes por interesse legítimo: confirmar o regime do art. 13.º-A da Lei n.º 41/2004 | §23 |
 
 ---
 
-**Versão 2026.10-draft2 · MINUTA PARA REVISÃO JURÍDICA.** Esta versão não substitui aconselhamento
+**Versão 2026.10-draft3 · MINUTA PARA REVISÃO JURÍDICA.** Esta versão não substitui aconselhamento
 jurídico e não deve entrar em produção sem revisão por advogado.`;
 
 /** Política de Privacidade — UProperty Market — de `20261007121200_privacy_v3_draft.sql`. */

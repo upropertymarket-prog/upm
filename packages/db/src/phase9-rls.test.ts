@@ -323,15 +323,21 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
       .single();
     const subscriptionId = (sub as { id: string }).id;
 
-    const { data: first } = await service.rpc("record_subscription_agreement" as never, {
-      p_subscription_id: subscriptionId,
-    } as never);
+    const { data: first } = await service.rpc(
+      "record_subscription_agreement" as never,
+      {
+        p_subscription_id: subscriptionId,
+      } as never,
+    );
     expect(first).toBeTruthy();
 
     // Repetir não cria um contrato novo: o Stripe reenvia eventos.
-    const { data: again } = await service.rpc("record_subscription_agreement" as never, {
-      p_subscription_id: subscriptionId,
-    } as never);
+    const { data: again } = await service.rpc(
+      "record_subscription_agreement" as never,
+      {
+        p_subscription_id: subscriptionId,
+      } as never,
+    );
     expect(again).toBe(first);
 
     // O preço do plano muda no Admin — e o contrato NÃO muda com ele. É a
@@ -348,7 +354,10 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
       .single();
     expect((agreement as { price_cents: number }).price_cents).toBe(precoContratado);
 
-    await service.from("plans").update({ price_year_cents: precoContratado } as never).eq("id", planId);
+    await service
+      .from("plans")
+      .update({ price_year_cents: precoContratado } as never)
+      .eq("id", planId);
     await service.from("subscription_agreements").delete().eq("subscription_id", subscriptionId);
     await service.from("subscriptions").delete().eq("id", subscriptionId);
   });

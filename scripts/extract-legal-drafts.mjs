@@ -26,9 +26,11 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 /** Cada entrada: a constante gerada, a migração e o delimitador do corpo PT. */
 const SOURCES = [
   {
+    // v3 desde 7 out 2026: §23 passou a dizer o mesmo que a Política de
+    // Privacidade sobre o fundamento das comunicações promocionais.
     constName: "TERMOS",
-    migration: "20261007120700_terms_v2_draft.sql",
-    tag: "terms_pt_v2",
+    migration: "20261007121300_terms_v3_draft.sql",
+    tag: "terms_pt_v3",
     title: "Termos e Condições de Utilização — UProperty Market",
   },
   {

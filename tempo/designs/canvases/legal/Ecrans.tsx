@@ -40,7 +40,6 @@ import { COOKIES, PRIVACIDADE, TERMOS, VERSOES } from "./conteudo.generated";
  * o texto escuro fica ilegível.
  */
 
-
 /**
  * A linha de versão é por documento, não partilhada: desde 7 out 2026 a
  * Privacidade está em `draft3` (o marketing passou a assentar em interesse
@@ -84,13 +83,25 @@ const TITULO_COOKIES = "Política de Cookies — UProperty Market";
 export const TermosClaro = () => (
   <Documento theme="light" title={TITULO_TERMOS} markdown={TERMOS} versao={VERSOES.TERMOS} />
 );
-export const TermosEscuro = () => <Documento theme="dark" title={TITULO_TERMOS} markdown={TERMOS} versao={VERSOES.TERMOS} />;
+export const TermosEscuro = () => (
+  <Documento theme="dark" title={TITULO_TERMOS} markdown={TERMOS} versao={VERSOES.TERMOS} />
+);
 
 export const PrivacidadeClaro = () => (
-  <Documento theme="light" title={TITULO_PRIVACIDADE} markdown={PRIVACIDADE} versao={VERSOES.PRIVACIDADE} />
+  <Documento
+    theme="light"
+    title={TITULO_PRIVACIDADE}
+    markdown={PRIVACIDADE}
+    versao={VERSOES.PRIVACIDADE}
+  />
 );
 export const PrivacidadeEscuro = () => (
-  <Documento theme="dark" title={TITULO_PRIVACIDADE} markdown={PRIVACIDADE} versao={VERSOES.PRIVACIDADE} />
+  <Documento
+    theme="dark"
+    title={TITULO_PRIVACIDADE}
+    markdown={PRIVACIDADE}
+    versao={VERSOES.PRIVACIDADE}
+  />
 );
 
 export const CookiesClaro = () => (
