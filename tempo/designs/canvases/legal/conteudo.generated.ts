@@ -9,19 +9,13 @@
 
 /** A versão de cada minuta, lida da respetiva migração. */
 export const VERSOES = {
-  TERMOS: "2026.10-draft3",
-  PRIVACIDADE: "2026.10-draft3",
-  COOKIES: "2026.10-draft2",
+  TERMOS: "2026.10-draft4",
+  PRIVACIDADE: "2026.10-draft4",
+  COOKIES: "2026.10-draft3",
 } as const;
 
-/** Termos e Condições de Utilização — UProperty Market — de `20261007121300_terms_v3_draft.sql`. */
-export const TERMOS = `> **MINUTA PARA REVISÃO JURÍDICA — NÃO É UM DOCUMENTO DEFINITIVO.**
-> Este texto foi redigido como estrutura de trabalho e **tem de ser revisto e
-> aprovado por advogado** antes de a plataforma entrar em produção. Contém
-> lacunas assinaladas em §30, que dependem de decisões ainda por tomar.
-> Nenhuma cláusula aqui escrita deve ser tratada como validada juridicamente.
-
-## 1. Identificação e objeto
+/** Termos e Condições de Utilização — UProperty Market — de `20261007150000_legal_sem_aviso_minuta.sql`. */
+export const TERMOS = `## 1. Identificação e objeto
 
 A plataforma **UProperty Market** é explorada por **[NOME LEGAL DA EMPRESA]**, com sede em
 **[MORADA]**, NIPC **[NIPC]**, contactável em **[E-MAIL DE CONTACTO]** e **[TELEFONE]** (adiante,
@@ -593,21 +587,10 @@ foro que a lei lhe reserva.
 | 6 | Dados de identificação da empresa | §1 |
 | 7 | Momento a partir do qual a troca de contactos diretos passa a ser admitida | §12 |
 | 8 | Inexistência de mecanismo de denúncia na aplicação; canal é o e-mail | §20 |
-| 9 | Marketing a clientes por interesse legítimo: confirmar o regime do art. 13.º-A da Lei n.º 41/2004 | §23 |
+| 9 | Marketing a clientes por interesse legítimo: confirmar o regime do art. 13.º-A da Lei n.º 41/2004 | §23 |`;
 
----
-
-**Versão 2026.10-draft3 · MINUTA PARA REVISÃO JURÍDICA.** Esta versão não substitui aconselhamento
-jurídico e não deve entrar em produção sem revisão por advogado.`;
-
-/** Política de Privacidade — UProperty Market — de `20261007121200_privacy_v3_draft.sql`. */
-export const PRIVACIDADE = `> **MINUTA PARA REVISÃO JURÍDICA — NÃO É UM DOCUMENTO DEFINITIVO.**
-> Este texto foi redigido como estrutura de trabalho e **tem de ser revisto e
-> aprovado por advogado** antes de a plataforma entrar em produção. Contém
-> lacunas assinaladas em §16, que dependem de decisões ainda por tomar.
-> Nenhuma cláusula aqui escrita deve ser tratada como validada juridicamente.
-
-## 1. Quem trata os seus dados
+/** Política de Privacidade — UProperty Market — de `20261007150000_legal_sem_aviso_minuta.sql`. */
+export const PRIVACIDADE = `## 1. Quem trata os seus dados
 
 O responsável pelo tratamento é **[NOME LEGAL DA EMPRESA]**, com sede em **[MORADA]**, NIPC
 **[NIPC]**, contactável em **[E-MAIL DE CONTACTO]** e **[TELEFONE]**.
@@ -838,20 +821,10 @@ em vigor está sempre disponível na plataforma, com a respetiva data.
 | 6 | Prazos de conservação de todas as categorias | §9 |
 | 7 | Base legal e prazo da retenção de identificadores após apagamento | §10 |
 | 8 | Equilíbrio de interesses do registo de acessos a documentos | §6 |
-| 9 | Marketing a clientes por interesse legítimo: "análogos", recusa nos dois momentos e teste de proporcionalidade | §6 |
+| 9 | Marketing a clientes por interesse legítimo: "análogos", recusa nos dois momentos e teste de proporcionalidade | §6 |`;
 
----
-
-**Versão 2026.10-draft3 · MINUTA PARA REVISÃO JURÍDICA.** Esta versão não substitui aconselhamento
-jurídico e não deve entrar em produção sem revisão por advogado.`;
-
-/** Política de Cookies — UProperty Market — de `20261007120900_cookies_v2_draft.sql`. */
-export const COOKIES = `> **MINUTA PARA REVISÃO JURÍDICA — NÃO É UM DOCUMENTO DEFINITIVO.**
-> Este texto foi redigido como estrutura de trabalho e **tem de ser revisto e
-> aprovado por advogado** antes de a plataforma entrar em produção.
-> Nenhuma cláusula aqui escrita deve ser tratada como validada juridicamente.
-
-## 1. O que esta política cobre
+/** Política de Cookies — UProperty Market — de `20261007150000_legal_sem_aviso_minuta.sql`. */
+export const COOKIES = `## 1. O que esta política cobre
 
 Explica que cookies e que armazenamento local a plataforma **UProperty Market** utiliza, para quê,
 durante quanto tempo, e o que pode fazer quanto a isso. Cobre o site público e a aplicação.
@@ -941,9 +914,4 @@ de um cookie novo — dá origem a uma versão nova, com data própria, disponí
 
 O tratamento de dados pessoais está descrito na **Política de Privacidade**, em \`/privacidade\`.
 
-Para qualquer questão sobre esta política, escreva para **[E-MAIL DE CONTACTO]**.
-
----
-
-**Versão 2026.10-draft2 · MINUTA PARA REVISÃO JURÍDICA.** Esta versão não substitui aconselhamento
-jurídico e não deve entrar em produção sem revisão por advogado.`;
+Para qualquer questão sobre esta política, escreva para **[E-MAIL DE CONTACTO]**.`;

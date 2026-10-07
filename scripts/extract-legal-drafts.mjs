@@ -26,40 +26,41 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 /** Cada entrada: a constante gerada, a migração e o delimitador do corpo PT. */
 const SOURCES = [
   {
-    // v3 desde 7 out 2026: §23 passou a dizer o mesmo que a Política de
-    // Privacidade sobre o fundamento das comunicações promocionais.
+    // Os três documentos passaram a sair da mesma migração a 7 out 2026, ao
+    // tirar-se o aviso de minuta do corpo — e ficaram em versões diferentes.
     constName: "TERMOS",
-    migration: "20261007121300_terms_v3_draft.sql",
-    tag: "terms_pt_v3",
+    migration: "20261007150000_legal_sem_aviso_minuta.sql",
+    tag: "terms_pt_v4",
     title: "Termos e Condições de Utilização — UProperty Market",
   },
   {
-    // v3 desde 7 out 2026: o marketing passou a assentar em interesse legítimo
-    // e não em consentimento. Quando uma minuta ganhar versão, é aqui que se
-    // aponta para a nova — o canvas segue a migração, não o contrário.
     constName: "PRIVACIDADE",
-    migration: "20261007121200_privacy_v3_draft.sql",
-    tag: "privacy_pt_v3",
+    migration: "20261007150000_legal_sem_aviso_minuta.sql",
+    tag: "privacy_pt_v4",
     title: "Política de Privacidade — UProperty Market",
   },
   {
     constName: "COOKIES",
-    migration: "20261007120900_cookies_v2_draft.sql",
-    tag: "cookies_pt_v2",
+    migration: "20261007150000_legal_sem_aviso_minuta.sql",
+    tag: "cookies_pt_v3",
     title: "Política de Cookies — UProperty Market",
   },
 ];
 
 /**
- * A versão sai da própria migração, não de uma constante — mas tem de ser a que
- * é INSERIDA, e não a que o `update ... set status = 'archived'` menciona. Como
- * a migração nomeia as duas, fica a de número mais alto: uma v2 arquiva sempre
- * uma versão anterior, nunca uma posterior.
+ * A versão do documento que este `tag` identifica.
+ *
+ * Tem de ser lida **junto do próprio `insert`**, e não do ficheiro inteiro. Duas
+ * razões, as duas já tropeçadas: a migração também nomeia a versão que arquiva,
+ * e desde 7 out 2026 um só ficheiro pode semear três documentos em versões
+ * diferentes — ler a maior do ficheiro dava `draft4` aos Cookies, que estão em
+ * `draft3`. A versão certa é a última declarada ANTES do delimitador.
  */
-function readVersion(sql) {
-  const found = [...sql.matchAll(/'(\d{4}\.\d{2}-draft(\d+))'/g)];
-  if (found.length === 0) throw new Error("Versão não encontrada na migração");
-  return found.sort((a, b) => Number(b[2]) - Number(a[2]))[0][1];
+function readVersion(sql, tag) {
+  const antes = sql.slice(0, sql.indexOf(`$${tag}$`));
+  const found = [...antes.matchAll(/'(\d{4}\.\d{2}-draft\d+)'/g)];
+  if (found.length === 0) throw new Error(`Versão não encontrada antes de ${tag}`);
+  return found[found.length - 1][1];
 }
 
 function extractBody(sql, tag) {
@@ -85,7 +86,7 @@ for (const source of SOURCES) {
   // Uma versão POR documento: desde 7 out 2026 as três minutas deixaram de
   // andar a par — a Privacidade foi para `draft3` e as outras ficaram em
   // `draft2`. Uma constante partilhada mentiria sobre duas delas.
-  versions.push(`  ${source.constName}: "${readVersion(sql)}",`);
+  versions.push(`  ${source.constName}: "${readVersion(sql, source.tag)}",`);
   const body = extractBody(sql, source.tag);
   blocks.push(
     `/** ${source.title} — de \`${source.migration}\`. */\n` +
