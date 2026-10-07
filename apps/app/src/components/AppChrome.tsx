@@ -1,12 +1,20 @@
 "use client";
 
-import { createElement, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AppShell, type NavItem, type Notification } from "@upm/ui";
+import {
+  AppShell,
+  ReportProblemModal,
+  installBreadcrumbs,
+  reportProblemLabels,
+  type NavItem,
+  type Notification,
+} from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
 import { navFor } from "../lib/navigation";
 import { useNotifications } from "./notifications/useNotifications";
+import { submitProblemReport } from "../app/actions/support";
 
 export type AppChromeProps = {
   role: "buyer" | "owner";
@@ -71,7 +79,16 @@ export function AppChrome({
 }: AppChromeProps) {
   const t = useTranslations();
   const [search, setSearch] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
   const { items, markAllRead } = useNotifications(notifications, liveNotifications);
+
+  // A trilha de "últimas ações" (04 §2.7 #2) tem de estar a recolher **antes**
+  // de alguém abrir o modal: o valor dela é dizer o que aconteceu até ao
+  // problema, e começar a gravar quando o utilizador já está a reportar daria
+  // uma trilha vazia. Idempotente — o shell monta uma vez por app.
+  useEffect(() => {
+    installBreadcrumbs();
+  }, []);
 
   const { entries, groupKey } = navFor(role);
 
@@ -91,8 +108,7 @@ export function AppChrome({
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
-        // TODO (Fase 6): abrir o modal de "Reportar problema" (03 F9).
-        onReport: () => undefined,
+        onReport: () => setReportOpen(true),
         // TODO (Fase 3): terminar sessão no Supabase Auth (03 F3).
         onSignOut: () => undefined,
         labels: {
@@ -128,6 +144,19 @@ export function AppChrome({
       }}
     >
       {children}
+      <ReportProblemModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        labels={reportProblemLabels(t)}
+        onSubmit={async ({ description, snapshot, screenshot }) => {
+          const form = new FormData();
+          form.set("description", description);
+          form.set("snapshot", JSON.stringify(snapshot));
+          if (screenshot) form.set("screenshot", screenshot);
+          const outcome = await submitProblemReport(form);
+          return "error" in outcome ? outcome : { ref: outcome.ref, merged: outcome.merged };
+        }}
+      />
     </AppShell>
   );
 }

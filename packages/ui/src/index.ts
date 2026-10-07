@@ -40,6 +40,16 @@ export type { TableColumn, TableProps } from "./components/Table";
 export { Drawer, Modal } from "./components/Overlay";
 export type { DrawerProps, ModalProps } from "./components/Overlay";
 
+export { ReportProblemModal } from "./support/ReportProblemModal";
+export type {
+  ReportProblemLabels,
+  ReportProblemModalProps,
+  ReportProblemSubmit,
+} from "./support/ReportProblemModal";
+export { reportProblemLabels } from "./support/labels";
+export { captureTechnicalSnapshot, installBreadcrumbs } from "./support/breadcrumbs";
+export type { Breadcrumb, TechnicalSnapshot } from "./support/breadcrumbs";
+
 export { ToastProvider, useToast } from "./components/Toast";
 export type { ToastTone } from "./components/Toast";
 

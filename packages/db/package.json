@@ -18,6 +18,7 @@
     "./cloud": "./src/cloud.ts",
     "./billing": "./src/billing.ts",
     "./legal": "./src/legal.ts",
+    "./support": "./src/support.ts",
     "./subscription": "./src/subscription.ts",
     "./stripe": "./src/stripe.ts",
     "./agreement": "./src/agreement.ts"

@@ -884,5 +884,28 @@
       "confirmHint": "In capitals.",
       "confirmDelete": "Delete permanently"
     }
+  },
+  "support": {
+    "report": {
+      "title": "Report a problem",
+      "subtitle": "Describe what happened. We collect the rest automatically.",
+      "descriptionLabel": "What happened?",
+      "descriptionHint": "Tell us what you were doing and what you expected to happen. No technical terms needed.",
+      "descriptionPlaceholder": "I clicked Publish and the listing does not show up in my properties…",
+      "attach": "Attach a screenshot",
+      "attachRemove": "Remove the screenshot",
+      "technicalTitle": "Sent along with your report",
+      "technicalNote": "Technical context for the screen you are on, so support can reproduce the problem. The contents of your messages, documents and searches are never included.",
+      "submit": "Send report",
+      "cancel": "Cancel",
+      "sending": "Sending…",
+      "successTitle": "Report received",
+      "successBody": "We saved the reference above. You will be notified at every step, and you can follow its status under My reports.",
+      "mergedBody": "We were already working on this problem — your report was merged into the existing one, which helps us prioritise it. You can follow its status under My reports.",
+      "close": "Close",
+      "tooShort": "Please describe the problem in a little more detail.",
+      "fileTooLarge": "The image cannot be larger than 5 MB.",
+      "fileWrongType": "Only PNG, JPG or WebP are accepted."
+    }
   }
 }

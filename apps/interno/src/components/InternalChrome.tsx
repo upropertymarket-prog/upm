@@ -1,11 +1,19 @@
 "use client";
 
-import { createElement, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AppShell, type NavItem, type Notification } from "@upm/ui";
+import {
+  AppShell,
+  ReportProblemModal,
+  installBreadcrumbs,
+  reportProblemLabels,
+  type NavItem,
+  type Notification,
+} from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
 import { navFor } from "../lib/navigation";
+import { submitProblemReport } from "../app/actions/support";
 
 export type InternalChromeProps = {
   role: "admin" | "support";
@@ -54,6 +62,13 @@ export function InternalChrome({
   const t = useTranslations();
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<Notification[]>(notifications);
+  const [reportOpen, setReportOpen] = useState(false);
+
+  // Ver a nota em `AppChrome`: a trilha recolhe desde que o shell monta, não
+  // desde que o modal abre.
+  useEffect(() => {
+    installBreadcrumbs();
+  }, []);
 
   const { entries, groupKey } = navFor(role);
 
@@ -71,8 +86,7 @@ export function InternalChrome({
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
-        // TODO (Fase 10): abrir o modal de "Reportar problema" (03 F9).
-        onReport: () => undefined,
+        onReport: () => setReportOpen(true),
         // TODO (Fase 3): terminar sessão de `interno` — 2FA + PIN (07 §6).
         onSignOut: () => undefined,
         labels: {
@@ -108,6 +122,19 @@ export function InternalChrome({
       }}
     >
       {children}
+      <ReportProblemModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        labels={reportProblemLabels(t)}
+        onSubmit={async ({ description, snapshot, screenshot }) => {
+          const form = new FormData();
+          form.set("description", description);
+          form.set("snapshot", JSON.stringify(snapshot));
+          if (screenshot) form.set("screenshot", screenshot);
+          const outcome = await submitProblemReport(form);
+          return "error" in outcome ? outcome : { ref: outcome.ref, merged: outcome.merged };
+        }}
+      />
     </AppShell>
   );
 }

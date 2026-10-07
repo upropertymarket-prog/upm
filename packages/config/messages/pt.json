@@ -884,5 +884,28 @@
       "confirmHint": "Em maiúsculas, sem acentos.",
       "confirmDelete": "Eliminar definitivamente"
     }
+  },
+  "support": {
+    "report": {
+      "title": "Reportar problema",
+      "subtitle": "Descreva o que aconteceu. O resto vai automaticamente.",
+      "descriptionLabel": "O que aconteceu?",
+      "descriptionHint": "Diga o que estava a fazer e o que esperava que acontecesse. Não precisa de termos técnicos.",
+      "descriptionPlaceholder": "Cliquei em Publicar e o anúncio não aparece nas minhas propriedades…",
+      "attach": "Anexar captura de ecrã",
+      "attachRemove": "Remover a captura",
+      "technicalTitle": "Segue também com o relato",
+      "technicalNote": "Contexto técnico do ecrã onde está, para o suporte conseguir reproduzir o problema. Nunca vai o conteúdo das suas mensagens, documentos ou pesquisas.",
+      "submit": "Enviar relato",
+      "cancel": "Cancelar",
+      "sending": "A enviar…",
+      "successTitle": "Relato recebido",
+      "successBody": "Guardámos a referência acima. Vai receber uma notificação a cada passo, e pode seguir o estado em Os meus reports.",
+      "mergedBody": "Já estávamos a tratar deste problema — o seu relato juntou-se ao que existia, o que ajuda a dar-lhe prioridade. Pode seguir o estado em Os meus reports.",
+      "close": "Fechar",
+      "tooShort": "Descreva o problema com um pouco mais de detalhe.",
+      "fileTooLarge": "A imagem não pode passar de 5 MB.",
+      "fileWrongType": "Só aceitamos PNG, JPG ou WebP."
+    }
   }
 }

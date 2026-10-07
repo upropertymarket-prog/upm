@@ -2737,6 +2737,149 @@ export type Database = {
           },
         ];
       };
+      ticket_events: {
+        Row: {
+          actor_id: string | null;
+          id: number;
+          note: string | null;
+          occurred_at: string;
+          status_from: Database["public"]["Enums"]["ticket_status"] | null;
+          status_to: Database["public"]["Enums"]["ticket_status"];
+          ticket_id: string;
+        };
+        Insert: {
+          actor_id?: string | null;
+          id?: never;
+          note?: string | null;
+          occurred_at?: string;
+          status_from?: Database["public"]["Enums"]["ticket_status"] | null;
+          status_to: Database["public"]["Enums"]["ticket_status"];
+          ticket_id: string;
+        };
+        Update: {
+          actor_id?: string | null;
+          id?: never;
+          note?: string | null;
+          occurred_at?: string;
+          status_from?: Database["public"]["Enums"]["ticket_status"] | null;
+          status_to?: Database["public"]["Enums"]["ticket_status"];
+          ticket_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ticket_events_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ticket_events_ticket_id_fkey";
+            columns: ["ticket_id"];
+            isOneToOne: false;
+            referencedRelation: "tickets";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tickets: {
+        Row: {
+          affected_users: number;
+          breadcrumbs: Json | null;
+          browser: string | null;
+          build_sha: string | null;
+          console_errors: Json | null;
+          created_at: string;
+          description: string;
+          fingerprint: string;
+          first_seen_at: string;
+          fix_note: string | null;
+          id: string;
+          last_seen_at: string;
+          network: string | null;
+          occurrences: number;
+          origin: Database["public"]["Enums"]["ticket_origin"];
+          os: string | null;
+          ref: string;
+          reporter_id: string | null;
+          route: string | null;
+          screenshot_path: string | null;
+          session_id: string | null;
+          severity: Database["public"]["Enums"]["ticket_severity"];
+          status: Database["public"]["Enums"]["ticket_status"];
+          technical_purged_at: string | null;
+          title: string;
+          updated_at: string;
+          viewport: string | null;
+        };
+        Insert: {
+          affected_users?: number;
+          breadcrumbs?: Json | null;
+          browser?: string | null;
+          build_sha?: string | null;
+          console_errors?: Json | null;
+          created_at?: string;
+          description?: string;
+          fingerprint: string;
+          first_seen_at?: string;
+          fix_note?: string | null;
+          id?: string;
+          last_seen_at?: string;
+          network?: string | null;
+          occurrences?: number;
+          origin?: Database["public"]["Enums"]["ticket_origin"];
+          os?: string | null;
+          ref?: string;
+          reporter_id?: string | null;
+          route?: string | null;
+          screenshot_path?: string | null;
+          session_id?: string | null;
+          severity?: Database["public"]["Enums"]["ticket_severity"];
+          status?: Database["public"]["Enums"]["ticket_status"];
+          technical_purged_at?: string | null;
+          title: string;
+          updated_at?: string;
+          viewport?: string | null;
+        };
+        Update: {
+          affected_users?: number;
+          breadcrumbs?: Json | null;
+          browser?: string | null;
+          build_sha?: string | null;
+          console_errors?: Json | null;
+          created_at?: string;
+          description?: string;
+          fingerprint?: string;
+          first_seen_at?: string;
+          fix_note?: string | null;
+          id?: string;
+          last_seen_at?: string;
+          network?: string | null;
+          occurrences?: number;
+          origin?: Database["public"]["Enums"]["ticket_origin"];
+          os?: string | null;
+          ref?: string;
+          reporter_id?: string | null;
+          route?: string | null;
+          screenshot_path?: string | null;
+          session_id?: string | null;
+          severity?: Database["public"]["Enums"]["ticket_severity"];
+          status?: Database["public"]["Enums"]["ticket_status"];
+          technical_purged_at?: string | null;
+          title?: string;
+          updated_at?: string;
+          viewport?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tickets_reporter_id_fkey";
+            columns: ["reporter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trial_extension_requests: {
         Row: {
           created_at: string;
@@ -3503,6 +3646,7 @@ export type Database = {
         }[];
       };
       format_eur_cents: { Args: { p_cents: number }; Returns: string };
+      generate_ticket_ref: { Args: never; Returns: string };
       get_property_location: {
         Args: { p_property_id: string };
         Returns: unknown;
@@ -3674,6 +3818,7 @@ export type Database = {
         };
         Returns: string;
       };
+      open_bugs_count: { Args: never; Returns: number };
       plan_limit_exceeded: {
         Args: { p_key: string; p_profile_id: string };
         Returns: boolean;
@@ -3758,6 +3903,7 @@ export type Database = {
       purge_document_access_log: { Args: never; Returns: number };
       purge_property_view_events: { Args: never; Returns: number };
       purge_site_analytics: { Args: never; Returns: number };
+      purge_ticket_technical_data: { Args: never; Returns: number };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
@@ -3796,6 +3942,30 @@ export type Database = {
           p_tax_id: string;
         };
         Returns: string;
+      };
+      report_problem: {
+        Args: {
+          p_breadcrumbs?: Json;
+          p_browser?: string;
+          p_build_sha?: string;
+          p_console_errors?: Json;
+          p_description?: string;
+          p_fingerprint: string;
+          p_network?: string;
+          p_origin?: Database["public"]["Enums"]["ticket_origin"];
+          p_os?: string;
+          p_route?: string;
+          p_screenshot_path?: string;
+          p_session_id?: string;
+          p_title: string;
+          p_viewport?: string;
+        };
+        Returns: {
+          id: string;
+          merged: boolean;
+          ref: string;
+          severity: Database["public"]["Enums"]["ticket_severity"];
+        }[];
       };
       request_subscription_cancellation: {
         Args: { p_reason?: string; p_subscription_id: string };
@@ -3883,6 +4053,14 @@ export type Database = {
           p_lead_id: string;
           p_outcome?: Database["public"]["Enums"]["lead_outcome"];
           p_stage: Database["public"]["Enums"]["lead_stage"];
+        };
+        Returns: undefined;
+      };
+      set_ticket_status: {
+        Args: {
+          p_fix_note?: string;
+          p_status: Database["public"]["Enums"]["ticket_status"];
+          p_ticket_id: string;
         };
         Returns: undefined;
       };
@@ -3980,6 +4158,10 @@ export type Database = {
         Args: { p_profile_id?: string };
         Returns: boolean;
       };
+      suggest_ticket_severity: {
+        Args: { p_affected_users?: number; p_route: string };
+        Returns: Database["public"]["Enums"]["ticket_severity"];
+      };
       terms_acceptance_status: {
         Args: { p_locale?: string };
         Returns: {
@@ -4058,6 +4240,9 @@ export type Database = {
         | "archived";
       share_permission: "view" | "download";
       staff_department: "suporte" | "financeiro" | "moderacao" | "admin";
+      ticket_origin: "auto" | "report" | "both";
+      ticket_severity: "critical" | "high" | "medium" | "low";
+      ticket_status: "new" | "triage" | "in_progress" | "awaiting_confirmation" | "closed";
       user_role: "buyer" | "owner" | "admin" | "support";
       visit_status: "pending" | "accepted" | "rescheduled" | "cancelled" | "completed" | "archived";
     };
@@ -4725,6 +4910,9 @@ export const Constants = {
       ],
       share_permission: ["view", "download"],
       staff_department: ["suporte", "financeiro", "moderacao", "admin"],
+      ticket_origin: ["auto", "report", "both"],
+      ticket_severity: ["critical", "high", "medium", "low"],
+      ticket_status: ["new", "triage", "in_progress", "awaiting_confirmation", "closed"],
       user_role: ["buyer", "owner", "admin", "support"],
       visit_status: ["pending", "accepted", "rescheduled", "cancelled", "completed", "archived"],
     },
