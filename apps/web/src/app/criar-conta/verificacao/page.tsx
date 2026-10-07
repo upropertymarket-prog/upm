@@ -4,6 +4,14 @@ import { AuthShell } from "../../../components/auth/AuthLayout";
 import { ResendVerificationForm } from "./ResendVerificationForm";
 import { resendVerificationEmail } from "../actions";
 
+import { buildMetadata } from "@/lib/seo";
+import { seo } from "./seo";
+
+/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+export function generateMetadata() {
+  return buildMetadata(seo, "/criar-conta/verificacao");
+}
+
 /**
  * Verificação do e-mail — `/criar-conta/verificacao`
  * =========================================================================

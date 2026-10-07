@@ -4,6 +4,14 @@ import { Card, CardBody, CardHeader, CardTitle, PageHeader } from "@upm/ui";
 import { PublicHeader } from "../components/PublicHeader";
 import { setLocalePreference } from "./actions/preferences";
 
+import { buildMetadata } from "@/lib/seo";
+import { seo } from "./seo";
+
+/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+export function generateMetadata() {
+  return buildMetadata(seo, "/");
+}
+
 /**
  * Ecrã de verificação da Fase 1 em `www` (P1-01 · P1-02 · P1-03 · P1-06)
  * =========================================================================

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
@@ -9,9 +8,13 @@ import { AuthShell } from "../../components/auth/AuthLayout";
 import { RegisterWizard, type RegisterPlan } from "./RegisterWizard";
 import { registerAccount } from "./actions";
 
-export const metadata: Metadata = {
-  title: "Criar conta · UProperty Market",
-};
+import { buildMetadata } from "@/lib/seo";
+import { seo } from "./seo";
+
+/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+export function generateMetadata() {
+  return buildMetadata(seo, "/criar-conta");
+}
 
 export const dynamic = "force-dynamic";
 

@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-
 import { LegalDocumentPage } from "../../components/legal/LegalDocumentPage";
 
-export const metadata: Metadata = {
-  title: "Política de Cookies · UProperty Market",
-  // Como os Termos: enquanto for minuta não é indexada. Sai em P11-07.
-  robots: { index: false, follow: false },
-};
+import { buildMetadata } from "@/lib/seo";
+import { seo } from "./seo";
+
+/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+export function generateMetadata() {
+  return buildMetadata(seo, "/cookies");
+}
 
 export const dynamic = "force-dynamic";
 

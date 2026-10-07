@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
-
 import { LegalDocumentPage } from "../../components/legal/LegalDocumentPage";
 
-export const metadata: Metadata = {
-  title: "Termos e Condições · UProperty Market",
-  // A minuta não é para ser indexada. Quando P11-07 publicar a versão revista,
-  // esta linha sai e a página entra no `seo.ts` da rota, como as outras.
-  robots: { index: false, follow: false },
-};
+import { buildMetadata } from "@/lib/seo";
+import { seo } from "./seo";
+
+/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+export function generateMetadata() {
+  return buildMetadata(seo, "/termos");
+}
 
 export const dynamic = "force-dynamic";
 

@@ -59,6 +59,12 @@ jobs:
       - name: Portão · grelhas e ellipsis responsivos
         run: pnpm gate:responsive
 
+      # 04 §2.1.2 AC #5 — uma rota pública sem `seo.ts` falha o PR. Uma página
+      # que entra em produção sem título nem cartão de partilha só se descobre
+      # quando alguém partilha o link, que é tarde.
+      - name: Portão · SEO por rota pública
+        run: pnpm gate:seo
+
       - name: Portão · dependências vulneráveis
         run: pnpm gate:deps
 
