@@ -58,3 +58,27 @@ export function createServiceClient(): ServiceClient {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+/**
+ * Cliente **anónimo e sem sessão**, para leituras públicas que ficam em cache.
+ *
+ * Existe por causa do Site público (P2-01): o `launch_mode`, o catálogo de
+ * planos e os imóveis recentes são iguais para toda a gente, e ler com
+ * `createClient(cookies)` tornava a resposta impossível de partilhar em cache
+ * — um `cookies()` num Server Component marca a rota como dinâmica, e a home
+ * passaria a ser renderizada por pedido.
+ *
+ * Não é um atalho à RLS, é o contrário: passa por ela com o papel `anon`, que
+ * é exactamente o que um visitante tem. O que este cliente não vê, o visitante
+ * também não devia ver.
+ */
+export function createAnonClient(): SupabaseClient<Database> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error("Faltam NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+  }
+  return createSupabaseClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}

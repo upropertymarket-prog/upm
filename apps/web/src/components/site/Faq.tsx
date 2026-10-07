@@ -1,0 +1,124 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+import { FAQ } from "../../lib/site-content";
+
+/**
+ * Dúvidas — acordeão com título sticky (P2-01 · 04 §2.1)
+ * =========================================================================
+ * Acordeão escrito à mão e não `<details>`: 04 §1.7 pede foco visível e
+ * navegação por teclado, e o `<summary>` nativo não deixa controlar o estado
+ * para fechar os outros ao abrir um — que é o comportamento do protótipo.
+ *
+ * Uma pergunta aberta de cada vez. Com todas abertas a secção fica com três
+ * ecrãs de altura e deixa de se poder varrer.
+ */
+export function Faq() {
+  const [open, setOpen] = useState<number | null>(0);
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
+        gap: "clamp(1.5rem, 4vw, 3rem)",
+        alignItems: "start",
+      }}
+    >
+      {/* Sticky, como o protótipo. Só cola onde há altura para isso. */}
+      <header style={{ position: "sticky", top: "96px", display: "grid", gap: "var(--sp-3)" }}>
+        <h2
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.4rem, 3.4vw, 2.5rem)",
+            lineHeight: 1.15,
+            color: "var(--text)",
+          }}
+        >
+          {FAQ.title}
+        </h2>
+        <p style={{ margin: 0, fontSize: "14px", lineHeight: 1.6, color: "var(--muted)" }}>
+          {FAQ.body}
+        </p>
+      </header>
+
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-2)" }}>
+        {FAQ.items.map((item, index) => {
+          const isOpen = open === index;
+          const panelId = `faq-panel-${index}`;
+          const buttonId = `faq-button-${index}`;
+          return (
+            <li
+              key={item.q}
+              style={{
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-md)",
+                background: "var(--surface)",
+                overflow: "hidden",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>
+                <button
+                  type="button"
+                  id={buttonId}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => setOpen(isOpen ? null : index)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    gap: "var(--sp-3)",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    textAlign: "left",
+                    // 44 px de alvo: é um controlo de toque grande numa
+                    // página pública, não uma ação dentro de uma lista densa.
+                    minHeight: "44px",
+                    padding: "var(--sp-3) var(--sp-4)",
+                    background: "transparent",
+                    border: "none",
+                    font: "inherit",
+                    fontSize: "14.5px",
+                    fontWeight: 600,
+                    color: "var(--text)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {item.q}
+                  <ChevronDown
+                    size={17}
+                    aria-hidden="true"
+                    style={{
+                      flexShrink: 0,
+                      color: "var(--muted)",
+                      transform: isOpen ? "rotate(180deg)" : undefined,
+                      transition: "transform 150ms ease",
+                    }}
+                  />
+                </button>
+              </h3>
+              {isOpen ? (
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  style={{
+                    padding: "0 var(--sp-4) var(--sp-4)",
+                    fontSize: "14px",
+                    lineHeight: 1.6,
+                    color: "var(--muted)",
+                  }}
+                >
+                  {item.a}
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}

@@ -2162,6 +2162,8 @@ export type Database = {
       site_leads: {
         Row: {
           assigned_to: string | null;
+          confirm_token_hash: string | null;
+          confirmed_at: string | null;
           consent_at: string | null;
           consent_marketing: boolean;
           created_at: string;
@@ -2180,6 +2182,8 @@ export type Database = {
         };
         Insert: {
           assigned_to?: string | null;
+          confirm_token_hash?: string | null;
+          confirmed_at?: string | null;
           consent_at?: string | null;
           consent_marketing?: boolean;
           created_at?: string;
@@ -2198,6 +2202,8 @@ export type Database = {
         };
         Update: {
           assigned_to?: string | null;
+          confirm_token_hash?: string | null;
+          confirmed_at?: string | null;
           consent_at?: string | null;
           consent_marketing?: boolean;
           created_at?: string;
@@ -3514,6 +3520,15 @@ export type Database = {
         Args: { p_identifier: string; p_kind: string };
         Returns: Json;
       };
+      check_submission_rate_limit: {
+        Args: {
+          p_identifier: string;
+          p_kind: string;
+          p_max?: number;
+          p_window?: string;
+        };
+        Returns: boolean;
+      };
       cloud_add_file_version: {
         Args: {
           p_checksum: string;
@@ -3561,6 +3576,7 @@ export type Database = {
         Returns: number;
       };
       complete_due_visits: { Args: never; Returns: number };
+      confirm_site_lead: { Args: { p_token: string }; Returns: boolean };
       contract_history: {
         Args: { p_contract_id: string };
         Returns: {
@@ -3917,6 +3933,7 @@ export type Database = {
       purge_property_view_events: { Args: never; Returns: number };
       purge_site_analytics: { Args: never; Returns: number };
       purge_ticket_technical_data: { Args: never; Returns: number };
+      purge_unconfirmed_site_leads: { Args: never; Returns: number };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
@@ -4131,6 +4148,26 @@ export type Database = {
       };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
+      submit_site_lead: {
+        Args: {
+          p_consent_marketing?: boolean;
+          p_email: string;
+          p_form: string;
+          p_honeypot?: string;
+          p_ip?: string;
+          p_message?: string;
+          p_name: string;
+          p_phone?: string;
+          p_profile_type: string;
+          p_reason?: string;
+          p_utm?: Json;
+        };
+        Returns: {
+          already_confirmed: boolean;
+          confirm_token: string;
+          lead_id: string;
+        }[];
+      };
       subscription_agreements_for_me: {
         Args: never;
         Returns: {
