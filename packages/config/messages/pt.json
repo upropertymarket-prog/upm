@@ -84,7 +84,8 @@
     "campaigns": "Campanhas",
     "emailMetrics": "Métricas de e-mail",
     "internalCloud": "Cloud interna",
-    "subscriptions": "Assinaturas"
+    "subscriptions": "Assinaturas",
+    "seo": "SEO"
   },
   "emptyState": {
     "noResults": "Sem resultados",

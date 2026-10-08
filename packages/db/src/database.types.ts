@@ -2066,6 +2066,62 @@ export type Database = {
           },
         ];
       };
+      seo_pages: {
+        Row: {
+          canonical: string | null;
+          created_at: string;
+          meta_description: string | null;
+          noindex: boolean | null;
+          og_description: string | null;
+          og_image: string | null;
+          og_image_alt: string | null;
+          og_same_as_page: boolean | null;
+          og_title: string | null;
+          route: string;
+          title_tag: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          canonical?: string | null;
+          created_at?: string;
+          meta_description?: string | null;
+          noindex?: boolean | null;
+          og_description?: string | null;
+          og_image?: string | null;
+          og_image_alt?: string | null;
+          og_same_as_page?: boolean | null;
+          og_title?: string | null;
+          route: string;
+          title_tag?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          canonical?: string | null;
+          created_at?: string;
+          meta_description?: string | null;
+          noindex?: boolean | null;
+          og_description?: string | null;
+          og_image?: string | null;
+          og_image_alt?: string | null;
+          og_same_as_page?: boolean | null;
+          og_title?: string | null;
+          route?: string;
+          title_tag?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "seo_pages_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       site_analytics_daily: {
         Row: {
           avg_duration_s: number;
@@ -3393,6 +3449,21 @@ export type Database = {
           status: string;
           total_cents: number;
         }[];
+      };
+      admin_save_seo_page: {
+        Args: {
+          p_canonical?: string;
+          p_meta_description?: string;
+          p_noindex?: boolean;
+          p_og_description?: string;
+          p_og_image?: string;
+          p_og_image_alt?: string;
+          p_og_same_as_page?: boolean;
+          p_og_title?: string;
+          p_route: string;
+          p_title_tag?: string;
+        };
+        Returns: undefined;
       };
       admin_set_profile_status: {
         Args: {

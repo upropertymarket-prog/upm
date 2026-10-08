@@ -13,14 +13,16 @@
     "./tsconfig/base.json": "./tsconfig/base.json",
     "./tsconfig/next.json": "./tsconfig/next.json",
     "./server": "./server.ts",
-    "./security": "./security.ts"
+    "./security": "./security.ts",
+    "./seo-routes": "./seo-routes.generated.ts"
   },
   "files": [
     "tsconfig",
     "messages",
     "i18n.ts",
     "server.ts",
-    "security.ts"
+    "security.ts",
+    "seo-routes.generated.ts"
   ],
   "scripts": {
     "lint": "eslint .",

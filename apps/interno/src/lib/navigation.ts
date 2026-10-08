@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   Mail,
   Megaphone,
+  Search,
   Settings,
   Sparkles,
   TrendingUp,
@@ -22,9 +23,13 @@ import {
  * Listas de 07 §4.1, rotas de 03 §1.3, com duas correções de 07:
  *  - `/admin/reports` → `/admin/tickets`, vista **só de leitura** (07 §5.10);
  *    o workflow de tickets é exclusivo do Suporte, em `/suporte/tickets`;
- *  - `/admin/seo` **não existe na v1** — a tabela `seo_pages` e a página de
- *    administração de SEO saíram (07 §2.1). O SEO edita-se nas Route
- *    Storyboards, por rota.
+ *  - `/admin/seo` tinha saído da v1 por 07 §2.1 ("o SEO edita-se nas Route
+ *    Storyboards, por rota") e **voltou por 07 §24.5**, a 7 out 2026. A razão
+ *    da volta não contradiz a da saída: as storyboards escrevem o `seo.ts`, que
+ *    é a fonte versionada e continua a ser onde o SEO nasce — mas escrever o
+ *    ficheiro exige um deploy, e o marketing precisa de corrigir um título em
+ *    produção sem esperar por um. `seo_pages` é a sobreposição para esse caso,
+ *    e esta página é onde se edita.
  *
  * Etiquetas de grupo: "Administração" e "Suporte" (04 §5.5).
  */
@@ -57,6 +62,7 @@ export const ADMIN_NAV: NavEntry[] = [
     icon: FileSignature,
   },
   { id: "siteLeads", titleKey: "siteLeads", href: "/admin/leads-site", icon: Users, counter: true },
+  { id: "seo", titleKey: "seo", href: "/admin/seo", icon: Search },
   // Só leitura (07 §5.10).
   { id: "tickets", titleKey: "tickets", href: "/admin/tickets", icon: LifeBuoy },
   { id: "mailboxes", titleKey: "mailboxes", href: "/admin/caixas-email", icon: Mail },

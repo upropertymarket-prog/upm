@@ -16,7 +16,7 @@
     "db:types": "supabase gen types typescript --linked > packages/db/src/database.types.ts && prettier --write packages/db/src/database.types.ts",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff",
-    "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && node scripts/gate/check-responsive.mjs && node scripts/gate/check-seo.mjs && pnpm gate:db && pnpm gate:deps",
+    "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && node scripts/gate/check-responsive.mjs && pnpm gate:seo && pnpm gate:db && pnpm gate:deps",
     "gate:env": "node scripts/gate/check-public-env.mjs",
     "gate:bundle": "node scripts/gate/check-client-bundle.mjs",
     "gate:responsive": "node scripts/gate/check-responsive.mjs",
@@ -26,7 +26,8 @@
     "create-staff-user": "node scripts/create-staff-user.mjs",
     "stripe:sync": "tsx scripts/stripe/sync-catalog.ts",
     "analytics:import": "tsx scripts/analytics/import-daily.ts",
-    "gate:seo": "node scripts/gate/check-seo.mjs"
+    "gate:seo": "node scripts/generate-seo-routes.mjs --check && node scripts/gate/check-seo.mjs",
+    "seo:routes": "node scripts/generate-seo-routes.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -4,12 +4,12 @@ import { AuthShell } from "../../components/auth/AuthLayout";
 import { RequestForm } from "./RequestForm";
 import { requestPasswordReset } from "./actions";
 
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
 
-/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+/** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return buildMetadata(seo, "/recuperar-palavra-passe");
+  return pageMetadata(seo, "/recuperar-palavra-passe");
 }
 
 export default async function RequestPasswordResetPage() {

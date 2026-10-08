@@ -1,0 +1,93 @@
+import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
+import { createAnonClient } from "@upm/db/server";
+
+import { buildMetadata, type PageSeo, type SeoOverride } from "./seo";
+
+/**
+ * A sobreposição de SEO vinda de `seo_pages` (P2-06 2.ª metade · 07 §24.5)
+ * =========================================================================
+ * O `seo.ts` de cada rota continua a ser a fonte de verdade versionada; isto é
+ * só a camada por cima, para o marketing corrigir um título em produção sem
+ * esperar por um deploy. `buildMetadata` já sabe combinar as duas — campos
+ * vazios não sobrepõem — e os testes dele cobrem essa regra.
+ *
+ * **Cliente `anon` e sem cookies**, como no `launch-mode`: o SEO de uma página
+ * é o mesmo para toda a gente, e passar a sessão tornaria a resposta
+ * impossível de partilhar em cache. A policy de leitura de `seo_pages` é
+ * pública justamente porque tudo o que lá está acaba impresso no HTML.
+ *
+ * **Uma leitura por rota, com tag por rota.** Uma leitura única da tabela
+ * inteira seria menos pedidos, mas invalidar o título de `/termos` deitaria
+ * abaixo a cache de todas as outras páginas.
+ *
+ * `revalidate: 60` é a rede de segurança e, hoje, é também o mecanismo
+ * principal: a invalidação imediata exigiria o Admin — que corre noutro
+ * processo Next — chamar uma rota do `www`, e essa rota nunca chegou a existir
+ * (o comentário do `launch-mode.ts` promete-a desde a Fase 2). Até lá, uma
+ * alteração no Admin aparece no site dentro de um minuto, que é o que 04
+ * §2.1.1 pede ("sem novo deploy"), e a chamada direta fica como **D61**.
+ *
+ * Falha aberta, ao contrário do `launch-mode`: sem a tabela, a página sai com
+ * o SEO do ficheiro. O pior resultado possível é o site ficar com os
+ * metadados versionados — que é exatamente o que tinha antes desta camada.
+ */
+
+export const seoTag = (route: string) => `seo:${route}`;
+
+async function fetchOverride(route: string): Promise<SeoOverride> {
+  const supabase = createAnonClient();
+  const { data, error } = await supabase
+    .from("seo_pages")
+    .select(
+      "title_tag, meta_description, og_same_as_page, og_title, og_description, og_image, og_image_alt, canonical, noindex",
+    )
+    .eq("route", route)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  // `null` em coluna significa "o ficheiro manda", e `buildMetadata` espera
+  // `undefined` para esse caso — `null` ali seria lido como valor.
+  const value = <T>(raw: T | null): T | undefined => raw ?? undefined;
+
+  return {
+    titleTag: value(data.title_tag),
+    metaDescription: value(data.meta_description),
+    ogSameAsPage: value(data.og_same_as_page),
+    ogTitle: value(data.og_title),
+    ogDescription: value(data.og_description),
+    ogImage: value(data.og_image),
+    ogImageAlt: value(data.og_image_alt),
+    canonical: value(data.canonical),
+    noindex: value(data.noindex),
+  };
+}
+
+/**
+ * A sobreposição de uma rota, ou `null` quando não há registo — que é o caso
+ * normal: a tabela só tem linhas para as páginas que alguém editou.
+ */
+export async function getSeoOverride(route: string): Promise<SeoOverride> {
+  try {
+    const cached = unstable_cache(() => fetchOverride(route), ["seo-override", route], {
+      tags: [seoTag(route)],
+      revalidate: 60,
+    });
+    return await cached();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * O que cada `page.tsx` chama no seu `generateMetadata()`.
+ *
+ * Existe para que uma rota nova não tenha de se lembrar de ler a sobreposição:
+ * é uma chamada só, e quem a esquecer fica sem metadados nenhuns — um erro
+ * visível — em vez de ficar com metadados que o Admin não consegue corrigir,
+ * que é um erro silencioso e que só aparece quando alguém tenta editá-los.
+ */
+export async function pageMetadata(seo: PageSeo, route: string): Promise<Metadata> {
+  return buildMetadata(seo, route, await getSeoOverride(route));
+}

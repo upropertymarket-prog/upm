@@ -1,6 +1,6 @@
 import { getLocale } from "next-intl/server";
 
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
 
 import { HomeSections } from "../components/site/HomeSections";
@@ -9,9 +9,9 @@ import { getPublicPlans } from "../lib/public-plans";
 import { setLocalePreference } from "./actions/preferences";
 import { submitContact } from "./pre-inscricao/actions";
 
-/** Metadados a partir do `seo.ts` desta rota (P2-06). */
+/** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return buildMetadata(seo, "/");
+  return pageMetadata(seo, "/");
 }
 
 /**
