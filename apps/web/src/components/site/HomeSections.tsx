@@ -105,7 +105,7 @@ export function HomeSections({ launchMode, plans, locale, onLocaleChange }: Home
                 display: "grid",
                 placeItems: "center",
                 color: "var(--muted)",
-                fontSize: "12.5px",
+                fontSize: "var(--fs-body)",
               }}
             >
               {ABOUT.imageLabel}
@@ -171,7 +171,7 @@ export function HomeSections({ launchMode, plans, locale, onLocaleChange }: Home
                 display: "grid",
                 placeItems: "center",
                 color: "var(--muted)",
-                fontSize: "12.5px",
+                fontSize: "var(--fs-body)",
               }}
             >
               {BUSINESS.imageLabel}

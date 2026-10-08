@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Languages, Menu, Search } from "lucide-react";
+import { Bell, Menu, Search } from "lucide-react";
 
 import { cx } from "../lib/cx";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { useClickOutside } from "../lib/useDismissable";
+import { LanguageMenu, type LocaleOption } from "./LanguageMenu";
 import { ThemeToggle, type ThemeToggleLabels } from "../theme/ThemeToggle";
 
 export type Notification = {
@@ -17,10 +18,7 @@ export type Notification = {
   href?: string;
 };
 
-export type LocaleOption = {
-  value: string;
-  label: string;
-};
+export type { LocaleOption };
 
 export type TopbarLabels = {
   search: string;
@@ -69,13 +67,10 @@ export function Topbar({
   onOpenSidebar,
   className,
 }: TopbarProps) {
-  const [langOpen, setLangOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const langRef = useClickOutside<HTMLDivElement>(langOpen, () => setLangOpen(false));
   const notifRef = useClickOutside<HTMLDivElement>(notifOpen, () => setNotifOpen(false));
 
   const unread = notifications.filter((item) => !item.read).length;
-  const currentLocale = locales.find((item) => item.value === locale);
 
   return (
     /*
@@ -110,38 +105,12 @@ export function Topbar({
         />
 
         <div className="upm-topbar__actions">
-          <div className="upm-menu" ref={langRef}>
-            <Button
-              variant="secondary"
-              iconOnly
-              aria-haspopup="menu"
-              aria-expanded={langOpen}
-              aria-label={`${labels.language}: ${currentLocale?.label ?? locale}`}
-              title={`${labels.language}: ${currentLocale?.label ?? locale}`}
-              onClick={() => setLangOpen((value) => !value)}
-            >
-              <Languages size={17} />
-            </Button>
-            {langOpen ? (
-              <div className="upm-menu__panel" role="menu" aria-label={labels.language}>
-                {locales.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={option.value === locale}
-                    className="upm-menu__item"
-                    onClick={() => {
-                      onLocaleChange(option.value);
-                      setLangOpen(false);
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <LanguageMenu
+            locale={locale}
+            locales={locales}
+            onLocaleChange={onLocaleChange}
+            label={labels.language}
+          />
 
           <ThemeToggle variant="segmented" labels={labels.theme} />
 

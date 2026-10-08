@@ -70,7 +70,10 @@ export function SectionHeading({
       {eyebrow ? (
         <span
           style={{
-            fontSize: "12px",
+            // 07 §3: no site público nada desce de 14 px, e `--fs-label` já é
+            // 14 px por `[data-app="web"]`. O sobretítulo distingue-se pelo
+            // peso, pelas maiúsculas e pela cor de acento — não por ser menor.
+            fontSize: "var(--fs-label)",
             fontWeight: 800,
             letterSpacing: "0.1em",
             textTransform: "uppercase",

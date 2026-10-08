@@ -37,7 +37,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
         <div style={{ display: "grid", gap: "var(--sp-5)" }}>
           <span
             style={{
-              fontSize: "12px",
+              // Token e não um valor à mão: `[data-app="web"]` põe
+              // `--fs-label` nos 14 px que 07 §3 fixa como mínimo do site
+              // público. Escrever "12px" aqui furava esse piso.
+              fontSize: "var(--fs-label)",
               fontWeight: 800,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
@@ -74,13 +77,12 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
             {/* Links com as classes do botão, não `<Button>`: o destino é uma
                 navegação e tem de ser uma âncora real — para abrir em
                 separador novo, para o teclado e para os motores de busca.
-                `upm-btn--lg` (48 px) é o único tamanho que 04 §1.8 reserva
-                para o CTA principal do site público. É o mesmo padrão de
-                `guardados/page.tsx` e `conta-suspensa/page.tsx`. */}
-            <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--lg">
+                É o mesmo padrão de `guardados/page.tsx` e
+                `conta-suspensa/page.tsx`. */}
+            <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--md">
               {HERO.primaryCta}
             </Link>
-            <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--lg">
+            <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--md">
               {HERO.secondaryCta}
             </a>
           </div>
@@ -102,7 +104,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "var(--sp-2)",
-                  fontSize: "13.5px",
+                  fontSize: "var(--fs-body)",
                   fontWeight: 700,
                   color: "var(--text)",
                 }}
@@ -137,7 +139,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
             display: "grid",
             placeItems: "center",
             color: "var(--muted)",
-            fontSize: "12.5px",
+            fontSize: "var(--fs-body)",
           }}
         >
           {HERO.imageLabel}

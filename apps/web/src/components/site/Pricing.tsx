@@ -143,7 +143,9 @@ export function Pricing({
                     }}
                   >
                     {money(cents, locale)}
-                    <span style={{ fontSize: "13px", color: "var(--muted)", fontWeight: 400 }}>
+                    <span
+                      style={{ fontSize: "var(--fs-body)", color: "var(--muted)", fontWeight: 400 }}
+                    >
                       {billing === "year" ? " / ano" : " / mês"}
                     </span>
                   </span>
@@ -165,7 +167,7 @@ export function Pricing({
                         display: "flex",
                         gap: "var(--sp-2)",
                         alignItems: "start",
-                        fontSize: "13.5px",
+                        fontSize: "var(--fs-body)",
                         color: "var(--text)",
                       }}
                     >
@@ -182,7 +184,7 @@ export function Pricing({
                         display: "flex",
                         gap: "var(--sp-2)",
                         alignItems: "center",
-                        fontSize: "13.5px",
+                        fontSize: "var(--fs-body)",
                         color: "var(--muted)",
                       }}
                     >

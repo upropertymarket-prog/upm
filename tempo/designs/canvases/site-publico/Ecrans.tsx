@@ -36,8 +36,10 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  * Três decisões herdadas do canvas `legal`, que custaram tentativas lá:
  *
  *  1. **Sem `intrinsicSizing`** — estas páginas têm largura máxima e
- *     centram-se; medir pelo conteúdo colapsava a moldura e fazia
- *     desaparecer as margens reais.
+ *     centram-se; medir pelo conteúdo colapsava a moldura, fazia desaparecer
+ *     as margens reais e punha cada moldura por cima da seguinte. O
+ *     `index.canvas.tsx` tem o relato completo — a regra estava escrita aqui
+ *     e foi quebrada no canvas, o que é o pior dos dois mundos.
  *  2. **O tema fixa-se num `data-theme` à volta de cada ecrã**, nunca no
  *     `documentElement`: as storyboards partilham o documento do host, e
  *     escrever na raiz faria a última a renderizar arrastar as outras.

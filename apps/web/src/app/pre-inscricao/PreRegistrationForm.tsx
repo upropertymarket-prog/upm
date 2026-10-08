@@ -125,7 +125,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
                 display: "flex",
                 gap: "var(--sp-3)",
                 alignItems: "start",
-                fontSize: "13.5px",
+                fontSize: "var(--fs-body)",
               }}
             >
               <input
@@ -145,7 +145,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
                 display: "flex",
                 gap: "var(--sp-3)",
                 alignItems: "start",
-                fontSize: "13.5px",
+                fontSize: "var(--fs-body)",
               }}
             >
               <input
@@ -162,13 +162,13 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
       </Field>
 
       {state.error ? (
-        <p role="alert" style={{ margin: 0, fontSize: "13.5px", color: "var(--danger)" }}>
+        <p role="alert" style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--danger)" }}>
           {state.error}
         </p>
       ) : null}
 
       <div>
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="md" disabled={pending}>
           {pending ? "A enviar…" : "Quero ser avisado"}
         </Button>
       </div>

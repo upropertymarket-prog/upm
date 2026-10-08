@@ -36,7 +36,14 @@ export function SiteFooter() {
         >
           <div style={{ display: "grid", gap: "var(--sp-3)", alignContent: "start" }}>
             <Brand />
-            <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)", maxWidth: "18rem" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--fs-body)",
+                color: "var(--muted)",
+                maxWidth: "18rem",
+              }}
+            >
               {FOOTER.tagline}
             </p>
           </div>
@@ -49,7 +56,7 @@ export function SiteFooter() {
             >
               <strong
                 style={{
-                  fontSize: "12px",
+                  fontSize: "var(--fs-label)",
                   fontWeight: 800,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
@@ -70,11 +77,17 @@ export function SiteFooter() {
                 {column.links.map((link) => (
                   <li key={link.href}>
                     {link.href.startsWith("#") ? (
-                      <a href={link.href} style={{ fontSize: "13.5px", color: "var(--text)" }}>
+                      <a
+                        href={link.href}
+                        style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
+                      >
                         {link.label}
                       </a>
                     ) : (
-                      <Link href={link.href} style={{ fontSize: "13.5px", color: "var(--text)" }}>
+                      <Link
+                        href={link.href}
+                        style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
+                      >
                         {link.label}
                       </Link>
                     )}
@@ -90,7 +103,7 @@ export function SiteFooter() {
             margin: 0,
             paddingTop: "var(--sp-5)",
             borderTop: "1px solid var(--border)",
-            fontSize: "12.5px",
+            fontSize: "var(--fs-body)",
             color: "var(--muted)",
           }}
         >

@@ -86,6 +86,7 @@ export { Brand } from "./shell/Brand";
 export type { BrandProps } from "./shell/Brand";
 export { Sidebar } from "./shell/Sidebar";
 export type { NavGroup, NavItem, SidebarLabels, SidebarProps, SidebarUser } from "./shell/Sidebar";
+export { LanguageMenu } from "./shell/LanguageMenu";
 export { Topbar } from "./shell/Topbar";
 export type { LocaleOption, Notification, TopbarLabels, TopbarProps } from "./shell/Topbar";
 export { PageHeader, greetingKey } from "./shell/PageHeader";

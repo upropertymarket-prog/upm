@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Brand, Button, ThemeToggle } from "@upm/ui";
+import { Brand, LanguageMenu, ThemeToggle } from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
 import { NAV_ANCHORS, PRE_LAUNCH_BANNER } from "../lib/site-content";
@@ -48,7 +48,7 @@ export function PublicHeader({
             background: "var(--accent)",
             color: "var(--on-solid)",
             textAlign: "center",
-            fontSize: "11.5px",
+            fontSize: "var(--fs-label)",
             fontWeight: 700,
             letterSpacing: "0.14em",
             textTransform: "uppercase",
@@ -80,7 +80,7 @@ export function PublicHeader({
                 <a
                   key={anchor.id}
                   href={`#${anchor.id}`}
-                  style={{ fontSize: "13px", color: "var(--text)", whiteSpace: "nowrap" }}
+                  style={{ fontSize: "var(--fs-body)", color: "var(--text)", whiteSpace: "nowrap" }}
                 >
                   {anchor.label}
                 </a>
@@ -89,18 +89,19 @@ export function PublicHeader({
           ) : null}
 
           <div className="upm-topbar__actions">
-            {LOCALES.map((value) => (
-              <Button
-                key={value}
-                variant={value === locale ? "primary" : "ghost"}
-                size="sm"
-                aria-pressed={value === locale}
-                onClick={() => void onLocaleChange(value)}
-              >
-                {t(`locale.${value}`)}
-              </Button>
-            ))}
+            {/* Os mesmos dois controlos da topbar da app, e não uma versão
+                própria: 04 §1.5 quer a barra de topo "igual para todos".
+                Até 8 out 2026 isto desenhava os idiomas como dois `<Button>`
+                lado a lado — padrão que não existe em lado nenhum da app e
+                que deixa de caber ao terceiro idioma. */}
+            <LanguageMenu
+              locale={locale}
+              locales={LOCALES.map((value) => ({ value, label: t(`locale.${value}`) }))}
+              onLocaleChange={(next) => void onLocaleChange(next)}
+              label={t("locale.title")}
+            />
             <ThemeToggle
+              variant="segmented"
               labels={{
                 title: t("theme.title"),
                 light: t("theme.light"),
@@ -108,7 +109,10 @@ export function PublicHeader({
                 system: t("theme.system"),
               }}
             />
-            <Link href={ctaHref} className="upm-btn upm-btn--primary upm-btn--sm">
+            {/* `md` e não `sm`: 04 §1.8 fixa 36 px como a altura padrão de um
+                botão, e um CTA de barra de topo não é uma ação dentro de uma
+                linha de lista. */}
+            <Link href={ctaHref} className="upm-btn upm-btn--primary upm-btn--md">
               {ctaLabel}
             </Link>
           </div>
