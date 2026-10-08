@@ -3,13 +3,15 @@
 import Link from "next/link";
 
 import { PublicHeader } from "../PublicHeader";
+import { ContactForm } from "./ContactForm";
 import { Faq } from "./Faq";
 import { FeatureGrid } from "./FeatureGrid";
 import { Hero } from "./Hero";
 import { Pricing, type PublicPlan } from "./Pricing";
 import { SectionHeading, SiteSection } from "./SiteSection";
 import { SiteFooter } from "./SiteFooter";
-import { ABOUT, AUDIENCES, BUSINESS, COMING_SOON, PLATFORM } from "../../lib/site-content";
+import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
+import { ABOUT, AUDIENCES, BUSINESS, COMING_SOON, CONTACT, PLATFORM } from "../../lib/site-content";
 
 /**
  * A home inteira, sem ir buscar nada (P2-01)
@@ -33,9 +35,17 @@ export type HomeSectionsProps = {
   locale: string;
   /** Server Action na app; no canvas, um no-op. */
   onLocaleChange: (locale: string) => void | Promise<void>;
+  /** `submitContact` de `pre-inscricao/actions.ts`; no canvas, um no-op. */
+  onContact: (previous: LeadFormState, formData: FormData) => Promise<LeadFormState>;
 };
 
-export function HomeSections({ launchMode, plans, locale, onLocaleChange }: HomeSectionsProps) {
+export function HomeSections({
+  launchMode,
+  plans,
+  locale,
+  onLocaleChange,
+  onContact,
+}: HomeSectionsProps) {
   const signupHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
 
   return (
@@ -230,14 +240,17 @@ export function HomeSections({ launchMode, plans, locale, onLocaleChange }: Home
         </SiteSection>
 
         <SiteSection id="contactos">
-          {/* O formulário é P2-02, com double opt-in, honeypot e rate limit.
-              Até lá, o contacto público é o e-mail que a secção Dúvidas já
-              anuncia — uma caixa de texto que não envia nada seria pior. */}
-          <SectionHeading
-            title="Tem dúvidas? Fale connosco."
-            body="O formulário de contacto entra em P2-02. Entretanto, escreva para info@upropertymarket.pt — respondemos por ordem de chegada."
-            align="center"
-          />
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
+              gap: "clamp(1.5rem, 4vw, 3rem)",
+              alignItems: "start",
+            }}
+          >
+            <SectionHeading title={CONTACT.title} body={CONTACT.body} />
+            <ContactForm onSubmit={onContact} />
+          </div>
         </SiteSection>
       </main>
 

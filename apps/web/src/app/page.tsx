@@ -7,6 +7,7 @@ import { HomeSections } from "../components/site/HomeSections";
 import { getLaunchMode } from "../lib/launch-mode";
 import { getPublicPlans } from "../lib/public-plans";
 import { setLocalePreference } from "./actions/preferences";
+import { submitContact } from "./pre-inscricao/actions";
 
 /** Metadados a partir do `seo.ts` desta rota (P2-06). */
 export function generateMetadata() {
@@ -43,6 +44,7 @@ export default async function HomePage() {
       plans={plans}
       locale={locale}
       onLocaleChange={setLocalePreference}
+      onContact={submitContact}
     />
   );
 }

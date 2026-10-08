@@ -154,13 +154,19 @@ function Ecra({ theme, children }: { theme: "light" | "dark"; children: ReactNod
 /** Trocar o idioma dentro de uma storyboard não leva a lado nenhum. */
 const semEfeito = () => undefined;
 
-/** O formulário do canvas não submete: devolve o estado inicial. */
+/** Os formulários do canvas não submetem: devolvem o estado inicial. */
 const semSubmissao = async () => ({});
 
 function Home({ theme, launchMode }: { theme: "light" | "dark"; launchMode: "pre" | "post" }) {
   return (
     <Ecra theme={theme}>
-      <HomeSections launchMode={launchMode} plans={PLANOS} locale="pt" onLocaleChange={semEfeito} />
+      <HomeSections
+        launchMode={launchMode}
+        plans={PLANOS}
+        locale="pt"
+        onLocaleChange={semEfeito}
+        onContact={semSubmissao}
+      />
     </Ecra>
   );
 }
