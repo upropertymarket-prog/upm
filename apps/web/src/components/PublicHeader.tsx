@@ -60,7 +60,12 @@ export function PublicHeader({
       ) : null}
 
       <header className="upm-topbar">
-        <div className="upm-topbar__inner">
+        {/* `column-gap` só aqui, por cima do `gap: var(--sp-6)` que
+            `.upm-topbar__inner` dá a toda a app: a barra do site público leva
+            marca, seis âncoras, idioma, tema e CTA na mesma linha, e com o
+            espaçamento da app os blocos ficavam encostados. Ajustado no canvas
+            a 12 out 2026. */}
+        <div className="upm-topbar__inner" style={{ columnGap: "48px" }}>
           <Link href="/" aria-label="UProperty Market">
             <Brand />
           </Link>
