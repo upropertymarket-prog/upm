@@ -46,6 +46,11 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(min(11rem, 100%), 1fr))",
         gap: "var(--sp-4)",
+        // Ajustado no canvas a 12 out 2026: a grelha quebra para duas e três
+        // linhas conforme a largura, e o espaçamento entre colunas deixava as
+        // linhas demasiado juntas quando isso acontecia. A coluna fica no
+        // `gap` acima; só a linha sobe.
+        rowGap: "16px",
         alignItems: "end",
         padding: "var(--sp-5)",
         borderRadius: "var(--r-lg)",
