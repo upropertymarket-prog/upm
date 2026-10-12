@@ -41,6 +41,21 @@ import {
  * `/cookies` (P11-07 antecipada). Proteção de Dados fica para quando tiver
  * página; o `Ecrans.tsx` explica porquê.
  *
+ * **12 out 2026 — Termos, Privacidade e Cookies levam a barra e o rodapé do
+ * site público.** São páginas do `www`, e revê-las sem o menu e o rodapé é
+ * rever meia página. A correção começou na app: `LegalDocumentPage` servia o
+ * documento sozinho, e agora serve-o com a mesma moldura de `/imoveis`.
+ *
+ * O **contrato** não leva nenhuma das duas: leva o `AuthShell`, o invólucro do
+ * registo. Decisão do cliente a 12 out 2026 — o contrato tem de ser mostrado
+ * **antes** de se entrar na app, e o shell da app só existe depois do login.
+ *
+ * **Estas duas storyboards são proposta, não retrato.** A rota `/plano/contrato`
+ * de hoje é autenticada e serve a cópia do contrato já celebrado; o que falta é
+ * o documento completo no momento da adesão, onde hoje só há um resumo e uma
+ * caixa de aceitação. O `Contrato.tsx` tem o relato das três versões por que
+ * isto passou.
+ *
  * O **contrato de adesão** entrou a 7 out 2026 (doc 13), e a rota
  * `/plano/contrato` foi implementada no mesmo dia. É o único destes quatro
  * documentos que vive na app autenticada e não no site público — está aqui
@@ -90,13 +105,13 @@ export default function LegalCanvas() {
 
       <Storyboard
         id="ContratoClaro"
-        name="Contrato de adesão · Claro (/plano/contrato)"
+        name="Contrato de adesão · Claro (proposta: antes do login)"
         component={ContratoClaro}
         layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ContratoEscuro"
-        name="Contrato de adesão · Escuro (/plano/contrato)"
+        name="Contrato de adesão · Escuro (proposta: antes do login)"
         component={ContratoEscuro}
         layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />

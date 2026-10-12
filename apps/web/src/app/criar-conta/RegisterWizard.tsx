@@ -55,6 +55,28 @@ export type RegisterWizardProps = {
   plans: RegisterPlan[];
   /** `null` quando não há versão publicada — a contratação não pode avançar. */
   terms: RegisterTerms | null;
+  /**
+   * Estado de arranque do assistente. **A página real não o passa** — quem
+   * chega a `/criar-conta` começa sempre no Perfil, e é assim que deve ser.
+   *
+   * Existe para o canvas, pela mesma razão que `AppChrome` tem
+   * `liveNotifications`: o passo da Contratação é o momento em que a pessoa
+   * aceita o contrato e autoriza o pagamento, e era o único ecrã do registo
+   * que **nenhuma storyboard conseguia mostrar** — para lá chegar é preciso
+   * escolher perfil, preencher a conta e escolher plano, e uma captura não
+   * clica. Sem isto, o ecrã mais delicado do produto revia-se no browser ou
+   * não se revia.
+   *
+   * Não abre caminho nenhum: tudo o que fixa é estado de interface que o
+   * utilizador podia pôr sozinho em três cliques. A validação continua toda no
+   * servidor (08 §7.8), que não lê nada daqui.
+   */
+  initialSelection?: {
+    step?: Step;
+    role?: ProfileChoice;
+    planSlug?: string;
+    interval?: "month" | "year";
+  };
 };
 
 function money(cents: number, locale: string) {
@@ -75,13 +97,15 @@ function money(cents: number, locale: string) {
  * com o valor que vem da configuração (12 meses desde 7 out 2026). Quando não
  * houver nenhum, mostra-se a ausência dele — nunca um zero (P9-09).
  */
-export function RegisterWizard({ action, plans, terms }: RegisterWizardProps) {
+export function RegisterWizard({ action, plans, terms, initialSelection }: RegisterWizardProps) {
   const t = useTranslations("auth");
   const tc = useTranslations("auth.register.contract");
-  const [step, setStep] = useState<Step>("profile");
-  const [role, setRole] = useState<ProfileChoice | null>(null);
-  const [planSlug, setPlanSlug] = useState<string | null>(null);
-  const [interval, setInterval] = useState<"month" | "year">("month");
+  const [step, setStep] = useState<Step>(initialSelection?.step ?? "profile");
+  const [role, setRole] = useState<ProfileChoice | null>(initialSelection?.role ?? null);
+  const [planSlug, setPlanSlug] = useState<string | null>(initialSelection?.planSlug ?? null);
+  const [interval, setInterval] = useState<"month" | "year">(
+    initialSelection?.interval ?? "month",
+  );
   const [state, formAction, pending] = useActionState(action, initialState);
 
   // Uma recusa de campo devolve o passo onde o campo vive, para o utilizador

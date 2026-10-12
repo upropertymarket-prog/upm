@@ -138,6 +138,52 @@ function CriarConta({ theme }: { theme: "light" | "dark" }) {
   );
 }
 
+/**
+ * O passo da **Contratação** — o quarto do assistente (P9-02, P9-09).
+ * =========================================================================
+ * É o momento em que a pessoa aceita o contrato e autoriza o pagamento, e até
+ * 12 out 2026 não existia em storyboard nenhuma: `CriarConta` arranca no
+ * Perfil, e para chegar ao quarto passo é preciso escolher perfil, preencher a
+ * conta e escolher plano — coisas que uma captura não faz. O ecrã mais
+ * delicado do registo revia-se no browser ou não se revia.
+ *
+ * **Isto é pré-login, e é esse o ponto.** O contrato de adesão mostra-se aqui,
+ * dentro do `AuthShell`, antes de existir conta — nada de `AppChrome`, que só
+ * aparece depois de entrar. O `/plano/contrato` do canvas `legal` é o outro
+ * momento: a cópia do contrato **já celebrado**, consultável pelo titular.
+ *
+ * O `initialSelection` só fixa o estado de interface que o utilizador poria
+ * sozinho em três cliques — perfil de proprietário, Smarter, mensal. É o
+ * mesmo recurso que `AppChrome` usa com `liveNotifications`.
+ */
+function Contratacao({ theme }: { theme: "light" | "dark" }) {
+  return (
+    <Ecra theme={theme}>
+      <AuthShell
+        width="lg"
+        switchPrompt="Já tem conta?"
+        switchHref="/entrar"
+        switchLabel="Entrar"
+        legalLabel="Termos e Condições"
+        privacyLabel="Política de Privacidade"
+        cookiesLabel="Política de Cookies"
+      >
+        <RegisterWizard
+          action={demoAction}
+          plans={demoPlans}
+          terms={demoTerms}
+          initialSelection={{
+            step: "contract",
+            role: "owner",
+            planSlug: "smarter-owner",
+            interval: "month",
+          }}
+        />
+      </AuthShell>
+    </Ecra>
+  );
+}
+
 function Verificacao({ theme }: { theme: "light" | "dark" }) {
   return (
     <Ecra theme={theme}>
@@ -203,6 +249,9 @@ export const EntrarClaro = () => <Entrar theme="light" />;
 export const EntrarEscuro = () => <Entrar theme="dark" />;
 export const CriarContaClaro = () => <CriarConta theme="light" />;
 export const CriarContaEscuro = () => <CriarConta theme="dark" />;
+
+export const ContratacaoClaro = () => <Contratacao theme="light" />;
+export const ContratacaoEscuro = () => <Contratacao theme="dark" />;
 export const VerificacaoClaro = () => <Verificacao theme="light" />;
 export const VerificacaoEscuro = () => <Verificacao theme="dark" />;
 export const PedirRecuperacaoClaro = () => <PedirRecuperacao theme="light" />;

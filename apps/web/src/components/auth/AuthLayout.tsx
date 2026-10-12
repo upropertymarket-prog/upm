@@ -28,6 +28,11 @@ const WIDTHS = {
   sm: "max-w-sm",
   md: "max-w-md",
   lg: "max-w-lg",
+  // Para um documento, não para um formulário: o contrato de adesão tem tabelas
+  // de duas colunas e `lg` partia cada valor em três linhas. É a mesma largura
+  // que as páginas legais usam (`LegalDocumentView`), porque é o mesmo tipo de
+  // texto — longo, para ler, não para preencher.
+  xl: "max-w-3xl",
 } as const;
 
 export type AuthCardWidth = keyof typeof WIDTHS;

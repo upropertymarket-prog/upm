@@ -1,10 +1,18 @@
 import { NextIntlClientProvider } from "next-intl";
+import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
+import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 
+import { AuthShell } from "../../../../apps/web/src/components/auth/AuthLayout";
 import {
   SubscriptionAgreement,
   type SubscriptionAgreementData,
 } from "../../../../apps/app/src/components/billing/SubscriptionAgreement";
 import ptMessages from "../../../../packages/config/messages/pt.json";
+// O travão de navegação vive no canvas do Proprietário e é importado daqui em
+// vez de copiado: é o mesmo problema e a mesma solução. Se vier a ser preciso
+// num terceiro canvas, muda-se para uma pasta partilhada — a dois chamadores,
+// mover já seria mexer em seis ficheiros para arrumar um.
+import { NoNavigation } from "../proprietario/NoNavigation";
 
 /**
  * Contrato de adesão — claro e escuro (doc 13).
@@ -69,26 +77,52 @@ const contrato: SubscriptionAgreementData = {
 
 /**
  * O tema fixa-se num `data-theme` à volta de cada ecrã, **não** no
- * `documentElement`: as storyboards partilham o documento do host. O wrapper
- * pinta `bg-bg` e garante `min-h-screen` porque na app é o `<body>` que dá o
- * fundo, e dentro de uma storyboard não há `<body>` próprio.
+ * `documentElement`: as storyboards partilham o documento do host.
  *
- * **E repõe `text-text`**, pela mesma razão: `.upm-pagehead__title` não declara
- * cor nenhuma — herda-a —, e quem lha dá na app é o `AppShell`. Sem o shell, o
- * título do contrato saía quase invisível. O componente não está errado; é a
- * moldura que lhe falta aqui.
+ * **12 out 2026 — o enquadramento é o pré-login, por decisão do cliente.** Esta
+ * storyboard passou por três versões no mesmo dia, e vale a pena o registo:
  *
- * O `max-w-3xl` repete o que a página fará: este ecrã vive dentro do
- * `AppShell`, mas o shell não entra aqui — o que se revê é o documento.
+ * 1. documento sozinho, sem moldura nenhuma;
+ * 2. dentro do `AppChrome`, por ser o que a rota `/plano/contrato` faz hoje;
+ * 3. dentro do `AuthShell` — **esta** —, porque o contrato tem de ser mostrado
+ *    **antes** de a pessoa entrar na app, e o shell só existe depois do login.
+ *
+ * Ou seja: o que esta storyboard mostra **não é a rota de hoje**, é a proposta.
+ * Hoje `/plano/contrato` serve a cópia do contrato já celebrado, autenticada e
+ * com shell; o que falta é o documento **completo** aparecer no momento da
+ * adesão, onde hoje só há um resumo de seis linhas e uma caixa de aceitação
+ * (`RegisterWizard`, passo 4 — ver a storyboard "Contratação" no canvas de
+ * Autenticação). É esse ecrã por construir que isto desenha.
+ *
+ * Quando for implementado, a moldura é a do registo: `AuthShell`, o mesmo que
+ * envolve os quatro passos. Daí o `switchPrompt` e os links legais no fundo
+ * serem os de `/criar-conta` — não é decoração copiada, é o mesmo invólucro.
  */
 function Ecra({ theme }: { theme: "light" | "dark" }) {
   return (
-    <div data-theme={theme} className="min-h-screen bg-bg text-text">
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        <main className="mx-auto w-full max-w-3xl px-4 py-16">
-          <SubscriptionAgreement data={contrato} />
-        </main>
-      </NextIntlClientProvider>
+    <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>
+              <AuthShell
+                // `xl` e não o `lg` do registo: um contrato é documento, não
+                // formulário — a `lg` as tabelas de duas colunas partiam cada
+                // valor em três linhas.
+                width="xl"
+                switchPrompt="Já tem conta?"
+                switchHref="/entrar"
+                switchLabel="Entrar"
+                legalLabel="Termos e Condições"
+                privacyLabel="Política de Privacidade"
+                cookiesLabel="Política de Cookies"
+              >
+                <SubscriptionAgreement data={contrato} />
+              </AuthShell>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }

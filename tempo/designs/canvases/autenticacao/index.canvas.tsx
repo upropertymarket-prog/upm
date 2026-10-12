@@ -1,6 +1,8 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 
 import {
+  ContratacaoClaro,
+  ContratacaoEscuro,
   CriarContaClaro,
   CriarContaEscuro,
   EntrarClaro,
@@ -52,43 +54,60 @@ export default function AutenticacaoCanvas() {
         layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
       />
 
+      {/* O quarto passo do mesmo assistente, e não uma rota nova: fica logo a
+          seguir a `/criar-conta` porque é a continuação dela. É o ecrã onde o
+          contrato é aceite — pré-login, dentro do `AuthShell`, sem o shell da
+          app, que só aparece depois de entrar. */}
+      <Storyboard
+        id="ContratacaoClaro"
+        name="Contratação · Claro (/criar-conta — passo 4)"
+        component={ContratacaoClaro}
+        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ContratacaoEscuro"
+        name="Contratação · Escuro (/criar-conta — passo 4)"
+        component={ContratacaoEscuro}
+        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+      />
+
       <Storyboard
         id="VerificacaoClaro"
         name="Verificação · Claro (/criar-conta/verificacao)"
         component={VerificacaoClaro}
-        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="VerificacaoEscuro"
         name="Verificação · Escuro (/criar-conta/verificacao)"
         component={VerificacaoEscuro}
-        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="PedirRecuperacaoClaro"
         name="Pedir recuperação · Claro (/recuperar-palavra-passe)"
         component={PedirRecuperacaoClaro}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PedirRecuperacaoEscuro"
         name="Pedir recuperação · Escuro (/recuperar-palavra-passe)"
         component={PedirRecuperacaoEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="NovaPalavraPasseClaro"
         name="Nova palavra-passe · Claro (/recuperar-palavra-passe/confirmar)"
         component={NovaPalavraPasseClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="NovaPalavraPasseEscuro"
         name="Nova palavra-passe · Escuro (/recuperar-palavra-passe/confirmar)"
         component={NovaPalavraPasseEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
     </Canvas>
   );

@@ -63,7 +63,7 @@ export function HomeSections({
         locale={locale}
         onLocaleChange={onLocaleChange}
         launchMode={launchMode}
-        showAnchors
+        anchors="same-page"
       />
 
       <main>

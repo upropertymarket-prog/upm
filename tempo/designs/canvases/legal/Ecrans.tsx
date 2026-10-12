@@ -1,6 +1,9 @@
 import { NextIntlClientProvider } from "next-intl";
 
+import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { LegalDocumentView } from "../../../../apps/web/src/components/legal/LegalDocumentView";
+import { PublicHeader } from "../../../../apps/web/src/components/PublicHeader";
+import { SiteFooter } from "../../../../apps/web/src/components/site/SiteFooter";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import { COOKIES, PRIVACIDADE, TERMOS, VERSOES } from "./conteudo.generated";
 
@@ -29,10 +32,23 @@ import { COOKIES, PRIVACIDADE, TERMOS, VERSOES } from "./conteudo.generated";
  * dentro delas, como rola num browser. O `index.canvas.tsx` explica porque é que
  * o `intrinsicSizing` foi tentado e revertido.
  *
+ * **12 out 2026 — os três ecrãs passaram a ter a barra e o rodapé do site.** O
+ * cliente olhou para as storyboards e disse o óbvio: não se revê como vai ficar
+ * uma página do `www` sem o menu e o rodapé com que o visitante a vê. O que se
+ * corrigiu primeiro foi a **app** — `LegalDocumentPage` servia o documento
+ * sozinho —, e estes ecrãs limitam-se a mostrar o que a rota passou a fazer. Se
+ * só a storyboard tivesse mudado, estaria a mostrar uma página que não existe.
+ *
  * O tema fixa-se num `data-theme` à volta de cada ecrã, **não** no
  * `documentElement`: as storyboards partilham o documento do host, por isso
- * escrever na raiz faz a última a renderizar arrastar as outras todas. Não se
- * usa o `ThemeProvider` — leria o `localStorage`, partilhado pelo host.
+ * escrever na raiz faz a última a renderizar arrastar as outras todas.
+ *
+ * **O `ThemeProvider` entrou com o cabeçalho**, e só por causa dele: o
+ * `PublicHeader` tem o `ThemeToggle`, que chama `useTheme()` e rebenta sem
+ * provider. A ordem é a que o canvas `site-publico` já tinha encontrado —
+ * **provider por fora, `data-theme` por dentro** —, porque o atributo mais
+ * próximo é o que os tokens resolvem, e assim cada storyboard mantém o seu tema
+ * mesmo com o provider a escrever outro na raiz.
  *
  * O wrapper pinta `bg-bg` e garante `min-h-screen` porque a `page.tsx` real não
  * o faz: na app é o `<body>` que dá o fundo, e dentro de uma storyboard não há
@@ -50,13 +66,18 @@ const linhaVersao = (versao: string) => `Versão ${versao} · em vigor desde 07/
 
 function Ecra({ theme, children }: { theme: "light" | "dark"; children: React.ReactNode }) {
   return (
-    <div data-theme={theme} className="min-h-screen bg-bg">
-      <NextIntlClientProvider locale="pt" messages={ptMessages}>
-        {children}
-      </NextIntlClientProvider>
-    </div>
+    <NextIntlClientProvider locale="pt" messages={ptMessages}>
+      <ThemeProvider initialChoice={theme}>
+        <div data-theme={theme} data-app="web" className="min-h-screen bg-bg text-text">
+          {children}
+        </div>
+      </ThemeProvider>
+    </NextIntlClientProvider>
   );
 }
+
+/** Trocar o idioma dentro de uma storyboard não leva a lado nenhum. */
+const semEfeito = () => undefined;
 
 function Documento({
   theme,
@@ -71,7 +92,13 @@ function Documento({
 }) {
   return (
     <Ecra theme={theme}>
+      {/* `launchMode="pre"` porque é o modo em que o site está hoje, faixa
+          incluída: é essa a página que alguém abre agora a partir da caixa de
+          aceitação ou do rodapé. Em `post` muda a faixa (desaparece) e o CTA
+          (`Criar conta`), e isso já se revê nas storyboards do site público. */}
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
       <LegalDocumentView title={title} versionLine={linhaVersao(versao)} markdown={markdown} />
+      <SiteFooter />
     </Ecra>
   );
 }

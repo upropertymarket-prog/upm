@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 
@@ -413,6 +414,54 @@ export function ImoveisSemResultados() {
   return <Imoveis theme="light" listings={[]} />;
 }
 
+export function ImoveisSemResultadosEscuro() {
+  return <Imoveis theme="dark" listings={[]} />;
+}
+
+/**
+ * `/imoveis` em **pré-lançamento** — o outro ramo inteiro da mesma rota.
+ *
+ * A `page.tsx` tem dois retornos: com catálogo e, em `pre`, uma página que diz
+ * que ainda não abriu e leva à pré-inscrição. Esse segundo ramo é o que
+ * **todos** os visitantes vão ver até ao lançamento — era o ecrã mais visto do
+ * site e não tinha storyboard nenhuma. Sem ela, o que se revia do Market era só
+ * o estado que ainda não existe.
+ */
+function ImoveisPreLancamento({ theme }: { theme: "light" | "dark" }) {
+  return (
+    <Ecra theme={theme}>
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
+      <main>
+        <SiteSection>
+          <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+            <SectionHeading
+              eyebrow={COMING_SOON.eyebrow}
+              title={COMING_SOON.title}
+              body={COMING_SOON.body}
+              align="center"
+            />
+            <FeatureGrid cards={COMING_SOON.cards} minColumn="14rem" />
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Link href="/pre-inscricao" className="upm-btn upm-btn--primary upm-btn--md">
+                {COMING_SOON.primaryCta}
+              </Link>
+            </div>
+          </div>
+        </SiteSection>
+      </main>
+      <SiteFooter />
+    </Ecra>
+  );
+}
+
+export function ImoveisPreLancamentoClaro() {
+  return <ImoveisPreLancamento theme="light" />;
+}
+
+export function ImoveisPreLancamentoEscuro() {
+  return <ImoveisPreLancamento theme="dark" />;
+}
+
 /**
  * `/imoveis/[slug]` — a ficha (P2-05).
  *
@@ -437,29 +486,46 @@ export function FichaEscuro() {
   return <Ficha theme="dark" />;
 }
 
-export function PreInscricaoClaro() {
+function PreInscricao({ theme }: { theme: "light" | "dark" }) {
   return (
-    <Ecra theme="light">
-      <SiteSection>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
-            gap: "clamp(1.5rem, 4vw, 3rem)",
-            alignItems: "start",
-          }}
-        >
-          <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-            <SectionHeading
-              eyebrow={COMING_SOON.eyebrow}
-              title={COMING_SOON.title}
-              body={COMING_SOON.body}
-            />
-            <FeatureGrid cards={COMING_SOON.cards} minColumn="13rem" />
+    <Ecra theme={theme}>
+      {/* Cabeçalho e rodapé reproduzidos como na `page.tsx`: a página de
+          conversão do pré-lançamento tem navbar, e sem ela a storyboard
+          mostrava o formulário a flutuar — o visitante nunca o vê assim. Em
+          `pre` o cabeçalho é o que dá a saída para a home e para `/imoveis`,
+          por isso é parte do que se revê, não moldura decorativa. */}
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
+      <main>
+        <SiteSection>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
+              gap: "clamp(1.5rem, 4vw, 3rem)",
+              alignItems: "start",
+            }}
+          >
+            <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+              <SectionHeading
+                eyebrow={COMING_SOON.eyebrow}
+                title={COMING_SOON.title}
+                body={COMING_SOON.body}
+              />
+              <FeatureGrid cards={COMING_SOON.cards} minColumn="13rem" />
+            </div>
+            <PreRegistrationForm onSubmit={semSubmissao} />
           </div>
-          <PreRegistrationForm onSubmit={semSubmissao} />
-        </div>
-      </SiteSection>
+        </SiteSection>
+      </main>
+      <SiteFooter />
     </Ecra>
   );
+}
+
+export function PreInscricaoClaro() {
+  return <PreInscricao theme="light" />;
+}
+
+export function PreInscricaoEscuro() {
+  return <PreInscricao theme="dark" />;
 }

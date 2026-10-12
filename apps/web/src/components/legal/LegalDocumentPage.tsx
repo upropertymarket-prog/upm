@@ -3,6 +3,10 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { currentLegalDocument, type LegalDocumentKind } from "@upm/db/legal";
 
+import { setLocalePreference } from "../../app/actions/preferences";
+import { getLaunchMode } from "../../lib/launch-mode";
+import { PublicHeader } from "../PublicHeader";
+import { SiteFooter } from "../site/SiteFooter";
 import { LegalDocumentView } from "./LegalDocumentView";
 
 /**
@@ -19,6 +23,18 @@ import { LegalDocumentView } from "./LegalDocumentView";
  *
  * **Nenhuma das três está revista por advogado.** O aviso não é decorativo —
  * sai de `review_state`, e desaparece sozinho quando a revisão entrar.
+ *
+ * **12 out 2026 — passou a ter a barra e o rodapé do site público.** As três
+ * rotas serviam o documento sozinho, sem nada à volta: quem chegava ao fim dos
+ * Termos não tinha forma de voltar ao site, e quem lá chegava por link não via
+ * de que site se tratava. São páginas do `www` como `/imoveis` ou `/`, e levam
+ * a mesma moldura.
+ *
+ * O menu vem com as secções do site, apontadas à home (`/#precos`): a primeira
+ * versão trazia só a marca e o botão, e uma barra sem links não é navegação —
+ * quem abre os Termos a partir de um e-mail ficava sem forma de chegar a
+ * Preços ou a Contactos. O `PublicHeader` resolve-o com `anchors`, que escolhe
+ * o destino em vez de esconder o menu.
  */
 export async function LegalDocumentPage({
   kind,
@@ -29,20 +45,32 @@ export async function LegalDocumentPage({
   fallbackTitleKey: "termsTitle" | "privacyTitle" | "cookiesTitle";
 }) {
   const supabase = createClient(await cookies());
-  const [locale, t] = await Promise.all([getLocale(), getTranslations("legal")]);
+  const [locale, t, launchMode] = await Promise.all([
+    getLocale(),
+    getTranslations("legal"),
+    getLaunchMode(),
+  ]);
 
   const document = await currentLegalDocument(supabase, kind, locale);
 
+  const chrome = (conteudo: React.ReactNode) => (
+    <>
+      <PublicHeader locale={locale} onLocaleChange={setLocalePreference} launchMode={launchMode} />
+      {conteudo}
+      <SiteFooter />
+    </>
+  );
+
   if (!document) {
-    return (
+    return chrome(
       <main className="mx-auto w-full max-w-3xl px-4 py-16">
         <h1 className="text-xl font-semibold text-text">{t(fallbackTitleKey)}</h1>
         <p className="mt-4 text-sm text-muted">{t("unavailable")}</p>
-      </main>
+      </main>,
     );
   }
 
-  return (
+  return chrome(
     <LegalDocumentView
       title={document.title}
       versionLine={t("versionLine", {
@@ -52,6 +80,6 @@ export async function LegalDocumentPage({
           : "—",
       })}
       markdown={document.bodyMd}
-    />
+    />,
   );
 }

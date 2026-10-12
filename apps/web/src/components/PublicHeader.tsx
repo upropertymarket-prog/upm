@@ -19,20 +19,29 @@ import { NAV_ANCHORS, PRE_LAUNCH_BANNER } from "../lib/site-content";
  * da Fase 5". É esta — as secções, a faixa de pré-lançamento e o CTA por modo
  * entraram agora, com o Site público (D59).
  *
- * As âncoras só aparecem quando há secções para onde saltar, ou seja na home.
- * Numa página legal, um menu que promete "Preços" e não vai a lado nenhum é
- * pior do que não ter menu.
+ * **As âncoras aparecem em todas as páginas do site** (12 out 2026). Até aqui
+ * só a home as mostrava, com o argumento de que "um menu que promete Preços e
+ * não vai a lado nenhum é pior do que não ter menu". O argumento estava certo e
+ * a conclusão errada: o problema era o `href`, não o menu. Quem abre `/termos`
+ * ou `/imoveis` fica sem **nenhuma** forma de voltar às secções do site — e uma
+ * barra com marca e um botão só não é navegação.
+ *
+ * Daí `anchors`, que diz **para onde** a âncora aponta e não se existe:
+ *
+ * - `"same-page"` — na home, `#precos`: rola, sem recarregar nada.
+ * - `"home"` — fora dela, `/#precos`: vai à home e cai na secção.
+ * - `"none"` — quando não há sítio para onde mandar a pessoa.
  */
 export function PublicHeader({
   locale,
   onLocaleChange,
   launchMode = "pre",
-  showAnchors = false,
+  anchors = "home",
 }: {
   locale: string;
   onLocaleChange: (locale: string) => void | Promise<void>;
   launchMode?: "pre" | "post";
-  showAnchors?: boolean;
+  anchors?: "none" | "same-page" | "home";
 }) {
   const t = useTranslations();
   const ctaHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
@@ -70,7 +79,7 @@ export function PublicHeader({
             <Brand />
           </Link>
 
-          {showAnchors ? (
+          {anchors !== "none" ? (
             <nav
               aria-label="Secções"
               style={{
@@ -84,7 +93,7 @@ export function PublicHeader({
               {NAV_ANCHORS.map((anchor) => (
                 <a
                   key={anchor.id}
-                  href={`#${anchor.id}`}
+                  href={anchors === "same-page" ? `#${anchor.id}` : `/#${anchor.id}`}
                   style={{ fontSize: "var(--fs-body)", color: "var(--text)", whiteSpace: "nowrap" }}
                 >
                   {anchor.label}
