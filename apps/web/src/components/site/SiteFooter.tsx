@@ -105,6 +105,10 @@ export function SiteFooter() {
             borderTop: "1px solid var(--border)",
             fontSize: "var(--fs-body)",
             color: "var(--muted)",
+            // Centrado no canvas a 12 out 2026: é a última linha do rodapé,
+            // sozinha debaixo do traço, e alinhada à esquerda ficava a puxar
+            // o olho para um canto sem nada do outro lado.
+            textAlign: "center",
           }}
         >
           {FOOTER.copyright}
