@@ -1,11 +1,18 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 
 import {
+  FichaClaro,
+  FichaEscuro,
+  ImoveisClaro,
+  ImoveisEscuro,
+  ImoveisSemResultados,
   PosLancamentoClaro,
   PosLancamentoEscuro,
   PreInscricaoClaro,
   PreLancamentoClaro,
   PreLancamentoEscuro,
+  RecentesClaro,
+  RecentesEscuro,
 } from "./Ecrans";
 
 /**
@@ -38,6 +45,11 @@ import {
  * Daí a regra: **sem `intrinsicSizing`**, 1440 × 900, pares claro/escuro com
  * 80 px entre si e 980 px entre linhas (900 de moldura + 80 de goteira), que é
  * exatamente o passo do canvas `legal`.
+ *
+ * O Market público (`/imoveis`) e a ficha entraram a 12 out 2026, com P2-05.
+ * "Sem resultados" tem storyboard própria porque é o estado que um visitante
+ * encontra ao filtrar por uma localidade sem anúncios — acontece desde o
+ * primeiro dia e é o mais fácil de deixar feio.
  */
 export default function SitePublicoCanvas() {
   return (
@@ -73,6 +85,54 @@ export default function SitePublicoCanvas() {
         name="Pré-inscrição · claro (/pre-inscricao)"
         component={PreInscricaoClaro}
         layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+      />
+
+      {/* A secção de imóveis recentes da home, isolada: na moldura de 900 px
+          ela fica abaixo da dobra e a captura da home nunca a mostra. */}
+      <Storyboard
+        id="RecentesClaro"
+        name="Home · Imóveis mais recentes · claro"
+        component={RecentesClaro}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="RecentesEscuro"
+        name="Home · Imóveis mais recentes · escuro"
+        component={RecentesEscuro}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="ImoveisClaro"
+        name="Market público · claro (/imoveis)"
+        component={ImoveisClaro}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ImoveisEscuro"
+        name="Market público · escuro (/imoveis)"
+        component={ImoveisEscuro}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="ImoveisSemResultados"
+        name="Market público · sem resultados (/imoveis?cidade=Guarda)"
+        component={ImoveisSemResultados}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="FichaClaro"
+        name="Ficha de imóvel · claro (/imoveis/[slug])"
+        component={FichaClaro}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="FichaEscuro"
+        name="Ficha de imóvel · escuro (/imoveis/[slug])"
+        component={FichaEscuro}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
     </Canvas>
   );

@@ -8,9 +8,11 @@ import { Faq } from "./Faq";
 import { FeatureGrid } from "./FeatureGrid";
 import { Hero } from "./Hero";
 import { Pricing, type PublicPlan } from "./Pricing";
+import { RecentListings } from "./RecentListings";
 import { SectionHeading, SiteSection } from "./SiteSection";
 import { SiteFooter } from "./SiteFooter";
 import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
+import type { PublicListingCard } from "../../lib/public-listings";
 import { ABOUT, AUDIENCES, BUSINESS, COMING_SOON, CONTACT, PLATFORM } from "../../lib/site-content";
 
 /**
@@ -37,6 +39,12 @@ export type HomeSectionsProps = {
   onLocaleChange: (locale: string) => void | Promise<void>;
   /** `submitContact` de `pre-inscricao/actions.ts`; no canvas, um no-op. */
   onContact: (previous: LeadFormState, formData: FormData) => Promise<LeadFormState>;
+  /**
+   * Os seis últimos publicados (P2-05). Só se usa em `post`; em `pre` chega
+   * vazia e nunca se lê. Entra por prop como tudo o resto — se esta lista
+   * fosse buscada aqui dentro, a home voltava a ser irrenderizável no canvas.
+   */
+  recentListings?: PublicListingCard[];
 };
 
 export function HomeSections({
@@ -45,6 +53,7 @@ export function HomeSections({
   locale,
   onLocaleChange,
   onContact,
+  recentListings = [],
 }: HomeSectionsProps) {
   const signupHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
 
@@ -189,10 +198,16 @@ export function HomeSections({
           </div>
         </SiteSection>
 
-        {/* "Em breve" só existe em pré-lançamento. Em pós-lançamento o lugar é
-            dos "Imóveis mais recentes" (P2-05), que ainda não existem — por
-            isso a secção simplesmente não se mostra, em vez de mostrar uma
-            promessa falsa a quem já pode ver imóveis. */}
+        {/* "Em breve" em pré-lançamento, "Imóveis mais recentes" depois — a
+            troca que 04 §2.1 pede. Em pós-lançamento sem nada publicado o
+            `RecentListings` devolve `null` e a secção desaparece: uma grelha
+            vazia sob o título diria que o site está partido. */}
+        {launchMode === "post" ? (
+          <SiteSection id="imoveis-recentes">
+            <RecentListings listings={recentListings} />
+          </SiteSection>
+        ) : null}
+
         {launchMode === "pre" ? (
           <SiteSection>
             <div style={{ display: "grid", gap: "var(--sp-6)" }}>

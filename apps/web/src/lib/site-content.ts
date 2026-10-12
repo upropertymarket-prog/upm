@@ -113,6 +113,18 @@ export const COMING_SOON = {
   ] satisfies FeatureCard[],
 } as const;
 
+/**
+ * "Imóveis mais recentes" — o que ocupa o lugar de `COMING_SOON` depois do
+ * lançamento (04 §2.1). Texto novo e não herdado do protótipo: o protótipo é
+ * de pré-lançamento e não tem esta secção.
+ */
+export const RECENT_LISTINGS = {
+  eyebrow: "Imóveis",
+  title: "Imóveis mais recentes",
+  body: "Os últimos anúncios publicados pelos proprietários. Fale diretamente com quem vende, sem intermediários e sem comissões.",
+  cta: "Ver todos os imóveis",
+} as const;
+
 export const AUDIENCES = {
   tabs: [
     { id: "particulares", label: "Particulares" },

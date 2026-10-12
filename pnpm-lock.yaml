@@ -194,7 +194,7 @@ importers:
         version: 19.1.0(react@19.1.0)
       tempo-sdk:
         specifier: 0.0.51
-        version: 0.0.51(@babel/core@7.29.7)(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(next@15.5.26(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.63.5)(vite@8.3.1(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+        version: 0.0.51(@babel/core@7.29.7)(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(next@15.5.26(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.63.5)(vite@8.3.1(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -241,6 +241,9 @@ importers:
       '@upm/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      maplibre-gl:
+        specifier: ^6.11.2
+        version: 6.11.2
       next:
         specifier: 15.5.26
         version: 15.5.26(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -255,7 +258,7 @@ importers:
         version: 19.1.0(react@19.1.0)
       tempo-sdk:
         specifier: 0.0.51
-        version: 0.0.51(@babel/core@7.29.7)(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(next@15.5.26(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.63.5)(vite@8.3.1(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
+        version: 0.0.51(@babel/core@7.29.7)(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(next@15.5.26(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.63.5)(vite@8.3.1(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3

@@ -6,8 +6,17 @@ import { HomeSections } from "../../../../apps/web/src/components/site/HomeSecti
 import { PreRegistrationForm } from "../../../../apps/web/src/app/pre-inscricao/PreRegistrationForm";
 import { FeatureGrid } from "../../../../apps/web/src/components/site/FeatureGrid";
 import { SectionHeading, SiteSection } from "../../../../apps/web/src/components/site/SiteSection";
+import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";
+import { ListingsBrowser } from "../../../../apps/web/src/components/site/ListingsBrowser";
+import { PublicHeader } from "../../../../apps/web/src/components/PublicHeader";
+import { RecentListings } from "../../../../apps/web/src/components/site/RecentListings";
+import { SiteFooter } from "../../../../apps/web/src/components/site/SiteFooter";
 import { COMING_SOON } from "../../../../apps/web/src/lib/site-content";
 import type { PublicPlan } from "../../../../apps/web/src/components/site/Pricing";
+import type {
+  PublicListingCard,
+  PublicListingDetail,
+} from "../../../../apps/web/src/lib/public-listings";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 
 /**
@@ -46,6 +55,139 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  *  3. **O envoltório pinta o fundo e garante `min-h-screen`**: na app é o
  *     `<body>` que o dá, e dentro de uma storyboard não há `<body>` próprio.
  */
+
+/**
+ * Imóveis de demonstração (P2-05).
+ *
+ * **Inventados, e pela mesma razão dos planos — mas por um motivo mais forte.**
+ * Verificado em staging a 12 out 2026: os 23 imóveis que lá estão são fixtures
+ * dos testes de faturação (`ref` a começar em `BILL-`), **todos em `draft`**,
+ * com título vazio, sem preço, sem localidade — e `property_media` está vazia,
+ * ou seja não existe **uma única fotografia** no projeto. `properties_public`
+ * filtra `status in ('active','featured')`, por isso o site público vê zero
+ * linhas, corretamente.
+ *
+ * Revê-se o ecrã com estes dados ou não se revê nenhum. O que a storyboard
+ * mostra é o enquadramento — a grelha, o cartão, o ritmo da ficha, a coluna de
+ * ação —, e isso é o que tem de estar certo antes de existirem imóveis reais.
+ *
+ * A capa fica `null` de propósito: sem fotografias no projeto, qualquer URL que
+ * se pusesse aqui seria um link morto, e o estado "sem fotografia" é o que o
+ * site vai mostrar nos primeiros anúncios de quem não carregar imagens.
+ */
+const IMOVEIS: PublicListingCard[] = [
+  {
+    id: "0f8fad5b-d9cb-469f-a165-70867728950e",
+    slug: "apartamento-t2-com-varanda-no-porto-0f8fad5b-d9cb-469f-a165-70867728950e",
+    title: "Apartamento T2 com varanda no Porto",
+    deal: "sale",
+    typology: "T2",
+    city: "Porto",
+    grossArea: 88,
+    bedrooms: 2,
+    bathrooms: 1,
+    priceCents: 24500000,
+    rentCents: null,
+    coverUrl: null,
+    publishedAt: "2026-10-10T09:00:00Z",
+  },
+  {
+    id: "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    slug: "moradia-t4-em-braga-1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    title: "Moradia T4 em Braga, com jardim",
+    deal: "sale",
+    typology: "T4",
+    city: "Braga",
+    grossArea: 210,
+    bedrooms: 4,
+    bathrooms: 3,
+    priceCents: 39000000,
+    rentCents: null,
+    coverUrl: null,
+    publishedAt: "2026-10-09T14:30:00Z",
+  },
+  {
+    id: "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+    slug: "t1-mobilado-em-lisboa-2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+    title: "T1 mobilado em Lisboa, junto ao metro",
+    deal: "rent",
+    typology: "T1",
+    city: "Lisboa",
+    grossArea: 46,
+    bedrooms: 1,
+    bathrooms: 1,
+    priceCents: null,
+    rentCents: 95000,
+    coverUrl: null,
+    publishedAt: "2026-10-08T11:15:00Z",
+  },
+  {
+    id: "3c4d5e6f-7a8b-4c9d-8e1f-2a3b4c5d6e7f",
+    slug: "estudio-em-coimbra-3c4d5e6f-7a8b-4c9d-8e1f-2a3b4c5d6e7f",
+    title: "Estúdio remodelado em Coimbra",
+    deal: "rent",
+    typology: "T0",
+    city: "Coimbra",
+    grossArea: 32,
+    bedrooms: 0,
+    bathrooms: 1,
+    priceCents: null,
+    rentCents: 58000,
+    coverUrl: null,
+    publishedAt: "2026-10-07T16:45:00Z",
+  },
+  {
+    id: "4d5e6f7a-8b9c-4d0e-9f2a-3b4c5d6e7f80",
+    slug: "quinta-com-2-hectares-em-evora-4d5e6f7a-8b9c-4d0e-9f2a-3b4c5d6e7f80",
+    title: "Quinta com 2 hectares em Évora",
+    deal: "sale",
+    typology: "T5+",
+    city: "Évora",
+    grossArea: 320,
+    bedrooms: 5,
+    bathrooms: 4,
+    priceCents: 58000000,
+    rentCents: null,
+    coverUrl: null,
+    publishedAt: "2026-10-06T10:00:00Z",
+  },
+  {
+    id: "5e6f7a8b-9c0d-4e1f-8a3b-4c5d6e7f8091",
+    slug: "t3-em-faro-a-500-m-da-praia-5e6f7a8b-9c0d-4e1f-8a3b-4c5d6e7f8091",
+    title: "T3 em Faro, a 500 m da praia",
+    deal: "sale",
+    typology: "T3",
+    city: "Faro",
+    grossArea: 124,
+    bedrooms: 3,
+    bathrooms: 2,
+    priceCents: 31500000,
+    rentCents: null,
+    coverUrl: null,
+    publishedAt: "2026-10-05T08:20:00Z",
+  },
+];
+
+/** A ficha do primeiro, com o que a view expõe além do cartão. */
+const FICHA: PublicListingDetail = {
+  ...IMOVEIS[0],
+  ref: "UPM-2026-0412",
+  description:
+    "Apartamento T2 no segundo andar, com varanda virada a sul e vista desafogada. Cozinha equipada, dois quartos com roupeiro e sala com acesso direto à varanda. Prédio com elevador, a cinco minutos a pé do metro.\n\nDisponível para visitas a partir do próximo mês. Falo diretamente com quem tiver interesse, sem intermediários.",
+  propertyType: "Apartamento",
+  condition: "Remodelado",
+  netArea: 74,
+  floor: "2.º",
+  yearBuilt: 1998,
+  energyCert: "B-",
+  condoFeeCents: 4500,
+  amenities: ["Varanda", "Elevador", "Cozinha equipada", "Roupeiros", "Vidros duplos"],
+  parish: "Bonfim",
+  district: "Porto",
+  // Ponto aproximado, que é o único que `properties_public` expõe (08 §2.7).
+  approx: { lon: -8.595, lat: 41.153, radiusM: 500 },
+  photoUrls: [],
+};
 
 /** Os preços de 07 §8.3 — ver a nota acima sobre porque não são os de staging. */
 const PLANOS: PublicPlan[] = [
@@ -166,6 +308,9 @@ function Home({ theme, launchMode }: { theme: "light" | "dark"; launchMode: "pre
         locale="pt"
         onLocaleChange={semEfeito}
         onContact={semSubmissao}
+        // Em `pre` a secção não existe e a lista nunca é lida; passar sempre
+        // mantém as duas storyboards com o mesmo chamador.
+        recentListings={IMOVEIS}
       />
     </Ecra>
   );
@@ -195,6 +340,103 @@ export function PosLancamentoEscuro() {
  * rever — o formulário, os consentimentos separados, os quatro cartões — são
  * os componentes reais.
  */
+/**
+ * "Imóveis mais recentes" — a secção que substitui "Em breve" em pós-lançamento.
+ *
+ * Storyboard própria e não só dentro da home: na moldura de 1440 × 900 a
+ * secção fica muito abaixo da dobra, e a captura da home nunca a mostra. Foi
+ * isso que aconteceu na primeira revisão de P2-05 — a secção estava feita e
+ * não havia **nenhuma** captura onde se visse. Uma storyboard de uma secção é
+ * a forma de a poder olhar.
+ */
+function Recentes({ theme }: { theme: "light" | "dark" }) {
+  return (
+    <Ecra theme={theme}>
+      <SiteSection>
+        <RecentListings listings={IMOVEIS} />
+      </SiteSection>
+    </Ecra>
+  );
+}
+
+export function RecentesClaro() {
+  return <Recentes theme="light" />;
+}
+
+export function RecentesEscuro() {
+  return <Recentes theme="dark" />;
+}
+
+/**
+ * `/imoveis` — o Market público (P2-05).
+ *
+ * `ListingsBrowser` é o mesmo componente que a `page.tsx` renderiza; o que ela
+ * faz e aqui não se faz é validar os parâmetros do URL e consultar a base de
+ * dados. Duas storyboards, porque os dois estados que se revêem são diferentes:
+ * com resultados e sem nenhum — o segundo é o que um visitante vê ao filtrar
+ * por uma localidade onde ainda não há nada, e é fácil de deixar feio.
+ */
+function Imoveis({ theme, listings }: { theme: "light" | "dark"; listings: PublicListingCard[] }) {
+  return (
+    <Ecra theme={theme}>
+      {/* A moldura da página — cabeçalho, `main`, rodapé — é reproduzida aqui
+          porque vive na `page.tsx` e não no `ListingsBrowser`. São três
+          elementos e nenhum conteúdo: sem eles a storyboard mostrava a lista a
+          flutuar, sem a navbar com que o visitante a vê. O conteúdo em si
+          continua a ser o componente real. */}
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="post" />
+      <main>
+        <SiteSection>
+          <ListingsBrowser
+            listings={listings}
+            total={listings.length}
+            page={1}
+            pageCount={1}
+            raw={listings.length === 0 ? { cidade: "Guarda" } : {}}
+          />
+        </SiteSection>
+      </main>
+      <SiteFooter />
+    </Ecra>
+  );
+}
+
+export function ImoveisClaro() {
+  return <Imoveis theme="light" listings={IMOVEIS} />;
+}
+
+export function ImoveisEscuro() {
+  return <Imoveis theme="dark" listings={IMOVEIS} />;
+}
+
+export function ImoveisSemResultados() {
+  return <Imoveis theme="light" listings={[]} />;
+}
+
+/**
+ * `/imoveis/[slug]` — a ficha (P2-05).
+ *
+ * O mapa aparece como o visitante o vê de início: fechado, com o aviso de que
+ * carregá-lo expõe o IP ao OpenFreeMap. É deliberado que a storyboard mostre
+ * esse estado e não o mapa aberto — é o estado por omissão da página, e é o que
+ * se revê.
+ */
+function Ficha({ theme }: { theme: "light" | "dark" }) {
+  return (
+    <Ecra theme={theme}>
+      <ListingDetail listing={FICHA} locale="pt" launchMode="post" onLocaleChange={semEfeito} />
+    </Ecra>
+  );
+}
+
+export function FichaClaro() {
+  return <Ficha theme="light" />;
+}
+
+export function FichaEscuro() {
+  return <Ficha theme="dark" />;
+}
+
 export function PreInscricaoClaro() {
   return (
     <Ecra theme="light">

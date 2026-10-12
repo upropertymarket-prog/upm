@@ -6,6 +6,7 @@ import { seo } from "./seo";
 import { HomeSections } from "../components/site/HomeSections";
 import { getLaunchMode } from "../lib/launch-mode";
 import { getPublicPlans } from "../lib/public-plans";
+import { getRecentListings } from "../lib/public-listings";
 import { setLocalePreference } from "./actions/preferences";
 import { submitContact } from "./pre-inscricao/actions";
 
@@ -38,6 +39,10 @@ export default async function HomePage() {
     getPublicPlans(),
   ]);
 
+  // Só em pós-lançamento. Em `pre` a secção não existe, e pedir seis imóveis
+  // que a página não vai mostrar seria uma consulta por cada visita à home.
+  const recentListings = launchMode === "post" ? await getRecentListings(6) : [];
+
   return (
     <HomeSections
       launchMode={launchMode}
@@ -45,6 +50,7 @@ export default async function HomePage() {
       locale={locale}
       onLocaleChange={setLocalePreference}
       onContact={submitContact}
+      recentListings={recentListings}
     />
   );
 }
