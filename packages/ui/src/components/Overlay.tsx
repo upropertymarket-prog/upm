@@ -9,10 +9,29 @@ import { useDismissable } from "../lib/useDismissable";
 import { useOptionalTheme } from "../theme/ThemeProvider";
 import { Button } from "./Button";
 
-/** Só monta o portal depois de haver `document` — os overlays são client-only. */
+/**
+ * Só monta o portal depois de haver `document` — os overlays são client-only.
+ *
+ * **O destino é o `body`, exceto onde alguém o reclamar com
+ * `data-upm-overlay-root`.** Na aplicação nada tem esse atributo, logo nada
+ * muda: modais e drawers continuam a sair no fim do `body`, por cima de tudo.
+ *
+ * Quem o usa são as storyboards (13 out 2026). O canvas projeta **a raiz da
+ * storyboard**, e um portal para o `body` cai fora dessa raiz: as storyboards
+ * do Detalhe do utilizador, do Detalhe de moderação e da Confirmação de PIN
+ * mostravam o ecrã de fundo e nenhuma sobreposição — uma storyboard que não
+ * mostra o seu próprio assunto. Com o atributo no invólucro do canvas, o
+ * overlay nasce dentro da raiz projetada e vê-se.
+ *
+ * É propositadamente um atributo e não uma prop: assim o componente de produto
+ * continua a ser chamado exatamente como é chamado na app, que é a única forma
+ * de a storyboard provar alguma coisa sobre ele.
+ */
 function usePortalTarget(): HTMLElement | null {
   const [target, setTarget] = useState<HTMLElement | null>(null);
-  useEffect(() => setTarget(document.body), []);
+  useEffect(() => {
+    setTarget(document.querySelector<HTMLElement>("[data-upm-overlay-root]") ?? document.body);
+  }, []);
   return target;
 }
 

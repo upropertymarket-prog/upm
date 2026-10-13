@@ -89,7 +89,13 @@ function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?
   };
 
   return (
-    <div data-theme={theme} style={{ minHeight: "1050px", background: "var(--bg)" }}>
+    // `data-upm-overlay-root`: o drawer do detalhe nasce aqui dentro e não no
+    // `body` — ver a nota de `usePortalTarget` em `packages/ui`.
+    <div
+      data-theme={theme}
+      data-upm-overlay-root
+      style={{ minHeight: "1050px", background: "var(--bg)" }}
+    >
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <ToastProvider>

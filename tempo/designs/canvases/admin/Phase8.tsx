@@ -31,6 +31,12 @@ const dashboard: AdminDashboardPayload = {
     featured_properties: 8,
     pending_moderation: 4,
     new_leads: 12,
+    // O 4.º KPI do Painel (04 §8.5), que P10-02 fez nascer ao criar `tickets` e
+    // pagar D48. Ficou de fora desta fixture nesse dia, e as duas storyboards do
+    // Painel passaram a rebentar em `summary.open_bugs.toLocaleString()` — o
+    // ecrã não tem como adivinhar um número que não lhe chega. Encontrado a 13
+    // out 2026 no `canvas_debug` das storyboards dos Tickets.
+    open_bugs: 3,
   },
   daily: Array.from({ length: 30 }, (_, index) => ({
     date: new Date(Date.UTC(2026, 8, index + 1)).toISOString().slice(0, 10),
@@ -202,7 +208,13 @@ function Frame({
   children: React.ReactNode;
 }) {
   return (
-    <div data-theme={theme} style={{ minHeight: 900, background: "var(--bg)" }}>
+    // `data-upm-overlay-root`: o drawer de moderação nasce aqui dentro e não no
+    // `body` — ver a nota de `usePortalTarget` em `packages/ui`.
+    <div
+      data-theme={theme}
+      data-upm-overlay-root
+      style={{ minHeight: 900, background: "var(--bg)" }}
+    >
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <ToastProvider>
@@ -224,17 +236,37 @@ function Frame({
   );
 }
 
+/**
+ * O painel "Configuração de e-mail" (P10-03), com as mesmas caixas de
+ * `Mailboxes.tsx`: três criadas, uma por configurar e uma em erro. Sem esta
+ * prop o cartão caía em "Não foi possível contar as caixas de e-mail" — o
+ * estado de leitura falhada —, que é o único dos cinco que não se quer rever.
+ */
+const mailConfig = { total: 3, pending: 1, failing: 1 };
+
 export function AdminPainelClaro() {
   return (
     <Frame theme="light" activeId="dashboard">
-      <DashboardView data={dashboard} mrrCents={128700} locale="pt" loadError={false} />
+      <DashboardView
+        data={dashboard}
+        mrrCents={128700}
+        locale="pt"
+        loadError={false}
+        mailConfig={mailConfig}
+      />
     </Frame>
   );
 }
 export function AdminPainelEscuro() {
   return (
     <Frame theme="dark" activeId="dashboard">
-      <DashboardView data={dashboard} mrrCents={128700} locale="pt" loadError={false} />
+      <DashboardView
+        data={dashboard}
+        mrrCents={128700}
+        locale="pt"
+        loadError={false}
+        mailConfig={mailConfig}
+      />
     </Frame>
   );
 }
