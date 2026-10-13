@@ -56,6 +56,18 @@ const secretSchema = z.object({
 export type MailboxActionResult = { ok?: boolean; error?: string; notice?: string };
 export type MailboxSaveInput = z.input<typeof saveSchema>;
 
+/**
+ * A resposta do `POST /mailboxes/:id/test` do worker. Escrita aqui à mão e não
+ * importada de `@upm/mail-worker`: o worker é um processo à parte, com
+ * dependências próprias (`imapflow`, `nodemailer`), e importar o seu módulo
+ * para dentro do bundle do Next arrastaria tudo isso atrás. O contrato é o
+ * JSON, não o tipo.
+ */
+type ConnectionCheck = {
+  imap: { ok: boolean; error?: string };
+  smtp: { ok: boolean; error?: string };
+};
+
 async function getAdminClient() {
   const supabase = createClient(await cookies());
   const {
@@ -161,18 +173,21 @@ export async function saveMailboxSecret(input: unknown): Promise<MailboxActionRe
 }
 
 /**
- * Testar ligação — **ainda não liga a nada, e diz isso**.
+ * Testar ligação — o pedido vai ao mail-worker, que é quem tem credencial.
  *
- * O teste real é um IMAP/POP3 `LOGIN` e um SMTP `EHLO`+`AUTH`, e isso é
- * trabalho do mail-worker (02 §3.2: `imapflow` / `node-pop3` + `nodemailer`),
- * que corre fora do Next — em Fly.io/Railway — e é o único processo com
+ * O teste real é um IMAP `LOGIN` e um SMTP `EHLO`+`AUTH`, e isso é trabalho do
+ * `apps/mail-worker` (02 §3.2): corre fora do Next e é o único processo com
  * `service_role` para ler o segredo do Vault. Fazer o teste a partir daqui
  * obrigaria a app do Admin a abrir ligações IMAP e a ter a chave de serviço no
- * seu ambiente: as duas coisas que a arquitetura separa de propósito.
+ * seu ambiente — as duas coisas que a arquitetura separa de propósito.
  *
- * Fica a costura, com a resposta honesta. É melhor um "ainda não existe" do
- * que um botão que devolve verde sem ter testado nada — que é o pior resultado
- * possível num ecrã de credenciais.
+ * Esta action é por isso um intermediário com três responsabilidades e nenhuma
+ * mais: confirmar que quem pede é admin, falar com o worker e traduzir a
+ * resposta. **A palavra-passe não passa por aqui** — nem à ida, nem à volta.
+ *
+ * **As duas pontas respondem em separado** porque falham em separado: o que
+ * costuma estar errado é a porta de saída, e "não foi possível ligar" mandaria
+ * rever seis campos para corrigir um.
  */
 export async function testMailboxConnection(mailboxId: unknown): Promise<MailboxActionResult> {
   if (typeof mailboxId !== "string" || !z.string().uuid().safeParse(mailboxId).success) {
@@ -183,15 +198,54 @@ export async function testMailboxConnection(mailboxId: unknown): Promise<Mailbox
   if (!supabase) return { error: "Sem permissão para gerir caixas de e-mail." };
 
   const workerUrl = process.env.MAIL_WORKER_URL;
-  if (!workerUrl) {
+  const workerToken = process.env.MAIL_WORKER_TOKEN;
+  if (!workerUrl || !workerToken) {
     return {
       error:
-        "O mail-worker ainda não está configurado (MAIL_WORKER_URL). A ligação não pode ser testada a partir daqui.",
+        "O mail-worker ainda não está configurado (MAIL_WORKER_URL e MAIL_WORKER_TOKEN). A ligação não pode ser testada a partir daqui.",
     };
   }
 
-  return {
-    error:
-      "O teste de ligação entra com o mail-worker, em P10-03. A configuração já é guardada e a palavra-passe já vai para o Vault.",
-  };
+  let payload: ConnectionCheck;
+  try {
+    // Com limite de tempo: um servidor de correio que não responde deixa um
+    // `fetch` pendurado até ao timeout do Node, e o botão do ecrã ficaria a
+    // girar sem fim. 20 s chega para um `LOGIN` lento e é pouco para cansar.
+    const response = await fetch(`${workerUrl.replace(/\/$/, "")}/mailboxes/${mailboxId}/test`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${workerToken}` },
+      signal: AbortSignal.timeout(20_000),
+    });
+
+    const body = (await response.json().catch(() => null)) as
+      (Partial<ConnectionCheck> & { error?: string }) | null;
+
+    if (!response.ok) {
+      return { error: body?.error ?? `O mail-worker respondeu ${response.status}.` };
+    }
+    if (!body?.imap || !body?.smtp) {
+      return { error: "Resposta inesperada do mail-worker." };
+    }
+    payload = { imap: body.imap, smtp: body.smtp };
+  } catch {
+    return { error: "Não foi possível falar com o mail-worker." };
+  }
+
+  await writeAuditLog(supabase, {
+    action: "mailbox.test",
+    entity: "mailboxes",
+    entityId: mailboxId,
+    diff: { imap: payload.imap.ok, smtp: payload.smtp.ok },
+  });
+
+  if (payload.imap.ok && payload.smtp.ok) {
+    return { ok: true, notice: "Entrada e saída ligaram sem erros." };
+  }
+
+  const problems = [
+    payload.imap.ok ? null : `Entrada: ${payload.imap.error ?? "falhou"}`,
+    payload.smtp.ok ? null : `Saída (SMTP): ${payload.smtp.error ?? "falhou"}`,
+  ].filter(Boolean);
+
+  return { error: problems.join(" · ") };
 }
