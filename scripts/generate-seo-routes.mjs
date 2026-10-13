@@ -52,6 +52,14 @@ function field(source, name) {
   return match ? match[1].replace(/\\"/g, '"') : "";
 }
 
+/**
+ * Campo booleano, pela mesma leitura por regex. Ausente conta como `false`, que
+ * é o mesmo que o `buildMetadata` assume — uma rota sem `noindex` é indexável.
+ */
+function flag(source, name) {
+  return new RegExp(`${name}\\s*:\\s*true`).test(source);
+}
+
 const routes = [];
 for (const dir of findSeoDirs(ROOT).sort()) {
   const segments = relative(ROOT, dir).split(/[\\/]/).filter(Boolean);
@@ -71,6 +79,8 @@ for (const dir of findSeoDirs(ROOT).sort()) {
     metaDescription: field(source, "metaDescription"),
     // Rotas dinâmicas usam o registo como template (04 §2.1.2).
     dynamic: segments.some((segment) => segment.startsWith("[")),
+    // Para o sitemap saber o que não deve listar — ver `app/sitemap.ts`.
+    noindex: flag(source, "noindex"),
   });
 }
 
@@ -91,6 +101,8 @@ export type SeoRoute = {
   metaDescription: string;
   /** Rotas com segmento \`[slug]\`: o registo é um template. */
   dynamic: boolean;
+  /** \`noindex: true\` no \`seo.ts\`. O sitemap exclui estas rotas. */
+  noindex: boolean;
 };
 
 export const SEO_ROUTES: readonly SeoRoute[] = ${JSON.stringify(routes, null, 2)} as const;

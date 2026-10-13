@@ -91,9 +91,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       titleTag: fill(seo.titleTag, listing),
       metaDescription: fill(seo.metaDescription, listing),
       ogImageAlt: fill(seo.ogImageAlt ?? "", listing),
-      // Sem imagem OG própria usa a foto de capa; o `buildMetadata` cai para
-      // `/og/default.jpg` quando nem isso existe — que hoje é sempre, porque
-      // esse ficheiro não existe no projeto (D63).
+      // Sem imagem OG própria usa a foto de capa; sem capa, o `buildMetadata`
+      // cai para o cartão de omissão — que desde 13 out 2026 existe e é
+      // desenhado em `app/og/default.png` (fecha a D63). Até aí caía num
+      // ficheiro inexistente e a partilha saía sem imagem nenhuma.
       ogImage: listing.coverUrl ?? undefined,
       canonical: undefined,
     },
@@ -167,7 +168,10 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
     // Mesmo negócio e mesma cidade: é tudo o que se sabe do anúncio que saiu.
     // Quatro e não seis — esta é uma secção de consolação, não um catálogo.
     const { listings: alternatives } = availability.city
-      ? await getPublicListings({ deal: availability.deal ?? undefined, city: availability.city }, 1)
+      ? await getPublicListings(
+          { deal: availability.deal ?? undefined, city: availability.city },
+          1,
+        )
       : { listings: [] };
 
     return (

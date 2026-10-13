@@ -1,22 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { AppShell, Card, CardBody, StatusTag, Table, type TableColumn } from "@upm/ui";
-import {
-  DEMO_BUYER_LISTINGS,
-  DEMO_BUYER_NAV,
-  DEMO_BUYER_NOTIFICATIONS,
-  DEMO_BUYER_USER,
-  DEMO_LOCALES,
-  DEMO_OWNER_KPIS,
-  DEMO_OWNER_LEADS,
-  DEMO_OWNER_NAV,
-  DEMO_OWNER_NOTIFICATIONS,
-  DEMO_OWNER_USER,
-  DEMO_SIDEBAR_LABELS,
-  DEMO_TOPBAR_LABELS,
-  type DemoLead,
-} from "@upm/ui/demo-data";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 
 /**
  * Demonstração interativa da plataforma — `/#plataforma` (P2-04 · 07 §7)
@@ -82,166 +67,66 @@ const TABS = [
   { id: "buyer", label: "Comprador" },
 ] as const;
 
-type TabId = (typeof TABS)[number]["id"];
+export type TabId = (typeof TABS)[number]["id"];
 
-/** Na demo nada acontece: os controlos desenham-se e não levam a lado nenhum. */
-const noop = () => undefined;
+/**
+ * Os ecrãs vêm num chunk próprio, e só quando a secção se aproxima do ecrã.
+ *
+ * Arrastam o `AppShell` inteiro e as fixtures. Num ficheiro só, esse peso
+ * entrava no chunk da home — descarregado e interpretado por toda a gente que
+ * abre o site, inclusive quem nunca desce até aqui. `ssr: false` porque não há
+ * nada nesta demonstração que valha a pena ter no HTML servido: são dados
+ * inventados, não conteúdo para indexar.
+ */
+const PlatformDemoScreens = dynamic(() => import("./PlatformDemoScreens"), { ssr: false });
 
-const LEAD_TONES = {
-  new: { tone: "new", label: "Nova" },
-  answered: { tone: "active", label: "Respondida" },
-  scheduled: { tone: "visitAccepted", label: "Visita marcada" },
-} as const;
+/**
+ * Monta a demo só quando ela se aproxima do ecrã.
+ *
+ * **Não contradiz o "pré-carregados" de 07 §7, serve-o.** A exigência é não
+ * haver ecrã branco *ao trocar de separador*; para trocar, é preciso ver os
+ * botões, e quando se veem os botões já os dois shells estão montados — o
+ * observador dispara 400 px antes. O que isto evita é o custo noutro sítio: a
+ * demo são dois `AppShell` completos, e montá-los no primeiro paint carrega-os
+ * sobre a home, que é precisamente a página onde o AC de P2-06 mede Lighthouse
+ * ≥ 90. Dois shells a hidratar acima do tempo de interação é trabalho pago por
+ * toda a gente que abre o site, inclusive quem nunca chega a esta secção.
+ *
+ * Uma vez montada, fica — o `true` nunca volta a `false`.
+ *
+ * Sem `IntersectionObserver` (browser antigo, ou o observador indisponível),
+ * monta já: mais vale a demo pesada do que a demo ausente.
+ */
+function useNearViewport<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [near, setNear] = useState(false);
 
-const LEAD_COLUMNS: TableColumn<DemoLead>[] = [
-  { id: "name", header: "Interessado", cell: (lead) => lead.name },
-  { id: "property", header: "Propriedade", cell: (lead) => lead.property },
-  { id: "when", header: "Quando", cell: (lead) => lead.when },
-  {
-    id: "state",
-    header: "Estado",
-    cell: (lead) => (
-      <StatusTag tone={LEAD_TONES[lead.state].tone}>{LEAD_TONES[lead.state].label}</StatusTag>
-    ),
-  },
-];
+  useEffect(() => {
+    if (near) return;
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setNear(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setNear(true);
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [near]);
 
-function OwnerScreen() {
-  return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <h3 style={{ margin: 0, fontSize: 20 }}>Bom dia, Marta.</h3>
-        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-          Tem 2 leads por responder e uma visita marcada para quinta-feira.
-        </p>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))",
-          gap: 12,
-        }}
-      >
-        {DEMO_OWNER_KPIS.map((kpi) => (
-          <Card key={kpi.id}>
-            <CardBody style={{ gap: 4, padding: 16 }}>
-              <span style={{ color: "var(--muted)", fontSize: 12 }}>{kpi.label}</span>
-              <strong style={{ fontSize: 24, lineHeight: 1.1 }}>{kpi.value}</strong>
-              <span style={{ color: "var(--muted)", fontSize: 12 }}>{kpi.hint}</span>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardBody style={{ gap: 12, padding: 16 }}>
-          <strong style={{ fontSize: 15 }}>Últimas leads</strong>
-          <Table
-            caption="Últimas leads recebidas"
-            columns={LEAD_COLUMNS}
-            rows={DEMO_OWNER_LEADS}
-            rowKey={(lead) => lead.id}
-          />
-        </CardBody>
-      </Card>
-    </div>
-  );
-}
-
-function BuyerScreen() {
-  return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <h3 style={{ margin: 0, fontSize: 20 }}>Market</h3>
-        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-          4 propriedades a corresponder à sua procura guardada.
-        </p>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
-          gap: 12,
-        }}
-      >
-        {DEMO_BUYER_LISTINGS.map((listing) => (
-          <Card key={listing.id}>
-            <div
-              aria-hidden="true"
-              style={{
-                aspectRatio: "16 / 10",
-                background: "var(--surface2)",
-                borderTopLeftRadius: "inherit",
-                borderTopRightRadius: "inherit",
-                display: "grid",
-                placeItems: "center",
-                color: "var(--muted)",
-                fontSize: 12,
-              }}
-            >
-              fotografia
-            </div>
-            <CardBody style={{ gap: 8, padding: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <StatusTag tone={listing.deal === "sale" ? "dealSale" : "dealRent"}>
-                  {listing.deal === "sale" ? "Venda" : "Arrendamento"}
-                </StatusTag>
-                {listing.saved ? <StatusTag tone="primary">Guardado</StatusTag> : null}
-              </div>
-              <strong style={{ fontSize: 14, lineHeight: 1.3 }}>{listing.title}</strong>
-              <span style={{ fontSize: 18, fontWeight: 700 }}>{listing.price}</span>
-              <span style={{ color: "var(--muted)", fontSize: 12 }}>
-                {listing.typology} · {listing.area} m² · {listing.city}
-              </span>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DemoShell({
-  active,
-  children,
-}: {
-  active: TabId;
-  children: React.ReactNode;
-}) {
-  const owner = active === "owner";
-  return (
-    <AppShell
-      // Ver a nota do ficheiro: `100%` e nunca uma altura em pixels.
-      style={{ minHeight: "100%" }}
-      sidebar={{
-        groups: owner ? DEMO_OWNER_NAV : DEMO_BUYER_NAV,
-        activeId: owner ? "painel" : "market",
-        user: owner ? DEMO_OWNER_USER : DEMO_BUYER_USER,
-        onReport: noop,
-        onSignOut: noop,
-        labels: DEMO_SIDEBAR_LABELS,
-      }}
-      topbar={{
-        labels: DEMO_TOPBAR_LABELS,
-        locale: "pt",
-        locales: DEMO_LOCALES,
-        onLocaleChange: noop,
-        notifications: owner ? DEMO_OWNER_NOTIFICATIONS : DEMO_BUYER_NOTIFICATIONS,
-        onMarkAllRead: noop,
-      }}
-    >
-      {children}
-    </AppShell>
-  );
+  return { ref, near };
 }
 
 export function PlatformDemo() {
   const [active, setActive] = useState<TabId>("owner");
+  const { ref, near } = useNearViewport<HTMLDivElement>();
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-5)" }}>
+    <div ref={ref} style={{ display: "grid", gap: "var(--sp-5)" }}>
       <div
         role="tablist"
         aria-label="Perfis da demonstração"
@@ -279,20 +164,7 @@ export function PlatformDemo() {
           contain: "paint",
         }}
       >
-        {TABS.map((tab) => (
-          <div
-            key={tab.id}
-            role="tabpanel"
-            id={`demo-panel-${tab.id}`}
-            aria-labelledby={`demo-tab-${tab.id}`}
-            hidden={active !== tab.id}
-            style={{ height: "100%", overflow: "auto" }}
-          >
-            <DemoShell active={tab.id}>
-              {tab.id === "owner" ? <OwnerScreen /> : <BuyerScreen />}
-            </DemoShell>
-          </div>
-        ))}
+        {near ? <PlatformDemoScreens active={active} /> : null}
       </div>
 
       <p style={{ margin: 0, fontSize: "var(--fs-label)", color: "var(--muted)" }}>

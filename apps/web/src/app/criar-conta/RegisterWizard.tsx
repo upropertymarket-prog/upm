@@ -103,9 +103,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
   const [step, setStep] = useState<Step>(initialSelection?.step ?? "profile");
   const [role, setRole] = useState<ProfileChoice | null>(initialSelection?.role ?? null);
   const [planSlug, setPlanSlug] = useState<string | null>(initialSelection?.planSlug ?? null);
-  const [interval, setInterval] = useState<"month" | "year">(
-    initialSelection?.interval ?? "month",
-  );
+  const [interval, setInterval] = useState<"month" | "year">(initialSelection?.interval ?? "month");
   const [state, formAction, pending] = useActionState(action, initialState);
 
   // Uma recusa de campo devolve o passo onde o campo vive, para o utilizador

@@ -15,6 +15,8 @@ export type SeoRoute = {
   metaDescription: string;
   /** Rotas com segmento `[slug]`: o registo é um template. */
   dynamic: boolean;
+  /** `noindex: true` no `seo.ts`. O sitemap exclui estas rotas. */
+  noindex: boolean;
 };
 
 export const SEO_ROUTES: readonly SeoRoute[] = [
@@ -25,6 +27,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários e sem comissões.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/cookies",
@@ -33,6 +36,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Que cookies e tecnologias semelhantes a UProperty Market utiliza, e como pode controlá-los.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/criar-conta",
@@ -41,6 +45,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Crie a sua conta na UProperty Market e comece a comprar, vender ou arrendar sem comissões sobre a venda.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/criar-conta/verificacao",
@@ -48,6 +53,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     titleTag: "Verificar o e-mail · UProperty Market",
     metaDescription: "Confirme o seu endereço de e-mail para ativar a conta.",
     dynamic: false,
+    noindex: true,
   },
   {
     route: "/entrar",
@@ -55,6 +61,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     titleTag: "Entrar · UProperty Market",
     metaDescription: "Acesso à sua conta UProperty Market.",
     dynamic: false,
+    noindex: true,
   },
   {
     route: "/imoveis",
@@ -63,6 +70,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Casas e apartamentos para comprar e arrendar, falando diretamente com quem vende. Sem comissões, sem intermediários e sem contactos indesejados.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/imoveis/[slug]",
@@ -71,6 +79,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "{titulo} — {tipologia} em {localidade} por {preco}. Fale diretamente com o proprietário, sem comissões nem intermediários.",
     dynamic: true,
+    noindex: false,
   },
   {
     route: "/pre-inscricao",
@@ -79,6 +88,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/privacidade",
@@ -87,6 +97,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Como a UProperty Market trata os seus dados pessoais: finalidades, bases legais, prazos de conservação e os seus direitos.",
     dynamic: false,
+    noindex: false,
   },
   {
     route: "/recuperar-palavra-passe",
@@ -94,6 +105,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     titleTag: "Recuperar palavra-passe · UProperty Market",
     metaDescription: "Recupere o acesso à sua conta UProperty Market.",
     dynamic: false,
+    noindex: true,
   },
   {
     route: "/recuperar-palavra-passe/confirmar",
@@ -101,6 +113,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     titleTag: "Nova palavra-passe · UProperty Market",
     metaDescription: "Defina uma nova palavra-passe para a sua conta.",
     dynamic: false,
+    noindex: true,
   },
   {
     route: "/termos",
@@ -109,5 +122,6 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     metaDescription:
       "Os Termos e Condições de utilização da plataforma UProperty Market, com versão e data de entrada em vigor.",
     dynamic: false,
+    noindex: false,
   },
 ] as const;

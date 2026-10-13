@@ -47,11 +47,7 @@ export default function SiteError({
               justifyContent: "center",
             }}
           >
-            <button
-              type="button"
-              onClick={reset}
-              className="upm-btn upm-btn--primary upm-btn--md"
-            >
+            <button type="button" onClick={reset} className="upm-btn upm-btn--primary upm-btn--md">
               Tentar novamente
             </button>
             <Link href="/" className="upm-btn upm-btn--secondary upm-btn--md">

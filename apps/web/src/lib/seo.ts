@@ -45,7 +45,17 @@ export type SeoOverride = Partial<Omit<PageSeo, "pageName">> | null;
 export const SEO_LIMITS = { titleTag: 60, metaDescription: 160 } as const;
 
 const SITE_NAME = "UProperty Market";
-const DEFAULT_OG_IMAGE = "/og/default.jpg";
+
+/**
+ * Desenhada em `app/og/default.png/route.tsx`, não um ficheiro em `public/`.
+ *
+ * Apontava para `/og/default.jpg`, que **nunca existiu** — era a D63, e o
+ * efeito era todas as partilhas do site saírem sem imagem, porque nenhuma rota
+ * declara `ogImage` e portanto todas caem aqui. A rota que a substitui explica
+ * ao pormenor porque é gerada em vez de versionada; em duas linhas: o ícone da
+ * marca ainda não foi entregue e não se deriva um a partir do wordmark.
+ */
+const DEFAULT_OG_IMAGE = "/og/default.png";
 
 /**
  * O URL público. Lê-se de `WEB_URL` para que staging não anuncie canonicals de

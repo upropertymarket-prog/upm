@@ -197,7 +197,12 @@ const PLANOS: PublicPlan[] = [
     audience: "owner",
     priceYearCents: 599,
     priceMonthCents: 69,
-    features: ["1 propriedade ativa", "Até 3 visitas agendadas", "Até 1 chat ativo", "Suporte normal"],
+    features: [
+      "1 propriedade ativa",
+      "Até 3 visitas agendadas",
+      "Até 1 chat ativo",
+      "Suporte normal",
+    ],
     highlighted: false,
   },
   {

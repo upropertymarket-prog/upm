@@ -1,14 +1,5 @@
 import Link from "next/link";
-import {
-  Bath,
-  BedDouble,
-  CalendarDays,
-  Building2,
-  Layers,
-  Ruler,
-  Wallet,
-  Zap,
-} from "lucide-react";
+import { Bath, BedDouble, CalendarDays, Building2, Layers, Ruler, Wallet, Zap } from "lucide-react";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { PublicHeader } from "../PublicHeader";
@@ -294,7 +285,9 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                     exata encostado à direita. */}
                 <Card>
                   <CardBody style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
+                    >
                       <strong>Localização aproximada</strong>
                       <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>
                         morada exata após contacto
@@ -380,10 +373,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                       <Link href="/entrar" className="upm-btn upm-btn--primary upm-btn--md">
                         Entrar para falar
                       </Link>
-                      <Link
-                        href="/criar-conta"
-                        className="upm-btn upm-btn--secondary upm-btn--md"
-                      >
+                      <Link href="/criar-conta" className="upm-btn upm-btn--secondary upm-btn--md">
                         Criar conta
                       </Link>
                     </div>
