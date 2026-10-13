@@ -29,6 +29,12 @@ import { AdminPlanosClaro, AdminPlanosEscuro } from "./Billing";
 import { AdminContratosClaro, AdminContratosEscuro } from "./Demo";
 import { AdminStepUpClaro, AdminStepUpEscuro } from "./StepUp";
 import { AdminSeoClaro, AdminSeoEscuro } from "./Seo";
+import {
+  AdminCaixasEmailClaro,
+  AdminCaixasEmailEscuro,
+  AdminCaixasEmailVazio,
+  AdminCaixasEmailVazioEscuro,
+} from "./Mailboxes";
 
 /**
  * Canvas do Admin — pela ordem do menu
@@ -216,18 +222,51 @@ export default function AdminCanvas() {
         layout={{ x: 1520, y: 12160, width: 1440, height: 1150 }}
       />
 
+      {/* Configuração de e-mail (P10-03). Entra aqui, entre o SEO e as
+          Definições, porque é essa a posição no menu do Admin — `navigation.ts`
+          tem `seo`, `tickets`, `mailboxes`, `settings`, e o canvas percorre-se
+          como se percorre a app. `tickets` ainda não tem storyboard; a ordem
+          não precisa de estar completa para estar certa. */}
+      <Storyboard
+        id="AdminCaixasEmailClaro"
+        name="Configuração de e-mail · Claro (/admin/caixas-email)"
+        component={AdminCaixasEmailClaro}
+        layout={{ x: 0, y: 13390, width: 1440, height: 1150 }}
+      />
+      <Storyboard
+        id="AdminCaixasEmailEscuro"
+        name="Configuração de e-mail · Escuro (/admin/caixas-email)"
+        component={AdminCaixasEmailEscuro}
+        layout={{ x: 1520, y: 13390, width: 1440, height: 1150 }}
+      />
+
+      {/* O estado que hoje é o único real: nenhuma caixa criada ainda. É o ecrã
+          que recebe quem volta a isto depois de as criar na Amen. */}
+      <Storyboard
+        id="AdminCaixasEmailVazio"
+        name="Configuração de e-mail · Sem caixas · Claro"
+        component={AdminCaixasEmailVazio}
+        layout={{ x: 0, y: 14620, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="AdminCaixasEmailVazioEscuro"
+        name="Configuração de e-mail · Sem caixas · Escuro"
+        component={AdminCaixasEmailVazioEscuro}
+        layout={{ x: 1520, y: 14620, width: 1440, height: 900 }}
+      />
+
       {/* Definições */}
       <Storyboard
         id="AdminDefinicoesClaro"
         name="Definições · Claro"
         component={AdminDefinicoesClaro}
-        layout={{ x: 0, y: 13390, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 15600, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminDefinicoesEscuro"
         name="Definições · Escuro"
         component={AdminDefinicoesEscuro}
-        layout={{ x: 1520, y: 13390, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 15600, width: 1440, height: 1150 }}
       />
 
       {/* Diálogo transversal às ações sensíveis */}
@@ -235,13 +274,13 @@ export default function AdminCanvas() {
         id="AdminStepUpClaro"
         name="Confirmação de PIN · Claro"
         component={AdminStepUpClaro}
-        layout={{ x: 0, y: 14620, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 16830, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminStepUpEscuro"
         name="Confirmação de PIN · Escuro"
         component={AdminStepUpEscuro}
-        layout={{ x: 1520, y: 14620, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 16830, width: 1440, height: 900 }}
       />
     </Canvas>
   );

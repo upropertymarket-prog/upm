@@ -78,7 +78,7 @@
     "contractTemplates": "Templates de contrato",
     "siteLeads": "Leads do site",
     "tickets": "Tickets",
-    "mailboxes": "Caixas de e-mail",
+    "mailboxes": "Configuração de e-mail",
     "mailbox": "Caixa de e-mail",
     "updates": "Atualizações",
     "campaigns": "Campanhas",
@@ -698,7 +698,7 @@
         "moderation": "Moderação de imóveis",
         "leads": "Leads do site",
         "plans": "Planos",
-        "mailboxes": "Caixas de e-mail"
+        "mailboxes": "Configuração de e-mail"
       },
       "activityTrend": "Registos e submissões",
       "last30Days": "Por dia nos últimos 30 dias",
@@ -737,7 +737,7 @@
       "openBugs": "Bugs abertos",
       "openBugsHint": "Tickets por fechar no Suporte",
       "mailConfig": {
-        "title": "Config. E-mail",
+        "title": "Configuração de e-mail",
         "cta": "Configurar caixas",
         "none": "Ainda não há nenhuma caixa. Crie-a na Amen e configure-a aqui.",
         "pending": "{count, plural, one {# caixa sem credencial} other {# caixas sem credencial}}.",

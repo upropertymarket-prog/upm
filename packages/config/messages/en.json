@@ -78,7 +78,7 @@
     "contractTemplates": "Contract templates",
     "siteLeads": "Site leads",
     "tickets": "Tickets",
-    "mailboxes": "Mailboxes",
+    "mailboxes": "Email configuration",
     "mailbox": "Mailbox",
     "updates": "Updates",
     "campaigns": "Campaigns",
@@ -698,7 +698,7 @@
         "moderation": "Property moderation",
         "leads": "Site leads",
         "plans": "Plans",
-        "mailboxes": "Mailboxes"
+        "mailboxes": "Email configuration"
       },
       "activityTrend": "Registrations and submissions",
       "last30Days": "Daily for the last 30 days",
@@ -737,7 +737,7 @@
       "openBugs": "Open bugs",
       "openBugsHint": "Tickets not yet closed in Support",
       "mailConfig": {
-        "title": "Email config.",
+        "title": "Email configuration",
         "cta": "Configure mailboxes",
         "none": "No mailbox yet. Create it at Amen and configure it here.",
         "pending": "{count, plural, one {# mailbox without credentials} other {# mailboxes without credentials}}.",

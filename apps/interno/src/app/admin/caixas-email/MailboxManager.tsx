@@ -223,7 +223,7 @@ export function MailboxManager({
         style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", flexWrap: "wrap" }}
       >
         <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-          <h1 style={{ margin: 0, fontSize: 22 }}>Caixas de e-mail</h1>
+          <h1 style={{ margin: 0, fontSize: 22 }}>Configuração de e-mail</h1>
           <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
             As caixas que o Suporte lê e de onde responde. As credenciais ficam no Vault, nunca na
             base de dados.
