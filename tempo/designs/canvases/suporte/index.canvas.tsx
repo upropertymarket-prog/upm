@@ -1,5 +1,13 @@
 import { Canvas, Storyboard } from "tempo-sdk/canvas";
 import {
+  SuporteCaixaClaro,
+  SuporteCaixaEscuro,
+  SuporteCaixaSemCaixas,
+  SuporteCaixaSemCaixasEscuro,
+  SuporteCaixaSemSelecao,
+  SuporteCaixaSemSelecaoEscuro,
+} from "./Mailbox";
+import {
   SuporteTicketsClaro,
   SuporteTicketsEscuro,
   SuporteTicketsFilaVazia,
@@ -17,12 +25,11 @@ import {
  * Assinaturas. Percorrer o canvas de cima a baixo é percorrer o menu de cima a
  * baixo, como no canvas do Admin e no do Proprietário.
  *
- * **Hoje só Tickets tem storyboards, porque só Tickets existe.** Das sete
- * entradas do menu, seis ainda não têm rota: a Caixa de e-mail e o Composer são
- * P10-04/P10-05, as Assinaturas P10-06 e a Cloud interna P10-10. Uma storyboard
- * de um ecrã que não existe seria UI escrita dentro da pasta do canvas — é o
- * erro que já custou as storyboards do Proprietário na Fase 4 (ver a nota desse
- * canvas). Entram aqui, cada uma na sua posição, à medida que as rotas nascerem.
+ * **Entram à medida que as rotas nascem.** A Caixa de e-mail (P10-04) e os
+ * Tickets (P10-02) já existem; o Composer é P10-05, as Assinaturas P10-06 e a
+ * Cloud interna P10-10. Uma storyboard de um ecrã que não existe seria UI
+ * escrita dentro da pasta do canvas — é o erro que já custou as storyboards do
+ * Proprietário na Fase 4 (ver a nota desse canvas).
  *
  * **As Atualizações, as Campanhas e as Métricas não vão ficar neste canvas:**
  * são trabalho de marketing, não de apoio ao cliente, e vão para um canvas
@@ -35,18 +42,60 @@ import {
 export default function SuporteCanvas() {
   return (
     <Canvas name="Suporte" backgroundColor="#232323">
-      {/* Tickets (2.ª entrada do menu; a 1.ª, a Caixa de e-mail, é P10-04) */}
+      {/* Caixa de e-mail — 1.ª entrada do menu (P10-04) */}
+      <Storyboard
+        id="SuporteCaixaClaro"
+        name="Caixa de e-mail · Claro (/suporte/email)"
+        component={SuporteCaixaClaro}
+        layout={{ x: 0, y: 0, width: 1440, height: 1000 }}
+      />
+      <Storyboard
+        id="SuporteCaixaEscuro"
+        name="Caixa de e-mail · Escuro (/suporte/email)"
+        component={SuporteCaixaEscuro}
+        layout={{ x: 1520, y: 0, width: 1440, height: 1000 }}
+      />
+
+      {/* O ecrã de quem entra: fila à vista, nada aberto */}
+      <Storyboard
+        id="SuporteCaixaSemSelecao"
+        name="Caixa de e-mail · Sem mensagem aberta · Claro"
+        component={SuporteCaixaSemSelecao}
+        layout={{ x: 0, y: 1080, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="SuporteCaixaSemSelecaoEscuro"
+        name="Caixa de e-mail · Sem mensagem aberta · Escuro"
+        component={SuporteCaixaSemSelecaoEscuro}
+        layout={{ x: 1520, y: 1080, width: 1440, height: 900 }}
+      />
+
+      {/* O estado real de hoje: ainda não há caixas criadas na Amen */}
+      <Storyboard
+        id="SuporteCaixaSemCaixas"
+        name="Caixa de e-mail · Sem caixas configuradas · Claro"
+        component={SuporteCaixaSemCaixas}
+        layout={{ x: 0, y: 2060, width: 1440, height: 700 }}
+      />
+      <Storyboard
+        id="SuporteCaixaSemCaixasEscuro"
+        name="Caixa de e-mail · Sem caixas configuradas · Escuro"
+        component={SuporteCaixaSemCaixasEscuro}
+        layout={{ x: 1520, y: 2060, width: 1440, height: 700 }}
+      />
+
+      {/* Tickets — 2.ª entrada do menu (P10-02) */}
       <Storyboard
         id="SuporteTicketsClaro"
         name="Tickets · Claro (/suporte/tickets)"
         component={SuporteTicketsClaro}
-        layout={{ x: 0, y: 0, width: 1440, height: 1000 }}
+        layout={{ x: 0, y: 2840, width: 1440, height: 1000 }}
       />
       <Storyboard
         id="SuporteTicketsEscuro"
         name="Tickets · Escuro (/suporte/tickets)"
         component={SuporteTicketsEscuro}
-        layout={{ x: 1520, y: 0, width: 1440, height: 1000 }}
+        layout={{ x: 1520, y: 2840, width: 1440, height: 1000 }}
       />
 
       {/* O ecrã de quem acaba de entrar: fila cheia, nada aberto */}
@@ -54,13 +103,13 @@ export default function SuporteCanvas() {
         id="SuporteTicketsSemSelecao"
         name="Tickets · Sem ticket aberto · Claro"
         component={SuporteTicketsSemSelecao}
-        layout={{ x: 0, y: 1080, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="SuporteTicketsSemSelecaoEscuro"
         name="Tickets · Sem ticket aberto · Escuro"
         component={SuporteTicketsSemSelecaoEscuro}
-        layout={{ x: 1520, y: 1080, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
 
       {/* Nada a tratar — tem de se ler como boa notícia, não como falha */}
@@ -68,13 +117,13 @@ export default function SuporteCanvas() {
         id="SuporteTicketsFilaVazia"
         name="Tickets · Fila vazia · Claro"
         component={SuporteTicketsFilaVazia}
-        layout={{ x: 0, y: 2060, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="SuporteTicketsFilaVaziaEscuro"
         name="Tickets · Fila vazia · Escuro"
         component={SuporteTicketsFilaVaziaEscuro}
-        layout={{ x: 1520, y: 2060, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
     </Canvas>
   );

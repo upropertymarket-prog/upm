@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@upm/db";
+import { mailUnreadCount } from "@upm/db/mail";
 import { ticketCounts } from "@upm/db/support";
 
 /**
@@ -33,7 +34,7 @@ export async function getSupportShellData(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [profileResult, staffResult, counts] = await Promise.all([
+  const [profileResult, staffResult, counts, unread] = await Promise.all([
     user
       ? supabase.from("profiles").select("full_name, locale").eq("id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -41,6 +42,9 @@ export async function getSupportShellData(
       ? supabase.from("staff_members").select("department").eq("profile_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
     ticketCounts(supabase),
+    // O badge da Caixa de e-mail: só as por ler que estão na entrada. Arquivar
+    // sem ler é uma decisão, e uma decisão tomada não é trabalho à espera.
+    mailUnreadCount(supabase),
   ]);
 
   const profile = profileResult.data;
@@ -50,6 +54,6 @@ export async function getSupportShellData(
     userName: profile?.full_name?.trim() || user?.email || "—",
     userMeta: department ? `${groupLabel} · ${department}` : groupLabel,
     locale: profile?.locale ?? "pt",
-    counters: { tickets: counts.pending },
+    counters: { tickets: counts.pending, mailbox: unread },
   };
 }

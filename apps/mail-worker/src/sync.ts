@@ -2,7 +2,7 @@ import { ImapFlow } from "imapflow";
 import { simpleParser, type AddressObject, type ParsedMail } from "mailparser";
 
 import { describe, imapOptions } from "./connection.ts";
-import type { MailMessageRow } from "./db-pending.ts";
+import type { MailMessageRow } from "@upm/db/pending";
 import {
   getMailboxPassword,
   listSyncableMailboxes,

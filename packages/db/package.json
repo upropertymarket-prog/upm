@@ -21,7 +21,9 @@
     "./support": "./src/support.ts",
     "./subscription": "./src/subscription.ts",
     "./stripe": "./src/stripe.ts",
-    "./agreement": "./src/agreement.ts"
+    "./agreement": "./src/agreement.ts",
+    "./mail": "./src/mail.ts",
+    "./pending": "./src/pending-types.ts"
   },
   "scripts": {
     "lint": "eslint src",

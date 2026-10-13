@@ -984,6 +984,46 @@
         "testing": "In testing",
         "resolved": "Resolved"
       }
+    },
+    "mailbox": {
+      "title": "Mailbox",
+      "subtitle": "Support email, one mailbox at a time.",
+      "mailboxLabel": "Mailbox",
+      "searchLabel": "Search mail",
+      "searchPlaceholder": "Subject or sender…",
+      "folders": {
+        "inbox": "Inbox",
+        "starred": "Starred",
+        "archive": "Archive"
+      },
+      "labelsTitle": "Labels",
+      "noLabels": "No labels in this mailbox yet.",
+      "newLabelLabel": "Create label",
+      "newLabelPlaceholder": "Label name",
+      "labelCreated": "Label created.",
+      "emptyTitle": "Nothing here",
+      "emptyBody": "No messages in this folder with the current filters.",
+      "pickTitle": "Pick a message",
+      "pickBody": "The message opens here, with its body isolated and the support actions.",
+      "noSubject": "(no subject)",
+      "noMailboxTitle": "No mailboxes configured yet",
+      "noMailboxBody": "Mailboxes are created in Administration › Email configuration. Mail shows up here afterwards.",
+      "star": "Star",
+      "unstar": "Remove star",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "archive": "Archive",
+      "unarchive": "Move back to inbox",
+      "archived": "Message archived.",
+      "unarchived": "Message moved back to the inbox.",
+      "hasTicket": "Has ticket",
+      "createTicket": "Create ticket",
+      "openTicket": "Already has a ticket",
+      "to": "To",
+      "bodyTitle": "Email content",
+      "emptyBodyText": "This message had no text body.",
+      "attachments": "Attachments",
+      "attachment": "Attachment"
     }
   }
 }

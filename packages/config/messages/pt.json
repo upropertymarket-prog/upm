@@ -984,6 +984,46 @@
         "testing": "Em teste",
         "resolved": "Resolvido"
       }
+    },
+    "mailbox": {
+      "title": "Caixa de e-mail",
+      "subtitle": "O correio do Suporte, por caixa.",
+      "mailboxLabel": "Caixa",
+      "searchLabel": "Procurar no correio",
+      "searchPlaceholder": "Assunto ou remetente…",
+      "folders": {
+        "inbox": "Entrada",
+        "starred": "Com estrela",
+        "archive": "Arquivo"
+      },
+      "labelsTitle": "Marcadores",
+      "noLabels": "Ainda não há marcadores nesta caixa.",
+      "newLabelLabel": "Criar marcador",
+      "newLabelPlaceholder": "Nome do marcador",
+      "labelCreated": "Marcador criado.",
+      "emptyTitle": "Nada por aqui",
+      "emptyBody": "Não há mensagens nesta pasta com os filtros atuais.",
+      "pickTitle": "Escolha uma mensagem",
+      "pickBody": "A mensagem abre aqui, com o corpo isolado e as ações do Suporte.",
+      "noSubject": "(sem assunto)",
+      "noMailboxTitle": "Ainda não há caixas configuradas",
+      "noMailboxBody": "As caixas criam-se em Administração › Configuração de e-mail. Depois disso, o correio aparece aqui.",
+      "star": "Marcar com estrela",
+      "unstar": "Retirar a estrela",
+      "markRead": "Marcar como lida",
+      "markUnread": "Marcar como não lida",
+      "archive": "Arquivar",
+      "unarchive": "Devolver à entrada",
+      "archived": "Mensagem arquivada.",
+      "unarchived": "Mensagem devolvida à entrada.",
+      "hasTicket": "Com ticket",
+      "createTicket": "Criar ticket",
+      "openTicket": "Já tem ticket",
+      "to": "Para",
+      "bodyTitle": "Conteúdo do e-mail",
+      "emptyBodyText": "Esta mensagem não trazia texto.",
+      "attachments": "Anexos",
+      "attachment": "Anexo"
     }
   }
 }

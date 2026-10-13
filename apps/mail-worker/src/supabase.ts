@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import type { Env } from "./env.ts";
-import type { MailDatabase } from "./db-pending.ts";
+import type { MailDatabase } from "@upm/db/pending";
 
 /**
  * O cliente do worker — `service_role`, sem sessão e sem refresh.
