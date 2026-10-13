@@ -45,11 +45,11 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
       <SectionHeading
-        title="Imóveis"
+        title="Propriedades"
         body={
           total === 0
-            ? "Nenhum imóvel corresponde a esta pesquisa."
-            : `${total} ${total === 1 ? "imóvel disponível" : "imóveis disponíveis"}.`
+            ? "Nenhuma propriedade corresponde a esta pesquisa."
+            : `${total} ${total === 1 ? "propriedade disponível" : "propriedades disponíveis"}.`
         }
       />
 

@@ -10,7 +10,7 @@ import type { PageSeo } from "@/lib/seo";
  */
 export const seo: PageSeo = {
   pageName: "Início",
-  titleTag: "UProperty Market · Imóveis sem comissões",
+  titleTag: "UProperty Market · Propriedades sem comissões",
   metaDescription:
     "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários e sem comissões.",
 };

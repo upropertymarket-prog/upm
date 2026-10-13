@@ -10,7 +10,6 @@ import { SectionHeading, SiteSection } from "../../../../apps/web/src/components
 import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";
 import { ListingsBrowser } from "../../../../apps/web/src/components/site/ListingsBrowser";
 import { PublicHeader } from "../../../../apps/web/src/components/PublicHeader";
-import { RecentListings } from "../../../../apps/web/src/components/site/RecentListings";
 import { SiteFooter } from "../../../../apps/web/src/components/site/SiteFooter";
 import { COMING_SOON } from "../../../../apps/web/src/lib/site-content";
 import type { PublicPlan } from "../../../../apps/web/src/components/site/Pricing";
@@ -58,25 +57,25 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  */
 
 /**
- * Imóveis de demonstração (P2-05).
+ * Propriedades de demonstração (P2-05).
  *
- * **Inventados, e pela mesma razão dos planos — mas por um motivo mais forte.**
- * Verificado em staging a 12 out 2026: os 23 imóveis que lá estão são fixtures
- * dos testes de faturação (`ref` a começar em `BILL-`), **todos em `draft`**,
+ * **Inventadas, e pela mesma razão dos planos — mas por um motivo mais forte.**
+ * Verificado em staging a 12 out 2026: as 23 propriedades que lá estão são fixtures
+ * dos testes de faturação (`ref` a começar em `BILL-`), **todas em `draft`**,
  * com título vazio, sem preço, sem localidade — e `property_media` está vazia,
  * ou seja não existe **uma única fotografia** no projeto. `properties_public`
  * filtra `status in ('active','featured')`, por isso o site público vê zero
  * linhas, corretamente.
  *
  * Revê-se o ecrã com estes dados ou não se revê nenhum. O que a storyboard
- * mostra é o enquadramento — a grelha, o cartão, o ritmo da ficha, a coluna de
- * ação —, e isso é o que tem de estar certo antes de existirem imóveis reais.
+ * mostra é o enquadramento — a grelha, o cartão, o ritmo do detalhe, a coluna de
+ * ação —, e isso é o que tem de estar certo antes de existirem propriedades reais.
  *
  * A capa fica `null` de propósito: sem fotografias no projeto, qualquer URL que
  * se pusesse aqui seria um link morto, e o estado "sem fotografia" é o que o
  * site vai mostrar nos primeiros anúncios de quem não carregar imagens.
  */
-const IMOVEIS: PublicListingCard[] = [
+const PROPRIEDADES: PublicListingCard[] = [
   {
     id: "0f8fad5b-d9cb-469f-a165-70867728950e",
     slug: "apartamento-t2-com-varanda-no-porto-0f8fad5b-d9cb-469f-a165-70867728950e",
@@ -169,9 +168,9 @@ const IMOVEIS: PublicListingCard[] = [
   },
 ];
 
-/** A ficha do primeiro, com o que a view expõe além do cartão. */
-const FICHA: PublicListingDetail = {
-  ...IMOVEIS[0],
+/** O detalhe do primeiro, com o que a view expõe além do cartão. */
+const DETALHE: PublicListingDetail = {
+  ...PROPRIEDADES[0],
   ref: "UPM-2026-0412",
   description:
     "Apartamento T2 no segundo andar, com varanda virada a sul e vista desafogada. Cozinha equipada, dois quartos com roupeiro e sala com acesso direto à varanda. Prédio com elevador, a cinco minutos a pé do metro.\n\nDisponível para visitas a partir do próximo mês. Falo diretamente com quem tiver interesse, sem intermediários.",
@@ -198,7 +197,7 @@ const PLANOS: PublicPlan[] = [
     audience: "owner",
     priceYearCents: 599,
     priceMonthCents: 69,
-    features: ["1 imóvel ativo", "Até 3 visitas agendadas", "Até 1 chat ativo", "Suporte normal"],
+    features: ["1 propriedade ativa", "Até 3 visitas agendadas", "Até 1 chat ativo", "Suporte normal"],
     highlighted: false,
   },
   {
@@ -208,7 +207,7 @@ const PLANOS: PublicPlan[] = [
     priceYearCents: 2990,
     priceMonthCents: 299,
     features: [
-      "Até 5 imóveis ativos",
+      "Até 5 propriedades ativas",
       "Até 5 visitas agendadas",
       "Até 4 chats ativos",
       "Suporte prioritário",
@@ -223,7 +222,7 @@ const PLANOS: PublicPlan[] = [
     priceYearCents: 5990,
     priceMonthCents: 599,
     features: [
-      "Imóveis ilimitados",
+      "Propriedades ilimitadas",
       "Visitas e agenda ilimitadas",
       "Chats ilimitados",
       "Suporte premium",
@@ -238,7 +237,7 @@ const PLANOS: PublicPlan[] = [
     priceYearCents: 2990,
     priceMonthCents: 299,
     features: [
-      "Até 25 imóveis guardados",
+      "Até 25 propriedades guardadas",
       "Até 5 chats ativos",
       "Alertas de descida de preço",
       "Agenda de visitas",
@@ -311,7 +310,7 @@ function Home({ theme, launchMode }: { theme: "light" | "dark"; launchMode: "pre
         onContact={semSubmissao}
         // Em `pre` a secção não existe e a lista nunca é lida; passar sempre
         // mantém as duas storyboards com o mesmo chamador.
-        recentListings={IMOVEIS}
+        recentListings={PROPRIEDADES}
       />
     </Ecra>
   );
@@ -341,33 +340,6 @@ export function PosLancamentoEscuro() {
  * rever — o formulário, os consentimentos separados, os quatro cartões — são
  * os componentes reais.
  */
-/**
- * "Imóveis mais recentes" — a secção que substitui "Em breve" em pós-lançamento.
- *
- * Storyboard própria e não só dentro da home: na moldura de 1440 × 900 a
- * secção fica muito abaixo da dobra, e a captura da home nunca a mostra. Foi
- * isso que aconteceu na primeira revisão de P2-05 — a secção estava feita e
- * não havia **nenhuma** captura onde se visse. Uma storyboard de uma secção é
- * a forma de a poder olhar.
- */
-function Recentes({ theme }: { theme: "light" | "dark" }) {
-  return (
-    <Ecra theme={theme}>
-      <SiteSection>
-        <RecentListings listings={IMOVEIS} />
-      </SiteSection>
-    </Ecra>
-  );
-}
-
-export function RecentesClaro() {
-  return <Recentes theme="light" />;
-}
-
-export function RecentesEscuro() {
-  return <Recentes theme="dark" />;
-}
-
 /**
  * `/imoveis` — o Market público (P2-05).
  *
@@ -403,11 +375,11 @@ function Imoveis({ theme, listings }: { theme: "light" | "dark"; listings: Publi
 }
 
 export function ImoveisClaro() {
-  return <Imoveis theme="light" listings={IMOVEIS} />;
+  return <Imoveis theme="light" listings={PROPRIEDADES} />;
 }
 
 export function ImoveisEscuro() {
-  return <Imoveis theme="dark" listings={IMOVEIS} />;
+  return <Imoveis theme="dark" listings={PROPRIEDADES} />;
 }
 
 export function ImoveisSemResultados() {
@@ -463,27 +435,27 @@ export function ImoveisPreLancamentoEscuro() {
 }
 
 /**
- * `/imoveis/[slug]` — a ficha (P2-05).
+ * `/imoveis/[slug]` — o detalhe de propriedade (P2-05).
  *
  * O mapa aparece como o visitante o vê de início: fechado, com o aviso de que
  * carregá-lo expõe o IP ao OpenFreeMap. É deliberado que a storyboard mostre
  * esse estado e não o mapa aberto — é o estado por omissão da página, e é o que
  * se revê.
  */
-function Ficha({ theme }: { theme: "light" | "dark" }) {
+function Detalhe({ theme }: { theme: "light" | "dark" }) {
   return (
     <Ecra theme={theme}>
-      <ListingDetail listing={FICHA} locale="pt" launchMode="post" onLocaleChange={semEfeito} />
+      <ListingDetail listing={DETALHE} locale="pt" launchMode="post" onLocaleChange={semEfeito} />
     </Ecra>
   );
 }
 
 export function FichaClaro() {
-  return <Ficha theme="light" />;
+  return <Detalhe theme="light" />;
 }
 
 export function FichaEscuro() {
-  return <Ficha theme="dark" />;
+  return <Detalhe theme="dark" />;
 }
 
 function PreInscricao({ theme }: { theme: "light" | "dark" }) {

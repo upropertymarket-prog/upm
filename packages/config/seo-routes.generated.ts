@@ -21,7 +21,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
   {
     route: "/",
     pageName: "Início",
-    titleTag: "UProperty Market · Imóveis sem comissões",
+    titleTag: "UProperty Market · Propriedades sem comissões",
     metaDescription:
       "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários e sem comissões.",
     dynamic: false,
@@ -58,15 +58,15 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
   },
   {
     route: "/imoveis",
-    pageName: "Imóveis",
-    titleTag: "Imóveis sem comissões · UProperty Market",
+    pageName: "Propriedades",
+    titleTag: "Propriedades sem comissões · UProperty Market",
     metaDescription:
       "Casas e apartamentos para comprar e arrendar, falando diretamente com quem vende. Sem comissões, sem intermediários e sem contactos indesejados.",
     dynamic: false,
   },
   {
     route: "/imoveis/[slug]",
-    pageName: "Imóvel (ficha)",
+    pageName: "Propriedade (detalhe)",
     titleTag: "{titulo} · {tipologia} em {localidade} · UProperty Market",
     metaDescription:
       "{titulo} — {tipologia} em {localidade} por {preco}. Fale diretamente com o proprietário, sem comissões nem intermediários.",
@@ -77,7 +77,7 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     pageName: "Pré-inscrição",
     titleTag: "Pré-inscrição · UProperty Market",
     metaDescription:
-      "Inscreva-se para ser avisado quando os primeiros imóveis abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
+      "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
     dynamic: false,
   },
   {

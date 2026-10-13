@@ -5,9 +5,12 @@ import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
 
 import { ListingDetail } from "../../../components/site/ListingDetail";
+import { ListingGone } from "../../../components/site/ListingGone";
 import { getLaunchMode } from "../../../lib/launch-mode";
 import {
+  getListingAvailability,
   getPublicListing,
+  getPublicListings,
   listingIdFromSlug,
   listingSlug,
   type PublicListingDetail,
@@ -52,7 +55,7 @@ function fill(template: string, listing: PublicListingDetail): string {
       .replaceAll("{titulo}", listing.title)
       .replaceAll("{preco}", formatted)
       .replaceAll("{localidade}", listing.city ?? "Portugal")
-      .replaceAll("{tipologia}", listing.typology ?? "Imóvel")
+      .replaceAll("{tipologia}", listing.typology ?? "Propriedade")
       // Um template que fique com um buraco ("· em ·") lê-se pior do que um
       // título curto: colapsa-se a pontuação que sobrou.
       .replace(/\s*·\s*·\s*/g, " · ")
@@ -66,10 +69,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const id = listingIdFromSlug(slug);
   const listing = id ? await getPublicListing(id) : null;
 
-  // Sem imóvel não se inventam metadados: a página vai dar 404, e um título
-  // real numa página inexistente é um convite ao Google para a indexar.
+  // Sem propriedade ativa não se inventam metadados: a página vai dar 404 ou
+  // dizer que o anúncio saiu, e um título real numa dessas é um convite ao
+  // Google para a indexar. `noindex` nos dois casos — num anúncio encerrado é
+  // o que substitui o 410 que o App Router não sabe devolver (ver a nota de
+  // `ListingGone.tsx`).
   if (!listing) {
-    return { title: "Imóvel não encontrado · UProperty Market", robots: { index: false } };
+    const availability = id ? await getListingAvailability(id) : { outcome: "never" as const };
+    return {
+      title:
+        availability.outcome === "gone"
+          ? "Anúncio encerrado · UProperty Market"
+          : "Propriedade não encontrada · UProperty Market",
+      robots: { index: false, follow: true },
+    };
   }
 
   return pageMetadata(
@@ -141,7 +154,32 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
   if (!id) notFound();
 
   const listing = await getPublicListing(id);
-  if (!listing) notFound();
+
+  // Sem propriedade ativa há dois casos muito diferentes, e até 13 out 2026
+  // davam ambos 404. Um anúncio que esteve publicado e saiu merece explicação
+  // e alternativas; um uuid que nunca existiu merece o 404. Quem os separa é a
+  // `listing_availability`, que só revela o que já foi público — e que falha
+  // para `never`, por isso um erro dela nunca inventa uma venda.
+  if (!listing) {
+    const availability = await getListingAvailability(id);
+    if (availability.outcome === "never") notFound();
+
+    // Mesmo negócio e mesma cidade: é tudo o que se sabe do anúncio que saiu.
+    // Quatro e não seis — esta é uma secção de consolação, não um catálogo.
+    const { listings: alternatives } = availability.city
+      ? await getPublicListings({ deal: availability.deal ?? undefined, city: availability.city }, 1)
+      : { listings: [] };
+
+    return (
+      <ListingGone
+        availability={availability}
+        alternatives={alternatives.slice(0, 4)}
+        locale={locale}
+        launchMode={launchMode}
+        onLocaleChange={setLocalePreference}
+      />
+    );
+  }
 
   // Slug desatualizado (o título mudou) → 301 para o canónico.
   const canonicalSlug = listingSlug({ id: listing.id, title: listing.title });

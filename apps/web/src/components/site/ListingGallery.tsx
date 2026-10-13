@@ -13,11 +13,31 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
  *
  * Escrito à mão e não com uma biblioteca: a página é pública e é medida pelo
  * Lighthouse (04 §2.1 AC), e uma lightbox são trinta linhas — não vale mais
- * uma dependência no bundle de uma ficha de imóvel.
+ * uma dependência no bundle de um detalhe de propriedade.
  *
  * `<img>` e não `next/image`: os URL são assinados e expiram. A nota completa
  * está em `ListingCard.tsx`.
+ *
+ * **O enquadramento é o do `PropertyDetail` da app, à medida** (13 out 2026):
+ * capa a 3fr à esquerda, três miniaturas empilhadas a 1fr à direita, altura
+ * `clamp(220px, 46vw, 360px)`, cantos a 16 e 10. Antes era capa em 16/9 com
+ * uma tira de miniaturas por baixo — bonito, mas era **outra** galeria, e
+ * quem entrasse na conta a ver este anúncio dava com um ecrã diferente a
+ * mostrar a mesma propriedade. A lightbox é o que esta tem a mais, e isso não
+ * muda o enquadramento: só acrescenta ao clique.
  */
+
+/**
+ * A medida do `PropertyDetail`, repetida aqui de propósito e não aproximada.
+ *
+ * Exportada porque o `ListingDetail` alinha o cartão de preço por ela: as duas
+ * peças do topo do detalhe — galeria à esquerda, cartão de ação à direita —
+ * têm de fechar à mesma linha, e um número solto nos dois ficheiros voltava a
+ * divergir à primeira alteração.
+ */
+export const LISTING_MEDIA_HEIGHT = "clamp(220px, 46vw, 360px)";
+
+const GALLERY_HEIGHT = LISTING_MEDIA_HEIGHT;
 export function ListingGallery({ photos, title }: { photos: string[]; title: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -51,15 +71,9 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
   if (photos.length === 0) {
     return (
       <div
-        aria-hidden="true"
         style={{
-          // Altura fixa e curta, não a proporção 16/9 das fotografias: numa
-          // coluna de 830 px essa proporção dava 467 px de caixa vazia, que
-          // empurrava o título e os factos para fora do primeiro ecrã. Visto
-          // na captura da storyboard `FichaClaro`. Uma ausência de fotografias
-          // deve ocupar o espaço de um aviso, não o de uma galeria.
-          height: 160,
-          borderRadius: "var(--r-lg)",
+          height: GALLERY_HEIGHT,
+          borderRadius: 16,
           border: "1px solid var(--border)",
           background: "var(--surface2)",
           display: "grid",
@@ -77,19 +91,30 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
 
   return (
     <>
-      <div style={{ display: "grid", gap: "var(--sp-3)" }}>
+      {/* Mesma grelha do `PropertyDetail` da app: capa a 3fr, tira de
+          miniaturas a 1fr com um mínimo de 84 px, e a altura fluida em vez de
+          proporção. Ver a nota de topo sobre porque é a mesma e não parecida. */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 3fr) minmax(84px, 1fr)",
+          gap: 8,
+          height: GALLERY_HEIGHT,
+        }}
+      >
         <button
           type="button"
           onClick={() => setOpenIndex(0)}
           aria-label={`Ver fotografia 1 de ${photos.length} em tamanho grande`}
           style={{
             padding: 0,
-            border: "1px solid var(--border)",
-            borderRadius: "var(--r-lg)",
+            border: 0,
+            borderRadius: 16,
             overflow: "hidden",
             background: "none",
             cursor: "pointer",
             display: "block",
+            height: "100%",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- URL assinado, expira. */}
@@ -98,65 +123,55 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
             alt={`${title} — fotografia principal`}
             width={1280}
             height={720}
-            style={{
-              display: "block",
-              width: "100%",
-              height: "auto",
-              aspectRatio: "16 / 9",
-              objectFit: "cover",
-            }}
+            style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
           />
         </button>
 
-        {rest.length > 0 ? (
-          <ul
-            style={{
-              listStyle: "none",
-              margin: 0,
-              padding: 0,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(min(7rem, 30%), 1fr))",
-              gap: "var(--sp-3)",
-            }}
-          >
-            {rest.map((photo, index) => (
-              <li key={photo}>
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(index + 1)}
-                  aria-label={`Ver fotografia ${index + 2} de ${photos.length} em tamanho grande`}
-                  style={{
-                    padding: 0,
-                    border: "1px solid var(--border)",
-                    borderRadius: "var(--r-md)",
-                    overflow: "hidden",
-                    background: "none",
-                    cursor: "pointer",
-                    display: "block",
-                    width: "100%",
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- URL assinado, expira. */}
-                  <img
-                    src={photo}
-                    alt=""
-                    width={320}
-                    height={240}
-                    loading="lazy"
-                    decoding="async"
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      height: "auto",
-                      aspectRatio: "4 / 3",
-                      objectFit: "cover",
-                    }}
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        {/* Só três: a quarta miniatura deixava cada uma com menos de 80 px de
+            altura na moldura de 360 px, e a lightbox dá acesso às restantes. */}
+        <ul
+          style={{
+            listStyle: "none",
+            margin: 0,
+            padding: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            overflow: "hidden",
+          }}
+        >
+          {rest.slice(0, 3).map((photo, index) => (
+            <li key={photo} style={{ flex: 1, minHeight: 0 }}>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(index + 1)}
+                aria-label={`Ver fotografia ${index + 2} de ${photos.length} em tamanho grande`}
+                style={{
+                  padding: 0,
+                  border: 0,
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  background: "none",
+                  cursor: "pointer",
+                  display: "block",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL assinado, expira. */}
+                <img
+                  src={photo}
+                  alt=""
+                  width={320}
+                  height={240}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {openIndex !== null ? (

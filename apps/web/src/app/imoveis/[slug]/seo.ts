@@ -7,7 +7,7 @@ import type { PageSeo } from "@/lib/seo";
  * usa a foto de capa e, em último caso, `/og/default.jpg`.
  */
 export const seo: PageSeo = {
-  pageName: "Imóvel (ficha)",
+  pageName: "Propriedade (detalhe)",
   titleTag: "{titulo} · {tipologia} em {localidade} · UProperty Market",
   metaDescription:
     "{titulo} — {tipologia} em {localidade} por {preco}. Fale diretamente com o proprietário, sem comissões nem intermediários.",

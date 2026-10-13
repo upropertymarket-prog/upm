@@ -46,7 +46,7 @@ export const PRE_LAUNCH_BANNER = "Plataforma em pré-lançamento — pré-inscri
 
 export const HERO = {
   eyebrow: "Your property your choice",
-  title: "Imóveis sem comissões, nem contactos indesejados.",
+  title: "Propriedades sem comissões, nem contactos indesejados.",
   body: "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários, sem pressões, sem surpresas no fim.",
   // CORRIGIDO (1): o protótipo dizia "Criar conta grátis".
   primaryCta: "Começar agora",
@@ -63,7 +63,7 @@ export const PLATFORM = {
 
 export const ABOUT = {
   eyebrow: "Sobre nós",
-  title: "Uma solução digital para simplificar a compra e venda de imóveis.",
+  title: "Uma solução digital para simplificar a compra e venda de propriedades.",
   body: "A UProperty Market torna o processo mais simples e direto: comunica de forma segura, por chat, sem necessidade de intermediários, sem partilha de contactos pessoais e sem comissões sobre a venda.",
   imageLabel: "fotografia · equipa",
   points: [
@@ -82,11 +82,11 @@ export const BUSINESS = {
   imageLabel: "fotografia · obra em construção",
 } as const;
 
-/** A secção "Em breve", que o modo pós-lançamento substitui por imóveis reais. */
+/** A secção "Em breve", que o modo pós-lançamento substitui por propriedades reais. */
 export const COMING_SOON = {
   eyebrow: "Em breve",
-  title: "Os primeiros imóveis estão a caminho",
-  body: "Ainda não há imóveis publicados. Estamos a preparar o arranque com os primeiros proprietários — faça a sua pré-inscrição agora e seja avisado assim que os anúncios abrirem.",
+  title: "As primeiras propriedades estão a caminho",
+  body: "Ainda não há propriedades publicadas. Estamos a preparar o arranque com os primeiros proprietários — faça a sua pré-inscrição agora e seja avisado assim que os anúncios abrirem.",
   primaryCta: "Quero ser avisado",
   secondaryCta: "Ver pré-visualização",
   cards: [
@@ -114,15 +114,15 @@ export const COMING_SOON = {
 } as const;
 
 /**
- * "Imóveis mais recentes" — o que ocupa o lugar de `COMING_SOON` depois do
+ * "Propriedades mais recentes" — o que ocupa o lugar de `COMING_SOON` depois do
  * lançamento (04 §2.1). Texto novo e não herdado do protótipo: o protótipo é
  * de pré-lançamento e não tem esta secção.
  */
 export const RECENT_LISTINGS = {
-  eyebrow: "Imóveis",
-  title: "Imóveis mais recentes",
+  eyebrow: "Propriedades",
+  title: "Propriedades mais recentes",
   body: "Os últimos anúncios publicados pelos proprietários. Fale diretamente com quem vende, sem intermediários e sem comissões.",
-  cta: "Ver todos os imóveis",
+  cta: "Ver todas as propriedades",
 } as const;
 
 export const AUDIENCES = {
@@ -151,7 +151,7 @@ export const AUDIENCES = {
       {
         icon: "cloud",
         title: "Documentação na cloud",
-        body: "Certidões, plantas e contratos organizados por imóvel, sempre acessíveis.",
+        body: "Certidões, plantas e contratos organizados por propriedade, sempre acessíveis.",
       },
       {
         icon: "message-square",
@@ -171,7 +171,7 @@ export const AUDIENCES = {
       {
         icon: "handshake",
         title: "Proximidade",
-        body: "Reduz intermediários entre o cliente final e os seus imóveis.",
+        body: "Reduz intermediários entre o cliente final e as suas propriedades.",
       },
       {
         icon: "layout-dashboard",
@@ -255,8 +255,8 @@ export const CONTACT = {
   title: "Tem dúvidas? Fale connosco.",
   body: "Respondemos com a maior brevidade possível, sempre com a atenção que cada questão merece.",
   reasons: [
-    { value: "vender", label: "Quero vender um imóvel" },
-    { value: "comprar", label: "Quero comprar um imóvel" },
+    { value: "vender", label: "Quero vender uma propriedade" },
+    { value: "comprar", label: "Quero comprar uma propriedade" },
     { value: "planos", label: "Questões sobre planos" },
     { value: "suporte", label: "Suporte técnico" },
   ],
@@ -264,7 +264,7 @@ export const CONTACT = {
 
 /** O rodapé de cinco colunas de 04 §2.1. */
 export const FOOTER = {
-  tagline: "Compra e venda de imóveis, sem comissões.",
+  tagline: "Compra e venda de propriedades, sem comissões.",
   columns: [
     {
       title: "A plataforma",

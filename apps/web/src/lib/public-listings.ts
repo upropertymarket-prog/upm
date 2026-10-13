@@ -145,7 +145,7 @@ function toCard(row: Row, coverUrl: string | null): PublicListingCard {
   return {
     id,
     slug: listingSlug({ id, title: row.title }),
-    title: row.title?.trim() || "Imóvel sem título",
+    title: row.title?.trim() || "Propriedade sem título",
     deal: row.deal,
     typology: row.typology,
     city: row.city,
@@ -381,7 +381,7 @@ function approxFrom(
   return { lon, lat, radiusM };
 }
 
-/** Uma ficha pública pelo id que o slug carrega. */
+/** O detalhe público pelo id que o slug carrega. */
 export async function getPublicListing(id: string): Promise<PublicListingDetail | null> {
   try {
     const cached = unstable_cache(() => fetchListing(id), ["public-listing", id], {
@@ -391,5 +391,73 @@ export async function getPublicListing(id: string): Promise<PublicListingDetail 
     return await cached();
   } catch {
     return null;
+  }
+}
+
+/**
+ * "Nunca existiu" ou "já não está" (P2-05)
+ * =========================================================================
+ * `properties_public` não distingue os dois — filtra `status in
+ * ('active','featured')`, por isso um uuid inventado e uma propriedade vendida
+ * devolvem ambos nada. Quem decide é a função `listing_availability`, que corre
+ * `security definer` e só revela o que já esteve publicado; a migração
+ * `20261013090000_listing_availability.sql` tem as regras todas.
+ *
+ * **Falha para `never`, deliberadamente.** Se a função não existir ainda na
+ * base de dados (migração por aplicar), se der erro ou se a resposta vier com
+ * outra forma, o resultado é `never` — e a página dá 404, que é o
+ * comportamento de antes. Um erro aqui nunca pode transformar-se em "esta
+ * propriedade foi vendida" sobre uma propriedade que não existe.
+ */
+export type ListingAvailability =
+  | { outcome: "never" }
+  | {
+      outcome: "gone";
+      reason: "sold" | "rented" | "withdrawn";
+      deal: "sale" | "rent" | null;
+      city: string | null;
+    };
+
+const GONE_REASONS = new Set(["sold", "rented", "withdrawn"]);
+
+type AvailabilityRow = { outcome?: unknown; reason?: unknown; deal?: unknown; city?: unknown };
+
+async function fetchAvailability(id: string): Promise<ListingAvailability> {
+  const supabase = createAnonClient();
+
+  // `rpc` tipado pelo `Database` gerado, que ainda não conhece esta função: o
+  // `pnpm db:types` precisa de um token de gestão novo e isso é passo de
+  // produção, que neste projeto fica para o fim. O molde abaixo é a ponte até
+  // lá — **apagar o `as never` assim que os tipos forem regenerados**, que é
+  // quando o compilador volta a poder verificar o nome e os argumentos.
+  const { data, error } = await supabase.rpc(
+    "listing_availability" as never,
+    { p_property_id: id } as never,
+  );
+  if (error) return { outcome: "never" };
+
+  const row = (Array.isArray(data) ? data[0] : data) as AvailabilityRow | null | undefined;
+  if (!row || row.outcome !== "gone") return { outcome: "never" };
+
+  return {
+    outcome: "gone",
+    reason:
+      typeof row.reason === "string" && GONE_REASONS.has(row.reason)
+        ? (row.reason as "sold" | "rented" | "withdrawn")
+        : "withdrawn",
+    deal: row.deal === "sale" || row.deal === "rent" ? row.deal : null,
+    city: typeof row.city === "string" && row.city.trim() !== "" ? row.city : null,
+  };
+}
+
+export async function getListingAvailability(id: string): Promise<ListingAvailability> {
+  try {
+    const cached = unstable_cache(() => fetchAvailability(id), ["listing-availability", id], {
+      tags: [LISTINGS_TAG, `listing:${id}`],
+      revalidate: REVALIDATE,
+    });
+    return await cached();
+  } catch {
+    return { outcome: "never" };
   }
 }

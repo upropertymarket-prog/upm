@@ -1,8 +1,8 @@
 import type { PageSeo } from "@/lib/seo";
 
 export const seo: PageSeo = {
-  pageName: "Imóveis",
-  titleTag: "Imóveis sem comissões · UProperty Market",
+  pageName: "Propriedades",
+  titleTag: "Propriedades sem comissões · UProperty Market",
   metaDescription:
     "Casas e apartamentos para comprar e arrendar, falando diretamente com quem vende. Sem comissões, sem intermediários e sem contactos indesejados.",
   ogSameAsPage: true,
@@ -15,7 +15,7 @@ export const seo: PageSeo = {
   // imagem nos dois casos, com a diferença de que o caminho escrito dá a
   // entender que está resolvido. Fica como **D63**.
   ogImage: "",
-  ogImageAlt: "Imóveis na UProperty Market",
+  ogImageAlt: "Propriedades na UProperty Market",
   canonical: "https://upropertymarket.pt/imoveis",
   noindex: false,
 };

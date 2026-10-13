@@ -87,7 +87,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
         error={state.fieldErrors?.profileType}
         options={[
           { value: "", label: "Selecione uma opção…" },
-          { value: "owner", label: "Tenho um imóvel para vender ou arrendar" },
+          { value: "owner", label: "Tenho uma propriedade para vender ou arrendar" },
           { value: "buyer", label: "Procuro casa" },
           { value: "empresa", label: "Represento uma empresa" },
         ]}

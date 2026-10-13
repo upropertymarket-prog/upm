@@ -11,5 +11,5 @@ export const seo: PageSeo = {
   pageName: "Pré-inscrição",
   titleTag: "Pré-inscrição · UProperty Market",
   metaDescription:
-    "Inscreva-se para ser avisado quando os primeiros imóveis abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
+    "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
 };

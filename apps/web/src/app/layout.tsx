@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "UProperty Market",
-  description: "Compre, venda e arrende imóveis diretamente, sem comissões.",
+  description: "Compre, venda e arrende propriedades diretamente, sem comissões.",
   // TODO: ícone final da marca (07 §10.1) — `icons` e o `og:image` por omissão
   // ficam por preencher até o cliente entregar o ícone. O SEO a sério entra na
   // Fase 5, com um `seo.ts` por rota (04 §8.1.2).

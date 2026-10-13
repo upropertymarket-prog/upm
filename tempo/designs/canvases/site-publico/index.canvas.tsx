@@ -15,8 +15,6 @@ import {
   PreInscricaoEscuro,
   PreLancamentoClaro,
   PreLancamentoEscuro,
-  RecentesClaro,
-  RecentesEscuro,
 } from "./Ecrans";
 
 /**
@@ -48,12 +46,22 @@ import {
  *
  * Daí a regra: **sem `intrinsicSizing`**, 1440 × 900, pares claro/escuro com
  * 80 px entre si e 980 px entre linhas (900 de moldura + 80 de goteira), que é
- * exatamente o passo do canvas `legal`.
+ * exatamente o passo do canvas `legal`. Sem exceções: todas as molduras deste
+ * canvas são páginas inteiras, e nenhuma linha foge ao passo.
  *
- * O Market público (`/imoveis`) e a ficha entraram a 12 out 2026, com P2-05.
- * "Sem resultados" tem storyboard própria porque é o estado que um visitante
+ * O Market público (`/imoveis`) e o detalhe entraram a 12 out 2026, com P2-05.
+ * "Sem propriedades" tem storyboard própria porque é o estado que um visitante
  * encontra ao filtrar por uma localidade sem anúncios — acontece desde o
  * primeiro dia e é o mais fácil de deixar feio.
+ *
+ * **A ordem das linhas é a do visitante, não a de quem escreveu o código.** De
+ * cima para baixo: home em pré-lançamento → home em pós-lançamento →
+ * pré-inscrição → Market em pré-lançamento → Market sem propriedades → Market
+ * com propriedades → detalhe de propriedade. É a vida do site do dia zero ao
+ * catálogo cheio, e dentro do Market é do estado mais vazio para o mais cheio.
+ * Quem percorre o canvas de cima a baixo vê o produto a encher-se; a ordem
+ * anterior punha o catálogo cheio primeiro e o ecrã de pré-lançamento — o
+ * único que hoje existe a sério — enterrado no fim.
  *
  * Revisto a 12 out 2026, e o que faltava era de três tipos:
  *
@@ -64,12 +72,19 @@ import {
  *  - **Storyboard sem a navbar da página.** `/pre-inscricao` mostrava só o
  *    formulário e os cartões; a `page.tsx` tem `PublicHeader` e `SiteFooter`.
  *    A regra para páginas é reproduzir a moldura da rota — foi o que se fez em
- *    `/imoveis` e não se tinha feito aqui. Uma secção isolada (`Recentes`) é a
- *    exceção deliberada: aí o que se revê é a secção, não a página.
+ *    `/imoveis` e não se tinha feito aqui.
  *  - **Um ramo de rota inteiro sem storyboard.** `/imoveis` em `pre` devolve
  *    uma página diferente — "em breve" + CTA para a pré-inscrição —, que é o
  *    que **todos** os visitantes vão ver até ao lançamento. Era o ecrã mais
  *    visto do site e não existia no canvas.
+ *
+ * **Uma storyboard por rota, nunca por secção.** A 13 out 2026 saíram as duas
+ * molduras de "Propriedades mais recentes": a secção já é renderizada dentro das
+ * storyboards de `/` em pós-lançamento, e uma moldura só para ela era uma
+ * segunda entrada para o mesmo componente — mais uma coisa a manter alinhada a
+ * cada alteração, sem ecrã novo nenhum. O preço é conhecido e aceite: a secção
+ * fica abaixo da dobra dos 900 px, por isso vê-se rolando `PosLancamento`, e
+ * não há captura isolada dela.
  */
 export default function SitePublicoCanvas() {
   return (
@@ -113,72 +128,58 @@ export default function SitePublicoCanvas() {
         layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
       />
 
-      {/* A secção de imóveis recentes da home, isolada: na moldura de 900 px
-          ela fica abaixo da dobra e a captura da home nunca a mostra. */}
-      <Storyboard
-        id="RecentesClaro"
-        name="Home · Imóveis mais recentes · claro"
-        component={RecentesClaro}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="RecentesEscuro"
-        name="Home · Imóveis mais recentes · escuro"
-        component={RecentesEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
-      />
-
-      <Storyboard
-        id="ImoveisClaro"
-        name="Market público · claro (/imoveis)"
-        component={ImoveisClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="ImoveisEscuro"
-        name="Market público · escuro (/imoveis)"
-        component={ImoveisEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
-      />
-
-      <Storyboard
-        id="ImoveisSemResultados"
-        name="Market público · sem resultados · claro (/imoveis?cidade=Guarda)"
-        component={ImoveisSemResultados}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="ImoveisSemResultadosEscuro"
-        name="Market público · sem resultados · escuro (/imoveis?cidade=Guarda)"
-        component={ImoveisSemResultadosEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
-      />
-
-      {/* O ramo `pre` da mesma rota: é o que o visitante vê até ao lançamento. */}
+      {/* O ramo `pre` da mesma rota, e por isso **antes** dos outros dois: é o
+          que o visitante vê até ao lançamento. */}
       <Storyboard
         id="ImoveisPreLancamentoClaro"
         name="Market público · pré-lançamento · claro (/imoveis)"
         component={ImoveisPreLancamentoClaro}
-        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"
         name="Market público · pré-lançamento · escuro (/imoveis)"
         component={ImoveisPreLancamentoEscuro}
-        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="ImoveisSemResultados"
+        name="Market público · sem propriedades · claro (/imoveis?cidade=Guarda)"
+        component={ImoveisSemResultados}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ImoveisSemResultadosEscuro"
+        name="Market público · sem propriedades · escuro (/imoveis?cidade=Guarda)"
+        component={ImoveisSemResultadosEscuro}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+      />
+
+      <Storyboard
+        id="ImoveisClaro"
+        name="Market público · com propriedades · claro (/imoveis)"
+        component={ImoveisClaro}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ImoveisEscuro"
+        name="Market público · com propriedades · escuro (/imoveis)"
+        component={ImoveisEscuro}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="FichaClaro"
-        name="Ficha de imóvel · claro (/imoveis/[slug])"
+        name="Detalhe de propriedade · claro (/imoveis/[slug])"
         component={FichaClaro}
-        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
         id="FichaEscuro"
-        name="Ficha de imóvel · escuro (/imoveis/[slug])"
+        name="Detalhe de propriedade · escuro (/imoveis/[slug])"
         component={FichaEscuro}
-        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
     </Canvas>
   );

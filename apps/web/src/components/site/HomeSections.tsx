@@ -7,6 +7,7 @@ import { ContactForm } from "./ContactForm";
 import { Faq } from "./Faq";
 import { FeatureGrid } from "./FeatureGrid";
 import { Hero } from "./Hero";
+import { PlatformDemo } from "./PlatformDemo";
 import { Pricing, type PublicPlan } from "./Pricing";
 import { RecentListings } from "./RecentListings";
 import { SectionHeading, SiteSection } from "./SiteSection";
@@ -76,26 +77,13 @@ export function HomeSections({
               title={PLATFORM.title}
               body={PLATFORM.body}
             />
-            {/* A demonstração interativa é P2-04 e ainda não existe. Em vez de
-                um espaço vazio, o lugar está declarado com a sua proporção —
-                para o layout não saltar quando ela entrar — e com uma ligação
-                que leva a algum lado entretanto. */}
-            <div
-              style={{
-                aspectRatio: "16 / 10",
-                borderRadius: "var(--r-lg)",
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                display: "grid",
-                placeItems: "center",
-                gap: "var(--sp-3)",
-                textAlign: "center",
-                padding: "var(--sp-6)",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: "14px", color: "var(--muted)", maxWidth: "28rem" }}>
-                A demonstração interativa dos painéis entra em P2-04.
-              </p>
+            {/* A demonstração interativa (P2-04). Ocupou o lugar que estava
+                reservado aqui com uma caixa 16/10 vazia desde P2-01. Os ecrãs
+                são os componentes reais da plataforma com fixtures estáticas —
+                a razão de não serem as rotas autenticadas está em 07 §7 e
+                repetida no cabeçalho do `PlatformDemo`. */}
+            <PlatformDemo />
+            <div style={{ display: "flex", justifyContent: "center" }}>
               <Link href={signupHref} className="upm-btn upm-btn--secondary upm-btn--md">
                 {launchMode === "pre" ? "Fazer pré-inscrição" : "Criar conta"}
               </Link>
@@ -198,7 +186,7 @@ export function HomeSections({
           </div>
         </SiteSection>
 
-        {/* "Em breve" em pré-lançamento, "Imóveis mais recentes" depois — a
+        {/* "Em breve" em pré-lançamento, "Propriedades mais recentes" depois — a
             troca que 04 §2.1 pede. Em pós-lançamento sem nada publicado o
             `RecentListings` devolve `null` e a secção desaparece: uma grelha
             vazia sob o título diria que o site está partido. */}
