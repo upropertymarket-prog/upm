@@ -55,7 +55,7 @@ export type MailListItem = Pick<
   | "ticket_id"
   | "sent_at"
   | "received_at"
-> & { preview: string };
+> & { preview: string; has_attachments: boolean };
 
 export type MailboxOption = {
   id: string;
@@ -66,7 +66,7 @@ export type MailboxOption = {
 };
 
 const LIST_COLUMNS =
-  "id, subject, from_address, from_name, folder, is_read, is_starred, labels, ticket_id, sent_at, received_at, text_body";
+  "id, subject, from_address, from_name, folder, is_read, is_starred, labels, ticket_id, sent_at, received_at, text_body, attachments";
 
 export async function listMailboxOptions(client: AnySupabaseClient): Promise<MailboxOption[]> {
   const { data, error } = await client
@@ -133,6 +133,9 @@ export async function listMail(
     sent_at: row.sent_at,
     received_at: row.received_at,
     preview: (row.text_body ?? "").replace(/\s+/g, " ").trim().slice(0, 160),
+    // Só se há ou não: o nome e o tamanho ficam para a leitura, e a lista não
+    // precisa de arrastar o `jsonb` inteiro para desenhar um clipe.
+    has_attachments: Array.isArray(row.attachments) && row.attachments.length > 0,
   }));
 }
 

@@ -1,10 +1,12 @@
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
-import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
 import { MailboxView } from "../../../../apps/interno/src/app/suporte/email/MailboxView";
 import ptMessages from "../../../../packages/config/messages/pt.json";
+// A folha do cliente de correio. Sem ela a storyboard mostrava três colunas sem
+// moldura — este ecrã é o CSS tanto como é o JSX.
+import "../../../../apps/interno/src/app/suporte/email/mailbox.css";
 import {
   MAILBOXES,
   MAIL_COUNTS,
@@ -49,7 +51,10 @@ function CaixaDemo({
   selected: typeof MAIL_SELECTED | null;
 }) {
   return (
-    <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
+    // `height` e não `minHeight`: o cliente de correio herda a altura do shell
+    // em `fill`, e sem uma altura fechada aqui as três colunas voltariam a ficar
+    // do tamanho do texto — que é exactamente o que esta versão corrige.
+    <div data-theme={theme} style={{ height: "900px", background: "var(--bg)" }}>
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <ToastProvider>
@@ -61,8 +66,8 @@ function CaixaDemo({
               locale="pt"
               onLocaleChange={async () => undefined}
               counters={{ mailbox: MAIL_COUNTS.unread, tickets: 3 }}
+              fill
             >
-              <PageHeader title="Caixa de e-mail" subtitle="O correio do Suporte, por caixa." />
               <MailboxView
                 mailboxes={mailboxes}
                 mailboxId={mailboxes[0]?.id ?? null}
@@ -80,6 +85,7 @@ function CaixaDemo({
                 onCreateLabel={semEscrita}
                 onToggleLabel={semEscrita}
                 onCreateTicket={semEscrita}
+                onSync={semEscrita}
               />
             </InternalChrome>
           </ToastProvider>

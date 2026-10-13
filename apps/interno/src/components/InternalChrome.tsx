@@ -25,6 +25,13 @@ export type InternalChromeProps = {
   onLocaleChange: (locale: string) => void | Promise<void>;
   counters?: Record<string, number>;
   notifications?: Notification[];
+  /**
+   * Trava o shell no viewport e dá ao conteúdo a altura que sobra. É o que a
+   * Caixa de e-mail precisa: um cliente de correio de três colunas tem de
+   * herdar uma altura definida, senão as colunas ficam do tamanho do texto e o
+   * ecrã deixa de parecer uma aplicação (04 §5.5, mesma razão das Mensagens).
+   */
+  fill?: boolean;
   children: React.ReactNode;
 };
 
@@ -57,6 +64,7 @@ export function InternalChrome({
   onLocaleChange,
   counters = {},
   notifications = [],
+  fill = false,
   children,
 }: InternalChromeProps) {
   const t = useTranslations();
@@ -82,6 +90,7 @@ export function InternalChrome({
 
   return (
     <AppShell
+      fill={fill}
       sidebar={{
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,

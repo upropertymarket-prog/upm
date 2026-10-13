@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
-import { PageHeader } from "@upm/ui";
 import {
   getMailMessage,
   listMail,
@@ -14,8 +13,16 @@ import {
 import { InternalChrome } from "../../../components/InternalChrome";
 import { getSupportShellData } from "../../../lib/support-shell";
 import { setLocalePreference } from "../../actions/preferences";
-import { addLabel, moveMessage, setFlags, ticketFromMail, toggleMailLabel } from "./actions";
+import {
+  addLabel,
+  moveMessage,
+  setFlags,
+  syncNow,
+  ticketFromMail,
+  toggleMailLabel,
+} from "./actions";
 import { MailboxView } from "./MailboxView";
+import "./mailbox.css";
 
 /**
  * `/suporte/email` — a Caixa de e-mail (P10-04 · 04 §2.5)
@@ -34,7 +41,11 @@ import { MailboxView } from "./MailboxView";
 
 export const dynamic = "force-dynamic";
 
-const folderSchema = z.enum(["inbox", "archive"]);
+// As quatro pastas de `mail_folder`: `sent` e `drafts` ainda nascem vazias —
+// quem lá escreve é o composer, em P10-05 —, mas aparecem no menu lateral
+// porque existem no esquema e porque uma pasta que falta é mais confusa do que
+// uma pasta vazia.
+const folderSchema = z.enum(["inbox", "sent", "drafts", "archive"]);
 const uuid = z.string().uuid();
 
 function first(value: string | string[] | undefined) {
@@ -95,8 +106,8 @@ export default async function SupportMailboxPage({
       locale={shell.locale}
       onLocaleChange={setLocalePreference}
       counters={shell.counters}
+      fill
     >
-      <PageHeader title={t("support.mailbox.title")} subtitle={t("support.mailbox.subtitle")} />
       <MailboxView
         mailboxes={mailboxes}
         mailboxId={mailboxId}
@@ -114,6 +125,7 @@ export default async function SupportMailboxPage({
         onCreateLabel={addLabel}
         onToggleLabel={toggleMailLabel}
         onCreateTicket={ticketFromMail}
+        onSync={syncNow}
       />
     </InternalChrome>
   );

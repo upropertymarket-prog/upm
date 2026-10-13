@@ -993,8 +993,10 @@
       "searchPlaceholder": "Subject or sender…",
       "folders": {
         "inbox": "Inbox",
-        "starred": "Starred",
-        "archive": "Archive"
+        "sent": "Sent",
+        "drafts": "Drafts",
+        "archive": "Archive",
+        "starred": "Starred"
       },
       "labelsTitle": "Labels",
       "noLabels": "No labels in this mailbox yet.",
@@ -1023,7 +1025,16 @@
       "bodyTitle": "Email content",
       "emptyBodyText": "This message had no text body.",
       "attachments": "Attachments",
-      "attachment": "Attachment"
+      "attachment": "Attachment",
+      "compose": "New email",
+      "composerSoon": "The composer arrives with P10-05.",
+      "reply": "Reply",
+      "forward": "Forward",
+      "sync": "Sync",
+      "foldersLabel": "Folders",
+      "listLabel": "Messages",
+      "readerLabel": "Reading",
+      "messageCount": "{count, plural, =0 {No messages} one {# message} other {# messages}}"
     }
   }
 }

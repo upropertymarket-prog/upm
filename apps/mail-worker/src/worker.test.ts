@@ -17,7 +17,7 @@ const baseEnv = {
 
 group("readEnv", () => {
   it("recusa arrancar sem a chave de serviço", () => {
-    const { SUPABASE_SERVICE_ROLE_KEY: _omitida, ...semChave } = baseEnv;
+    const semChave = { ...baseEnv, SUPABASE_SERVICE_ROLE_KEY: undefined };
     expect(() => readEnv(semChave as NodeJS.ProcessEnv)).toThrow(/SUPABASE_SERVICE_ROLE_KEY/);
   });
 

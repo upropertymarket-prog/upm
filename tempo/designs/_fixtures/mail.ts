@@ -74,6 +74,7 @@ export const MAIL_LIST: MailListItem[] = [
     received_at: "2026-10-13T08:42:30.000Z",
     preview:
       "Boa tarde, carreguei em Publicar e o anúncio continua como rascunho. Já tentei em dois browsers…",
+    has_attachments: true,
   },
   {
     id: "eeeeeeee-2222-4222-8222-eeeeeeeeeeee",
@@ -88,6 +89,7 @@ export const MAIL_LIST: MailListItem[] = [
     sent_at: "2026-10-12T16:20:00.000Z",
     received_at: "2026-10-12T16:20:10.000Z",
     preview: "Obrigado pela ajuda. A fatura já abre no telemóvel, podem fechar o pedido.",
+    has_attachments: false,
   },
   {
     id: "ffffffff-3333-4333-8333-ffffffffffff",
@@ -104,6 +106,7 @@ export const MAIL_LIST: MailListItem[] = [
     sent_at: "2026-10-11T11:05:00.000Z",
     received_at: "2026-10-11T11:05:20.000Z",
     preview: "Olá, confirmo a visita de sábado. Levo a documentação toda.",
+    has_attachments: false,
   },
 ];
 
@@ -145,4 +148,11 @@ export const MAIL_SELECTED: MailMessageRow = {
   updated_at: "2026-10-13T08:42:30.000Z",
 };
 
-export const MAIL_COUNTS = { inbox: 3, archive: 12, unread: 1, starred: 1 };
+export const MAIL_COUNTS = {
+  inbox: 3,
+  sent: 0,
+  drafts: 0,
+  archive: 12,
+  unread: 1,
+  starred: 1,
+};

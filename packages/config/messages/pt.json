@@ -992,9 +992,11 @@
       "searchLabel": "Procurar no correio",
       "searchPlaceholder": "Assunto ou remetente…",
       "folders": {
-        "inbox": "Entrada",
-        "starred": "Com estrela",
-        "archive": "Arquivo"
+        "inbox": "Caixa de entrada",
+        "sent": "Enviados",
+        "drafts": "Rascunhos",
+        "archive": "Arquivo",
+        "starred": "Com estrela"
       },
       "labelsTitle": "Marcadores",
       "noLabels": "Ainda não há marcadores nesta caixa.",
@@ -1023,7 +1025,16 @@
       "bodyTitle": "Conteúdo do e-mail",
       "emptyBodyText": "Esta mensagem não trazia texto.",
       "attachments": "Anexos",
-      "attachment": "Anexo"
+      "attachment": "Anexo",
+      "compose": "Novo e-mail",
+      "composerSoon": "O composer chega com P10-05.",
+      "reply": "Responder",
+      "forward": "Encaminhar",
+      "sync": "Sincronizar",
+      "foldersLabel": "Pastas",
+      "listLabel": "Mensagens",
+      "readerLabel": "Leitura",
+      "messageCount": "{count, plural, =0 {Sem mensagens} one {# mensagem} other {# mensagens}}"
     }
   }
 }

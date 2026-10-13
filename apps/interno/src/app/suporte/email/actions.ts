@@ -138,6 +138,57 @@ export async function toggleMailLabel(input: unknown): Promise<MailActionResult>
 }
 
 /**
+ * "Sincronizar" — pede ao `mail-worker` uma passagem agora.
+ *
+ * O worker já sincroniza sozinho de cinco em cinco minutos; este botão existe
+ * para quem está à espera de um e-mail concreto e não quer contar os minutos.
+ * Como no teste de ligação, a app **não fala com o IMAP**: pede ao worker, que
+ * é quem tem a credencial.
+ */
+export async function syncNow(): Promise<MailActionResult> {
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para sincronizar o correio." };
+
+  const workerUrl = process.env.MAIL_WORKER_URL;
+  const workerToken = process.env.MAIL_WORKER_TOKEN;
+  if (!workerUrl || !workerToken) {
+    return { error: "O mail-worker ainda não está configurado (MAIL_WORKER_URL)." };
+  }
+
+  try {
+    // Uma passagem por todas as caixas pode demorar: 60 s é o tempo de espera,
+    // e não o tempo da sincronização — o worker continua depois disso.
+    const response = await fetch(`${workerUrl.replace(/\/$/, "")}/sync`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${workerToken}` },
+      signal: AbortSignal.timeout(60_000),
+    });
+
+    if (!response.ok) return { error: `O mail-worker respondeu ${response.status}.` };
+
+    const body = (await response.json().catch(() => null)) as {
+      mailboxes?: { address: string; inserted: number; error?: string }[];
+    } | null;
+
+    const reports = body?.mailboxes ?? [];
+    const failed = reports.filter((report) => report.error);
+    const inserted = reports.reduce((total, report) => total + (report.inserted ?? 0), 0);
+
+    revalidatePath("/suporte/email");
+
+    if (failed.length > 0) {
+      return { error: `${failed[0]!.address}: ${failed[0]!.error}` };
+    }
+    return {
+      ok: true,
+      notice: inserted > 0 ? `${inserted} mensagem(ns) nova(s).` : "Sem mensagens novas.",
+    };
+  } catch {
+    return { error: "Não foi possível falar com o mail-worker." };
+  }
+}
+
+/**
  * "Criar ticket" (04 §2.5). Idempotente: a função devolve o ticket existente
  * quando a mensagem já tem um, e o ecrã diz "Abrir ticket" nesse caso.
  */
