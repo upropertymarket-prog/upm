@@ -24,6 +24,13 @@ import type { SeoActionResult, SeoSaveInput } from "./actions";
  *    campos em falta caem para o ficheiro; o aviso existe porque uma
  *    sobreposição meia é quase sempre um esquecimento, não uma escolha.
  *
+ * **A coluna "Última alteração" é o rasto, não a data do ficheiro.** Diz quando
+ * e por quem esta página foi editada *aqui*; uma página que nunca passou pelo
+ * painel aparece como "nunca editada aqui" em vez de pedir emprestada a data do
+ * último commit, que mede outra coisa. Uma página devolvida ao ficheiro perde a
+ * linha em `seo_pages` mas não perde o rasto — essa vem do `audit_log`, e é
+ * marcada como tal.
+ *
  * As pré-visualizações são aproximações honestas, não reproduções: o Google
  * trunca por largura em píxeis e não por número de caracteres, e muda as
  * regras sem avisar. Servem para ver o texto no formato certo e apanhar um
@@ -42,13 +49,28 @@ export type SeoOverrideFields = {
   noindex: boolean;
 };
 
+/**
+ * Quando e por quem, para uma rota. É `null` quando ninguém mexeu nesta página
+ * a partir do Admin — e aí a resposta honesta é que a última alteração está no
+ * git, não aqui.
+ */
+export type SeoLastChange = {
+  /** ISO. Formatado no cliente com o fuso fixo — ver `formatWhen`. */
+  at: string;
+  /** Nome de quem alterou. `null` quando o perfil já não existe. */
+  by: string | null;
+  /** A última alteração foi limpar os campos, devolvendo a página ao ficheiro. */
+  reset?: boolean;
+};
+
 export type SeoPageRow = {
   route: string;
   pageName: string;
   dynamic: boolean;
   /** O que o `seo.ts` da rota diz — o valor em vigor quando não há registo. */
   defaults: { titleTag: string; metaDescription: string };
-  override: (SeoOverrideFields & { updatedAt: string }) | null;
+  override: SeoOverrideFields | null;
+  lastChange: SeoLastChange | null;
 };
 
 /** Os limites de 04 §2.1.1. Conselho, não regra — ver a nota em `actions.ts`. */
@@ -81,6 +103,47 @@ function effective(row: SeoPageRow, draft: SeoOverrideFields | null) {
     title: source?.titleTag.trim() || row.defaults.titleTag,
     description: source?.metaDescription.trim() || row.defaults.metaDescription,
   };
+}
+
+/**
+ * Data e hora de uma alteração.
+ *
+ * **O fuso é fixo e não é um detalhe.** Esta lista é desenhada no servidor e
+ * hidratada no browser; sem `timeZone`, o servidor formata em UTC e o browser
+ * no fuso de quem lê, e o React acusa a diferença. `Europe/Lisbon` é a mesma
+ * escolha — e pela mesma razão — do `timeZone` do `next-intl` em
+ * `packages/config/server.ts`: as horas do produto são as de Portugal.
+ */
+function formatWhen(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "pt-PT", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Europe/Lisbon",
+  }).format(new Date(value));
+}
+
+/** A coluna "Última alteração": quando, em cima; quem, por baixo. */
+function LastChangeCell({ change, locale }: { change: SeoLastChange | null; locale: string }) {
+  if (!change) {
+    return (
+      <span style={{ display: "grid", gap: "2px" }}>
+        <span style={{ color: "var(--muted)" }}>—</span>
+        <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
+          nunca editada aqui
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <span style={{ display: "grid", gap: "2px" }}>
+      <span style={{ color: "var(--text)" }}>{formatWhen(change.at, locale)}</span>
+      <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
+        {change.by ?? "Autor removido"}
+        {change.reset ? " · devolveu ao ficheiro" : ""}
+      </span>
+    </span>
+  );
 }
 
 function Counter({ value, limit }: { value: string; limit: number }) {
@@ -176,10 +239,13 @@ function SocialPreview({
 export function SeoManager({
   rows,
   loadError,
+  locale,
   onSave,
 }: {
   rows: SeoPageRow[];
   loadError: boolean;
+  /** Só para as datas; os textos deste ecrã são de administração, em pt. */
+  locale: string;
   onSave: (input: SeoSaveInput) => Promise<SeoActionResult>;
 }) {
   const [editing, setEditing] = useState<SeoPageRow | null>(null);
@@ -214,6 +280,12 @@ export function SeoManager({
       id: "title",
       header: "Título em vigor",
       cell: (row) => effective(row, null).title,
+    },
+    {
+      id: "lastChange",
+      header: "Última alteração",
+      width: "190px",
+      cell: (row) => <LastChangeCell change={row.lastChange} locale={locale} />,
     },
     {
       id: "status",
@@ -399,12 +471,14 @@ export function SeoManager({
               </p>
             ) : null}
 
-            {editing.override ? (
-              <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-                Personalizado. Última alteração em{" "}
-                {new Date(editing.override.updatedAt).toLocaleString("pt-PT")}.
-              </span>
-            ) : null}
+            <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
+              {editing.override ? "Personalizado. " : "A usar o ficheiro. "}
+              {editing.lastChange
+                ? `Última alteração em ${formatWhen(editing.lastChange.at, locale)} por ${
+                    editing.lastChange.by ?? "autor removido"
+                  }.`
+                : "Nunca editada a partir daqui."}
+            </span>
           </div>
         ) : null}
       </Drawer>

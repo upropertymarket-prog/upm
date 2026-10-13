@@ -110,13 +110,20 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
   // O SEO já está escrito, por isso uma falha aqui não desfaz nada — mas
   // também não se cala. Mesmo tratamento de `savePlan`: quem lê o registo tem
   // de saber que ele está incompleto.
+  //
+  // **A rota vai no `diff`, não em `entityId`.** `audit_log.entity_id` é `uuid`
+  // e `seo_pages` tem a rota por chave primária: mandar "/termos" para lá fazia
+  // o Postgres recusar o cast, a `write_audit_log` atirar, e cada gravação de
+  // SEO acabar com o aviso de "o registo de auditoria falhou" — era isso que
+  // acontecia, e é porque essa falha é visível que não passou em claro. O
+  // painel de `/admin/seo` lê a rota daqui para dizer quem alterou o quê.
   let notice: string | undefined;
   try {
     await writeAuditLog(supabase, {
       action: "seo.updated",
       entity: "seo_pages",
-      entityId: data.route,
-      diff: { after: data },
+      entityId: null,
+      diff: { route: data.route, after: data },
     });
   } catch {
     notice = "Guardado, mas o registo de auditoria falhou — avise a administração.";

@@ -28,6 +28,7 @@ import {
 import { AdminPlanosClaro, AdminPlanosEscuro } from "./Billing";
 import { AdminContratosClaro, AdminContratosEscuro } from "./Demo";
 import { AdminStepUpClaro, AdminStepUpEscuro } from "./StepUp";
+import { AdminSeoClaro, AdminSeoEscuro } from "./Seo";
 
 export default function AdminCanvas() {
   return (
@@ -192,18 +193,34 @@ export default function AdminCanvas() {
         layout={{ x: 1520, y: 12160, width: 1440, height: 1150 }}
       />
 
+      {/* Gestor de SEO (P2-06). A storyboard "SEO Manager" de 04 §2.1.1,
+          traduzida para a convenção deste repositório pela decisão de 7 out
+          2026: o componente real do Admin, não um editor próprio. */}
+      <Storyboard
+        id="AdminSeoClaro"
+        name="SEO e Open Graph · Claro (/admin/seo)"
+        component={AdminSeoClaro}
+        layout={{ x: 0, y: 13390, width: 1440, height: 1150 }}
+      />
+      <Storyboard
+        id="AdminSeoEscuro"
+        name="SEO e Open Graph · Escuro (/admin/seo)"
+        component={AdminSeoEscuro}
+        layout={{ x: 1520, y: 13390, width: 1440, height: 1150 }}
+      />
+
       {/* Diálogo transversal às ações sensíveis */}
       <Storyboard
         id="AdminStepUpClaro"
         name="Confirmação de PIN · Claro"
         component={AdminStepUpClaro}
-        layout={{ x: 0, y: 13390, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 14620, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminStepUpEscuro"
         name="Confirmação de PIN · Escuro"
         component={AdminStepUpEscuro}
-        layout={{ x: 1520, y: 13390, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 14620, width: 1440, height: 900 }}
       />
     </Canvas>
   );

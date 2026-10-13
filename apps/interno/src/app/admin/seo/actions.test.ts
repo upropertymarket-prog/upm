@@ -155,7 +155,14 @@ describe("campos vazios", () => {
 });
 
 describe("auditoria", () => {
-  it("regista a alteração com a rota como entidade", async () => {
+  /**
+   * A rota vai no `diff` e o `entityId` vai vazio. Não é cosmético:
+   * `audit_log.entity_id` é `uuid`, e enquanto a rota era mandada para lá o
+   * Postgres recusava o cast — todas as gravações de SEO acabavam com o aviso
+   * de "o registo de auditoria falhou" e ficavam sem rasto. O painel de
+   * `/admin/seo` lê a rota daqui para dizer quem alterou cada página.
+   */
+  it("regista a alteração com a rota no diff, não no entityId", async () => {
     await saveSeoPage({ route: "/termos", titleTag: "Termos" });
 
     expect(auditLog).toHaveBeenCalledWith(
@@ -163,7 +170,8 @@ describe("auditoria", () => {
       expect.objectContaining({
         action: "seo.updated",
         entity: "seo_pages",
-        entityId: "/termos",
+        entityId: null,
+        diff: expect.objectContaining({ route: "/termos" }),
       }),
     );
   });

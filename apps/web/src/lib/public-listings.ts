@@ -403,11 +403,11 @@ export async function getPublicListing(id: string): Promise<PublicListingDetail 
  * `security definer` e só revela o que já esteve publicado; a migração
  * `20261013090000_listing_availability.sql` tem as regras todas.
  *
- * **Falha para `never`, deliberadamente.** Se a função não existir ainda na
- * base de dados (migração por aplicar), se der erro ou se a resposta vier com
- * outra forma, o resultado é `never` — e a página dá 404, que é o
- * comportamento de antes. Um erro aqui nunca pode transformar-se em "esta
- * propriedade foi vendida" sobre uma propriedade que não existe.
+ * **Falha para `never`, deliberadamente.** Se a função der erro, se a resposta
+ * vier vazia ou com um `outcome` inesperado, o resultado é `never` — e a
+ * página dá 404, que é o comportamento de antes. Um erro aqui nunca pode
+ * transformar-se em "esta propriedade foi vendida" sobre uma propriedade que
+ * não existe.
  */
 export type ListingAvailability =
   | { outcome: "never" }
@@ -420,23 +420,17 @@ export type ListingAvailability =
 
 const GONE_REASONS = new Set(["sold", "rented", "withdrawn"]);
 
-type AvailabilityRow = { outcome?: unknown; reason?: unknown; deal?: unknown; city?: unknown };
-
 async function fetchAvailability(id: string): Promise<ListingAvailability> {
   const supabase = createAnonClient();
 
-  // `rpc` tipado pelo `Database` gerado, que ainda não conhece esta função: o
-  // `pnpm db:types` precisa de um token de gestão novo e isso é passo de
-  // produção, que neste projeto fica para o fim. O molde abaixo é a ponte até
-  // lá — **apagar o `as never` assim que os tipos forem regenerados**, que é
-  // quando o compilador volta a poder verificar o nome e os argumentos.
-  const { data, error } = await supabase.rpc(
-    "listing_availability" as never,
-    { p_property_id: id } as never,
-  );
+  const { data, error } = await supabase.rpc("listing_availability", { p_property_id: id });
   if (error) return { outcome: "never" };
 
-  const row = (Array.isArray(data) ? data[0] : data) as AvailabilityRow | null | undefined;
+  // A função devolve `table(...)`, logo um array. Continua a validar-se campo a
+  // campo mesmo com os tipos gerados: o que o compilador garante é a **forma**,
+  // e o que interessa aqui é que um `outcome` inesperado caia para `never` em
+  // vez de inventar uma venda — ver a nota de `getListingAvailability`.
+  const row = Array.isArray(data) ? data[0] : data;
   if (!row || row.outcome !== "gone") return { outcome: "never" };
 
   return {

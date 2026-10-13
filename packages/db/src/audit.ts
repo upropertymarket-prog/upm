@@ -23,6 +23,12 @@ export type AuditEntry = {
   action: string;
   /** Tabela ou agregado a que a ação se aplica. */
   entity: string;
+  /**
+   * **Tem de ser um uuid**: `audit_log.entity_id` é `uuid` e o Postgres recusa
+   * o cast de qualquer outra coisa — a chamada atira, em vez de guardar o
+   * valor como texto. Uma entidade cuja chave não é um uuid (a rota, em
+   * `seo_pages`) identifica-se dentro do `diff`.
+   */
   entityId?: string | null;
   /** `{ before, after }` nas alterações; o que explique a decisão nas restantes. */
   diff?: Record<string, unknown> | null;

@@ -558,6 +558,14 @@
   background: var(--surface2);
 }
 
+/* O cursor segue o que a linha faz. Uma linha clicável que mantém a seta diz
+   ao rato que não há nada ali, enquanto o realce do `:hover` diz o contrário —
+   e é o cursor que as pessoas acreditam. Só nas linhas com `onRowClick`: uma
+   mão por cima de uma tabela que não abre nada é a promessa ao contrário. */
+.upm-table tbody tr[data-clickable="true"] {
+  cursor: pointer;
+}
+
 .upm-table tbody tr[data-selected="true"] td {
   background: var(--accent-soft);
 }
@@ -688,6 +696,14 @@
   gap: var(--sp-5);
   padding: var(--sp-7) var(--sp-8);
   border-bottom: 1px solid var(--border);
+}
+
+/* O bloco de texto ocupa o espaço que sobra, para o X ficar encostado à
+   direita do painel em vez de colado ao fim do título. Com um título curto, um
+   X a seguir às palavras lê-se como parte do título — e o canto superior
+   direito é onde se procura o fechar. */
+.upm-panel__header > .upm-pagehead__text {
+  flex: 1 1 auto;
 }
 
 .upm-panel__title {

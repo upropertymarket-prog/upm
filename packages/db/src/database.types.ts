@@ -4,7 +4,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5";
+    PostgrestVersion: "14.17";
   };
   graphql_public: {
     Tables: {
@@ -1053,6 +1053,80 @@ export type Database = {
           {
             foreignKeyName: "legal_documents_created_by_fkey";
             columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mailboxes: {
+        Row: {
+          address: string;
+          created_at: string;
+          department: Database["public"]["Enums"]["staff_department"];
+          display_name: string;
+          id: string;
+          in_host: string;
+          in_port: number;
+          in_security: Database["public"]["Enums"]["mail_security"];
+          last_error: string | null;
+          last_sync_at: string | null;
+          owner_profile_id: string | null;
+          protocol: Database["public"]["Enums"]["mail_protocol"];
+          secret_id: string | null;
+          smtp_host: string;
+          smtp_port: number;
+          smtp_security: Database["public"]["Enums"]["mail_security"];
+          status: Database["public"]["Enums"]["mailbox_status"];
+          updated_at: string;
+          username: string;
+        };
+        Insert: {
+          address: string;
+          created_at?: string;
+          department?: Database["public"]["Enums"]["staff_department"];
+          display_name?: string;
+          id?: string;
+          in_host: string;
+          in_port: number;
+          in_security?: Database["public"]["Enums"]["mail_security"];
+          last_error?: string | null;
+          last_sync_at?: string | null;
+          owner_profile_id?: string | null;
+          protocol?: Database["public"]["Enums"]["mail_protocol"];
+          secret_id?: string | null;
+          smtp_host: string;
+          smtp_port: number;
+          smtp_security?: Database["public"]["Enums"]["mail_security"];
+          status?: Database["public"]["Enums"]["mailbox_status"];
+          updated_at?: string;
+          username: string;
+        };
+        Update: {
+          address?: string;
+          created_at?: string;
+          department?: Database["public"]["Enums"]["staff_department"];
+          display_name?: string;
+          id?: string;
+          in_host?: string;
+          in_port?: number;
+          in_security?: Database["public"]["Enums"]["mail_security"];
+          last_error?: string | null;
+          last_sync_at?: string | null;
+          owner_profile_id?: string | null;
+          protocol?: Database["public"]["Enums"]["mail_protocol"];
+          secret_id?: string | null;
+          smtp_host?: string;
+          smtp_port?: number;
+          smtp_security?: Database["public"]["Enums"]["mail_security"];
+          status?: Database["public"]["Enums"]["mailbox_status"];
+          updated_at?: string;
+          username?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mailboxes_owner_profile_id_fkey";
+            columns: ["owner_profile_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -3758,6 +3832,15 @@ export type Database = {
       };
       is_staff: { Args: never; Returns: boolean };
       is_valid_pt_nif: { Args: { p_value: string }; Returns: boolean };
+      listing_availability: {
+        Args: { p_property_id: string };
+        Returns: {
+          city: string;
+          deal: Database["public"]["Enums"]["property_deal"];
+          outcome: string;
+          reason: string;
+        }[];
+      };
       log_document_access: {
         Args: {
           p_action: Database["public"]["Enums"]["document_action"];
@@ -4133,6 +4216,10 @@ export type Database = {
         };
         Returns: string;
       };
+      save_mailbox_secret: {
+        Args: { p_mailbox_id: string; p_password: string };
+        Returns: undefined;
+      };
       seed_demo_site_analytics: { Args: { p_days?: number }; Returns: number };
       set_app_setting: {
         Args: { p_key: string; p_value: Json };
@@ -4404,6 +4491,9 @@ export type Database = {
       lead_stage: "new" | "contacted" | "visit" | "closed";
       legal_document_kind: "terms" | "privacy" | "cookies" | "data_protection";
       legal_review_state: "draft_pending_legal_review" | "legally_reviewed";
+      mail_protocol: "imap" | "pop3";
+      mail_security: "ssl_tls" | "starttls" | "none";
+      mailbox_status: "active" | "paused" | "error";
       plan_audience: "owner" | "buyer" | "both";
       profile_status: "pending" | "active" | "suspended" | "deleted";
       property_deal: "sale" | "rent";
@@ -5073,6 +5163,9 @@ export const Constants = {
       lead_stage: ["new", "contacted", "visit", "closed"],
       legal_document_kind: ["terms", "privacy", "cookies", "data_protection"],
       legal_review_state: ["draft_pending_legal_review", "legally_reviewed"],
+      mail_protocol: ["imap", "pop3"],
+      mail_security: ["ssl_tls", "starttls", "none"],
+      mailbox_status: ["active", "paused", "error"],
       plan_audience: ["owner", "buyer", "both"],
       profile_status: ["pending", "active", "suspended", "deleted"],
       property_deal: ["sale", "rent"],

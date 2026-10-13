@@ -89,6 +89,8 @@ export function Table<Row>({
                 <tr
                   key={key}
                   data-selected={selectedKey === key ? "true" : undefined}
+                  // O CSS põe o cursor de mão só nestas: ver `components.css`.
+                  data-clickable={onRowClick ? "true" : undefined}
                   // Uma linha clicável tem de responder ao teclado (04 §5.7).
                   tabIndex={onRowClick ? 0 : undefined}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
