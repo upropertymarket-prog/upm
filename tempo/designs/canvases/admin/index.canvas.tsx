@@ -30,6 +30,27 @@ import { AdminContratosClaro, AdminContratosEscuro } from "./Demo";
 import { AdminStepUpClaro, AdminStepUpEscuro } from "./StepUp";
 import { AdminSeoClaro, AdminSeoEscuro } from "./Seo";
 
+/**
+ * Canvas do Admin — pela ordem do menu
+ * =========================================================================
+ * **A ordem vertical das storyboards segue `ADMIN_NAV`**
+ * (`apps/interno/src/lib/navigation.ts`), de cima para baixo: Painel,
+ * Utilizadores, Moderação de imóveis, Tráfego, Planos, Templates de contrato,
+ * Leads do site, SEO, Definições. Quem revê o canvas percorre-o na mesma ordem
+ * em que percorre a aplicação, e uma storyboard fora do sítio passa a ler-se
+ * como um erro — que é o que é. **Ao acrescentar uma entrada ao menu, a
+ * storyboard entra na posição correspondente**, não no fim.
+ *
+ * Claro à esquerda (x = 0), escuro à direita (x = 1520), e os detalhes (os
+ * drawers) logo por baixo da lista a que pertencem.
+ *
+ * Duas entradas do menu ainda não têm storyboard: **Tickets** (`/admin/tickets`,
+ * vista só de leitura) e **Caixas de e-mail** (`/admin/caixas-email`). É uma
+ * falta, não uma ordenação errada.
+ *
+ * A Confirmação de PIN fica no fim de propósito: não é uma entrada do menu, é
+ * um diálogo transversal às ações sensíveis de várias páginas.
+ */
 export default function AdminCanvas() {
   return (
     <Canvas name="Admin" backgroundColor="#232323">
@@ -179,20 +200,6 @@ export default function AdminCanvas() {
         layout={{ x: 1520, y: 11000, width: 1440, height: 1080 }}
       />
 
-      {/* Definições */}
-      <Storyboard
-        id="AdminDefinicoesClaro"
-        name="Definições · Claro"
-        component={AdminDefinicoesClaro}
-        layout={{ x: 0, y: 12160, width: 1440, height: 1150 }}
-      />
-      <Storyboard
-        id="AdminDefinicoesEscuro"
-        name="Definições · Escuro"
-        component={AdminDefinicoesEscuro}
-        layout={{ x: 1520, y: 12160, width: 1440, height: 1150 }}
-      />
-
       {/* Gestor de SEO (P2-06). A storyboard "SEO Manager" de 04 §2.1.1,
           traduzida para a convenção deste repositório pela decisão de 7 out
           2026: o componente real do Admin, não um editor próprio. */}
@@ -200,12 +207,26 @@ export default function AdminCanvas() {
         id="AdminSeoClaro"
         name="SEO e Open Graph · Claro (/admin/seo)"
         component={AdminSeoClaro}
-        layout={{ x: 0, y: 13390, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 12160, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminSeoEscuro"
         name="SEO e Open Graph · Escuro (/admin/seo)"
         component={AdminSeoEscuro}
+        layout={{ x: 1520, y: 12160, width: 1440, height: 1150 }}
+      />
+
+      {/* Definições */}
+      <Storyboard
+        id="AdminDefinicoesClaro"
+        name="Definições · Claro"
+        component={AdminDefinicoesClaro}
+        layout={{ x: 0, y: 13390, width: 1440, height: 1150 }}
+      />
+      <Storyboard
+        id="AdminDefinicoesEscuro"
+        name="Definições · Escuro"
+        component={AdminDefinicoesEscuro}
         layout={{ x: 1520, y: 13390, width: 1440, height: 1150 }}
       />
 

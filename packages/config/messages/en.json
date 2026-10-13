@@ -697,7 +697,8 @@
         "users": "Users",
         "moderation": "Property moderation",
         "leads": "Site leads",
-        "plans": "Plans"
+        "plans": "Plans",
+        "mailboxes": "Mailboxes"
       },
       "activityTrend": "Registrations and submissions",
       "last30Days": "Daily for the last 30 days",
@@ -734,7 +735,16 @@
         "settings": "Settings"
       },
       "openBugs": "Open bugs",
-      "openBugsHint": "Tickets not yet closed in Support"
+      "openBugsHint": "Tickets not yet closed in Support",
+      "mailConfig": {
+        "title": "Email config.",
+        "cta": "Configure mailboxes",
+        "none": "No mailbox yet. Create it at Amen and configure it here.",
+        "pending": "{count, plural, one {# mailbox without credentials} other {# mailboxes without credentials}}.",
+        "failing": "{count, plural, one {# mailbox failing to sync} other {# mailboxes failing to sync}}.",
+        "ready": "{count, plural, one {# mailbox configured} other {# mailboxes configured}}.",
+        "loadFailed": "Could not count the mailboxes."
+      }
     },
     "traffic": {
       "title": "Site traffic",

@@ -31,6 +31,15 @@ import {
  *    produção sem esperar por um. `seo_pages` é a sobreposição para esse caso,
  *    e esta página é onde se edita.
  *
+ * **O SEO vai ter duas portas, não duas cópias** (decisão de 13 out 2026):
+ * quando existir a dashboard do departamento de **Marketing**, a gestão e o
+ * controlo de SEO têm de estar também lá — é o marketing quem corrige um título
+ * em produção, e obrigá-lo a entrar pelo Admin é obrigá-lo a passar por um
+ * painel que não é o dele. O que **não** se faz é um segundo editor: a entrada
+ * de menu do Marketing aponta ao mesmo `SeoManager` e às mesmas server actions
+ * de `/admin/seo`, com a mesma verificação de papel do lado do servidor. Dois
+ * editores da mesma tabela divergem à primeira alteração.
+ *
  * Etiquetas de grupo: "Administração" e "Suporte" (04 §5.5).
  */
 

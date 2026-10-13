@@ -697,7 +697,8 @@
         "users": "Utilizadores",
         "moderation": "Moderação de imóveis",
         "leads": "Leads do site",
-        "plans": "Planos"
+        "plans": "Planos",
+        "mailboxes": "Caixas de e-mail"
       },
       "activityTrend": "Registos e submissões",
       "last30Days": "Por dia nos últimos 30 dias",
@@ -734,7 +735,16 @@
         "settings": "Definições"
       },
       "openBugs": "Bugs abertos",
-      "openBugsHint": "Tickets por fechar no Suporte"
+      "openBugsHint": "Tickets por fechar no Suporte",
+      "mailConfig": {
+        "title": "Config. E-mail",
+        "cta": "Configurar caixas",
+        "none": "Ainda não há nenhuma caixa. Crie-a na Amen e configure-a aqui.",
+        "pending": "{count, plural, one {# caixa sem credencial} other {# caixas sem credencial}}.",
+        "failing": "{count, plural, one {# caixa a falhar a sincronização} other {# caixas a falhar a sincronização}}.",
+        "ready": "{count, plural, one {# caixa configurada} other {# caixas configuradas}}.",
+        "loadFailed": "Não foi possível contar as caixas de e-mail."
+      }
     },
     "traffic": {
       "title": "Tráfego do site",

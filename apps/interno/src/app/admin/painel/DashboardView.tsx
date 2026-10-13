@@ -1,11 +1,21 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ArrowUpRight, Building2, CircleDollarSign, ClipboardList, UsersRound } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  CircleDollarSign,
+  ClipboardList,
+  Mail,
+  UsersRound,
+} from "lucide-react";
 import { Card, EmptyState, StatusTag, Table, type TableColumn } from "@upm/ui";
 import type { AdminDashboardPayload } from "../../../lib/admin-shell";
 
 type Activity = AdminDashboardPayload["activity"][number];
+
+/** O resumo das caixas, contado no servidor. `null` quando a leitura falhou. */
+export type MailConfigSummary = { total: number; pending: number; failing: number } | null;
 
 function LineChart({
   data,
@@ -148,11 +158,13 @@ export function DashboardView({
   mrrCents,
   locale,
   loadError,
+  mailConfig,
 }: {
   data: AdminDashboardPayload | null;
   mrrCents: number;
   locale: string;
   loadError: boolean;
+  mailConfig: MailConfigSummary;
 }) {
   const t = useTranslations("admin.dashboard");
   const money = new Intl.NumberFormat(locale === "en" ? "en-IE" : "pt-PT", {
@@ -187,6 +199,7 @@ export function DashboardView({
     ["moderation", "/admin/imoveis", <Building2 size={18} key="icon" />],
     ["leads", "/admin/leads-site", <ClipboardList size={18} key="icon" />],
     ["plans", "/admin/planos", <CircleDollarSign size={18} key="icon" />],
+    ["mailboxes", "/admin/caixas-email", <Mail size={18} key="icon" />],
   ] as const;
   return (
     <div className="flex flex-col gap-6">
@@ -286,6 +299,7 @@ export function DashboardView({
               </section>
             </Card>
           </div>
+          <MailConfigCard summary={mailConfig} t={t} />
           <Card padded>
             <section className="grid gap-4">
               <div>
@@ -307,6 +321,70 @@ export function DashboardView({
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * Config. E-mail — o painel de configuração das caixas (P10-03)
+ * =========================================================================
+ * **Existe porque a configuração é a última coisa a acontecer.** As caixas são
+ * criadas na Amen e só depois configuradas aqui, e isso é trabalho que fica
+ * pendente durante semanas. Um item de menu não chega: ninguém abre
+ * `/admin/caixas-email` para descobrir que há coisas por fazer — abre porque já
+ * sabe. Este cartão é o que faz saber.
+ *
+ * Por isso o que mostra não são caixas, são **pendências**: quantas estão sem
+ * credencial e quantas estão a falhar. Com tudo em ordem o cartão não
+ * desaparece — diz que está tudo configurado, que é a informação que alguém
+ * procura antes de uma entrega.
+ *
+ * O caso que se vê hoje é `total: 0`: nenhuma caixa criada ainda. O texto desse
+ * estado diz o passo seguinte em vez de um zero seco, porque um zero aqui não
+ * se distingue de um erro de leitura.
+ */
+function MailConfigCard({
+  summary,
+  t,
+}: {
+  summary: MailConfigSummary;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const pending = summary?.pending ?? 0;
+  const failing = summary?.failing ?? 0;
+  const tone = failing > 0 ? "rejected" : pending > 0 ? "pending" : "active";
+
+  const state = !summary
+    ? t("mailConfig.loadFailed")
+    : summary.total === 0
+      ? t("mailConfig.none")
+      : failing > 0
+        ? t("mailConfig.failing", { count: failing })
+        : pending > 0
+          ? t("mailConfig.pending", { count: pending })
+          : t("mailConfig.ready", { count: summary.total });
+
+  return (
+    <Card padded>
+      <section className="flex flex-wrap items-center gap-4">
+        <span className="text-accent">
+          <Mail size={18} aria-hidden="true" />
+        </span>
+        <div className="grid gap-1">
+          <h2 className="text-lg font-semibold text-text">{t("mailConfig.title")}</h2>
+          <p className="text-sm text-muted">{state}</p>
+        </div>
+        {summary && summary.total > 0 ? (
+          <StatusTag tone={tone}>{failing > 0 ? failing : pending > 0 ? pending : "OK"}</StatusTag>
+        ) : null}
+        <a
+          href="/admin/caixas-email"
+          className="ml-auto flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-text hover:bg-surface2"
+        >
+          {t("mailConfig.cta")}
+          <ArrowUpRight className="text-muted" size={16} aria-hidden="true" />
+        </a>
+      </section>
+    </Card>
   );
 }
 
