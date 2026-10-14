@@ -6,12 +6,16 @@ import { createClient } from "@upm/db/server";
 import {
   createMailLabel,
   createTicketFromMail,
+  discardMailDraft,
   getMailMessage,
+  mailDraftSchema,
   mailFlagsSchema,
   mailLabelCreateSchema,
   mailLabelsSchema,
   mailMoveSchema,
+  mailSendSchema,
   moveMail,
+  saveMailDraft,
   setMailFlags,
   setMailLabels,
 } from "@upm/db/mail";
@@ -135,6 +139,91 @@ export async function toggleMailLabel(input: unknown): Promise<MailActionResult>
 
   revalidatePath("/suporte/email");
   return { ok: true };
+}
+
+/**
+ * Gravar rascunho (P10-05). Chamada a cada pausa de escrita do composer, e por
+ * isso devolve o `draftId`: a partir da segunda vez grava **por cima** do mesmo
+ * rascunho em vez de deixar um rasto de cópias na pasta.
+ */
+export async function saveDraft(input: unknown): Promise<MailActionResult & { draftId?: string }> {
+  const parsed = mailDraftSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Rascunho inválido." };
+  }
+
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para escrever correio." };
+
+  try {
+    const draftId = await saveMailDraft(supabase, parsed.data);
+    revalidatePath("/suporte/email");
+    return { ok: true, draftId };
+  } catch {
+    return { error: "Não foi possível guardar o rascunho." };
+  }
+}
+
+export async function discardDraft(draftId: unknown): Promise<MailActionResult> {
+  if (typeof draftId !== "string") return { error: "Pedido inválido." };
+
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para apagar rascunhos." };
+
+  try {
+    await discardMailDraft(supabase, draftId);
+    revalidatePath("/suporte/email");
+    return { ok: true };
+  } catch {
+    return { error: "Não foi possível apagar o rascunho." };
+  }
+}
+
+/**
+ * Enviar (P10-05).
+ *
+ * **A app não fala com o SMTP** — pede ao worker, que é quem tem a credencial,
+ * e o worker só regista a mensagem como enviada depois de o servidor a aceitar.
+ * A ordem é essa e não a inversa: uma caixa que mostra como enviado aquilo que
+ * ficou pelo caminho diz a um cliente que lhe respondemos quando não
+ * respondemos.
+ */
+export async function sendMail(input: unknown): Promise<MailActionResult> {
+  const parsed = mailSendSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Mensagem inválida." };
+  }
+
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para enviar correio." };
+
+  const workerUrl = process.env.MAIL_WORKER_URL;
+  const workerToken = process.env.MAIL_WORKER_TOKEN;
+  if (!workerUrl || !workerToken) {
+    return { error: "O mail-worker ainda não está configurado (MAIL_WORKER_URL)." };
+  }
+
+  try {
+    const response = await fetch(`${workerUrl.replace(/\/$/, "")}/send`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${workerToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(parsed.data),
+      signal: AbortSignal.timeout(45_000),
+    });
+
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    if (!response.ok) {
+      return { error: body?.error ?? `O mail-worker respondeu ${response.status}.` };
+    }
+
+    revalidatePath("/suporte/email");
+    return { ok: true, notice: "Mensagem enviada." };
+  } catch {
+    return { error: "Não foi possível falar com o mail-worker." };
+  }
 }
 
 /**

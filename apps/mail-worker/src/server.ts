@@ -1,11 +1,44 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
+import { z } from "zod";
 
 import { checkConnection, describe } from "./connection.ts";
 import type { Env } from "./env.ts";
 import { drainOutbox } from "./outbox.ts";
+import { sendMail } from "./send.ts";
 import { getMailbox, getMailboxPassword, type MailWorkerClient } from "./supabase.ts";
 import { syncAllMailboxes } from "./sync.ts";
+
+/**
+ * O corpo do `POST /send`, validado aqui e não lá dentro: o worker recebe JSON
+ * de outro processo, e "outro processo" é entrada que se valida como qualquer
+ * outra — mesmo quando o token já provou quem é.
+ */
+const sendSchema = z.object({
+  mailboxId: z.string().uuid(),
+  to: z.array(z.string().email()).min(1, "É preciso pelo menos um destinatário."),
+  cc: z.array(z.string().email()).max(50).optional(),
+  bcc: z.array(z.string().email()).max(50).optional(),
+  subject: z.string().max(500),
+  html: z.string().max(500_000),
+  text: z.string().max(200_000).optional(),
+  draftId: z.string().uuid().nullish(),
+  inReplyTo: z.string().max(400).nullish(),
+  fromName: z.string().max(200).optional(),
+});
+
+/** Com limite: um corpo sem fim é a forma mais simples de derrubar o worker. */
+async function readJson(req: IncomingMessage): Promise<unknown> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > 2_000_000) throw new Error("Corpo do pedido demasiado grande.");
+    chunks.push(chunk as Buffer);
+  }
+  if (chunks.length === 0) return null;
+  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+}
 
 /**
  * A porta do worker (P10-03)
@@ -55,6 +88,22 @@ async function handle(
   const testMatch = /^\/mailboxes\/([0-9a-f-]{36})\/test$/i.exec(path);
   if (req.method === "POST" && testMatch) {
     await handleTest(res, client, testMatch[1]!);
+    return;
+  }
+
+  if (req.method === "POST" && path === "/send") {
+    const body = await readJson(req);
+    const parsed = sendSchema.safeParse(body);
+    if (!parsed.success) {
+      send(res, 400, { error: parsed.error.issues[0]?.message ?? "Pedido inválido." });
+      return;
+    }
+    try {
+      const result = await sendMail(client, parsed.data);
+      send(res, 200, result);
+    } catch (error) {
+      send(res, 502, { error: describe(error) });
+    }
     return;
   }
 

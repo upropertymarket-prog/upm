@@ -8,6 +8,7 @@ import {
   listMailLabels,
   listMailboxOptions,
   mailFolderCounts,
+  mailboxSignature,
 } from "@upm/db/mail";
 
 import { InternalChrome } from "../../../components/InternalChrome";
@@ -15,7 +16,10 @@ import { getSupportShellData } from "../../../lib/support-shell";
 import { setLocalePreference } from "../../actions/preferences";
 import {
   addLabel,
+  discardDraft,
   moveMessage,
+  saveDraft,
+  sendMail,
   setFlags,
   syncNow,
   ticketFromMail,
@@ -82,7 +86,7 @@ export default async function SupportMailboxPage({
   const labelId = uuidOrNull(first(params.marcador));
   const selectedId = uuidOrNull(first(params.id));
 
-  const [labels, messages, counts, selected] = mailboxId
+  const [labels, messages, counts, selected, signature] = mailboxId
     ? await Promise.all([
         listMailLabels(supabase, mailboxId),
         listMail(supabase, {
@@ -94,8 +98,9 @@ export default async function SupportMailboxPage({
         }),
         mailFolderCounts(supabase, mailboxId),
         selectedId ? getMailMessage(supabase, selectedId) : Promise.resolve(null),
+        mailboxSignature(supabase, mailboxId),
       ])
-    : [[], [], { inbox: 0, sent: 0, drafts: 0, archive: 0, unread: 0, starred: 0 }, null];
+    : [[], [], { inbox: 0, sent: 0, drafts: 0, archive: 0, unread: 0, starred: 0 }, null, ""];
 
   return (
     <InternalChrome
@@ -126,6 +131,10 @@ export default async function SupportMailboxPage({
         onToggleLabel={toggleMailLabel}
         onCreateTicket={ticketFromMail}
         onSync={syncNow}
+        signature={signature}
+        onSaveDraft={saveDraft}
+        onSend={sendMail}
+        onDiscardDraft={discardDraft}
       />
     </InternalChrome>
   );

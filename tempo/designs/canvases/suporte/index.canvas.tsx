@@ -6,6 +6,8 @@ import {
   SuporteCaixaSemCaixasEscuro,
   SuporteCaixaSemSelecao,
   SuporteCaixaSemSelecaoEscuro,
+  SuporteComposerClaro,
+  SuporteComposerEscuro,
 } from "./Mailbox";
 import {
   SuporteTicketsClaro,
@@ -70,18 +72,32 @@ export default function SuporteCanvas() {
         layout={{ x: 1520, y: 1080, width: 1440, height: 900 }}
       />
 
+      {/* Composer (P10-05): a janela de escrever por cima da caixa */}
+      <Storyboard
+        id="SuporteComposerClaro"
+        name="Composer · Claro (/suporte/email)"
+        component={SuporteComposerClaro}
+        layout={{ x: 0, y: 2060, width: 1440, height: 1000 }}
+      />
+      <Storyboard
+        id="SuporteComposerEscuro"
+        name="Composer · Escuro (/suporte/email)"
+        component={SuporteComposerEscuro}
+        layout={{ x: 1520, y: 2060, width: 1440, height: 1000 }}
+      />
+
       {/* O estado real de hoje: ainda não há caixas criadas na Amen */}
       <Storyboard
         id="SuporteCaixaSemCaixas"
         name="Caixa de e-mail · Sem caixas configuradas · Claro"
         component={SuporteCaixaSemCaixas}
-        layout={{ x: 0, y: 2060, width: 1440, height: 700 }}
+        layout={{ x: 0, y: 3140, width: 1440, height: 700 }}
       />
       <Storyboard
         id="SuporteCaixaSemCaixasEscuro"
         name="Caixa de e-mail · Sem caixas configuradas · Escuro"
         component={SuporteCaixaSemCaixasEscuro}
-        layout={{ x: 1520, y: 2060, width: 1440, height: 700 }}
+        layout={{ x: 1520, y: 3140, width: 1440, height: 700 }}
       />
 
       {/* Tickets — 2.ª entrada do menu (P10-02) */}
@@ -89,13 +105,13 @@ export default function SuporteCanvas() {
         id="SuporteTicketsClaro"
         name="Tickets · Claro (/suporte/tickets)"
         component={SuporteTicketsClaro}
-        layout={{ x: 0, y: 2840, width: 1440, height: 1000 }}
+        layout={{ x: 0, y: 3920, width: 1440, height: 1000 }}
       />
       <Storyboard
         id="SuporteTicketsEscuro"
         name="Tickets · Escuro (/suporte/tickets)"
         component={SuporteTicketsEscuro}
-        layout={{ x: 1520, y: 2840, width: 1440, height: 1000 }}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 1000 }}
       />
 
       {/* O ecrã de quem acaba de entrar: fila cheia, nada aberto */}
@@ -103,13 +119,13 @@ export default function SuporteCanvas() {
         id="SuporteTicketsSemSelecao"
         name="Tickets · Sem ticket aberto · Claro"
         component={SuporteTicketsSemSelecao}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5000, width: 1440, height: 900 }}
       />
       <Storyboard
         id="SuporteTicketsSemSelecaoEscuro"
         name="Tickets · Sem ticket aberto · Escuro"
         component={SuporteTicketsSemSelecaoEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5000, width: 1440, height: 900 }}
       />
 
       {/* Nada a tratar — tem de se ler como boa notícia, não como falha */}
@@ -117,13 +133,13 @@ export default function SuporteCanvas() {
         id="SuporteTicketsFilaVazia"
         name="Tickets · Fila vazia · Claro"
         component={SuporteTicketsFilaVazia}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5980, width: 1440, height: 900 }}
       />
       <Storyboard
         id="SuporteTicketsFilaVaziaEscuro"
         name="Tickets · Fila vazia · Escuro"
         component={SuporteTicketsFilaVaziaEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5980, width: 1440, height: 900 }}
       />
     </Canvas>
   );

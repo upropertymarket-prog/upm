@@ -148,6 +148,17 @@ export const MAIL_SELECTED: MailMessageRow = {
   updated_at: "2026-10-13T08:42:30.000Z",
 };
 
+/**
+ * A assinatura da caixa, como o composer a recebe: já com as variáveis de
+ * 05 §1.8 resolvidas pela base de dados. Em HTML simples e **sem cores
+ * próprias** — é assim que ela se adapta ao tema escuro dentro do composer,
+ * que é um dos pontos da referência do cliente.
+ */
+export const ASSINATURA =
+  "<p><strong>Helena Matos</strong><br>Apoio ao cliente · Suporte<br>" +
+  '<a href="mailto:suporte@upropertymarket.pt">suporte@upropertymarket.pt</a>' +
+  " · +351 210 000 000</p>";
+
 export const MAIL_COUNTS = {
   inbox: 3,
   sent: 0,

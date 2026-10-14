@@ -3,11 +3,13 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
 import { MailboxView } from "../../../../apps/interno/src/app/suporte/email/MailboxView";
+import { Composer } from "../../../../apps/interno/src/app/suporte/email/Composer";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 // A folha do cliente de correio. Sem ela a storyboard mostrava três colunas sem
 // moldura — este ecrã é o CSS tanto como é o JSX.
 import "../../../../apps/interno/src/app/suporte/email/mailbox.css";
 import {
+  ASSINATURA,
   MAILBOXES,
   MAIL_COUNTS,
   MAIL_LABELS,
@@ -45,10 +47,13 @@ function CaixaDemo({
   theme,
   mailboxes,
   selected,
+  composer = false,
 }: {
   theme: "light" | "dark";
   mailboxes: typeof MAILBOXES;
   selected: typeof MAIL_SELECTED | null;
+  /** Abre a janela de escrever por cima da caixa, como depois de "Responder". */
+  composer?: boolean;
 }) {
   return (
     // `height` e não `minHeight`: o cliente de correio herda a altura do shell
@@ -86,7 +91,28 @@ function CaixaDemo({
                 onToggleLabel={semEscrita}
                 onCreateTicket={semEscrita}
                 onSync={semEscrita}
+                signature={ASSINATURA}
+                onSaveDraft={semEscrita}
+                onSend={semEscrita}
+                onDiscardDraft={semEscrita}
               />
+              {composer ? (
+                <Composer
+                  open
+                  mailboxes={mailboxes}
+                  mailboxId={mailboxes[0]!.id}
+                  signature={ASSINATURA}
+                  initial={{
+                    to: ["ana.silva@example.pt"],
+                    subject: "Re: Não consigo publicar o anúncio da casa de Sintra",
+                    html: `<p>Boa tarde, Ana,</p><p>Obrigado pelo contacto — já estamos a ver o que aconteceu com o anúncio.</p><p><br></p><hr />${ASSINATURA}`,
+                  }}
+                  onClose={() => undefined}
+                  onSave={semEscrita}
+                  onSend={semEscrita}
+                  onDiscard={semEscrita}
+                />
+              ) : null}
             </InternalChrome>
           </ToastProvider>
         </ThemeProvider>
@@ -119,4 +145,18 @@ export function SuporteCaixaSemCaixas() {
 
 export function SuporteCaixaSemCaixasEscuro() {
   return <CaixaDemo theme="dark" mailboxes={[]} selected={null} />;
+}
+
+/**
+ * A janela de escrever por cima da caixa — o desenho da imagem 4 da referência:
+ * barra de título com minimizar/expandir/fechar, Para com Cc/Bcc à direita,
+ * Assunto, corpo com a assinatura já lá, barra de formatação em baixo e o
+ * rodapé com Anexar à esquerda e Guardar rascunho · Enviar à direita.
+ */
+export function SuporteComposerClaro() {
+  return <CaixaDemo theme="light" mailboxes={MAILBOXES} selected={MAIL_SELECTED} composer />;
+}
+
+export function SuporteComposerEscuro() {
+  return <CaixaDemo theme="dark" mailboxes={MAILBOXES} selected={MAIL_SELECTED} composer />;
 }

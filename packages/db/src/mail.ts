@@ -277,6 +277,72 @@ export async function createMailLabel(
   return data ?? null;
 }
 
+// ---------------------------------------------------------------------------
+// Composer (P10-05)
+// ---------------------------------------------------------------------------
+
+/**
+ * A assinatura da caixa, já com as variáveis de quem é dono dela resolvidas.
+ * Resolvida na base de dados e não aqui: o composer de hoje e as campanhas de
+ * amanhã têm de obter exatamente a mesma coisa (05 §1.8).
+ */
+export async function mailboxSignature(
+  client: AnySupabaseClient,
+  mailboxId: string,
+): Promise<string> {
+  const { data, error } = await mailClient(client).rpc("mailbox_signature", {
+    p_mailbox_id: mailboxId,
+  });
+  if (error || typeof data !== "string") return "";
+  return data;
+}
+
+export const mailDraftSchema = z.object({
+  mailboxId: z.string().uuid(),
+  draftId: z.string().uuid().nullish(),
+  to: z.array(z.string().trim().email("Destinatário inválido.")).max(50),
+  cc: z.array(z.string().trim().email("Cc inválido.")).max(50).default([]),
+  bcc: z.array(z.string().trim().email("Bcc inválido.")).max(50).default([]),
+  subject: z.string().max(500).default(""),
+  html: z.string().max(500_000).default(""),
+  text: z.string().max(200_000).default(""),
+  inReplyTo: z.string().max(400).nullish(),
+});
+
+export type MailDraftInput = z.infer<typeof mailDraftSchema>;
+
+export async function saveMailDraft(
+  client: AnySupabaseClient,
+  input: MailDraftInput,
+): Promise<string> {
+  const { data, error } = await mailClient(client).rpc("mail_save_draft", {
+    p_mailbox_id: input.mailboxId,
+    p_draft_id: input.draftId ?? null,
+    p_to: input.to,
+    p_cc: input.cc,
+    p_bcc: input.bcc,
+    p_subject: input.subject,
+    p_html: input.html,
+    p_text: input.text,
+    p_in_reply_to: input.inReplyTo ?? null,
+  });
+
+  if (error) throw new Error(error.message);
+  return String(data);
+}
+
+export async function discardMailDraft(client: AnySupabaseClient, draftId: string): Promise<void> {
+  const { error } = await mailClient(client).rpc("mail_discard_draft", {
+    p_draft_id: draftId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** O envio exige pelo menos um destinatário; gravar um rascunho não. */
+export const mailSendSchema = mailDraftSchema.extend({
+  to: z.array(z.string().trim().email("Destinatário inválido.")).min(1, "Falta o destinatário."),
+});
+
 export type TicketFromMail = { id: string; ref: string; created: boolean };
 
 export async function createTicketFromMail(

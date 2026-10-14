@@ -117,6 +117,38 @@ export type MailDatabase = Omit<Database, "public"> & {
         Returns: { id: string; ref: string; created: boolean }[];
       };
       mail_unread_count: { Args: never; Returns: number };
+      mail_save_draft: {
+        Args: {
+          p_mailbox_id: string;
+          p_draft_id?: string | null;
+          p_to?: string[];
+          p_cc?: string[];
+          p_bcc?: string[];
+          p_subject?: string;
+          p_html?: string;
+          p_text?: string;
+          p_in_reply_to?: string | null;
+        };
+        Returns: string;
+      };
+      mail_discard_draft: { Args: { p_draft_id: string }; Returns: undefined };
+      mailbox_signature: { Args: { p_mailbox_id: string }; Returns: string };
+      mail_record_sent: {
+        Args: {
+          p_mailbox_id: string;
+          p_message_id: string;
+          p_to: string[];
+          p_cc: string[];
+          p_bcc: string[];
+          p_subject: string;
+          p_html: string;
+          p_text: string;
+          p_from_name?: string;
+          p_draft_id?: string | null;
+          p_in_reply_to?: string | null;
+        };
+        Returns: string;
+      };
     };
   };
 };
