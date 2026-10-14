@@ -11,6 +11,7 @@ import {
   Megaphone,
   Search,
   Settings,
+  Signature,
   Sparkles,
   TrendingUp,
   Users,
@@ -86,12 +87,17 @@ export const SUPPORT_NAV: NavEntry[] = [
   { id: "campaigns", titleKey: "campaigns", href: "/suporte/campanhas", icon: Megaphone },
   { id: "emailMetrics", titleKey: "emailMetrics", href: "/suporte/metricas", icon: BarChart3 },
   { id: "internalCloud", titleKey: "internalCloud", href: "/suporte/cloud", icon: Cloud },
-  {
-    id: "subscriptions",
-    titleKey: "subscriptions",
-    href: "/suporte/assinaturas",
-    icon: CreditCard,
-  },
+  /**
+   * **Assinaturas de e-mail, não subscrições.** Esta entrada nasceu com o id
+   * `subscriptions`, a etiqueta inglesa "Subscriptions" e um ícone de cartão de
+   * crédito — e aponta para `/suporte/assinaturas`, que é o editor de
+   * assinaturas de P10-06. A ambiguidade é do português: "assinaturas" são as
+   * duas coisas, e em inglês não são nenhuma vez a mesma. Corrigido ao
+   * construir o ecrã (P10-06): o id e a chave passam a `signatures` e o ícone
+   * passa a ser o da assinatura. As subscrições vivem em `/admin/planos` e no
+   * `/plano` do cliente, e nunca tiveram nada que fazer no menu do Suporte.
+   */
+  { id: "signatures", titleKey: "signatures", href: "/suporte/assinaturas", icon: Signature },
 ];
 
 export function navFor(role: "admin" | "support"): {

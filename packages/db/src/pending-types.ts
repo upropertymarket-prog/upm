@@ -63,6 +63,16 @@ export type MailMessageRow = {
   updated_at: string;
 };
 
+/** `20261014090000`, com o composer; o editor é P10-06 (`20261014110000`). */
+export type EmailSignatureRow = {
+  id: string;
+  name: string;
+  html: string;
+  mailbox_ids: string[];
+  created_at: string;
+  updated_at: string;
+};
+
 export type MailLabelRow = {
   id: string;
   mailbox_id: string;
@@ -103,6 +113,7 @@ export type MailDatabase = Omit<Database, "public"> & {
       mail_threads: PendingTable<MailThreadRow, "mailbox_id" | "thread_key">;
       mail_messages: PendingTable<MailMessageRow, "mailbox_id" | "message_id">;
       mail_labels: PendingTable<MailLabelRow, "mailbox_id" | "name">;
+      email_signatures: PendingTable<EmailSignatureRow, "name">;
     };
     Functions: Database["public"]["Functions"] & {
       mailbox_credential: { Args: { p_mailbox_id: string }; Returns: string | null };
@@ -133,6 +144,16 @@ export type MailDatabase = Omit<Database, "public"> & {
       };
       mail_discard_draft: { Args: { p_draft_id: string }; Returns: undefined };
       mailbox_signature: { Args: { p_mailbox_id: string }; Returns: string };
+      /** As três portas do editor de assinaturas (P10-06). */
+      resolve_signature_variables: {
+        Args: { p_html: string; p_mailbox_id: string };
+        Returns: string;
+      };
+      email_signature_save: {
+        Args: { p_id: string | null; p_name: string; p_html: string; p_mailbox_ids: string[] };
+        Returns: string;
+      };
+      email_signature_delete: { Args: { p_id: string }; Returns: undefined };
       /**
        * Os três RPC dos anexos (D66). `p_source` entra como `string` e não
        * como o enum gerado porque o valor `mail_attachment` nasceu na mesma

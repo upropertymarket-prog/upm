@@ -84,8 +84,8 @@
     "campaigns": "Campaigns",
     "emailMetrics": "Email metrics",
     "internalCloud": "Internal cloud",
-    "subscriptions": "Subscriptions",
-    "seo": "SEO"
+    "seo": "SEO",
+    "signatures": "Email signatures"
   },
   "emptyState": {
     "noResults": "No results",
@@ -1081,6 +1081,35 @@
         "error": "This attachment's contents were not stored.",
         "purged": "Contents passed the retention period and were deleted."
       }
+    },
+    "signatures": {
+      "title": "Signatures",
+      "subtitle": "The signatures the composer inserts, per mailbox.",
+      "new": "New signature",
+      "newName": "Untitled signature",
+      "listLabel": "Signatures",
+      "editorLabel": "Signature editor",
+      "previewLabel": "Signature preview",
+      "empty": "No signatures yet. The first one starts from the brand layout.",
+      "noMailbox": "No mailbox assigned",
+      "nameLabel": "Signature name",
+      "htmlLabel": "Signature HTML",
+      "variablesTitle": "Insert a variable at the cursor",
+      "insertVariable": "Insert {name}",
+      "mailboxesTitle": "Mailboxes using this signature",
+      "noMailboxes": "No mailboxes configured. They are created in Administration › Email setup.",
+      "unsafeWarning": "This will be stripped on save, as it is not safe inside an email: {list}",
+      "unknownWarning": "These variables do not exist and will go out in the email exactly as written: {list}",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Signature saved.",
+      "delete": "Delete",
+      "deleted": "Signature deleted.",
+      "pickTitle": "Pick a signature",
+      "pickBody": "The signature opens here, with the HTML on the left and the result on the right.",
+      "previewTitle": "How it looks in the email",
+      "previewRaw": "No mailbox — variables shown raw",
+      "previewNote": "Variables resolve with the data of the assigned mailbox owner, same as in the composer."
     }
   }
 }

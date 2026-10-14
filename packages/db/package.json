@@ -24,6 +24,7 @@
     "./agreement": "./src/agreement.ts",
     "./mail": "./src/mail.ts",
     "./mail-attachments": "./src/mail-attachments.ts",
+    "./signatures": "./src/signatures.ts",
     "./pending": "./src/pending-types.ts"
   },
   "scripts": {
@@ -35,10 +36,12 @@
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.47.10",
     "hash-wasm": "^4.11.0",
+    "sanitize-html": "^2.14.0",
     "stripe": "^23.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/sanitize-html": "^2.13.0",
     "@upm/config": "workspace:*",
     "typescript": "^5.7.3",
     "vitest": "^4.1.11"

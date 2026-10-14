@@ -84,8 +84,8 @@
     "campaigns": "Campanhas",
     "emailMetrics": "Métricas de e-mail",
     "internalCloud": "Cloud interna",
-    "subscriptions": "Assinaturas",
-    "seo": "SEO"
+    "seo": "SEO",
+    "signatures": "Assinaturas de e-mail"
   },
   "emptyState": {
     "noResults": "Sem resultados",
@@ -1081,6 +1081,35 @@
         "error": "O conteúdo deste anexo não foi guardado.",
         "purged": "O conteúdo já passou o prazo de reteção e foi apagado."
       }
+    },
+    "signatures": {
+      "title": "Assinaturas",
+      "subtitle": "As assinaturas que o composer insere, por caixa de e-mail.",
+      "new": "Nova assinatura",
+      "newName": "Assinatura sem nome",
+      "listLabel": "Assinaturas",
+      "editorLabel": "Editor da assinatura",
+      "previewLabel": "Pré-visualização da assinatura",
+      "empty": "Ainda não há assinaturas. A primeira começa pelo desenho da marca.",
+      "noMailbox": "Sem caixa associada",
+      "nameLabel": "Nome da assinatura",
+      "htmlLabel": "HTML da assinatura",
+      "variablesTitle": "Inserir variável onde está o cursor",
+      "insertVariable": "Inserir {name}",
+      "mailboxesTitle": "Caixas que usam esta assinatura",
+      "noMailboxes": "Não há caixas configuradas. Criam-se em Administração › Configuração de e-mail.",
+      "unsafeWarning": "Isto vai ser retirado ao guardar, por não ser seguro num e-mail: {list}",
+      "unknownWarning": "Estas variáveis não existem e vão sair no e-mail como estão escritas: {list}",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Assinatura guardada.",
+      "delete": "Apagar",
+      "deleted": "Assinatura apagada.",
+      "pickTitle": "Escolha uma assinatura",
+      "pickBody": "A assinatura abre aqui, com o HTML à esquerda e o resultado à direita.",
+      "previewTitle": "Como fica no e-mail",
+      "previewRaw": "Sem caixa — variáveis à vista",
+      "previewNote": "As variáveis são resolvidas com os dados do dono da caixa associada, como no composer."
     }
   }
 }
