@@ -13,6 +13,7 @@ import {
 import { LOCALES } from "@upm/config";
 
 import { navFor } from "../lib/navigation";
+import { AppUpdatesGate } from "./notifications/AppUpdatesGate";
 import { useNotifications } from "./notifications/useNotifications";
 import { submitProblemReport } from "../app/actions/support";
 
@@ -143,6 +144,11 @@ export function AppChrome({
         onMarkAllRead: () => void markAllRead(),
       }}
     >
+      {/* As novidades (P10-07 · 04 §8.1.3): "ao entrar" é montar o shell, e
+          não abrir uma rota concreta — por isso a porta é aqui e não em cada
+          página. Decide sozinha se abre o modal, deixa a faixa, ou não mostra
+          nada. */}
+      <AppUpdatesGate />
       {children}
       <ReportProblemModal
         open={reportOpen}

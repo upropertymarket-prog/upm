@@ -8,10 +8,24 @@ import {
   isIpAllowed,
 } from "@upm/config/security";
 
+import { asPendingRole } from "@upm/db/pending";
+
 import { createMiddlewareClient } from "./lib/supabase-middleware";
 
-const ADMIN_ONLY_PREFIX = "/admin";
-const SUPPORT_ONLY_PREFIX = "/suporte";
+/**
+ * As três áreas internas, e cada uma só para o seu papel (07 §24.6).
+ *
+ * `/marketing` entrou a 14 out 2026 com P10-07, a tarefa que faz a área
+ * nascer. O guarda é por prefixo e não por `is_staff()` de propósito: o
+ * marketing **não** é staff (ver `is_marketing()` em `20261014120100`), e um
+ * guarda que lesse "é da equipa?" dava-lhe a moderação de imóveis e o
+ * diretório de utilizadores de uma vez.
+ */
+const AREA_PREFIX = {
+  "/admin": "admin",
+  "/suporte": "support",
+  "/marketing": "marketing",
+} as const;
 
 const SESSION_STARTED_COOKIE = "interno_session_started_at";
 const LAST_ACTIVITY_COOKIE = "interno_last_activity_at";
@@ -76,11 +90,12 @@ export async function middleware(request: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  const role = profile?.role;
+  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
+  const role = asPendingRole(profile?.role);
   if (profile?.status === "suspended") {
     return signOutAndRedirectToLogin(request, true);
   }
-  if (role !== "admin" && role !== "support") {
+  if (role !== "admin" && role !== "support" && role !== "marketing") {
     // Sessão de comprador/proprietário chegou aqui via cookie partilhado — não pertence.
     return NextResponse.redirect(appUrl(request));
   }
@@ -116,11 +131,13 @@ export async function middleware(request: NextRequest) {
   response.cookies.set(SESSION_STARTED_COOKIE, String(startedAt), cookieOptions);
   response.cookies.set(LAST_ACTIVITY_COOKIE, String(now), cookieOptions);
 
-  if (pathname.startsWith(ADMIN_ONLY_PREFIX) && role !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  if (pathname.startsWith(SUPPORT_ONLY_PREFIX) && role !== "support") {
-    return NextResponse.redirect(new URL("/", request.url));
+  // Cada área só para o seu papel. O destino é a raiz, que encaminha cada um
+  // para a sua — e não um 403: quem se perde num link antigo quer chegar ao
+  // trabalho dele, não a uma parede.
+  for (const [prefix, allowed] of Object.entries(AREA_PREFIX)) {
+    if (pathname.startsWith(prefix) && role !== allowed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   applySecurityHeaders(response.headers, nonce);

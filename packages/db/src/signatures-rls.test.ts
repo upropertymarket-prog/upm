@@ -91,9 +91,12 @@ describe.skipIf(!hasEnv)(
       }
 
       // A caixa é do perfil do Suporte: é de lá que as variáveis saem.
+      // `department` é `staff_department`, cujos valores estão **em português**
+      // desde `20260926120000` (`suporte`, `financeiro`, `moderacao`, `admin`).
+      // É também o que `{{departamento}}` mostra, por `department::text`.
       await service
         .from("staff_members")
-        .upsert({ profile_id: supportId, department: "support", title: "Técnica de Suporte" });
+        .upsert({ profile_id: supportId, department: "suporte", title: "Técnica de Suporte" });
 
       const mailbox = await service
         .from("mailboxes")

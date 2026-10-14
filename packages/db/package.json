@@ -25,6 +25,7 @@
     "./mail": "./src/mail.ts",
     "./mail-attachments": "./src/mail-attachments.ts",
     "./signatures": "./src/signatures.ts",
+    "./updates": "./src/updates.ts",
     "./pending": "./src/pending-types.ts"
   },
   "scripts": {

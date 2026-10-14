@@ -47,7 +47,8 @@
       "search": "Procurar",
       "manage": "Gerir",
       "admin": "Administração",
-      "support": "Suporte"
+      "support": "Suporte",
+      "marketing": "Marketing"
     }
   },
   "greeting": {
@@ -85,7 +86,8 @@
     "emailMetrics": "Métricas de e-mail",
     "internalCloud": "Cloud interna",
     "seo": "SEO",
-    "signatures": "Assinaturas de e-mail"
+    "signatures": "Assinaturas de e-mail",
+    "marketing": "Marketing"
   },
   "emptyState": {
     "noResults": "Sem resultados",
@@ -1110,6 +1112,69 @@
       "previewTitle": "Como fica no e-mail",
       "previewRaw": "Sem caixa — variáveis à vista",
       "previewNote": "As variáveis são resolvidas com os dados do dono da caixa associada, como no composer."
+    }
+  },
+  "updates": {
+    "title": "Novidades",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "acknowledge": "Entendi",
+    "later": "Mais tarde",
+    "close": "Fechar",
+    "openBanner": "Ver novidades",
+    "bannerText": "Há novidades na sua conta.",
+    "counter": "{current} de {total}"
+  },
+  "marketing": {
+    "updates": {
+      "title": "Atualizações",
+      "subtitle": "As novidades que aparecem na app de compradores e proprietários.",
+      "new": "Nova atualização",
+      "listLabel": "Atualizações",
+      "editorLabel": "Editor da atualização",
+      "empty": "Ainda não há atualizações.",
+      "pickBody": "Escolha uma atualização à esquerda, ou crie a primeira.",
+      "lockedNote": "Esta atualização já foi publicada e não se edita — já foi lida por pessoas, e o registo dessas leituras ficaria a apontar para outro texto. Arquive-a e escreva outra.",
+      "versionLabel": "Versão",
+      "versionPlaceholder": "1.4 ou Outubro 2026",
+      "titleLabel": "Título",
+      "pointsLabel": "Pontos",
+      "pointsHint": "Uma linha por ponto. Aparecem como lista no modal.",
+      "bodyLabel": "Corpo",
+      "toolbar": "Formatação",
+      "audienceLabel": "Público",
+      "deliveryLabel": "Entrega",
+      "scheduleLabel": "Agendar para",
+      "scheduleHint": "Com data, fica Agendada e é publicada sozinha. Sem data, volta a Rascunho.",
+      "preview": "Pré-visualizar",
+      "publish": "Publicar",
+      "archive": "Arquivar",
+      "delete": "Apagar",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Atualização guardada.",
+      "reach": "{count, plural, =0 {ninguém viu} one {# pessoa viu} other {# pessoas viram}}",
+      "status": {
+        "draft": "Rascunho",
+        "scheduled": "Agendada",
+        "published": "Publicada",
+        "archived": "Arquivada"
+      },
+      "audience": {
+        "all": "Todos",
+        "owners": "Proprietários",
+        "buyers": "Compradores"
+      },
+      "delivery": {
+        "banner": "Faixa agora",
+        "next_login": "No próximo acesso",
+        "mandatory": "Obrigatória"
+      },
+      "deliveryHint": {
+        "banner": "Faixa no topo agora; o modal abre no próximo acesso.",
+        "next_login": "Nada agora; o modal abre no próximo acesso.",
+        "mandatory": "Modal imediato, sem \"Mais tarde\". Só para o que não pode passar ao lado de ninguém."
+      }
     }
   }
 }

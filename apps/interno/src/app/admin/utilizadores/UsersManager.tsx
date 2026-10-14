@@ -27,7 +27,10 @@ export type UserDirectoryRow = {
   id: string;
   full_name: string;
   email: string;
-  role: "buyer" | "owner" | "admin" | "support";
+  // `marketing` entrou com P10-07, quando a área nasceu (07 §24.6). Este tipo
+  // é escrito à mão enquanto D64 não permitir regenerar os gerados — e foi
+  // exatamente assim que `status` divergiu na Fase 9, com o quarto estado.
+  role: "buyer" | "owner" | "admin" | "support" | "marketing";
   // `deleted` entrou com P9-06: a conta eliminada não some de `profiles` —
   // esvazia-se, para o histórico de subscrições e de aceitações não ficar
   // órfão. Este tipo era escrito à mão com três estados e só divergiu quando a
@@ -66,7 +69,7 @@ export type UserPageInfo = {
   lastCursor: UserCursor | null;
 };
 
-type RoleLabelKey = "adminRole" | "buyer" | "owner" | "support";
+type RoleLabelKey = "adminRole" | "buyer" | "owner" | "support" | "marketing";
 const PAGE_SIZE = 25;
 
 function statusTone(status: UserDirectoryRow["status"]): StatusTone {
@@ -269,6 +272,7 @@ export function UsersManager({
                 { value: "owner", label: t("owner") },
                 { value: "admin", label: t("adminRole") },
                 { value: "support", label: t("support") },
+                { value: "marketing", label: t("marketing") },
               ]}
             />
             <Select

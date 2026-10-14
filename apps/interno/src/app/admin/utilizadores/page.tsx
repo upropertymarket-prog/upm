@@ -14,7 +14,10 @@ import { getAdminSidebarCounters } from "../../../lib/admin-shell";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
-const roleSchema = z.enum(["buyer", "owner", "admin", "support"]);
+// `marketing` entrou com P10-07, quando a área nasceu (07 §24.6). Sem ele aqui,
+// o filtro de papel do diretório recusava em silêncio a opção que o ecrã
+// oferece.
+const roleSchema = z.enum(["buyer", "owner", "admin", "support", "marketing"]);
 const statusSchema = z.enum(["pending", "active", "suspended"]);
 const uuidSchema = z.string().uuid();
 const dateSchema = z.string().datetime({ offset: true });

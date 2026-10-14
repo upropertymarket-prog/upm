@@ -1,0 +1,33 @@
+-- ---------------------------------------------------------------------------
+-- O Marketing passa a ser área própria, parte 1/3 — os dois valores de enum
+--
+-- Decisão do cliente de 13 out 2026, escrita ecrã a ecrã em 07 §24.6: o
+-- Marketing deixa de caber no Suporte. O critério que a decide, e que evita
+-- voltar a esta conversa a cada ecrã novo: **o Suporte responde a uma pessoa
+-- concreta que pediu ajuda — reativo e 1:1; o Marketing fala com um público —
+-- proativo e 1:N.**
+--
+-- Esta migração entra em P10-07 e não antes, pela razão que 07 §24.6 dá: abrir
+-- um papel antes de haver ecrã é criar uma conta que entra e não vê nada.
+--
+-- ## Papel e departamento são dois eixos, com trabalhos diferentes
+--
+-- - `user_role` ganha `marketing` porque é o eixo de **permissão**: é o que a
+--   RLS lê, o que o middleware de `apps/interno` lê e o que decide o menu. Sem
+--   valor novo aqui, não havia como dar acesso a `/marketing` sem o dar a tudo
+--   o que o Suporte vê.
+-- - `staff_department` ganha `marketing` porque é o eixo **descritivo**:
+--   atribuição de caixa de e-mail e a variável `{{departamento}}` das
+--   assinaturas. Não decide permissões hoje e não passa a decidir.
+--
+-- Os valores de `staff_department` estão em português desde `20260926120000`
+-- (`suporte`, `financeiro`, `moderacao`, `admin`) e `marketing` escreve-se da
+-- mesma maneira nas duas línguas — não há aqui uma incoerência a resolver.
+--
+-- Ficam sozinhos num ficheiro porque `alter type ... add value` não pode ser
+-- usado na mesma transação em que é declarado. As funções que os usam estão na
+-- parte 2/3 — é o mesmo arranjo de `20261001120300`.
+-- ---------------------------------------------------------------------------
+
+alter type public.user_role add value if not exists 'marketing';
+alter type public.staff_department add value if not exists 'marketing';

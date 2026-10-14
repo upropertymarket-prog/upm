@@ -6,21 +6,39 @@
  * Fonte: doc 05 §6 e doc 07.
  */
 
-export const USER_ROLES = ["buyer", "owner", "admin", "support"] as const;
+/** `marketing` entrou com P10-07, quando a área nasceu (07 §24.6). */
+export const USER_ROLES = ["buyer", "owner", "admin", "support", "marketing"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
-export const PROFILE_STATUSES = ["pending", "active", "suspended"] as const;
+/** `deleted` entrou com P9-06: a conta eliminada esvazia-se, não desaparece. */
+export const PROFILE_STATUSES = ["pending", "active", "suspended", "deleted"] as const;
 export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
 
-export const STAFF_DEPARTMENTS = ["suporte", "financeiro", "moderacao", "admin"] as const;
+export const STAFF_DEPARTMENTS = [
+  "suporte",
+  "financeiro",
+  "moderacao",
+  "admin",
+  "marketing",
+] as const;
 export type StaffDepartment = (typeof STAFF_DEPARTMENTS)[number];
 
 /** 03 F14 — o site público troca de modo através desta flag. */
 export const LAUNCH_MODES = ["pre", "post"] as const;
 export type LaunchMode = (typeof LAUNCH_MODES)[number];
 
+/**
+ * A gémea de `is_staff()` no Postgres, e com a mesma fronteira: **o marketing
+ * não entra**. É o eixo de permissão que decide moderação, leads, diretório de
+ * utilizadores e tickets, e alargá-lo era dar tudo isso de uma vez (07 §24.6).
+ */
 export function isStaffRole(role: UserRole): boolean {
   return role === "admin" || role === "support";
+}
+
+/** `is_internal()`: toda a equipa interna. Só onde a intenção é mesmo essa. */
+export function isInternalRole(role: UserRole): boolean {
+  return role === "admin" || role === "support" || role === "marketing";
 }
 
 /** 05 §1.2 / Anexo A — Fase 2 (schema de domínio). */

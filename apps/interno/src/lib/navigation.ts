@@ -79,13 +79,19 @@ export const ADMIN_NAV: NavEntry[] = [
   { id: "settings", titleKey: "settings", href: "/admin/definicoes", icon: Settings },
 ];
 
-/** 07 §4.1 — Suporte. Abre na Caixa de e-mail (03 §1.3). */
+/**
+ * 07 §4.1 — Suporte. Abre na Caixa de e-mail (03 §1.3).
+ *
+ * **Três entradas saíram daqui a 14 out 2026** (P10-07): Atualizações,
+ * Campanhas e Métricas de e-mail foram para o `MARKETING_NAV`, por decisão do
+ * cliente de 13 out (07 §24.6). O que fica é o que é apoio ao cliente: o
+ * correio, os tickets, as assinaturas e a Cloud interna. Nenhum ID de tarefa se
+ * renumerou — mudou a rota e o menu onde o ecrã nasce, não o que a tarefa
+ * entrega.
+ */
 export const SUPPORT_NAV: NavEntry[] = [
   { id: "mailbox", titleKey: "mailbox", href: "/suporte/email", icon: Inbox, counter: true },
   { id: "tickets", titleKey: "tickets", href: "/suporte/tickets", icon: LifeBuoy, counter: true },
-  { id: "updates", titleKey: "updates", href: "/suporte/atualizacoes", icon: Sparkles },
-  { id: "campaigns", titleKey: "campaigns", href: "/suporte/campanhas", icon: Megaphone },
-  { id: "emailMetrics", titleKey: "emailMetrics", href: "/suporte/metricas", icon: BarChart3 },
   { id: "internalCloud", titleKey: "internalCloud", href: "/suporte/cloud", icon: Cloud },
   /**
    * **Assinaturas de e-mail, não subscrições.** Esta entrada nasceu com o id
@@ -100,11 +106,35 @@ export const SUPPORT_NAV: NavEntry[] = [
   { id: "signatures", titleKey: "signatures", href: "/suporte/assinaturas", icon: Signature },
 ];
 
-export function navFor(role: "admin" | "support"): {
+/**
+ * 07 §24.6 — Marketing. Abre nas Atualizações, que é a primeira tarefa da área
+ * (P10-07) e a que a faz nascer.
+ *
+ * **O SEO tem aqui a sua segunda porta, não uma segunda cópia** (07 §24.5 e
+ * §24.6): é o marketing quem corrige um título em produção, e obrigá-lo a
+ * entrar pelo painel do Admin é obrigá-lo a passar por um painel que não é o
+ * dele. A entrada aponta ao mesmo `SeoManager` e às mesmas server actions de
+ * `/admin/seo`, com a verificação de papel do lado do servidor. Dois editores
+ * da mesma tabela divergem à primeira alteração.
+ *
+ * A Cloud interna aparece nas duas áreas pela mesma razão: é a mesma
+ * `cloud_scope = 'staff'` da Fase 6, não uma segunda Cloud.
+ */
+export const MARKETING_NAV: NavEntry[] = [
+  { id: "updates", titleKey: "updates", href: "/marketing/atualizacoes", icon: Sparkles },
+  { id: "campaigns", titleKey: "campaigns", href: "/marketing/campanhas", icon: Megaphone },
+  { id: "emailMetrics", titleKey: "emailMetrics", href: "/marketing/metricas", icon: BarChart3 },
+  { id: "seo", titleKey: "seo", href: "/marketing/seo", icon: Search },
+  { id: "internalCloud", titleKey: "internalCloud", href: "/marketing/cloud", icon: Cloud },
+];
+
+export type InternalRole = "admin" | "support" | "marketing";
+
+export function navFor(role: InternalRole): {
   entries: NavEntry[];
-  groupKey: "admin" | "support";
+  groupKey: InternalRole;
 } {
-  return role === "admin"
-    ? { entries: ADMIN_NAV, groupKey: "admin" }
-    : { entries: SUPPORT_NAV, groupKey: "support" };
+  if (role === "admin") return { entries: ADMIN_NAV, groupKey: "admin" };
+  if (role === "marketing") return { entries: MARKETING_NAV, groupKey: "marketing" };
+  return { entries: SUPPORT_NAV, groupKey: "support" };
 }

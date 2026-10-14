@@ -12,11 +12,11 @@ import {
 } from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
-import { navFor } from "../lib/navigation";
+import { navFor, type InternalRole } from "../lib/navigation";
 import { submitProblemReport } from "../app/actions/support";
 
 export type InternalChromeProps = {
-  role: "admin" | "support";
+  role: InternalRole;
   userName: string;
   /** "Administração · IT" — papel · departamento (04 §5.5). */
   userMeta: string;

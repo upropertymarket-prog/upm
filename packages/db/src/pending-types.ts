@@ -26,6 +26,36 @@ import type { Database } from "./database.types";
 export const MAIL_FOLDERS = ["inbox", "sent", "drafts", "archive"] as const;
 export type MailFolder = (typeof MAIL_FOLDERS)[number];
 
+/**
+ * Os dois valores de enum que a área do Marketing abriu (P10-07)
+ * =========================================================================
+ * `user_role` ganhou `marketing` e `staff_department` também
+ * (`20261014120000`), e o `database.types.ts` **ainda não os conhece** — é a
+ * mesma D64 que mantém as tabelas do correio aqui.
+ *
+ * O que isto estragava era subtil e vale explicá-lo: um
+ * `profile?.role === "marketing"` não dá erro de tipo "em falta", dá
+ * **TS2367 — esta comparação não tem sobreposição**, porque o TypeScript sabe
+ * que o enum gerado não tem esse valor. O compilador tinha razão: a comparação
+ * era sempre falsa *para ele*. No Postgres é verdadeira.
+ *
+ * `asPendingRole` é a ponte, e está aqui com nome em vez de espalhada em
+ * `as never` pelos quatro sítios que comparam papéis — a lição de D52.
+ */
+export type PendingUserRole = Database["public"]["Enums"]["user_role"] | "marketing";
+export type PendingStaffDepartment = Database["public"]["Enums"]["staff_department"] | "marketing";
+
+/** O papel como o Postgres o conhece hoje, não como o ficheiro gerado o conhece. */
+export function asPendingRole(role: string | null | undefined): PendingUserRole | null {
+  return (role ?? null) as PendingUserRole | null;
+}
+
+export function asPendingDepartment(
+  department: string | null | undefined,
+): PendingStaffDepartment | null {
+  return (department ?? null) as PendingStaffDepartment | null;
+}
+
 export type MailThreadRow = {
   id: string;
   mailbox_id: string;
@@ -73,6 +103,32 @@ export type EmailSignatureRow = {
   updated_at: string;
 };
 
+/** `20261014120200`, com a área do Marketing (P10-07). */
+export type AppUpdateRow = {
+  id: string;
+  version: string;
+  title: string;
+  body_html: string;
+  points: string[];
+  image_path: string | null;
+  image_alt: string;
+  audience: "all" | "owners" | "buyers";
+  status: "draft" | "scheduled" | "published" | "archived";
+  delivery: "banner" | "next_login" | "mandatory";
+  scheduled_for: string | null;
+  published_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AppUpdateViewRow = {
+  id: string;
+  update_id: string;
+  profile_id: string;
+  seen_at: string;
+};
+
 export type MailLabelRow = {
   id: string;
   mailbox_id: string;
@@ -114,6 +170,8 @@ export type MailDatabase = Omit<Database, "public"> & {
       mail_messages: PendingTable<MailMessageRow, "mailbox_id" | "message_id">;
       mail_labels: PendingTable<MailLabelRow, "mailbox_id" | "name">;
       email_signatures: PendingTable<EmailSignatureRow, "name">;
+      app_updates: PendingTable<AppUpdateRow, "title">;
+      app_update_views: PendingTable<AppUpdateViewRow, "update_id" | "profile_id">;
     };
     Functions: Database["public"]["Functions"] & {
       mailbox_credential: { Args: { p_mailbox_id: string }; Returns: string | null };
@@ -154,6 +212,43 @@ export type MailDatabase = Omit<Database, "public"> & {
         Returns: string;
       };
       email_signature_delete: { Args: { p_id: string }; Returns: undefined };
+      /** Os helpers de papel novos (P10-07 · 07 §24.6). */
+      is_marketing: { Args: never; Returns: boolean };
+      is_internal: { Args: never; Returns: boolean };
+      /** As Atualizações (P10-07). */
+      app_updates_for_me: {
+        Args: never;
+        Returns: {
+          id: string;
+          version: string;
+          title: string;
+          body_html: string;
+          points: string[];
+          image_path: string | null;
+          image_alt: string;
+          delivery: "banner" | "next_login" | "mandatory";
+          published_at: string | null;
+        }[];
+      };
+      mark_app_update_seen: { Args: { p_update_id: string }; Returns: undefined };
+      app_update_save: {
+        Args: {
+          p_id: string | null;
+          p_version: string;
+          p_title: string;
+          p_body_html: string;
+          p_points: string[];
+          p_image_path: string | null;
+          p_image_alt: string;
+          p_audience: string;
+          p_delivery: string;
+          p_scheduled_for: string | null;
+        };
+        Returns: string;
+      };
+      app_update_publish: { Args: { p_id: string }; Returns: undefined };
+      app_update_archive: { Args: { p_id: string }; Returns: undefined };
+      app_update_delete: { Args: { p_id: string }; Returns: undefined };
       /**
        * Os três RPC dos anexos (D66). `p_source` entra como `string` e não
        * como o enum gerado porque o valor `mail_attachment` nasceu na mesma

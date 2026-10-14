@@ -47,7 +47,8 @@
       "search": "Browse",
       "manage": "Manage",
       "admin": "Administration",
-      "support": "Support"
+      "support": "Support",
+      "marketing": "Marketing"
     }
   },
   "greeting": {
@@ -85,7 +86,8 @@
     "emailMetrics": "Email metrics",
     "internalCloud": "Internal cloud",
     "seo": "SEO",
-    "signatures": "Email signatures"
+    "signatures": "Email signatures",
+    "marketing": "Marketing"
   },
   "emptyState": {
     "noResults": "No results",
@@ -1110,6 +1112,69 @@
       "previewTitle": "How it looks in the email",
       "previewRaw": "No mailbox — variables shown raw",
       "previewNote": "Variables resolve with the data of the assigned mailbox owner, same as in the composer."
+    }
+  },
+  "updates": {
+    "title": "What's new",
+    "previous": "Previous",
+    "next": "Next",
+    "acknowledge": "Got it",
+    "later": "Later",
+    "close": "Close",
+    "openBanner": "See what's new",
+    "bannerText": "There is news on your account.",
+    "counter": "{current} of {total}"
+  },
+  "marketing": {
+    "updates": {
+      "title": "Updates",
+      "subtitle": "The news shown in the buyer and owner app.",
+      "new": "New update",
+      "listLabel": "Updates",
+      "editorLabel": "Update editor",
+      "empty": "No updates yet.",
+      "pickBody": "Pick an update on the left, or create the first one.",
+      "lockedNote": "This update is published and cannot be edited — people have read it, and the record of those reads would point at different text. Archive it and write another.",
+      "versionLabel": "Version",
+      "versionPlaceholder": "1.4 or October 2026",
+      "titleLabel": "Title",
+      "pointsLabel": "Bullet points",
+      "pointsHint": "One line per point. They appear as a list in the modal.",
+      "bodyLabel": "Body",
+      "toolbar": "Formatting",
+      "audienceLabel": "Audience",
+      "deliveryLabel": "Delivery",
+      "scheduleLabel": "Schedule for",
+      "scheduleHint": "With a date it becomes Scheduled and publishes itself. Without one it goes back to Draft.",
+      "preview": "Preview",
+      "publish": "Publish",
+      "archive": "Archive",
+      "delete": "Delete",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Update saved.",
+      "reach": "{count, plural, =0 {nobody has seen it} one {# person has seen it} other {# people have seen it}}",
+      "status": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "audience": {
+        "all": "Everyone",
+        "owners": "Owners",
+        "buyers": "Buyers"
+      },
+      "delivery": {
+        "banner": "Banner now",
+        "next_login": "Next sign-in",
+        "mandatory": "Mandatory"
+      },
+      "deliveryHint": {
+        "banner": "Banner at the top now; the modal opens on the next sign-in.",
+        "next_login": "Nothing now; the modal opens on the next sign-in.",
+        "mandatory": "Modal right away, with no \"Later\". Only for what nobody can miss."
+      }
     }
   }
 }

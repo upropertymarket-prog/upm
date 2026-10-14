@@ -47,6 +47,9 @@ export type {
   ReportProblemSubmit,
 } from "./support/ReportProblemModal";
 export { reportProblemLabels } from "./support/labels";
+
+export { AppUpdatesModal, appUpdatesLabels } from "./support/AppUpdatesModal";
+export type { AppUpdate, AppUpdatesLabels, AppUpdatesModalProps } from "./support/AppUpdatesModal";
 export { captureTechnicalSnapshot, installBreadcrumbs } from "./support/breadcrumbs";
 export type { Breadcrumb, TechnicalSnapshot } from "./support/breadcrumbs";
 
