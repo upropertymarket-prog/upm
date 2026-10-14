@@ -1,6 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { ImapFlow } from "imapflow";
 import { simpleParser, type AddressObject, type ParsedMail } from "mailparser";
 
+import { discardUploads, storeAttachments } from "./attachments.ts";
 import { describe, imapOptions } from "./connection.ts";
 import type { MailMessageRow } from "@upm/db/pending";
 import {
@@ -32,9 +34,14 @@ import {
  *
  * Não apaga, não move e não marca nada no servidor — abre a ligação em modo de
  * leitura. O estado "lida" vive do nosso lado (`mail_messages.is_read`), porque
- * é a equipa que trabalha na app, não no servidor IMAP. Anexos ficam em
- * `attachments` como metadados (nome, tipo, tamanho); o conteúdo só se descarrega
- * quando houver ecrã que o mostre, em P10-04.
+ * é a equipa que trabalha na app, não no servidor IMAP.
+ *
+ * ## Os anexos (D66, paga a 14 out 2026)
+ *
+ * Desde D66 que `attachments` leva o **caminho no bucket** além do nome, do
+ * tipo e do tamanho. Os bytes já vinham na mensagem — o IMAP entrega-a inteira
+ * —, e o que faltava era guardá-los: ver `attachments.ts`, que também diz o que
+ * acontece a um anexo recusado e porque é que ele continua na lista.
  */
 
 export type SyncReport = {
@@ -151,7 +158,22 @@ async function storeMessage(
   const subject = parsed.subject?.trim() ?? "";
   const threadId = await ensureThread(client, mailbox, parsed, subject, sentAt);
 
+  /**
+   * O `id` da linha é gerado aqui, e não pela base de dados: o caminho de cada
+   * anexo leva-o dentro, e os objetos sobem antes da linha existir (ver
+   * `attachments.ts`). Gerar um uuid no worker é o que permite ter o caminho
+   * antes da escrita sem precisar de duas voltas à base de dados.
+   */
+  const id = randomUUID();
+  const { attachments, uploaded } = await storeAttachments(
+    client,
+    mailbox.id,
+    id,
+    parsed.attachments,
+  );
+
   const row: Partial<MailMessageRow> & { mailbox_id: string; message_id: string } = {
+    id,
     mailbox_id: mailbox.id,
     thread_id: threadId,
     message_id: messageId,
@@ -165,11 +187,7 @@ async function storeMessage(
     html: typeof parsed.html === "string" ? parsed.html : null,
     text_body: parsed.text ?? null,
     folder: "inbox",
-    attachments: parsed.attachments.map((file) => ({
-      filename: file.filename ?? "anexo",
-      contentType: file.contentType,
-      size: file.size,
-    })),
+    attachments,
     sent_at: sentAt,
   };
 
@@ -178,10 +196,18 @@ async function storeMessage(
   // 23505 é o índice único a fazer o seu trabalho: outra passagem inseriu esta
   // mensagem entre a leitura e a escrita. Não é erro — é a idempotência.
   if (error && error.code !== "23505") {
+    await discardUploads(client, uploaded);
     throw new Error(`Escrita em mail_messages falhou: ${error.message}`);
   }
 
-  return !error;
+  // A mensagem já cá estava: os anexos que acabaram de subir ficariam no bucket
+  // com um caminho que nenhuma linha referencia — invisíveis e a ocupar espaço.
+  if (error) {
+    await discardUploads(client, uploaded);
+    return false;
+  }
+
+  return true;
 }
 
 /**

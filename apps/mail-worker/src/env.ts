@@ -47,6 +47,14 @@ const schema = z.object({
   SYNC_BATCH: z.coerce.number().int().positive().max(500).default(50),
   /** Entregas tiradas da fila em cada passagem. */
   OUTBOX_BATCH: z.coerce.number().int().positive().max(200).default(25),
+  /**
+   * Minutos entre purgas dos anexos expirados (D66). Seis horas: a reteção
+   * mede-se em dias, e varrer de minuto a minuto um bucket onde, na maioria
+   * das passagens, não há nada para apagar é trabalho por trabalho.
+   */
+  PURGE_INTERVAL_MINUTES: z.coerce.number().int().positive().default(360),
+  /** Mensagens com anexos expirados tratadas em cada passagem. */
+  PURGE_BATCH: z.coerce.number().int().positive().max(1000).default(200),
 });
 
 export type Env = z.infer<typeof schema>;

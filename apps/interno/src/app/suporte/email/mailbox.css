@@ -490,6 +490,20 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* A razão por que um anexo não tem bytes (D66): recusado por tipo, por
+   tamanho, por ser o 11.º da mensagem, ou já expirado. Fica à vista e não só
+   em `title` — um `title` só aparece ao rato, e quem navega por teclado ou toca
+   no ecrã merecia saber porque é que os botões não respondem. */
+.upm-mail__attachment-note {
+  flex: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.upm-mail__attachment[data-stored="false"] .upm-mail__attachment-name {
+  color: var(--muted);
+}
+
 .upm-mail__attachment-actions {
   display: flex;
   gap: 2px;
@@ -499,6 +513,13 @@
 
 .upm-mail__attachment:hover .upm-mail__attachment-actions,
 .upm-mail__attachment:focus-within .upm-mail__attachment-actions {
+  opacity: 1;
+}
+
+/* Já guardado na Cloud: o visto não se esconde no hover. A estrela da mensagem
+   segue a mesma regra, e pela mesma razão — um estado que não se vê não é um
+   estado. */
+.upm-mail__attachment-actions[data-saved="true"] {
   opacity: 1;
 }
 

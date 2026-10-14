@@ -1071,7 +1071,16 @@
       "download": "Download",
       "print": "Print",
       "saveToCloud": "Save to Cloud",
-      "attachmentSoon": "Attachment contents arrive once the worker downloads them."
+      "savedToCloud": "Already in the internal Cloud",
+      "printUnsupported": "This file type cannot be printed in the browser — download it first.",
+      "attachmentFailed": "The attachment could not be opened.",
+      "attachmentSkipped": {
+        "type": "File type not accepted — contents were not stored.",
+        "size": "Over 10 MB — contents were not stored.",
+        "count": "Past the message attachment limit — contents were not stored.",
+        "error": "This attachment's contents were not stored.",
+        "purged": "Contents passed the retention period and were deleted."
+      }
     }
   }
 }

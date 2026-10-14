@@ -16,6 +16,8 @@ import { getSupportShellData } from "../../../lib/support-shell";
 import { setLocalePreference } from "../../actions/preferences";
 import {
   addLabel,
+  attachmentLink,
+  attachmentToCloud,
   discardDraft,
   moveMessage,
   saveDraft,
@@ -135,6 +137,8 @@ export default async function SupportMailboxPage({
         onSaveDraft={saveDraft}
         onSend={sendMail}
         onDiscardDraft={discardDraft}
+        onAttachmentLink={attachmentLink}
+        onAttachmentToCloud={attachmentToCloud}
       />
     </InternalChrome>
   );

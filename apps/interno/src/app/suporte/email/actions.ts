@@ -1,24 +1,31 @@
 "use server";
 
+import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { createClient } from "@upm/db/server";
 import {
   createMailLabel,
   createTicketFromMail,
   discardMailDraft,
   getMailMessage,
+  mailAttachmentSchema,
+  mailAttachmentsOf,
   mailDraftSchema,
   mailFlagsSchema,
   mailLabelCreateSchema,
   mailLabelsSchema,
   mailMoveSchema,
   mailSendSchema,
+  markMailAttachmentSaved,
   moveMail,
+  registerStaffCloudFile,
   saveMailDraft,
   setMailFlags,
   setMailLabels,
 } from "@upm/db/mail";
+import { MAIL_ATTACHMENT_BUCKET } from "@upm/db/mail-attachments";
 
 /**
  * As escritas da Caixa de e-mail (P10-04)
@@ -36,6 +43,14 @@ import {
  */
 
 export type MailActionResult = { ok?: boolean; error?: string; notice?: string };
+
+/**
+ * `download` guarda o ficheiro com o nome original; `view` abre-o no
+ * visualizador do browser, que é o que a impressão precisa. Fica aqui e não em
+ * `@upm/db/mail` porque é uma decisão do ecrã — a base de dados não sabe o que
+ * é um `Content-Disposition`.
+ */
+const mailAttachmentModeSchema = z.enum(["download", "view"]);
 
 async function getSupportClient() {
   const supabase = createClient(await cookies());
@@ -275,6 +290,132 @@ export async function syncNow(): Promise<MailActionResult> {
   } catch {
     return { error: "Não foi possível falar com o mail-worker." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Anexos (D66)
+// ---------------------------------------------------------------------------
+
+/**
+ * O URL assinado de um anexo — Transferir e Imprimir
+ * =========================================================================
+ * **O URL é assinado com a sessão de quem o pede**, e não com a chave de
+ * serviço: a policy `mail_attachments_staff_select` é avaliada no momento da
+ * assinatura, e por isso quem não é staff não consegue sequer obter o link. É o
+ * mesmo caminho das fotos dos imóveis desde a Fase 4.
+ *
+ * Dois minutos de validade. Não é por desconfiança de quem pede — é porque um
+ * URL assinado é uma chave anónima enquanto durar, e um anexo de suporte traz
+ * frequentemente dados de um cliente: contrato, caderneta predial, recibo. O
+ * tempo que precisa de viver é o de um clique.
+ *
+ * `mode` decide o `Content-Disposition`: `download` manda o browser guardar o
+ * ficheiro com o nome original, `view` deixa-o abrir no visualizador. O segundo
+ * é o que a impressão usa.
+ */
+export async function attachmentLink(
+  input: unknown,
+): Promise<MailActionResult & { url?: string; filename?: string; contentType?: string }> {
+  const parsed = mailAttachmentSchema.extend({ mode: mailAttachmentModeSchema }).safeParse(input);
+  if (!parsed.success) return { error: "Pedido inválido." };
+
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para abrir anexos." };
+
+  const message = await getMailMessage(supabase, parsed.data.messageId);
+  if (!message) return { error: "Mensagem inexistente." };
+
+  const file = mailAttachmentsOf(message)[parsed.data.index];
+  if (!file) return { error: "Anexo inexistente." };
+  if (!file.path) return { error: "Este anexo não tem conteúdo guardado." };
+
+  const { data, error } = await supabase.storage
+    .from(MAIL_ATTACHMENT_BUCKET)
+    .createSignedUrl(file.path, 120, {
+      download: parsed.data.mode === "download" ? file.filename : undefined,
+    });
+
+  if (error || !data?.signedUrl) return { error: "Não foi possível abrir o anexo." };
+  return { ok: true, url: data.signedUrl, filename: file.filename, contentType: file.contentType };
+}
+
+/**
+ * "Guardar na Cloud" — a cópia para a Cloud interna
+ * =========================================================================
+ * É uma **cópia**, e não uma referência. A alternativa — apontar a linha de
+ * `files` para o bucket `mail-attachments` — parecia mais limpa e era pior: os
+ * bytes do bucket do correio expiram aos 180 dias (decisão do cliente), e a
+ * Cloud ficaria com um ficheiro que desaparecia sozinho meio ano depois de
+ * alguém o ter guardado exatamente para não o perder.
+ *
+ * Fica com `scope = 'staff'`, que existe desde a Fase 6 (`20260930120000`) à
+ * espera da Cloud interna, e `source = 'mail_attachment'`, que é novo: o anexo
+ * do chat (`message_attachment`) é outra conversa com outra pessoa, e misturá-los
+ * faria os relatórios de P10-10 contar as duas coisas na mesma linha.
+ *
+ * A ordem é a de `uploadFile` na Cloud do cliente: objeto primeiro, registo
+ * depois, e se o registo recusar o objeto sai. Um ficheiro no bucket que nenhuma
+ * linha referencia é espaço que ninguém contabiliza.
+ */
+export async function attachmentToCloud(input: unknown): Promise<MailActionResult> {
+  const parsed = mailAttachmentSchema.safeParse(input);
+  if (!parsed.success) return { error: "Pedido inválido." };
+
+  const supabase = await getSupportClient();
+  if (!supabase) return { error: "Sem permissão para guardar anexos." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sessão inválida." };
+
+  const message = await getMailMessage(supabase, parsed.data.messageId);
+  if (!message) return { error: "Mensagem inexistente." };
+
+  const file = mailAttachmentsOf(message)[parsed.data.index];
+  if (!file) return { error: "Anexo inexistente." };
+  if (!file.path) return { error: "Este anexo não tem conteúdo guardado." };
+  if (file.cloudFileId) return { error: "Este anexo já está na Cloud interna." };
+
+  const download = await supabase.storage.from(MAIL_ATTACHMENT_BUCKET).download(file.path);
+  if (download.error || !download.data) return { error: "Não foi possível ler o anexo." };
+
+  const bytes = new Uint8Array(await download.data.arrayBuffer());
+  const storagePath = `${user.id}/${randomUUID()}/1`;
+
+  const upload = await supabase.storage
+    .from("cloud")
+    .upload(storagePath, bytes, { contentType: file.contentType, upsert: false });
+  if (upload.error) return { error: "Não foi possível guardar na Cloud." };
+
+  let fileId: string | null = null;
+  try {
+    fileId = await registerStaffCloudFile(supabase, {
+      name: file.filename.slice(0, 200),
+      mime: file.contentType,
+      size: bytes.byteLength,
+      storagePath,
+      checksum: createHash("sha256").update(bytes).digest("hex"),
+      source: "mail_attachment",
+    });
+
+    await markMailAttachmentSaved(supabase, { ...parsed.data, fileId });
+  } catch (error) {
+    // Desfaz pela ordem inversa: a linha e, com ela, as versões por cascade; e
+    // depois o objeto. É o caso raro de dois turnos a guardar o mesmo anexo ao
+    // mesmo tempo — a função recusa o segundo, e o segundo não deixa restos.
+    if (fileId) await supabase.from("files").delete().eq("id", fileId);
+    await supabase.storage.from("cloud").remove([storagePath]);
+
+    const detail = error instanceof Error ? error.message : "";
+    if (detail.includes("já está na Cloud")) {
+      return { error: "Este anexo já está na Cloud interna." };
+    }
+    return { error: "Não foi possível guardar na Cloud." };
+  }
+
+  revalidatePath("/suporte/email");
+  return { ok: true, notice: "Anexo guardado na Cloud interna." };
 }
 
 /**

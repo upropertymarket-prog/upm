@@ -133,6 +133,32 @@ export type MailDatabase = Omit<Database, "public"> & {
       };
       mail_discard_draft: { Args: { p_draft_id: string }; Returns: undefined };
       mailbox_signature: { Args: { p_mailbox_id: string }; Returns: string };
+      /**
+       * Os três RPC dos anexos (D66). `p_source` entra como `string` e não
+       * como o enum gerado porque o valor `mail_attachment` nasceu na mesma
+       * migração: o ficheiro gerado de hoje não o conhece, e escrevê-lo aqui
+       * como união à mão era inventar um segundo sítio onde o enum vive.
+       */
+      cloud_register_staff_file: {
+        Args: {
+          p_name: string;
+          p_mime: string;
+          p_size: number;
+          p_storage_path: string;
+          p_checksum: string;
+          p_source?: string;
+        };
+        Returns: string;
+      };
+      mail_attachment_saved_to_cloud: {
+        Args: { p_message_id: string; p_index: number; p_file_id: string };
+        Returns: undefined;
+      };
+      mail_attachments_expired: {
+        Args: { p_limit?: number };
+        Returns: { message_id: string; paths: string[] }[];
+      };
+      mail_attachment_purged: { Args: { p_message_id: string }; Returns: undefined };
       mail_record_sent: {
         Args: {
           p_mailbox_id: string;

@@ -1071,7 +1071,16 @@
       "download": "Transferir",
       "print": "Imprimir",
       "saveToCloud": "Guardar na Cloud",
-      "attachmentSoon": "O conteúdo dos anexos chega quando o worker os descarregar."
+      "savedToCloud": "Já está na Cloud interna",
+      "printUnsupported": "Este tipo de ficheiro não se imprime no browser — transfira-o primeiro.",
+      "attachmentFailed": "Não foi possível abrir o anexo.",
+      "attachmentSkipped": {
+        "type": "Tipo de ficheiro não aceite — o conteúdo não foi guardado.",
+        "size": "Acima de 10 MB — o conteúdo não foi guardado.",
+        "count": "Fora do limite de anexos da mensagem — o conteúdo não foi guardado.",
+        "error": "O conteúdo deste anexo não foi guardado.",
+        "purged": "O conteúdo já passou o prazo de reteção e foi apagado."
+      }
     }
   }
 }

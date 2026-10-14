@@ -1,3 +1,4 @@
+import { purgeExpiredAttachments } from "./attachments.ts";
 import { readEnv } from "./env.ts";
 import { drainOutbox } from "./outbox.ts";
 import { createWorkerServer } from "./server.ts";
@@ -7,8 +8,9 @@ import { syncAllMailboxes } from "./sync.ts";
 /**
  * O arranque do mail-worker (P10-03 · 02 §3.2)
  * =========================================================================
- * Um processo, três trabalhos: servir os pedidos do Admin, sincronizar as
- * caixas de tempos a tempos e drenar a fila de saída.
+ * Um processo, quatro trabalhos: servir os pedidos do Admin, sincronizar as
+ * caixas de tempos a tempos, drenar a fila de saída e apagar os anexos que
+ * passaram o prazo de reteção.
  *
  * **Os ciclos não se sobrepõem a si próprios.** Cada um só volta a agendar-se
  * quando o anterior acabou (`setTimeout` encadeado, nunca `setInterval`): uma
@@ -50,6 +52,26 @@ loop("outbox", env.OUTBOX_INTERVAL_MINUTES, async () => {
   if (report.reason) return;
   if (report.sent > 0 || report.failed > 0) {
     log("info", `fila de saída: ${report.sent} enviado(s), ${report.failed} falhado(s)`);
+  }
+});
+
+/**
+ * A purga dos anexos (D66). De seis em seis horas por omissão: a reteção
+ * mede-se em dias e uma passagem por turno é mais do que suficiente. Corre no
+ * worker e não em `pg_cron` porque apagar uma linha de `storage.objects` não
+ * apaga os bytes — ver `attachments.ts`.
+ */
+loop("attachments", env.PURGE_INTERVAL_MINUTES, async () => {
+  const report = await purgeExpiredAttachments(client, { batch: env.PURGE_BATCH });
+  if (report.error) {
+    log("error", `purga de anexos: ${report.error}`);
+    return;
+  }
+  if (report.objects > 0) {
+    log(
+      "info",
+      `purga de anexos: ${report.objects} ficheiro(s) de ${report.messages} mensagem(ns)`,
+    );
   }
 });
 

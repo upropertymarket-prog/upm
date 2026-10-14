@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { readMailAttachments, type MailAttachment } from "./mail-attachments";
 import {
   MAIL_FOLDERS,
   type MailDatabase,
@@ -40,6 +41,8 @@ function mailClient(client: AnySupabaseClient): SupabaseClient<MailDatabase> {
 
 export { MAIL_FOLDERS };
 export type { MailFolder, MailLabelRow, MailMessageRow };
+export { readMailAttachments };
+export type { MailAttachment };
 
 /** O que a lista mostra. O corpo não vem: 50 mensagens × HTML é muito payload. */
 export type MailListItem = Pick<
@@ -275,6 +278,67 @@ export async function createMailLabel(
 
   if (error) throw new Error(error.message);
   return data ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Anexos (D66) — ler a lista, e as duas portas de "Guardar na Cloud"
+// ---------------------------------------------------------------------------
+
+/**
+ * Os anexos de uma mensagem, já validados. A coluna é `jsonb` e as mensagens
+ * que entraram antes de D66 ser paga não têm `path` — `readMailAttachments`
+ * trata-as como anexos sem bytes em vez de deixar o ecrã rebentar.
+ */
+export function mailAttachmentsOf(message: Pick<MailMessageRow, "attachments">): MailAttachment[] {
+  return readMailAttachments(message.attachments);
+}
+
+/** O índice é a posição na lista, e é por isso que ele é a metade da chave. */
+export const mailAttachmentSchema = z.object({
+  messageId: z.string().uuid(),
+  index: z.number().int().min(0).max(99),
+});
+
+export const cloudStaffFileSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  mime: z.string().min(1).max(200),
+  size: z.number().int().nonnegative(),
+  storagePath: z.string().min(1).max(500),
+  checksum: z.string().min(16).max(128),
+});
+
+/**
+ * Registra o ficheiro na Cloud interna (`scope = 'staff'`). Corre **depois** de
+ * o objeto estar no bucket `cloud`, como `cloud_register_upload` desde a Fase 6.
+ */
+export async function registerStaffCloudFile(
+  client: AnySupabaseClient,
+  input: z.infer<typeof cloudStaffFileSchema> & { source: string },
+): Promise<string> {
+  const { data, error } = await mailClient(client).rpc("cloud_register_staff_file", {
+    p_name: input.name,
+    p_mime: input.mime,
+    p_size: input.size,
+    p_storage_path: input.storagePath,
+    p_checksum: input.checksum,
+    p_source: input.source,
+  });
+
+  if (error) throw new Error(error.message);
+  return String(data);
+}
+
+/** A nota, no próprio anexo, de que já lá está. Recusa a segunda cópia. */
+export async function markMailAttachmentSaved(
+  client: AnySupabaseClient,
+  input: z.infer<typeof mailAttachmentSchema> & { fileId: string },
+): Promise<void> {
+  const { error } = await mailClient(client).rpc("mail_attachment_saved_to_cloud", {
+    p_message_id: input.messageId,
+    p_index: input.index,
+    p_file_id: input.fileId,
+  });
+  if (error) throw new Error(error.message);
 }
 
 // ---------------------------------------------------------------------------

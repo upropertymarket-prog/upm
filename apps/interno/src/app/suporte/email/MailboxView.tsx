@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import {
   Archive,
   ArchiveRestore,
+  Check,
   CloudUpload,
   Download,
   FileEdit,
@@ -26,12 +27,15 @@ import {
 import { useTranslations } from "next-intl";
 import { Button, EmptyState, Input, StatusTag, useToast, type StatusTone } from "@upm/ui";
 import type {
+  MailAttachment,
   MailFolder,
   MailLabelRow,
   MailListItem,
   MailMessageRow,
   MailboxOption,
 } from "@upm/db/mail";
+import { mailAttachmentsOf } from "@upm/db/mail";
+import { MAIL_ATTACHMENT_PRINTABLE } from "@upm/db/mail-attachments";
 
 import type { MailActionResult } from "./actions";
 import { Composer, type ComposerDraft } from "./Composer";
@@ -68,13 +72,14 @@ import { Composer, type ComposerDraft } from "./Composer";
  * remetente — um `src` remoto confirmaria a leitura a quem enviou, que é o que o
  * bloqueio de imagens externas existe para evitar.
  *
- * ## Os três botões que estão desativados
+ * ## Os anexos, e os botões que já não estão desativados
  *
- * "Novo e-mail", "Responder" e "Encaminhar" são o composer, que é **P10-05**.
- * Ficam no sítio, desativados e com o motivo escrito em `title` — e não
- * escondidos: o ecrã é o mesmo quando o composer chegar, e quem o revê agora vê
- * onde as peças vão encaixar. Um botão ativo que não faz nada é que seria uma
- * promessa partida.
+ * As três ações do anexo — Transferir, Imprimir, Guardar na Cloud — nasceram
+ * desativadas em P10-04, com o motivo em `title`, porque o worker guardava só o
+ * nome, o tipo e o tamanho. Foi D66, e está paga: os bytes vivem no bucket
+ * `mail-attachments` e as três fazem o que dizem. Ver `AttachmentRow`, que
+ * também diz o que acontece a um anexo que não tem bytes — e eles continuam a
+ * existir, por tipo recusado, por tamanho ou por prazo de reteção.
  */
 
 const LABEL_TONES: Record<string, StatusTone> = {
@@ -125,6 +130,13 @@ export type MailboxViewProps = {
   onSaveDraft: (input: Record<string, unknown>) => Promise<MailActionResult & { draftId?: string }>;
   onSend: (input: Record<string, unknown>) => Promise<MailActionResult>;
   onDiscardDraft: (draftId: string) => Promise<MailActionResult>;
+  /** O URL assinado de um anexo, para transferir ou para imprimir (D66). */
+  onAttachmentLink: (input: {
+    messageId: string;
+    index: number;
+    mode: "download" | "view";
+  }) => Promise<MailActionResult & { url?: string; filename?: string }>;
+  onAttachmentToCloud: (input: { messageId: string; index: number }) => Promise<MailActionResult>;
 };
 
 export function MailboxView(props: MailboxViewProps) {
@@ -425,6 +437,11 @@ export function MailboxView(props: MailboxViewProps) {
             onCreateTicket={() => run(() => props.onCreateTicket(props.selected!.id))}
             onReply={() => setComposer(replyDraft(props.selected!, t))}
             onForward={() => setComposer(forwardDraft(props.selected!, t))}
+            onAttachmentLink={props.onAttachmentLink}
+            onAttachmentToCloud={(index) =>
+              run(() => props.onAttachmentToCloud({ messageId: props.selected!.id, index }))
+            }
+            onError={(message) => toast(message, "error")}
             t={t}
           />
         ) : (
@@ -751,6 +768,167 @@ function MailRow({
   );
 }
 
+/**
+ * A linha de um anexo, com as três ações da referência (D66)
+ * =========================================================================
+ * As três estavam no ecrã desde P10-04, desativadas, porque o worker guardava
+ * só o cartão de visita do anexo. Com os bytes no bucket `mail-attachments`,
+ * passam a fazer o que dizem — e cada uma por um caminho diferente, pela razão
+ * que está escrita em cada uma.
+ *
+ * **Um anexo sem bytes continua a aparecer.** Recusado por tipo, por tamanho,
+ * por ser o 11.º da mensagem, ou já expirado pelos 180 dias: a linha fica, com
+ * a razão em `title`, e as três ações desativadas. Esconder o anexo era pior do
+ * que isto — quem lê deixava de saber que o cliente tinha anexado alguma coisa.
+ */
+function AttachmentRow({
+  file,
+  pending,
+  onLink,
+  onSaveToCloud,
+  onError,
+  t,
+}: {
+  file: MailAttachment;
+  pending: boolean;
+  onLink: (
+    mode: "download" | "view",
+  ) => Promise<MailActionResult & { url?: string; filename?: string }>;
+  onSaveToCloud: () => void;
+  onError: (message: string) => void;
+  t: Translate;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const stored = Boolean(file.path);
+  const printable = stored && MAIL_ATTACHMENT_PRINTABLE.includes(file.contentType);
+  const saved = Boolean(file.cloudFileId);
+  const reason = stored ? undefined : t(`attachmentSkipped.${file.skipped ?? "error"}`);
+
+  /**
+   * Transferir: o URL assinado já leva o `Content-Disposition` com o nome
+   * original, por isso basta navegar para ele. `<a download>` com um URL de
+   * outra origem é ignorado pelos browsers — o cabeçalho é que decide, e é por
+   * isso que a escolha está do lado do servidor e não num atributo.
+   */
+  async function download() {
+    setBusy(true);
+    try {
+      const result = await onLink("download");
+      if (result.error || !result.url) {
+        onError(result.error ?? t("attachmentFailed"));
+        return;
+      }
+      window.location.assign(result.url);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * Imprimir: os bytes vêm para cá e abrem numa janela **nossa**.
+   *
+   * Não é um `window.open(url)` seguido de `print()`: o URL assinado é de outra
+   * origem (o Storage), e o browser não deixa a nossa página chamar `print()`
+   * dentro dela. Um `blob:` criado aqui herda a nossa origem — e com isso a
+   * janela volta a ser nossa e o `print()` é chamável. É também o que evita um
+   * segundo pedido ao Storage para desenhar o que já temos em mão.
+   */
+  async function print() {
+    setBusy(true);
+    let blobUrl: string | null = null;
+    try {
+      const result = await onLink("view");
+      if (result.error || !result.url) {
+        onError(result.error ?? t("attachmentFailed"));
+        return;
+      }
+
+      const response = await fetch(result.url);
+      if (!response.ok) {
+        onError(t("attachmentFailed"));
+        return;
+      }
+      blobUrl = URL.createObjectURL(await response.blob());
+
+      const frame = document.createElement("iframe");
+      frame.hidden = true;
+      frame.src = blobUrl;
+      frame.onload = () => {
+        frame.contentWindow?.focus();
+        frame.contentWindow?.print();
+      };
+      document.body.append(frame);
+
+      // A janela de impressão é modal e síncrona, mas o utilizador pode
+      // cancelá-la; a limpeza é por tempo porque não há evento que diga "a
+      // caixa de diálogo fechou". Um minuto é folgado de propósito: tirar o
+      // iframe com a caixa aberta cancelava a impressão.
+      window.setTimeout(() => {
+        frame.remove();
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+      }, 60_000);
+    } catch {
+      onError(t("attachmentFailed"));
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <li className="upm-mail__attachment" data-stored={stored ? "true" : "false"}>
+      <span className="upm-mail__attachment-icon" aria-hidden="true">
+        <Paperclip size={15} />
+      </span>
+      <span className="upm-mail__attachment-name" title={reason ?? file.filename}>
+        {file.filename || t("attachment")}
+      </span>
+      {reason ? <span className="upm-mail__attachment-note">{reason}</span> : null}
+      <span className="upm-mail__attachment-size">{fileSize(file.size)}</span>
+
+      <span className="upm-mail__attachment-actions" data-saved={saved ? "true" : "false"}>
+        <Button
+          size="sm"
+          variant="ghost"
+          iconOnly
+          aria-label={t("download")}
+          title={reason ?? t("download")}
+          disabled={!stored || busy}
+          onClick={download}
+        >
+          <Download size={14} />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          iconOnly
+          aria-label={t("print")}
+          title={reason ?? (printable ? t("print") : t("printUnsupported"))}
+          disabled={!printable || busy}
+          onClick={print}
+        >
+          <Printer size={14} />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          iconOnly
+          aria-label={saved ? t("savedToCloud") : t("saveToCloud")}
+          title={reason ?? (saved ? t("savedToCloud") : t("saveToCloud"))}
+          aria-pressed={saved}
+          disabled={!stored || saved || busy || pending}
+          onClick={onSaveToCloud}
+        >
+          {/* Já guardado: o visto, e não uma segunda nuvem — o ícone tem de
+              dizer "está feito" e não "faz outra vez". */}
+          {saved ? <Check size={14} /> : <CloudUpload size={14} />}
+        </Button>
+      </span>
+    </li>
+  );
+}
+
 function MailReader({
   message,
   labels,
@@ -762,6 +940,9 @@ function MailReader({
   onCreateTicket,
   onReply,
   onForward,
+  onAttachmentLink,
+  onAttachmentToCloud,
+  onError,
   t,
 }: {
   message: MailMessageRow;
@@ -774,11 +955,12 @@ function MailReader({
   onCreateTicket: () => void;
   onReply: () => void;
   onForward: () => void;
+  onAttachmentLink: MailboxViewProps["onAttachmentLink"];
+  onAttachmentToCloud: (index: number) => void;
+  onError: (message: string) => void;
   t: Translate;
 }) {
-  const attachments = Array.isArray(message.attachments)
-    ? (message.attachments as { filename?: string; size?: number }[])
-    : [];
+  const attachments = mailAttachmentsOf(message);
   const when = message.sent_at ?? message.received_at;
 
   return (
@@ -861,52 +1043,15 @@ function MailReader({
             <strong>{t("attachmentsCount", { count: attachments.length })}</strong>
             <ul>
               {attachments.map((file, index) => (
-                <li key={index} className="upm-mail__attachment">
-                  <span className="upm-mail__attachment-icon" aria-hidden="true">
-                    <Paperclip size={15} />
-                  </span>
-                  <span className="upm-mail__attachment-name" title={file.filename}>
-                    {file.filename ?? t("attachment")}
-                  </span>
-                  <span className="upm-mail__attachment-size">{fileSize(file.size)}</span>
-                  {/* As três ações da referência. Ficam desativadas enquanto o
-                      worker guardar só os metadados do anexo: transferir,
-                      imprimir e guardar na Cloud precisam todas dos bytes, e um
-                      botão que devolve um ficheiro vazio é pior do que um botão
-                      que diz que ainda não. Registado como dívida D66. */}
-                  <span className="upm-mail__attachment-actions">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      iconOnly
-                      aria-label={t("download")}
-                      title={t("attachmentSoon")}
-                      disabled
-                    >
-                      <Download size={14} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      iconOnly
-                      aria-label={t("print")}
-                      title={t("attachmentSoon")}
-                      disabled
-                    >
-                      <Printer size={14} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      iconOnly
-                      aria-label={t("saveToCloud")}
-                      title={t("attachmentSoon")}
-                      disabled
-                    >
-                      <CloudUpload size={14} />
-                    </Button>
-                  </span>
-                </li>
+                <AttachmentRow
+                  key={index}
+                  file={file}
+                  pending={pending}
+                  onLink={(mode) => onAttachmentLink({ messageId: message.id, index, mode })}
+                  onSaveToCloud={() => onAttachmentToCloud(index)}
+                  onError={onError}
+                  t={t}
+                />
               ))}
             </ul>
           </section>

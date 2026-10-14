@@ -23,6 +23,7 @@
     "./stripe": "./src/stripe.ts",
     "./agreement": "./src/agreement.ts",
     "./mail": "./src/mail.ts",
+    "./mail-attachments": "./src/mail-attachments.ts",
     "./pending": "./src/pending-types.ts"
   },
   "scripts": {
