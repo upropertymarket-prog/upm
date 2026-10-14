@@ -3,19 +3,19 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { variableLabel } from "./contractTypes";
 
 /**
- * O nó `variable` — a "variável em chip" de 04 §8.3
+ * O nó `variable` — a variável do contrato, 04 §8.3
  * =========================================================================
- * Inline e **atom**: não se escreve dentro de um chip, apaga-se inteiro. É o
- * que faz dele um campo e não uma palavra — meio `[ Proprietár` não é nada.
+ * Inline e **atom**: não se escreve dentro de uma variável, apaga-se inteira. É
+ * o que faz dela um campo e não uma palavra — meio "Proprietár" não é nada.
  *
  * Guarda `name` (a chave, `proprietario`) e `label` (o que se lê,
  * "Proprietário"). O `name` é o que casa com `contracts.values` e com
  * `contract_templates.variables`; o `label` é só apresentação e é recalculado a
- * partir do `name` quando faltar, para um modelo antigo nunca mostrar um chip
- * vazio.
+ * partir do `name` quando faltar, para um modelo antigo nunca mostrar uma
+ * variável vazia.
  *
- * Na pré-visualização o chip não aparece: `substituteVariables` troca-o pelo
- * valor (04 §8.3 — "substituídas em pré-visualização").
+ * Na pré-visualização a variável dá lugar ao valor (04 §8.3 — "substituídas em
+ * pré-visualização"); só fica à vista a que ninguém preencheu.
  */
 export const Variable = Node.create({
   name: "variable",
@@ -46,12 +46,12 @@ export const Variable = Node.create({
   renderHTML({ HTMLAttributes, node }) {
     const name = String(node.attrs.name ?? "");
     const label = String(node.attrs.label ?? "") || variableLabel(name);
-    return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), `[ ${label} ]`];
+    return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), label];
   },
 
   renderText({ node }) {
     const name = String(node.attrs.name ?? "");
-    return `[ ${String(node.attrs.label ?? "") || variableLabel(name)} ]`;
+    return String(node.attrs.label ?? "") || variableLabel(name);
   },
 });
 
@@ -63,18 +63,18 @@ type DocNode = {
 };
 
 /**
- * Troca cada chip pelo valor que o utilizador escreveu. Uma variável por
- * preencher fica com o chip à vista, em vez de deixar um buraco: um contrato
- * com um espaço em branco onde devia estar o preço é pior do que um contrato
- * que diz, à frente de quem o lê, que falta ali o preço.
+ * Troca cada variável pelo valor que o utilizador escreveu. Uma variável por
+ * preencher fica à vista como está no editor — roxa, por entre o texto preto —
+ * em vez de deixar um buraco: um contrato com um espaço em branco onde devia
+ * estar o preço é pior do que um contrato que diz, à frente de quem o lê, que
+ * falta ali o preço.
  */
 export function substituteVariables(doc: unknown, values: Record<string, string>): unknown {
   function walk(node: DocNode): DocNode {
     if (node.type === "variable") {
       const name = String(node.attrs?.name ?? "");
-      const label = String(node.attrs?.label ?? "") || variableLabel(name);
       const value = values[name]?.trim();
-      return { type: "text", text: value && value.length > 0 ? value : `[ ${label} ]` };
+      return value && value.length > 0 ? { type: "text", text: value } : node;
     }
     if (Array.isArray(node.content)) {
       return { ...node, content: node.content.map(walk) };

@@ -105,10 +105,10 @@ const EXTENSIONS = [
  *
  * Três coisas que vale a pena ler antes de mexer:
  *
- * 1. **A pré-visualização não é o editor com os chips escondidos.** É um
+ * 1. **A pré-visualização não é o editor com as variáveis escondidas.** É um
  *    segundo documento, com as variáveis já substituídas
  *    (`substituteVariables`). É esse que se pagina e é esse que se imprime —
- *    imprimir o editor imprimiria `[ Preço ]` onde devia estar o preço.
+ *    imprimir o editor imprimiria "Preço" onde devia estar o preço.
  * 2. **Guardar cria versão** (07 §13.2), por isso não se guarda a cada tecla:
  *    guarda-se ao pedir, ao mudar de estado, e ao fim de 5 minutos parado.
  * 3. **O estado não anda para trás.** O `Select` só oferece o que está à frente

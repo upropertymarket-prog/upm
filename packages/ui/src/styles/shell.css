@@ -447,6 +447,16 @@
   overflow: hidden;
 }
 
+/* Os 260 px acima são a largura de que as notificações precisam para caber um
+   título e uma data na mesma linha. Um menu que só tem rótulos curtos — os
+   idiomas, por exemplo — fica com uma faixa de vazio à direita do texto. Aqui a
+   largura passa a sair do conteúdo, com o `max-width` a travar rótulos longos. */
+.upm-menu__panel--compact {
+  min-width: 0;
+  width: max-content;
+  max-width: min(92vw, 280px);
+}
+
 .upm-menu__header {
   display: flex;
   align-items: center;

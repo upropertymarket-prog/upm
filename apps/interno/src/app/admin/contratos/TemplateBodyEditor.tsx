@@ -87,11 +87,11 @@ const TemplateVariable = TiptapNode.create({
   renderHTML({ HTMLAttributes, node }) {
     const name = String(node.attrs.name ?? "");
     const label = String(node.attrs.label ?? "") || variableLabel(name);
-    return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), `[ ${label} ]`];
+    return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), label];
   },
   renderText({ node }) {
     const name = String(node.attrs.name ?? "");
-    return `[ ${String(node.attrs.label ?? "") || variableLabel(name)} ]`;
+    return String(node.attrs.label ?? "") || variableLabel(name);
   },
 });
 

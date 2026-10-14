@@ -78,23 +78,23 @@
   text-align: left;
 }
 
-/* O chip da variável — 04 §8.3, "variáveis como chips [ Proprietário ]". */
+/* A variável — 04 §8.3 pedia um chip em pílula, `[ Proprietário ]`; o produto
+   preferiu-a a acompanhar o texto do contrato, com o mesmo tipo de letra e o
+   mesmo tamanho que o utilizador escolheu. Distinguem-na só a cor (a mesma do
+   botão de inserir variável) e o peso médio. */
 .upm-contract .upm-chip {
-  display: inline-block;
-  padding: 1px var(--sp-3);
-  border-radius: var(--r-pill);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: var(--fw-semibold);
+  color: var(--variable-action);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--fw-medium);
   white-space: nowrap;
   cursor: default;
 }
 
 .upm-contract .ProseMirror-selectednode.upm-chip {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--variable-action);
   outline-offset: 1px;
+  border-radius: var(--r-sm);
 }
 
 /* Paginação da pré-visualização (04 §8.3). */

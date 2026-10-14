@@ -63,7 +63,7 @@ export function LanguageMenu({
         <Languages size={17} />
       </Button>
       {open ? (
-        <div className="upm-menu__panel" role="menu" aria-label={label}>
+        <div className="upm-menu__panel upm-menu__panel--compact" role="menu" aria-label={label}>
           {locales.map((option) => (
             <button
               key={option.value}
