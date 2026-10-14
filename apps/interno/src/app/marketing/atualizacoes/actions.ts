@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
@@ -50,6 +51,71 @@ async function getMarketingClient() {
     .maybeSingle();
   // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
   return asPendingRole(profile?.role) === "marketing" ? supabase : null;
+}
+
+/**
+ * A imagem do modal de novidades (04 §8.1.3)
+ * =========================================================================
+ * O bucket `app-updates` é privado e aceita três formatos de imagem até 5 MB —
+ * a mesma lista e o mesmo limite de `ticket-screenshots`, que é a referência
+ * certa aqui: uma imagem de novidade é uma captura de ecrã da funcionalidade.
+ *
+ * O tipo decide-se pelos **primeiros bytes** e não pela extensão nem pelo
+ * `type` que o browser declara (07 §19.8 #2): os dois são escritos por quem
+ * carrega. A lista do bucket é a rede de segurança, não a porta.
+ *
+ * O caminho é `{profile_id}/{uuid}.{ext}`, como em `ticket-screenshots`: o
+ * primeiro segmento é quem carregou, e é o que a policy de escrita lê.
+ */
+export async function uploadUpdateImage(
+  formData: FormData,
+): Promise<UpdateActionResult & { path?: string }> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Escolha uma imagem." };
+  if (file.size > 5 * 1024 * 1024) return { error: "A imagem excede 5 MB." };
+
+  const supabase = await getMarketingClient();
+  if (!supabase) return { error: "Sem permissão para carregar imagens." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sessão inválida." };
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const mime = sniffImageMime(bytes);
+  if (!mime) return { error: "Só se aceitam imagens PNG, JPG e WebP." };
+
+  const path = `${user.id}/${randomUUID()}.${mime.extension}`;
+  const { error } = await supabase.storage
+    .from("app-updates")
+    .upload(path, bytes, { contentType: mime.type, upsert: false });
+
+  if (error) return { error: "Não foi possível carregar a imagem." };
+
+  // Devolve o caminho; é a gravação da atualização que o persiste. Uma imagem
+  // carregada e não gravada fica no bucket sem referência — é o preço de não
+  // obrigar a gravar antes de ver, e o bucket é varrido com os anexos quando
+  // P10-10 tocar na Cloud interna.
+  return { ok: true, path };
+}
+
+/** As assinaturas dos três formatos aceites, e a extensão de cada um. */
+function sniffImageMime(bytes: Uint8Array): { type: string; extension: string } | null {
+  const starts = (signature: number[]) => signature.every((byte, at) => bytes[at] === byte);
+
+  if (starts([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
+    return { type: "image/png", extension: "png" };
+  }
+  if (starts([0xff, 0xd8, 0xff])) return { type: "image/jpeg", extension: "jpg" };
+  // WebP é RIFF com o tipo no 9.º byte.
+  if (
+    starts([0x52, 0x49, 0x46, 0x46]) &&
+    [0x57, 0x45, 0x42, 0x50].every((byte, at) => bytes[8 + at] === byte)
+  ) {
+    return { type: "image/webp", extension: "webp" };
+  }
+  return null;
 }
 
 export async function saveUpdate(input: unknown): Promise<UpdateActionResult> {

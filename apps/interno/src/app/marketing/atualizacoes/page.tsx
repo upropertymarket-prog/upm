@@ -6,7 +6,13 @@ import { appUpdateReach, listAppUpdates } from "@upm/db/updates";
 import { InternalChrome } from "../../../components/InternalChrome";
 import { getMarketingShellData } from "../../../lib/marketing-shell";
 import { setLocalePreference } from "../../actions/preferences";
-import { archiveUpdate, publishUpdate, removeUpdate, saveUpdate } from "./actions";
+import {
+  archiveUpdate,
+  publishUpdate,
+  removeUpdate,
+  saveUpdate,
+  uploadUpdateImage,
+} from "./actions";
 import { UpdatesManager } from "./UpdatesManager";
 
 /**
@@ -53,6 +59,7 @@ export default async function MarketingUpdatesPage() {
         onPublish={publishUpdate}
         onArchive={archiveUpdate}
         onDelete={removeUpdate}
+        onUploadImage={uploadUpdateImage}
       />
     </InternalChrome>
   );

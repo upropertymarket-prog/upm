@@ -164,15 +164,11 @@ export async function listAppUpdates(client: AnySupabaseClient): Promise<AppUpda
  * são meia dúzia de novidades e uma leitura só.
  */
 export async function appUpdateReach(client: AnySupabaseClient): Promise<Record<string, number>> {
-  const { data } = await updateClient(client)
-    .from("app_update_views")
-    .select("update_id")
-    .limit(100_000);
+  const { data, error } = await updateClient(client).rpc("app_update_reach");
+  if (error || !Array.isArray(data)) return {};
 
   const reach: Record<string, number> = {};
-  for (const row of data ?? []) {
-    reach[row.update_id] = (reach[row.update_id] ?? 0) + 1;
-  }
+  for (const row of data) reach[row.update_id] = row.seen;
   return reach;
 }
 

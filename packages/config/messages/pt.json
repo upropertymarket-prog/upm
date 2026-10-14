@@ -1174,7 +1174,15 @@
         "banner": "Faixa no topo agora; o modal abre no próximo acesso.",
         "next_login": "Nada agora; o modal abre no próximo acesso.",
         "mandatory": "Modal imediato, sem \"Mais tarde\". Só para o que não pode passar ao lado de ninguém."
-      }
+      },
+      "imageLabel": "Imagem do modal",
+      "imageChoose": "Escolher imagem",
+      "imageReplace": "Trocar imagem",
+      "imageRemove": "Remover",
+      "imageNone": "Sem imagem. PNG, JPG ou WebP até 5 MB.",
+      "imageAltLabel": "Descrição da imagem",
+      "imageAltHint": "Para quem usa leitor de ecrã. Descreva o que a imagem mostra.",
+      "imageFailed": "Não foi possível carregar a imagem."
     }
   }
 }

@@ -1174,7 +1174,15 @@
         "banner": "Banner at the top now; the modal opens on the next sign-in.",
         "next_login": "Nothing now; the modal opens on the next sign-in.",
         "mandatory": "Modal right away, with no \"Later\". Only for what nobody can miss."
-      }
+      },
+      "imageLabel": "Modal image",
+      "imageChoose": "Choose image",
+      "imageReplace": "Replace image",
+      "imageRemove": "Remove",
+      "imageNone": "No image. PNG, JPG or WebP up to 5 MB.",
+      "imageAltLabel": "Image description",
+      "imageAltHint": "For screen reader users. Describe what the image shows.",
+      "imageFailed": "The image could not be uploaded."
     }
   }
 }

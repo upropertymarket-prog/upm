@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Archive, Eye, Plus, Send, Trash2 } from "lucide-react";
+import { useRef, useState, useTransition } from "react";
+import { Archive, Eye, ImagePlus, Plus, Send, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   AppUpdatesModal,
@@ -61,6 +61,7 @@ export type UpdatesManagerProps = {
   onPublish: (id: string) => Promise<UpdateActionResult>;
   onArchive: (id: string) => Promise<UpdateActionResult>;
   onDelete: (id: string) => Promise<UpdateActionResult>;
+  onUploadImage: (formData: FormData) => Promise<UpdateActionResult & { path?: string }>;
 };
 
 type Draft = {
@@ -123,6 +124,27 @@ export function UpdatesManager(props: UpdatesManagerProps) {
     props.updates[0] ? draftOf(props.updates[0]) : null,
   );
   const [preview, setPreview] = useState(false);
+  const picker = useRef<HTMLInputElement>(null);
+
+  /**
+   * A imagem sobe assim que é escolhida, e o que fica no rascunho é o caminho.
+   * Não espera pelo "Guardar" de propósito: o campo do `alt` só faz sentido
+   * depois de haver imagem, e um upload diferido obrigava a gravar duas vezes
+   * para a poder descrever.
+   */
+  function upload(file: File) {
+    if (!draft) return;
+    const form = new FormData();
+    form.set("file", file);
+    startTransition(async () => {
+      const result = await props.onUploadImage(form);
+      if (result.error || !result.path) {
+        toast(result.error ?? t("imageFailed"), "error");
+        return;
+      }
+      setDraft({ ...draft, imagePath: result.path });
+    });
+  }
 
   const current = draft?.id ? props.updates.find((row) => row.id === draft.id) : null;
   const locked = current?.status === "published" || current?.status === "archived";
@@ -344,6 +366,76 @@ export function UpdatesManager(props: UpdatesManagerProps) {
               disabled={locked}
               onChange={(event) => setDraft({ ...draft, title: event.target.value })}
             />
+
+            {/* A imagem do modal (04 §8.1.3). O `alt` não é opcional: o modal
+                abre a toda a gente, e uma imagem sem alternativa textual falha
+                o AA de 04 §1.7 na cara de quem usa leitor de ecrã. */}
+            <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+              <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+                {t("imageLabel")}
+              </span>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "var(--sp-3)",
+                }}
+              >
+                <input
+                  ref={picker}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = "";
+                    if (file) upload(file);
+                  }}
+                />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  leadingIcon={<ImagePlus size={14} />}
+                  disabled={locked || pending}
+                  onClick={() => picker.current?.click()}
+                >
+                  {draft.imagePath ? t("imageReplace") : t("imageChoose")}
+                </Button>
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                  }}
+                >
+                  {draft.imagePath || t("imageNone")}
+                </span>
+                {draft.imagePath && !locked ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setDraft({ ...draft, imagePath: "", imageAlt: "" })}
+                  >
+                    {t("imageRemove")}
+                  </Button>
+                ) : null}
+              </div>
+              {draft.imagePath ? (
+                <Input
+                  label={t("imageAltLabel")}
+                  hint={t("imageAltHint")}
+                  value={draft.imageAlt}
+                  maxLength={200}
+                  disabled={locked}
+                  onChange={(event) => setDraft({ ...draft, imageAlt: event.target.value })}
+                />
+              ) : null}
+            </div>
 
             <Textarea
               label={t("pointsLabel")}

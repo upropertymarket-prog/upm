@@ -231,6 +231,7 @@ export type MailDatabase = Omit<Database, "public"> & {
         }[];
       };
       mark_app_update_seen: { Args: { p_update_id: string }; Returns: undefined };
+      app_update_reach: { Args: never; Returns: { update_id: string; seen: number }[] };
       app_update_save: {
         Args: {
           p_id: string | null;
