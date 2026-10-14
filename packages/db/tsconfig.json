@@ -1,5 +1,12 @@
 {
   "extends": "@upm/config/tsconfig/base.json",
-  "compilerOptions": { "noEmit": true },
-  "include": ["src/**/*.ts"]
+  "compilerOptions": {
+    "noEmit": true,
+    // `campaign-render.tsx` é o renderizador de campanhas em React Email
+    // (P10-08): é o único `.tsx` do pacote, e existe aqui — e não numa app —
+    // porque quem o chama é o servidor, nos três sítios que precisam do mesmo
+    // HTML (pré-visualização, "Enviar teste" e o envio a sério).
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
