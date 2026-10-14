@@ -32,10 +32,27 @@ function walk(dir, out = []) {
   return out;
 }
 
+/**
+ * Só as apps **Next**, e é por isso que o teste é a existência de um
+ * `next.config`.
+ *
+ * O portão varria `apps/*` e exigia `.next/static` a todas. Funcionou até
+ * `apps/mail-worker` nascer, em P10-03: um processo Node que compila com `tsc`
+ * e nunca terá `.next`. A partir daí **este portão falhava sempre** — e é o
+ * portão que verifica que nenhum segredo vai no bundle servido ao browser
+ * (08 §6.2). Um portão que falha sempre é um portão que se aprende a ignorar,
+ * que é pior do que não o ter.
+ *
+ * O teste fica pelo `next.config` e não por uma lista de nomes: uma app nova
+ * entra sozinha, e é essa a razão de não ser uma allowlist.
+ */
+const NEXT_CONFIGS = ["next.config.ts", "next.config.js", "next.config.mjs"];
+
 const apps = existsSync("apps")
   ? readdirSync("apps", { withFileTypes: true })
       .filter((d) => d.isDirectory())
       .map((d) => d.name)
+      .filter((name) => NEXT_CONFIGS.some((file) => existsSync(join("apps", name, file))))
   : [];
 
 let scanned = 0;

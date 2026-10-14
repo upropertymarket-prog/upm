@@ -1,28 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import {
-  Bold,
-  Italic,
-  Link2,
-  List,
-  ListOrdered,
-  Maximize2,
-  Minus,
-  Paperclip,
-  Quote,
-  Redo2,
-  Send,
-  Strikethrough,
-  Underline,
-  Undo2,
-  X,
-} from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { Maximize2, Minus, Paperclip, Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, useToast } from "@upm/ui";
+import { RichText, richTextLabels } from "@upm/ui/editor";
 import type { MailboxOption } from "@upm/db/mail";
 
 import type { MailActionResult } from "./actions";
+import { htmlToText, parseAddresses } from "./mail-text";
 
 /**
  * Composer — a janela de escrever (P10-05 · 04 §2.5)
@@ -43,16 +29,19 @@ import type { MailActionResult } from "./actions";
  * linha. Sem isso, uma mensagem escrita em dez minutos deixava dezenas de
  * rascunhos na pasta — e o que se procura depois é o último, não a coleção.
  *
- * ## Porque é `contentEditable` e não o TipTap
+ * ## O corpo é o `RichText` partilhado (desde 14 out 2026)
  *
- * O TipTap está na stack (02 §3.2) e é o editor dos **contratos**, onde o
- * documento é estruturado, tem variáveis como nós e precisa de serializar para
- * PDF. Um e-mail é HTML simples que vai ser lido por clientes de correio que
- * ignoram metade do que lhes mandamos. `contentEditable` com `execCommand` dá
- * exatamente o que a barra da referência mostra — negrito, itálico, listas,
- * ligação — sem trazer um editor inteiro para dentro do bundle do Suporte.
- * Quando o Composer precisar de blocos (as campanhas vão precisar), a conversa
- * muda; hoje, não precisa.
+ * Esta janela nasceu com `contentEditable` + `execCommand`, e a nota que aqui
+ * estava defendia-o: "um e-mail é HTML simples, não vale um editor inteiro".
+ * Deixou de se defender quando as Novidades repetiram o mesmo ficheiro e as
+ * Campanhas iam repetir o terceiro — e, sobretudo, porque `execCommand` é uma
+ * API obsoleta que cada browser implementa à sua maneira, no editor que o
+ * Suporte usa o dia inteiro para responder a clientes.
+ *
+ * O corpo passou a ser `@upm/ui/editor`, em TipTap. **A janela não mudou**: os
+ * três tamanhos, o rascunho automático de dois segundos, os campos e os botões
+ * são os mesmos. O que mudou é quem desenha o corpo e a barra — que continua no
+ * fim, junto à linha dos botões, como 04 §2.5 pede.
  *
  * A assinatura entra **no HTML inicial**, separada por um `<hr>`: é texto
  * editável como o resto, porque quem escreve às vezes quer tirá-la — e um
@@ -85,8 +74,10 @@ type Size = "normal" | "minimized" | "expanded";
 
 export function Composer(props: ComposerProps) {
   const t = useTranslations("support.mailbox.composer");
+  // As etiquetas da barra vivem em `editor.*`: passaram a ser de três ecrãs.
+  const tRoot = useTranslations();
   const { toast } = useToast();
-  const body = useRef<HTMLDivElement>(null);
+  const [html, setHtml] = useState("");
   const [size, setSize] = useState<Size>("normal");
   const [draftId, setDraftId] = useState<string | null>(props.initial?.draftId ?? null);
   const [to, setTo] = useState((props.initial?.to ?? []).join(", "));
@@ -99,16 +90,24 @@ export function Composer(props: ComposerProps) {
   const [saving, setSaving] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  // O conteúdo inicial entra uma vez, por `innerHTML`: um `contentEditable`
-  // controlado por React perde a posição do cursor a cada tecla.
+  /**
+   * O conteúdo inicial entra **uma vez por abertura**, e é o `resetKey` do
+   * `RichText` que o garante. Antes isto era um `innerHTML` a seco num
+   * `contentEditable`, com um comentário a explicar que um editor controlado
+   * por React perdia o cursor a cada tecla; o `RichText` guarda o seu próprio
+   * estado e a reposição passou a ter uma porta com nome.
+   *
+   * A caixa e a assinatura mudam quando se troca de caixa; o conteúdo já
+   * escrito, não — daí a chave contar as aberturas e não seguir `props`.
+   */
+  const [opened, setOpened] = useState(0);
   useEffect(() => {
-    if (!props.open || !body.current) return;
-    body.current.innerHTML =
+    if (!props.open) return;
+    setHtml(
       props.initial?.html ??
-      (props.signature ? `<p><br></p><hr />${props.signature}` : "<p><br></p>");
-    body.current.focus();
-    // A caixa e a assinatura mudam quando se troca de caixa; o conteúdo já
-    // escrito, não — daí só reagir à abertura.
+        (props.signature ? `<p><br></p><hr />${props.signature}` : "<p><br></p>"),
+    );
+    setOpened((count) => count + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.open]);
 
@@ -128,8 +127,12 @@ export function Composer(props: ComposerProps) {
       cc: parseAddresses(cc),
       bcc: parseAddresses(bcc),
       subject,
-      html: body.current?.innerHTML ?? "",
-      text: body.current?.innerText ?? "",
+      html,
+      // A versão em texto do que vai no corpo. Era o `innerText` do
+      // `contentEditable`; agora sai do HTML, no servidor é que não — o
+      // destinatário recebe as duas partes e a de texto é a que um cliente
+      // sem HTML mostra.
+      text: htmlToText(html),
       inReplyTo: props.initial?.inReplyTo ?? null,
     };
   }
@@ -159,17 +162,6 @@ export function Composer(props: ComposerProps) {
       if (draftId) await props.onDiscard(draftId);
       props.onClose();
     });
-  }
-
-  /**
-   * A barra de formatação. `execCommand` está marcado como obsoleto há anos e
-   * continua a ser o que todos os browsers implementam para isto; a alternativa
-   * é um editor completo, que esta janela não justifica (ver a nota de topo).
-   */
-  function format(command: string, value?: string) {
-    body.current?.focus();
-    document.execCommand(command, false, value);
-    setDirty(true);
   }
 
   if (!props.open) return null;
@@ -272,57 +264,22 @@ export function Composer(props: ComposerProps) {
             </label>
           </div>
 
-          <div
-            ref={body}
+          {/* O corpo e a barra, agora do editor partilhado. A barra fica no
+              fim junto aos botoes, como 04 §2.5 pede ("toolbar no fim junto a
+              linha") — e e por isso que o RichText tem toolbarPosition. */}
+          <RichText
             className="upm-composer__body"
-            contentEditable
-            suppressContentEditableWarning
-            role="textbox"
-            aria-multiline="true"
-            aria-label={t("bodyLabel")}
-            onInput={() => setDirty(true)}
+            label={t("bodyLabel")}
+            value={html}
+            onChange={(next) => {
+              setHtml(next);
+              setDirty(true);
+            }}
+            labels={richTextLabels(tRoot)}
+            resetKey={opened}
+            toolbarPosition="bottom"
+            minHeight={160}
           />
-
-          <div className="upm-composer__toolbar" role="toolbar" aria-label={t("toolbar")}>
-            <ToolbarButton label={t("bold")} onClick={() => format("bold")}>
-              <Bold size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("italic")} onClick={() => format("italic")}>
-              <Italic size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("underline")} onClick={() => format("underline")}>
-              <Underline size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("strike")} onClick={() => format("strikeThrough")}>
-              <Strikethrough size={14} />
-            </ToolbarButton>
-            <span className="upm-composer__divider" aria-hidden="true" />
-            <ToolbarButton label={t("bullets")} onClick={() => format("insertUnorderedList")}>
-              <List size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("numbers")} onClick={() => format("insertOrderedList")}>
-              <ListOrdered size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("quote")} onClick={() => format("formatBlock", "blockquote")}>
-              <Quote size={14} />
-            </ToolbarButton>
-            <ToolbarButton
-              label={t("link")}
-              onClick={() => {
-                const url = window.prompt(t("linkPrompt"));
-                if (url) format("createLink", url);
-              }}
-            >
-              <Link2 size={14} />
-            </ToolbarButton>
-            <span className="upm-composer__divider" aria-hidden="true" />
-            <ToolbarButton label={t("undo")} onClick={() => format("undo")}>
-              <Undo2 size={14} />
-            </ToolbarButton>
-            <ToolbarButton label={t("redo")} onClick={() => format("redo")}>
-              <Redo2 size={14} />
-            </ToolbarButton>
-          </div>
 
           <footer className="upm-composer__foot">
             <Button
@@ -355,39 +312,4 @@ export function Composer(props: ComposerProps) {
       )}
     </section>
   );
-}
-
-function ToolbarButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      className="upm-composer__tool"
-      aria-label={label}
-      title={label}
-      // `onMouseDown` e não `onClick`: a seleção no corpo perde-se quando o
-      // botão ganha foco, e sem seleção o comando não tem a que se aplicar.
-      onMouseDown={(event) => {
-        event.preventDefault();
-        onClick();
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-/** "ana@x.pt, rui@y.pt" → duas moradas. Vírgula ou ponto e vírgula, como nos clientes de correio. */
-export function parseAddresses(value: string): string[] {
-  return value
-    .split(/[,;]/)
-    .map((part) => part.trim())
-    .filter(Boolean);
 }

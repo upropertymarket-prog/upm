@@ -7,10 +7,12 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./editor": "./src/editor/index.ts",
     "./demo-data": "./src/demo-data/index.tsx",
     "./fonts": "./src/fonts/index.ts",
     "./styles.css": "./src/styles/index.css",
-    "./tokens.css": "./src/styles/tokens.css"
+    "./tokens.css": "./src/styles/tokens.css",
+    "./editor.css": "./src/editor/editor.css"
   },
   "scripts": {
     "lint": "eslint src",
@@ -19,6 +21,12 @@
     "fonts:sync": "node scripts/sync-fonts.mjs"
   },
   "dependencies": {
+    "@tiptap/core": "^2",
+    "@tiptap/extension-link": "^2",
+    "@tiptap/extension-text-align": "^2",
+    "@tiptap/extension-underline": "^2",
+    "@tiptap/react": "^2",
+    "@tiptap/starter-kit": "^2",
     "lucide-react": "^0.469.0"
   },
   "peerDependencies": {

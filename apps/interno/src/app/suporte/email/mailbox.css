@@ -656,63 +656,34 @@
   text-decoration: underline;
 }
 
+/**
+ * O corpo da janela — agora o `RichText` partilhado (`@upm/ui/editor`).
+ *
+ * O que era um `contentEditable` com estilos próprios passou a ser um
+ * componente com a sua folha em `@upm/ui`. O que fica aqui é só o que é da
+ * **janela**: crescer para ocupar o que sobra e rolar por dentro. A tipografia
+ * do texto é da folha partilhada — repeti-la aqui era ter dois sítios a
+ * discordar sobre o tamanho de letra de um e-mail.
+ */
 .upm-composer__body {
   flex: 1;
-  min-height: 180px;
+  min-height: 0;
   overflow-y: auto;
+}
+
+.upm-composer__body .ProseMirror {
   padding: var(--sp-5);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.6;
-  outline: none;
 }
 
-.upm-composer__body:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-
-.upm-composer__body hr {
-  border: 0;
-  border-top: 1px solid var(--border);
+.upm-composer__body .ProseMirror hr {
   margin: var(--sp-5) 0;
 }
 
-.upm-composer__body a {
-  color: var(--accent);
-}
-
-.upm-composer__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
+/* A barra do editor partilhado, dentro da janela: fica no fim e separada por
+   uma linha, como 04 §2.5 pede ("toolbar no fim junto à linha"). */
+.upm-composer__body [role="toolbar"] {
   padding: var(--sp-2) var(--sp-4);
   border-top: 1px solid var(--border);
-}
-
-.upm-composer__tool {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--r-md);
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.upm-composer__tool:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-.upm-composer__divider {
-  width: 1px;
-  height: 18px;
-  margin: 0 var(--sp-2);
-  background: var(--border);
 }
 
 .upm-composer__foot {

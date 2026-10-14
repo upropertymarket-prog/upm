@@ -22,8 +22,9 @@ import {
   type AppUpdateRow,
 } from "@upm/db/updates";
 
+import { RichText, richTextLabels } from "@upm/ui/editor";
+
 import type { UpdateActionResult } from "./actions";
-import { UpdateBodyEditor } from "./UpdateBodyEditor";
 
 /**
  * Atualizações — `/marketing/atualizacoes` (P10-07 · 04 §2.6)
@@ -462,23 +463,21 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                 dangerouslySetInnerHTML={{ __html: draft.bodyHtml }}
               />
             ) : (
-              <UpdateBodyEditor
-                label={t("bodyLabel")}
-                toolbarLabel={t("toolbar")}
-                value={draft.bodyHtml}
-                onChange={(html) => setDraft({ ...draft, bodyHtml: html })}
-                labels={{
-                  bold: tRoot("support.mailbox.composer.bold"),
-                  italic: tRoot("support.mailbox.composer.italic"),
-                  bullets: tRoot("support.mailbox.composer.bullets"),
-                  numbers: tRoot("support.mailbox.composer.numbers"),
-                  quote: tRoot("support.mailbox.composer.quote"),
-                  link: tRoot("support.mailbox.composer.link"),
-                  linkPrompt: tRoot("support.mailbox.composer.linkPrompt"),
-                  undo: tRoot("support.mailbox.composer.undo"),
-                  redo: tRoot("support.mailbox.composer.redo"),
-                }}
-              />
+              <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+                  {t("bodyLabel")}
+                </span>
+                <RichText
+                  label={t("bodyLabel")}
+                  value={draft.bodyHtml}
+                  onChange={(html) => setDraft({ ...draft, bodyHtml: html })}
+                  labels={richTextLabels(tRoot)}
+                  // `resetKey` é o id da atualização: trocar de novidade na
+                  // lista repõe o corpo, e escrever na mesma não mexe no cursor.
+                  resetKey={draft.id ?? "novo"}
+                  minHeight={220}
+                />
+              </div>
             )}
 
             <div
