@@ -5,14 +5,18 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import {
   Archive,
   ArchiveRestore,
+  CloudUpload,
+  Download,
   FileEdit,
+  Forward,
   Inbox,
   LifeBuoy,
   Mail,
   MailOpen,
-  Forward,
+  MailX,
   Paperclip,
   Plus,
+  Printer,
   RefreshCw,
   Reply,
   Search,
@@ -184,7 +188,11 @@ export function MailboxView(props: MailboxViewProps) {
   if (props.mailboxes.length === 0) {
     return (
       <div className="upm-mail upm-mail--empty">
-        <EmptyState title={t("noMailboxTitle")} description={t("noMailboxBody")} />
+        <EmptyState
+          icon={<EmptyIcon icon={MailX} />}
+          title={t("noMailboxTitle")}
+          description={t("noMailboxBody")}
+        />
       </div>
     );
   }
@@ -421,7 +429,11 @@ export function MailboxView(props: MailboxViewProps) {
           />
         ) : (
           <div className="upm-mail__reader-empty">
-            <EmptyState title={t("pickTitle")} description={t("pickBody")} />
+            <EmptyState
+              icon={<EmptyIcon icon={Mail} />}
+              title={t("pickTitle")}
+              description={t("pickBody")}
+            />
           </div>
         )}
       </section>
@@ -584,6 +596,19 @@ blockquote{margin:0;padding-left:12px;border-left:3px solid ${theme.border};colo
 }
 
 /**
+ * O ícone dos estados vazios: num disco, discreto, como na referência. Não é
+ * decoração — um painel só com texto lê-se como um erro, e o envelope diz em
+ * meio segundo que aquele espaço é de correio e está à espera de uma escolha.
+ */
+function EmptyIcon({ icon: Icon }: { icon: typeof Mail }) {
+  return (
+    <span className="upm-mail__empty-icon">
+      <Icon size={22} />
+    </span>
+  );
+}
+
+/**
  * O tema é escuro? Decidido pela luminância da superfície, com a fórmula
  * habitual (ITU-R BT.601). Serve só para dizer ao documento do e-mail que
  * `color-scheme` usar — é o que faz o browser desenhar as barras de rolamento e
@@ -594,6 +619,18 @@ function isDark(color: string): boolean {
   if (!parts || parts.length < 3) return false;
   const [r, g, b] = parts.map(Number) as [number, number, number];
   return (r * 299 + g * 587 + b * 114) / 1000 < 128;
+}
+
+/**
+ * O tamanho do ficheiro como as pessoas o leem. Base 1024, e casa decimal só a
+ * partir dos MB: "1,2 MB" é informação, "1,2 KB" é ruído.
+ */
+export function fileSize(bytes: number | undefined): string {
+  if (!bytes || bytes < 0) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${(kb / 1024).toFixed(1).replace(".", ",")} MB`;
 }
 
 /** As iniciais de quem escreveu, como em qualquer cliente de correio. */
@@ -821,12 +858,54 @@ function MailReader({
 
         {attachments.length > 0 ? (
           <section className="upm-mail__attachments">
-            <strong>{t("attachments")}</strong>
+            <strong>{t("attachmentsCount", { count: attachments.length })}</strong>
             <ul>
               {attachments.map((file, index) => (
-                <li key={index}>
-                  <Paperclip size={14} aria-hidden="true" />
-                  {file.filename ?? t("attachment")}
+                <li key={index} className="upm-mail__attachment">
+                  <span className="upm-mail__attachment-icon" aria-hidden="true">
+                    <Paperclip size={15} />
+                  </span>
+                  <span className="upm-mail__attachment-name" title={file.filename}>
+                    {file.filename ?? t("attachment")}
+                  </span>
+                  <span className="upm-mail__attachment-size">{fileSize(file.size)}</span>
+                  {/* As três ações da referência. Ficam desativadas enquanto o
+                      worker guardar só os metadados do anexo: transferir,
+                      imprimir e guardar na Cloud precisam todas dos bytes, e um
+                      botão que devolve um ficheiro vazio é pior do que um botão
+                      que diz que ainda não. Registado como dívida D66. */}
+                  <span className="upm-mail__attachment-actions">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      iconOnly
+                      aria-label={t("download")}
+                      title={t("attachmentSoon")}
+                      disabled
+                    >
+                      <Download size={14} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      iconOnly
+                      aria-label={t("print")}
+                      title={t("attachmentSoon")}
+                      disabled
+                    >
+                      <Printer size={14} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      iconOnly
+                      aria-label={t("saveToCloud")}
+                      title={t("attachmentSoon")}
+                      disabled
+                    >
+                      <CloudUpload size={14} />
+                    </Button>
+                  </span>
                 </li>
               ))}
             </ul>

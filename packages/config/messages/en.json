@@ -1066,7 +1066,12 @@
         "saving": "Saving…",
         "sent": "Message sent."
       },
-      "quotedIntro": "{name} wrote:"
+      "quotedIntro": "{name} wrote:",
+      "attachmentsCount": "{count, plural, one {# attachment} other {# attachments}}",
+      "download": "Download",
+      "print": "Print",
+      "saveToCloud": "Save to Cloud",
+      "attachmentSoon": "Attachment contents arrive once the worker downloads them."
     }
   }
 }

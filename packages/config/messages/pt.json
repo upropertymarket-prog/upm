@@ -1066,7 +1066,12 @@
         "saving": "A guardar…",
         "sent": "Mensagem enviada."
       },
-      "quotedIntro": "{name} escreveu:"
+      "quotedIntro": "{name} escreveu:",
+      "attachmentsCount": "{count, plural, one {# anexo} other {# anexos}}",
+      "download": "Transferir",
+      "print": "Imprimir",
+      "saveToCloud": "Guardar na Cloud",
+      "attachmentSoon": "O conteúdo dos anexos chega quando o worker os descarregar."
     }
   }
 }

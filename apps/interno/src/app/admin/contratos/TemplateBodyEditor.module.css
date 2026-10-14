@@ -206,22 +206,22 @@
   text-align: left;
 }
 
+/* A variável acompanha o texto à volta — mesmo tipo de letra e mesmo tamanho
+   que o utilizador escolheu na barra. Só a cor (a mesma do botão de inserir)
+   e o peso médio a distinguem do corpo do contrato. */
 .content :global(.upm-chip) {
-  display: inline-block;
-  padding: 1px var(--sp-3);
-  border-radius: var(--r-pill);
-  background: var(--accent-soft);
-  color: var(--accent-ink);
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: var(--fw-semibold);
+  color: var(--variable-action);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--fw-medium);
   white-space: nowrap;
   cursor: default;
 }
 
 .content :global(.ProseMirror-selectednode.upm-chip) {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--variable-action);
   outline-offset: 1px;
+  border-radius: var(--r-sm);
 }
 
 .hint {
