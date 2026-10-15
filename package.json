@@ -18,6 +18,7 @@
     "db:diff": "supabase db diff",
     "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && node scripts/gate/check-responsive.mjs && pnpm gate:seo && pnpm gate:db && pnpm gate:deps",
     "gate:env": "node scripts/gate/check-public-env.mjs",
+    "gate:i18n": "node scripts/gate/check-i18n.mjs",
     "gate:bundle": "node scripts/gate/check-client-bundle.mjs",
     "gate:responsive": "node scripts/gate/check-responsive.mjs",
     "audit:responsive": "node scripts/audit-responsive.mjs",
