@@ -77,6 +77,13 @@ export type CampaignRenderContext = {
   /** Texto do link de cancelar subscrição e do pré-cabeçalho. */
   labels: { unsubscribe: string };
   preheader?: string;
+  /**
+   * O fundo do e-mail — `campaigns.email_bg` (05 §1.9), o painel "Estilo" de
+   * 04 §2.6. Hexadecimal e não token: terceira exceção viva a 04 §5.1, pela
+   * mesma razão das outras duas — um cliente de e-mail não tem as `custom
+   * properties` do design system.
+   */
+  background?: string;
 };
 
 const ALIGN_STYLE = (align?: string) => ({ textAlign: (align ?? "left") as "left" });
@@ -281,7 +288,7 @@ export function CampaignEmail({
         style={{
           margin: 0,
           padding: "24px 0",
-          backgroundColor: BACKGROUND,
+          backgroundColor: context.background || BACKGROUND,
           fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >

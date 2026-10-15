@@ -195,3 +195,15 @@ describe("renderCampaignText", () => {
     expect(renderCampaignText(blocks, context)).not.toMatch(/\n{3}/);
   });
 });
+
+describe("o fundo do e-mail (campaigns.email_bg)", () => {
+  it("usa o que a campanha escolheu", async () => {
+    const html = await renderCampaignHtml([footer], { ...context, background: "#101820" });
+    expect(html).toContain("#101820");
+  });
+
+  it("sem escolha, fica o fundo da marca", async () => {
+    const html = await renderCampaignHtml([footer], context);
+    expect(html).toContain("#f6f7f9");
+  });
+});
