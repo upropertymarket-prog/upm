@@ -235,4 +235,282 @@ describe.skipIf(!hasEnv)("Fase 10 · campanhas: audiências, consentimento e sup
       .eq("id", campaignId);
     expect(error).not.toBeNull();
   });
+
+  // -------------------------------------------------------------------------
+  // 5 — as escritas são todas por função (`20261015120000`)
+  //
+  // O que estes testes guardam não é "a função funciona": é que **os
+  // invariantes que uma policy não sabe ver** estão mesmo no caminho de
+  // escrita. Cada um deles corresponde a um estado que não devia poder existir.
+  // -------------------------------------------------------------------------
+
+  const footer = { id: "f1", type: "footer", align: "left", text: "" };
+  const heading = { id: "h1", type: "heading", align: "left", text: "Olá", level: 1 };
+
+  it("só o Marketing grava campanhas", async () => {
+    for (const role of ["admin", "support", "owner"] as const) {
+      const { error } = await clients[role].rpc("campaign_save", {
+        p_id: null,
+        p_name: `Pirata ${STAMP}`,
+        p_audience: "all",
+        p_from_mailbox_id: null,
+        p_email_bg: "#ffffff",
+      });
+      expect(error, `${role} devia ser recusado`).not.toBeNull();
+    }
+  });
+
+  it("uma campanha nasce com o primeiro e-mail da sequência", async () => {
+    const { data, error } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Sequência ${STAMP}`,
+      p_audience: "owners",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    expect(error).toBeNull();
+
+    const nova = String(data);
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("position")
+      .eq("campaign_id", nova);
+
+    // "Uma campanha é uma sequência de 1..N" (05 §1.9), e N começa em 1.
+    expect(emails ?? []).toHaveLength(1);
+    expect(emails?.[0]?.position).toBe(1);
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("o fundo não hexadecimal é recusado pela função, não só pelo check", async () => {
+    const { error } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Fundo ${STAMP}`,
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "var(--bg)",
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("gravar blocos sem rodapé é recusado — é o link de cancelar subscrição (02 §4.3)", async () => {
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .order("position")
+      .limit(1);
+    const emailId = emails?.[0]?.id;
+    expect(emailId).toBeTruthy();
+
+    const semRodape = await clients.marketing.rpc("campaign_email_save", {
+      p_id: emailId!,
+      p_campaign_id: campaignId,
+      p_name: "",
+      p_subject: "Assunto",
+      p_preheader: "",
+      p_blocks: [heading],
+      p_delay_days: 0,
+    });
+    expect(semRodape.error).not.toBeNull();
+
+    const comRodape = await clients.marketing.rpc("campaign_email_save", {
+      p_id: emailId!,
+      p_campaign_id: campaignId,
+      p_name: "",
+      p_subject: "Assunto",
+      p_preheader: "",
+      p_blocks: [heading, footer],
+      p_delay_days: 0,
+    });
+    expect(comRodape.error).toBeNull();
+  });
+
+  it("HTML inseguro nos blocos é recusado — a prova de que o sanitizador do Node correu", async () => {
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .order("position")
+      .limit(1);
+
+    const { error } = await clients.marketing.rpc("campaign_email_save", {
+      p_id: emails![0]!.id,
+      p_campaign_id: campaignId,
+      p_name: "",
+      p_subject: "Assunto",
+      p_preheader: "",
+      p_blocks: [
+        { id: "t1", type: "text", align: "left", html: "<script>alert(1)</script>" },
+        footer,
+      ],
+      p_delay_days: 0,
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("não se apaga o último e-mail da sequência, e apagar um do meio renumera", async () => {
+    const { data: criada } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Renumerar ${STAMP}`,
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    const nova = String(criada);
+
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", nova);
+
+    // Só há um: apagá-lo deixava uma campanha sem conteúdo nenhum.
+    const unico = await clients.marketing.rpc("campaign_email_delete", { p_id: emails![0]!.id });
+    expect(unico.error).not.toBeNull();
+
+    // Com três, apagar o do meio tem de deixar 1 e 2 — e não 1 e 3, que o
+    // `delay` de P10-09 leria como uma espera que ninguém escreveu.
+    const extras: string[] = [];
+    for (const assunto of ["Dois", "Três"]) {
+      const { data } = await clients.marketing.rpc("campaign_email_save", {
+        p_id: null,
+        p_campaign_id: nova,
+        p_name: "",
+        p_subject: assunto,
+        p_preheader: "",
+        p_blocks: [footer],
+        p_delay_days: 3,
+      });
+      extras.push(String(data));
+    }
+
+    const meio = await clients.marketing.rpc("campaign_email_delete", { p_id: extras[0]! });
+    expect(meio.error).toBeNull();
+
+    const { data: finais } = await clients.marketing
+      .from("campaign_emails")
+      .select("position")
+      .eq("campaign_id", nova)
+      .order("position");
+    expect((finais ?? []).map((linha) => linha.position)).toEqual([1, 2]);
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("agendar exige data futura e e-mails completos; desagendar limpa a data", async () => {
+    const { data: criada } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Agendar ${STAMP}`,
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    const nova = String(criada);
+
+    const passado = await clients.marketing.rpc("campaign_schedule", {
+      p_id: nova,
+      p_at: new Date(Date.now() - 3600_000).toISOString(),
+    });
+    expect(passado.error).not.toBeNull();
+
+    // O e-mail 1 nasce sem assunto e sem blocos: agendar assim era marcar data
+    // para um envio em branco.
+    const incompleta = await clients.marketing.rpc("campaign_schedule", {
+      p_id: nova,
+      p_at: new Date(Date.now() + 86_400_000).toISOString(),
+    });
+    expect(incompleta.error).not.toBeNull();
+
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", nova);
+    await clients.marketing.rpc("campaign_email_save", {
+      p_id: emails![0]!.id,
+      p_campaign_id: nova,
+      p_name: "",
+      p_subject: "Pronto",
+      p_preheader: "",
+      p_blocks: [footer],
+      p_delay_days: 0,
+    });
+
+    const agendada = await clients.marketing.rpc("campaign_schedule", {
+      p_id: nova,
+      p_at: new Date(Date.now() + 86_400_000).toISOString(),
+    });
+    expect(agendada.error).toBeNull();
+
+    const { data: depois } = await clients.marketing
+      .from("campaigns")
+      .select("status, scheduled_at")
+      .eq("id", nova)
+      .single();
+    expect(depois?.status).toBe("scheduled");
+    expect(depois?.scheduled_at).not.toBeNull();
+
+    const desagendada = await clients.marketing.rpc("campaign_unschedule", { p_id: nova });
+    expect(desagendada.error).toBeNull();
+
+    const { data: final } = await clients.marketing
+      .from("campaigns")
+      .select("status, scheduled_at")
+      .eq("id", nova)
+      .single();
+    // O `check campaigns_scheduled_has_date` obriga a limpar a data com o estado.
+    expect(final?.status).toBe("draft");
+    expect(final?.scheduled_at).toBeNull();
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("uma campanha enviada não se edita nem se apaga", async () => {
+    const { data: criada } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Enviada ${STAMP}`,
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    const nova = String(criada);
+
+    // O estado `sent` é do worker (P10-09); aqui chega-se lá pela service_role.
+    await service
+      .from("campaigns")
+      .update({ status: "sent", sent_at: new Date().toISOString() })
+      .eq("id", nova);
+
+    const editar = await clients.marketing.rpc("campaign_save", {
+      p_id: nova,
+      p_name: "Outro nome",
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    expect(editar.error).not.toBeNull();
+
+    // Apagá-la levava `campaign_recipients` e as métricas pelo `on delete
+    // cascade` — e com elas a prova de que aquele e-mail saiu.
+    const apagar = await clients.marketing.rpc("campaign_delete", { p_id: nova });
+    expect(apagar.error).not.toBeNull();
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("o remetente chega como três colunas, e não como a configuração das caixas", async () => {
+    const { data, error } = await clients.marketing.rpc("campaign_sender_options");
+    expect(error).toBeNull();
+
+    for (const linha of (data ?? []) as Record<string, unknown>[]) {
+      // Nada de `in_host`, `username` nem `secret_id`: o Marketing escolhe um
+      // remetente, não lê a configuração do Suporte (07 §24.6 #2).
+      expect(Object.keys(linha).sort()).toEqual(["address", "display_name", "id"]);
+    }
+
+    for (const role of ["admin", "support", "owner"] as const) {
+      const { error: recusa } = await clients[role].rpc("campaign_sender_options");
+      expect(recusa, `${role} devia ser recusado`).not.toBeNull();
+    }
+  });
 });

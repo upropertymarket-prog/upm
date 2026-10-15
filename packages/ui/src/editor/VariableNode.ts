@@ -24,7 +24,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
  *
  * O envio de uma campanha corre no servidor e não pode carregar o TipTap para
  * trocar três palavras. A substituição é uma função pura sobre o HTML, em
- * `@upm/db/campaigns` (`substituteCampaignVariables`), e o contrato entre as
+ * `@upm/db/campaign-blocks` (`substituteCampaignVariables`), e o contrato entre as
  * duas é esta marcação — que está fixada por testes dos dois lados.
  */
 

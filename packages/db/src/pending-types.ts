@@ -129,6 +129,73 @@ export type AppUpdateViewRow = {
   seen_at: string;
 };
 
+/**
+ * `20261015090000` (as tabelas) e `20261015120000` (as escritas), com as
+ * campanhas (P10-08).
+ *
+ * `blocks` entra como `unknown` e não como `CampaignBlock[]`: o que está na
+ * base de dados é `jsonb` — pode ter sido escrito por uma versão anterior do
+ * contrato — e quem decide se é válido é `campaignBlocksSchema`, na leitura.
+ * Tipá-lo aqui era prometer ao compilador uma garantia que a coluna não dá.
+ *
+ * `delay` é texto porque é o que o `supabase-js` devolve de um `interval`
+ * (`'3 days'`). Quem o converte para dias é `campaigns.ts`, num sítio só — a
+ * ida é `p_delay_days`, que é inteiro de propósito (ver a nota da função).
+ */
+export type CampaignRow = {
+  id: string;
+  name: string;
+  audience: "all" | "owners" | "buyers" | "site_leads_pre" | "site_leads_post";
+  from_mailbox_id: string | null;
+  email_bg: string;
+  status: "draft" | "scheduled" | "sending" | "sent";
+  scheduled_at: string | null;
+  sent_at: string | null;
+  recipients: number;
+  opens: number;
+  clicks: number;
+  bounces: number;
+  unsubscribes: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CampaignEmailRow = {
+  id: string;
+  campaign_id: string;
+  position: number;
+  name: string;
+  subject: string;
+  preheader: string;
+  blocks: unknown;
+  delay: string;
+  send_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CampaignRecipientRow = {
+  id: string;
+  campaign_id: string;
+  campaign_email_id: string | null;
+  email: string;
+  profile_id: string | null;
+  status: "pending" | "sent" | "delivered" | "bounced" | "failed";
+  opened_at: string | null;
+  clicked_at: string | null;
+  unsubscribe_token: string;
+  created_at: string;
+};
+
+export type EmailSuppressionRow = {
+  id: string;
+  email: string;
+  reason: "unsubscribe" | "bounce" | "complaint";
+  campaign_id: string | null;
+  created_at: string;
+};
+
 export type MailLabelRow = {
   id: string;
   mailbox_id: string;
@@ -172,6 +239,10 @@ export type MailDatabase = Omit<Database, "public"> & {
       email_signatures: PendingTable<EmailSignatureRow, "name">;
       app_updates: PendingTable<AppUpdateRow, "title">;
       app_update_views: PendingTable<AppUpdateViewRow, "update_id" | "profile_id">;
+      campaigns: PendingTable<CampaignRow, "name">;
+      campaign_emails: PendingTable<CampaignEmailRow, "campaign_id" | "position">;
+      campaign_recipients: PendingTable<CampaignRecipientRow, "campaign_id" | "email">;
+      email_suppressions: PendingTable<EmailSuppressionRow, "email" | "reason">;
     };
     Functions: Database["public"]["Functions"] & {
       mailbox_credential: { Args: { p_mailbox_id: string }; Returns: string | null };
@@ -250,6 +321,48 @@ export type MailDatabase = Omit<Database, "public"> & {
       app_update_publish: { Args: { p_id: string }; Returns: undefined };
       app_update_archive: { Args: { p_id: string }; Returns: undefined };
       app_update_delete: { Args: { p_id: string }; Returns: undefined };
+      /**
+       * As campanhas (P10-08). `campaign_audience_count` nasceu com as tabelas
+       * em `20261015090000`; as sete restantes são as escritas de
+       * `20261015120000`.
+       *
+       * `p_audience` e `p_blocks` entram como `string`/`unknown` e não como os
+       * tipos gerados pela mesma razão de `p_source` nos anexos: os dois enums
+       * (`campaign_audience`, `campaign_status`) nasceram nessas migrações e o
+       * ficheiro gerado de hoje não os conhece. Quem os valida é o zod da
+       * server action, antes de chegarem aqui.
+       */
+      campaign_audience_count: { Args: { p_audience: string }; Returns: number };
+      campaign_sender_options: {
+        Args: never;
+        Returns: { id: string; address: string; display_name: string }[];
+      };
+      campaign_save: {
+        Args: {
+          p_id: string | null;
+          p_name: string;
+          p_audience: string;
+          p_from_mailbox_id: string | null;
+          p_email_bg: string;
+        };
+        Returns: string;
+      };
+      campaign_email_save: {
+        Args: {
+          p_id: string | null;
+          p_campaign_id: string;
+          p_name: string;
+          p_subject: string;
+          p_preheader: string;
+          p_blocks: unknown;
+          p_delay_days: number;
+        };
+        Returns: string;
+      };
+      campaign_email_delete: { Args: { p_id: string }; Returns: undefined };
+      campaign_schedule: { Args: { p_id: string; p_at: string }; Returns: undefined };
+      campaign_unschedule: { Args: { p_id: string }; Returns: undefined };
+      campaign_delete: { Args: { p_id: string }; Returns: undefined };
       /**
        * Os três RPC dos anexos (D66). `p_source` entra como `string` e não
        * como o enum gerado porque o valor `mail_attachment` nasceu na mesma

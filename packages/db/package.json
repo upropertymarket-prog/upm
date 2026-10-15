@@ -27,7 +27,8 @@
     "./signatures": "./src/signatures.ts",
     "./updates": "./src/updates.ts",
     "./pending": "./src/pending-types.ts",
-    "./campaigns": "./src/campaign-blocks.ts",
+    "./campaigns": "./src/campaigns.ts",
+    "./campaign-blocks": "./src/campaign-blocks.ts",
     "./campaign-render": "./src/campaign-render.tsx"
   },
   "scripts": {

@@ -177,6 +177,54 @@ export const campaignBlocksSchema = z
     message: "Dois blocos com o mesmo identificador.",
   });
 
+/** Os dois sem alinhamento, como pergunta — é o que a barra do bloco lê. */
+export function blockHasAlignment(type: CampaignBlockType): boolean {
+  return !(UNALIGNED_BLOCKS as readonly string[]).includes(type);
+}
+
+/**
+ * Um bloco novo, com os valores por omissão do seu esquema
+ * =========================================================================
+ * O `parse` de um objeto com só `id` e `type` é o que aplica os `default()` de
+ * cada campo — e é de propósito que a lista de valores iniciais não está aqui
+ * escrita outra vez. Dois sítios a dizer que um espaçador começa com 24 px
+ * divergem no dia em que um deles mudar.
+ */
+export function createCampaignBlock(
+  type: CampaignBlockType,
+  id: string = newBlockId(),
+): CampaignBlock {
+  return campaignBlockSchema.parse({ id, type });
+}
+
+/**
+ * Os blocos de um e-mail acabado de criar (04 §2.6).
+ *
+ * Cabeçalho, título, texto e **rodapé** — o último porque é o que 02 §4.3
+ * exige e porque um e-mail que nasce já inválido obrigava a descobrir a regra
+ * ao tentar gravar.
+ */
+export function defaultCampaignBlocks(): CampaignBlock[] {
+  return [
+    createCampaignBlock("header"),
+    createCampaignBlock("heading"),
+    createCampaignBlock("text"),
+    createCampaignBlock("footer"),
+  ];
+}
+
+/**
+ * Os `id` só têm de ser únicos dentro da lista (ver `campaignBlocksSchema`).
+ * `crypto.randomUUID` existe no browser e no Node há muito; o recuo serve os
+ * contextos sem `crypto` — um teste em ambiente mínimo — e não é segurança
+ * nenhuma, que aqui não é pedida.
+ */
+export function newBlockId(): string {
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `b${Date.now()}${Math.random().toString(36).slice(2)}`
+  );
+}
+
 /** As variáveis de 04 §2.6, e só estas. */
 export const CAMPAIGN_VARIABLES = ["nome", "apelido", "plano"] as const;
 export type CampaignVariable = (typeof CAMPAIGN_VARIABLES)[number];
