@@ -148,7 +148,11 @@ export function ThemeToggle({
         {icon(choice)}
       </Button>
       {open ? (
-        <div className="upm-menu__panel upm-menu__panel--compact" role="menu" aria-label={labels.title}>
+        <div
+          className="upm-menu__panel upm-menu__panel--compact"
+          role="menu"
+          aria-label={labels.title}
+        >
           {THEME_CHOICES.map((option) => (
             <button
               key={option}

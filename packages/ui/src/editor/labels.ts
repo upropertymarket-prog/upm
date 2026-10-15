@@ -10,6 +10,7 @@ import type { RichTextLabels } from "./RichText";
  */
 export function richTextLabels(t: (key: never) => string): RichTextLabels {
   const translate = t as unknown as (key: string) => string;
+  const translateWith = t as unknown as (key: string, values: Record<string, unknown>) => string;
   return {
     toolbar: translate("editor.toolbar"),
     bold: translate("editor.bold"),
@@ -26,5 +27,6 @@ export function richTextLabels(t: (key: never) => string): RichTextLabels {
     alignRight: translate("editor.alignRight"),
     undo: translate("editor.undo"),
     redo: translate("editor.redo"),
+    insertVariable: (label: string) => translateWith("editor.insertVariable", { label }),
   };
 }

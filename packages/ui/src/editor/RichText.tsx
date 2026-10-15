@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../components/Button";
+import { Variable, type EditorVariable } from "./VariableNode";
 
 // A folha vem com o componente, e não na folha partilhada: assim chega a quem
 // monta o editor e **não** ao CSS do site público. Ver a nota do ponto de
@@ -121,6 +122,8 @@ export type RichTextLabels = {
   alignRight: string;
   undo: string;
   redo: string;
+  /** "Inserir {label}" — o título do botão de cada variável. */
+  insertVariable: (label: string) => string;
 };
 
 export type RichTextProps = {
@@ -130,6 +133,12 @@ export type RichTextProps = {
   onChange: (html: string) => void;
   labels: RichTextLabels;
   features?: RichTextFeature[];
+  /**
+   * As variáveis que este editor oferece, como chips. Vazio ou ausente e o nó
+   * nem sequer entra nas extensões — é o que mantém o correio e as novidades,
+   * que não têm variáveis, sem nada a mais.
+   */
+  variables?: EditorVariable[];
   /** Trocar este valor repõe o conteúdo a partir de `value`. */
   resetKey?: string | number;
   disabled?: boolean;
@@ -145,6 +154,7 @@ export function RichText({
   onChange,
   labels,
   features = RICH_TEXT_PROSE,
+  variables = [],
   resetKey,
   disabled = false,
   toolbarPosition = "top",
@@ -169,6 +179,7 @@ export function RichText({
       ...(features.includes("align")
         ? [TextAlign.configure({ types: ["heading", "paragraph"] })]
         : []),
+      ...(variables.length > 0 ? [Variable] : []),
     ],
     content: value || "<p></p>",
     editable: !disabled,
@@ -358,6 +369,38 @@ export function RichText({
           >
             <Redo2 size={14} />
           </Tool>
+        </>
+      ) : null}
+
+      {/* As variáveis, como botões e não como menu: são três (04 §2.6) e um
+          menu para três opções é um clique a mais para ver o que já cabia na
+          barra. Entram **onde está o cursor**, que é o que uma variável
+          precisa — inserir no fim é quase nunca onde se quer. */}
+      {variables.length > 0 ? (
+        <>
+          <Divider />
+          {variables.map((variable) => (
+            <Button
+              key={variable.name}
+              size="sm"
+              variant="ghost"
+              title={labels.insertVariable(variable.label)}
+              aria-label={labels.insertVariable(variable.label)}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .insertContent({
+                    type: "variable",
+                    attrs: { name: variable.name, label: variable.label },
+                  })
+                  .run()
+              }
+            >
+              {variable.label}
+            </Button>
+          ))}
         </>
       ) : null}
     </div>

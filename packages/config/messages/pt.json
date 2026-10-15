@@ -1187,6 +1187,7 @@
     "alignCenter": "Centrar",
     "alignRight": "Alinhar à direita",
     "undo": "Anular",
-    "redo": "Refazer"
+    "redo": "Refazer",
+    "insertVariable": "Inserir {label}"
   }
 }

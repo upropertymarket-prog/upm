@@ -7,3 +7,5 @@
 export { RichText, RICH_TEXT_PROSE } from "./RichText";
 export type { RichTextFeature, RichTextLabels, RichTextProps } from "./RichText";
 export { richTextLabels } from "./labels";
+export { Variable } from "./VariableNode";
+export type { EditorVariable } from "./VariableNode";

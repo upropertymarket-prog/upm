@@ -95,3 +95,30 @@
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+/**
+ * O chip de uma variável — a mesma marcação dos contratos (`.upm-chip`)
+ *
+ * Os contratos já desenham esta classe na sua própria folha
+ * (`contract-editor.css`), com os mesmos tokens. Repete-se aqui porque esta
+ * folha tem de valer sozinha nos ecrãs que não carregam a dos contratos — e
+ * quando D68 os convergir, é esta que fica.
+ */
+.upm-richtext .upm-chip {
+  display: inline-block;
+  padding: 1px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: default;
+}
+
+/* Selecionado: é um átomo, apaga-se inteiro, e o contorno diz isso. */
+.upm-richtext .ProseMirror-selectednode.upm-chip {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

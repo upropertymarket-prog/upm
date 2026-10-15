@@ -1187,6 +1187,7 @@
     "alignCenter": "Center",
     "alignRight": "Align right",
     "undo": "Undo",
-    "redo": "Redo"
+    "redo": "Redo",
+    "insertVariable": "Insert {label}"
   }
 }
