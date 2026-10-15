@@ -194,6 +194,46 @@ export type CampaignRecipientRow = {
   created_at: string;
 };
 
+/** `20261015160000`, com o agendamento que dispara (P10-09). */
+export type ScheduledSendRow = {
+  id: string;
+  kind: "direct" | "campaign_email";
+  ref_id: string;
+  send_at: string;
+  status: "scheduled" | "sent" | "cancelled" | "failed";
+  created_by: string | null;
+  attempts: number;
+  last_error: string | null;
+  fired_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const EMAIL_EVENT_TYPES = [
+  "delivered",
+  "bounced",
+  "opened",
+  "read_receipt",
+  "clicked",
+  "unsubscribed",
+  "complained",
+] as const;
+export type EmailEventType = (typeof EMAIL_EVENT_TYPES)[number];
+
+/** `20261015170000`, com os recibos (P10-09). */
+export type EmailEventRow = {
+  id: string;
+  message_ref: string;
+  recipient: string;
+  type: EmailEventType;
+  url: string | null;
+  campaign_id: string | null;
+  recipient_id: string | null;
+  payload: unknown;
+  occurred_at: string;
+  created_at: string;
+};
+
 export type EmailSuppressionRow = {
   id: string;
   email: string;
@@ -249,6 +289,8 @@ export type MailDatabase = Omit<Database, "public"> & {
       campaign_emails: PendingTable<CampaignEmailRow, "campaign_id" | "position">;
       campaign_recipients: PendingTable<CampaignRecipientRow, "campaign_id" | "email">;
       email_suppressions: PendingTable<EmailSuppressionRow, "email" | "reason">;
+      scheduled_sends: PendingTable<ScheduledSendRow, "kind" | "ref_id" | "send_at">;
+      email_events: PendingTable<EmailEventRow, "message_ref" | "recipient" | "type">;
     };
     Functions: Database["public"]["Functions"] & {
       mailbox_credential: { Args: { p_mailbox_id: string }; Returns: string | null };
@@ -400,6 +442,33 @@ export type MailDatabase = Omit<Database, "public"> & {
       campaign_unsubscribe: { Args: { p_token: string }; Returns: boolean };
       /** `20261015150000`: a assinatura do bloco, resolvida — também para a service_role. */
       campaign_signature_html: { Args: { p_campaign_email_id: string }; Returns: string };
+      /**
+       * O agendamento e os recibos (P10-09, `20261015160000` e
+       * `20261015170000`). `campaign_start_sending` e `scheduled_sends_run` são
+       * do worker e do `pg_cron`; `campaign_receipts` é do Marketing.
+       */
+      campaign_start_sending: { Args: { p_id: string }; Returns: number };
+      scheduled_sends_run: { Args: { p_limit?: number }; Returns: number };
+      campaign_recipient_provider_id: {
+        Args: { p_id: string; p_provider_message_id: string };
+        Returns: undefined;
+      };
+      record_email_event: {
+        Args: {
+          p_message_ref: string;
+          p_recipient: string;
+          /** O enum nasceu nesta migração; quem o valida é o mapa de `receipts.ts`. */
+          p_type: string;
+          p_url?: string | null;
+          p_occurred_at?: string | null;
+          p_payload?: unknown;
+        };
+        Returns: boolean;
+      };
+      campaign_receipts: {
+        Args: { p_campaign_id: string };
+        Returns: { type: EmailEventType; total: number; pessoas: number }[];
+      };
       campaign_schedule: { Args: { p_id: string; p_at: string }; Returns: undefined };
       campaign_unschedule: { Args: { p_id: string }; Returns: undefined };
       campaign_delete: { Args: { p_id: string }; Returns: undefined };

@@ -57,6 +57,15 @@ const schema = z.object({
    * produção, 07 §16.1).
    */
   CAMPAIGN_FROM: z.string().optional(),
+  /**
+   * O segredo com que o Resend assina os webhooks dos recibos (P10-09), ao
+   * estilo Svix. **Sem ele o endpoint recusa tudo** — e isso é de propósito:
+   * um endpoint que escreve métricas a partir de qualquer `POST` que lhe chegue
+   * é um endpoint que qualquer pessoa pode usar para inventar aberturas.
+   * Opcional porque o worker tem de arrancar sem recibos configurados; o que
+   * não é opcional é aceitar sem verificar.
+   */
+  RESEND_WEBHOOK_SECRET: z.string().optional(),
 
   /** Minutos entre sincronizações de todas as caixas ativas. */
   SYNC_INTERVAL_MINUTES: z.coerce.number().int().positive().default(5),

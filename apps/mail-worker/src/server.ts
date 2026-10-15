@@ -6,6 +6,7 @@ import { sendCampaignTest } from "./campaigns.ts";
 import { checkConnection, describe } from "./connection.ts";
 import type { Env } from "./env.ts";
 import { drainOutbox } from "./outbox.ts";
+import { recordResendEvent, verifyResendSignature } from "./receipts.ts";
 import { sendMail } from "./send.ts";
 import { getMailbox, getMailboxPassword, type MailWorkerClient } from "./supabase.ts";
 import { syncAllMailboxes } from "./sync.ts";
@@ -39,7 +40,7 @@ const campaignTestSchema = z.object({
 });
 
 /** Com limite: um corpo sem fim é a forma mais simples de derrubar o worker. */
-async function readJson(req: IncomingMessage): Promise<unknown> {
+async function readRaw(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of req) {
@@ -47,8 +48,12 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
     if (size > 2_000_000) throw new Error("Corpo do pedido demasiado grande.");
     chunks.push(chunk as Buffer);
   }
-  if (chunks.length === 0) return null;
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+async function readJson(req: IncomingMessage): Promise<unknown> {
+  const raw = await readRaw(req);
+  return raw.length === 0 ? null : JSON.parse(raw);
 }
 
 /**
@@ -64,6 +69,7 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
  *   POST /outbox                  — força uma drenagem da fila de saída
  *   POST /send                    — entrega uma mensagem do composer do Suporte
  *   POST /campaign-test           — o "Enviar teste" do construtor de campanhas
+ *   POST /resend-webhook          — os recibos do Resend (sem token: assinatura)
  *
  * **O token compara-se em tempo constante.** Uma comparação com `===` demora o
  * que demora o prefixo comum, e isso chega para adivinhar um token byte a byte
@@ -90,6 +96,47 @@ async function handle(
 
   if (req.method === "GET" && (path === "/health" || path === "/")) {
     send(res, 200, { ok: true, service: "mail-worker" });
+    return;
+  }
+
+  /**
+   * Os recibos do Resend (P10-09) ficam **antes** do guarda do token, e não é
+   * um esquecimento: o Resend não sabe o nosso token e não tem como o saber. A
+   * identidade dele é a **assinatura** do corpo, que `verifyResendSignature`
+   * confere com o segredo partilhado — e sem segredo configurado recusa tudo.
+   *
+   * O corpo lê-se em bruto porque é sobre os bytes exatos que o HMAC é
+   * calculado: um `JSON.parse` seguido de `JSON.stringify` muda o espaçamento e
+   * a assinatura deixa de corresponder.
+   */
+  if (req.method === "POST" && path === "/resend-webhook") {
+    const raw = await readRaw(req);
+    const verificacao = verifyResendSignature(
+      raw,
+      {
+        id: header(req, "svix-id"),
+        timestamp: header(req, "svix-timestamp"),
+        signature: header(req, "svix-signature"),
+      },
+      env.RESEND_WEBHOOK_SECRET,
+    );
+
+    if (!verificacao.ok) {
+      send(res, 401, { error: verificacao.reason });
+      return;
+    }
+
+    try {
+      const report = await recordResendEvent(client, JSON.parse(raw));
+      // 200 sempre que o recibo foi tratado — incluindo os ignorados. Um erro
+      // aqui faz o Resend reentregar, e reentregar um evento que não nos
+      // interessa é trabalho de graça para os dois lados.
+      send(res, 200, report);
+    } catch (error) {
+      // Um 5xx é o que pede a reentrega, e é o que queremos quando a falha é
+      // nossa: o recibo não se perde.
+      send(res, 500, { error: describe(error) });
+    }
     return;
   }
 
@@ -178,6 +225,12 @@ async function handleTest(
 
   const result = await checkConnection(mailbox, password);
   send(res, 200, result);
+}
+
+/** Um cabeçalho, como string — o Node dá-os como `string | string[]`. */
+function header(req: IncomingMessage, name: string): string | undefined {
+  const value = req.headers[name];
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function authorized(req: IncomingMessage, env: Env): boolean {

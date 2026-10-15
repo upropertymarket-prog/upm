@@ -43,6 +43,8 @@ import {
   type CampaignRow,
   type CampaignSender,
   type CampaignStatus,
+  type EmailEventType,
+  type ScheduledSendRow,
 } from "@upm/db/campaigns";
 import {
   CAMPAIGN_BLOCK_TYPES,
@@ -108,6 +110,10 @@ export type CampaignBuilderProps = {
   properties: { id: string; label: string }[];
   /** A contagem da audiência da campanha aberta, lida no servidor. */
   audienceCount: number | null;
+  /** Os recibos por tipo (P10-09). Vazio numa campanha que ainda não saiu. */
+  receipts: { type: EmailEventType; total: number; people: number }[];
+  /** O agendamento mais recente — incluindo um que falhou (P10-09). */
+  scheduled: ScheduledSendRow | null;
   locale: string;
   onSaveCampaign: (input: Record<string, unknown>) => Promise<CampaignActionResult>;
   onDeleteCampaign: (id: string) => Promise<CampaignActionResult>;
@@ -527,6 +533,36 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
           </Panel>
 
           {/* ------------------------------------------------------------- */}
+          {/* O disparo que falhou — o único estado que a campanha não diz   */}
+          {/* ------------------------------------------------------------- */}
+          {props.scheduled?.status === "failed" ? (
+            <p
+              role="alert"
+              style={{
+                margin: 0,
+                padding: "var(--sp-3) var(--sp-4)",
+                border: "1px solid var(--danger)",
+                borderRadius: "var(--r-md)",
+                background: "var(--danger-soft)",
+                color: "var(--danger)",
+                fontSize: "13px",
+                lineHeight: 1.5,
+              }}
+            >
+              {/* Sem isto a campanha ficava "Agendada" com uma data que já
+                  passou e nenhuma explicação: o disparo tenta três vezes e
+                  desiste, e as razões por que desiste — sem remetente, um
+                  e-mail vazio, audiência a zero — são todas corrigíveis por
+                  quem está a ler isto. */}
+              {t("scheduleFailed", {
+                when: dateFormat.format(new Date(props.scheduled.send_at)),
+                attempts: props.scheduled.attempts,
+              })}
+              {props.scheduled.last_error ? ` — ${props.scheduled.last_error}` : ""}
+            </p>
+          ) : null}
+
+          {/* ------------------------------------------------------------- */}
           {/* Faixa 2 — a sequência                                         */}
           {/* ------------------------------------------------------------- */}
           <Panel label={t("bandSequence")}>
@@ -841,6 +877,42 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
               )}
             </section>
           </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* Os recibos (P10-09)                                           */}
+          {/* ------------------------------------------------------------- */}
+          {props.receipts.length > 0 ? (
+            <Panel label={t("receiptsLabel")}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 140px), 1fr))",
+                  gap: "var(--sp-4)",
+                }}
+              >
+                {props.receipts.map((receipt) => (
+                  <div key={receipt.type} style={{ display: "grid", gap: "var(--sp-1)" }}>
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      {t(`receipts.${receipt.type}`)}
+                    </span>
+                    <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--text)" }}>
+                      {receipt.people}
+                    </span>
+                    {/* Duas contagens e não uma: "300 aberturas de 100 pessoas"
+                        diz algo; "300 aberturas" numa campanha de 100
+                        destinatários parece um erro. O número grande é o de
+                        pessoas, que é o que se usa; o total fica ao lado. */}
+                    <span style={{ fontSize: "11.5px", color: "var(--muted)" }}>
+                      {t("receiptsTotal", { count: receipt.total })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}>
+                {t("receiptsNote")}
+              </p>
+            </Panel>
+          ) : null}
 
           {/* ------------------------------------------------------------- */}
           {/* As ações de 04 §2.6                                           */}

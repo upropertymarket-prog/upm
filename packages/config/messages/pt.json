@@ -1297,7 +1297,20 @@
       "sendTestHint": "Envia o que está guardado para um endereço à sua escolha.",
       "sendTestNeedsSave": "Guarde o e-mail antes de enviar um teste.",
       "sendTestPrompt": "Endereço para onde enviar o teste",
-      "sending": "A enviar…"
+      "sending": "A enviar…",
+      "receiptsLabel": "Recibos",
+      "receiptsTotal": "{count, plural, one {# evento} other {# eventos}}",
+      "receiptsNote": "O número grande é de pessoas distintas; o total conta cada evento. As aberturas dependem de o cliente de e-mail carregar as imagens, por isso são sempre um mínimo e não um exato.",
+      "receipts": {
+        "delivered": "Entregues",
+        "bounced": "Devolvidos",
+        "opened": "Abriram",
+        "read_receipt": "Aviso de leitura",
+        "clicked": "Clicaram",
+        "unsubscribed": "Cancelaram",
+        "complained": "Queixaram-se"
+      },
+      "scheduleFailed": "O envio agendado para {when} falhou {attempts, plural, one {# vez} other {# vezes}} e deixou de ser tentado. Corrija o que falta e agende outra vez."
     }
   },
   "editor": {

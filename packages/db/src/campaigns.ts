@@ -4,7 +4,14 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { campaignBlocksSchema, type CampaignBlock } from "./campaign-blocks";
 import type { Database } from "./database.types";
-import type { CampaignEmailRow, CampaignRow, MailDatabase } from "./pending-types";
+import {
+  EMAIL_EVENT_TYPES,
+  type CampaignEmailRow,
+  type CampaignRow,
+  type EmailEventType,
+  type MailDatabase,
+  type ScheduledSendRow,
+} from "./pending-types";
 
 /**
  * Campanhas — leitura, escrita e sanitização (P10-08 · 04 §2.6 · 05 §1.9)
@@ -48,7 +55,8 @@ function campaignClient(client: AnySupabaseClient): SupabaseClient<MailDatabase>
   return client as unknown as SupabaseClient<MailDatabase>;
 }
 
-export type { CampaignEmailRow, CampaignRow };
+export type { CampaignEmailRow, CampaignRow, EmailEventType, ScheduledSendRow };
+export { EMAIL_EVENT_TYPES };
 
 export const CAMPAIGN_AUDIENCES = [
   "all",
@@ -387,6 +395,51 @@ export async function sendCampaignNow(client: AnySupabaseClient, id: string): Pr
   const { data, error } = await campaignClient(client).rpc("campaign_send_now", { p_id: id });
   if (error) throw new Error(error.message);
   return typeof data === "number" ? data : 0;
+}
+
+/**
+ * O agendamento mais recente desta campanha (P10-09).
+ *
+ * **Não** filtra por `scheduled`, e isso é o ponto: o estado que o ecrã mais
+ * precisa de mostrar é o que a campanha, sozinha, não consegue dizer — um
+ * disparo que **falhou** três vezes deixa a campanha em `scheduled` para
+ * sempre, com uma data que já passou e nenhuma explicação. Devolver só o que
+ * está à espera era esconder exactamente o caso que vale a pena ver.
+ */
+export async function latestScheduledSend(
+  client: AnySupabaseClient,
+  campaignId: string,
+): Promise<ScheduledSendRow | null> {
+  const { data } = await campaignClient(client)
+    .from("scheduled_sends")
+    .select("*")
+    .eq("kind", "campaign_email")
+    .eq("ref_id", campaignId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+/**
+ * Os recibos de uma campanha, por tipo (P10-09).
+ *
+ * Duas contagens por tipo e não uma: `total` são os eventos, `pessoas` são
+ * endereços distintos. A diferença é a que faz um relatório poder ser lido —
+ * "300 aberturas de 100 pessoas" diz algo; "300 aberturas" sobre uma campanha
+ * de 100 destinatários parece um erro.
+ */
+export async function campaignReceipts(
+  client: AnySupabaseClient,
+  campaignId: string,
+): Promise<{ type: EmailEventType; total: number; people: number }[]> {
+  const { data, error } = await campaignClient(client).rpc("campaign_receipts", {
+    p_campaign_id: campaignId,
+  });
+
+  if (error || !Array.isArray(data)) return [];
+  return data.map((row) => ({ type: row.type, total: row.total, people: row.pessoas }));
 }
 
 /**

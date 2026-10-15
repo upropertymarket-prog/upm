@@ -3,8 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import {
   campaignAudienceCount,
+  campaignReceipts,
   campaignSenderOptions,
   delayInDays,
+  latestScheduledSend,
   listCampaignEmails,
   listCampaigns,
   parseCampaignBlocks,
@@ -87,9 +89,16 @@ export default async function MarketingCampaignsPage({
     delayByEmail[row.id] = delayInDays(row.delay);
   }
 
-  const audienceCount = selected
-    ? await campaignAudienceCount(supabase, selected.audience as CampaignAudience)
-    : null;
+  // A contagem, os recibos e o agendamento da campanha aberta. Em paralelo: são
+  // três leituras independentes e a página espera pela mais lenta das três e
+  // não pela soma.
+  const [audienceCount, receipts, scheduled] = selected
+    ? await Promise.all([
+        campaignAudienceCount(supabase, selected.audience as CampaignAudience),
+        campaignReceipts(supabase, selected.id),
+        latestScheduledSend(supabase, selected.id),
+      ])
+    : [null, [], null];
 
   return (
     <InternalChrome
@@ -111,6 +120,8 @@ export default async function MarketingCampaignsPage({
         senders={senders}
         properties={properties}
         audienceCount={audienceCount}
+        receipts={receipts}
+        scheduled={scheduled}
         locale={shell.locale}
         onSaveCampaign={guardarCampanha}
         onDeleteCampaign={apagarCampanha}

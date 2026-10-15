@@ -642,6 +642,226 @@ describe.skipIf(!hasEnv)("Fase 10 · campanhas: audiências, consentimento e sup
     expect(doCliente).toBe("");
   });
 
+  // -------------------------------------------------------------------------
+  // 7 — o agendamento e os recibos (P10-09)
+  // -------------------------------------------------------------------------
+
+  it("agendar cria o disparo; desagendar deixa-o como cancelado e não apagado", async () => {
+    const { data: criada } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Disparo ${STAMP}`,
+      p_audience: "all",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    const nova = String(criada);
+
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", nova);
+    await clients.marketing.rpc("campaign_email_save", {
+      p_id: emails![0]!.id,
+      p_campaign_id: nova,
+      p_name: "",
+      p_subject: "Pronto",
+      p_preheader: "",
+      p_blocks: [footer],
+      p_delay_days: 0,
+    });
+
+    const quando = new Date(Date.now() + 86_400_000).toISOString();
+    expect(
+      (await clients.marketing.rpc("campaign_schedule", { p_id: nova, p_at: quando })).error,
+    ).toBeNull();
+
+    const { data: disparo } = await clients.marketing
+      .from("scheduled_sends")
+      .select("status, send_at, attempts")
+      .eq("ref_id", nova)
+      .single();
+    expect(disparo?.status).toBe("scheduled");
+
+    // Reagendar muda a hora do disparo que existe, e não cria um segundo: é o
+    // índice único parcial que o garante.
+    const outra = new Date(Date.now() + 2 * 86_400_000).toISOString();
+    await clients.marketing.rpc("campaign_schedule", { p_id: nova, p_at: outra });
+
+    const { data: todos } = await clients.marketing
+      .from("scheduled_sends")
+      .select("status")
+      .eq("ref_id", nova);
+    expect(todos ?? []).toHaveLength(1);
+
+    await clients.marketing.rpc("campaign_unschedule", { p_id: nova });
+    const { data: depois } = await clients.marketing
+      .from("scheduled_sends")
+      .select("status")
+      .eq("ref_id", nova)
+      .single();
+    // `cancelled` e não apagado: o rasto de que esteve agendada é o que a
+    // campanha, sozinha, deixa de poder dizer.
+    expect(depois?.status).toBe("cancelled");
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("o disparo e o envio sem papel são da service_role, não de quem tem sessão", async () => {
+    for (const rpc of ["scheduled_sends_run", "campaign_start_sending"] as const) {
+      const { error } = await clients.marketing.rpc(rpc, {} as never);
+      expect(error, `${rpc} devia ser recusado a authenticated`).not.toBeNull();
+    }
+  });
+
+  it("os recibos contam uma vez por tipo, mesmo com o webhook a reentregar", async () => {
+    const { data: emails } = await service
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .order("position")
+      .limit(1);
+
+    const provider = `prov-${STAMP}`;
+    const endereco = `recibos-${STAMP}@exemplo.pt`;
+
+    const { data: destinatario } = await service
+      .from("campaign_recipients")
+      .insert({
+        campaign_id: campaignId,
+        campaign_email_id: emails![0]!.id,
+        email: endereco,
+        status: "sent",
+        provider_message_id: provider,
+      })
+      .select("id")
+      .single();
+
+    const { data: antes } = await service
+      .from("campaigns")
+      .select("opens, clicks")
+      .eq("id", campaignId)
+      .single();
+
+    const registar = (type: string, url?: string) =>
+      service.rpc("record_email_event", {
+        p_message_ref: provider,
+        p_recipient: endereco,
+        p_type: type,
+        p_url: url ?? null,
+      });
+
+    expect((await registar("opened")).data).toBe(true);
+    // A reentrega: o Resend reenvia o que não respondeu 200.
+    expect((await registar("opened")).data).toBe(false);
+
+    const { data: depois } = await service
+      .from("campaigns")
+      .select("opens, clicks")
+      .eq("id", campaignId)
+      .single();
+    expect(depois?.opens).toBe((antes?.opens ?? 0) + 1);
+
+    // Dois cliques em links diferentes são dois eventos — isso é informação.
+    expect((await registar("clicked", "https://upm.pt/a")).data).toBe(true);
+    expect((await registar("clicked", "https://upm.pt/b")).data).toBe(true);
+    expect((await registar("clicked", "https://upm.pt/a")).data).toBe(false);
+
+    const { data: final } = await service
+      .from("campaign_recipients")
+      .select("opened_at, clicked_at")
+      .eq("id", destinatario!.id)
+      .single();
+    expect(final?.opened_at).not.toBeNull();
+    expect(final?.clicked_at).not.toBeNull();
+
+    await service.from("campaign_recipients").delete().eq("id", destinatario!.id);
+    await service.from("email_events").delete().eq("message_ref", provider);
+  });
+
+  it("uma devolução suprime o endereço e uma queixa sobrepõe-se-lhe", async () => {
+    const { data: emails } = await service
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .order("position")
+      .limit(1);
+
+    const provider = `prov-bounce-${STAMP}`;
+    const endereco = `devolve-${STAMP}@exemplo.pt`;
+
+    const { data: destinatario } = await service
+      .from("campaign_recipients")
+      .insert({
+        campaign_id: campaignId,
+        campaign_email_id: emails![0]!.id,
+        email: endereco,
+        status: "sent",
+        provider_message_id: provider,
+      })
+      .select("id")
+      .single();
+
+    await service.rpc("record_email_event", {
+      p_message_ref: provider,
+      p_recipient: endereco,
+      p_type: "bounced",
+    });
+
+    const { data: supressao } = await service
+      .from("email_suppressions")
+      .select("reason")
+      .eq("email", endereco)
+      .single();
+    expect(supressao?.reason).toBe("bounce");
+
+    const { data: linha } = await service
+      .from("campaign_recipients")
+      .select("status")
+      .eq("id", destinatario!.id)
+      .single();
+    expect(linha?.status).toBe("bounced");
+
+    // Uma queixa é mais grave: o provedor já nos marcou, e é a razão que fica.
+    await service.rpc("record_email_event", {
+      p_message_ref: provider,
+      p_recipient: endereco,
+      p_type: "complained",
+    });
+
+    const { data: agravada } = await service
+      .from("email_suppressions")
+      .select("reason")
+      .eq("email", endereco)
+      .single();
+    expect(agravada?.reason).toBe("complaint");
+
+    await service.from("campaign_recipients").delete().eq("id", destinatario!.id);
+    await service.from("email_events").delete().eq("message_ref", provider);
+    await service.from("email_suppressions").delete().eq("email", endereco);
+  });
+
+  it("os recibos são do Marketing — nem o Admin nem o Suporte os leem", async () => {
+    for (const role of ["admin", "support", "owner", "anon"] as const) {
+      const { data } = await clients[role].from("email_events").select("id").limit(1);
+      expect(data ?? [], `${role} não devia ver recibos`).toHaveLength(0);
+
+      const { data: agendados } = await clients[role].from("scheduled_sends").select("id").limit(1);
+      expect(agendados ?? [], `${role} não devia ver agendamentos`).toHaveLength(0);
+    }
+
+    const { error } = await clients.marketing.rpc("campaign_receipts", {
+      p_campaign_id: campaignId,
+    });
+    expect(error).toBeNull();
+
+    for (const role of ["admin", "support", "owner"] as const) {
+      const { error: recusa } = await clients[role].rpc("campaign_receipts", {
+        p_campaign_id: campaignId,
+      });
+      expect(recusa, `${role} devia ser recusado`).not.toBeNull();
+    }
+  });
+
   it("o remetente chega como três colunas, e não como a configuração das caixas", async () => {
     const { data, error } = await clients.marketing.rpc("campaign_sender_options");
     expect(error).toBeNull();

@@ -1297,7 +1297,20 @@
       "sendTestHint": "Sends what is saved to an address of your choice.",
       "sendTestNeedsSave": "Save the email before sending a test.",
       "sendTestPrompt": "Address to send the test to",
-      "sending": "Sending…"
+      "sending": "Sending…",
+      "receiptsLabel": "Receipts",
+      "receiptsTotal": "{count, plural, one {# event} other {# events}}",
+      "receiptsNote": "The large number is distinct people; the total counts every event. Opens depend on the mail client loading images, so they are always a floor and not an exact figure.",
+      "receipts": {
+        "delivered": "Delivered",
+        "bounced": "Bounced",
+        "opened": "Opened",
+        "read_receipt": "Read receipt",
+        "clicked": "Clicked",
+        "unsubscribed": "Unsubscribed",
+        "complained": "Complained"
+      },
+      "scheduleFailed": "The send scheduled for {when} failed {attempts, plural, one {# time} other {# times}} and is no longer being retried. Fix what is missing and schedule it again."
     }
   },
   "editor": {

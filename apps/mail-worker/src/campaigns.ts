@@ -50,6 +50,8 @@ export type CampaignReport = {
   sent: number;
   failed: number;
   advanced: number;
+  /** Agendamentos que venceram e dispararam nesta passagem (P10-09). */
+  fired: number;
   reason?: string;
 };
 
@@ -74,7 +76,28 @@ export async function drainCampaigns(
   env: Env,
   options: { batch: number },
 ): Promise<CampaignReport> {
-  const report: CampaignReport = { sent: 0, failed: 0, advanced: 0 };
+  const report: CampaignReport = { sent: 0, failed: 0, advanced: 0, fired: 0 };
+
+  /**
+   * Os agendamentos vencidos, **antes** de tudo o resto e mesmo sem Resend
+   * configurado (P10-09).
+   *
+   * O `pg_cron` faz o mesmo de minuto a minuto dentro do Postgres; isto é a
+   * rede para quando a extensão não existe — em desenvolvimento, ou se o
+   * agendador parar sem ninguém notar. `scheduled_sends_run()` reclama cada
+   * linha com `skip locked`, por isso os dois a correrem juntos repartem a fila
+   * em vez de disparar o mesmo envio duas vezes.
+   *
+   * Fica fora da guarda do `RESEND_API_KEY` de propósito: disparar é pôr a
+   * campanha em `sending` e materializar destinatários, o que não precisa do
+   * Resend. Sem chave eles ficam na fila à espera — que é o estado honesto, e
+   * não "a campanha não chegou a arrancar".
+   */
+  const { data: fired, error: fireError } = await client.rpc("scheduled_sends_run", {
+    p_limit: 20,
+  });
+  if (fireError) throw new Error(`Não foi possível disparar agendamentos: ${fireError.message}`);
+  report.fired = typeof fired === "number" ? fired : 0;
 
   if (!env.RESEND_API_KEY) {
     report.reason = "RESEND_API_KEY não está definida — as campanhas ficam na fila.";
@@ -155,6 +178,20 @@ export async function drainCampaigns(
       });
 
       if (sent.error) throw new Error(sent.error.message);
+
+      /**
+       * O id do provedor **antes** de marcar como enviado, e é a ordem que
+       * importa (P10-09): é esta coluna que liga um recibo do Resend a este
+       * destinatário, e um webhook de entrega pode chegar antes de nós
+       * acabarmos de escrever. Sem o id gravado primeiro, esse recibo não
+       * encontrava ninguém e a entrega ficava por contar.
+       */
+      if (sent.data?.id) {
+        await client.rpc("campaign_recipient_provider_id", {
+          p_id: row.recipient_id,
+          p_provider_message_id: sent.data.id,
+        });
+      }
 
       const { error: marcar } = await client.rpc("campaign_recipient_sent", {
         p_id: row.recipient_id,

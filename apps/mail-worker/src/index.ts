@@ -78,6 +78,14 @@ loop("outbox", env.OUTBOX_INTERVAL_MINUTES, async () => {
  */
 loop("campaigns", env.CAMPAIGN_INTERVAL_MINUTES, async () => {
   const report = await drainCampaigns(client, env, { batch: env.CAMPAIGN_BATCH });
+
+  // Os agendamentos disparam mesmo sem Resend configurado (põem a campanha em
+  // envio e materializam destinatários), por isso dizem-se mesmo quando o resto
+  // da passagem parou por falta de chave.
+  if (report.fired > 0) {
+    log("info", `agendamentos: ${report.fired} campanha(s) posta(s) em envio`);
+  }
+
   if (report.reason) return;
   if (report.sent > 0 || report.failed > 0 || report.advanced > 0) {
     log(
