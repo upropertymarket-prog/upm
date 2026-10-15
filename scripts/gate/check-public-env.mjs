@@ -18,6 +18,21 @@ const ALLOWLIST = new Set([
   // Fase 3 — cookie de sessão partilhado entre subdomínios (07 §9.1-adjacent,
   // ver packages/db/src/client.ts). Não é segredo, só um domínio de cookie.
   "NEXT_PUBLIC_AUTH_COOKIE_DOMAIN",
+  /**
+   * Fase 10 (P10-01) — a identidade da build na captura técnica do modal
+   * "Reportar problema" (`packages/ui/src/support/ReportProblemModal.tsx`).
+   *
+   * Entrou com o modal e **ficou fora desta lista**, o que deixou o `gate:env`
+   * vermelho desde d7f975b sem ninguém notar — o conjunto de gates que se corre
+   * antes de cada commit não o inclui. Encontrado em P10-08, ao documentar as
+   * variáveis das campanhas.
+   *
+   * Não é segredo e não podia ser: é o SHA do que está em produção, que vai no
+   * bundle de qualquer forma, e serve exatamente para o Suporte saber a que
+   * versão se refere um report. Tirar-lhe o prefixo era mantê-lo no servidor —
+   * onde não serve de nada a um modal do browser.
+   */
+  "NEXT_PUBLIC_BUILD_SHA",
 ]);
 
 const PUBLIC_VAR = /\bNEXT_PUBLIC_[A-Z0-9_]+/g;
