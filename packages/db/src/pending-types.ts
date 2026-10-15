@@ -171,6 +171,8 @@ export type CampaignEmailRow = {
   blocks: unknown;
   delay: string;
   send_at: string | null;
+  /** `20261015140000`: quando foi expandido em destinatários. Nulo = ainda não. */
+  materialized_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -181,10 +183,14 @@ export type CampaignRecipientRow = {
   campaign_email_id: string | null;
   email: string;
   profile_id: string | null;
-  status: "pending" | "sent" | "delivered" | "bounced" | "failed";
+  /** `sending` nasceu em `20261015130000`: o worker reclama antes de enviar. */
+  status: "pending" | "sending" | "sent" | "delivered" | "bounced" | "failed";
   opened_at: string | null;
   clicked_at: string | null;
   unsubscribe_token: string;
+  /** `20261015140000`: a mesma política de `notification_deliveries`. */
+  attempts: number;
+  last_error: string | null;
   created_at: string;
 };
 
@@ -360,6 +366,40 @@ export type MailDatabase = Omit<Database, "public"> & {
         Returns: string;
       };
       campaign_email_delete: { Args: { p_id: string }; Returns: undefined };
+      /**
+       * O envio (`20261015130000` e `20261015140000`). As quatro do worker têm
+       * `grant` só para a `service_role` — o guarda é o `grant` e não uma
+       * verificação lá dentro, como em `mail_attachments_expired`.
+       */
+      campaign_send_now: { Args: { p_id: string }; Returns: number };
+      campaign_materialize_recipients: {
+        Args: { p_campaign_email_id: string };
+        Returns: number;
+      };
+      campaign_claim_recipients: {
+        Args: { p_limit?: number };
+        Returns: {
+          recipient_id: string;
+          campaign_id: string;
+          campaign_email_id: string;
+          email: string;
+          unsubscribe_token: string;
+          var_nome: string;
+          var_apelido: string;
+          var_plano: string;
+          subject: string;
+          preheader: string;
+          blocks: unknown;
+          email_bg: string;
+          from_mailbox_id: string | null;
+        }[];
+      };
+      campaign_recipient_sent: { Args: { p_id: string }; Returns: undefined };
+      campaign_recipient_failed: { Args: { p_id: string; p_error: string }; Returns: undefined };
+      campaign_advance_sequence: { Args: never; Returns: number };
+      campaign_unsubscribe: { Args: { p_token: string }; Returns: boolean };
+      /** `20261015150000`: a assinatura do bloco, resolvida — também para a service_role. */
+      campaign_signature_html: { Args: { p_campaign_email_id: string }; Returns: string };
       campaign_schedule: { Args: { p_id: string; p_at: string }; Returns: undefined };
       campaign_unschedule: { Args: { p_id: string }; Returns: undefined };
       campaign_delete: { Args: { p_id: string }; Returns: undefined };

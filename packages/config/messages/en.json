@@ -1231,8 +1231,7 @@
       "exportFailed": "The HTML could not be exported.",
       "sendTest": "Send test",
       "send": "Send",
-      "sendPending": "Sending arrives with the third part of P10-08.",
-      "sendPendingNote": "Scheduling sets the status and the date. Sending — the queue, the recipients and the hand-off to the mail worker — comes next; until then nothing goes out on its own.",
+      "sendPendingNote": "Scheduling sets the status and the date; what fires at that moment is P10-09. Sending puts the campaign in the mail worker's queue, which delivers in batches — the status becomes Sent when the last recipient goes out.",
       "schedule": "Schedule",
       "scheduleLabel": "Schedule for",
       "unschedule": "Back to draft",
@@ -1292,7 +1291,13 @@
       "footerLabel": "Legal text",
       "footerHint": "What appears above the unsubscribe link.",
       "footerUnsubscribeNote": "The unsubscribe link is added at send time, with each recipient's own token.",
-      "unsubscribeLink": "Unsubscribe"
+      "unsubscribeLink": "Unsubscribe",
+      "sendHint": "Puts the campaign into sending. The mail worker takes it from there.",
+      "sendConfirm": "Send “{name}”? A campaign goes out once — there is no calling it back.",
+      "sendTestHint": "Sends what is saved to an address of your choice.",
+      "sendTestNeedsSave": "Save the email before sending a test.",
+      "sendTestPrompt": "Address to send the test to",
+      "sending": "Sending…"
     }
   },
   "editor": {

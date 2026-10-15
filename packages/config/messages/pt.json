@@ -1231,8 +1231,7 @@
       "exportFailed": "Não foi possível exportar o HTML.",
       "sendTest": "Enviar teste",
       "send": "Enviar",
-      "sendPending": "O envio entra com a terceira parte de P10-08.",
-      "sendPendingNote": "Agendar põe o estado e a data. O envio — a fila, os destinatários e a passagem ao mail-worker — entra a seguir; até lá nada sai sozinho.",
+      "sendPendingNote": "Agendar põe o estado e a data; quem dispara no momento marcado é P10-09. Enviar põe a campanha na fila do mail-worker, que entrega em lotes — o estado passa a Enviada quando o último destinatário sair.",
       "schedule": "Agendar",
       "scheduleLabel": "Agendar para",
       "unschedule": "Voltar a rascunho",
@@ -1292,7 +1291,13 @@
       "footerLabel": "Texto legal",
       "footerHint": "O que aparece acima do link de cancelar subscrição.",
       "footerUnsubscribeNote": "O link de cancelar subscrição é acrescentado no envio, com o token de cada destinatário.",
-      "unsubscribeLink": "Cancelar subscrição"
+      "unsubscribeLink": "Cancelar subscrição",
+      "sendHint": "Põe a campanha em envio. O mail-worker entrega a partir daí.",
+      "sendConfirm": "Enviar “{name}”? Uma campanha sai uma vez — não há forma de a chamar de volta.",
+      "sendTestHint": "Envia o que está guardado para um endereço à sua escolha.",
+      "sendTestNeedsSave": "Guarde o e-mail antes de enviar um teste.",
+      "sendTestPrompt": "Endereço para onde enviar o teste",
+      "sending": "A enviar…"
     }
   },
   "editor": {

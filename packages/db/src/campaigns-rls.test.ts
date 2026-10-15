@@ -498,6 +498,150 @@ describe.skipIf(!hasEnv)("Fase 10 · campanhas: audiências, consentimento e sup
     await service.from("campaigns").delete().eq("id", nova);
   });
 
+  // -------------------------------------------------------------------------
+  // 6 — o envio (`20261015130000`, `20261015140000`, `20261015150000`)
+  //
+  // O que estes testes guardam é a fronteira de 07 §24.6 #5: a audiência
+  // materializa-se **dentro** do Postgres, e as funções que veem endereços são
+  // as do worker — fechadas a `authenticated` pelo `grant`, não por um `if`.
+  // -------------------------------------------------------------------------
+
+  it("as funções do worker estão fechadas a quem tem sessão", async () => {
+    // O guarda aqui é o `grant` (o padrão de `mail_attachments_expired`), e é
+    // isso que este teste prova: nem o Marketing, que é dono das campanhas,
+    // consegue reclamar destinatários — porque reclamar é ver endereços.
+    for (const rpc of [
+      "campaign_claim_recipients",
+      "campaign_advance_sequence",
+      "campaign_materialize_recipients",
+    ] as const) {
+      const { error } = await clients.marketing.rpc(rpc, {} as never);
+      expect(error, `${rpc} devia ser recusado a authenticated`).not.toBeNull();
+    }
+  });
+
+  it("enviar exige remetente, conteúdo e alguém que receba", async () => {
+    const { data: criada } = await clients.marketing.rpc("campaign_save", {
+      p_id: null,
+      p_name: `Enviar ${STAMP}`,
+      p_audience: "owners",
+      p_from_mailbox_id: null,
+      p_email_bg: "#ffffff",
+    });
+    const nova = String(criada);
+
+    // Sem remetente: a caixa é a identidade de quem assina (07 §24.6 #2).
+    const semRemetente = await clients.marketing.rpc("campaign_send_now", { p_id: nova });
+    expect(semRemetente.error).not.toBeNull();
+    expect(semRemetente.error?.message).toContain("remetente");
+
+    await service.from("campaigns").delete().eq("id", nova);
+  });
+
+  it("o cancelamento por token suprime, retira o consentimento e conta uma vez", async () => {
+    // Um destinatário à mão: o caminho normal é a materialização, mas aqui o
+    // que se testa é o link do rodapé, que só precisa do token.
+    const { data: emails } = await service
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .order("position")
+      .limit(1);
+
+    const { data: destinatario, error: criar } = await service
+      .from("campaign_recipients")
+      .insert({
+        campaign_id: campaignId,
+        campaign_email_id: emails![0]!.id,
+        email: USERS.owner.email.toLowerCase(),
+        profile_id: ids.owner,
+      })
+      .select("unsubscribe_token")
+      .single();
+    expect(criar).toBeNull();
+
+    await service
+      .from("profiles")
+      .update({ marketing_consent: true, marketing_consent_at: new Date().toISOString() })
+      .eq("id", ids.owner);
+    await service.from("email_suppressions").delete().eq("email", USERS.owner.email.toLowerCase());
+
+    const token = destinatario!.unsubscribe_token;
+
+    // Anónimo: quem clica no link não tem sessão, e exigir login era exigir
+    // conta para exercer um direito (02 §4.3).
+    const { data: primeiro, error: erro1 } = await clients.anon.rpc("campaign_unsubscribe", {
+      p_token: token,
+    });
+    expect(erro1).toBeNull();
+    expect(primeiro).toBe(true);
+
+    const { data: suprimido } = await service
+      .from("email_suppressions")
+      .select("reason")
+      .eq("email", USERS.owner.email.toLowerCase())
+      .maybeSingle();
+    expect(suprimido?.reason).toBe("unsubscribe");
+
+    const { data: perfil } = await service
+      .from("profiles")
+      .select("marketing_consent, marketing_consent_at")
+      .eq("id", ids.owner)
+      .single();
+    // A supressão travava o envio na mesma; o consentimento sai porque é ele
+    // que responde a um pedido de prestação de contas.
+    expect(perfil?.marketing_consent).toBe(false);
+    expect(perfil?.marketing_consent_at).toBeNull();
+
+    const { data: antes } = await service
+      .from("campaigns")
+      .select("unsubscribes")
+      .eq("id", campaignId)
+      .single();
+
+    // Segundo clique no mesmo link: continua a devolver `true` (já estava
+    // cancelado não é um erro de quem clicou) e **não** conta outra vez.
+    const { data: segundo } = await clients.anon.rpc("campaign_unsubscribe", { p_token: token });
+    expect(segundo).toBe(true);
+
+    const { data: depois } = await service
+      .from("campaigns")
+      .select("unsubscribes")
+      .eq("id", campaignId)
+      .single();
+    expect(depois?.unsubscribes).toBe(antes?.unsubscribes);
+
+    await service.from("campaign_recipients").delete().eq("unsubscribe_token", token);
+  });
+
+  it("um token que não existe devolve false sem escrever nada", async () => {
+    const { data } = await clients.anon.rpc("campaign_unsubscribe", {
+      p_token: "00000000-0000-4000-8000-000000000000",
+    });
+    expect(data).toBe(false);
+  });
+
+  it("a assinatura resolvida é do Marketing e da service_role, não de um cliente", async () => {
+    const { data: emails } = await clients.marketing
+      .from("campaign_emails")
+      .select("id")
+      .eq("campaign_id", campaignId)
+      .limit(1);
+
+    // Sem bloco de assinatura devolve string vazia — e não erro.
+    const { data, error } = await clients.marketing.rpc("campaign_signature_html", {
+      p_campaign_email_id: emails![0]!.id,
+    });
+    expect(error).toBeNull();
+    expect(typeof data).toBe("string");
+
+    // Um proprietário não lê assinaturas de equipa: `is_internal()` é falso.
+    const { data: doCliente } = await clients.owner.rpc("campaign_signature_html", {
+      p_campaign_email_id: emails![0]!.id,
+    });
+    expect(doCliente).toBe("");
+  });
+
   it("o remetente chega como três colunas, e não como a configuração das caixas", async () => {
     const { data, error } = await clients.marketing.rpc("campaign_sender_options");
     expect(error).toBeNull();

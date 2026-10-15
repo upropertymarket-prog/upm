@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
+import { sendCampaignTest } from "./campaigns.ts";
 import { checkConnection, describe } from "./connection.ts";
 import type { Env } from "./env.ts";
 import { drainOutbox } from "./outbox.ts";
@@ -25,6 +26,16 @@ const sendSchema = z.object({
   draftId: z.string().uuid().nullish(),
   inReplyTo: z.string().max(400).nullish(),
   fromName: z.string().max(200).optional(),
+});
+
+/**
+ * O corpo do `POST /campaign-test`. O e-mail a testar identifica-se pelo seu
+ * `id` e **não** pelos blocos: o que se testa tem de ser o que está guardado,
+ * senão o teste prova uma coisa e o envio faz outra.
+ */
+const campaignTestSchema = z.object({
+  campaignEmailId: z.string().uuid(),
+  to: z.string().email(),
 });
 
 /** Com limite: um corpo sem fim é a forma mais simples de derrubar o worker. */
@@ -51,6 +62,8 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
  *   POST /mailboxes/:id/test      — IMAP LOGIN + SMTP AUTH, resultado por ponta
  *   POST /sync                    — força uma sincronização de todas as caixas
  *   POST /outbox                  — força uma drenagem da fila de saída
+ *   POST /send                    — entrega uma mensagem do composer do Suporte
+ *   POST /campaign-test           — o "Enviar teste" do construtor de campanhas
  *
  * **O token compara-se em tempo constante.** Uma comparação com `===` demora o
  * que demora o prefixo comum, e isso chega para adivinhar um token byte a byte
@@ -116,6 +129,30 @@ async function handle(
   if (req.method === "POST" && path === "/outbox") {
     const report = await drainOutbox(client, env, { batch: env.OUTBOX_BATCH });
     send(res, 200, report);
+    return;
+  }
+
+  /**
+   * O "Enviar teste" do construtor de campanhas (P10-08 · 04 §2.6).
+   *
+   * Passa pelo worker e não pela app pela razão de sempre — só ele tem o
+   * Resend — e **não** toca em `campaign_recipients`: um teste que criasse uma
+   * linha de destinatário contava-se nas métricas da campanha e sujava o
+   * alcance com os ensaios de quem a escreveu.
+   */
+  if (req.method === "POST" && path === "/campaign-test") {
+    const body = await readJson(req);
+    const parsed = campaignTestSchema.safeParse(body);
+    if (!parsed.success) {
+      send(res, 400, { error: parsed.error.issues[0]?.message ?? "Pedido inválido." });
+      return;
+    }
+    try {
+      await sendCampaignTest(client, env, parsed.data);
+      send(res, 200, { ok: true });
+    } catch (error) {
+      send(res, 502, { error: describe(error) });
+    }
     return;
   }
 

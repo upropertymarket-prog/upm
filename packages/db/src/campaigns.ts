@@ -373,3 +373,36 @@ export async function deleteCampaign(client: AnySupabaseClient, id: string): Pro
   const { error } = await campaignClient(client).rpc("campaign_delete", { p_id: id });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * O envio (`campaign_send_now`) — e o que ele **não** faz.
+ *
+ * Põe a campanha em `sending` e materializa o primeiro e-mail da sequência,
+ * devolvendo quantos destinatários ficaram na fila. Quem entrega é o
+ * `mail-worker`: a app não fala com SMTP (02 §3.3), e a lista de endereços
+ * nunca atravessa esta fronteira — materializa-se dentro do Postgres
+ * (07 §24.6 #5).
+ */
+export async function sendCampaignNow(client: AnySupabaseClient, id: string): Promise<number> {
+  const { data, error } = await campaignClient(client).rpc("campaign_send_now", { p_id: id });
+  if (error) throw new Error(error.message);
+  return typeof data === "number" ? data : 0;
+}
+
+/**
+ * O cancelamento de subscrição, por token (02 §4.3).
+ *
+ * Chamada do site público **sem sessão** — o token é a identidade. Devolve
+ * `false` só quando o token não existe; um token já usado devolve `true`,
+ * porque "já estava cancelado" não é um erro de quem clicou.
+ */
+export async function unsubscribeByToken(
+  client: AnySupabaseClient,
+  token: string,
+): Promise<boolean> {
+  const { data, error } = await campaignClient(client).rpc("campaign_unsubscribe", {
+    p_token: token,
+  });
+  if (error) return false;
+  return data === true;
+}

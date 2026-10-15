@@ -30,6 +30,14 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     noindex: false,
   },
   {
+    route: "/cancelar-subscricao",
+    pageName: "Cancelar subscrição",
+    titleTag: "Cancelar subscrição · UProperty Market",
+    metaDescription: "Deixe de receber as comunicações de marketing da UProperty Market.",
+    dynamic: false,
+    noindex: true,
+  },
+  {
     route: "/cookies",
     pageName: "Política de Cookies",
     titleTag: "Política de Cookies · UProperty Market",

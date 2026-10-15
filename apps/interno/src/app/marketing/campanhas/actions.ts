@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
+import { z } from "zod";
 import { createClient } from "@upm/db/server";
 import { asPendingRole } from "@upm/db/pending";
 import {
@@ -17,6 +18,7 @@ import {
   saveCampaign,
   saveCampaignEmail,
   scheduleCampaign,
+  sendCampaignNow,
   unscheduleCampaign,
   CAMPAIGN_AUDIENCES,
   type CampaignAudience,
@@ -32,14 +34,14 @@ import { renderCampaignHtml } from "@upm/db/campaign-render";
  * lado (07 §20.5). `is_staff()` não serve: 07 §24.6 é explícito em que não
  * inclui o marketing.
  *
- * ## O que não está aqui
+ * ## O envio passa por aqui mas não acontece aqui
  *
- * Não há `enviarCampanha` nem `enviarTeste`. O envio é a terceira parte de
- * P10-08 — fila, materialização de `campaign_recipients` filtrada por
- * supressões e consentimento, e a passagem ao `mail-worker` — e a app nunca
- * fala com SMTP. Os dois botões existem no construtor **desativados**, com a
- * razão no ecrã: um botão que não faz nada é pior do que um botão que diz
- * porque é que ainda não faz.
+ * `enviarCampanha` chama `campaign_send_now()`, que põe a campanha em `sending`
+ * e materializa os destinatários **dentro do Postgres** — esta action nunca vê
+ * um endereço (07 §24.6 #5). Quem entrega é o `mail-worker`: a app não fala com
+ * SMTP (02 §3.3). `enviarTeste` é o mesmo princípio por outra porta — um `POST`
+ * ao worker com o id do e-mail e o endereço, e é o worker que lê o conteúdo
+ * guardado e o envia.
  *
  * ## A pré-visualização usa o renderizador a sério
  *
@@ -92,6 +94,9 @@ function explain(error: unknown, fallback: string): string {
     "não está agendada",
     "hexadecimal",
     "precisa de um nome",
+    "consentimento de marketing",
+    "Escolha o remetente",
+    "não tem e-mails",
   ];
   return conhecidas.some((pedaco) => detail.includes(pedaco)) ? detail : fallback;
 }
@@ -206,6 +211,82 @@ export async function desagendarCampanha(id: unknown): Promise<CampaignActionRes
     return { ok: true, notice: "Campanha de volta a rascunho." };
   } catch (error) {
     return { error: explain(error, "Não foi possível desagendar a campanha.") };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// O envio — a app pede, o worker entrega
+// ---------------------------------------------------------------------------
+
+/**
+ * "Enviar" (04 §2.6).
+ *
+ * `campaign_send_now()` põe a campanha em `sending` e materializa o primeiro
+ * e-mail da sequência **dentro do Postgres** (07 §24.6 #5): esta action nunca
+ * vê um endereço. Quem entrega é o `mail-worker`, no ciclo seguinte — a app não
+ * fala com SMTP (02 §3.3), e é isso que a mensagem de volta diz.
+ */
+export async function enviarCampanha(id: unknown): Promise<CampaignActionResult> {
+  if (typeof id !== "string") return { error: "Pedido inválido." };
+
+  const supabase = await getMarketingClient();
+  if (!supabase) return { error: "Sem permissão para enviar campanhas." };
+
+  try {
+    const count = await sendCampaignNow(supabase, id);
+    revalidatePath("/marketing/campanhas");
+    return {
+      ok: true,
+      notice: `Campanha em envio: ${count} destinatário(s) na fila. O mail-worker entrega a partir de agora.`,
+    };
+  } catch (error) {
+    return { error: explain(error, "Não foi possível enviar a campanha.") };
+  }
+}
+
+/**
+ * "Enviar teste" (04 §2.6) — pelo worker, e sem tocar nas métricas.
+ *
+ * O que vai no pedido é o **id** do e-mail da sequência e o endereço: o worker
+ * lê o que está guardado. Mandar os blocos daqui fazia o teste provar uma coisa
+ * e o envio fazer outra.
+ */
+export async function enviarTeste(input: unknown): Promise<CampaignActionResult> {
+  const parsed = z
+    .object({ campaignEmailId: z.string().uuid(), to: z.string().email("Endereço inválido.") })
+    .safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Pedido inválido." };
+  }
+
+  const supabase = await getMarketingClient();
+  if (!supabase) return { error: "Sem permissão para enviar testes." };
+
+  const workerUrl = process.env.MAIL_WORKER_URL;
+  const workerToken = process.env.MAIL_WORKER_TOKEN;
+  if (!workerUrl || !workerToken) {
+    return { error: "O mail-worker ainda não está configurado (MAIL_WORKER_URL)." };
+  }
+
+  try {
+    const response = await fetch(`${workerUrl.replace(/\/$/, "")}/campaign-test`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${workerToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(parsed.data),
+      signal: AbortSignal.timeout(45_000),
+    });
+
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    if (!response.ok) {
+      return { error: body?.error ?? `O mail-worker respondeu ${response.status}.` };
+    }
+
+    return { ok: true, notice: `Teste enviado para ${parsed.data.to}.` };
+  } catch {
+    return { error: "Não foi possível falar com o mail-worker." };
   }
 }
 

@@ -1,0 +1,22 @@
+-- ---------------------------------------------------------------------------
+-- `campaign_recipient_status` ganha `sending` (P10-08)
+--
+-- **Sozinho num ficheiro, e é obrigatório que seja**: `alter type ... add
+-- value` não pode ser usado na mesma transação em que é declarado, e cada
+-- ficheiro de migração corre numa transação. Juntá-lo às funções do envio dava
+-- "unsafe use of new value of enum type" na primeira que o usasse.
+--
+-- ## Porque é que o estado existe
+--
+-- É a mesma razão que levou `delivery_status` a ganhar `sending` em
+-- `20261014090000`: **o worker reclama o destinatário antes de o enviar.** Sem
+-- um estado intermédio, duas passagens do worker que se cruzem leem a mesma
+-- linha `pending` e a pessoa recebe a campanha duas vezes — e um e-mail de
+-- marketing duplicado é uma queixa, não um incómodo.
+--
+-- A reclamação é um `update ... where status = 'pending'` com `for update skip
+-- locked`: quem chega primeiro leva, quem chega depois não espera e segue para
+-- a linha seguinte.
+-- ---------------------------------------------------------------------------
+
+alter type public.campaign_recipient_status add value if not exists 'sending' after 'pending';

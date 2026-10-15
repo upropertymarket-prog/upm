@@ -38,6 +38,25 @@ const schema = z.object({
    */
   MAIL_FROM: z.string().default("UProperty Market <onboarding@resend.dev>"),
   APP_URL: z.string().url().default("http://localhost:3001"),
+  /**
+   * O site público — é dele que sai o link de cancelar subscrição das campanhas
+   * (`/cancelar-subscricao?t=…`) e a ficha de um imóvel em destaque. Separado
+   * de `APP_URL`, que é a app autenticada: um link de cancelamento tem de abrir
+   * **sem sessão**, e mandá-lo para a app era pedir login para exercer um
+   * direito (02 §4.3).
+   */
+  WEB_URL: z.string().url().default("http://localhost:4300"),
+  /**
+   * O remetente das campanhas, **por cima** da identidade da caixa.
+   *
+   * Por omissão não existe, e o `from` é o nome e o endereço da caixa escolhida
+   * no construtor (07 §24.6 #2) — que é o comportamento certo e o que fica.
+   * Enquanto o domínio não estiver verificado no Resend, qualquer `from` que
+   * não seja de um domínio dele é recusado no envio; esta variável é a porta
+   * para atravessar esse período sem mentir sobre quem assina (confirmação de
+   * produção, 07 §16.1).
+   */
+  CAMPAIGN_FROM: z.string().optional(),
 
   /** Minutos entre sincronizações de todas as caixas ativas. */
   SYNC_INTERVAL_MINUTES: z.coerce.number().int().positive().default(5),
@@ -55,6 +74,19 @@ const schema = z.object({
   PURGE_INTERVAL_MINUTES: z.coerce.number().int().positive().default(360),
   /** Mensagens com anexos expirados tratadas em cada passagem. */
   PURGE_BATCH: z.coerce.number().int().positive().max(1000).default(200),
+  /**
+   * Minutos entre passagens às campanhas. Um, como a fila de notificações: uma
+   * campanha que o Marketing acabou de mandar sair não pode ficar cinco minutos
+   * parada sem nada visível a acontecer.
+   */
+  CAMPAIGN_INTERVAL_MINUTES: z.coerce.number().int().positive().default(1),
+  /**
+   * Destinatários por passagem. Mais conservador do que o lote das
+   * notificações: cada um é um `render` de React Email, e o Resend tem limite
+   * de pedidos por segundo. Uma campanha grande leva muitas passagens — e isso
+   * é melhor do que uma passagem que estoura o limite e volta tudo à fila.
+   */
+  CAMPAIGN_BATCH: z.coerce.number().int().positive().max(100).default(20),
 });
 
 export type Env = z.infer<typeof schema>;

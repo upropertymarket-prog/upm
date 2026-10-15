@@ -72,17 +72,20 @@ import type { CampaignActionResult, PreviewInput } from "./actions";
  *   ocupa o resto.
  * - **Pré-visualização computador/telemóvel** com o renderizador a sério.
  *
- * ## O que está desativado, e porque é que está à vista
+ * ## O que cada ação faz, e quem a executa
  *
- * "Enviar teste" e "Enviar" **existem e não funcionam ainda**: o envio é a
- * terceira parte de P10-08 (fila, materialização de `campaign_recipients`
- * filtrada por supressões e consentimento, passagem ao `mail-worker`). Ficam no
- * ecrã, desativados, com a razão no `title` — porque esconder um botão que a
- * especificação pede é fazer com que quem abra o ecrã pense que falta desenhar
- * em vez de faltar ligar.
+ * "Enviar" põe a campanha em `sending` e materializa os destinatários dentro do
+ * Postgres; **a entrega é do `mail-worker`**, que leva o lote na passagem
+ * seguinte. Por isso a mensagem de volta diz quantos ficaram na fila e não
+ * "enviada": a app não fala com SMTP (02 §3.3), e prometer o que não controla
+ * era mentir no sítio mais visível.
  *
- * "Agendar" **funciona**: põe o estado e a data, que é tudo o que P10-08 lhe
- * pede. Quem dispara é P10-09, e isso está dito no aviso que acompanha o botão.
+ * "Enviar teste" manda **o que está guardado** — o id do e-mail, não os blocos
+ * que o ecrã tem na mão — para um endereço escrito na hora. Um teste sobre um
+ * rascunho não gravado provava uma coisa e o envio fazia outra.
+ *
+ * "Agendar" põe o estado e a data. Quem dispara é P10-09, e isso está dito no
+ * aviso que acompanha o botão.
  *
  * ## A contagem da audiência pode ser zero, e isso não é um defeito
  *
@@ -112,6 +115,8 @@ export type CampaignBuilderProps = {
   onDeleteEmail: (id: string) => Promise<CampaignActionResult>;
   onSchedule: (input: Record<string, unknown>) => Promise<CampaignActionResult>;
   onUnschedule: (id: string) => Promise<CampaignActionResult>;
+  onSend: (id: string) => Promise<CampaignActionResult>;
+  onSendTest: (input: Record<string, unknown>) => Promise<CampaignActionResult>;
   onCountAudience: (audience: string) => Promise<{ count?: number; error?: string }>;
   onPreview: (input: PreviewInput) => Promise<{ html?: string; error?: string }>;
   onUploadImage: (
@@ -349,6 +354,22 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
     next.splice(at < 0 ? next.length : at, 0, novo);
     setBlocks(next);
     setSelectedBlockId(novo.id);
+  }
+
+  /**
+   * O teste vai para um endereço que se escreve na hora, com `window.prompt`.
+   *
+   * É a mesma escolha do link do editor partilhado, e pela mesma razão: um
+   * modal próprio para escrever um endereço, dentro de um ecrã que já tem três
+   * faixas e dois painéis, é uma sobreposição a mais para um campo só. O valor
+   * por omissão fica em branco de propósito — sugerir o e-mail de quem está
+   * ligado obrigava a trazer a conta ao cliente para ganhar um atalho.
+   */
+  function enviarTeste() {
+    if (!email) return;
+    const to = window.prompt(t("sendTestPrompt"));
+    if (!to) return;
+    run(() => props.onSendTest({ campaignEmailId: email.id, to: to.trim() }));
   }
 
   function exportarHtml() {
@@ -838,20 +859,29 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 >
                   {t("exportHtml")}
                 </Button>
-                {/* Os dois que esperam pelo envio (a 3.ª parte de P10-08). */}
+                {/* O teste: pede o endereço e manda-o ao worker, que lê o que
+                    está **guardado** — por isso só está disponível depois de
+                    gravar, e o `title` di-lo. */}
                 <Button
                   variant="secondary"
                   leadingIcon={<Send size={15} />}
-                  disabled
-                  title={t("sendPending")}
+                  disabled={pending || !email || blocks.length === 0}
+                  title={email ? t("sendTestHint") : t("sendTestNeedsSave")}
+                  onClick={enviarTeste}
                 >
                   {t("sendTest")}
                 </Button>
                 <Button
                   variant="secondary"
                   leadingIcon={<Send size={15} />}
-                  disabled
-                  title={t("sendPending")}
+                  disabled={locked || pending || campaign.status === "sending"}
+                  title={t("sendHint")}
+                  onClick={() => {
+                    // Uma campanha sai uma vez. A confirmação é por isso, e não
+                    // por cautela genérica: não há "desenviar".
+                    if (!window.confirm(t("sendConfirm", { name: name || t("newName") }))) return;
+                    run(() => props.onSend(campaign.id));
+                  }}
                 >
                   {t("send")}
                 </Button>

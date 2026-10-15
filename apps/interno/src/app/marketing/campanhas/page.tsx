@@ -22,6 +22,8 @@ import {
   carregarImagem,
   contarAudiencia,
   desagendarCampanha,
+  enviarCampanha,
+  enviarTeste,
   guardarCampanha,
   guardarEmail,
   preverCampanha,
@@ -116,6 +118,8 @@ export default async function MarketingCampaignsPage({
         onDeleteEmail={apagarEmail}
         onSchedule={agendarCampanha}
         onUnschedule={desagendarCampanha}
+        onSend={enviarCampanha}
+        onSendTest={enviarTeste}
         onCountAudience={contarAudiencia}
         onPreview={preverCampanha}
         onUploadImage={carregarImagem}

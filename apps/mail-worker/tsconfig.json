@@ -4,6 +4,10 @@
     "noEmit": true,
     "lib": ["ES2022"],
     "types": ["node"],
+    // O worker renderiza campanhas com `@upm/db/campaign-render`, que é React
+    // Email e portanto `.tsx` (P10-08). Não desenha nada no ecrã — compõe HTML
+    // de e-mail —, mas o compilador precisa de saber ler JSX para o seguir.
+    "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "verbatimModuleSyntax": true
