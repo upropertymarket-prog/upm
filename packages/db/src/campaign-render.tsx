@@ -64,12 +64,23 @@ export type CampaignRenderContext = {
   unsubscribeUrl: string;
   /** A assinatura da caixa escolhida, já resolvida (05 §1.8). */
   signatureHtml?: string;
-  /** O imóvel em destaque, já lido — o renderizador não fala com a base de dados. */
+  /**
+   * O imóvel em destaque, já lido — o renderizador não fala com a base de dados.
+   *
+   * `imageUrl` é **opcional**, e a razão é concreta: as fotografias dos imóveis
+   * vivem no bucket `property-media`, que é **privado**, e um URL assinado
+   * expira numa hora — exatamente o retângulo partido que levou o bucket das
+   * campanhas a ser público (05 §1.4). A capa de um imóvel só pode ir num
+   * e-mail depois de ser **copiada** para `campaign-assets`, e essa cópia exige
+   * a `service_role`: é trabalho do `mail-worker`, no envio. Até lá o cartão
+   * desenha-se sem foto — com título, localização, preço e ligação — em vez de
+   * desenhar uma imagem que não abre.
+   */
   property?: {
     title: string;
     price: string;
     location: string;
-    imageUrl: string;
+    imageUrl?: string;
     url: string;
   } | null;
   /** Com valores, as variáveis saem substituídas; sem eles, ficam os rótulos. */
@@ -198,11 +209,13 @@ function Block({ block, context }: { block: CampaignBlock; context: CampaignRend
             margin: "12px 0",
           }}
         >
-          <Img
-            src={context.property.imageUrl}
-            alt={context.property.title}
-            style={{ width: "100%", display: "block" }}
-          />
+          {context.property.imageUrl ? (
+            <Img
+              src={context.property.imageUrl}
+              alt={context.property.title}
+              style={{ width: "100%", display: "block" }}
+            />
+          ) : null}
           <Section style={{ padding: "16px", ...ALIGN_STYLE(block.align) }}>
             <Text style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: TEXT }}>
               {context.property.title}
