@@ -1311,6 +1311,34 @@
         "complained": "Complained"
       },
       "scheduleFailed": "The send scheduled for {when} failed {attempts, plural, one {# time} other {# times}} and is no longer being retried. Fix what is missing and schedule it again."
+    },
+    "metrics": {
+      "title": "Email metrics",
+      "subtitle": "What happened to each campaign after it went out.",
+      "download": "Download CSV",
+      "downloadFailed": "The report could not be composed.",
+      "save": "Save to Cloud",
+      "saveHint": "The same report, in the internal Cloud, under \"Campaign reports\".",
+      "empty": "No campaigns yet.",
+      "emptyHint": "Metrics appear here as soon as the first campaign goes out.",
+      "tableCaption": "Metrics by campaign",
+      "countOf": "{count, plural, one {# event} other {# events}}",
+      "noReceiptsNote": "There are sent campaigns and no receipts received. Until the Resend webhook points at the mail worker and RESEND_WEBHOOK_SECRET is set, these numbers stay at zero — which does not mean the emails did not arrive. See doc 09, Deliverability.",
+      "columns": {
+        "name": "Campaign",
+        "audience": "Audience",
+        "status": "Status",
+        "recipients": "Recipients",
+        "delivered": "Delivered",
+        "opens": "Opens",
+        "openRate": "Open rate",
+        "clicks": "Clicks",
+        "clickRate": "Click rate",
+        "bounces": "Bounces",
+        "bounceRate": "Bounce rate",
+        "unsubscribes": "Unsubscribes",
+        "sentAt": "Sent at"
+      }
     }
   },
   "editor": {
@@ -1330,5 +1358,37 @@
     "undo": "Undo",
     "redo": "Redo",
     "insertVariable": "Insert {label}"
+  },
+  "internalCloud": {
+    "title": "Internal Cloud",
+    "subtitle": "The team's file drawer. What is here belongs to everyone — Admin, Support and Marketing.",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "newFolder": "New folder",
+    "folderPrompt": "Folder name",
+    "allFiles": "All ({count})",
+    "recycleBin": "Recycle bin ({count})",
+    "empty": "No files here yet.",
+    "emptyHint": "Upload a PDF, JPG or PNG up to 25 MB.",
+    "emptyBin": "The recycle bin is empty.",
+    "tableCaption": "Internal Cloud files",
+    "download": "Download",
+    "downloadFailed": "The file could not be opened.",
+    "delete": "Delete",
+    "restore": "Restore",
+    "columns": {
+      "file": "File",
+      "owner": "Uploaded by",
+      "size": "Size",
+      "added": "Added",
+      "actions": "Actions"
+    },
+    "source": {
+      "mail_attachment": "Mail attachment",
+      "invoice": "Invoice",
+      "contract": "Contract",
+      "property_document": "Property document",
+      "campaign_report": "Campaign report"
+    }
   }
 }

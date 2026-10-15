@@ -299,34 +299,13 @@ export const mailAttachmentSchema = z.object({
   index: z.number().int().min(0).max(99),
 });
 
-export const cloudStaffFileSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  mime: z.string().min(1).max(200),
-  size: z.number().int().nonnegative(),
-  storagePath: z.string().min(1).max(500),
-  checksum: z.string().min(16).max(128),
-});
-
 /**
- * Registra o ficheiro na Cloud interna (`scope = 'staff'`). Corre **depois** de
- * o objeto estar no bucket `cloud`, como `cloud_register_upload` desde a Fase 6.
+ * `cloudStaffFileSchema` e `registerStaffCloudFile` **mudaram-se para
+ * `@upm/db/cloud`** em P10-10. Nasceram aqui com D66 porque o primeiro
+ * chamador foi o anexo de correio, mas o que fazem é registar um ficheiro na
+ * Cloud — e em P10-10 passaram a ter um segundo chamador, o ecrã da Cloud
+ * interna. Ficar no módulo do correio obrigava a Cloud a importar correio.
  */
-export async function registerStaffCloudFile(
-  client: AnySupabaseClient,
-  input: z.infer<typeof cloudStaffFileSchema> & { source: string },
-): Promise<string> {
-  const { data, error } = await mailClient(client).rpc("cloud_register_staff_file", {
-    p_name: input.name,
-    p_mime: input.mime,
-    p_size: input.size,
-    p_storage_path: input.storagePath,
-    p_checksum: input.checksum,
-    p_source: input.source,
-  });
-
-  if (error) throw new Error(error.message);
-  return String(data);
-}
 
 /** A nota, no próprio anexo, de que já lá está. Recusa a segunda cópia. */
 export async function markMailAttachmentSaved(

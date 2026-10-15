@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
+import { registerStaffCloudFile } from "@upm/db/cloud";
 import {
   createMailLabel,
   createTicketFromMail,
@@ -20,7 +21,6 @@ import {
   mailSendSchema,
   markMailAttachmentSaved,
   moveMail,
-  registerStaffCloudFile,
   saveMailDraft,
   setMailFlags,
   setMailLabels,

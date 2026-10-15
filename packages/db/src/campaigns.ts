@@ -443,6 +443,24 @@ export async function campaignReceipts(
 }
 
 /**
+ * Quantos recibos existem ao todo (P10-10).
+ *
+ * Zero com campanhas enviadas quer dizer uma coisa muito concreta: o webhook
+ * do Resend ainda não está apontado. É isso que o ecrã das Métricas precisa de
+ * saber para não mostrar zeros que se leem como resultado.
+ *
+ * `head: true` — o que interessa é o número. Trazer as linhas para as contar
+ * seria trazer endereços para a app sem razão nenhuma (07 §24.6 #5).
+ */
+export async function countEmailEvents(client: AnySupabaseClient): Promise<number> {
+  const { count } = await campaignClient(client)
+    .from("email_events")
+    .select("id", { count: "exact", head: true });
+
+  return count ?? 0;
+}
+
+/**
  * O cancelamento de subscrição, por token (02 §4.3).
  *
  * Chamada do site público **sem sessão** — o token é a identidade. Devolve

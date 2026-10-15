@@ -486,9 +486,15 @@ export type MailDatabase = Omit<Database, "public"> & {
           p_storage_path: string;
           p_checksum: string;
           p_source?: string;
+          /** P10-10: a pasta da Cloud interna; nula põe o ficheiro na raiz. */
+          p_folder_id?: string | null;
         };
         Returns: string;
       };
+      /** A Cloud interna (P10-10, `20261015180000` e `20261015190000`). */
+      staff_cloud_folder: { Args: { p_name: string }; Returns: string };
+      cloud_delete_staff_file: { Args: { p_file_id: string }; Returns: undefined };
+      cloud_restore_staff_file: { Args: { p_file_id: string }; Returns: undefined };
       mail_attachment_saved_to_cloud: {
         Args: { p_message_id: string; p_index: number; p_file_id: string };
         Returns: undefined;

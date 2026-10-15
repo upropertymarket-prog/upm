@@ -29,7 +29,8 @@
     "./pending": "./src/pending-types.ts",
     "./campaigns": "./src/campaigns.ts",
     "./campaign-blocks": "./src/campaign-blocks.ts",
-    "./campaign-render": "./src/campaign-render.tsx"
+    "./campaign-render": "./src/campaign-render.tsx",
+    "./campaign-report": "./src/campaign-report.ts"
   },
   "scripts": {
     "lint": "eslint src",

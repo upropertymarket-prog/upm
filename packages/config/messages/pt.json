@@ -1311,6 +1311,34 @@
         "complained": "Queixaram-se"
       },
       "scheduleFailed": "O envio agendado para {when} falhou {attempts, plural, one {# vez} other {# vezes}} e deixou de ser tentado. Corrija o que falta e agende outra vez."
+    },
+    "metrics": {
+      "title": "Métricas de e-mail",
+      "subtitle": "O que aconteceu a cada campanha depois de sair.",
+      "download": "Descarregar CSV",
+      "downloadFailed": "Não foi possível compor o relatório.",
+      "save": "Guardar na Cloud",
+      "saveHint": "O mesmo relatório, na Cloud interna, em \"Relatórios de campanha\".",
+      "empty": "Ainda não há campanhas.",
+      "emptyHint": "As métricas aparecem aqui assim que a primeira campanha sair.",
+      "tableCaption": "Métricas por campanha",
+      "countOf": "{count, plural, one {# evento} other {# eventos}}",
+      "noReceiptsNote": "Há campanhas enviadas e nenhum recibo recebido. Enquanto o webhook do Resend não estiver apontado ao mail-worker e o RESEND_WEBHOOK_SECRET definido, estes números ficam a zero — o que não quer dizer que os e-mails não tenham chegado. Ver o doc 09, Entregabilidade.",
+      "columns": {
+        "name": "Campanha",
+        "audience": "Público",
+        "status": "Estado",
+        "recipients": "Destinatários",
+        "delivered": "Entregues",
+        "opens": "Aberturas",
+        "openRate": "Taxa de abertura",
+        "clicks": "Cliques",
+        "clickRate": "Taxa de cliques",
+        "bounces": "Devoluções",
+        "bounceRate": "Taxa de devolução",
+        "unsubscribes": "Cancelamentos",
+        "sentAt": "Enviada em"
+      }
     }
   },
   "editor": {
@@ -1330,5 +1358,37 @@
     "undo": "Anular",
     "redo": "Refazer",
     "insertVariable": "Inserir {label}"
+  },
+  "internalCloud": {
+    "title": "Cloud interna",
+    "subtitle": "A gaveta de ficheiros da equipa. O que está aqui é de todos — Admin, Suporte e Marketing.",
+    "upload": "Carregar",
+    "uploading": "A carregar…",
+    "newFolder": "Nova pasta",
+    "folderPrompt": "Nome da pasta",
+    "allFiles": "Todos ({count})",
+    "recycleBin": "Reciclagem ({count})",
+    "empty": "Ainda não há ficheiros aqui.",
+    "emptyHint": "Carregue um PDF, JPG ou PNG até 25 MB.",
+    "emptyBin": "A reciclagem está vazia.",
+    "tableCaption": "Ficheiros da Cloud interna",
+    "download": "Transferir",
+    "downloadFailed": "Não foi possível abrir o ficheiro.",
+    "delete": "Apagar",
+    "restore": "Repor",
+    "columns": {
+      "file": "Ficheiro",
+      "owner": "Carregado por",
+      "size": "Tamanho",
+      "added": "Adicionado",
+      "actions": "Ações"
+    },
+    "source": {
+      "mail_attachment": "Anexo de correio",
+      "invoice": "Fatura",
+      "contract": "Contrato",
+      "property_document": "Documento de imóvel",
+      "campaign_report": "Relatório de campanha"
+    }
   }
 }

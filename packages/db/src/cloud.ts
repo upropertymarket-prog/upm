@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
+import type { MailDatabase } from "./pending-types";
+
 /**
  * Cloud e contratos (Fase 6) — 05 §6.4 e §6.5, 07 §13, 07 §19.
  * =========================================================================
@@ -192,4 +196,91 @@ export function formatBytes(bytes: number) {
   // Milhares com espaço e decimal com vírgula, como 04 §8.5 pede nos números.
   const rounded = value >= 10 ? Math.round(value) : Math.round(value * 10) / 10;
   return `${String(rounded).replace(".", ",")} ${units[unit]}`;
+}
+
+// ---------------------------------------------------------------------------
+// A Cloud interna — scope `staff` (D66, completa em P10-10)
+//
+// A mesma tabela da Cloud do cliente, com `scope = 'staff'`: a nota de
+// `folders` di-lo desde a Fase 6 ("a Cloud interna do Suporte é a mesma tabela
+// com scope='staff'"). O que a distingue é quem lá chega — `is_internal()`
+// desde `20261015180000`, para o Marketing entrar com o Suporte e o Admin.
+//
+// Estas duas peças nasceram em `mail.ts` com D66, porque o primeiro chamador
+// foi o anexo de correio guardado na Cloud. Mudaram-se para aqui em P10-10, ao
+// ganharem um segundo chamador — o ecrã da Cloud interna: o que fazem é
+// registar um ficheiro na Cloud, e deixá-las no módulo do correio obrigava a
+// Cloud a importar correio.
+// ---------------------------------------------------------------------------
+
+export const cloudStaffFileSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  mime: z.string().min(1).max(200),
+  size: z.number().int().nonnegative(),
+  storagePath: z.string().min(1).max(500),
+  checksum: z.string().min(16).max(128),
+  /** A pasta da Cloud interna. Nula põe o ficheiro na raiz (P10-10). */
+  folderId: z.string().uuid().nullish(),
+});
+
+/**
+ * Registra o ficheiro na Cloud interna (`scope = 'staff'`). Corre **depois** de
+ * o objeto estar no bucket `cloud`, como `cloud_register_upload` desde a Fase
+ * 6 — e é a única porta: `files` não tem policy de `insert` desde
+ * `20260930120300`, porque um insert direto passava ao lado da quota.
+ */
+export async function registerStaffCloudFile(
+  client: SupabaseClient<Database>,
+  input: z.infer<typeof cloudStaffFileSchema> & { source: string },
+): Promise<string> {
+  // A mesma costura de `mail.ts` e `campaigns.ts`: sai com o `db:types` (D64).
+  const staff = client as unknown as SupabaseClient<MailDatabase>;
+
+  const { data, error } = await staff.rpc("cloud_register_staff_file", {
+    p_name: input.name,
+    p_mime: input.mime,
+    p_size: input.size,
+    p_storage_path: input.storagePath,
+    p_checksum: input.checksum,
+    p_source: input.source,
+    p_folder_id: input.folderId ?? null,
+  });
+
+  if (error) throw new Error(error.message);
+  return String(data);
+}
+
+/**
+ * As outras três portas da Cloud interna (P10-10).
+ *
+ * A costura com `MailDatabase` fica aqui e não em cada chamador, que é a lição
+ * de D52 e a razão de `pending-types.ts` existir: os `as` dispersos sobrevivem
+ * à regeneração que os torna desnecessários, porque ninguém sabe onde estão.
+ */
+export async function staffCloudFolder(
+  client: SupabaseClient<Database>,
+  name: string,
+): Promise<string> {
+  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const { data, error } = await staff.rpc("staff_cloud_folder", { p_name: name });
+  if (error) throw new Error(error.message);
+  return String(data);
+}
+
+export async function deleteStaffCloudFile(
+  client: SupabaseClient<Database>,
+  fileId: string,
+): Promise<void> {
+  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const { error } = await staff.rpc("cloud_delete_staff_file", { p_file_id: fileId });
+  if (error) throw new Error(error.message);
+}
+
+export async function restoreStaffCloudFile(
+  client: SupabaseClient<Database>,
+  fileId: string,
+): Promise<void> {
+  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const { error } = await staff.rpc("cloud_restore_staff_file", { p_file_id: fileId });
+  if (error) throw new Error(error.message);
 }
