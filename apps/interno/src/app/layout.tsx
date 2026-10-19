@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
@@ -10,13 +10,22 @@ import { setThemePreference } from "./actions/preferences";
 import { getServerThemeChoice } from "../lib/theme";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "UProperty Market · Interno",
-  description: "Área interna de Administração e Suporte.",
-  // `noindex` em toda a área interna — 02 §3.1 e 07 §6.
-  robots: { index: false, follow: false, nocache: true },
-  // TODO: ícone final da marca (07 §10.1).
-};
+/**
+ * `generateMetadata` e não um `metadata` constante: o título e a descrição são
+ * texto que alguém lê — no separador do browser e no histórico — e seguem o
+ * idioma escolhido como o resto do painel. O `robots` é o único campo que não
+ * muda com a língua.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.interno");
+  return {
+    title: t("title"),
+    description: t("description"),
+    // `noindex` em toda a área interna — 02 §3.1 e 07 §6.
+    robots: { index: false, follow: false, nocache: true },
+    // TODO: ícone final da marca (07 §10.1).
+  };
+}
 
 /**
  * Root layout de `interno.upropertymarket.pt` (P1-02 · P1-03 · P1-06)

@@ -93,6 +93,14 @@
     "owner": "Proprietário",
     "buyer": "Comprador"
   },
+  "meta": {
+    "interno": {
+      "title": "UProperty Market · Interno",
+      "description": "Área interna de Administração e Suporte.",
+      "login": "Entrar · UProperty Market Interno",
+      "security": "Segurança · Definições · UProperty Market Interno"
+    }
+  },
   "share": {
     "permission": {
       "view": "Pode ver",
@@ -1656,7 +1664,18 @@
     "addVariable": "Adicionar variável",
     "insertVariableTitle": "Inserir variável",
     "variablesEmptyPopover": "Adicione variáveis no campo acima para as inserir no texto.",
-    "variablesEmptyHint": "Adicione variáveis acima para as poder inserir no texto."
+    "variablesEmptyHint": "Adicione variáveis acima para as poder inserir no texto.",
+    "variables": {
+      "proprietario": "Proprietário",
+      "comprador": "Comprador",
+      "inquilino": "Inquilino",
+      "imovel": "Imóvel",
+      "morada": "Morada",
+      "preco": "Preço",
+      "renda": "Renda",
+      "prazo": "Prazo",
+      "data": "Data"
+    }
   },
   "internalCloud": {
     "title": "Cloud interna",

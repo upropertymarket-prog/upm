@@ -42,20 +42,26 @@ type Props = {
 };
 
 const EMPTY_DOCUMENT = { type: "doc", content: [{ type: "paragraph" }] };
-const VARIABLE_LABELS: Record<string, string> = {
-  proprietario: "Proprietário",
-  comprador: "Comprador",
-  inquilino: "Inquilino",
-  imovel: "Imóvel",
-  morada: "Morada",
-  preco: "Preço",
-  renda: "Renda",
-  prazo: "Prazo",
-  data: "Data",
-};
+/**
+ * As variáveis que têm rótulo em `editor.variables.*`. O administrador pode
+ * escrever qualquer nome no campo das variáveis, logo há sempre nomes sem
+ * rótulo — e `t()` de uma chave que não existe imprime a chave.
+ */
+const VARIAVEIS_COM_ROTULO = new Set([
+  "proprietario",
+  "comprador",
+  "inquilino",
+  "imovel",
+  "morada",
+  "preco",
+  "renda",
+  "prazo",
+  "data",
+]);
 
-function variableLabel(name: string) {
-  return VARIABLE_LABELS[name] ?? name.charAt(0).toUpperCase() + name.slice(1);
+/** Sem rótulo conhecido, o nome com a primeira letra em maiúscula. */
+function nomeEmRotulo(name: string) {
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 function isDocument(value: unknown): value is { type: "doc"; content?: DocNode[] } {
@@ -87,12 +93,15 @@ const TemplateVariable = TiptapNode.create({
   },
   renderHTML({ HTMLAttributes, node }) {
     const name = String(node.attrs.name ?? "");
-    const label = String(node.attrs.label ?? "") || variableLabel(name);
+    // Sem tradução de propósito: o rótulo que conta é o que ficou guardado
+    // no documento quando a variável foi inserida. Um contrato assinado não
+    // muda de palavras por alguém trocar o idioma do painel.
+    const label = String(node.attrs.label ?? "") || nomeEmRotulo(name);
     return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), label];
   },
   renderText({ node }) {
     const name = String(node.attrs.name ?? "");
-    return String(node.attrs.label ?? "") || variableLabel(name);
+    return String(node.attrs.label ?? "") || nomeEmRotulo(name);
   },
 });
 
@@ -110,6 +119,10 @@ export function TemplateBodyEditor({
    * este editor para o `@upm/ui/editor`, as chaves já são as certas.
    */
   const t = useTranslations("editor");
+  const tVar = useTranslations("editor.variables");
+  /** O rótulo que se mostra e que se guarda ao inserir, no idioma do painel. */
+  const rotulo = (nome: string) =>
+    VARIAVEIS_COM_ROTULO.has(nome) ? tVar(nome) : nomeEmRotulo(nome);
   const [document, setDocument] = useState(
     isDocument(initialContent) ? initialContent : EMPTY_DOCUMENT,
   );
@@ -310,13 +323,13 @@ export function TemplateBodyEditor({
                             .focus()
                             .insertContent({
                               type: "variable",
-                              attrs: { name: variable, label: variableLabel(variable) },
+                              attrs: { name: variable, label: rotulo(variable) },
                             })
                             .run();
                           setVariableMenuOpen(false);
                         }}
                       >
-                        {variableLabel(variable)}
+                        {rotulo(variable)}
                       </Button>
                     ))}
                   </div>

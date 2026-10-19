@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { PinSetupForm } from "./PinSetupForm";
 
-export const metadata: Metadata = {
-  title: "Segurança · Definições · UProperty Market Interno",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.interno");
+  return { title: t("security") };
+}
 
 export default function SecuritySettingsPage() {
   return (

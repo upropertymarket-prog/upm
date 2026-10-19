@@ -93,6 +93,14 @@
     "owner": "Owner",
     "buyer": "Buyer"
   },
+  "meta": {
+    "interno": {
+      "title": "UProperty Market · Internal",
+      "description": "Internal area for Administration and Support.",
+      "login": "Sign in · UProperty Market Internal",
+      "security": "Security · Settings · UProperty Market Internal"
+    }
+  },
   "share": {
     "permission": {
       "view": "Can view",
@@ -1656,7 +1664,18 @@
     "addVariable": "Add variable",
     "insertVariableTitle": "Insert variable",
     "variablesEmptyPopover": "Add variables in the field above to insert them in the text.",
-    "variablesEmptyHint": "Add variables above to be able to insert them in the text."
+    "variablesEmptyHint": "Add variables above to be able to insert them in the text.",
+    "variables": {
+      "proprietario": "Owner",
+      "comprador": "Buyer",
+      "inquilino": "Tenant",
+      "imovel": "Property",
+      "morada": "Address",
+      "preco": "Price",
+      "renda": "Rent",
+      "prazo": "Term",
+      "data": "Date"
+    }
   },
   "internalCloud": {
     "title": "Internal Cloud",

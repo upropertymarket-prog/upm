@@ -3,10 +3,10 @@ import { getTranslations } from "next-intl/server";
 
 import { LoginForm } from "./LoginForm";
 
-export const metadata: Metadata = {
-  title: "Entrar · UProperty Market Interno",
-  robots: { index: false, follow: false, nocache: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.interno");
+  return { title: t("login"), robots: { index: false, follow: false, nocache: true } };
+}
 
 export default async function InternoLoginPage({
   searchParams,

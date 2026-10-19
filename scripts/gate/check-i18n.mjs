@@ -28,6 +28,23 @@ import { join, relative, sep } from "node:path";
  *    `aria-label`, `alt`, `hint`, `subtitle`, `caption`, `description`,
  *    `header`, `empty`.
  * 3. O primeiro argumento de `toast(...)`, que é uma frase dita ao utilizador.
+ * 4. Valores de objeto: `{ header: "Ações" }`, `{ label: "Compra e venda" }`,
+ *    um `Record<string, string>` de rótulos.
+ * 5. Os pedaços fixos de um template literal: `` `Transferir ${row.name}` ``.
+ *
+ * Os dois últimos entraram a **19 out 2026**, e a razão é o próprio número: o
+ * portão marcava 20 strings no `CloudScreen` e havia lá perto de 40 em
+ * português. A primeira versão só via JSX e props — e neste produto quase todo
+ * o texto está em colunas de tabela e em listas de opções, isto é, dentro de
+ * objetos. Era o erro de forma do `messages.test.ts` outra vez, uma camada
+ * acima: um portão a medir parte do problema e a dar confiança pelo todo. Com
+ * eles, a conta passou de 272 para 504 — não houve regressão nenhuma, apenas
+ * deixou de haver ponto cego.
+ *
+ * Varre-se também **`.ts`** e, com a restrição de `RAIZES`, `packages/db`: um
+ * `Record` de rótulos não deixa de ser texto visível por o ficheiro não ter
+ * JSX, e o `SHARE_PERMISSION_LABELS` ("Pode ver") vivia no pacote da base de
+ * dados.
  *
  * ## O que não conta, e porquê
  *
@@ -40,6 +57,10 @@ import { join, relative, sep } from "node:path";
  *   estiver escrito à mão, que é falha na mesma; por isso varre-se também, só
  *   sem as fixtures.
  * - **Fixtures, testes e canvases**: dados de exemplo não são produto.
+ * - **Mensagens de server action**, que são **D73**: contam-se e imprimem-se à
+ *   parte, nunca somadas ao total. Ver a nota de `paraD73` — a correção delas é
+ *   outra (`getTranslations` dentro das actions, i18n do `zod`), e um portão
+ *   que mistura duas dívidas não serve para fechar nenhuma.
  *
  * ## Porque é que ainda não está no `pnpm gate`
  *
@@ -53,7 +74,23 @@ import { join, relative, sep } from "node:path";
  * limitar a falhar.
  */
 
-const RAIZES = ["apps/web/src", "apps/app/src", "apps/interno/src", "packages/ui/src"];
+/**
+ * Onde se procura. `soRotulos` existe por uma razão só: `packages/db` tem
+ * texto de duas naturezas misturado no mesmo ficheiro — rótulos de UI (o
+ * `SHARE_PERMISSION_LABELS` que lá estava até 19 out) e mensagens de
+ * validação do `zod`. Os primeiros são defeito desta dívida; as segundas são
+ * **D73** (precisam de `getTranslations` dentro das actions e da i18n do
+ * próprio zod) e contá-las aqui era pôr no mesmo saco duas correções com
+ * caminhos diferentes. Nessas raízes só se olha para valores de objeto, e as
+ * linhas de uma cadeia `z.` ficam de fora.
+ */
+const RAIZES = [
+  { dir: "apps/web/src" },
+  { dir: "apps/app/src" },
+  { dir: "apps/interno/src" },
+  { dir: "packages/ui/src" },
+  { dir: "packages/db/src", soRotulos: true },
+];
 
 /** Pastas que nunca são produto. */
 const IGNORAR_PASTAS = new Set(["node_modules", ".next", "dist", "demo-data", "__tests__"]);
@@ -78,6 +115,32 @@ const PROPS_VISIVEIS =
 const TOAST = /\btoast\(\s*"([^"\n]+)"/g;
 
 /**
+ * `chave: "frase"` — um valor de objeto.
+ *
+ * Acrescentado a 19 out 2026, depois de o `CloudScreen` ter mostrado o
+ * tamanho do ponto cego: o portão marcava-lhe 20 strings e havia perto de 40
+ * em português. A diferença estava quase toda aqui — `{ header: "Ações" }`
+ * numa coluna de tabela, `{ label: "Compra e venda" }` numa lista de opções,
+ * um `Record<string, string>` de rótulos. Neste produto quase todos os ecrãs
+ * montam tabelas e selects, logo quase todo o texto vivia onde não se olhava.
+ *
+ * **A chave não entra na decisão, só o valor.** Um `Record` de rótulos tem
+ * chaves que são o domínio (`view`, `share_created`), não nomes de props, e
+ * filtrar por uma lista de chaves deixava-o passar outra vez. Quem decide é o
+ * `ehTexto` — e foi por isso que ele ganhou as regras de CSS: é este padrão
+ * que vê os objetos de `style`.
+ */
+const VALOR_EM_OBJETO = /(?:^|[{,[(\s])([A-Za-z_$][\w$]*)\s*:\s*"([^"\n]+)"/g;
+
+/**
+ * Template literal: `` `Transferir ${row.name}` ``. Olha-se para os pedaços
+ * fixos, que é onde está a frase; o que vem de `${}` é dado e não texto.
+ * Um pedaço tem de ter duas letras seguidas para contar — assim `" · "` e
+ * `"/mês"` não enchem a lista, mas "Transferir " conta.
+ */
+const TEMPLATE = /`([^`\\]*)`/g;
+
+/**
  * Texto entre tags: `<p>Calendário</p>`.
  *
  * O fecho tem de ser **uma tag de fecho** (`</`) e não um `<` qualquer. Sem
@@ -98,13 +161,55 @@ const TECNICO = [
   /^[\w.-]+@[\w.-]+$/, // e-mail
   /^https?:\/\//,
   /^[./#]/, // caminho, âncora
-  /^var\(--/,
   /^#[0-9a-f]{3,8}$/i,
   /^\d+(\.\d+)?(px|rem|em|%|fr|vh|vw|s|ms)?$/,
   /^[\s\p{P}\p{S}]+$/u, // só pontuação ou símbolos
   /^(noopener|noreferrer|_blank|_self|true|false|null|undefined)$/,
   /^[a-z-]+(\s+[a-z-]+)*$/, // lista de classes ou de valores, tudo minúsculo
+
+  /**
+   * CSS. Vieram com o padrão dos valores de objeto (19 out): um objeto de
+   * `style` é um objeto como outro qualquer, e `padding: "0 var(--sp-3)"` tem
+   * espaço como uma frase tem. Reconhece-se pela função, pela unidade ou por
+   * ser só números e pontuação — não pelo nome da propriedade, que num
+   * `Record` de rótulos não ajuda.
+   */
+  /(?:var|calc|minmax|repeat|rgba?|hsla?|url|translate[XYZ]?|rotate|scale|cubic-bezier|linear-gradient|clamp|fit-content)\(/,
+  /(?:^|\s)-?\d+(\.\d+)?(px|rem|em|%|fr|vh|vw|dvh|ch|s|ms)(\s|$|,|\))/,
+  /^[\d\s.,;:()%+/*-]+$/, // só números e pontuação
+  // pilha de tipos de letra: `Arial, Helvetica, sans-serif`
+  /^["']?[A-Za-z][\w -]*["']?(,\s*["']?[A-Za-z][\w -]*["']?)+$/,
+  // valores de atalho do CSS: `0 0 auto`, `1px solid`, `none`
+  /^-?[\d.\s]*(auto|none|inherit|initial|unset|solid|dashed|hidden|nowrap|ellipsis)(\s|$)/,
+
+  /**
+   * Pedaços de HTML e de CSS escritos à mão. Vêm dos construtores de e-mail,
+   * que montam o corpo com `<style>` embutido porque é o que os clientes de
+   * correio desenham — e o `!important` de uma folha de estilos não é texto
+   * que alguém leia. A frase do e-mail conta; a folha de estilos não.
+   */
+  /!important|<\/[a-z]|<!doctype|<(html|head|body|style|meta|br|p|a|hr|img|div|span|table|td|tr)[\s/>]/i,
+  /^[\s;}]*[a-z-]+\s*:\s*[^;]+;/, // declaração de CSS
+  /\{[^}]*[a-z-]+\s*:[^}]*(;|\})/, // bloco de CSS: `blockquote{margin:0;…}`
+  /^,\s*\w+(\s*,\s*\w+)+$/, // lista de colunas de um `select`
+  /**
+   * Classes utilitárias: tudo minúsculo e **pelo menos uma** palavra
+   * hifenizada (`flex w-full items-center rounded-xl`). O hífen é o que
+   * distingue — sem essa exigência, "12 meses" e "no seu portefólio" caíam
+   * aqui. O preço é deixar passar uma frase minúscula com hífen, que em
+   * português quase sempre leva acento e volta pela outra porta.
+   */
+  /^(?=[a-z0-9:[\]/.%\s-]*-)[a-z0-9:[\]/.%-]+(\s+[a-z0-9:[\]/.%-]+)*$/,
+  /^var\s|document\.|window\.|localStorage/, // script embutido no `<head>`
 ];
+
+/**
+ * Pedaços de JSX que o padrão do texto apanha mas não são frases: expressão a
+ * meio, fragmento de código, atributo. Vale a pena tê-los em separado dos
+ * técnicos porque a razão é outra — ali é "não se traduz", aqui é "não é
+ * sequer texto".
+ */
+const NAO_E_FRASE = [/&&|\|\||=>|[=!<>]=|\?\s*\(|\$\{/, /^\s*[a-z]+\s*[?:]/i];
 
 /** Frases que são a marca ou convenções que não se traduzem. */
 const PERMITIDAS = new Set([
@@ -123,13 +228,17 @@ const PERMITIDAS = new Set([
   "NIF",
 ]);
 
+/** @type {(dir: string, out?: string[]) => string[]} */
 function ficheiros(dir, out = []) {
   if (!existsSync(dir)) return out;
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
     if (IGNORAR_PASTAS.has(entrada.name)) continue;
     const completo = join(dir, entrada.name);
     if (entrada.isDirectory()) ficheiros(completo, out);
-    else if (/\.tsx$/.test(entrada.name) && !/\.(test|spec)\.tsx$/.test(entrada.name))
+    // `.ts` também, desde 19 out: os rótulos de estado e os formatos de data
+    // vivem em ficheiros `…Types.ts`, e um `Record` de rótulos não deixa de
+    // ser texto visível por o ficheiro não ter JSX.
+    else if (/\.tsx?$/.test(entrada.name) && !/\.(test|spec)\.tsx?$/.test(entrada.name))
       out.push(completo);
   }
   return out;
@@ -197,6 +306,7 @@ function ehTexto(valor) {
   if (limpo.length < 2) return false;
   if (PERMITIDAS.has(limpo)) return false;
   if (!/\p{L}/u.test(limpo)) return false;
+  for (const padrao of NAO_E_FRASE) if (padrao.test(limpo)) return false;
   for (const padrao of TECNICO) if (padrao.test(limpo)) return false;
   // Uma frase tem espaço ou acento. Uma palavra isolada sem acento é quase
   // sempre um identificador — e o custo de a deixar passar é menor do que o de
@@ -210,32 +320,105 @@ function linhaDe(fonte, indice) {
 
 const achados = [];
 
+/**
+ * O que é de D73 e não desta dívida — contado em separado, nunca somado.
+ *
+ * Um módulo de server action não pode usar `useTranslations`: corre no
+ * servidor, e as frases que devolve (`return { error: "Sessão inválida." }`)
+ * chegam ao ecrã tal e qual. A correção existe — `getTranslations` — mas é
+ * outra: muda a assinatura das actions, e parte das mensagens vem do `zod`,
+ * que tem o seu próprio caminho de internacionalização. Decisão do cliente a
+ * 19 out 2026: fica para D73.
+ *
+ * Contar aqui era deixar o número de D72 subir com trabalho que não lhe
+ * pertence — e um portão que mistura duas dívidas não serve para fechar
+ * nenhuma. Imprime-se o total à parte, para não voltar a ser ponto cego.
+ */
+const paraD73 = [];
+
+/** Um módulo que corre no servidor declara-o na primeira linha. */
+function ehServerAction(fonte, caminho) {
+  return /^\s*["']use server["']/.test(fonte) || /\/actions?(\/|\.ts$)/.test(caminho);
+}
+
+/** A linha onde um índice cai, inteira — para a guarda do `z.` das raízes só-rótulos. */
+function linhaInteira(fonte, indice) {
+  const antes = fonte.lastIndexOf("\n", indice) + 1;
+  const depois = fonte.indexOf("\n", indice);
+  return fonte.slice(antes, depois === -1 ? undefined : depois);
+}
+
 for (const raiz of RAIZES) {
-  for (const ficheiro of ficheiros(raiz)) {
+  for (const ficheiro of ficheiros(raiz.dir)) {
     const relativo = relative(process.cwd(), ficheiro).split(sep).join("/");
     if (ISENTOS.has(relativo)) continue;
 
     const original = readFileSync(ficheiro, "utf8");
     const fonte = semComentarios(original);
+    const servidor = ehServerAction(original, relativo);
 
     const registar = (valor, indice, tipo) => {
       if (!ehTexto(valor)) return;
-      achados.push({
-        ficheiro: relative(process.cwd(), ficheiro).split(sep).join("/"),
+      // Ver a nota de `RAIZES`: numa raiz só-rótulos, uma frase na linha de
+      // uma cadeia `z.` é mensagem de validação, e essa é D73.
+      if (raiz.soRotulos && /\bz\./.test(linhaInteira(fonte, indice))) return;
+      (servidor ? paraD73 : achados).push({
+        ficheiro: relativo,
         linha: linhaDe(fonte, indice),
         texto: valor.trim().slice(0, 70),
         tipo,
       });
     };
 
+    for (const m of fonte.matchAll(VALOR_EM_OBJETO)) registar(m[2], m.index, "objeto");
+    if (raiz.soRotulos) continue;
+
     for (const m of fonte.matchAll(PROPS_VISIVEIS)) registar(m[2], m.index, "prop");
     for (const m of fonte.matchAll(TOAST)) registar(m[1], m.index, "toast");
     for (const m of fonte.matchAll(TEXTO_JSX)) registar(m[1], m.index, "jsx");
+    for (const m of fonte.matchAll(TEMPLATE)) {
+      // Só os pedaços fixos: o que vem de `${}` é dado.
+      for (const pedaco of m[1].split(/\$\{[^}]*\}/)) {
+        if (/\p{L}\p{L}/u.test(pedaco)) registar(pedaco, m.index, "template");
+      }
+    }
   }
+}
+
+/** O que fica para D73, resumido em duas linhas. Nunca soma ao total. */
+function notaD73() {
+  if (paraD73.length === 0) return;
+  const ficheiros = new Set(paraD73.map((a) => a.ficheiro)).size;
+  console.error(
+    `\nℹ Fora desta conta, para D73: ${paraD73.length} mensagens em ${ficheiros} módulos de\n` +
+      `  server action. Correm no servidor, pedem \`getTranslations\` e parte vem do \`zod\` —\n` +
+      `  outra correção. Ver \`--d73\` para a lista.`,
+  );
+}
+
+const TUDO = process.argv.includes("--all");
+const FILTRO = process.argv.find((a) => a.startsWith("--filter="))?.slice(9);
+const SO_D73 = process.argv.includes("--d73");
+
+if (SO_D73) {
+  const porModulo = new Map();
+  for (const a of paraD73) porModulo.set(a.ficheiro, [...(porModulo.get(a.ficheiro) ?? []), a]);
+  console.error(
+    `D73 — mensagens de server action: ${paraD73.length} em ${porModulo.size} módulos\n`,
+  );
+  for (const [ficheiro, lista] of [...porModulo].sort((a, b) => b[1].length - a[1].length)) {
+    if (FILTRO && !ficheiro.includes(FILTRO)) continue;
+    console.error(`  ${String(lista.length).padStart(3)}  ${ficheiro}`);
+    for (const a of TUDO ? lista : lista.slice(0, 3))
+      console.error(`       ${a.linha}: ${JSON.stringify(a.texto)}`);
+    if (!TUDO && lista.length > 3) console.error(`       … mais ${lista.length - 3}`);
+  }
+  process.exit(0);
 }
 
 if (achados.length === 0) {
   console.log("✓ i18n: nenhum texto visível escrito à mão");
+  notaD73();
   process.exit(0);
 }
 
@@ -252,12 +435,10 @@ console.error(
 );
 /**
  * `--all` imprime todas as ocorrências e `--filter=<troço>` limita-as a um
- * caminho. Não é enfeite: é com isto que se traduz um ficheiro de cada vez,
- * sem ter de adivinhar o que está nas linhas que a lista corta.
+ * caminho — é com isto que se traduz um ficheiro de cada vez, sem adivinhar o
+ * que está nas linhas que a lista corta. `--d73` troca a lista pela das
+ * mensagens de server action, que não entram nesta conta.
  */
-const TUDO = process.argv.includes("--all");
-const FILTRO = process.argv.find((a) => a.startsWith("--filter="))?.slice(9);
-
 for (const [ficheiro, lista] of ordenados) {
   if (FILTRO && !ficheiro.includes(FILTRO)) continue;
   console.error(`  ${String(lista.length).padStart(3)}  ${ficheiro}`);
@@ -270,4 +451,5 @@ for (const [ficheiro, lista] of ordenados) {
 console.error("\nO texto que o utilizador lê vem de `packages/config/messages/*.json`,");
 console.error("por `useTranslations` (cliente), `getTranslations` (servidor) ou");
 console.error("por uma prop `labels` nos componentes de `@upm/ui`.");
+notaD73();
 process.exit(1);
