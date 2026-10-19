@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { FilePlus2, FileSignature } from "lucide-react";
 import {
   Button,
@@ -16,13 +18,7 @@ import {
   useToast,
   type TableColumn,
 } from "@upm/ui";
-import {
-  CONTRACT_KINDS,
-  CONTRACT_KIND_LABELS,
-  CONTRACT_STATUS_LABELS,
-  CONTRACT_STATUS_TONES,
-  type ContractKind,
-} from "@upm/db/cloud";
+import { CONTRACT_KINDS, CONTRACT_STATUS_TONES, type ContractKind } from "@upm/db/cloud";
 
 import {
   formatDateTime,
@@ -66,6 +62,11 @@ export function ContractsScreen({
   canCreate,
   onCreate,
 }: ContractsScreenProps) {
+  const t = useTranslations("contracts.screen");
+  const tKind = useTranslations("contracts.kind");
+  const tStatus = useTranslations("contracts.status");
+  const tCommon = useTranslations("common");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   const [tab, setTab] = useState<"contracts" | "templates" | "shared">(
     contracts.length === 0 && canCreate ? "templates" : "contracts",
   );
@@ -106,12 +107,12 @@ export function ContractsScreen({
   const columns: TableColumn<ContractRow>[] = [
     {
       id: "title",
-      header: "Contrato",
+      header: t("columnContract"),
       cell: (row) => (
         <div style={{ display: "grid", minWidth: 0 }}>
           <strong>{row.title}</strong>
           <span style={{ color: "var(--muted)" }}>
-            {CONTRACT_KIND_LABELS[row.kind]}
+            {tKind(row.kind)}
             {row.propertyTitle ? ` · ${row.propertyTitle}` : ""}
           </span>
         </div>
@@ -119,32 +120,36 @@ export function ContractsScreen({
     },
     {
       id: "counterparty",
-      header: "Contraparte",
+      header: t("columnCounterparty"),
       cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>{row.counterpartyName || "Por definir"}</span>
+        <span style={{ color: "var(--muted)" }}>
+          {row.counterpartyName || t("counterpartyUnset")}
+        </span>
       ),
     },
     {
       id: "status",
-      header: "Estado",
+      header: t("columnStatus"),
       cell: (row) => (
         <StatusTag tone={CONTRACT_STATUS_TONES[row.status] as never}>
-          {CONTRACT_STATUS_LABELS[row.status]}
+          {tStatus(row.status)}
         </StatusTag>
       ),
     },
     {
       id: "updated",
-      header: "Atualizado",
-      cell: (row) => <span style={{ color: "var(--muted)" }}>{formatDateTime(row.updatedAt)}</span>,
+      header: t("columnUpdated"),
+      cell: (row) => (
+        <span style={{ color: "var(--muted)" }}>{formatDateTime(row.updatedAt, intlLocale)}</span>
+      ),
     },
     {
       id: "actions",
-      header: "Ações",
+      header: t("columnActions"),
       cell: (row) => (
         <div style={{ display: "flex", justifyContent: "flex-start" }}>
           <Button variant="secondary" size="md" onClick={() => open(row.id)}>
-            Abrir
+            {t("open")}
           </Button>
         </div>
       ),
@@ -154,34 +159,32 @@ export function ContractsScreen({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-7)" }}>
       <Tabs
-        label="Contratos e modelos"
+        label={t("tabsLabel")}
         value={tab}
         onValueChange={(next) => setTab(next as typeof tab)}
         items={[
-          { id: "contracts", label: "Contratos", count: contracts.length },
-          ...(canCreate ? [{ id: "templates", label: "Modelos", count: templates.length }] : []),
-          { id: "shared", label: "Partilhados comigo", count: sharedWithMe.length },
+          { id: "contracts", label: t("tabContracts"), count: contracts.length },
+          ...(canCreate
+            ? [{ id: "templates", label: t("tabTemplates"), count: templates.length }]
+            : []),
+          { id: "shared", label: t("tabShared"), count: sharedWithMe.length },
         ]}
       />
 
       {tab === "contracts" ? (
         contracts.length === 0 ? (
           <EmptyState
-            title="Ainda sem contratos"
-            description={
-              canCreate
-                ? "Escolha um modelo para gerar o primeiro contrato — compra e venda ou arrendamento."
-                : "Os contratos que lhe partilharem aparecem no separador ao lado."
-            }
+            title={t("emptyTitle")}
+            description={canCreate ? t("emptyBodyOwner") : t("emptyBodyBuyer")}
           />
         ) : (
           <Card>
             <Table
-              caption="Os meus contratos"
+              caption={t("tableCaption")}
               columns={columns}
               rows={contracts}
               rowKey={(row) => row.id}
-              empty="Nenhum contrato."
+              empty={t("tableEmpty")}
             />
           </Card>
         )
@@ -212,55 +215,52 @@ export function ContractsScreen({
 
       {tab === "shared" ? (
         sharedWithMe.length === 0 ? (
-          <EmptyState
-            title="Nada partilhado consigo"
-            description="Um contrato que lhe partilhem aparece aqui, em leitura."
-          />
+          <EmptyState title={t("sharedEmptyTitle")} description={t("sharedEmptyBody")} />
         ) : (
           <Card>
             <Table
-              caption="Contratos partilhados comigo"
+              caption={t("sharedCaption")}
               rows={sharedWithMe}
               rowKey={(row) => row.shareId}
-              empty="Nada partilhado consigo."
+              empty={t("sharedTableEmpty")}
               columns={[
                 {
                   id: "title",
-                  header: "Contrato",
+                  header: t("columnContract"),
                   cell: (row) => (
                     <div style={{ display: "grid", minWidth: 0 }}>
                       <strong>{row.title}</strong>
                       <span style={{ color: "var(--muted)" }}>
-                        {CONTRACT_KIND_LABELS[row.kind]} · de {row.sharedByName}
+                        {tKind(row.kind)} · {t("sharedBy", { name: row.sharedByName })}
                       </span>
                     </div>
                   ),
                 },
                 {
                   id: "status",
-                  header: "Estado",
+                  header: t("columnStatus"),
                   cell: (row) => (
                     <StatusTag tone={CONTRACT_STATUS_TONES[row.status] as never}>
-                      {CONTRACT_STATUS_LABELS[row.status]}
+                      {tStatus(row.status)}
                     </StatusTag>
                   ),
                 },
                 {
                   id: "expires",
-                  header: "Expira",
+                  header: t("columnExpires"),
                   cell: (row) => (
                     <span style={{ color: "var(--muted)" }}>
-                      {row.expiresAt ? formatDateTime(row.expiresAt) : "Sem expirar"}
+                      {row.expiresAt ? formatDateTime(row.expiresAt, intlLocale) : t("noExpiry")}
                     </span>
                   ),
                 },
                 {
                   id: "actions",
-                  header: "Ações",
+                  header: t("columnActions"),
                   cell: (row) => (
                     <div style={{ display: "flex", justifyContent: "flex-end" }}>
                       <Button variant="ghost" size="sm" onClick={() => open(row.contractId)}>
-                        Ver
+                        {t("view")}
                       </Button>
                     </div>
                   ),
@@ -274,32 +274,32 @@ export function ContractsScreen({
       <Modal
         open={creating !== null}
         onClose={() => setCreating(null)}
-        title="Novo contrato"
-        subtitle={creating ? `A partir de "${creating.name}"` : undefined}
+        title={t("newContract")}
+        subtitle={creating ? t("fromTemplate", { name: creating.name }) : undefined}
         footer={
           <>
             <Button variant="secondary" onClick={() => setCreating(null)}>
-              Cancelar
+              {tCommon("cancel")}
             </Button>
             <Button disabled={pending || title.trim().length === 0} onClick={create}>
-              Criar e abrir
+              {t("createAndOpen")}
             </Button>
           </>
         }
       >
         <div style={{ display: "grid", gap: "var(--sp-6)" }}>
           <Input
-            label="Título"
+            label={t("titleLabel")}
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={200}
           />
           {properties.length > 0 ? (
             <Select
-              label="Imóvel"
+              label={t("propertyLabel")}
               value={propertyId}
               onChange={(event) => setPropertyId(event.target.value)}
-              placeholder="Sem imóvel associado"
+              placeholder={t("propertyPlaceholder")}
               options={properties.map((property) => ({
                 value: property.id,
                 label: property.title,
@@ -307,11 +307,11 @@ export function ContractsScreen({
             />
           ) : null}
           <Input
-            label="Contraparte"
+            label={t("counterpartyLabel")}
             value={counterparty}
             onChange={(event) => setCounterparty(event.target.value)}
-            placeholder="Nome de quem assina do outro lado"
-            hint="Pode ficar por preencher e completar-se depois."
+            placeholder={t("counterpartyPlaceholder")}
+            hint={t("counterpartyHint")}
             maxLength={160}
           />
         </div>
@@ -329,15 +329,17 @@ function TemplateColumn({
   templates: TemplateRow[];
   onPick: (template: TemplateRow) => void;
 }) {
+  const t = useTranslations("contracts.screen");
+  const tKind = useTranslations("contracts.kind");
   return (
     <Card padded style={{ display: "grid", gap: "var(--sp-5)" }}>
       <strong style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
         <FileSignature size={16} aria-hidden="true" />
-        {CONTRACT_KIND_LABELS[kind]}
+        {tKind(kind)}
       </strong>
 
       {templates.length === 0 ? (
-        <span style={{ color: "var(--muted)" }}>Ainda não há modelos publicados deste tipo.</span>
+        <span style={{ color: "var(--muted)" }}>{t("noTemplates")}</span>
       ) : (
         templates.map((template) => (
           <div
@@ -347,7 +349,10 @@ function TemplateColumn({
             <div style={{ display: "grid", flex: 1, minWidth: 0 }}>
               <span>{template.name}</span>
               <span style={{ color: "var(--muted)" }}>
-                versão {template.version} · {template.variables.length} variáveis
+                {t("templateMeta", {
+                  version: String(template.version),
+                  count: String(template.variables.length),
+                })}
               </span>
             </div>
             <Button
@@ -356,7 +361,7 @@ function TemplateColumn({
               leadingIcon={<FilePlus2 size={15} />}
               onClick={() => onPick(template)}
             >
-              Usar
+              {t("use")}
             </Button>
           </div>
         ))

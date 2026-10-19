@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
@@ -29,18 +30,19 @@ import {
 import { Button, Card, Input, Select, StatusTag, Tabs, useToast } from "@upm/ui";
 import {
   CONTRACT_STATUSES,
-  CONTRACT_STATUS_LABELS,
   CONTRACT_STATUS_TONES,
-  CONTRACT_KIND_LABELS,
   canAdvanceContract,
   type ContractStatus,
   type SharePermission,
 } from "@upm/db/cloud";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 
 import type { ShareContact } from "../cloud/cloudTypes";
 import {
   formatDateTime,
   variableLabel,
+  VARIAVEIS_COM_ROTULO,
+  nomeEmRotulo,
   type ContractDetail,
   type ContractHistoryRow,
 } from "./contractTypes";
@@ -116,6 +118,15 @@ const EXTENSIONS = [
  */
 export function ContractEditor(props: ContractEditorProps) {
   const { contract } = props;
+  const t = useTranslations("contracts.editor");
+  const tKind = useTranslations("contracts.kind");
+  const tStatus = useTranslations("contracts.status");
+  const tShare = useTranslations("share");
+  const tCommon = useTranslations("common");
+  const tVar = useTranslations("editor.variables");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
+  /** O rótulo de uma variável, com as chaves partilhadas com o Admin. */
+  const rotulo = (nome: string) => variableLabel(nome, tVar);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [focus, setFocus] = useState(false);
   const [values, setValues] = useState<Record<string, string>>(contract.values);
@@ -162,9 +173,9 @@ export function ContractEditor(props: ContractEditorProps) {
   /** 07 §13.2 — a sessão de edição fecha-se sozinha ao fim de 5 min parada. */
   useEffect(() => {
     if (!dirty) return;
-    const timer = setTimeout(() => save("Guardado automaticamente"), AUTOSAVE_MS);
+    const timer = setTimeout(() => save(t("autosaveNote")), AUTOSAVE_MS);
     return () => clearTimeout(timer);
-  }, [dirty, save]);
+  }, [dirty, save, t]);
 
   /** A pré-visualização acompanha o que está a ser escrito e preenchido. */
   useEffect(() => {
@@ -215,7 +226,7 @@ export function ContractEditor(props: ContractEditorProps) {
         <Button
           variant="ghost"
           iconOnly
-          aria-label={focus ? "Sair do modo foco" : "Modo foco"}
+          aria-label={focus ? t("focusExit") : t("focus")}
           onClick={() => setFocus((value) => !value)}
         >
           {focus ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -225,28 +236,35 @@ export function ContractEditor(props: ContractEditorProps) {
             {contract.title}
           </strong>
           <span style={{ color: "var(--muted)" }}>
-            Contrato · {CONTRACT_KIND_LABELS[contract.kind]} ·{" "}
-            {dirty
-              ? "Alterações por guardar"
-              : savedAt
-                ? `Guardado às ${savedAt.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}`
-                : `Versão ${contract.currentVersion}`}
+            {t("metaLine", {
+              kind: tKind(contract.kind),
+              state: dirty
+                ? t("stateUnsaved")
+                : savedAt
+                  ? t("stateSavedAt", {
+                      time: savedAt.toLocaleTimeString(intlLocale, {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                    })
+                  : t("stateVersion", { version: String(contract.currentVersion) }),
+            })}
           </span>
         </div>
 
         <Tabs
-          label="Modo do editor"
+          label={t("modeLabel")}
           value={mode}
           onValueChange={(next) => setMode(next as "edit" | "preview")}
           items={[
-            { id: "edit", label: "Editar" },
-            { id: "preview", label: "Pré-visualizar" },
+            { id: "edit", label: t("modeEdit") },
+            { id: "preview", label: t("modePreview") },
           ]}
         />
 
         <div style={{ display: "flex", gap: "var(--sp-3)" }}>
           <Button size="sm" disabled={pending || !dirty} onClick={() => save()}>
-            Guardar
+            {tCommon("save")}
           </Button>
           <Button
             variant="secondary"
@@ -254,7 +272,7 @@ export function ContractEditor(props: ContractEditorProps) {
             leadingIcon={<Download size={15} />}
             onClick={exportPdf}
           >
-            Exportar PDF
+            {t("exportPdf")}
           </Button>
           <Button
             variant="secondary"
@@ -262,7 +280,7 @@ export function ContractEditor(props: ContractEditorProps) {
             leadingIcon={<Share2 size={15} />}
             onClick={() => setShare(true)}
           >
-            Partilhar
+            {tShare("shareAction")}
           </Button>
         </div>
       </Card>
@@ -317,7 +335,7 @@ export function ContractEditor(props: ContractEditorProps) {
                   variant="ghost"
                   size="sm"
                   iconOnly
-                  aria-label="Página anterior"
+                  aria-label={t("prevPage")}
                   disabled={page === 1}
                   onClick={() => setPage((value) => Math.max(1, value - 1))}
                 >
@@ -338,7 +356,7 @@ export function ContractEditor(props: ContractEditorProps) {
                   variant="ghost"
                   size="sm"
                   iconOnly
-                  aria-label="Página seguinte"
+                  aria-label={t("nextPage")}
                   disabled={page === pageCount}
                   onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
                 >
@@ -353,14 +371,14 @@ export function ContractEditor(props: ContractEditorProps) {
           style={{ display: "grid", gap: "var(--sp-6)", position: "sticky", top: "var(--sp-6)" }}
         >
           <Card padded style={{ display: "grid", gap: "var(--sp-4)" }}>
-            <strong>Dados do contrato</strong>
+            <strong>{t("dataTitle")}</strong>
             {usedVariables.length === 0 ? (
-              <span style={{ color: "var(--muted)" }}>Este modelo não tem variáveis.</span>
+              <span style={{ color: "var(--muted)" }}>{t("noVariables")}</span>
             ) : (
               usedVariables.map((name) => (
                 <Input
                   key={name}
-                  label={variableLabel(name)}
+                  label={rotulo(name)}
                   value={values[name] ?? ""}
                   onChange={(event) => {
                     setValues((current) => ({ ...current, [name]: event.target.value }));
@@ -372,18 +390,18 @@ export function ContractEditor(props: ContractEditorProps) {
           </Card>
 
           <Card padded style={{ display: "grid", gap: "var(--sp-4)" }}>
-            <strong>Estado</strong>
+            <strong>{t("statusTitle")}</strong>
             <StatusTag tone={CONTRACT_STATUS_TONES[contract.status] as never}>
-              {CONTRACT_STATUS_LABELS[contract.status]}
+              {tStatus(contract.status)}
             </StatusTag>
             {nextStatuses.length === 0 ? (
-              <span style={{ color: "var(--muted)" }}>O ciclo está concluído.</span>
+              <span style={{ color: "var(--muted)" }}>{t("cycleDone")}</span>
             ) : (
               <Select
-                label="Avançar para"
+                label={t("advanceTo")}
                 labelHidden
                 value=""
-                placeholder="Avançar para…"
+                placeholder={t("advanceToPlaceholder")}
                 onChange={(event) => {
                   const next = event.target.value as ContractStatus;
                   if (!next) return;
@@ -398,23 +416,23 @@ export function ContractEditor(props: ContractEditorProps) {
                     if (result.error) toast(result.error, "error");
                     else {
                       setDirty(false);
-                      toast(`Contrato marcado como "${CONTRACT_STATUS_LABELS[next]}".`, "success");
+                      toast(t("markedAs", { status: tStatus(next) }), "success");
                     }
                   });
                 }}
                 options={nextStatuses.map((status) => ({
                   value: status,
-                  label: CONTRACT_STATUS_LABELS[status],
+                  label: tStatus(status),
                 }))}
-                hint="O estado de um contrato não anda para trás."
+                hint={t("noGoingBack")}
               />
             )}
           </Card>
 
           <Card padded style={{ display: "grid", gap: "var(--sp-4)" }}>
-            <strong>Histórico</strong>
+            <strong>{t("historyTitle")}</strong>
             {props.history.length === 0 ? (
-              <span style={{ color: "var(--muted)" }}>Ainda sem versões guardadas.</span>
+              <span style={{ color: "var(--muted)" }}>{t("noVersions")}</span>
             ) : (
               <ul
                 style={{
@@ -429,10 +447,10 @@ export function ContractEditor(props: ContractEditorProps) {
                   <li key={entry.version} style={{ display: "grid" }}>
                     <span>
                       v{entry.version}
-                      {entry.frozen ? " · congelada" : ""} · {entry.authorName}
+                      {entry.frozen ? ` · ${t("frozen")}` : ""} · {entry.authorName}
                     </span>
                     <span style={{ color: "var(--muted)" }}>
-                      {formatDateTime(entry.createdAt)}
+                      {formatDateTime(entry.createdAt, intlLocale)}
                       {entry.note ? ` · ${entry.note}` : ""}
                     </span>
                   </li>
@@ -442,7 +460,7 @@ export function ContractEditor(props: ContractEditorProps) {
           </Card>
 
           <Button variant="secondary" size="sm" onClick={props.onBack}>
-            Voltar aos contratos
+            {t("back")}
           </Button>
         </div>
       </div>
@@ -471,6 +489,14 @@ export function ContractEditor(props: ContractEditorProps) {
  * partiria a escala de 04 §1.3 em cada documento.
  */
 function Toolbar({ editor, variables }: { editor: Editor | null; variables: string[] }) {
+  /**
+   * O namespace do editor partilhado, como no editor de modelos do Admin:
+   * negrito é negrito nos dois, e D68 vai juntar as duas barras numa só.
+   */
+  const t = useTranslations("editor");
+  const tVar = useTranslations("editor.variables");
+  const rotulo = (nome: string) =>
+    VARIAVEIS_COM_ROTULO.has(nome) ? tVar(nome) : nomeEmRotulo(nome);
   if (!editor) return null;
 
   const style = editor.isActive("heading", { level: 1 })
@@ -488,7 +514,7 @@ function Toolbar({ editor, variables }: { editor: Editor | null; variables: stri
     >
       <div style={{ width: 150 }}>
         <Select
-          label="Estilo"
+          label={t("textStyle")}
           labelHidden
           value={style}
           onChange={(event) => {
@@ -498,30 +524,30 @@ function Toolbar({ editor, variables }: { editor: Editor | null; variables: stri
             else chain.setHeading({ level: Number(value.slice(1)) as 1 | 2 | 3 }).run();
           }}
           options={[
-            { value: "p", label: "Texto" },
-            { value: "h1", label: "Título" },
-            { value: "h2", label: "Secção" },
-            { value: "h3", label: "Subsecção" },
+            { value: "p", label: t("styleParagraph") },
+            { value: "h1", label: t("styleTitle") },
+            { value: "h2", label: t("styleSection") },
+            { value: "h3", label: t("styleSubsection") },
           ]}
         />
       </div>
 
       <ToolButton
-        label="Negrito"
+        label={t("bold")}
         active={editor.isActive("bold")}
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
         <Bold size={14} />
       </ToolButton>
       <ToolButton
-        label="Itálico"
+        label={t("italic")}
         active={editor.isActive("italic")}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
         <Italic size={14} />
       </ToolButton>
       <ToolButton
-        label="Sublinhado"
+        label={t("underline")}
         active={editor.isActive("underline")}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
@@ -529,21 +555,21 @@ function Toolbar({ editor, variables }: { editor: Editor | null; variables: stri
       </ToolButton>
 
       <ToolButton
-        label="Alinhar à esquerda"
+        label={t("alignLeft")}
         active={editor.isActive({ textAlign: "left" })}
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
       >
         <AlignLeft size={14} />
       </ToolButton>
       <ToolButton
-        label="Centrar"
+        label={t("alignCenter")}
         active={editor.isActive({ textAlign: "center" })}
         onClick={() => editor.chain().focus().setTextAlign("center").run()}
       >
         <AlignCenter size={14} />
       </ToolButton>
       <ToolButton
-        label="Alinhar à direita"
+        label={t("alignRight")}
         active={editor.isActive({ textAlign: "right" })}
         onClick={() => editor.chain().focus().setTextAlign("right").run()}
       >
@@ -551,21 +577,21 @@ function Toolbar({ editor, variables }: { editor: Editor | null; variables: stri
       </ToolButton>
 
       <ToolButton
-        label="Lista"
+        label={t("bullets")}
         active={editor.isActive("bulletList")}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
         <List size={14} />
       </ToolButton>
       <ToolButton
-        label="Lista numerada"
+        label={t("numbers")}
         active={editor.isActive("orderedList")}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
         <ListOrdered size={14} />
       </ToolButton>
       <ToolButton
-        label="Tabela"
+        label={t("insertTable")}
         active={editor.isActive("table")}
         onClick={() =>
           editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
@@ -576,20 +602,20 @@ function Toolbar({ editor, variables }: { editor: Editor | null; variables: stri
 
       <div style={{ width: 170, marginLeft: "auto" }}>
         <Select
-          label="Variável"
+          label={t("variable")}
           labelHidden
           value=""
-          placeholder="Variável"
+          placeholder={t("variable")}
           onChange={(event) => {
             const name = event.target.value;
             if (!name) return;
             editor
               .chain()
               .focus()
-              .insertContent({ type: "variable", attrs: { name, label: variableLabel(name) } })
+              .insertContent({ type: "variable", attrs: { name, label: rotulo(name) } })
               .run();
           }}
-          options={variables.map((name) => ({ value: name, label: variableLabel(name) }))}
+          options={variables.map((name) => ({ value: name, label: rotulo(name) }))}
         />
       </div>
     </Card>

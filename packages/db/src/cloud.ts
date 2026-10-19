@@ -108,14 +108,13 @@ export const CONTRACT_STATUSES = [
 export const contractStatusSchema = z.enum(CONTRACT_STATUSES);
 export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
 
-/** As etiquetas de 04 §8.3, na ordem do ciclo. */
-export const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
-  draft: "Rascunho",
-  shared: "Partilhado",
-  awaiting_signature: "Por assinar",
-  signed: "Assinado",
-  completed: "Concluído",
-};
+/**
+ * As etiquetas de 04 §8.3 **não vivem aqui**: estão em `contracts.status.*`
+ * nas mensagens, e quem monta o ecrã é que as traduz. Mesma razão do
+ * `SHARE_PERMISSION_LABELS`, que saiu a 19 out — este pacote fala com a base
+ * de dados e não sabe em que idioma o ecrã está. O que fica é a ordem do
+ * ciclo (`CONTRACT_STATUSES`) e os tons, que são os mesmos nos dois idiomas.
+ */
 
 /**
  * Tons de estado. 04 §5.6 **não** define uma família de cores para contratos,
@@ -148,11 +147,7 @@ export const CONTRACT_KINDS = ["sale", "rent"] as const;
 export const contractKindSchema = z.enum(CONTRACT_KINDS);
 export type ContractKind = (typeof CONTRACT_KINDS)[number];
 
-/** Os dois tipos lado a lado de 04 §8.3. */
-export const CONTRACT_KIND_LABELS: Record<ContractKind, string> = {
-  sale: "Compra e venda",
-  rent: "Arrendamento",
-};
+/** Os dois tipos lado a lado de 04 §8.3 têm rótulo em `contracts.kind.*`. */
 
 export const createContractSchema = z.object({
   templateId: z.string().uuid(),

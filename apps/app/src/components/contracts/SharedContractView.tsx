@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
@@ -11,7 +12,7 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import { Download } from "lucide-react";
 import { Button, Card, StatusTag } from "@upm/ui";
-import { CONTRACT_KIND_LABELS, CONTRACT_STATUS_LABELS, CONTRACT_STATUS_TONES } from "@upm/db/cloud";
+import { CONTRACT_STATUS_TONES } from "@upm/db/cloud";
 
 import type { ContractSharedWithMeRow } from "./contractTypes";
 import { Variable, substituteVariables } from "./VariableNode";
@@ -33,6 +34,9 @@ export type SharedContractViewProps = {
  * tem de existir na interface, não só na policy.
  */
 export function SharedContractView({ contract }: SharedContractViewProps) {
+  const t = useTranslations("contracts.sharedView");
+  const tKind = useTranslations("contracts.kind");
+  const tStatus = useTranslations("contracts.status");
   const router = useRouter();
   const editor = useEditor({
     editable: false,
@@ -59,11 +63,11 @@ export function SharedContractView({ contract }: SharedContractViewProps) {
         <div style={{ display: "grid", flex: 1, minWidth: 0 }}>
           <strong>{contract.title}</strong>
           <span style={{ color: "var(--muted)" }}>
-            {CONTRACT_KIND_LABELS[contract.kind]} · partilhado por {contract.sharedByName}
+            {tKind(contract.kind)} · {t("sharedByLine", { name: contract.sharedByName })}
           </span>
         </div>
         <StatusTag tone={CONTRACT_STATUS_TONES[contract.status] as never}>
-          {CONTRACT_STATUS_LABELS[contract.status]}
+          {tStatus(contract.status)}
         </StatusTag>
         {contract.permission === "download" ? (
           <Button
@@ -72,11 +76,11 @@ export function SharedContractView({ contract }: SharedContractViewProps) {
             leadingIcon={<Download size={15} />}
             onClick={() => window.print()}
           >
-            Transferir PDF
+            {t("downloadPdf")}
           </Button>
         ) : null}
         <Button variant="ghost" size="sm" onClick={() => router.push("/contratos")}>
-          Voltar
+          {t("back")}
         </Button>
       </Card>
 

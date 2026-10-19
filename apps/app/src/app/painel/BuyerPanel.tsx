@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import { CONTRACT_STATUS_LABELS, CONTRACT_STATUS_TONES } from "@upm/db/cloud";
+import { CONTRACT_STATUS_TONES } from "@upm/db/cloud";
 import { createClient } from "@upm/db/server";
 import { PageHeader, greetingKey } from "@upm/ui";
 
@@ -51,6 +51,8 @@ export async function BuyerPanel({
 }) {
   const supabase = createClient(await cookies());
   const t = await getTranslations();
+  const tStatus = await getTranslations("contracts.status");
+  const tActivity = await getTranslations("contracts.activity");
 
   const [
     savedCount,
@@ -139,10 +141,13 @@ export async function BuyerPanel({
     id: row.id,
     title: row.property_title ? `${row.title} · ${row.property_title}` : row.title,
     subtitle: row.counterparty_name
-      ? `com ${row.counterparty_name} · ${formatRelative(row.updated_at)}`
+      ? tActivity("withCounterparty", {
+          name: row.counterparty_name,
+          when: formatRelative(row.updated_at),
+        })
       : formatRelative(row.updated_at),
     href: `/contratos/${row.id}`,
-    tag: CONTRACT_STATUS_LABELS[row.status],
+    tag: tStatus(row.status),
     tone: CONTRACT_STATUS_TONES[row.status] as ActivityItem["tone"],
   }));
 

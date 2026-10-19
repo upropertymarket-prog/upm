@@ -59,6 +59,9 @@ export function TemplateManager({
 }) {
   const t = useTranslations("admin.contractTemplates");
   const tCommon = useTranslations("common");
+  // O tipo de contrato é o mesmo conceito dos dois lados do produto: as chaves
+  // são as de `contracts.kind`, e não um segundo "Compra e venda" só do Admin.
+  const tKind = useTranslations("contracts.kind");
   const [selected, setSelected] = useState(
     templates.find((template) => template.status === "draft")?.id ?? templates[0]?.id ?? "",
   );
@@ -98,8 +101,8 @@ export function TemplateManager({
                 label={t("kind")}
                 name="kind"
                 options={[
-                  { value: "sale", label: t("kinds.sale") },
-                  { value: "rent", label: t("kinds.rent") },
+                  { value: "sale", label: tKind("sale") },
+                  { value: "rent", label: tKind("rent") },
                 ]}
               />
               <Input
@@ -146,7 +149,7 @@ export function TemplateManager({
                     <span className="block font-semibold">{template.name}</span>
                     <span className="text-sm text-muted">
                       {t("kindAndVersion", {
-                        kind: t(`kinds.${template.kind}`),
+                        kind: tKind(template.kind),
                         version: String(template.version),
                       })}
                     </span>

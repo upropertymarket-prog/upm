@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 
-import { variableLabel } from "./contractTypes";
+import { nomeEmRotulo } from "./contractTypes";
 
 /**
  * O nó `variable` — a variável do contrato, 04 §8.3
@@ -13,6 +13,11 @@ import { variableLabel } from "./contractTypes";
  * `contract_templates.variables`; o `label` é só apresentação e é recalculado a
  * partir do `name` quando faltar, para um modelo antigo nunca mostrar uma
  * variável vazia.
+ *
+ * O rótulo de recurso **não se traduz**: o que conta é o `label` que ficou
+ * guardado no documento quando a variável foi inserida, e um contrato
+ * partilhado ou assinado não muda de palavras por alguém trocar o idioma. Sem
+ * `label` guardado — um modelo antigo —, mostra-se o `name` com maiúscula.
  *
  * Na pré-visualização a variável dá lugar ao valor (04 §8.3 — "substituídas em
  * pré-visualização"); só fica à vista a que ninguém preencheu.
@@ -45,13 +50,13 @@ export const Variable = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const name = String(node.attrs.name ?? "");
-    const label = String(node.attrs.label ?? "") || variableLabel(name);
+    const label = String(node.attrs.label ?? "") || nomeEmRotulo(name);
     return ["span", mergeAttributes(HTMLAttributes, { class: "upm-chip" }), label];
   },
 
   renderText({ node }) {
     const name = String(node.attrs.name ?? "");
-    return String(node.attrs.label ?? "") || variableLabel(name);
+    return String(node.attrs.label ?? "") || nomeEmRotulo(name);
   },
 });
 
