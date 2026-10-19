@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import {
   ArrowUpFromLine,
   ChevronRight,
@@ -109,6 +111,9 @@ type View =
  *    outro limite do plano é convidado a subir de plano, não a comprar o extra.
  */
 export function CloudScreen(props: CloudScreenProps) {
+  const t = useTranslations("cloud");
+  const tCommon = useTranslations("common");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   const { status, folders, files, sharedWithMe, contacts } = props;
   const [view, setView] = useState<View>({ kind: "all" });
   const [newFolder, setNewFolder] = useState(false);
@@ -160,7 +165,7 @@ export function CloudScreen(props: CloudScreenProps) {
     startTransition(async () => {
       const result = await props.onDownloadUrl(file.id, action);
       if (result.error || !result.url) {
-        toast(result.error ?? "Não foi possível abrir o ficheiro.", "error");
+        toast(result.error ?? t("openFailed"), "error");
         return;
       }
       window.open(result.url, "_blank", "noopener,noreferrer");
@@ -174,7 +179,7 @@ export function CloudScreen(props: CloudScreenProps) {
     const nearLimit = status.nearPlanLimit;
     return (
       <>
-        <PageHeader title="Cloud" subtitle={props.subtitle} />
+        <PageHeader title={t("title")} subtitle={props.subtitle} />
         <Card padded style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "start" }}>
           <span
             aria-hidden="true"
@@ -192,14 +197,10 @@ export function CloudScreen(props: CloudScreenProps) {
           </span>
           <div style={{ display: "grid", gap: "var(--sp-3)", maxWidth: "62ch" }}>
             <strong style={{ fontSize: "var(--fs-title-sm)" }}>
-              {nearLimit
-                ? "Está a chegar ao limite do seu plano"
-                : "A Cloud guarda os seus documentos"}
+              {nearLimit ? t("upsell.nearLimitTitle") : t("upsell.title")}
             </strong>
             <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
-              {nearLimit
-                ? "O Smarter dá-lhe mais imóveis ativos, mais conversas e 5 GB de Cloud."
-                : "Pretende guardar os seus ficheiros? A Cloud está incluída a partir do Essential, ou pode juntá-la ao plano que já tem."}
+              {nearLimit ? t("upsell.nearLimitBody") : t("upsell.body")}
             </p>
           </div>
           <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
@@ -208,7 +209,7 @@ export function CloudScreen(props: CloudScreenProps) {
               className="upm-btn upm-btn--primary upm-btn--md"
               style={{ textDecoration: "none" }}
             >
-              Ver planos
+              {t("upsell.seePlans")}
             </a>
             {nearLimit || !props.cloudAddonPrice ? null : (
               <a
@@ -216,7 +217,7 @@ export function CloudScreen(props: CloudScreenProps) {
                 className="upm-btn upm-btn--secondary upm-btn--md"
                 style={{ textDecoration: "none" }}
               >
-                {`Adicionar Cloud — ${props.cloudAddonPrice}/mês`}
+                {t("upsell.addCloud", { price: props.cloudAddonPrice })}
               </a>
             )}
           </div>
@@ -228,7 +229,7 @@ export function CloudScreen(props: CloudScreenProps) {
   const columns: TableColumn<CloudFileRow>[] = [
     {
       id: "name",
-      header: "Ficheiro",
+      header: t("columns.file"),
       cell: (row) => (
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", minWidth: 0 }}>
           <span
@@ -251,16 +252,13 @@ export function CloudScreen(props: CloudScreenProps) {
               {row.name}
             </strong>
             <span style={{ color: "var(--muted)" }}>
-              {mimeLabel(row.mime)} · {formatBytes(row.size)}
+              {mimeLabel(row.mime, t("fileFallback"))} · {formatBytes(row.size)}
               {row.currentVersion > 1 ? ` · v${row.currentVersion}` : ""}
             </span>
           </div>
           {row.readonly ? (
-            <span
-              title="Documento do imóvel — só de leitura aqui"
-              style={{ color: "var(--muted)" }}
-            >
-              <Lock size={13} aria-label="Só de leitura" />
+            <span title={t("readonlyHint")} style={{ color: "var(--muted)" }}>
+              <Lock size={13} aria-label={t("readonlyBadge")} />
             </span>
           ) : null}
         </div>
@@ -268,22 +266,24 @@ export function CloudScreen(props: CloudScreenProps) {
     },
     {
       id: "share",
-      header: "Partilha",
+      header: t("columns.share"),
       cell: (row) => (
         <span style={{ color: "var(--muted)" }}>
           {row.sharedLabel}
-          {row.hasLink ? " · por ligação" : ""}
+          {row.hasLink ? t("sharedViaLink") : ""}
         </span>
       ),
     },
     {
       id: "date",
-      header: "Adicionado",
-      cell: (row) => <span style={{ color: "var(--muted)" }}>{formatDate(row.createdAt)}</span>,
+      header: t("columns.added"),
+      cell: (row) => (
+        <span style={{ color: "var(--muted)" }}>{formatDate(row.createdAt, intlLocale)}</span>
+      ),
     },
     {
       id: "actions",
-      header: "Ações",
+      header: t("columns.actions"),
       width: "240px",
       cell: (row) => (
         <div
@@ -301,7 +301,7 @@ export function CloudScreen(props: CloudScreenProps) {
           <Button
             variant="secondary"
             iconOnly
-            aria-label={`Transferir ${row.name}`}
+            aria-label={t("downloadFile", { name: row.name })}
             onClick={() => download(row, "download")}
           >
             <Download size={16} />
@@ -309,7 +309,7 @@ export function CloudScreen(props: CloudScreenProps) {
           <Button
             variant="secondary"
             iconOnly
-            aria-label={`Partilhar ${row.name}`}
+            aria-label={t("shareFile", { name: row.name })}
             onClick={() => setShare(row)}
           >
             <Share2 size={16} />
@@ -318,9 +318,9 @@ export function CloudScreen(props: CloudScreenProps) {
             variant="secondary"
             iconOnly
             disabled={row.readonly}
-            aria-label={`Eliminar ${row.name}`}
-            title={row.readonly ? "Este documento não pode ser eliminado aqui" : undefined}
-            onClick={() => run(() => props.onDelete(row.id), "Ficheiro movido para a reciclagem.")}
+            aria-label={t("deleteFile", { name: row.name })}
+            title={row.readonly ? t("cannotDelete") : undefined}
+            onClick={() => run(() => props.onDelete(row.id), t("toast.binned"))}
           >
             <Trash2 size={16} />
           </Button>
@@ -332,7 +332,7 @@ export function CloudScreen(props: CloudScreenProps) {
             style={{ marginLeft: "var(--sp-3)" }}
             onClick={() => openFile(row)}
           >
-            Detalhes
+            {t("details")}
           </Button>
         </div>
       ),
@@ -347,7 +347,7 @@ export function CloudScreen(props: CloudScreenProps) {
   return (
     <>
       <PageHeader
-        title="Cloud"
+        title={t("title")}
         subtitle={props.subtitle}
         actions={
           <>
@@ -356,14 +356,14 @@ export function CloudScreen(props: CloudScreenProps) {
               leadingIcon={<FolderPlus size={15} />}
               onClick={() => setNewFolder(true)}
             >
-              Nova pasta
+              {t("newFolder")}
             </Button>
             <Button
               leadingIcon={<ArrowUpFromLine size={15} />}
               disabled={pending}
               onClick={() => uploadRef.current?.click()}
             >
-              Carregar ficheiro
+              {t("upload")}
             </Button>
             <input
               ref={uploadRef}
@@ -377,7 +377,7 @@ export function CloudScreen(props: CloudScreenProps) {
                 const form = new FormData();
                 form.set("file", file);
                 if (uploadFolderId) form.set("folderId", uploadFolderId);
-                run(() => props.onUpload(form), "Ficheiro carregado.");
+                run(() => props.onUpload(form), t("toast.uploaded"));
               }}
             />
           </>
@@ -411,7 +411,7 @@ export function CloudScreen(props: CloudScreenProps) {
         >
           <div style={{ display: "grid", alignContent: "start", gap: "var(--sp-3)" }}>
             <NavRow
-              label="Todos os ficheiros"
+              label={t("navAll")}
               icon={<CloudIcon size={15} />}
               count={live.length}
               active={view.kind === "all"}
@@ -421,14 +421,14 @@ export function CloudScreen(props: CloudScreenProps) {
               <FolderRow key={node.id} node={node} view={view} onSelect={setView} depth={0} />
             ))}
             <NavRow
-              label="Partilhados comigo"
+              label={t("navShared")}
               icon={<Inbox size={15} />}
               count={sharedWithMe.length}
               active={view.kind === "shared"}
               onClick={() => setView({ kind: "shared" })}
             />
             <NavRow
-              label="Reciclagem"
+              label={t("navRecycle")}
               icon={<Trash2 size={15} />}
               count={binned.length}
               active={view.kind === "recycle"}
@@ -445,7 +445,7 @@ export function CloudScreen(props: CloudScreenProps) {
               paddingTop: "var(--sp-6)",
             }}
           >
-            <strong>Armazenamento</strong>
+            <strong>{t("storage")}</strong>
             <div
               aria-hidden="true"
               style={{
@@ -464,8 +464,10 @@ export function CloudScreen(props: CloudScreenProps) {
               />
             </div>
             <span style={{ color: "var(--muted)" }}>
-              {formatBytes(status.usedBytes)} de{" "}
-              {status.limitBytes === null ? "ilimitado" : formatBytes(status.limitBytes)}
+              {t("storageUsed", {
+                used: formatBytes(status.usedBytes),
+                limit: status.limitBytes === null ? t("unlimited") : formatBytes(status.limitBytes),
+              })}
             </span>
           </div>
         </Card>
@@ -483,9 +485,9 @@ export function CloudScreen(props: CloudScreenProps) {
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => run(props.onEmptyRecycleBin, "Reciclagem esvaziada.")}
+                onClick={() => run(props.onEmptyRecycleBin, t("toast.recycleEmptied"))}
               >
-                Esvaziar reciclagem
+                {t("emptyRecycleBin")}
               </Button>
             ) : null}
           </div>
@@ -497,21 +499,17 @@ export function CloudScreen(props: CloudScreenProps) {
             />
           ) : visible.length === 0 ? (
             <EmptyState
-              title={view.kind === "recycle" ? "Reciclagem vazia" : "Ainda sem ficheiros"}
-              description={
-                view.kind === "recycle"
-                  ? "O que eliminar fica aqui 30 dias antes de desaparecer — e continua a contar para o seu armazenamento até lá."
-                  : "Carregue certidões, plantas e contratos. Aceitam-se PDF, JPG e PNG até 25 MB."
-              }
+              title={view.kind === "recycle" ? t("recycleEmptyTitle") : t("emptyTitle")}
+              description={view.kind === "recycle" ? t("recycleEmptyBody") : t("emptyBody")}
             />
           ) : (
             <Card>
               <Table
-                caption="Ficheiros da Cloud"
+                caption={t("tableCaption")}
                 columns={columns}
                 rows={visible}
                 rowKey={(row) => row.id}
-                empty="Nenhum ficheiro nesta pasta."
+                empty={t("tableEmpty")}
               />
             </Card>
           )}
@@ -520,13 +518,13 @@ export function CloudScreen(props: CloudScreenProps) {
         <Modal
           open={newFolder}
           onClose={() => setNewFolder(false)}
-          title="Nova pasta"
-          subtitle={view.kind === "folder" ? "Dentro da pasta selecionada" : undefined}
+          title={t("newFolder")}
+          subtitle={view.kind === "folder" ? t("newFolderIn") : undefined}
           size="sm"
           footer={
             <>
               <Button variant="secondary" onClick={() => setNewFolder(false)}>
-                Cancelar
+                {tCommon("cancel")}
               </Button>
               <Button
                 disabled={pending || folderName.trim().length === 0}
@@ -535,19 +533,19 @@ export function CloudScreen(props: CloudScreenProps) {
                   const parent = view.kind === "folder" ? view.id : undefined;
                   setNewFolder(false);
                   setFolderName("");
-                  run(() => props.onCreateFolder(name, parent), "Pasta criada.");
+                  run(() => props.onCreateFolder(name, parent), t("toast.folderCreated"));
                 }}
               >
-                Criar
+                {t("create")}
               </Button>
             </>
           }
         >
           <Input
-            label="Nome"
+            label={t("folderName")}
             value={folderName}
             onChange={(event) => setFolderName(event.target.value)}
-            placeholder="Escrituras"
+            placeholder={t("folderNamePlaceholder")}
             maxLength={120}
           />
         </Modal>
@@ -564,16 +562,20 @@ export function CloudScreen(props: CloudScreenProps) {
         <Drawer
           open={detail !== null}
           onClose={() => setDetail(null)}
-          title={detail?.name ?? "Ficheiro"}
-          subtitle={detail ? `${mimeLabel(detail.mime)} · ${formatBytes(detail.size)}` : undefined}
+          title={detail?.name ?? t("fileFallback")}
+          subtitle={
+            detail
+              ? `${mimeLabel(detail.mime, t("fileFallback"))} · ${formatBytes(detail.size)}`
+              : undefined
+          }
           footer={
             <>
               <Button variant="secondary" onClick={() => setDetail(null)}>
-                Fechar
+                {tCommon("close")}
               </Button>
               {detail && !detail.readonly ? (
                 <Button disabled={pending} onClick={() => replaceRef.current?.click()}>
-                  Substituir
+                  {t("replace")}
                 </Button>
               ) : null}
             </>
@@ -591,7 +593,7 @@ export function CloudScreen(props: CloudScreenProps) {
               const form = new FormData();
               form.set("file", file);
               form.set("fileId", detail.id);
-              run(() => props.onReplace(form), "Versão nova guardada.");
+              run(() => props.onReplace(form), t("toast.versionSaved"));
               setDetail(null);
             }}
           />
@@ -599,19 +601,18 @@ export function CloudScreen(props: CloudScreenProps) {
           <div style={{ display: "grid", gap: "var(--sp-7)" }}>
             {detail?.readonly ? (
               <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
-                Este é um documento do imóvel. Vê-se, transfere-se e partilha-se daqui — substituir
-                e eliminar fazem-se no formulário do imóvel, onde o aviso de nova moderação existe.
+                {t("readonlyNote")}
               </p>
             ) : null}
 
             <section style={{ display: "grid", gap: "var(--sp-4)" }}>
               <strong style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
-                <History size={15} aria-hidden="true" /> Versões
+                <History size={15} aria-hidden="true" /> {t("versions")}
               </strong>
               {details === null ? (
-                <span style={{ color: "var(--muted)" }}>A carregar…</span>
+                <span style={{ color: "var(--muted)" }}>{tCommon("loading")}</span>
               ) : details.versions.length === 0 ? (
-                <span style={{ color: "var(--muted)" }}>Sem histórico.</span>
+                <span style={{ color: "var(--muted)" }}>{t("noVersions")}</span>
               ) : (
                 <ul
                   style={{
@@ -643,7 +644,7 @@ export function CloudScreen(props: CloudScreenProps) {
                           {version.name}
                         </span>
                         <span style={{ color: "var(--muted)" }}>
-                          {formatDate(version.createdAt)} · {formatBytes(version.size)}
+                          {formatDate(version.createdAt, intlLocale)} · {formatBytes(version.size)}
                           {version.note ? ` · ${version.note}` : ""}
                         </span>
                       </div>
@@ -656,11 +657,11 @@ export function CloudScreen(props: CloudScreenProps) {
                             setDetail(null);
                             run(
                               () => props.onRestoreVersion(id, version.version),
-                              "Versão restaurada como versão nova.",
+                              t("toast.versionRestored"),
                             );
                           }}
                         >
-                          Restaurar
+                          {t("restore")}
                         </Button>
                       ) : null}
                     </li>
@@ -671,12 +672,12 @@ export function CloudScreen(props: CloudScreenProps) {
 
             <section style={{ display: "grid", gap: "var(--sp-4)" }}>
               <strong style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
-                <Users size={15} aria-hidden="true" /> Acessos
+                <Users size={15} aria-hidden="true" /> {t("accesses")}
               </strong>
               {details === null ? (
-                <span style={{ color: "var(--muted)" }}>A carregar…</span>
+                <span style={{ color: "var(--muted)" }}>{tCommon("loading")}</span>
               ) : details.accesses.length === 0 ? (
-                <span style={{ color: "var(--muted)" }}>Ninguém abriu este ficheiro ainda.</span>
+                <span style={{ color: "var(--muted)" }}>{t("noAccesses")}</span>
               ) : (
                 <ul
                   style={{
@@ -690,10 +691,15 @@ export function CloudScreen(props: CloudScreenProps) {
                   {details.accesses.slice(0, 20).map((access, index) => (
                     <li key={index} style={{ display: "grid" }}>
                       <span>
-                        {ACCESS_LABELS[access.action] ?? access.action} · {access.actorName}
-                        {access.viaLink ? " (ligação)" : ""}
+                        {ACCESS_ACTIONS.has(access.action)
+                          ? t(`access.${access.action}`)
+                          : access.action}{" "}
+                        · {access.actorName}
+                        {access.viaLink ? t("accessViaLink") : ""}
                       </span>
-                      <span style={{ color: "var(--muted)" }}>{formatDate(access.occurredAt)}</span>
+                      <span style={{ color: "var(--muted)" }}>
+                        {formatDate(access.occurredAt, intlLocale)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -706,14 +712,21 @@ export function CloudScreen(props: CloudScreenProps) {
   );
 }
 
-const ACCESS_LABELS: Record<string, string> = {
-  view: "Visto",
-  download: "Transferido",
-  export_pdf: "Exportado em PDF",
-  print: "Impresso",
-  share_created: "Partilha criada",
-  share_revoked: "Partilha revogada",
-};
+/**
+ * As ações que têm chave em `cloud.access.*`. A guarda existe porque
+ * `audit`/`file_access` podem ganhar uma ação nova na base de dados antes de
+ * alguém lhe escrever o rótulo, e `t()` de uma chave que não existe grita em
+ * desenvolvimento e imprime a chave em produção. Sem rótulo, mostra-se o nome
+ * técnico — feio, mas honesto.
+ */
+const ACCESS_ACTIONS = new Set([
+  "view",
+  "download",
+  "export_pdf",
+  "print",
+  "share_created",
+  "share_revoked",
+]);
 
 function flatten(node: FolderNode): FolderNode[] {
   return [node, ...node.children.flatMap(flatten)];
@@ -817,52 +830,49 @@ function SharedWithMeList({
   rows: SharedWithMeRow[];
   onOpen: (fileId: string) => void;
 }) {
+  const t = useTranslations("cloud");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   if (rows.length === 0) {
-    return (
-      <EmptyState
-        title="Nada partilhado consigo"
-        description="Os documentos que outra pessoa lhe partilhar aparecem aqui."
-      />
-    );
+    return <EmptyState title={t("sharedEmptyTitle")} description={t("sharedEmptyBody")} />;
   }
 
   return (
     <Card>
       <Table
-        caption="Partilhados comigo"
+        caption={t("sharedCaption")}
         rows={rows}
         rowKey={(row) => row.shareId}
-        empty="Nada partilhado consigo."
+        empty={t("sharedTableEmpty")}
         columns={[
           {
             id: "name",
-            header: "Ficheiro",
+            header: t("columns.file"),
             cell: (row) => (
               <div style={{ display: "grid", minWidth: 0 }}>
                 <strong>{row.name}</strong>
                 <span style={{ color: "var(--muted)" }}>
-                  {mimeLabel(row.mime)} · {formatBytes(row.size)}
+                  {mimeLabel(row.mime, t("fileFallback"))} · {formatBytes(row.size)}
                 </span>
               </div>
             ),
           },
           {
             id: "by",
-            header: "De",
+            header: t("columns.sharedBy"),
             cell: (row) => <span style={{ color: "var(--muted)" }}>{row.sharedByName}</span>,
           },
           {
             id: "expires",
-            header: "Expira",
+            header: t("columns.expires"),
             cell: (row) => (
               <span style={{ color: "var(--muted)" }}>
-                {row.expiresAt ? formatDate(row.expiresAt) : "Sem expirar"}
+                {row.expiresAt ? formatDate(row.expiresAt, intlLocale) : t("noExpiry")}
               </span>
             ),
           },
           {
             id: "actions",
-            header: "Ações",
+            header: t("columns.actions"),
             cell: (row) => (
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
@@ -871,7 +881,7 @@ function SharedWithMeList({
                   leadingIcon={<Download size={14} />}
                   onClick={() => onOpen(row.fileId)}
                 >
-                  {row.permission === "download" ? "Transferir" : "Ver"}
+                  {row.permission === "download" ? t("transfer") : t("view")}
                 </Button>
               </div>
             ),

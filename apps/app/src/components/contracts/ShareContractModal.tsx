@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Copy, Link2, UserPlus } from "lucide-react";
 import { Button, Input, Modal, Select, useToast } from "@upm/ui";
-import {
-  SHARE_EXPIRY_OPTIONS,
-  SHARE_PERMISSION_LABELS,
-  SHARE_PERMISSIONS,
-  type SharePermission,
-} from "@upm/db/cloud";
+import { SHARE_EXPIRY_OPTIONS, SHARE_PERMISSIONS, type SharePermission } from "@upm/db/cloud";
 
 import type { ShareContact } from "../cloud/cloudTypes";
 import type { ContractDetail } from "./contractTypes";
@@ -58,6 +54,9 @@ export function ShareContractModal({
   onShare,
   onRevoke,
 }: ShareContractModalProps) {
+  const t = useTranslations("contracts.shareModal");
+  const tShare = useTranslations("share");
+  const tCommon = useTranslations("common");
   const [permission, setPermission] = useState<SharePermission>("view");
   const [person, setPerson] = useState("");
   const [expiryIndex, setExpiryIndex] = useState("1");
@@ -81,15 +80,15 @@ export function ShareContractModal({
   if (!open) return null;
 
   const expiry = SHARE_EXPIRY_OPTIONS[Number(expiryIndex)] ?? SHARE_EXPIRY_OPTIONS[1]!;
-  const nameOf = (id: string) => contacts.find((c) => c.id === id)?.name ?? "Utilizador";
+  const nameOf = (id: string) => contacts.find((c) => c.id === id)?.name ?? tShare("someone");
 
   function submit(asLink: boolean) {
     if (!asLink && !person) {
-      toast("Escolha com quem quer partilhar.", "error");
+      toast(tShare("pickPerson"), "error");
       return;
     }
     if (asLink && accessCode && !/^\d{4,6}$/.test(accessCode)) {
-      toast("O código de acesso tem 4 a 6 dígitos.", "error");
+      toast(tShare("badCode"), "error");
       return;
     }
 
@@ -108,10 +107,10 @@ export function ShareContractModal({
       }
       if (result.url) {
         setLink(result.url);
-        toast("Ligação criada. A versão desta altura ficou congelada.", "success");
+        toast(t("linkCreated"), "success");
       } else {
         setPerson("");
-        toast("Contrato partilhado. A versão desta altura ficou congelada.", "success");
+        toast(t("shared"), "success");
       }
     });
   }
@@ -120,40 +119,38 @@ export function ShareContractModal({
     <Modal
       open
       onClose={onClose}
-      title="Partilhar contrato"
+      title={t("title")}
       subtitle={contract.title}
       footer={
         <Button variant="secondary" onClick={onClose}>
-          Fechar
+          {tCommon("close")}
         </Button>
       }
     >
       <div style={{ display: "grid", gap: "var(--sp-7)" }}>
         <Select
-          label="Permissão"
+          label={tShare("permissionLabel")}
           value={permission}
           onChange={(event) => setPermission(event.target.value as SharePermission)}
           options={SHARE_PERMISSIONS.map((value) => ({
             value,
-            label: SHARE_PERMISSION_LABELS[value],
+            label: tShare(`permission.${value}`),
           }))}
-          hint="Não há permissão de edição numa partilha: editar o contrato é seu."
+          hint={t("permissionHint")}
         />
 
         <section style={{ display: "grid", gap: "var(--sp-4)" }}>
-          <strong>Com acesso</strong>
+          <strong>{tShare("withAccess")}</strong>
           {contacts.length === 0 ? (
-            <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
-              Ainda não fala com ninguém na plataforma. Use a ligação abaixo.
-            </p>
+            <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>{t("noContacts")}</p>
           ) : (
             <div style={{ display: "flex", gap: "var(--sp-4)", alignItems: "flex-end" }}>
               <div style={{ flex: 1 }}>
                 <Select
-                  label="Pessoa"
+                  label={tShare("person")}
                   value={person}
                   onChange={(event) => setPerson(event.target.value)}
-                  placeholder="Escolha um contacto"
+                  placeholder={tShare("personPlaceholder")}
                   options={contacts.map((contact) => ({
                     value: contact.id,
                     label: contact.name,
@@ -166,7 +163,7 @@ export function ShareContractModal({
                 disabled={pending}
                 onClick={() => submit(false)}
               >
-                Partilhar
+                {tShare("shareAction")}
               </Button>
             </div>
           )}
@@ -189,10 +186,10 @@ export function ShareContractModal({
                     style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}
                   >
                     <span style={{ flex: 1 }}>
-                      {item.sharedWith ? nameOf(item.sharedWith) : "Utilizador"}
+                      {item.sharedWith ? nameOf(item.sharedWith) : tShare("someone")}
                       <span style={{ color: "var(--muted)" }}>
                         {" · "}
-                        {SHARE_PERMISSION_LABELS[item.permission]}
+                        {tShare(`permission.${item.permission}`)}
                       </span>
                     </span>
                     <Button
@@ -203,13 +200,13 @@ export function ShareContractModal({
                         startTransition(async () => {
                           const result = await onRevoke(item.id);
                           toast(
-                            result.error ?? "Acesso revogado.",
+                            result.error ?? tShare("revoked"),
                             result.error ? "error" : "success",
                           );
                         })
                       }
                     >
-                      Revogar
+                      {tShare("revoke")}
                     </Button>
                   </li>
                 ))}
@@ -218,7 +215,7 @@ export function ShareContractModal({
         </section>
 
         <section style={{ display: "grid", gap: "var(--sp-4)" }}>
-          <strong>Ligação</strong>
+          <strong>{tShare("link")}</strong>
           <div
             style={{
               display: "grid",
@@ -227,21 +224,21 @@ export function ShareContractModal({
             }}
           >
             <Select
-              label="Expira"
+              label={tShare("expires")}
               value={expiryIndex}
               onChange={(event) => setExpiryIndex(event.target.value)}
               options={SHARE_EXPIRY_OPTIONS.map((option, index) => ({
                 value: String(index),
-                label: option.label,
+                label: tShare(`expiry.${option.key}`),
               }))}
             />
             <Input
-              label="Código de acesso"
+              label={tShare("accessCode")}
               value={accessCode}
               onChange={(event) => setAccessCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="Opcional"
+              placeholder={tShare("accessCodeOptional")}
               inputMode="numeric"
-              hint="4 a 6 dígitos."
+              hint={t("accessCodeHint")}
             />
           </div>
 
@@ -269,10 +266,10 @@ export function ShareContractModal({
                 onClick={() => {
                   void navigator.clipboard.writeText(link);
                   setCopied(true);
-                  toast("Ligação copiada.", "success");
+                  toast(tShare("linkCopied"), "success");
                 }}
               >
-                {copied ? "Copiado" : "Copiar"}
+                {copied ? tShare("copied") : tShare("copy")}
               </Button>
             </div>
           ) : (
@@ -283,7 +280,7 @@ export function ShareContractModal({
               disabled={pending}
               onClick={() => submit(true)}
             >
-              Criar ligação
+              {tShare("createLink")}
             </Button>
           )}
         </section>

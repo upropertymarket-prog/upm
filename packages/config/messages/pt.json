@@ -89,6 +89,151 @@
     "signatures": "Assinaturas de e-mail",
     "marketing": "Marketing"
   },
+  "roles": {
+    "owner": "Proprietário",
+    "buyer": "Comprador"
+  },
+  "share": {
+    "permission": {
+      "view": "Pode ver",
+      "download": "Pode transferir"
+    },
+    "expiry": {
+      "hours24": "24 horas",
+      "days7": "7 dias",
+      "days30": "30 dias",
+      "never": "Sem expirar"
+    },
+    "permissionLabel": "Permissão",
+    "withAccess": "Com acesso",
+    "person": "Pessoa",
+    "personPlaceholder": "Escolha um contacto",
+    "shareAction": "Partilhar",
+    "someone": "Utilizador",
+    "revoke": "Revogar",
+    "revoked": "Acesso revogado.",
+    "link": "Ligação",
+    "expires": "Expira",
+    "accessCode": "Código de acesso",
+    "accessCodeOptional": "Opcional",
+    "createLink": "Criar ligação",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "linkCopied": "Ligação copiada.",
+    "pickPerson": "Escolha com quem quer partilhar.",
+    "badCode": "O código de acesso tem 4 a 6 dígitos."
+  },
+  "contracts": {
+    "shareModal": {
+      "title": "Partilhar contrato",
+      "permissionHint": "Não há permissão de edição numa partilha: editar o contrato é seu.",
+      "noContacts": "Ainda não fala com ninguém na plataforma. Use a ligação abaixo.",
+      "accessCodeHint": "4 a 6 dígitos.",
+      "linkCreated": "Ligação criada. A versão desta altura ficou congelada.",
+      "shared": "Contrato partilhado. A versão desta altura ficou congelada."
+    }
+  },
+  "cloud": {
+    "title": "Cloud",
+    "subtitleNoCloud": "A Cloud está incluída a partir do plano Essential",
+    "subtitleUnlimited": "{used} usados · armazenamento ilimitado",
+    "subtitleUsed": "{used} de {limit} usados",
+    "upsell": {
+      "title": "A Cloud guarda os seus documentos",
+      "body": "Pretende guardar os seus ficheiros? A Cloud está incluída a partir do Essential, ou pode juntá-la ao plano que já tem.",
+      "nearLimitTitle": "Está a chegar ao limite do seu plano",
+      "nearLimitBody": "O Smarter dá-lhe mais imóveis ativos, mais conversas e 5 GB de Cloud.",
+      "seePlans": "Ver planos",
+      "addCloud": "Adicionar Cloud — {price}/mês"
+    },
+    "columns": {
+      "file": "Ficheiro",
+      "share": "Partilha",
+      "added": "Adicionado",
+      "actions": "Ações",
+      "sharedBy": "De",
+      "expires": "Expira"
+    },
+    "readonlyHint": "Documento do imóvel — só de leitura aqui",
+    "readonlyBadge": "Só de leitura",
+    "sharedViaLink": " · por ligação",
+    "cannotDelete": "Este documento não pode ser eliminado aqui",
+    "downloadFile": "Transferir {name}",
+    "shareFile": "Partilhar {name}",
+    "deleteFile": "Eliminar {name}",
+    "details": "Detalhes",
+    "newFolder": "Nova pasta",
+    "newFolderIn": "Dentro da pasta selecionada",
+    "folderName": "Nome",
+    "folderNamePlaceholder": "Escrituras",
+    "create": "Criar",
+    "upload": "Carregar ficheiro",
+    "navAll": "Todos os ficheiros",
+    "navShared": "Partilhados comigo",
+    "navRecycle": "Reciclagem",
+    "storage": "Armazenamento",
+    "storageUsed": "{used} de {limit}",
+    "unlimited": "ilimitado",
+    "emptyRecycleBin": "Esvaziar reciclagem",
+    "emptyTitle": "Ainda sem ficheiros",
+    "emptyBody": "Carregue certidões, plantas e contratos. Aceitam-se PDF, JPG e PNG até 25 MB.",
+    "recycleEmptyTitle": "Reciclagem vazia",
+    "recycleEmptyBody": "O que eliminar fica aqui 30 dias antes de desaparecer — e continua a contar para o seu armazenamento até lá.",
+    "tableCaption": "Ficheiros da Cloud",
+    "tableEmpty": "Nenhum ficheiro nesta pasta.",
+    "openFailed": "Não foi possível abrir o ficheiro.",
+    "fileFallback": "Ficheiro",
+    "replace": "Substituir",
+    "readonlyNote": "Este é um documento do imóvel. Vê-se, transfere-se e partilha-se daqui — substituir e eliminar fazem-se no formulário do imóvel, onde o aviso de nova moderação existe.",
+    "versions": "Versões",
+    "noVersions": "Sem histórico.",
+    "restore": "Restaurar",
+    "accesses": "Acessos",
+    "noAccesses": "Ninguém abriu este ficheiro ainda.",
+    "accessViaLink": " (ligação)",
+    "access": {
+      "view": "Visto",
+      "download": "Transferido",
+      "export_pdf": "Exportado em PDF",
+      "print": "Impresso",
+      "share_created": "Partilha criada",
+      "share_revoked": "Partilha revogada"
+    },
+    "sharedCaption": "Partilhados comigo",
+    "sharedEmptyTitle": "Nada partilhado consigo",
+    "sharedEmptyBody": "Os documentos que outra pessoa lhe partilhar aparecem aqui.",
+    "sharedTableEmpty": "Nada partilhado consigo.",
+    "noExpiry": "Sem expirar",
+    "transfer": "Transferir",
+    "view": "Ver",
+    "shareModal": {
+      "title": "Partilhar",
+      "noContacts": "Ainda não fala com ninguém na plataforma. Use a ligação abaixo para enviar este documento a quem quiser.",
+      "personHint": "Partilha-se com quem já fala consigo; para os restantes, use a ligação.",
+      "accessCodeHint": "4 a 6 dígitos, pedidos ao abrir a ligação.",
+      "linkCreated": "Ligação criada.",
+      "shared": "Partilhado."
+    },
+    "sharedLink": {
+      "unavailableTitle": "Ligação indisponível",
+      "unavailableBody": "Esta ligação já não dá acesso ao documento. Peça uma nova a quem a partilhou.",
+      "protectedTitle": "Documento protegido",
+      "protectedBody": "Escreva o código que recebeu com a ligação.",
+      "codeLabel": "Código de acesso",
+      "codeWrong": "Código incorreto.",
+      "open": "Abrir documento",
+      "viewDocument": "Ver documento",
+      "notAvailable": "O documento não está disponível neste momento."
+    },
+    "toast": {
+      "folderCreated": "Pasta criada.",
+      "uploaded": "Ficheiro carregado.",
+      "binned": "Ficheiro movido para a reciclagem.",
+      "recycleEmptied": "Reciclagem esvaziada.",
+      "versionSaved": "Versão nova guardada.",
+      "versionRestored": "Versão restaurada como versão nova."
+    }
+  },
   "emptyState": {
     "noResults": "Sem resultados",
     "noResultsHint": "Tente alterar os filtros ou a pesquisa."

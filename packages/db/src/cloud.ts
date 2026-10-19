@@ -62,21 +62,22 @@ export const SHARE_PERMISSIONS = ["view", "download"] as const;
 export const sharePermissionSchema = z.enum(SHARE_PERMISSIONS);
 export type SharePermission = (typeof SHARE_PERMISSIONS)[number];
 
-export const SHARE_PERMISSION_LABELS: Record<SharePermission, string> = {
-  view: "Pode ver",
-  download: "Pode transferir",
-};
-
 /**
- * As opções de expiração do protótipo. `null` é "Sem expirar", que se mantém
- * por decisão do cliente (07 §19.11) — a rede de segurança é a revogação e o
- * registo de acessos, não o prazo.
+ * As opções de expiração do protótipo. `hours: null` é "sem expirar", que se
+ * mantém por decisão do cliente (07 §19.11) — a rede de segurança é a
+ * revogação e o registo de acessos, não o prazo.
+ *
+ * **`key` e não `label`**: este pacote fala com a base de dados e não sabe em
+ * que idioma o ecrã está. O rótulo vive em `share.expiry.*` nas mensagens, e
+ * quem monta o `Select` é que o traduz. As horas, essas, são as mesmas nos
+ * dois idiomas. O mesmo valeu para o `SHARE_PERMISSION_LABELS` que aqui
+ * estava: passou a `share.permission.*`.
  */
 export const SHARE_EXPIRY_OPTIONS = [
-  { label: "24 horas", hours: 24 },
-  { label: "7 dias", hours: 24 * 7 },
-  { label: "30 dias", hours: 24 * 30 },
-  { label: "Sem expirar", hours: null },
+  { key: "hours24", hours: 24 },
+  { key: "days7", hours: 24 * 7 },
+  { key: "days30", hours: 24 * 30 },
+  { key: "never", hours: null },
 ] as const;
 
 export const shareFileSchema = z

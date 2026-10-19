@@ -103,13 +103,23 @@ const MIME_LABELS: Record<string, string> = {
   "image/png": "PNG",
 };
 
-export function mimeLabel(mime: string): string {
-  return MIME_LABELS[mime] ?? mime.split("/").pop()?.toUpperCase() ?? "Ficheiro";
+/**
+ * `fallback` vem de quem chama, com a chave `cloud.fileFallback`: um MIME sem
+ * barra não tem extensão para mostrar, e o rótulo que o substitui é texto que
+ * o utilizador lê — logo não se escreve aqui.
+ */
+export function mimeLabel(mime: string, fallback = ""): string {
+  return MIME_LABELS[mime] ?? mime.split("/").pop()?.toUpperCase() ?? fallback;
 }
 
-/** "há 3 dias" — o mesmo formato relativo da Fase 5. */
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("pt-PT", {
+/**
+ * Data curta, na etiqueta `Intl` do idioma escolhido (02 §12). O `locale` é
+ * argumento e não constante porque "15 out 2026" e "15 Oct 2026" são a mesma
+ * data escrita por duas convenções, e fixar `pt-PT` punha o mês em português
+ * dentro de um ecrã inglês.
+ */
+export function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",

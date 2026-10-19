@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { createClient } from "@upm/db/server";
 import { formatBytes } from "@upm/db/cloud";
 
@@ -55,7 +56,12 @@ export const dynamic = "force-dynamic";
  */
 export default async function CloudPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, t, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("cloud"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
 
   const user = authData.user;
   if (!user) redirect("/");
@@ -94,23 +100,29 @@ export default async function CloudPage() {
 
   // 07 §19.4 — o convite nomeia o preço do extra, e esse preço vem de `addons`.
   const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
+  // A etiqueta `Intl` segue o idioma escolhido (02 §12): o preço é o mesmo em
+  // euros, mas "9,99 €" e "€9.99" não se escrevem da mesma maneira.
   const cloudAddonPrice = cloudAddon
-    ? new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(
-        cloudAddon.priceMonthCents / 100,
-      )
+    ? new Intl.NumberFormat(INTL_LOCALE[resolveLocale(locale)], {
+        style: "currency",
+        currency: "EUR",
+      }).format(cloudAddon.priceMonthCents / 100)
     : null;
 
   const subtitle = !status.hasCloud
-    ? "A Cloud está incluída a partir do plano Essential"
+    ? t("subtitleNoCloud")
     : status.limitBytes === null
-      ? `${formatBytes(status.usedBytes)} usados · armazenamento ilimitado`
-      : `${formatBytes(status.usedBytes)} de ${formatBytes(status.limitBytes)} usados`;
+      ? t("subtitleUnlimited", { used: formatBytes(status.usedBytes) })
+      : t("subtitleUsed", {
+          used: formatBytes(status.usedBytes),
+          limit: formatBytes(status.limitBytes),
+        });
 
   return (
     <AppChrome
       role={role}
-      userName={profile.full_name || (role === "owner" ? "Proprietário" : "Comprador")}
-      userMeta={role === "owner" ? "Proprietário" : "Comprador"}
+      userName={profile.full_name || tRoles(role)}
+      userMeta={tRoles(role)}
       activeId="cloud"
       locale={locale}
       onLocaleChange={setLocalePreference}

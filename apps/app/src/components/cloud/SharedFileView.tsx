@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Download, FileText, Lock } from "lucide-react";
 import { Button, Card, Input } from "@upm/ui";
 import { formatBytes } from "@upm/db/cloud";
@@ -36,6 +37,7 @@ export type SharedFileViewProps = {
  * adivinha se vale a pena continuar.
  */
 export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewProps) {
+  const t = useTranslations("cloud");
   const [state, setState] = useState<SharedLinkResult>(initial);
   const [code, setCode] = useState("");
   const [wrong, setWrong] = useState(false);
@@ -66,9 +68,11 @@ export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewP
       <Card padded style={{ width: "min(420px, 100%)", display: "grid", gap: "var(--sp-6)" }}>
         {"error" in state ? (
           <>
-            <strong style={{ fontSize: "var(--fs-title-sm)" }}>Ligação indisponível</strong>
+            <strong style={{ fontSize: "var(--fs-title-sm)" }}>
+              {t("sharedLink.unavailableTitle")}
+            </strong>
             <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
-              Esta ligação já não dá acesso ao documento. Peça uma nova a quem a partilhou.
+              {t("sharedLink.unavailableBody")}
             </p>
           </>
         ) : "needsCode" in state ? (
@@ -88,13 +92,15 @@ export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewP
               <Lock size={20} />
             </span>
             <div style={{ display: "grid", gap: "var(--sp-3)" }}>
-              <strong style={{ fontSize: "var(--fs-title-sm)" }}>Documento protegido</strong>
+              <strong style={{ fontSize: "var(--fs-title-sm)" }}>
+                {t("sharedLink.protectedTitle")}
+              </strong>
               <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
-                Escreva o código que recebeu com a ligação.
+                {t("sharedLink.protectedBody")}
               </p>
             </div>
             <Input
-              label="Código de acesso"
+              label={t("sharedLink.codeLabel")}
               value={code}
               onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
               onKeyDown={(event) => {
@@ -102,10 +108,10 @@ export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewP
               }}
               inputMode="numeric"
               autoFocus
-              error={wrong ? "Código incorreto." : undefined}
+              error={wrong ? t("sharedLink.codeWrong") : undefined}
             />
             <Button fullWidth disabled={pending || code.length < 4} onClick={submit}>
-              Abrir documento
+              {t("sharedLink.open")}
             </Button>
           </>
         ) : (
@@ -127,7 +133,7 @@ export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewP
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
               <strong style={{ fontSize: "var(--fs-title-sm)" }}>{state.name}</strong>
               <span style={{ color: "var(--muted)" }}>
-                {mimeLabel(state.mime)} · {formatBytes(state.size)}
+                {mimeLabel(state.mime, t("fileFallback"))} · {formatBytes(state.size)}
               </span>
             </div>
             {state.url ? (
@@ -139,12 +145,10 @@ export function SharedFileView({ token, initial, onSubmitCode }: SharedFileViewP
                 rel="noopener noreferrer"
               >
                 <Download size={15} aria-hidden="true" />
-                {state.permission === "download" ? "Transferir" : "Ver documento"}
+                {state.permission === "download" ? t("transfer") : t("sharedLink.viewDocument")}
               </a>
             ) : (
-              <p style={{ margin: 0, color: "var(--muted)" }}>
-                O documento não está disponível neste momento.
-              </p>
+              <p style={{ margin: 0, color: "var(--muted)" }}>{t("sharedLink.notAvailable")}</p>
             )}
           </>
         )}

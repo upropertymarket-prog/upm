@@ -89,6 +89,151 @@
     "signatures": "Email signatures",
     "marketing": "Marketing"
   },
+  "roles": {
+    "owner": "Owner",
+    "buyer": "Buyer"
+  },
+  "share": {
+    "permission": {
+      "view": "Can view",
+      "download": "Can download"
+    },
+    "expiry": {
+      "hours24": "24 hours",
+      "days7": "7 days",
+      "days30": "30 days",
+      "never": "No expiry"
+    },
+    "permissionLabel": "Permission",
+    "withAccess": "With access",
+    "person": "Person",
+    "personPlaceholder": "Pick a contact",
+    "shareAction": "Share",
+    "someone": "User",
+    "revoke": "Revoke",
+    "revoked": "Access revoked.",
+    "link": "Link",
+    "expires": "Expires",
+    "accessCode": "Access code",
+    "accessCodeOptional": "Optional",
+    "createLink": "Create link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "linkCopied": "Link copied.",
+    "pickPerson": "Pick who you want to share with.",
+    "badCode": "The access code is 4 to 6 digits."
+  },
+  "contracts": {
+    "shareModal": {
+      "title": "Share contract",
+      "permissionHint": "A share carries no editing permission: editing the contract stays yours.",
+      "noContacts": "You are not talking to anyone on the platform yet. Use the link below.",
+      "accessCodeHint": "4 to 6 digits.",
+      "linkCreated": "Link created. The version as it stands has been frozen.",
+      "shared": "Contract shared. The version as it stands has been frozen."
+    }
+  },
+  "cloud": {
+    "title": "Cloud",
+    "subtitleNoCloud": "Cloud storage is included from the Essential plan up",
+    "subtitleUnlimited": "{used} used · unlimited storage",
+    "subtitleUsed": "{used} of {limit} used",
+    "upsell": {
+      "title": "The Cloud keeps your documents",
+      "body": "Want somewhere to keep your files? Cloud storage is included from Essential up, or you can add it to the plan you already have.",
+      "nearLimitTitle": "You are close to your plan's limit",
+      "nearLimitBody": "Smarter gives you more active listings, more conversations and 5 GB of Cloud.",
+      "seePlans": "See plans",
+      "addCloud": "Add Cloud — {price}/month"
+    },
+    "columns": {
+      "file": "File",
+      "share": "Sharing",
+      "added": "Added",
+      "actions": "Actions",
+      "sharedBy": "From",
+      "expires": "Expires"
+    },
+    "readonlyHint": "Property document — read-only here",
+    "readonlyBadge": "Read-only",
+    "sharedViaLink": " · by link",
+    "cannotDelete": "This document cannot be deleted here",
+    "downloadFile": "Download {name}",
+    "shareFile": "Share {name}",
+    "deleteFile": "Delete {name}",
+    "details": "Details",
+    "newFolder": "New folder",
+    "newFolderIn": "Inside the selected folder",
+    "folderName": "Name",
+    "folderNamePlaceholder": "Deeds",
+    "create": "Create",
+    "upload": "Upload file",
+    "navAll": "All files",
+    "navShared": "Shared with me",
+    "navRecycle": "Recycle bin",
+    "storage": "Storage",
+    "storageUsed": "{used} of {limit}",
+    "unlimited": "unlimited",
+    "emptyRecycleBin": "Empty recycle bin",
+    "emptyTitle": "No files yet",
+    "emptyBody": "Upload land-registry certificates, floor plans and contracts. PDF, JPG and PNG up to 25 MB.",
+    "recycleEmptyTitle": "The recycle bin is empty",
+    "recycleEmptyBody": "Whatever you delete stays here for 30 days before it disappears — and still counts towards your storage until then.",
+    "tableCaption": "Cloud files",
+    "tableEmpty": "No files in this folder.",
+    "openFailed": "The file could not be opened.",
+    "fileFallback": "File",
+    "replace": "Replace",
+    "readonlyNote": "This is a property document. You can view, download and share it from here — replacing and deleting happen in the property form, where the warning about re-moderation lives.",
+    "versions": "Versions",
+    "noVersions": "No history.",
+    "restore": "Restore",
+    "accesses": "Access log",
+    "noAccesses": "Nobody has opened this file yet.",
+    "accessViaLink": " (link)",
+    "access": {
+      "view": "Viewed",
+      "download": "Downloaded",
+      "export_pdf": "Exported as PDF",
+      "print": "Printed",
+      "share_created": "Share created",
+      "share_revoked": "Share revoked"
+    },
+    "sharedCaption": "Shared with me",
+    "sharedEmptyTitle": "Nothing shared with you",
+    "sharedEmptyBody": "Documents someone shares with you show up here.",
+    "sharedTableEmpty": "Nothing shared with you.",
+    "noExpiry": "No expiry",
+    "transfer": "Download",
+    "view": "View",
+    "shareModal": {
+      "title": "Share",
+      "noContacts": "You are not talking to anyone on the platform yet. Use the link below to send this document to whoever you want.",
+      "personHint": "You can share with people already talking to you; for everyone else, use the link.",
+      "accessCodeHint": "4 to 6 digits, asked for when the link is opened.",
+      "linkCreated": "Link created.",
+      "shared": "Shared."
+    },
+    "sharedLink": {
+      "unavailableTitle": "Link unavailable",
+      "unavailableBody": "This link no longer gives access to the document. Ask whoever shared it for a new one.",
+      "protectedTitle": "Protected document",
+      "protectedBody": "Type the code you received with the link.",
+      "codeLabel": "Access code",
+      "codeWrong": "Wrong code.",
+      "open": "Open document",
+      "viewDocument": "View document",
+      "notAvailable": "The document is not available right now."
+    },
+    "toast": {
+      "folderCreated": "Folder created.",
+      "uploaded": "File uploaded.",
+      "binned": "File moved to the recycle bin.",
+      "recycleEmptied": "Recycle bin emptied.",
+      "versionSaved": "New version saved.",
+      "versionRestored": "Version restored as a new version."
+    }
+  },
   "emptyState": {
     "noResults": "No results",
     "noResultsHint": "Try changing the filters or the search."
