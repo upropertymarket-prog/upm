@@ -250,12 +250,21 @@ const ordenados = [...porFicheiro.entries()].sort((a, b) => b[1].length - a[1].l
 console.error(
   `✗ Texto visível escrito à mão (02 §12 · 07 §5.13): ${achados.length} em ${porFicheiro.size} ficheiros\n`,
 );
+/**
+ * `--all` imprime todas as ocorrências e `--filter=<troço>` limita-as a um
+ * caminho. Não é enfeite: é com isto que se traduz um ficheiro de cada vez,
+ * sem ter de adivinhar o que está nas linhas que a lista corta.
+ */
+const TUDO = process.argv.includes("--all");
+const FILTRO = process.argv.find((a) => a.startsWith("--filter="))?.slice(9);
+
 for (const [ficheiro, lista] of ordenados) {
+  if (FILTRO && !ficheiro.includes(FILTRO)) continue;
   console.error(`  ${String(lista.length).padStart(3)}  ${ficheiro}`);
-  for (const a of lista.slice(0, 3)) {
+  for (const a of TUDO ? lista : lista.slice(0, 3)) {
     console.error(`       ${a.linha}: ${JSON.stringify(a.texto)}`);
   }
-  if (lista.length > 3) console.error(`       … mais ${lista.length - 3}`);
+  if (!TUDO && lista.length > 3) console.error(`       … mais ${lista.length - 3}`);
 }
 
 console.error("\nO texto que o utilizador lê vem de `packages/config/messages/*.json`,");

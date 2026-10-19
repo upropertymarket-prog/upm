@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Card, Checkbox, Drawer, Input, StatusTag, Table, Textarea, Button } from "@upm/ui";
 import type { TableColumn } from "@upm/ui";
 
@@ -124,12 +125,14 @@ function formatWhen(value: string, locale: string) {
 
 /** A coluna "Última alteração": quando, em cima; quem, por baixo. */
 function LastChangeCell({ change, locale }: { change: SeoLastChange | null; locale: string }) {
+  const t = useTranslations("admin.seo");
+
   if (!change) {
     return (
       <span style={{ display: "grid", gap: "2px" }}>
         <span style={{ color: "var(--muted)" }}>—</span>
         <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-          nunca editada aqui
+          {t("neverEditedShort")}
         </span>
       </span>
     );
@@ -139,8 +142,8 @@ function LastChangeCell({ change, locale }: { change: SeoLastChange | null; loca
     <span style={{ display: "grid", gap: "2px" }}>
       <span style={{ color: "var(--text)" }}>{formatWhen(change.at, locale)}</span>
       <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-        {change.by ?? "Autor removido"}
-        {change.reset ? " · devolveu ao ficheiro" : ""}
+        {change.by ?? t("authorRemoved")}
+        {change.reset ? t("resetToFile") : ""}
       </span>
     </span>
   );
@@ -200,6 +203,8 @@ function SocialPreview({
   description: string;
   image: string;
 }) {
+  const t = useTranslations("admin.seo");
+
   return (
     <div
       style={{
@@ -211,7 +216,7 @@ function SocialPreview({
     >
       <div
         role="img"
-        aria-label={image ? `Imagem de partilha: ${image}` : "Sem imagem de partilha definida"}
+        aria-label={image ? t("shareImageAlt", { path: image }) : t("shareImageNone")}
         style={{
           aspectRatio: "1200 / 630",
           background: "var(--surface2)",
@@ -223,7 +228,7 @@ function SocialPreview({
           textAlign: "center",
         }}
       >
-        {image || "Sem imagem — usa a imagem da marca (/og/default.jpg)"}
+        {image || t("shareImageFallback")}
       </div>
       <div style={{ display: "grid", gap: "var(--sp-1)", padding: "var(--sp-4)" }}>
         <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
@@ -244,10 +249,16 @@ export function SeoManager({
 }: {
   rows: SeoPageRow[];
   loadError: boolean;
-  /** Só para as datas; os textos deste ecrã são de administração, em pt. */
+  /**
+   * Para as datas. Os textos vêm do ficheiro de mensagens como em todo o
+   * produto — este ecrã dizia "são de administração, em pt" e isso nunca foi
+   * verdade: o painel tem seletor de idioma ao lado (gate:i18n, 15 out 2026).
+   */
   locale: string;
   onSave: (input: SeoSaveInput) => Promise<SeoActionResult>;
 }) {
+  const t = useTranslations("admin.seo");
+  const tCommon = useTranslations("common");
   const [editing, setEditing] = useState<SeoPageRow | null>(null);
   const [draft, setDraft] = useState<SeoOverrideFields>(EMPTY);
   const [result, setResult] = useState<SeoActionResult>({});
@@ -265,7 +276,7 @@ export function SeoManager({
   const columns: TableColumn<SeoPageRow>[] = [
     {
       id: "page",
-      header: "Página",
+      header: t("columns.page"),
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
           <strong style={{ color: "var(--text)" }}>{row.pageName}</strong>
@@ -278,27 +289,29 @@ export function SeoManager({
     },
     {
       id: "title",
-      header: "Título em vigor",
+      header: t("columns.title"),
       cell: (row) => effective(row, null).title,
     },
     {
       id: "lastChange",
-      header: "Última alteração",
+      header: t("columns.lastChange"),
       width: "190px",
       cell: (row) => <LastChangeCell change={row.lastChange} locale={locale} />,
     },
     {
       id: "status",
-      header: "Estado",
+      header: t("columns.status"),
       width: "170px",
       cell: (row) => {
         // Tons do ciclo de vida genérico de `STATUS_TONES`, não cores novas:
         // 04 §1.6 é explícito em "cores nunca repetidas para significados
         // diferentes", e uma quarta família de verdes seria exatamente isso.
         const status = statusOf(row);
-        if (status === "complete") return <StatusTag tone="active">Completo</StatusTag>;
-        if (status === "partial") return <StatusTag tone="pending">Incompleto</StatusTag>;
-        return <StatusTag tone="draft">Usa predefinições</StatusTag>;
+        if (status === "complete")
+          return <StatusTag tone="active">{t("status.complete")}</StatusTag>;
+        if (status === "partial")
+          return <StatusTag tone="pending">{t("status.partial")}</StatusTag>;
+        return <StatusTag tone="draft">{t("status.defaults")}</StatusTag>;
       },
     },
   ];
@@ -318,25 +331,25 @@ export function SeoManager({
       {loadError ? (
         <Card padded style={{ marginBottom: "var(--sp-6)" }}>
           <p role="alert" style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--danger)" }}>
-            Não foi possível ler as personalizações. A lista mostra os valores dos ficheiros.
+            {t("loadError")}
           </p>
         </Card>
       ) : null}
 
       <Table
-        caption="Páginas públicas e o respetivo SEO"
+        caption={t("tableCaption")}
         columns={columns}
         rows={rows}
         rowKey={(row) => row.route}
         onRowClick={open}
         selectedKey={editing?.route}
-        empty="Nenhuma rota pública encontrada. Corra `pnpm seo:routes`."
+        empty={t("tableEmpty")}
       />
 
       <Drawer
         open={editing !== null}
         onClose={() => setEditing(null)}
-        closeLabel="Fechar"
+        closeLabel={tCommon("close")}
         title={editing?.pageName ?? ""}
         subtitle={editing?.route}
         footer={
@@ -351,21 +364,22 @@ export function SeoManager({
               });
             }}
           >
-            {saving ? "A guardar…" : "Guardar"}
+            {saving ? t("saving") : tCommon("save")}
           </Button>
         }
       >
         {editing ? (
           <div style={{ display: "grid", gap: "var(--sp-6)" }}>
             <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-              Campos deixados em branco usam o valor do ficheiro{" "}
-              <code>app{editing.route === "/" ? "" : editing.route}/seo.ts</code>. Limpar tudo
-              devolve a página inteira ao ficheiro.
+              {t.rich("fieldsHint", {
+                file: `app${editing.route === "/" ? "" : editing.route}/seo.ts`,
+                code: (chunks) => <code>{chunks}</code>,
+              })}
             </p>
 
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
               <Input
-                label="Title Tag"
+                label={t("titleTag")}
                 value={draft.titleTag}
                 placeholder={editing.defaults.titleTag}
                 onChange={(event) => set("titleTag", event.target.value)}
@@ -375,7 +389,7 @@ export function SeoManager({
 
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
               <Textarea
-                label="Meta Description"
+                label={t("metaDescription")}
                 rows={3}
                 value={draft.metaDescription}
                 placeholder={editing.defaults.metaDescription}
@@ -385,7 +399,7 @@ export function SeoManager({
             </div>
 
             <Checkbox
-              label="Open Graph igual aos dados da página"
+              label={t("ogSameAsPage")}
               checked={draft.ogSameAsPage}
               onChange={(event) => set("ogSameAsPage", event.target.checked)}
             />
@@ -396,12 +410,12 @@ export function SeoManager({
             {draft.ogSameAsPage ? null : (
               <>
                 <Input
-                  label="Open Graph Title"
+                  label={t("ogTitle")}
                   value={draft.ogTitle}
                   onChange={(event) => set("ogTitle", event.target.value)}
                 />
                 <Textarea
-                  label="Open Graph Description"
+                  label={t("ogDescription")}
                   rows={3}
                   value={draft.ogDescription}
                   onChange={(event) => set("ogDescription", event.target.value)}
@@ -410,33 +424,33 @@ export function SeoManager({
             )}
 
             <Input
-              label="Open Graph Image"
-              hint="Caminho em /public (1200×630) ou URL absoluto. Sem valor, usa a imagem da marca."
+              label={t("ogImage")}
+              hint={t("ogImageHint")}
               value={draft.ogImage}
               placeholder="/og/home.jpg"
               onChange={(event) => set("ogImage", event.target.value)}
             />
             <Input
-              label="Texto alternativo da imagem"
+              label={t("ogImageAlt")}
               value={draft.ogImageAlt}
               onChange={(event) => set("ogImageAlt", event.target.value)}
             />
             <Input
-              label="Canonical"
-              hint="Opcional. URL absoluto; sem valor, usa o URL da própria página."
+              label={t("canonical")}
+              hint={t("canonicalHint")}
               value={draft.canonical}
               placeholder="https://upropertymarket.pt/"
               onChange={(event) => set("canonical", event.target.value)}
             />
             <Checkbox
-              label="noindex — pedir aos motores de busca que não indexem esta página"
+              label={t("noindex")}
               checked={draft.noindex}
               onChange={(event) => set("noindex", event.target.checked)}
             />
 
             <div style={{ display: "grid", gap: "var(--sp-4)" }}>
               <strong style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}>
-                Resultado no Google
+                {t("googlePreview")}
               </strong>
               <Card padded>
                 <GooglePreview
@@ -449,7 +463,7 @@ export function SeoManager({
 
             <div style={{ display: "grid", gap: "var(--sp-4)" }}>
               <strong style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}>
-                Partilha no Facebook, LinkedIn, WhatsApp e X
+                {t("socialPreview")}
               </strong>
               <SocialPreview title={ogTitle} description={ogDescription} image={draft.ogImage} />
             </div>
@@ -472,12 +486,13 @@ export function SeoManager({
             ) : null}
 
             <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-              {editing.override ? "Personalizado. " : "A usar o ficheiro. "}
+              {editing.override ? t("overrideOn") : t("overrideOff")}
               {editing.lastChange
-                ? `Última alteração em ${formatWhen(editing.lastChange.at, locale)} por ${
-                    editing.lastChange.by ?? "autor removido"
-                  }.`
-                : "Nunca editada a partir daqui."}
+                ? t("lastChangeBy", {
+                    when: formatWhen(editing.lastChange.at, locale),
+                    who: editing.lastChange.by ?? t("authorRemovedInline"),
+                  })
+                : t("neverEdited")}
             </span>
           </div>
         ) : null}
@@ -488,14 +503,15 @@ export function SeoManager({
 
 /** Separado só para o componente principal não começar por vinte linhas de JSX. */
 function PageHeading() {
+  const t = useTranslations("admin.seo");
+
   return (
     <header style={{ display: "grid", gap: "var(--sp-2)", marginBottom: "var(--sp-7)" }}>
       <h1 style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "var(--fs-title)" }}>
-        SEO
+        {t("title")}
       </h1>
       <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-        Título, descrição e cartão de partilha de cada página pública. O que aqui guardar fica ativo
-        no site dentro de um minuto, sem novo deploy.
+        {t("subtitle")}
       </p>
     </header>
   );

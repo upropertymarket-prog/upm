@@ -221,13 +221,16 @@
         "submit": "Activate",
         "recoveryCodesTitle": "Save these recovery codes",
         "recoveryCodesBody": "Each code can only be used once. Keep them somewhere safe — they won't be shown again.",
-        "recoveryCodesConfirm": "I saved the codes"
+        "recoveryCodesConfirm": "I saved the codes",
+        "qrAlt": "QR code for your authenticator app",
+        "startFailed": "Two-factor setup could not be started. Please try again."
       },
       "challenge": {
         "title": "Verification code",
         "codeLabel": "6-digit code",
         "submit": "Verify",
-        "useRecoveryCode": "Use a recovery code"
+        "useRecoveryCode": "Use a recovery code",
+        "recoveryLabel": "Recovery code"
       }
     },
     "pin": {
@@ -866,6 +869,147 @@
         "cloud_gb": "Cloud (GB)"
       },
       "saveAnyway": "Save anyway"
+    },
+    "seo": {
+      "title": "SEO",
+      "subtitle": "Title, description and share card for each public page. What you save here goes live within a minute, with no new deploy.",
+      "loadError": "The overrides could not be read. The list shows the values from the files.",
+      "tableCaption": "Public pages and their SEO",
+      "tableEmpty": "No public route found. Run `pnpm seo:routes`.",
+      "saving": "Saving…",
+      "authorRemoved": "Author removed",
+      "shareImageAlt": "Share image: {path}",
+      "shareImageNone": "No share image set",
+      "shareImageFallback": "No image — uses the brand image (/og/default.jpg)",
+      "columns": {
+        "page": "Page",
+        "title": "Title in use",
+        "lastChange": "Last change",
+        "status": "Status"
+      },
+      "status": {
+        "complete": "Complete",
+        "partial": "Incomplete",
+        "defaults": "Uses defaults"
+      },
+      "fieldsHint": "Fields left blank use the value from <code>{file}</code>. Clearing everything returns the whole page to the file.",
+      "titleTag": "Title tag",
+      "metaDescription": "Meta description",
+      "ogSameAsPage": "Open Graph same as the page data",
+      "ogTitle": "Open Graph title",
+      "ogDescription": "Open Graph description",
+      "ogImage": "Open Graph image",
+      "ogImageHint": "Path in /public (1200×630) or an absolute URL. Blank uses the brand image.",
+      "ogImageAlt": "Image alternative text",
+      "canonical": "Canonical",
+      "canonicalHint": "Optional. Absolute URL; blank uses the page's own URL.",
+      "noindex": "noindex — ask search engines not to index this page",
+      "googlePreview": "Result on Google",
+      "socialPreview": "Shared on Facebook, LinkedIn, WhatsApp and X",
+      "overrideOn": "Customised. ",
+      "overrideOff": "Using the file. ",
+      "lastChangeBy": "Last changed on {when} by {who}.",
+      "neverEdited": "Never edited from here.",
+      "authorRemovedInline": "author removed",
+      "neverEditedShort": "never edited here",
+      "resetToFile": " · returned to the file"
+    },
+    "contractTemplates": {
+      "title": "Contract templates",
+      "subtitle": "Published models and versions in preparation",
+      "newTemplate": "New model",
+      "name": "Name",
+      "namePlaceholder": "Sale and purchase agreement",
+      "kind": "Type",
+      "kinds": {
+        "sale": "Sale and purchase",
+        "rent": "Rental"
+      },
+      "variables": "Variables",
+      "variablesPlaceholder": "owner, buyer, property, price",
+      "variablesHintNew": "Separate them with commas; then insert them into the text from the toolbar.",
+      "variablesHint": "Separate them with commas and insert them into the text from the toolbar.",
+      "body": "Contract content",
+      "createDraft": "Create draft",
+      "listTitle": "Models",
+      "listEmpty": "There are no models yet.",
+      "kindAndVersion": "{kind} · v{version}",
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "editVersion": "Edit v{version}",
+      "statusInline": {
+        "published": "published",
+        "draft": "draft"
+      },
+      "saveDraft": "Save draft",
+      "publishVersion": "Publish version",
+      "newVersion": "Create new version",
+      "saved": "Saved."
+    },
+    "mailboxes": {
+      "title": "Email configuration",
+      "subtitle": "The mailboxes Support reads and replies from. Credentials live in the Vault, never in the database.",
+      "newMailbox": "New mailbox",
+      "editMailbox": "Edit mailbox",
+      "createMailbox": "Create mailbox",
+      "loadError": "The mailboxes could not be loaded.",
+      "tableCaption": "Configured mailboxes",
+      "tableEmpty": "No mailbox configured yet.",
+      "columns": {
+        "mailbox": "Mailbox",
+        "department": "Department",
+        "secret": "Credential",
+        "status": "Status"
+      },
+      "secretSet": "Set",
+      "secretUnset": "Not set",
+      "status": {
+        "active": "Active",
+        "paused": "Paused",
+        "error": "Failing"
+      },
+      "security": {
+        "ssl_tls": "SSL/TLS",
+        "starttls": "STARTTLS",
+        "none": "No encryption"
+      },
+      "departments": {
+        "suporte": "Support",
+        "financeiro": "Billing",
+        "moderacao": "Moderation",
+        "admin": "Administration"
+      },
+      "address": "Address",
+      "addressPlaceholder": "support@upropertymarket.pt",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "UProperty Support",
+      "protocol": "Incoming protocol",
+      "protocolHint": "IMAP keeps state on the server and is the recommended option; POP3 downloads and deletes.",
+      "protocols": {
+        "imap": "IMAP (recommended)",
+        "pop3": "POP3"
+      },
+      "inHost": "Incoming server",
+      "inHostPlaceholder": "imap.example.com",
+      "port": "Port",
+      "inSecurity": "Incoming security",
+      "smtpHost": "SMTP server",
+      "smtpHostPlaceholder": "smtp.example.com",
+      "smtpSecurity": "SMTP security",
+      "username": "Username",
+      "usernameHint": "Usually the address itself.",
+      "department": "Department",
+      "owner": "Owner",
+      "ownerHint": "Whose details fill the signature variables.",
+      "ownerNone": "No owner",
+      "testConnection": "Test connection",
+      "passwordTitle": "Password",
+      "passwordNote": "Stored in the Supabase Vault. It cannot be read from here — to change it, type the new one.",
+      "newPassword": "New password",
+      "savePassword": "Save password"
     }
   },
   "legal": {
@@ -1357,7 +1501,17 @@
     "alignRight": "Align right",
     "undo": "Undo",
     "redo": "Redo",
-    "insertVariable": "Insert {label}"
+    "insertVariable": "Insert {label}",
+    "textStyle": "Text style",
+    "styleParagraph": "Body text",
+    "styleTitle": "Title",
+    "styleSection": "Section",
+    "styleSubsection": "Subsection",
+    "insertTable": "Insert table",
+    "addVariable": "Add variable",
+    "insertVariableTitle": "Insert variable",
+    "variablesEmptyPopover": "Add variables in the field above to insert them in the text.",
+    "variablesEmptyHint": "Add variables above to be able to insert them in the text."
   },
   "internalCloud": {
     "title": "Internal Cloud",
@@ -1390,5 +1544,9 @@
       "property_document": "Property document",
       "campaign_report": "Campaign report"
     }
+  },
+  "errors": {
+    "unexpectedTitle": "Something went wrong.",
+    "unexpectedBody": "The team has been notified. Please try again in a moment."
   }
 }

@@ -1,11 +1,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 
 import { EnrollForm } from "./EnrollForm";
 
 export default async function SetupTwoFactorPage() {
   const supabase = createClient(await cookies());
+  const t = await getTranslations("auth.mfa.enroll");
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,7 +25,7 @@ export default async function SetupTwoFactorPage() {
   if (error || !enrollment) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-bg px-4">
-        <p className="text-danger">Não foi possível iniciar a ativação do 2FA. Tente novamente.</p>
+        <p className="text-danger">{t("startFailed")}</p>
       </main>
     );
   }

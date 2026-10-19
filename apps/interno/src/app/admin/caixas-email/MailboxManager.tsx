@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Card, Drawer, Input, Select, StatusTag, Table } from "@upm/ui";
 import type { TableColumn } from "@upm/ui";
 
@@ -80,23 +81,17 @@ const EMPTY: MailboxSaveInput = {
   status: "active",
 };
 
-const SECURITY_OPTIONS = [
-  { value: "ssl_tls", label: "SSL/TLS" },
-  { value: "starttls", label: "STARTTLS" },
-  { value: "none", label: "Sem encriptação" },
-];
+/**
+ * Só os valores — as etiquetas são chaves de tradução e por isso nascem dentro
+ * do componente, onde o `useTranslations` existe.
+ */
+const SECURITY_VALUES = ["ssl_tls", "starttls", "none"] as const;
+const DEPARTMENT_VALUES = ["suporte", "financeiro", "moderacao", "admin"] as const;
 
-const DEPARTMENT_OPTIONS = [
-  { value: "suporte", label: "Suporte" },
-  { value: "financeiro", label: "Financeiro" },
-  { value: "moderacao", label: "Moderação" },
-  { value: "admin", label: "Administração" },
-];
-
-const STATUS_LABEL = {
-  active: { tone: "active", label: "Ativa" },
-  paused: { tone: "draft", label: "Em pausa" },
-  error: { tone: "rejected", label: "Com erro" },
+const STATUS_TONE = {
+  active: "active",
+  paused: "draft",
+  error: "rejected",
 } as const;
 
 function toInput(row: MailboxRow): MailboxSaveInput {
@@ -133,6 +128,8 @@ export function MailboxManager({
   onSaveSecret: (input: { id: string; password: string }) => Promise<MailboxActionResult>;
   onTest: (mailboxId: string) => Promise<MailboxActionResult>;
 }) {
+  const t = useTranslations("admin.mailboxes");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<MailboxSaveInput>(EMPTY);
@@ -171,10 +168,19 @@ export function MailboxManager({
     }));
   }
 
+  const securityOptions = SECURITY_VALUES.map((value) => ({
+    value,
+    label: t(`security.${value}`),
+  }));
+  const departmentOptions = DEPARTMENT_VALUES.map((value) => ({
+    value,
+    label: t(`departments.${value}`),
+  }));
+
   const columns: TableColumn<MailboxRow>[] = [
     {
       id: "address",
-      header: "Caixa",
+      header: t("columns.mailbox"),
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
           <strong style={{ color: "var(--text)" }}>{row.address}</strong>
@@ -186,27 +192,25 @@ export function MailboxManager({
     },
     {
       id: "department",
-      header: "Departamento",
-      cell: (row) => DEPARTMENT_OPTIONS.find((d) => d.value === row.department)?.label ?? "—",
+      header: t("columns.department"),
+      cell: (row) => t(`departments.${row.department}`),
     },
     {
       id: "secret",
-      header: "Credencial",
+      header: t("columns.secret"),
       cell: (row) =>
         row.hasSecret ? (
-          <StatusTag tone="active">Definida</StatusTag>
+          <StatusTag tone="active">{t("secretSet")}</StatusTag>
         ) : (
-          <StatusTag tone="pending">Por definir</StatusTag>
+          <StatusTag tone="pending">{t("secretUnset")}</StatusTag>
         ),
     },
     {
       id: "status",
-      header: "Estado",
+      header: t("columns.status"),
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
-          <StatusTag tone={STATUS_LABEL[row.status].tone}>
-            {STATUS_LABEL[row.status].label}
-          </StatusTag>
+          <StatusTag tone={STATUS_TONE[row.status]}>{t(`status.${row.status}`)}</StatusTag>
           {row.lastError ? (
             <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
               {row.lastError}
@@ -223,37 +227,34 @@ export function MailboxManager({
         style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", flexWrap: "wrap" }}
       >
         <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-          <h1 style={{ margin: 0, fontSize: 22 }}>Configuração de e-mail</h1>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-            As caixas que o Suporte lê e de onde responde. As credenciais ficam no Vault, nunca na
-            base de dados.
-          </p>
+          <h1 style={{ margin: 0, fontSize: 22 }}>{t("title")}</h1>
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>{t("subtitle")}</p>
         </div>
         <div style={{ marginLeft: "auto" }}>
-          <Button onClick={openNew}>Nova caixa</Button>
+          <Button onClick={openNew}>{t("newMailbox")}</Button>
         </div>
       </header>
 
       {loadError ? (
         <Card padded>
-          <strong>Não foi possível carregar as caixas de e-mail.</strong>
+          <strong>{t("loadError")}</strong>
         </Card>
       ) : null}
 
       <Table
-        caption="Caixas de e-mail configuradas"
+        caption={t("tableCaption")}
         columns={columns}
         rows={rows}
         rowKey={(row) => row.id}
         onRowClick={openRow}
         selectedKey={editingId ?? undefined}
-        empty="Ainda não há nenhuma caixa configurada."
+        empty={t("tableEmpty")}
       />
 
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
-        title={editingId ? "Editar caixa" : "Nova caixa"}
+        title={editingId ? t("editMailbox") : t("newMailbox")}
       >
         <div style={{ display: "grid", gap: "var(--sp-5)" }}>
           {result.error ? (
@@ -268,40 +269,40 @@ export function MailboxManager({
           ) : null}
 
           <Input
-            label="Endereço"
+            label={t("address")}
             type="email"
             value={draft.address}
             onChange={(event) => set("address", event.target.value)}
-            placeholder="suporte@upropertymarket.pt"
+            placeholder={t("addressPlaceholder")}
           />
 
           <Input
-            label="Nome a apresentar"
+            label={t("displayName")}
             value={draft.displayName ?? ""}
             onChange={(event) => set("displayName", event.target.value)}
-            placeholder="Suporte UProperty"
+            placeholder={t("displayNamePlaceholder")}
           />
 
           <Select
-            label="Protocolo de entrada"
-            hint="IMAP mantém o estado no servidor e é o recomendado; POP3 descarrega e apaga."
+            label={t("protocol")}
+            hint={t("protocolHint")}
             value={draft.protocol}
             onChange={(event) => setProtocol(event.target.value as "imap" | "pop3")}
             options={[
-              { value: "imap", label: "IMAP (recomendado)" },
-              { value: "pop3", label: "POP3" },
+              { value: "imap", label: t("protocols.imap") },
+              { value: "pop3", label: t("protocols.pop3") },
             ]}
           />
 
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "var(--sp-4)" }}>
             <Input
-              label="Servidor de entrada"
+              label={t("inHost")}
               value={draft.inHost}
               onChange={(event) => set("inHost", event.target.value)}
-              placeholder="imap.exemplo.pt"
+              placeholder={t("inHostPlaceholder")}
             />
             <Input
-              label="Porto"
+              label={t("port")}
               type="number"
               value={String(draft.inPort)}
               onChange={(event) => set("inPort", Number(event.target.value))}
@@ -309,23 +310,23 @@ export function MailboxManager({
           </div>
 
           <Select
-            label="Segurança da entrada"
+            label={t("inSecurity")}
             value={draft.inSecurity}
             onChange={(event) =>
               set("inSecurity", event.target.value as MailboxSaveInput["inSecurity"])
             }
-            options={SECURITY_OPTIONS}
+            options={securityOptions}
           />
 
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "var(--sp-4)" }}>
             <Input
-              label="Servidor SMTP"
+              label={t("smtpHost")}
               value={draft.smtpHost}
               onChange={(event) => set("smtpHost", event.target.value)}
-              placeholder="smtp.exemplo.pt"
+              placeholder={t("smtpHostPlaceholder")}
             />
             <Input
-              label="Porto"
+              label={t("port")}
               type="number"
               value={String(draft.smtpPort)}
               onChange={(event) => set("smtpPort", Number(event.target.value))}
@@ -333,37 +334,37 @@ export function MailboxManager({
           </div>
 
           <Select
-            label="Segurança do SMTP"
+            label={t("smtpSecurity")}
             value={draft.smtpSecurity}
             onChange={(event) =>
               set("smtpSecurity", event.target.value as MailboxSaveInput["smtpSecurity"])
             }
-            options={SECURITY_OPTIONS}
+            options={securityOptions}
           />
 
           <Input
-            label="Utilizador"
-            hint="Normalmente é o próprio endereço."
+            label={t("username")}
+            hint={t("usernameHint")}
             value={draft.username}
             onChange={(event) => set("username", event.target.value)}
           />
 
           <Select
-            label="Departamento"
+            label={t("department")}
             value={draft.department}
             onChange={(event) =>
               set("department", event.target.value as MailboxSaveInput["department"])
             }
-            options={DEPARTMENT_OPTIONS}
+            options={departmentOptions}
           />
 
           <Select
-            label="Responsável"
-            hint="De quem saem as variáveis da assinatura."
+            label={t("owner")}
+            hint={t("ownerHint")}
             value={draft.ownerProfileId ?? ""}
             onChange={(event) => set("ownerProfileId", event.target.value || null)}
             options={[
-              { value: "", label: "Sem responsável" },
+              { value: "", label: t("ownerNone") },
               ...staff.map((person) => ({ value: person.id, label: person.name })),
             ]}
           />
@@ -379,7 +380,7 @@ export function MailboxManager({
                 })
               }
             >
-              {editingId ? "Guardar alterações" : "Criar caixa"}
+              {editingId ? tCommon("saveChanges") : t("createMailbox")}
             </Button>
             {editingId ? (
               <Button
@@ -387,7 +388,7 @@ export function MailboxManager({
                 disabled={busy}
                 onClick={() => startBusy(async () => setResult(await onTest(editingId)))}
               >
-                Testar ligação
+                {t("testConnection")}
               </Button>
             ) : null}
           </div>
@@ -397,14 +398,13 @@ export function MailboxManager({
             <Card padded>
               <div style={{ display: "grid", gap: "var(--sp-4)" }}>
                 <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                  <strong>Palavra-passe</strong>
+                  <strong>{t("passwordTitle")}</strong>
                   <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-                    Guardada no Supabase Vault. Não é legível a partir daqui — para a mudar, escreva
-                    a nova.
+                    {t("passwordNote")}
                   </span>
                 </div>
                 <Input
-                  label="Nova palavra-passe"
+                  label={t("newPassword")}
                   type="password"
                   value={password}
                   autoComplete="new-password"
@@ -422,7 +422,7 @@ export function MailboxManager({
                       })
                     }
                   >
-                    Guardar palavra-passe
+                    {t("savePassword")}
                   </Button>
                 </div>
               </div>

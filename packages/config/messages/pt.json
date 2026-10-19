@@ -221,13 +221,16 @@
         "submit": "Ativar",
         "recoveryCodesTitle": "Guarde estes códigos de recuperação",
         "recoveryCodesBody": "Cada código só pode ser usado uma vez. Guarde-os num local seguro — não voltam a ser mostrados.",
-        "recoveryCodesConfirm": "Guardei os códigos"
+        "recoveryCodesConfirm": "Guardei os códigos",
+        "qrAlt": "Código QR para a app de autenticação",
+        "startFailed": "Não foi possível iniciar a ativação do 2FA. Tente novamente."
       },
       "challenge": {
         "title": "Código de verificação",
         "codeLabel": "Código de 6 dígitos",
         "submit": "Verificar",
-        "useRecoveryCode": "Usar um código de recuperação"
+        "useRecoveryCode": "Usar um código de recuperação",
+        "recoveryLabel": "Código de recuperação"
       }
     },
     "pin": {
@@ -866,6 +869,147 @@
         "cloud_gb": "Cloud (GB)"
       },
       "saveAnyway": "Guardar mesmo assim"
+    },
+    "seo": {
+      "title": "SEO",
+      "subtitle": "Título, descrição e cartão de partilha de cada página pública. O que aqui guardar fica ativo no site dentro de um minuto, sem novo deploy.",
+      "loadError": "Não foi possível ler as personalizações. A lista mostra os valores dos ficheiros.",
+      "tableCaption": "Páginas públicas e o respetivo SEO",
+      "tableEmpty": "Nenhuma rota pública encontrada. Corra `pnpm seo:routes`.",
+      "saving": "A guardar…",
+      "authorRemoved": "Autor removido",
+      "shareImageAlt": "Imagem de partilha: {path}",
+      "shareImageNone": "Sem imagem de partilha definida",
+      "shareImageFallback": "Sem imagem — usa a imagem da marca (/og/default.jpg)",
+      "columns": {
+        "page": "Página",
+        "title": "Título em vigor",
+        "lastChange": "Última alteração",
+        "status": "Estado"
+      },
+      "status": {
+        "complete": "Completo",
+        "partial": "Incompleto",
+        "defaults": "Usa predefinições"
+      },
+      "fieldsHint": "Campos deixados em branco usam o valor do ficheiro <code>{file}</code>. Limpar tudo devolve a página inteira ao ficheiro.",
+      "titleTag": "Title Tag",
+      "metaDescription": "Meta Description",
+      "ogSameAsPage": "Open Graph igual aos dados da página",
+      "ogTitle": "Open Graph Title",
+      "ogDescription": "Open Graph Description",
+      "ogImage": "Open Graph Image",
+      "ogImageHint": "Caminho em /public (1200×630) ou URL absoluto. Sem valor, usa a imagem da marca.",
+      "ogImageAlt": "Texto alternativo da imagem",
+      "canonical": "Canonical",
+      "canonicalHint": "Opcional. URL absoluto; sem valor, usa o URL da própria página.",
+      "noindex": "noindex — pedir aos motores de busca que não indexem esta página",
+      "googlePreview": "Resultado no Google",
+      "socialPreview": "Partilha no Facebook, LinkedIn, WhatsApp e X",
+      "overrideOn": "Personalizado. ",
+      "overrideOff": "A usar o ficheiro. ",
+      "lastChangeBy": "Última alteração em {when} por {who}.",
+      "neverEdited": "Nunca editada a partir daqui.",
+      "authorRemovedInline": "autor removido",
+      "neverEditedShort": "nunca editada aqui",
+      "resetToFile": " · devolveu ao ficheiro"
+    },
+    "contractTemplates": {
+      "title": "Templates de contrato",
+      "subtitle": "Modelos publicados e versões em preparação",
+      "newTemplate": "Novo modelo",
+      "name": "Nome",
+      "namePlaceholder": "Contrato de compra e venda",
+      "kind": "Tipo",
+      "kinds": {
+        "sale": "Compra e venda",
+        "rent": "Arrendamento"
+      },
+      "variables": "Variáveis",
+      "variablesPlaceholder": "proprietario, comprador, imovel, preco",
+      "variablesHintNew": "Separe por vírgulas; depois insira-as no texto a partir da toolbar.",
+      "variablesHint": "Separe por vírgulas e insira-as no texto a partir da toolbar.",
+      "body": "Conteúdo do contrato",
+      "createDraft": "Criar rascunho",
+      "listTitle": "Modelos",
+      "listEmpty": "Ainda não existem modelos.",
+      "kindAndVersion": "{kind} · v{version}",
+      "status": {
+        "published": "Publicado",
+        "draft": "Rascunho",
+        "archived": "Arquivado"
+      },
+      "editVersion": "Editar v{version}",
+      "statusInline": {
+        "published": "publicado",
+        "draft": "rascunho"
+      },
+      "saveDraft": "Guardar rascunho",
+      "publishVersion": "Publicar versão",
+      "newVersion": "Criar nova versão",
+      "saved": "Guardado."
+    },
+    "mailboxes": {
+      "title": "Configuração de e-mail",
+      "subtitle": "As caixas que o Suporte lê e de onde responde. As credenciais ficam no Vault, nunca na base de dados.",
+      "newMailbox": "Nova caixa",
+      "editMailbox": "Editar caixa",
+      "createMailbox": "Criar caixa",
+      "loadError": "Não foi possível carregar as caixas de e-mail.",
+      "tableCaption": "Caixas de e-mail configuradas",
+      "tableEmpty": "Ainda não há nenhuma caixa configurada.",
+      "columns": {
+        "mailbox": "Caixa",
+        "department": "Departamento",
+        "secret": "Credencial",
+        "status": "Estado"
+      },
+      "secretSet": "Definida",
+      "secretUnset": "Por definir",
+      "status": {
+        "active": "Ativa",
+        "paused": "Em pausa",
+        "error": "Com erro"
+      },
+      "security": {
+        "ssl_tls": "SSL/TLS",
+        "starttls": "STARTTLS",
+        "none": "Sem encriptação"
+      },
+      "departments": {
+        "suporte": "Suporte",
+        "financeiro": "Financeiro",
+        "moderacao": "Moderação",
+        "admin": "Administração"
+      },
+      "address": "Endereço",
+      "addressPlaceholder": "suporte@upropertymarket.pt",
+      "displayName": "Nome a apresentar",
+      "displayNamePlaceholder": "Suporte UProperty",
+      "protocol": "Protocolo de entrada",
+      "protocolHint": "IMAP mantém o estado no servidor e é o recomendado; POP3 descarrega e apaga.",
+      "protocols": {
+        "imap": "IMAP (recomendado)",
+        "pop3": "POP3"
+      },
+      "inHost": "Servidor de entrada",
+      "inHostPlaceholder": "imap.exemplo.pt",
+      "port": "Porto",
+      "inSecurity": "Segurança da entrada",
+      "smtpHost": "Servidor SMTP",
+      "smtpHostPlaceholder": "smtp.exemplo.pt",
+      "smtpSecurity": "Segurança do SMTP",
+      "username": "Utilizador",
+      "usernameHint": "Normalmente é o próprio endereço.",
+      "department": "Departamento",
+      "owner": "Responsável",
+      "ownerHint": "De quem saem as variáveis da assinatura.",
+      "ownerNone": "Sem responsável",
+      "testConnection": "Testar ligação",
+      "passwordTitle": "Palavra-passe",
+      "passwordNote": "Guardada no Supabase Vault. Não é legível a partir daqui — para a mudar, escreva a nova.",
+      "newPassword": "Nova palavra-passe",
+      "savePassword": "Guardar palavra-passe"
     }
   },
   "legal": {
@@ -1357,7 +1501,17 @@
     "alignRight": "Alinhar à direita",
     "undo": "Anular",
     "redo": "Refazer",
-    "insertVariable": "Inserir {label}"
+    "insertVariable": "Inserir {label}",
+    "textStyle": "Estilo de texto",
+    "styleParagraph": "Texto normal",
+    "styleTitle": "Título",
+    "styleSection": "Secção",
+    "styleSubsection": "Subsecção",
+    "insertTable": "Inserir tabela",
+    "addVariable": "Adicionar variável",
+    "insertVariableTitle": "Inserir variável",
+    "variablesEmptyPopover": "Adicione variáveis no campo acima para as inserir no texto.",
+    "variablesEmptyHint": "Adicione variáveis acima para as poder inserir no texto."
   },
   "internalCloud": {
     "title": "Cloud interna",
@@ -1390,5 +1544,9 @@
       "property_document": "Documento de imóvel",
       "campaign_report": "Relatório de campanha"
     }
+  },
+  "errors": {
+    "unexpectedTitle": "Ocorreu um erro inesperado.",
+    "unexpectedBody": "A equipa foi notificada. Tente novamente dentro de instantes."
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Card, CardBody, CardHeader, CardTitle, Input, PageHeader, Select } from "@upm/ui";
 import { TemplateBodyEditor } from "./TemplateBodyEditor";
 export type TemplateActionState = { ok?: boolean; error?: string; id?: string };
@@ -30,13 +31,14 @@ function parseVariables(value: string) {
 }
 
 function ActionMessage({ state }: { state: TemplateActionState }) {
+  const t = useTranslations("admin.contractTemplates");
   return state.error ? (
     <p role="alert" className="mt-3 text-sm text-danger">
       {state.error}
     </p>
   ) : state.ok ? (
     <p role="status" className="mt-3 text-sm text-ok">
-      Guardado.
+      {t("saved")}
     </p>
   ) : null;
 }
@@ -55,6 +57,8 @@ export function TemplateManager({
   templates: Template[];
   actions: TemplateManagerActions;
 }) {
+  const t = useTranslations("admin.contractTemplates");
+  const tCommon = useTranslations("common");
   const [selected, setSelected] = useState(
     templates.find((template) => template.status === "draft")?.id ?? templates[0]?.id ?? "",
   );
@@ -68,8 +72,8 @@ export function TemplateManager({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Templates de contrato"
-        subtitle="Modelos publicados e versões em preparação"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Button
             type="button"
@@ -78,44 +82,44 @@ export function TemplateManager({
               setCreateOpen(true);
             }}
           >
-            Novo modelo
+            {t("newTemplate")}
           </Button>
         }
       />
       {createOpen && (
         <Card>
           <CardHeader>
-            <CardTitle>Novo modelo</CardTitle>
+            <CardTitle>{t("newTemplate")}</CardTitle>
           </CardHeader>
           <CardBody>
             <form action={createAction} className="grid gap-4 md:grid-cols-2">
-              <Input label="Nome" name="name" placeholder="Contrato de compra e venda" />
+              <Input label={t("name")} name="name" placeholder={t("namePlaceholder")} />
               <Select
-                label="Tipo"
+                label={t("kind")}
                 name="kind"
                 options={[
-                  { value: "sale", label: "Compra e venda" },
-                  { value: "rent", label: "Arrendamento" },
+                  { value: "sale", label: t("kinds.sale") },
+                  { value: "rent", label: t("kinds.rent") },
                 ]}
               />
               <Input
-                label="Variáveis"
+                label={t("variables")}
                 name="variables"
                 value={createVariables}
                 onChange={(event) => setCreateVariables(event.target.value)}
-                placeholder="proprietario, comprador, imovel, preco"
-                hint="Separe por vírgulas; depois insira-as no texto a partir da toolbar."
+                placeholder={t("variablesPlaceholder")}
+                hint={t("variablesHintNew")}
               />
               <TemplateBodyEditor
-                label="Conteúdo do contrato"
+                label={t("body")}
                 name="body"
                 initialContent={emptyBody}
                 variables={parseVariables(createVariables)}
               />
               <div className="flex gap-3 md:col-span-2">
-                <Button type="submit">Criar rascunho</Button>
+                <Button type="submit">{t("createDraft")}</Button>
                 <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
-                  Cancelar
+                  {tCommon("cancel")}
                 </Button>
               </div>
               <ActionMessage state={createState} />
@@ -126,13 +130,11 @@ export function TemplateManager({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Modelos</CardTitle>
+            <CardTitle>{t("listTitle")}</CardTitle>
           </CardHeader>
           <CardBody>
             <div className="space-y-2">
-              {templates.length === 0 && (
-                <p className="text-sm text-muted">Ainda não existem modelos.</p>
-              )}
+              {templates.length === 0 && <p className="text-sm text-muted">{t("listEmpty")}</p>}
               {templates.map((template) => (
                 <button
                   key={template.id}
@@ -143,17 +145,13 @@ export function TemplateManager({
                   <span>
                     <span className="block font-semibold">{template.name}</span>
                     <span className="text-sm text-muted">
-                      {template.kind === "sale" ? "Compra e venda" : "Arrendamento"} · v
-                      {template.version}
+                      {t("kindAndVersion", {
+                        kind: t(`kinds.${template.kind}`),
+                        version: String(template.version),
+                      })}
                     </span>
                   </span>
-                  <span className="text-xs text-muted">
-                    {template.status === "published"
-                      ? "Publicado"
-                      : template.status === "draft"
-                        ? "Rascunho"
-                        : "Arquivado"}
-                  </span>
+                  <span className="text-xs text-muted">{t(`status.${template.status}`)}</span>
                 </button>
               ))}
             </div>
@@ -194,6 +192,7 @@ function Editor({
   publishState: TemplateActionState;
   onPublish: () => Promise<void>;
 }) {
+  const t = useTranslations("admin.contractTemplates");
   const [variablesText, setVariablesText] = useState(template.variables.join(", "));
   const [saveState, saveAction] = useActionState(
     (_prev: TemplateActionState, formData: FormData) => actions.saveTemplate(template.id, formData),
@@ -203,24 +202,27 @@ function Editor({
     <Card>
       <CardHeader>
         <CardTitle>
-          Editar v{template.version}{" "}
+          {t("editVersion", { version: String(template.version) })}{" "}
           <span className="text-sm font-normal text-muted">
-            · {template.status === "published" ? "publicado" : "rascunho"}
+            ·{" "}
+            {template.status === "published"
+              ? t("statusInline.published")
+              : t("statusInline.draft")}
           </span>
         </CardTitle>
       </CardHeader>
       <CardBody>
         <form action={saveAction} className="space-y-4">
-          <Input label="Nome" name="name" defaultValue={template.name} />
+          <Input label={t("name")} name="name" defaultValue={template.name} />
           <Input
-            label="Variáveis"
+            label={t("variables")}
             name="variables"
             value={variablesText}
             onChange={(event) => setVariablesText(event.target.value)}
-            hint="Separe por vírgulas e insira-as no texto a partir da toolbar."
+            hint={t("variablesHint")}
           />
           <TemplateBodyEditor
-            label="Conteúdo do contrato"
+            label={t("body")}
             name="body"
             initialContent={template.body}
             variables={parseVariables(variablesText)}
@@ -228,16 +230,16 @@ function Editor({
           />
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={template.status !== "draft"}>
-              Guardar rascunho
+              {t("saveDraft")}
             </Button>
             {template.status === "draft" && (
               <Button type="button" variant="secondary" onClick={() => void onPublish()}>
-                Publicar versão
+                {t("publishVersion")}
               </Button>
             )}
             {template.status === "published" && (
               <Button type="button" variant="secondary" onClick={() => void onVersion()}>
-                Criar nova versão
+                {t("newVersion")}
               </Button>
             )}
           </div>

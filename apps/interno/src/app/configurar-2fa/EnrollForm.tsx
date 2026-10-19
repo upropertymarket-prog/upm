@@ -51,7 +51,7 @@ export function EnrollForm({
       <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
       <p className="text-sm text-muted">{t("body")}</p>
       {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URI do próprio Supabase, não otimizável pelo next/image. */}
-      <img src={qrCode} alt="QR code TOTP" width={200} height={200} className="mx-auto" />
+      <img src={qrCode} alt={t("qrAlt")} width={200} height={200} className="mx-auto" />
       <p className="break-all text-center font-mono text-xs text-muted">{secret}</p>
       <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="factorId" value={factorId} />

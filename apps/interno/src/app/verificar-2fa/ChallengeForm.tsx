@@ -20,7 +20,7 @@ export function ChallengeForm({ factorId }: { factorId: string }) {
   if (useRecovery) {
     return (
       <form action={recoveryAction} className="flex flex-col gap-3">
-        <Input name="recoveryCode" label="Código de recuperação" required />
+        <Input name="recoveryCode" label={t("recoveryLabel")} required />
         {recoveryState.error ? (
           <p className="text-sm text-danger" role="alert">
             {recoveryState.error}

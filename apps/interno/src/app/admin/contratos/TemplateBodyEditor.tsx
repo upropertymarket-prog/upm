@@ -22,6 +22,7 @@ import {
   Table as TableIcon,
   Underline as UnderlineIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button, Select } from "@upm/ui";
 import styles from "./TemplateBodyEditor.module.css";
 
@@ -102,6 +103,13 @@ export function TemplateBodyEditor({
   variables,
   editable = true,
 }: Props) {
+  /**
+   * O namespace é o do editor partilhado, de propósito: as etiquetas da barra
+   * são as mesmas — negrito é negrito nos dois — e inventar aqui um segundo
+   * "Itálico" era garantir que um dia ficavam diferentes. Quando D68 trouxer
+   * este editor para o `@upm/ui/editor`, as chaves já são as certas.
+   */
+  const t = useTranslations("editor");
   const [document, setDocument] = useState(
     isDocument(initialContent) ? initialContent : EMPTY_DOCUMENT,
   );
@@ -150,10 +158,10 @@ export function TemplateBodyEditor({
     <div className={styles.field}>
       <span className={styles.label}>{label}</span>
       <div className={styles.editor} data-readonly={!editable || undefined}>
-        <div className={styles.toolbar} aria-label="Ferramentas de formatação">
+        <div className={styles.toolbar} aria-label={t("toolbar")}>
           <div className={styles.styleSelect}>
             <Select
-              label="Estilo de texto"
+              label={t("textStyle")}
               labelHidden
               value={
                 editor?.isActive("heading", { level: 1 })
@@ -177,15 +185,15 @@ export function TemplateBodyEditor({
                 }
               }}
               options={[
-                { value: "p", label: "Texto normal" },
-                { value: "h1", label: "Título" },
-                { value: "h2", label: "Secção" },
-                { value: "h3", label: "Subsecção" },
+                { value: "p", label: t("styleParagraph") },
+                { value: "h1", label: t("styleTitle") },
+                { value: "h2", label: t("styleSection") },
+                { value: "h3", label: t("styleSubsection") },
               ]}
             />
           </div>
           <ToolButton
-            label="Negrito"
+            label={t("bold")}
             active={Boolean(editor?.isActive("bold"))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -193,7 +201,7 @@ export function TemplateBodyEditor({
             <Bold size={15} />
           </ToolButton>
           <ToolButton
-            label="Itálico"
+            label={t("italic")}
             active={Boolean(editor?.isActive("italic"))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
@@ -201,7 +209,7 @@ export function TemplateBodyEditor({
             <Italic size={15} />
           </ToolButton>
           <ToolButton
-            label="Sublinhado"
+            label={t("underline")}
             active={Boolean(editor?.isActive("underline"))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
@@ -210,7 +218,7 @@ export function TemplateBodyEditor({
           </ToolButton>
           <span className={styles.separator} aria-hidden="true" />
           <ToolButton
-            label="Alinhar à esquerda"
+            label={t("alignLeft")}
             active={Boolean(editor?.isActive({ textAlign: "left" }))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().setTextAlign("left").run()}
@@ -218,7 +226,7 @@ export function TemplateBodyEditor({
             <AlignLeft size={15} />
           </ToolButton>
           <ToolButton
-            label="Centrar"
+            label={t("alignCenter")}
             active={Boolean(editor?.isActive({ textAlign: "center" }))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().setTextAlign("center").run()}
@@ -226,7 +234,7 @@ export function TemplateBodyEditor({
             <AlignCenter size={15} />
           </ToolButton>
           <ToolButton
-            label="Alinhar à direita"
+            label={t("alignRight")}
             active={Boolean(editor?.isActive({ textAlign: "right" }))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().setTextAlign("right").run()}
@@ -235,7 +243,7 @@ export function TemplateBodyEditor({
           </ToolButton>
           <span className={styles.separator} aria-hidden="true" />
           <ToolButton
-            label="Lista com marcas"
+            label={t("bullets")}
             active={Boolean(editor?.isActive("bulletList"))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
@@ -243,7 +251,7 @@ export function TemplateBodyEditor({
             <List size={15} />
           </ToolButton>
           <ToolButton
-            label="Lista numerada"
+            label={t("numbers")}
             active={Boolean(editor?.isActive("orderedList"))}
             disabled={!editor || !editable}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
@@ -251,7 +259,7 @@ export function TemplateBodyEditor({
             <ListOrdered size={15} />
           </ToolButton>
           <ToolButton
-            label="Inserir tabela"
+            label={t("insertTable")}
             active={Boolean(editor?.isActive("table"))}
             disabled={!editor || !editable}
             onClick={() =>
@@ -268,7 +276,7 @@ export function TemplateBodyEditor({
               type="button"
               className={styles.addVariableButton}
               iconOnly
-              aria-label="Adicionar variável"
+              aria-label={t("addVariable")}
               aria-expanded={variableMenuOpen}
               aria-controls={variableMenuOpen ? variablePopoverId : undefined}
               disabled={!editor || !editable}
@@ -281,14 +289,12 @@ export function TemplateBodyEditor({
               <div
                 id={variablePopoverId}
                 className={styles.variablePopover}
-                aria-label="Inserir variável"
+                aria-label={t("insertVariableTitle")}
                 role="group"
               >
-                <span className={styles.variablePopoverTitle}>Inserir variável</span>
+                <span className={styles.variablePopoverTitle}>{t("insertVariableTitle")}</span>
                 {variables.length === 0 ? (
-                  <p className={styles.emptyVariables}>
-                    Adicione variáveis no campo acima para as inserir no texto.
-                  </p>
+                  <p className={styles.emptyVariables}>{t("variablesEmptyPopover")}</p>
                 ) : (
                   <div className={styles.variableOptions}>
                     {variables.map((variable) => (
@@ -320,7 +326,7 @@ export function TemplateBodyEditor({
           </div>
         </div>
         {variables.length === 0 && editable && (
-          <p className={styles.hint}>Adicione variáveis acima para as poder inserir no texto.</p>
+          <p className={styles.hint}>{t("variablesEmptyHint")}</p>
         )}
       </div>
       <input type="hidden" name={name} value={JSON.stringify(document)} />
