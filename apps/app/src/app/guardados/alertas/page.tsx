@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import type { PropertyFilters } from "@upm/db/properties";
 
@@ -19,7 +19,12 @@ export const dynamic = "force-dynamic";
 /** Alertas de pesquisa (P4-04b) — buyer-only, já garantido pelo `middleware.ts`. */
 export default async function SearchAlertsPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, t, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("market.alerts"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
   const user = authData.user;
   if (!user) redirect("/");
 
@@ -43,16 +48,16 @@ export default async function SearchAlertsPage() {
   return (
     <AppChrome
       role="buyer"
-      userName={profile?.full_name || "Comprador"}
-      userMeta="Comprador"
+      userName={profile?.full_name || tRoles("buyer")}
+      userMeta={tRoles("buyer")}
       activeId="saved"
       locale={locale}
       onLocaleChange={setLocalePreference}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1 className="upm-card__title">Alertas de pesquisa</h1>
-          <Link href="/guardados">Voltar a Guardados</Link>
+          <h1 className="upm-card__title">{t("title")}</h1>
+          <Link href="/guardados">{t("backToSaved")}</Link>
         </div>
         <AlertsManager
           alerts={items}

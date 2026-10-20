@@ -67,24 +67,24 @@ export default async function SettingsPage() {
     <AppChrome
       role={role}
       userName={profile?.full_name || "Utilizador"}
-      userMeta={role === "owner" ? "Proprietário" : "Comprador"}
+      userMeta={t(`roles.${role === "owner" ? "owner" : "buyer"}`)}
       activeId="settings"
       locale={locale}
       onLocaleChange={setLocalePreference}
       counters={countersFor(role, conversations, visits, leads)}
       notifications={notifications}
     >
-      <PageHeader title="Definições" subtitle="Conta, perfil e notificações" />
+      <PageHeader title={t("settings.title")} subtitle={t("settings.subtitle")} />
 
       <div style={{ display: "grid", gap: "var(--sp-8)" }}>
         <NotificationPrefsForm prefs={prefs} onSave={updateNotificationPrefs} />
 
         <Card padded style={{ display: "grid", gap: "var(--sp-6)" }}>
           <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-            <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>Aparência</h2>
-            <p style={{ margin: 0, color: "var(--muted)" }}>
-              A escolha fica guardada nesta conta e segue-a noutros dispositivos.
-            </p>
+            <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>
+              {t("settings.appearance")}
+            </h2>
+            <p style={{ margin: 0, color: "var(--muted)" }}>{t("settings.appearanceHint")}</p>
           </div>
           <ThemeToggle
             variant="inline"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Checkbox, Input } from "@upm/ui";
 import type { PriceStepInput } from "@upm/db/properties";
 
@@ -26,6 +27,8 @@ function centsToEuros(cents: number | null): number | string {
  * (`price_cents` etc.), tal como a coluna na base de dados.
  */
 export function PriceStep({ value, onChange, errors }: PriceStepProps) {
+  const t = useTranslations("newProperty");
+
   function set<K extends keyof PriceStepInput>(key: K, next: PriceStepInput[K]) {
     onChange({ ...value, [key]: next });
   }
@@ -33,7 +36,7 @@ export function PriceStep({ value, onChange, errors }: PriceStepProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Input
-        label="Preço de venda (€)"
+        label={t("salePrice")}
         type="number"
         inputMode="decimal"
         value={centsToEuros(value.price_cents)}
@@ -41,7 +44,7 @@ export function PriceStep({ value, onChange, errors }: PriceStepProps) {
         error={errors?.price_cents}
       />
       <Input
-        label="Renda (€)"
+        label={t("rent")}
         type="number"
         inputMode="decimal"
         value={centsToEuros(value.rent_cents)}
@@ -49,7 +52,7 @@ export function PriceStep({ value, onChange, errors }: PriceStepProps) {
         error={errors?.rent_cents}
       />
       <Input
-        label="Condomínio (€)"
+        label={t("condoFee")}
         type="number"
         inputMode="decimal"
         value={centsToEuros(value.condo_fee_cents)}
@@ -57,7 +60,7 @@ export function PriceStep({ value, onChange, errors }: PriceStepProps) {
         error={errors?.condo_fee_cents}
       />
       <Input
-        label="IMI (€)"
+        label={t("imi")}
         type="number"
         inputMode="decimal"
         value={centsToEuros(value.imi_cents)}
@@ -65,7 +68,7 @@ export function PriceStep({ value, onChange, errors }: PriceStepProps) {
         error={errors?.imi_cents}
       />
       <Checkbox
-        label="Aceita propostas"
+        label={t("acceptsOffers")}
         checked={value.accepts_offers}
         onChange={(event) => set("accepts_offers", event.target.checked)}
       />

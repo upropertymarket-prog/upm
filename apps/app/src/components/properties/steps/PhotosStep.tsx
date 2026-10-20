@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@upm/ui";
 import { createClient } from "@upm/db/client";
 
@@ -31,6 +32,7 @@ type PendingPreview = { key: string; url: string };
  * Actions não devolvem as linhas criadas, só `{ error? }` (padrão do projeto).
  */
 export function PhotosStep({ propertyId, media, onMediaChange, actions, error }: PhotosStepProps) {
+  const t = useTranslations("newProperty");
   const [pending, setPending] = useState<PendingPreview[]>([]);
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | undefined>(undefined);
@@ -191,7 +193,7 @@ export function PhotosStep({ propertyId, media, onMediaChange, actions, error }:
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- pré-visualização local via blob URL */}
             <img src={preview.url} alt="" className="aspect-square rounded-md object-cover" />
-            <span className="text-muted text-sm">A enviar…</span>
+            <span className="text-muted text-sm">{t("uploading")}</span>
           </div>
         ))}
       </div>

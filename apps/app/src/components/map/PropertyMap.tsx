@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import * as maplibregl from "maplibre-gl";
 import type {
   GeoJSONSource,
@@ -79,6 +80,16 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
   const verticesRef = useRef<[number, number][]>([]);
   const [drawing, setDrawing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const t = useTranslations("market");
+
+  /**
+   * O popup do maplibre monta-se dentro do `useEffect` que cria o mapa, que
+   * corre uma vez (`[]`). Guardar o rótulo num ref em vez de o fechar na
+   * closure é o que faz o handler ler sempre o valor atual, sem acrescentar o
+   * `t` às dependências e remontar o mapa inteiro a cada renderização.
+   */
+  const viewPropertyLabelRef = useRef(t("viewProperty"));
+  viewPropertyLabelRef.current = t("viewProperty");
 
   const setPoints = useCallback((properties: MapProperty[]) => {
     const map = mapRef.current;
@@ -192,7 +203,7 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
         new maplibregl.Popup()
           .setLngLat([lon, lat])
           .setHTML(
-            `<strong>${title}</strong><br/>${price}<br/><a href="/market/${id}">Ver imóvel</a>`,
+            `<strong>${title}</strong><br/>${price}<br/><a href="/market/${id}">${viewPropertyLabelRef.current}</a>`,
           )
           .addTo(map);
       });

@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Tabs, type TabItem } from "@upm/ui";
-import type {
-  CharacteristicsStepInput,
-  IdentificationStepInput,
-  LocationStepInput,
-  PriceStepInput,
+import {
+  PROPERTY_CONDITIONS,
+  type CharacteristicsStepInput,
+  type IdentificationStepInput,
+  type LocationStepInput,
+  type PriceStepInput,
 } from "@upm/db/properties";
 
 import type { PropertyDraft, PropertyFormActions, PropertyMediaItem } from "./PropertyFormActions";
@@ -16,20 +18,32 @@ import { LocationStep } from "./steps/LocationStep";
 import { PriceStep } from "./steps/PriceStep";
 import { PhotosStep } from "./steps/PhotosStep";
 
-const STEP_ITEMS: TabItem[] = [
-  { id: "identificacao", label: "Identificação" },
-  { id: "caracteristicas", label: "Características" },
-  { id: "localizacao", label: "Localização" },
-  { id: "preco", label: "Preço" },
-  { id: "fotografias", label: "Fotografias" },
-];
+/**
+ * Só os ids dos passos, pela ordem do wizard. Os rótulos saíram daqui a 20 out
+ * 2026 (D72) — uma constante de módulo é avaliada no arranque e ficava presa ao
+ * idioma em que foi escrita. Os ids continuam aqui porque são eles que a lógica
+ * usa: decidem qual a Server Action que grava cada passo.
+ */
+const STEP_IDS = [
+  "identificacao",
+  "caracteristicas",
+  "localizacao",
+  "preco",
+  "fotografias",
+] as const;
 
+/**
+ * `property_type`, `typology` e `condition` são `text` na base de dados, com os
+ * valores em português fechados em `@upm/db/properties` (07 §17.2). O default
+ * da condição vem da própria lista em vez de repetir o literal: são dados, não
+ * um rótulo, e uma segunda cópia divergia da validação do `zod` em silêncio.
+ */
 const EMPTY_IDENTIFICATION: IdentificationStepInput = {
   title: "",
   deal: "sale",
   property_type: "Apartamento",
   typology: "T1",
-  condition: "Usado — bom estado",
+  condition: PROPERTY_CONDITIONS[1],
   description: "",
 };
 
@@ -125,6 +139,9 @@ export function PropertyFormWizard({
   initialValue,
   initialMedia,
 }: PropertyFormWizardProps) {
+  const t = useTranslations("newProperty");
+  const stepItems: TabItem[] = STEP_IDS.map((id) => ({ id, label: t(`steps.${id}`) }));
+
   const [propertyId, setPropertyId] = useState<string | null>(initialValue?.id ?? null);
   const [currentStep, setCurrentStep] = useState(0);
   const [creating, setCreating] = useState(false);
@@ -162,7 +179,7 @@ export function PropertyFormWizard({
 
   async function saveCurrentStep(): Promise<boolean> {
     if (!propertyId) {
-      setStepError("Rascunho ainda não foi criado. Aguarda um instante e tenta novamente.");
+      setStepError(t("draftNotReady"));
       return false;
     }
 
@@ -171,7 +188,7 @@ export function PropertyFormWizard({
     setNotice(undefined);
 
     let result: { error?: string };
-    switch (STEP_ITEMS[currentStep]?.id) {
+    switch (STEP_IDS[currentStep]) {
       case "identificacao":
         result = await actions.saveIdentification(propertyId, identification);
         break;
@@ -193,7 +210,7 @@ export function PropertyFormWizard({
     if (result.error) {
       // O passo de localização pode gravar com sucesso e ainda assim avisar
       // que o geocoding falhou — mostra-se como aviso, não bloqueia o avanço.
-      if (STEP_ITEMS[currentStep]?.id === "localizacao") {
+      if (STEP_IDS[currentStep] === "localizacao") {
         setNotice(result.error);
         return true;
       }
@@ -205,7 +222,7 @@ export function PropertyFormWizard({
 
   async function handleNext() {
     const ok = await saveCurrentStep();
-    if (ok && currentStep < STEP_ITEMS.length - 1) {
+    if (ok && currentStep < STEP_IDS.length - 1) {
       setCurrentStep((step) => step + 1);
     }
   }
@@ -224,24 +241,24 @@ export function PropertyFormWizard({
       setStepError(result.error);
       return;
     }
-    setNotice("Imóvel enviado para revisão.");
+    setNotice(t("sentForReview"));
   }
 
-  const isLastStep = currentStep === STEP_ITEMS.length - 1;
+  const isLastStep = currentStep === STEP_IDS.length - 1;
 
   return (
     <div className="flex flex-col gap-6">
       <Tabs
-        label="Passos do formulário de imóvel"
-        items={STEP_ITEMS}
-        value={STEP_ITEMS[currentStep]?.id ?? STEP_ITEMS[0]!.id}
+        label={t("tabsLabel")}
+        items={stepItems}
+        value={STEP_IDS[currentStep] ?? STEP_IDS[0]}
         onValueChange={(id) => {
-          const index = STEP_ITEMS.findIndex((item) => item.id === id);
+          const index = STEP_IDS.indexOf(id as (typeof STEP_IDS)[number]);
           if (index >= 0) setCurrentStep(index);
         }}
       />
 
-      {creating ? <p>A criar rascunho…</p> : null}
+      {creating ? <p>{t("creatingDraft")}</p> : null}
       {stepError ? (
         <p className="upm-field__error" role="alert">
           {stepError}
@@ -275,15 +292,15 @@ export function PropertyFormWizard({
 
       <div className="flex justify-end gap-3">
         <Button variant="secondary" onClick={() => void handleSaveDraft()} disabled={saving}>
-          Guardar rascunho
+          {t("saveDraft")}
         </Button>
         {!isLastStep ? (
           <Button onClick={() => void handleNext()} disabled={saving}>
-            Seguinte
+            {t("next")}
           </Button>
         ) : (
           <Button onClick={() => void handlePublish()} disabled={saving}>
-            Publicar
+            {t("publish")}
           </Button>
         )}
       </div>

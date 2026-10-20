@@ -94,6 +94,10 @@
     "buyer": "Comprador"
   },
   "meta": {
+    "app": {
+      "title": "UProperty Market",
+      "description": "Área de comprador e proprietário."
+    },
     "interno": {
       "title": "UProperty Market · Interno",
       "description": "Área interna de Administração e Suporte.",
@@ -330,8 +334,59 @@
       "alreadyArchived": "Este imóvel já está arquivado.",
       "body": "O imóvel deixa de aparecer no Market. Esta ação não tem «desarquivar» nesta fase — para voltar a publicar é preciso criar um novo anúncio."
     },
+    "statsTitle": "Estatísticas — {title}",
     "statsEmpty": "Ainda sem visitas registadas.",
-    "dailyViews": "Visitas diárias —"
+    "dailyViews": "Visitas diárias — {title}",
+    "day": "Dia",
+    "viewsColumn": "Visitas"
+  },
+  "newProperty": {
+    "tabsLabel": "Passos do formulário de imóvel",
+    "steps": {
+      "identificacao": "Identificação",
+      "caracteristicas": "Características",
+      "localizacao": "Localização",
+      "preco": "Preço",
+      "fotografias": "Fotografias"
+    },
+    "creatingDraft": "A criar rascunho…",
+    "draftNotReady": "Rascunho ainda não foi criado. Aguarda um instante e tenta novamente.",
+    "saveDraft": "Guardar rascunho",
+    "next": "Seguinte",
+    "publish": "Publicar",
+    "sentForReview": "Imóvel enviado para revisão.",
+    "title": "Título",
+    "dealKind": "Tipo de negócio",
+    "propertyType": "Tipo de imóvel",
+    "condition": "Estado",
+    "description": "Descrição",
+    "grossArea": "Área bruta (m²)",
+    "netArea": "Área útil (m²)",
+    "bedrooms": "Quartos",
+    "amenities": "Comodidades (separadas por vírgula)",
+    "address": "Morada",
+    "postalCode": "Código postal",
+    "parish": "Freguesia",
+    "district": "Distrito",
+    "showExact": "Mostrar localização exata no anúncio",
+    "showExactHint": "Sem isto, o Mapa mostra só uma zona aproximada até haver uma visita marcada.",
+    "salePrice": "Preço de venda (€)",
+    "rent": "Renda (€)",
+    "condoFee": "Condomínio (€)",
+    "imi": "IMI (€)",
+    "acceptsOffers": "Aceita propostas",
+    "uploading": "A enviar…"
+  },
+  "saved": {
+    "caption": "Imóveis guardados",
+    "unavailable": "(imóvel indisponível)",
+    "priceAtSave": "Preço ao guardar",
+    "currentPrice": "Preço atual",
+    "dropped": "Desceu",
+    "rose": "Subiu",
+    "emptyTitle": "Ainda não guardou nenhum imóvel",
+    "emptyDescription": "Explore o Market e guarde os imóveis que lhe interessam.",
+    "exploreMarket": "Explorar Market"
   },
   "cloud": {
     "title": "Cloud",
@@ -435,6 +490,7 @@
     }
   },
   "dashboard": {
+    "ownerSubtitle": "Resumo da sua atividade e ativos",
     "statsTitle": "As suas estatísticas",
     "charts": "Gráficos",
     "recentActivity": "Atividade recente",
@@ -583,6 +639,7 @@
     "pageSubtitle": "{count, plural, one {# contacto} other {# contactos}} nos últimos 30 dias"
   },
   "messages": {
+    "pageSubtitle": "Conversas por imóvel, sem partilhar contactos",
     "listLabel": "Conversas",
     "threadLabel": "Conversa",
     "listTitle": "Conversas",
@@ -1577,6 +1634,10 @@
     "pendingReview": "MINUTA PARA REVISÃO JURÍDICA. Este texto não foi revisto por advogado e não substitui aconselhamento jurídico. Contém lacunas assinaladas no próprio documento."
   },
   "settings": {
+    "title": "Definições",
+    "subtitle": "Conta, perfil e notificações",
+    "appearance": "Aparência",
+    "appearanceHint": "A escolha fica guardada nesta conta e segue-a noutros dispositivos.",
     "danger": {
       "title": "Zona de perigo",
       "subtitle": "Exportar os seus dados ou eliminar a conta. A eliminação não se desfaz.",

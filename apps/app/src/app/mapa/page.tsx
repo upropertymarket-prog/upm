@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { PageHeader } from "@upm/ui";
 
@@ -18,7 +18,12 @@ export const dynamic = "force-dynamic";
  */
 export default async function MapPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, tNav, t, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("nav"),
+    getTranslations("market"),
+    supabase.auth.getUser(),
+  ]);
   const user = authData.user;
   if (!user) redirect("/");
 
@@ -44,7 +49,7 @@ export default async function MapPage() {
       contentWidth="full"
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <PageHeader title="Mapa" subtitle="Imóveis publicados na sua zona" />
+        <PageHeader title={tNav("map")} subtitle={t("inYourArea")} />
         <PropertyMap initialProperties={properties ?? []} onDrawPolygon={propertiesWithinPolygon} />
       </div>
     </AppChrome>

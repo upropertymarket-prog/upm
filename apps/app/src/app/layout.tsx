@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
@@ -12,12 +12,22 @@ import { getServerThemeChoice } from "../lib/theme";
 import { getPendingGateInfo } from "../lib/pending-gate";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "UProperty Market",
-  description: "Área de comprador e proprietário.",
-  // TODO: ícone final da marca (07 §10.1) — `icons` fica por preencher até o
-  // cliente entregar o ícone. Nada de derivar um a partir do wordmark.
-};
+/**
+ * `generateMetadata` e não um `metadata` constante, pela mesma razão que no
+ * `apps/interno`: a descrição é texto que alguém lê — no separador do browser e
+ * no histórico — e segue o idioma escolhido como o resto da app. Um `metadata`
+ * constante é avaliado uma vez, fora de qualquer pedido, e não tem como saber
+ * em que língua o utilizador está.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.app");
+  return {
+    title: t("title"),
+    description: t("description"),
+    // TODO: ícone final da marca (07 §10.1) — `icons` fica por preencher até o
+    // cliente entregar o ícone. Nada de derivar um a partir do wordmark.
+  };
+}
 
 /**
  * Root layout de `app.upropertymarket.pt` (P1-02 · P1-03 · P1-06)

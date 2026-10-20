@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { Card, Table, type TableColumn } from "@upm/ui";
 
@@ -19,7 +19,12 @@ type ViewRow = { id: string; day: string; views_count: number };
 export default async function PropertyStatsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, t, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("myProperties"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
   const user = authData.user;
   if (!user) redirect("/");
 
@@ -48,28 +53,28 @@ export default async function PropertyStatsPage({ params }: { params: Promise<{ 
   const rows: ViewRow[] = views ?? [];
 
   const columns: TableColumn<ViewRow>[] = [
-    { id: "day", header: "Dia", cell: (row) => row.day },
-    { id: "views", header: "Visitas", numeric: true, cell: (row) => row.views_count },
+    { id: "day", header: t("day"), cell: (row) => row.day },
+    { id: "views", header: t("viewsColumn"), numeric: true, cell: (row) => row.views_count },
   ];
 
   return (
     <AppChrome
       role="owner"
-      userName={profile.full_name || "Proprietário"}
+      userName={profile.full_name || tRoles("owner")}
       userMeta="Proprietário"
       activeId="myProperties"
       locale={locale}
       onLocaleChange={setLocalePreference}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <h1 className="upm-card__title">Estatísticas — {property.title}</h1>
+        <h1 className="upm-card__title">{t("statsTitle", { title: property.title })}</h1>
         <Card>
           <Table
-            caption={`Visitas diárias — ${property.title}`}
+            caption={t("dailyViews", { title: property.title })}
             columns={columns}
             rows={rows}
             rowKey={(row) => row.id}
-            empty="Ainda sem visitas registadas."
+            empty={t("statsEmpty")}
           />
         </Card>
       </div>

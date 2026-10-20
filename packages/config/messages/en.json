@@ -94,6 +94,10 @@
     "buyer": "Buyer"
   },
   "meta": {
+    "app": {
+      "title": "UProperty Market",
+      "description": "Buyer and owner area."
+    },
     "interno": {
       "title": "UProperty Market · Internal",
       "description": "Internal area for Administration and Support.",
@@ -330,8 +334,59 @@
       "alreadyArchived": "This property is already archived.",
       "body": "The property stops appearing in the Market. This action has no «unarchive» at this stage — to publish it again you need to create a new listing."
     },
+    "statsTitle": "Statistics — {title}",
     "statsEmpty": "No views recorded yet.",
-    "dailyViews": "Daily views —"
+    "dailyViews": "Daily views — {title}",
+    "day": "Day",
+    "viewsColumn": "Views"
+  },
+  "newProperty": {
+    "tabsLabel": "Property form steps",
+    "steps": {
+      "identificacao": "Identification",
+      "caracteristicas": "Features",
+      "localizacao": "Location",
+      "preco": "Price",
+      "fotografias": "Photos"
+    },
+    "creatingDraft": "Creating draft…",
+    "draftNotReady": "The draft has not been created yet. Wait a moment and try again.",
+    "saveDraft": "Save draft",
+    "next": "Next",
+    "publish": "Publish",
+    "sentForReview": "Property sent for review.",
+    "title": "Title",
+    "dealKind": "Deal type",
+    "propertyType": "Property type",
+    "condition": "Condition",
+    "description": "Description",
+    "grossArea": "Gross area (m²)",
+    "netArea": "Net area (m²)",
+    "bedrooms": "Bedrooms",
+    "amenities": "Amenities (comma separated)",
+    "address": "Address",
+    "postalCode": "Postal code",
+    "parish": "Parish",
+    "district": "District",
+    "showExact": "Show the exact location on the listing",
+    "showExactHint": "Without this, the Map shows only an approximate area until a viewing is booked.",
+    "salePrice": "Sale price (€)",
+    "rent": "Rent (€)",
+    "condoFee": "Condo fee (€)",
+    "imi": "Property tax (€)",
+    "acceptsOffers": "Accepts offers",
+    "uploading": "Uploading…"
+  },
+  "saved": {
+    "caption": "Saved properties",
+    "unavailable": "(property unavailable)",
+    "priceAtSave": "Price when saved",
+    "currentPrice": "Current price",
+    "dropped": "Down",
+    "rose": "Up",
+    "emptyTitle": "You have not saved any properties yet",
+    "emptyDescription": "Browse the Market and save the properties you are interested in.",
+    "exploreMarket": "Browse the Market"
   },
   "cloud": {
     "title": "Cloud",
@@ -435,6 +490,7 @@
     }
   },
   "dashboard": {
+    "ownerSubtitle": "A summary of your activity and assets",
     "statsTitle": "Your figures",
     "charts": "Charts",
     "recentActivity": "Recent activity",
@@ -583,6 +639,7 @@
     "pageSubtitle": "{count, plural, one {# contact} other {# contacts}} in the last 30 days"
   },
   "messages": {
+    "pageSubtitle": "Conversations per property, without sharing contacts",
     "listLabel": "Conversations",
     "threadLabel": "Conversation",
     "listTitle": "Conversations",
@@ -1577,6 +1634,10 @@
     "pendingReview": "DRAFT PENDING LEGAL REVIEW. This text has not been reviewed by a lawyer and does not replace legal advice. It contains gaps flagged within the document itself."
   },
   "settings": {
+    "title": "Settings",
+    "subtitle": "Account, profile and notifications",
+    "appearance": "Appearance",
+    "appearanceHint": "Your choice is saved to this account and follows you on other devices.",
     "danger": {
       "title": "Danger zone",
       "subtitle": "Export your data or delete your account. Deletion cannot be undone.",

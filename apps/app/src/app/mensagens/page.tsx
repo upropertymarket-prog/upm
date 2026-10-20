@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { PageHeader } from "@upm/ui";
 
@@ -40,7 +40,12 @@ export default async function MessagesPage({
 }) {
   const { conversa } = await searchParams;
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, tNav, t, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("nav"),
+    getTranslations("messages"),
+    supabase.auth.getUser(),
+  ]);
 
   const user = authData.user;
   if (!user) redirect("/");
@@ -80,7 +85,7 @@ export default async function MessagesPage({
       // rolam por dentro, em vez de a página rolar por baixo deles.
       fill
     >
-      <PageHeader title="Mensagens" subtitle="Conversas por imóvel, sem partilhar contactos" />
+      <PageHeader title={tNav("messages")} subtitle={t("pageSubtitle")} />
       <MessagesPageClient
         conversations={conversations}
         active={active}

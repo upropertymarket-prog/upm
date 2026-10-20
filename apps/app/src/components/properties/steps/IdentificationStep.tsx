@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Input, Select, Textarea } from "@upm/ui";
 import {
   DEALS,
@@ -9,12 +10,13 @@ import {
   type IdentificationStepInput,
 } from "@upm/db/properties";
 
-const DEAL_LABELS: Record<(typeof DEALS)[number], string> = {
-  sale: "Venda",
-  rent: "Arrendamento",
-};
-
-const DEAL_OPTIONS = DEALS.map((deal) => ({ value: deal, label: DEAL_LABELS[deal] }));
+/**
+ * `property_type`, `typology` e `condition` são `text` na base de dados e os
+ * valores estão fechados em `@upm/db/properties` (07 §17.2) — por isso aqui o
+ * valor **é** a etiqueta, e continua em português nos dois idiomas. Traduzi-los
+ * mudaria o que se grava na coluna. O negócio é o caso diferente: o valor é
+ * `sale`/`rent`, logo a etiqueta vem de `property.deal`.
+ */
 const PROPERTY_TYPE_OPTIONS = PROPERTY_TYPES.map((type) => ({ value: type, label: type }));
 const TYPOLOGY_OPTIONS = TYPOLOGIES.map((typology) => ({ value: typology, label: typology }));
 const CONDITION_OPTIONS = PROPERTY_CONDITIONS.map((condition) => ({
@@ -32,6 +34,9 @@ export type IdentificationStepProps = {
  * Passo 1 do wizard "Nova propriedade" (P4-02) — identificação básica.
  */
 export function IdentificationStep({ value, onChange, errors }: IdentificationStepProps) {
+  const t = useTranslations("newProperty");
+  const tf = useTranslations("property");
+
   function set<K extends keyof IdentificationStepInput>(key: K, next: IdentificationStepInput[K]) {
     onChange({ ...value, [key]: next });
   }
@@ -39,21 +44,21 @@ export function IdentificationStep({ value, onChange, errors }: IdentificationSt
   return (
     <div className="flex flex-col gap-4" style={{ width: "100%" }}>
       <Input
-        label="Título"
+        label={t("title")}
         value={value.title}
         onChange={(event) => set("title", event.target.value)}
         error={errors?.title}
         maxLength={160}
       />
       <Select
-        label="Tipo de negócio"
-        options={DEAL_OPTIONS}
+        label={t("dealKind")}
+        options={DEALS.map((deal) => ({ value: deal, label: tf(`deal.${deal}`) }))}
         value={value.deal}
         onChange={(event) => set("deal", event.target.value as IdentificationStepInput["deal"])}
         error={errors?.deal}
       />
       <Select
-        label="Tipo de imóvel"
+        label={t("propertyType")}
         options={PROPERTY_TYPE_OPTIONS}
         value={value.property_type}
         onChange={(event) =>
@@ -62,7 +67,7 @@ export function IdentificationStep({ value, onChange, errors }: IdentificationSt
         error={errors?.property_type}
       />
       <Select
-        label="Tipologia"
+        label={tf("fields.typology")}
         options={TYPOLOGY_OPTIONS}
         value={value.typology}
         onChange={(event) =>
@@ -71,7 +76,7 @@ export function IdentificationStep({ value, onChange, errors }: IdentificationSt
         error={errors?.typology}
       />
       <Select
-        label="Estado"
+        label={t("condition")}
         options={CONDITION_OPTIONS}
         value={value.condition}
         onChange={(event) =>
@@ -80,7 +85,7 @@ export function IdentificationStep({ value, onChange, errors }: IdentificationSt
         error={errors?.condition}
       />
       <Textarea
-        label="Descrição"
+        label={t("description")}
         value={value.description}
         onChange={(event) => set("description", event.target.value)}
         error={errors?.description}

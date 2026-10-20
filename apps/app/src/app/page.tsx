@@ -7,6 +7,13 @@ import { Button, PageHeader, greetingKey } from "@upm/ui";
 
 import { AppChrome } from "../components/AppChrome";
 import { ComponentsPreview } from "../components/ComponentsPreview";
+import {
+  DEMO_OWNER_COUNTERS,
+  DEMO_OWNER_FULL_NAME,
+  DEMO_OWNER_META,
+  DEMO_OWNER_NAME,
+  DEMO_OWNER_NOTIFICATIONS,
+} from "../lib/demo-data/ownerShell";
 import { setLocalePreference } from "./actions/preferences";
 
 /**
@@ -38,29 +45,26 @@ export default async function Page() {
   }
 
   const [t, locale] = await Promise.all([getTranslations(), getLocale()]);
-  const greeting = t(`greeting.${greetingKey()}`, { name: "Ana" });
+  const greeting = t(`greeting.${greetingKey()}`, { name: DEMO_OWNER_NAME });
 
   return (
     <AppChrome
       role="owner"
-      userName="Ana Silva"
-      userMeta="Proprietária · Premium"
+      userName={DEMO_OWNER_FULL_NAME}
+      userMeta={DEMO_OWNER_META}
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
-      notifications={[
-        { id: "n1", text: "João Costa pediu uma visita ao UPM-1041", when: "há 2 h", read: false },
-        { id: "n2", text: "O UPM-1047 foi aprovado pela moderação", when: "ontem", read: true },
-      ]}
+      counters={DEMO_OWNER_COUNTERS}
+      notifications={DEMO_OWNER_NOTIFICATIONS}
     >
       <PageHeader
         title={greeting}
-        subtitle="Resumo da sua atividade e ativos"
+        subtitle={t("dashboard.ownerSubtitle")}
         actions={
           <>
             <Button variant="secondary">{t("common.export")}</Button>
-            <Button>Nova propriedade</Button>
+            <Button>{t("nav.newProperty")}</Button>
           </>
         }
       />

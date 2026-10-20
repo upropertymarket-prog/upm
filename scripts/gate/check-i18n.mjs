@@ -341,6 +341,28 @@ function ehServerAction(fonte, caminho) {
   return /^\s*["']use server["']/.test(fonte) || /\/actions?(\/|\.ts$)/.test(caminho);
 }
 
+/**
+ * Route handlers (`src/app/api/**`) — HTTP, não ecrã.
+ *
+ * Acrescentado a 20 out 2026, com o `api/stripe/webhook/route.ts`: as três
+ * strings que ele tinha eram um prefixo de `console.error` e dois
+ * `throw new Error`, e do outro lado deste endpoint não está uma pessoa — está
+ * o Stripe, que lê o código de estado. Nenhuma delas chega a um ecrã, em
+ * nenhum idioma.
+ *
+ * Não é uma isenção por ficheiro, que é o que a lista `ISENTOS` guarda: é a
+ * mesma distinção estrutural que o `ehServerAction` já fazia. Um `route.ts`
+ * devolve uma `Response`; um componente devolve marcação. Contá-los juntos
+ * punha no total de D72 trabalho que nunca pode descer a zero por tradução — e
+ * a definição de pronto desta dívida é o zero.
+ *
+ * Os ficheiros continuam a ser varridos: se um route handler passar a devolver
+ * HTML para alguém ler, é outra conversa e esta regra tem de cair com ela.
+ */
+function ehRouteHandler(caminho) {
+  return /\/src\/app\/api\//.test(caminho) && /\/route\.tsx?$/.test(caminho);
+}
+
 /** A linha onde um índice cai, inteira — para a guarda do `z.` das raízes só-rótulos. */
 function linhaInteira(fonte, indice) {
   const antes = fonte.lastIndexOf("\n", indice) + 1;
@@ -381,6 +403,8 @@ for (const raiz of RAIZES) {
   for (const ficheiro of ficheiros(raiz.dir)) {
     const relativo = relative(process.cwd(), ficheiro).split(sep).join("/");
     if (ISENTOS.has(relativo)) continue;
+
+    if (ehRouteHandler(relativo)) continue;
 
     const original = readFileSync(ficheiro, "utf8");
     const fonte = semComentarios(original);

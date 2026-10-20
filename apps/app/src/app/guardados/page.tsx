@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Bookmark } from "lucide-react";
 import { createClient } from "@upm/db/server";
 import { EmptyState, StatusTag, Table, type TableColumn } from "@upm/ui";
@@ -28,7 +28,15 @@ type SavedRow = {
  */
 export default async function SavedPropertiesPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, t, tNav, tProp, tAlerts, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("saved"),
+    getTranslations("nav"),
+    getTranslations("property"),
+    getTranslations("market.alerts"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
   const user = authData.user;
   if (!user) redirect("/");
 
@@ -60,7 +68,7 @@ export default async function SavedPropertiesPage() {
     return {
       id: row.id,
       propertyId: row.property_id,
-      title: property?.title ?? "(imóvel indisponível)",
+      title: property?.title ?? t("unavailable"),
       deal: property?.deal ?? null,
       priceAtSave: row.price_at_save_cents,
       currentPrice,
@@ -70,16 +78,16 @@ export default async function SavedPropertiesPage() {
   const columns: TableColumn<SavedRow>[] = [
     {
       id: "title",
-      header: "Imóvel",
+      header: tProp("fields.property"),
       cell: (row) => <a href={`/market/${row.propertyId}`}>{row.title}</a>,
     },
     {
       id: "deal",
-      header: "Negócio",
+      header: tProp("fields.deal"),
       cell: (row) =>
         row.deal ? (
           <StatusTag tone={row.deal === "sale" ? "dealSale" : "dealRent"}>
-            {row.deal === "sale" ? "Venda" : "Arrendamento"}
+            {tProp(`deal.${row.deal}`)}
           </StatusTag>
         ) : (
           "—"
@@ -87,13 +95,13 @@ export default async function SavedPropertiesPage() {
     },
     {
       id: "priceAtSave",
-      header: "Preço ao guardar",
+      header: t("priceAtSave"),
       numeric: true,
       cell: (row) => formatCents(row.priceAtSave),
     },
     {
       id: "currentPrice",
-      header: "Preço atual",
+      header: t("currentPrice"),
       numeric: true,
       cell: (row) => {
         const changed =
@@ -106,7 +114,7 @@ export default async function SavedPropertiesPage() {
           <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
             {formatCents(row.currentPrice)}
             <StatusTag tone={dropped ? "active" : "rejected"}>
-              {dropped ? "Desceu" : "Subiu"}
+              {dropped ? t("dropped") : t("rose")}
             </StatusTag>
           </span>
         );
@@ -117,35 +125,30 @@ export default async function SavedPropertiesPage() {
   return (
     <AppChrome
       role="buyer"
-      userName={profile?.full_name || "Comprador"}
-      userMeta="Comprador"
+      userName={profile?.full_name || tRoles("buyer")}
+      userMeta={tRoles("buyer")}
       activeId="saved"
       locale={locale}
       onLocaleChange={setLocalePreference}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1 className="upm-card__title">Guardados</h1>
-          <Link href="/guardados/alertas">Alertas de pesquisa</Link>
+          <h1 className="upm-card__title">{tNav("saved")}</h1>
+          <Link href="/guardados/alertas">{tAlerts("title")}</Link>
         </div>
         {rows.length === 0 ? (
           <EmptyState
             icon={<Bookmark size={40} />}
-            title="Ainda não guardou nenhum imóvel"
-            description="Explore o Market e guarde os imóveis que lhe interessam."
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
             action={
               <Link href="/market" className="upm-btn upm-btn--primary upm-btn--md">
-                Explorar Market
+                {t("exploreMarket")}
               </Link>
             }
           />
         ) : (
-          <Table
-            caption="Imóveis guardados"
-            columns={columns}
-            rows={rows}
-            rowKey={(row) => row.id}
-          />
+          <Table caption={t("caption")} columns={columns} rows={rows} rowKey={(row) => row.id} />
         )}
       </div>
     </AppChrome>
