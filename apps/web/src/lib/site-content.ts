@@ -112,39 +112,51 @@ export const FAQ_IDS = [
 export const CONTACT_REASON_VALUES = ["vender", "comprar", "planos", "suporte"] as const;
 
 /**
- * O rodapé de cinco colunas de 04 §2.1 — só a estrutura. Os `href` ficam aqui
- * de propósito: um caminho não se traduz, e traduzi-lo dava um 404.
+ * O rodapé de cinco colunas de 04 §2.1 — só a estrutura. Os destinos ficam
+ * aqui de propósito: um caminho não se traduz, e traduzi-lo dava um 404.
+ *
+ * **`anchor` e `route` são campos diferentes, e isso é deliberado** (20 out
+ * 2026). Eram os dois um `href`, e o rodapé decidia entre `<a>` e `<Link>` com
+ * um `href.startsWith("#")`. Funcionava e deixou de compilar quando os
+ * caminhos passaram a ser tipados: um `"#sobre"` não é uma rota do site, e o
+ * TypeScript não estreita uma união de literais por um `startsWith`.
+ *
+ * A correção certa não era um cast. Uma âncora da mesma página e uma rota são
+ * **duas coisas diferentes** — uma não leva prefixo de idioma, a outra leva —
+ * e passam a dizer-se por nomes diferentes. O rodapé escolhe por `"route" in
+ * link`, que o compilador entende, e um destino novo tem de declarar qual dos
+ * dois é.
  */
 export const FOOTER_COLUMNS = [
   {
     id: "platform",
     links: [
-      { id: "about", href: "#sobre" },
-      { id: "how", href: "#plataforma" },
-      { id: "business", href: "#empresas" },
-      { id: "pricing", href: "#precos" },
+      { id: "about", anchor: "#sobre" },
+      { id: "how", anchor: "#plataforma" },
+      { id: "business", anchor: "#empresas" },
+      { id: "pricing", anchor: "#precos" },
     ],
   },
   {
     id: "start",
     links: [
-      { id: "preRegistration", href: "/pre-inscricao" },
-      { id: "signIn", href: "/entrar" },
+      { id: "preRegistration", route: "/pre-inscricao" },
+      { id: "signIn", route: "/entrar" },
     ],
   },
   {
     id: "support",
     links: [
-      { id: "faq", href: "#duvidas" },
-      { id: "contact", href: "#contactos" },
+      { id: "faq", anchor: "#duvidas" },
+      { id: "contact", anchor: "#contactos" },
     ],
   },
   {
     id: "terms",
     links: [
-      { id: "terms", href: "/termos" },
-      { id: "privacy", href: "/privacidade" },
-      { id: "cookies", href: "/cookies" },
+      { id: "terms", route: "/termos" },
+      { id: "privacy", route: "/privacidade" },
+      { id: "cookies", route: "/cookies" },
     ],
   },
 ] as const;

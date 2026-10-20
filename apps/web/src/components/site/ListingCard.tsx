@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { BedDouble, Bath, Ruler, MapPin } from "lucide-react";
 import { StatusTag } from "@upm/ui";
 
@@ -62,7 +62,12 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
 
   return (
     <Link
-      href={`/propriedades/${listing.slug}`}
+      // A forma de objeto, e não `` `/propriedades/${slug}` ``: com os
+      // `pathnames` declarados, é assim que o `Link` do `next-intl` sabe que
+      // esta é a rota dinâmica e lhe põe o prefixo de idioma à frente. Uma
+      // string montada à mão ficava sem prefixo e mandava um visitante inglês
+      // para a ficha em português.
+      href={{ pathname: "/propriedades/[slug]", params: { slug: listing.slug } }}
       style={{
         display: "grid",
         gridTemplateRows: "auto 1fr",

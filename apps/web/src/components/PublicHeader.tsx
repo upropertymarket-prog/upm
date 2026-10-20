@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Brand, LanguageMenu, ThemeToggle } from "@upm/ui";
 import { LOCALES } from "@upm/config";
@@ -39,13 +40,65 @@ export function PublicHeader({
   anchors = "home",
 }: {
   locale: string;
-  onLocaleChange: (locale: string) => void | Promise<void>;
+  /**
+   * **Opcional desde 20 out 2026, e normalmente não se passa.**
+   *
+   * O idioma passou a estar no caminho (`/en`), logo trocá-lo é *navegar* para
+   * a mesma página na outra língua — e quem sabe qual é a página atual é este
+   * componente, pelo `usePathname` do `next-intl`. Antes era uma Server Action
+   * a escrever o cookie, enfiada por prop em oito sítios; hoje nenhum deles
+   * precisa de saber que o site é bilingue.
+   *
+   * O cookie continua a ser escrito, e não por nós: o middleware do `next-intl`
+   * sincroniza-o a cada navegação, com o nome `upm-locale` que o
+   * `i18n/routing.ts` lhe dá. É isso que leva a escolha do site para a app
+   * autenticada, que continua a ler o cookie.
+   *
+   * A prop fica como escape, e tem um utilizador concreto: as storyboards do
+   * canvas passam um no-op. Lá, navegar levaria o iframe do canvas para uma
+   * rota que o devserver não serve e a storyboard ficava presa num 404 — o
+   * mesmo motivo que já está escrito no `ContactActions`.
+   */
+  onLocaleChange?: (locale: string) => void | Promise<void>;
   launchMode?: "pre" | "post";
   anchors?: "none" | "same-page" | "home";
 }) {
   const t = useTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
   const ctaHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
-  const ctaLabel = launchMode === "pre" ? "Pré-inscrição" : "Criar conta";
+  const ctaLabel = t(`site.headerCta.${launchMode}`);
+
+  const trocarIdioma = (next: string) => {
+    if (onLocaleChange) {
+      void onLocaleChange(next);
+      return;
+    }
+
+    /**
+     * `{ pathname, params }` e não só `pathname`: numa rota dinâmica o
+     * `usePathname` do `next-intl` devolve o **molde**
+     * (`/propriedades/[slug]`), não o caminho concreto. Sem os `params`, trocar
+     * de idioma na ficha de uma propriedade levava a `/en/propriedades/[slug]`
+     * — com os cinco caracteres literais no URL.
+     *
+     * O `ts-expect-error` é o padrão que o próprio `next-intl` documenta para o
+     * caso genérico: o TypeScript não consegue provar que estes `params`
+     * pertencem a este `pathname`, porque nenhum dos dois é conhecido em tempo
+     * de compilação neste componente — ele serve todas as páginas do site. Com
+     * um `pathname` fixo a verificação funcionaria, e é por isso que o erro se
+     * silencia aqui e em nenhum outro `Link`.
+     *
+     * `replace` e não `push`: trocar de idioma não é um passo no histórico, é a
+     * mesma página noutra língua.
+     */
+    router.replace(
+      // @ts-expect-error -- ver acima: `pathname` e `params` são genéricos aqui.
+      { pathname, params },
+      { locale: next as (typeof LOCALES)[number] },
+    );
+  };
 
   return (
     <>
@@ -111,7 +164,7 @@ export function PublicHeader({
             <LanguageMenu
               locale={locale}
               locales={LOCALES.map((value) => ({ value, label: t(`locale.${value}`) }))}
-              onLocaleChange={(next) => void onLocaleChange(next)}
+              onLocaleChange={trocarIdioma}
               label={t("locale.title")}
             />
             <ThemeToggle

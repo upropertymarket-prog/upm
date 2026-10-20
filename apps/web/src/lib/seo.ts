@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DEFAULT_LOCALE, type Locale } from "@upm/config";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@upm/config";
 
 /**
  * SEO e Open Graph por rota (P2-06 · 04 §2.1.2 · 07 §2.1 e §2.2)
@@ -117,6 +117,22 @@ function absolute(path: string): string {
 }
 
 /**
+ * O caminho de uma rota no idioma pedido.
+ *
+ * Função pura e não o `getPathname` do `next-intl`, por uma razão de teste: o
+ * `seo.test.ts` corre em Node sem React, e importar a navegação do `next-intl`
+ * arrastava o runtime de cliente para dentro dele. A regra é uma linha e está
+ * fixada por testes nos dois lados — se o `localePrefix` do `routing.ts` deixar
+ * de ser `as-needed`, o teste de `hreflang` falha.
+ *
+ * `pt` não leva prefixo (é a língua-fonte); `en` entra debaixo de `/en`.
+ */
+export function localizedPath(route: string, locale: Locale): string {
+  const clean = route === "/" ? "" : route.replace(/\/+$/, "");
+  return locale === DEFAULT_LOCALE ? clean || "/" : `/${locale}${clean}`;
+}
+
+/**
  * Constrói os metadados de uma rota, no idioma em que a página está a ser
  * servida. Chamada pelo `generateMetadata()` de cada `page.tsx`, através do
  * `pageMetadata`, que é quem descobre o idioma.
@@ -126,12 +142,15 @@ function absolute(path: string): string {
  * vazios **não** sobrepõem: uma descrição apagada no Admin devolve o controlo
  * ao ficheiro, em vez de publicar uma descrição vazia.
  *
- * **O `hreflang` e o canonical por idioma ainda não entram aqui, e é
- * deliberado.** Os dois exigem que `/en/<rota>` responda, e o encaminhamento
- * com prefixo é a fase seguinte. Anunciar agora um `alternates.languages` a
- * apontar para URL que dão 404 é pior do que não o anunciar: o Google segue-os,
- * não os encontra, e o sinal que se queria dar passa a ser um sinal de site
- * partido. Entram no commit que fizer o `/en` existir.
+ * O `alternates.languages` sai com as duas entradas e com o `x-default`. É
+ * isso que diz ao Google que `/termos` e `/en/termos` são a mesma página em
+ * duas línguas, e não duas páginas a competir pela mesma consulta — sem ele, o
+ * que se ganhava por traduzir era conteúdo duplicado. O `x-default` aponta para
+ * a língua-fonte: é o que se serve a quem não casa com nenhuma das duas.
+ *
+ * O canonical passa a ser o da **própria** versão: `/en/termos` diz que o
+ * canónico dele é `/en/termos`, não `/termos`. Um canonical cruzado dizia ao
+ * Google para indexar só a portuguesa e deitava fora a tradução toda.
  */
 export function buildMetadata(
   routeSeo: RouteSeo,
@@ -153,13 +172,21 @@ export function buildMetadata(
   const ogTitle = sameAsPage ? title : (pick("ogTitle") ?? title);
   const ogDescription = sameAsPage ? description : (pick("ogDescription") ?? description);
   const image = pick("ogImage") ?? defaultOgImage(locale);
-  const canonical = pick("canonical") ?? absolute(route);
+  const canonical = pick("canonical") ?? absolute(localizedPath(route, locale));
   const noindex = pick("noindex") ?? false;
 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        ...Object.fromEntries(
+          LOCALES.map((outro) => [outro, absolute(localizedPath(route, outro))]),
+        ),
+        "x-default": absolute(localizedPath(route, DEFAULT_LOCALE)),
+      },
+    },
     robots: noindex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       type: "website",

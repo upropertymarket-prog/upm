@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2 } from "lucide-react";
 import { Button, Input, Select, Textarea } from "@upm/ui";
 
-import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
+import type { LeadFormState } from "@/lib/leadFormState";
 import { CONTACT_REASON_VALUES } from "../../lib/site-content";
 
 /**

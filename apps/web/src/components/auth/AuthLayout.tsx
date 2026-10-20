@@ -1,5 +1,5 @@
-import Link from "next/link";
-import type { Route } from "next";
+import { Link } from "@/i18n/navigation";
+import type { StaticSitePathname } from "@/i18n/routing";
 import { Brand } from "@upm/ui";
 
 /**
@@ -88,8 +88,14 @@ export type AuthShellProps = {
   subtitle?: React.ReactNode;
   /** A linha de troca abaixo do cartão: "Ainda não tem conta? Criar conta". */
   switchPrompt?: React.ReactNode;
-  /** `typedRoutes` do Next: uma rota conhecida, não uma string qualquer. */
-  switchHref?: Route;
+  /**
+   * Uma rota conhecida, não uma string qualquer — como estava. O tipo mudou de
+   * `Route` do Next para o do `next-intl` a 20 out 2026: com o segmento
+   * `[locale]`, o union do `typedRoutes` passou a ser `/[locale]/entrar` e
+   * deixou de casar com os caminhos sem prefixo que este site escreve. A lista
+   * está em `i18n/routing.ts`.
+   */
+  switchHref?: StaticSitePathname;
   switchLabel?: React.ReactNode;
   /** Texto do link para os Termos no rodapé. */
   legalLabel: React.ReactNode;

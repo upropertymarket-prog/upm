@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
 import { SEO_ROUTES } from "@upm/config/seo-routes";
 
-import { getLaunchMode } from "../lib/launch-mode";
-import { getPublicListings, LISTINGS_PAGE_SIZE } from "../lib/public-listings";
+import { LOCALES } from "@upm/config";
+
+import { getLaunchMode } from "@/lib/launch-mode";
+import { getPublicListings, LISTINGS_PAGE_SIZE } from "@/lib/public-listings";
+import { localizedPath } from "@/lib/seo";
 
 /**
  * `sitemap.xml` do site público (P2-06 · 04 §2.1.1)
@@ -68,6 +71,34 @@ function priorityFor(route: string): number {
   return 0.5;
 }
 
+/**
+ * Uma rota, **uma entrada por idioma**, com os `alternates` recíprocos.
+ *
+ * Acrescentado a 20 out 2026, com o `/en`. Listar só a portuguesa deixava a
+ * inglesa fora do sitemap — e um URL que não está no sitemap nem é ligado de
+ * fora é um URL que o Google pode levar meses a descobrir. Os `alternates`
+ * dizem-lhe que as duas são a mesma página: é a mesma informação que o
+ * `hreflang` do `<head>`, dada por outra via, e ele aceita as duas.
+ */
+function localizedEntries(
+  route: string,
+  base: string,
+  now: Date,
+  diaria: boolean,
+): MetadataRoute.Sitemap {
+  const languages = Object.fromEntries(
+    LOCALES.map((outro) => [outro, `${base}${localizedPath(route, outro)}`]),
+  );
+
+  return LOCALES.map((locale) => ({
+    url: `${base}${localizedPath(route, locale)}`,
+    lastModified: now,
+    changeFrequency: (diaria ? "daily" : "monthly") as "daily" | "monthly",
+    priority: priorityFor(route),
+    alternates: { languages },
+  }));
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const launchMode = await getLaunchMode();
   const base = siteUrl();
@@ -78,12 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Ver a nota acima: em `pre` o Market vai com `noindex`.
     if (entry.route === "/propriedades" && launchMode === "pre") return false;
     return true;
-  }).map((entry) => ({
-    url: `${base}${entry.route === "/" ? "" : entry.route}`,
-    lastModified: now,
-    changeFrequency: (entry.route === "/" ? "daily" : "monthly") as "daily" | "monthly",
-    priority: priorityFor(entry.route),
-  }));
+  }).flatMap((entry) => localizedEntries(entry.route, base, now, entry.route === "/"));
 
   if (launchMode === "pre") return staticEntries;
 
@@ -93,15 +119,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (listings.length === 0) break;
 
     for (const listing of listings) {
-      listingEntries.push({
-        url: `${base}/propriedades/${listing.slug}`,
-        // `publishedAt` e não "agora": dizer que todas as páginas mudaram
-        // sempre que o sitemap é regenerado é ruído, e os robôs aprendem a
-        // ignorar um `lastmod` que nunca corresponde a uma alteração real.
-        lastModified: listing.publishedAt ? new Date(listing.publishedAt) : now,
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      });
+      const route = `/propriedades/${listing.slug}`;
+      const languages = Object.fromEntries(
+        LOCALES.map((outro) => [outro, `${base}${localizedPath(route, outro)}`]),
+      );
+
+      for (const locale of LOCALES) {
+        listingEntries.push({
+          url: `${base}${localizedPath(route, locale)}`,
+          // `publishedAt` e não "agora": dizer que todas as páginas mudaram
+          // sempre que o sitemap é regenerado é ruído, e os robôs aprendem a
+          // ignorar um `lastmod` que nunca corresponde a uma alteração real.
+          lastModified: listing.publishedAt ? new Date(listing.publishedAt) : now,
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+          alternates: { languages },
+        });
+      }
     }
 
     if (page * LISTINGS_PAGE_SIZE >= total) break;

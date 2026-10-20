@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Bath, BedDouble, CalendarDays, Building2, Layers, Ruler, Wallet, Zap } from "lucide-react";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
@@ -65,8 +65,8 @@ export type ListingDetailProps = {
   listing: PublicListingDetail;
   locale: string;
   launchMode: "pre" | "post";
-  /** Server Action na app; no canvas, um no-op. */
-  onLocaleChange: (locale: string) => void | Promise<void>;
+  /** Só o canvas o passa (um no-op) — ver a nota do `PublicHeader`. */
+  onLocaleChange?: (locale: string) => void | Promise<void>;
 };
 
 /**

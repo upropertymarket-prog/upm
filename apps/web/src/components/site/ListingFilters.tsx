@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button, Input, Select } from "@upm/ui";
 import { DEALS, PROPERTY_TYPES, TYPOLOGIES } from "@upm/db/properties";

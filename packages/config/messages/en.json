@@ -456,6 +456,10 @@
       "pre": "Pre-register",
       "post": "Create account"
     },
+    "headerCta": {
+      "pre": "Pre-register",
+      "post": "Create account"
+    },
     "pricingCta": {
       "pre": "Pre-register",
       "post": "Choose plan"

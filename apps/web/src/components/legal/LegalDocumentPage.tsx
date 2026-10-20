@@ -3,7 +3,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { currentLegalDocument, type LegalDocumentKind } from "@upm/db/legal";
 
-import { setLocalePreference } from "../../app/actions/preferences";
 import { getLaunchMode } from "../../lib/launch-mode";
 import { PublicHeader } from "../PublicHeader";
 import { SiteFooter } from "../site/SiteFooter";
@@ -55,7 +54,7 @@ export async function LegalDocumentPage({
 
   const chrome = (conteudo: React.ReactNode) => (
     <>
-      <PublicHeader locale={locale} onLocaleChange={setLocalePreference} launchMode={launchMode} />
+      <PublicHeader locale={locale} launchMode={launchMode} />
       {conteudo}
       <SiteFooter />
     </>

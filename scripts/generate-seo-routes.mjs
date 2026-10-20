@@ -62,7 +62,24 @@ function flag(source, name) {
 
 const routes = [];
 for (const dir of findSeoDirs(ROOT).sort()) {
-  const segments = relative(ROOT, dir).split(/[\\/]/).filter(Boolean);
+  /**
+   * O `[locale]` sai do caminho (20 out 2026).
+   *
+   * As páginas do site passaram a viver em `app/[locale]/`, para o idioma
+   * entrar no URL (`/en`). Sem este corte, o inventário passava a declarar
+   * `/[locale]/termos` — e esse não é o caminho de nada: a rota **é** `/termos`,
+   * servida em `/termos` e em `/en/termos`.
+   *
+   * A chave sem prefixo é a identidade da página no resto do sistema: é por
+   * ela que a tabela `seo_pages` guarda a sobreposição (uma linha por rota, não
+   * por rota e idioma), é ela que o `sitemap` localiza para cada língua, e é
+   * dela que o `buildMetadata` deriva o canonical e o `hreflang`. Pôr o
+   * segmento aqui obrigava todos esses a saber tirá-lo.
+   */
+  const segments = relative(ROOT, dir)
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .filter((segment) => segment !== "[locale]");
   const route = "/" + segments.join("/");
   let source;
   try {

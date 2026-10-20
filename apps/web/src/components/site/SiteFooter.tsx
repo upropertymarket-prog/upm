@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Brand } from "@upm/ui";
 
@@ -109,21 +109,26 @@ export function SiteFooter() {
                   }}
                 >
                   {column.links.map((link) => (
-                    <li key={link.href}>
-                      {link.href.startsWith("#") ? (
-                        <a
-                          href={link.href}
-                          style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
-                        >
-                          {t(`columns.${column.id}.links.${link.id}`)}
-                        </a>
-                      ) : (
+                    <li key={link.id}>
+                      {/* `"route" in link` e não `href.startsWith("#")`: uma
+                          âncora da mesma página e uma rota do site são coisas
+                          diferentes — só a segunda leva prefixo de idioma — e
+                          o compilador distingue-as por nome de campo, que um
+                          `startsWith` sobre uma união de literais não faz. */}
+                      {"route" in link ? (
                         <Link
-                          href={link.href}
+                          href={link.route}
                           style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
                         >
                           {t(`columns.${column.id}.links.${link.id}`)}
                         </Link>
+                      ) : (
+                        <a
+                          href={link.anchor}
+                          style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
+                        >
+                          {t(`columns.${column.id}.links.${link.id}`)}
+                        </a>
                       )}
                     </li>
                   ))}

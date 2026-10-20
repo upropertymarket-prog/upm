@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 import { PublicHeader } from "../PublicHeader";
@@ -51,7 +51,8 @@ export type ListingGoneProps = {
   alternatives: PublicListingCard[];
   locale: string;
   launchMode: "pre" | "post";
-  onLocaleChange: (locale: string) => void | Promise<void>;
+  /** Só o canvas o passa (um no-op) — ver a nota do `PublicHeader`. */
+  onLocaleChange?: (locale: string) => void | Promise<void>;
 };
 
 export function ListingGone({

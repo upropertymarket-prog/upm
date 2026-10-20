@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getLaunchMode } from "../lib/launch-mode";
+import { getLaunchMode } from "@/lib/launch-mode";
 
 /**
  * `robots.txt` do site público (P2-06 · 04 §2.1.1)

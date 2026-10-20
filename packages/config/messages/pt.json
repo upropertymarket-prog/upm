@@ -456,6 +456,10 @@
       "pre": "Fazer pré-inscrição",
       "post": "Criar conta"
     },
+    "headerCta": {
+      "pre": "Pré-inscrição",
+      "post": "Criar conta"
+    },
     "pricingCta": {
       "pre": "Pré-inscrever",
       "post": "Escolher plano"

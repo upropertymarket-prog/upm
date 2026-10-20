@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 import { PublicHeader } from "../PublicHeader";
@@ -13,7 +13,7 @@ import { Pricing, type PublicPlan } from "./Pricing";
 import { RecentListings } from "./RecentListings";
 import { SectionHeading, SiteSection } from "./SiteSection";
 import { SiteFooter } from "./SiteFooter";
-import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
+import type { LeadFormState } from "@/lib/leadFormState";
 import type { PublicListingCard } from "../../lib/public-listings";
 import { ABOUT_POINT_IDS, AUDIENCE_CARDS, COMING_SOON_CARDS } from "../../lib/site-content";
 
@@ -37,8 +37,11 @@ export type HomeSectionsProps = {
   launchMode: "pre" | "post";
   plans: PublicPlan[];
   locale: string;
-  /** Server Action na app; no canvas, um no-op. */
-  onLocaleChange: (locale: string) => void | Promise<void>;
+  /**
+   * Só o canvas o passa, e passa um no-op: ver a nota do `PublicHeader`. Numa
+   * página do site não se passa — o cabeçalho troca de idioma navegando.
+   */
+  onLocaleChange?: (locale: string) => void | Promise<void>;
   /** `submitContact` de `pre-inscricao/actions.ts`; no canvas, um no-op. */
   onContact: (previous: LeadFormState, formData: FormData) => Promise<LeadFormState>;
   /**
