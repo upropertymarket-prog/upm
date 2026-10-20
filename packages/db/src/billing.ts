@@ -37,14 +37,14 @@ export const LIMIT_KEYS = [
 ] as const;
 export type LimitKey = (typeof LIMIT_KEYS)[number];
 
-export const LIMIT_LABELS: Record<LimitKey, string> = {
-  active_properties: "Propriedades ativas",
-  visits: "Pedidos de visita por mês",
-  active_chats: "Conversas ativas",
-  saved: "Propriedades guardadas",
-  alerts: "Alertas de pesquisa",
-  cloud_gb: "Cloud (GB)",
-};
+/**
+ * Os nomes dos limites estão em `plan.limits.*` nas mensagens. Houve aqui um
+ * `LIMIT_LABELS` com as mesmas seis frases em português, e a 20 out 2026
+ * descobriu-se que **ninguém o importava** — as chaves de `plan.limits` já
+ * existiam e os ecrãs sempre leram de lá. Um mapa de rótulos morto num pacote
+ * de base de dados é pior do que inútil: convida o próximo a usá-lo e a pôr
+ * português num ecrã inglês.
+ */
 
 /**
  * `null` significa ILIMITADO (07 §19.2: "grava-se como `null` na chave, nunca
@@ -132,10 +132,7 @@ export const BILLING_INTERVALS = ["month", "year"] as const;
 export const billingIntervalSchema = z.enum(BILLING_INTERVALS);
 export type BillingInterval = (typeof BILLING_INTERVALS)[number];
 
-export const BILLING_INTERVAL_LABELS: Record<BillingInterval, string> = {
-  month: "Mensal",
-  year: "Anual",
-};
+/** "Mensal"/"Anual" estão em `plan.interval.*`; o mapa que aqui estava também não tinha quem o importasse. */
 
 /** Os mesmos valores do `check` de `subscriptions.status` (Fase 2). */
 export const SUBSCRIPTION_STATUSES = [

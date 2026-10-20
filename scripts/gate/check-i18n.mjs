@@ -348,6 +348,35 @@ function linhaInteira(fonte, indice) {
   return fonte.slice(antes, depois === -1 ? undefined : depois);
 }
 
+/**
+ * As chaves com que um resultado sai de `packages/db` a caminho de quem o
+ * chamou. `{ error }` e `{ notice }` são a forma dos resultados das actions em
+ * todo o projeto, `message` é o campo do `zod`, e `reason` é a linha de um
+ * relatório que acaba num `notice` (ver `syncCatalog`). Nenhuma delas é um
+ * rótulo que um componente leia — são frases que o servidor devolve, e isso é
+ * **D73**.
+ */
+const CHAVES_DE_RESULTADO = new Set(["error", "notice", "message", "reason"]);
+
+/**
+ * Constantes de `packages/db` que são fonte de mensagens do servidor, com a
+ * razão de cada uma. Não se adivinha pelo nome: declara-se, para que
+ * acrescentar uma seja uma decisão e não um descuido.
+ */
+const MENSAGENS_DE_SERVIDOR = new Map([
+  [
+    "LIMIT_REACHED_MESSAGE",
+    "Lido pelo `planLimitMessage()`, que cinco server actions usam como `{ error: planLimitMessage(e) ?? ... }`. Traduzi-lo é devolver a chave do limite em vez da frase e deixar o ecrã compor — exatamente o trabalho de D73.",
+  ],
+]);
+
+/** O `export const` mais próximo acima de um índice — para a lista de cima. */
+function constanteQueEnvolve(fonte, indice) {
+  const antes = fonte.slice(0, indice);
+  const match = [...antes.matchAll(/export const ([A-Z][A-Z0-9_]*)\s*[:=]/g)].pop();
+  return match?.[1] ?? null;
+}
+
 for (const raiz of RAIZES) {
   for (const ficheiro of ficheiros(raiz.dir)) {
     const relativo = relative(process.cwd(), ficheiro).split(sep).join("/");
@@ -359,12 +388,23 @@ for (const raiz of RAIZES) {
 
     const registar = (valor, indice, tipo, chave) => {
       if (!ehTexto(valor)) return;
-      // Ver a nota de `RAIZES`: numa raiz só-rótulos, uma frase na linha de
-      // uma cadeia `z.` é mensagem de validação, e essa é D73. A chave
-      // `message` entra pela mesma porta: num `.refine({ message, path })` a
-      // frase fica numa linha só dela, sem o `z.` à vista — e `message` é o
-      // nome que o zod lhe dá, não um rótulo de interface.
-      if (raiz.soRotulos && (/\bz\./.test(linhaInteira(fonte, indice)) || chave === "message")) {
+      /**
+       * Ver a nota de `RAIZES`. Numa raiz só-rótulos há três maneiras de uma
+       * frase ser mensagem do servidor, e nenhuma delas é adivinhada:
+       *
+       * 1. está na linha de uma cadeia `z.` — validação;
+       * 2. a chave é a de um resultado (`error`, `notice`, `message`,
+       *    `reason`), porque num `.refine({ message, path })` ou num
+       *    `return { error: … }` a frase fica numa linha só dela;
+       * 3. a constante que a envolve está declarada em
+       *    `MENSAGENS_DE_SERVIDOR`, com a razão escrita.
+       */
+      if (
+        raiz.soRotulos &&
+        (/\bz\./.test(linhaInteira(fonte, indice)) ||
+          CHAVES_DE_RESULTADO.has(chave) ||
+          MENSAGENS_DE_SERVIDOR.has(constanteQueEnvolve(fonte, indice) ?? ""))
+      ) {
         paraD73.push({
           ficheiro: relativo,
           linha: linhaDe(fonte, indice),

@@ -43,10 +43,10 @@ import type { AddonOption, InvoiceRow, PlanOption, PlanStatus } from "../../lib/
  * decidir nada.
  *
  * **Nem há texto escrito aqui** (07 §5.13 · fecha metade de D39): tudo passa
- * por `plan.*` em `packages/config/messages`. As etiquetas dos estados e dos
- * limites também: `LIMIT_LABELS` e `BILLING_INTERVAL_LABELS` de `@upm/db` são
- * PT, e servem o lado do servidor e os e-mails — num ecrã, quem manda é o
- * idioma da sessão. O que **não** se traduz é o que vem da base de dados:
+ * por `plan.*` em `packages/config/messages`. As etiquetas dos estados, dos
+ * limites e dos intervalos também — e os mapas em português que `@upm/db`
+ * tinha para isso foram apagados a 20 out 2026, quando se viu que ninguém os
+ * importava. O que **não** se traduz é o que vem da base de dados:
  * nomes de planos e `plans.features` são dados, e traduzi-los é uma coluna
  * nova, não uma chave de tradução.
  */
