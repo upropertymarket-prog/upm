@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Check, Minus } from "lucide-react";
 import { Tabs } from "@upm/ui";
 
-import { PRICING } from "../../lib/site-content";
+import { PRICING_AUDIENCE_IDS, PRICING_BILLING_IDS } from "../../lib/site-content";
 import { SectionHeading } from "./SiteSection";
 
 /**
@@ -60,6 +61,7 @@ export function Pricing({
   ctaHref: "/pre-inscricao" | "/criar-conta";
   ctaLabel: string;
 }) {
+  const t = useTranslations("site.pricing");
   const [audience, setAudience] = useState<Audience>("owner");
   const [billing, setBilling] = useState<Billing>("year");
 
@@ -69,12 +71,7 @@ export function Pricing({
 
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-      <SectionHeading
-        eyebrow={PRICING.eyebrow}
-        title={PRICING.title}
-        body={PRICING.body}
-        align="center"
-      />
+      <SectionHeading eyebrow={t("eyebrow")} title={t("title")} body={t("body")} align="center" />
 
       <div
         style={{
@@ -85,16 +82,16 @@ export function Pricing({
         }}
       >
         <Tabs
-          label={PRICING.eyebrow}
+          label={t("eyebrow")}
           value={audience}
           onValueChange={(id) => setAudience(id as Audience)}
-          items={PRICING.audienceTabs.map((tab) => ({ id: tab.id, label: tab.label }))}
+          items={PRICING_AUDIENCE_IDS.map((id) => ({ id, label: t(`audienceTabs.${id}`) }))}
         />
         <Tabs
-          label="Periodicidade"
+          label={t("billingLabel")}
           value={billing}
           onValueChange={(id) => setBilling(id as Billing)}
-          items={PRICING.billingTabs.map((tab) => ({ id: tab.id, label: tab.label }))}
+          items={PRICING_BILLING_IDS.map((id) => ({ id, label: t(`billingTabs.${id}`) }))}
         />
       </div>
 
@@ -103,7 +100,7 @@ export function Pricing({
         // acontecer em staging, e um painel de preços em branco faria o
         // visitante pensar que o site rebentou.
         <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>
-          Os planos para este público estão a ser preparados.
+          {t("audienceSoon")}
         </p>
       ) : (
         <ul
@@ -189,7 +186,7 @@ export function Pricing({
                       }}
                     >
                       <Minus size={15} style={{ flexShrink: 0 }} />
-                      Funcionalidades por anunciar
+                      {t("featuresSoon")}
                     </li>
                   ) : null}
                 </ul>

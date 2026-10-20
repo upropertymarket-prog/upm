@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import type { PublicListingCard } from "../../lib/public-listings";
-import { RECENT_LISTINGS } from "../../lib/site-content";
 import { ListingCard } from "./ListingCard";
 import { SectionHeading } from "./SiteSection";
 
@@ -23,15 +23,13 @@ import { SectionHeading } from "./SiteSection";
  * plataforma, os preços e as dúvidas.
  */
 export function RecentListings({ listings }: { listings: PublicListingCard[] }) {
+  const t = useTranslations("site.recentListings");
+
   if (listings.length === 0) return null;
 
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-      <SectionHeading
-        eyebrow={RECENT_LISTINGS.eyebrow}
-        title={RECENT_LISTINGS.title}
-        body={RECENT_LISTINGS.body}
-      />
+      <SectionHeading eyebrow={t("eyebrow")} title={t("title")} body={t("body")} />
 
       <ul
         style={{
@@ -53,7 +51,7 @@ export function RecentListings({ listings }: { listings: PublicListingCard[] }) 
 
       <div>
         <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
-          {RECENT_LISTINGS.cta}
+          {t("cta")}
         </Link>
       </div>
     </div>

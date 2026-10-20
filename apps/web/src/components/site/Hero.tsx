@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-import { HERO } from "../../lib/site-content";
+import { HERO_STAT_IDS } from "../../lib/site-content";
 import { SITE_MAX_WIDTH } from "./SiteSection";
 
 /**
@@ -14,6 +15,7 @@ import { SITE_MAX_WIDTH } from "./SiteSection";
  * depende da flag, e por isso é a única coisa que entra por prop.
  */
 export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
+  const t = useTranslations("site.hero");
   const primaryHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
 
   return (
@@ -47,7 +49,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               color: "var(--accent)",
             }}
           >
-            {HERO.eyebrow}
+            {t("eyebrow")}
           </span>
           <h1
             style={{
@@ -59,7 +61,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               color: "var(--text)",
             }}
           >
-            {HERO.title}
+            {t("title")}
           </h1>
           <p
             style={{
@@ -70,7 +72,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               maxWidth: "34rem",
             }}
           >
-            {HERO.body}
+            {t("body")}
           </p>
 
           <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
@@ -80,10 +82,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                 É o mesmo padrão de `guardados/page.tsx` e
                 `conta-suspensa/page.tsx`. */}
             <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--md">
-              {HERO.primaryCta}
+              {t("primaryCta")}
             </Link>
             <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--md">
-              {HERO.secondaryCta}
+              {t("secondaryCta")}
             </a>
           </div>
 
@@ -97,9 +99,9 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               gap: "var(--sp-3) var(--sp-6)",
             }}
           >
-            {HERO.stats.map((stat) => (
+            {HERO_STAT_IDS.map((statId) => (
               <li
-                key={stat}
+                key={statId}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -118,7 +120,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                     background: "var(--accent)",
                   }}
                 />
-                {stat}
+                {t(`stats.${statId}`)}
               </li>
             ))}
           </ul>
@@ -130,7 +132,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
             um erro a quem vê o ecrã antes de haver fotografia. */}
         <div
           role="img"
-          aria-label={HERO.imageLabel}
+          aria-label={t("imageLabel")}
           style={{
             aspectRatio: "4 / 3",
             borderRadius: "var(--r-lg)",
@@ -142,7 +144,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
             fontSize: "var(--fs-body)",
           }}
         >
-          {HERO.imageLabel}
+          {t("imageLabel")}
         </div>
       </div>
     </section>

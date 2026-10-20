@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Brand } from "@upm/ui";
 
-import { FOOTER } from "../../lib/site-content";
+import { FOOTER_COLUMNS } from "../../lib/site-content";
 import { SITE_MAX_WIDTH } from "./SiteSection";
 
 /**
@@ -17,6 +18,8 @@ import { SITE_MAX_WIDTH } from "./SiteSection";
  * página só isso chega; quando houver `/imoveis`, passam a `/#sobre`.
  */
 export function SiteFooter() {
+  const t = useTranslations("site.footer");
+
   return (
     <footer
       style={{
@@ -54,7 +57,7 @@ export function SiteFooter() {
                 maxWidth: "18rem",
               }}
             >
-              {FOOTER.tagline}
+              {t("tagline")}
             </p>
           </div>
 
@@ -75,10 +78,10 @@ export function SiteFooter() {
               flex: "1 1 22rem",
             }}
           >
-            {FOOTER.columns.map((column) => (
+            {FOOTER_COLUMNS.map((column) => (
               <nav
-                key={column.title}
-                aria-label={column.title}
+                key={column.id}
+                aria-label={t(`columns.${column.id}.title`)}
                 style={{
                   display: "grid",
                   gap: "var(--sp-3)",
@@ -94,7 +97,7 @@ export function SiteFooter() {
                     color: "var(--muted)",
                   }}
                 >
-                  {column.title}
+                  {t(`columns.${column.id}.title`)}
                 </strong>
                 <ul
                   style={{
@@ -112,14 +115,14 @@ export function SiteFooter() {
                           href={link.href}
                           style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
                         >
-                          {link.label}
+                          {t(`columns.${column.id}.links.${link.id}`)}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
                           style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
                         >
-                          {link.label}
+                          {t(`columns.${column.id}.links.${link.id}`)}
                         </Link>
                       )}
                     </li>
@@ -143,7 +146,7 @@ export function SiteFooter() {
             textAlign: "center",
           }}
         >
-          {FOOTER.copyright}
+          {t("copyright")}
         </p>
       </div>
     </footer>

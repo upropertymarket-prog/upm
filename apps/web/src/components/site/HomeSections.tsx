@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { PublicHeader } from "../PublicHeader";
 import { ContactForm } from "./ContactForm";
@@ -14,7 +15,7 @@ import { SectionHeading, SiteSection } from "./SiteSection";
 import { SiteFooter } from "./SiteFooter";
 import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
 import type { PublicListingCard } from "../../lib/public-listings";
-import { ABOUT, AUDIENCES, BUSINESS, COMING_SOON, CONTACT, PLATFORM } from "../../lib/site-content";
+import { ABOUT_POINT_IDS, AUDIENCE_CARDS, COMING_SOON_CARDS } from "../../lib/site-content";
 
 /**
  * A home inteira, sem ir buscar nada (P2-01)
@@ -56,6 +57,7 @@ export function HomeSections({
   onContact,
   recentListings = [],
 }: HomeSectionsProps) {
+  const t = useTranslations("site");
   const signupHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
 
   return (
@@ -73,9 +75,9 @@ export function HomeSections({
         <SiteSection id="plataforma" tone="alt">
           <div style={{ display: "grid", gap: "var(--sp-6)" }}>
             <SectionHeading
-              eyebrow={PLATFORM.eyebrow}
-              title={PLATFORM.title}
-              body={PLATFORM.body}
+              eyebrow={t("platform.eyebrow")}
+              title={t("platform.title")}
+              body={t("platform.body")}
             />
             {/* A demonstração interativa (P2-04). Ocupou o lugar que estava
                 reservado aqui com uma caixa 16/10 vazia desde P2-01. Os ecrãs
@@ -85,7 +87,7 @@ export function HomeSections({
             <PlatformDemo />
             <div style={{ display: "flex", justifyContent: "center" }}>
               <Link href={signupHref} className="upm-btn upm-btn--secondary upm-btn--md">
-                {launchMode === "pre" ? "Fazer pré-inscrição" : "Criar conta"}
+                {t(`platformCta.${launchMode}`)}
               </Link>
             </div>
           </div>
@@ -103,7 +105,7 @@ export function HomeSections({
             {/* Imagem à esquerda, como 04 §2.1 pede para esta secção. */}
             <div
               role="img"
-              aria-label={ABOUT.imageLabel}
+              aria-label={t("about.imageLabel")}
               style={{
                 aspectRatio: "4 / 3",
                 borderRadius: "var(--r-lg)",
@@ -115,10 +117,14 @@ export function HomeSections({
                 fontSize: "var(--fs-body)",
               }}
             >
-              {ABOUT.imageLabel}
+              {t("about.imageLabel")}
             </div>
             <div style={{ display: "grid", gap: "var(--sp-5)" }}>
-              <SectionHeading eyebrow={ABOUT.eyebrow} title={ABOUT.title} body={ABOUT.body} />
+              <SectionHeading
+                eyebrow={t("about.eyebrow")}
+                title={t("about.title")}
+                body={t("about.body")}
+              />
               <ul
                 style={{
                   listStyle: "none",
@@ -128,12 +134,14 @@ export function HomeSections({
                   gap: "var(--sp-4)",
                 }}
               >
-                {ABOUT.points.map((point) => (
-                  <li key={point.title} style={{ display: "grid", gap: "2px" }}>
+                {ABOUT_POINT_IDS.map((pointId) => (
+                  <li key={pointId} style={{ display: "grid", gap: "2px" }}>
                     <strong style={{ fontSize: "14.5px", color: "var(--text)" }}>
-                      {point.title}
+                      {t(`about.points.${pointId}.title`)}
                     </strong>
-                    <span style={{ fontSize: "14px", color: "var(--muted)" }}>{point.body}</span>
+                    <span style={{ fontSize: "14px", color: "var(--muted)" }}>
+                      {t(`about.points.${pointId}.body`)}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -154,22 +162,22 @@ export function HomeSections({
                 alternado do protótipo, e é o que dá ritmo à página. */}
             <div style={{ display: "grid", gap: "var(--sp-5)" }}>
               <SectionHeading
-                eyebrow={BUSINESS.eyebrow}
-                title={BUSINESS.title}
-                body={BUSINESS.body}
+                eyebrow={t("business.eyebrow")}
+                title={t("business.title")}
+                body={t("business.body")}
               />
               <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
                 <Link href={signupHref} className="upm-btn upm-btn--primary upm-btn--md">
-                  {BUSINESS.primaryCta}
+                  {t("business.primaryCta")}
                 </Link>
                 <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
-                  {BUSINESS.secondaryCta}
+                  {t("business.secondaryCta")}
                 </a>
               </div>
             </div>
             <div
               role="img"
-              aria-label={BUSINESS.imageLabel}
+              aria-label={t("business.imageLabel")}
               style={{
                 aspectRatio: "4 / 3",
                 borderRadius: "var(--r-lg)",
@@ -181,7 +189,7 @@ export function HomeSections({
                 fontSize: "var(--fs-body)",
               }}
             >
-              {BUSINESS.imageLabel}
+              {t("business.imageLabel")}
             </div>
           </div>
         </SiteSection>
@@ -200,12 +208,19 @@ export function HomeSections({
           <SiteSection>
             <div style={{ display: "grid", gap: "var(--sp-6)" }}>
               <SectionHeading
-                eyebrow={COMING_SOON.eyebrow}
-                title={COMING_SOON.title}
-                body={COMING_SOON.body}
+                eyebrow={t("comingSoon.eyebrow")}
+                title={t("comingSoon.title")}
+                body={t("comingSoon.body")}
                 align="center"
               />
-              <FeatureGrid cards={COMING_SOON.cards} minColumn="14rem" />
+              <FeatureGrid
+                cards={COMING_SOON_CARDS.map((card) => ({
+                  icon: card.icon,
+                  title: t(`comingSoon.cards.${card.id}.title`),
+                  body: t(`comingSoon.cards.${card.id}.body`),
+                }))}
+                minColumn="14rem"
+              />
               <div
                 style={{
                   display: "flex",
@@ -215,10 +230,10 @@ export function HomeSections({
                 }}
               >
                 <Link href="/pre-inscricao" className="upm-btn upm-btn--primary upm-btn--md">
-                  {COMING_SOON.primaryCta}
+                  {t("comingSoon.primaryCta")}
                 </Link>
                 <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--md">
-                  {COMING_SOON.secondaryCta}
+                  {t("comingSoon.secondaryCta")}
                 </a>
               </div>
             </div>
@@ -234,7 +249,7 @@ export function HomeSections({
             plans={plans}
             locale={locale}
             ctaHref={signupHref}
-            ctaLabel={launchMode === "pre" ? "Pré-inscrever" : "Escolher plano"}
+            ctaLabel={t(`pricingCta.${launchMode}`)}
           />
         </SiteSection>
 
@@ -251,7 +266,7 @@ export function HomeSections({
               alignItems: "start",
             }}
           >
-            <SectionHeading title={CONTACT.title} body={CONTACT.body} />
+            <SectionHeading title={t("contact.title")} body={t("contact.body")} />
             <ContactForm onSubmit={onContact} />
           </div>
         </SiteSection>
@@ -265,10 +280,18 @@ export function HomeSections({
 /** As duas audiências de 04 §2.1. Por agora só Particulares tem conteúdo
  *  aprovado no protótipo; Empresas entra quando o texto for validado. */
 function Audiences() {
+  const t = useTranslations("site.audiences");
+
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-      <SectionHeading title={AUDIENCES.particulares.title} align="center" />
-      <FeatureGrid cards={AUDIENCES.particulares.cards} />
+      <SectionHeading title={t("particulares.title")} align="center" />
+      <FeatureGrid
+        cards={AUDIENCE_CARDS.particulares.map((card) => ({
+          icon: card.icon,
+          title: t(`particulares.cards.${card.id}.title`),
+          body: t(`particulares.cards.${card.id}.body`),
+        }))}
+      />
     </div>
   );
 }

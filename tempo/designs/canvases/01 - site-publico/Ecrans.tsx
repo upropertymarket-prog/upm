@@ -11,7 +11,7 @@ import { ListingDetail } from "../../../../apps/web/src/components/site/ListingD
 import { ListingsBrowser } from "../../../../apps/web/src/components/site/ListingsBrowser";
 import { PublicHeader } from "../../../../apps/web/src/components/PublicHeader";
 import { SiteFooter } from "../../../../apps/web/src/components/site/SiteFooter";
-import { COMING_SOON } from "../../../../apps/web/src/lib/site-content";
+import { COMING_SOON_CARDS } from "../../../../apps/web/src/lib/site-content";
 import type { PublicPlan } from "../../../../apps/web/src/components/site/Pricing";
 import type {
   PublicListingCard,
@@ -282,6 +282,27 @@ const PLANOS: PublicPlan[] = [
  * fica partilhado é só o estado visual do botão do tema — que não é o que se
  * revê aqui.
  */
+/**
+ * O texto de "Em breve", lido do ficheiro de mensagens em vez de um `t()`.
+ *
+ * A copy do site saiu do `site-content.ts` para `messages/*.json` a 20 out 2026
+ * (D72). Aqui não se pode usar `useTranslations`: quem monta estes ecrãs
+ * devolve `<Ecra>…</Ecra>`, e é o `Ecra` que monta o
+ * `NextIntlClientProvider` — um hook chamado no componente de fora fica
+ * **acima** do provider que ele próprio cria, e atirava. Ler o `ptMessages`
+ * diretamente é o mesmo caminho que o provider já usa duas linhas abaixo, e
+ * uma storyboard é de propósito de um idioma só: o que se revê aqui é o
+ * desenho, não a tradução.
+ */
+const EM_BREVE = ptMessages.site.comingSoon;
+
+const cartoesEmBreve = () =>
+  COMING_SOON_CARDS.map((card) => ({
+    icon: card.icon,
+    title: EM_BREVE.cards[card.id as keyof typeof EM_BREVE.cards].title,
+    body: EM_BREVE.cards[card.id as keyof typeof EM_BREVE.cards].body,
+  }));
+
 function Ecra({ theme, children }: { theme: "light" | "dark"; children: ReactNode }) {
   return (
     <NextIntlClientProvider locale="pt" messages={ptMessages}>
@@ -412,15 +433,15 @@ function ImoveisPreLancamento({ theme }: { theme: "light" | "dark" }) {
         <SiteSection>
           <div style={{ display: "grid", gap: "var(--sp-6)" }}>
             <SectionHeading
-              eyebrow={COMING_SOON.eyebrow}
-              title={COMING_SOON.title}
-              body={COMING_SOON.body}
+              eyebrow={EM_BREVE.eyebrow}
+              title={EM_BREVE.title}
+              body={EM_BREVE.body}
               align="center"
             />
-            <FeatureGrid cards={COMING_SOON.cards} minColumn="14rem" />
+            <FeatureGrid cards={cartoesEmBreve()} minColumn="14rem" />
             <div style={{ display: "flex", justifyContent: "center" }}>
               <Link href="/pre-inscricao" className="upm-btn upm-btn--primary upm-btn--md">
-                {COMING_SOON.primaryCta}
+                {EM_BREVE.primaryCta}
               </Link>
             </div>
           </div>
@@ -484,11 +505,11 @@ function PreInscricao({ theme }: { theme: "light" | "dark" }) {
           >
             <div style={{ display: "grid", gap: "var(--sp-6)" }}>
               <SectionHeading
-                eyebrow={COMING_SOON.eyebrow}
-                title={COMING_SOON.title}
-                body={COMING_SOON.body}
+                eyebrow={EM_BREVE.eyebrow}
+                title={EM_BREVE.title}
+                body={EM_BREVE.body}
               />
-              <FeatureGrid cards={COMING_SOON.cards} minColumn="13rem" />
+              <FeatureGrid cards={cartoesEmBreve()} minColumn="13rem" />
             </div>
             <PreRegistrationForm onSubmit={semSubmissao} />
           </div>

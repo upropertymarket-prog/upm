@@ -420,6 +420,260 @@
     "others": "Other properties",
     "othersBody": "Same type of deal, listed by owners directly."
   },
+  "site": {
+    "preLaunchBanner": "Platform in pre-launch — pre-registration open",
+    "platformCta": {
+      "pre": "Pre-register",
+      "post": "Create account"
+    },
+    "pricingCta": {
+      "pre": "Pre-register",
+      "post": "Choose plan"
+    },
+    "hero": {
+      "eyebrow": "Your property your choice",
+      "title": "Properties with no commission and no unwanted calls.",
+      "body": "Buyers and owners talk directly, at their own pace, with transparent information and full control of the process. No middlemen, no pressure, no surprises at the end.",
+      "primaryCta": "Get started",
+      "secondaryCta": "See the platform",
+      "stats": {
+        "commission": "0 % commission",
+        "privacy": "100 % private contacts",
+        "profiles": "4 profiles in one platform"
+      },
+      "imageLabel": "main photograph · interior"
+    },
+    "platform": {
+      "eyebrow": "The platform",
+      "title": "Organise, talk and sell — all in a single dashboard.",
+      "body": "Try it right here. Pick a profile and explore the platform's real dashboard."
+    },
+    "about": {
+      "eyebrow": "About us",
+      "title": "A digital solution that makes buying and selling property simpler.",
+      "body": "UProperty Market makes the process simpler and more direct: you talk securely, over chat, with no need for middlemen, no personal contacts shared and no commission on the sale.",
+      "imageLabel": "photograph · team",
+      "points": {
+        "fairMarket": {
+          "title": "A fairer market",
+          "body": "Real opportunities, with no price speculation."
+        },
+        "freedom": {
+          "title": "Freedom to negotiate",
+          "body": "An open conversation between buyer and seller."
+        },
+        "transparency": {
+          "title": "Transparency",
+          "body": "Complete, verified information on every listing."
+        }
+      }
+    },
+    "business": {
+      "eyebrow": "For businesses",
+      "title": "An integrated management solution for the construction sector.",
+      "body": "At UProperty Market you get an integrated system with tools built specifically for what the construction sector needs. Centralise all your company's information in one place, always available and always up to date.",
+      "primaryCta": "Pre-register",
+      "secondaryCta": "Contact us",
+      "imageLabel": "photograph · building site"
+    },
+    "comingSoon": {
+      "eyebrow": "Coming soon",
+      "title": "The first properties are on their way",
+      "body": "There are no published properties yet. We are preparing the launch with our first owners — pre-register now and we will let you know as soon as the listings open.",
+      "primaryCta": "Notify me",
+      "secondaryCta": "See a preview",
+      "cards": {
+        "launchAlert": {
+          "title": "Launch alert",
+          "body": "We email you when the first listings go live."
+        },
+        "preLaunchPrice": {
+          "title": "Pre-launch price",
+          "body": "Register now and you keep the launch price."
+        },
+        "publishFirst": {
+          "title": "Publish first",
+          "body": "Registered owners publish before the public opening."
+        },
+        "directChat": {
+          "title": "Direct chat access",
+          "body": "Talk to sellers as soon as the first listing opens."
+        }
+      }
+    },
+    "recentListings": {
+      "eyebrow": "Properties",
+      "title": "Most recent properties",
+      "body": "The latest listings published by owners. Talk directly to the seller, with no middlemen and no commission.",
+      "cta": "See all properties"
+    },
+    "audiences": {
+      "tabs": {
+        "particulares": "Individuals",
+        "empresas": "Businesses"
+      },
+      "particulares": {
+        "title": "For individuals",
+        "cards": {
+          "bureaucracy": {
+            "title": "Help with the paperwork",
+            "body": "Clear information and personal support to guide you through every step of the sale or letting."
+          },
+          "noCommission": {
+            "title": "No commission",
+            "body": "Sell at your own pace, with no middlemen. The sale price is 100% yours."
+          },
+          "visits": {
+            "title": "Viewing schedule",
+            "body": "Every viewing in one place, with confirmations and automatic reminders."
+          },
+          "cloud": {
+            "title": "Documents in the cloud",
+            "body": "Certificates, floor plans and contracts organised by property, always available."
+          },
+          "directChat": {
+            "title": "Direct conversations",
+            "body": "Talk only to people who are genuinely interested, without sharing your contacts."
+          },
+          "honestLocation": {
+            "title": "Honest location",
+            "body": "An approximate map before contact, the exact address once you accept."
+          }
+        }
+      },
+      "empresas": {
+        "title": "For businesses",
+        "cards": {
+          "proximity": {
+            "title": "Closer to your buyers",
+            "body": "Fewer middlemen between the end client and your properties."
+          },
+          "centralized": {
+            "title": "Centralised management",
+            "body": "All your company's information in one place, updated in real time."
+          },
+          "contracts": {
+            "title": "Digital contracts",
+            "body": "Templates, versions and signing, without leaving the platform."
+          },
+          "docsPerProject": {
+            "title": "Documents per project",
+            "body": "Floor plans, licences and certificates organised by development."
+          },
+          "dataProtected": {
+            "title": "Protected data",
+            "body": "Access by profile, with a record of who opened each document."
+          },
+          "noCommission": {
+            "title": "No commission",
+            "body": "You pay for the plan, nothing else. No cut of any sale."
+          }
+        }
+      }
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "Clear plans for different needs",
+      "body": "Pick the plan you need and change it whenever you want. No commission on the sale, on any plan.",
+      "audienceTabs": {
+        "owner": "For owners",
+        "buyer": "For buyers"
+      },
+      "billingLabel": "Billing period",
+      "billingTabs": {
+        "year": "Yearly",
+        "month": "Monthly"
+      },
+      "audienceSoon": "The plans for this audience are being prepared.",
+      "featuresSoon": "Features to be announced"
+    },
+    "faq": {
+      "title": "Clear up your questions before you decide",
+      "body": "Every request sent through the form is answered in the order it arrives. If you prefer, email us at info@upropertymarket.pt",
+      "items": {
+        "availability": {
+          "q": "When will the platform be available?",
+          "a": "The platform is in pre-launch. Pre-registering now secures you early access and the launch prices."
+        },
+        "cost": {
+          "q": "How much does the platform cost?",
+          "a": "Every plan is paid and none of them charges commission on the sale. You will find each plan's price in the Pricing section, yearly or monthly."
+        },
+        "professional": {
+          "q": "Do I need to work in the industry to use it?",
+          "a": "No. UProperty Market was designed to connect owners and buyers directly, with no middlemen."
+        },
+        "mobile": {
+          "q": "Can I use UProperty Market on my phone only?",
+          "a": "Yes. The platform is fully responsive, and a dedicated mobile app will follow."
+        },
+        "contactVisible": {
+          "q": "Will my phone number show on the listing?",
+          "a": "Never. All communication happens through the platform's chat until you choose to share more."
+        },
+        "bug": {
+          "q": "What if I find a problem on the platform?",
+          "a": "Every dashboard has a “Report a problem” button. Describe what happened, attach a screenshot, and the IT team keeps you posted on the status."
+        }
+      }
+    },
+    "contact": {
+      "title": "Questions? Talk to us.",
+      "body": "We reply as quickly as we can, always with the attention each question deserves.",
+      "reasons": {
+        "vender": "I want to sell a property",
+        "comprar": "I want to buy a property",
+        "planos": "Questions about plans",
+        "suporte": "Technical support"
+      }
+    },
+    "footer": {
+      "tagline": "Buying and selling property, with no commission.",
+      "columns": {
+        "platform": {
+          "title": "The platform",
+          "links": {
+            "about": "About us",
+            "how": "How it works",
+            "business": "For businesses",
+            "pricing": "Pricing"
+          }
+        },
+        "start": {
+          "title": "Get started",
+          "links": {
+            "preRegistration": "Pre-register",
+            "signIn": "I already have an account"
+          }
+        },
+        "support": {
+          "title": "Support",
+          "links": {
+            "faq": "FAQ",
+            "contact": "Contact"
+          }
+        },
+        "terms": {
+          "title": "Legal",
+          "links": {
+            "terms": "Terms and conditions",
+            "privacy": "Privacy policy",
+            "cookies": "Cookie policy"
+          }
+        }
+      },
+      "copyright": "© 2026 UProperty Market — All rights reserved."
+    },
+    "nav": {
+      "plataforma": "The platform",
+      "sobre": "About us",
+      "empresas": "Businesses",
+      "precos": "Pricing",
+      "duvidas": "FAQ",
+      "contactos": "Contact",
+      "sections": "Sections"
+    }
+  },
   "cloud": {
     "title": "Cloud",
     "subtitleNoCloud": "Cloud storage is included from the Essential plan up",

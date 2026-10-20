@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
@@ -7,7 +7,7 @@ import { PublicHeader } from "../../components/PublicHeader";
 import { SectionHeading, SiteSection } from "../../components/site/SiteSection";
 import { SiteFooter } from "../../components/site/SiteFooter";
 import { getLaunchMode } from "../../lib/launch-mode";
-import { COMING_SOON } from "../../lib/site-content";
+import { COMING_SOON_CARDS } from "../../lib/site-content";
 import { FeatureGrid } from "../../components/site/FeatureGrid";
 import { setLocalePreference } from "../actions/preferences";
 import { submitPreRegistration } from "./actions";
@@ -30,7 +30,11 @@ export function generateMetadata() {
  * dar nada em troca.
  */
 export default async function PreRegistrationPage() {
-  const [locale, launchMode] = await Promise.all([getLocale(), getLaunchMode()]);
+  const [locale, launchMode, t] = await Promise.all([
+    getLocale(),
+    getLaunchMode(),
+    getTranslations("site.comingSoon"),
+  ]);
 
   return (
     <>
@@ -47,12 +51,15 @@ export default async function PreRegistrationPage() {
             }}
           >
             <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-              <SectionHeading
-                eyebrow={COMING_SOON.eyebrow}
-                title={COMING_SOON.title}
-                body={COMING_SOON.body}
+              <SectionHeading eyebrow={t("eyebrow")} title={t("title")} body={t("body")} />
+              <FeatureGrid
+                cards={COMING_SOON_CARDS.map((card) => ({
+                  icon: card.icon,
+                  title: t(`cards.${card.id}.title`),
+                  body: t(`cards.${card.id}.body`),
+                }))}
+                minColumn="13rem"
               />
-              <FeatureGrid cards={COMING_SOON.cards} minColumn="13rem" />
             </div>
             <PreRegistrationForm onSubmit={submitPreRegistration} />
           </div>

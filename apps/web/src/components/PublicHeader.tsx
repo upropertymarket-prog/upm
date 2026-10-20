@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Brand, LanguageMenu, ThemeToggle } from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
-import { NAV_ANCHORS, PRE_LAUNCH_BANNER } from "../lib/site-content";
+import { NAV_ANCHOR_IDS } from "../lib/site-content";
 
 /**
  * Cabeçalho do site público (P1-03 · P1-05 · completado em P2-01)
@@ -64,7 +64,7 @@ export function PublicHeader({
             padding: "8px 16px",
           }}
         >
-          {PRE_LAUNCH_BANNER}
+          {t("site.preLaunchBanner")}
         </div>
       ) : null}
 
@@ -81,7 +81,7 @@ export function PublicHeader({
 
           {anchors !== "none" ? (
             <nav
-              aria-label="Secções"
+              aria-label={t("site.nav.sections")}
               style={{
                 display: "flex",
                 gap: "var(--sp-5)",
@@ -90,13 +90,13 @@ export function PublicHeader({
                 minWidth: 0,
               }}
             >
-              {NAV_ANCHORS.map((anchor) => (
+              {NAV_ANCHOR_IDS.map((anchorId) => (
                 <a
-                  key={anchor.id}
-                  href={anchors === "same-page" ? `#${anchor.id}` : `/#${anchor.id}`}
+                  key={anchorId}
+                  href={anchors === "same-page" ? `#${anchorId}` : `/#${anchorId}`}
                   style={{ fontSize: "var(--fs-body)", color: "var(--text)", whiteSpace: "nowrap" }}
                 >
-                  {anchor.label}
+                  {t(`site.nav.${anchorId}`)}
                 </a>
               ))}
             </nav>

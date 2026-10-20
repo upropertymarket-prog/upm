@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 
-import { FAQ } from "../../lib/site-content";
+import { FAQ_IDS } from "../../lib/site-content";
 
 /**
  * Dúvidas — acordeão com título sticky (P2-01 · 04 §2.1)
@@ -16,6 +17,7 @@ import { FAQ } from "../../lib/site-content";
  * ecrãs de altura e deixa de se poder varrer.
  */
 export function Faq() {
+  const t = useTranslations("site.faq");
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -38,21 +40,21 @@ export function Faq() {
             color: "var(--text)",
           }}
         >
-          {FAQ.title}
+          {t("title")}
         </h2>
         <p style={{ margin: 0, fontSize: "14px", lineHeight: 1.6, color: "var(--muted)" }}>
-          {FAQ.body}
+          {t("body")}
         </p>
       </header>
 
       <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-2)" }}>
-        {FAQ.items.map((item, index) => {
+        {FAQ_IDS.map((itemId, index) => {
           const isOpen = open === index;
           const panelId = `faq-panel-${index}`;
           const buttonId = `faq-button-${index}`;
           return (
             <li
-              key={item.q}
+              key={itemId}
               style={{
                 border: "1px solid var(--border)",
                 borderRadius: "var(--r-md)",
@@ -87,7 +89,7 @@ export function Faq() {
                     cursor: "pointer",
                   }}
                 >
-                  {item.q}
+                  {t(`items.${itemId}.q`)}
                   <ChevronDown
                     size={17}
                     aria-hidden="true"
@@ -112,7 +114,7 @@ export function Faq() {
                     color: "var(--muted)",
                   }}
                 >
-                  {item.a}
+                  {t(`items.${itemId}.a`)}
                 </div>
               ) : null}
             </li>

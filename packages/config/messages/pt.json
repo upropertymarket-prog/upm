@@ -420,6 +420,260 @@
     "others": "Outras propriedades",
     "othersBody": "Do mesmo tipo de negócio, publicadas por proprietários diretos."
   },
+  "site": {
+    "preLaunchBanner": "Plataforma em pré-lançamento — pré-inscrição disponível",
+    "platformCta": {
+      "pre": "Fazer pré-inscrição",
+      "post": "Criar conta"
+    },
+    "pricingCta": {
+      "pre": "Pré-inscrever",
+      "post": "Escolher plano"
+    },
+    "hero": {
+      "eyebrow": "Your property your choice",
+      "title": "Propriedades sem comissões, nem contactos indesejados.",
+      "body": "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários, sem pressões, sem surpresas no fim.",
+      "primaryCta": "Começar agora",
+      "secondaryCta": "Ver a plataforma",
+      "stats": {
+        "commission": "0 % de comissão",
+        "privacy": "100 % contactos privados",
+        "profiles": "4 perfis numa só plataforma"
+      },
+      "imageLabel": "fotografia principal · interior"
+    },
+    "platform": {
+      "eyebrow": "A plataforma",
+      "title": "Organize, comunique e venda — tudo num único painel.",
+      "body": "Experimente aqui mesmo. Escolha um perfil e navegue pelo painel real da plataforma."
+    },
+    "about": {
+      "eyebrow": "Sobre nós",
+      "title": "Uma solução digital para simplificar a compra e venda de propriedades.",
+      "body": "A UProperty Market torna o processo mais simples e direto: comunica de forma segura, por chat, sem necessidade de intermediários, sem partilha de contactos pessoais e sem comissões sobre a venda.",
+      "imageLabel": "fotografia · equipa",
+      "points": {
+        "fairMarket": {
+          "title": "Mercado mais justo",
+          "body": "Oportunidades reais, sem especulação sobre o preço."
+        },
+        "freedom": {
+          "title": "Liberdade para negociar",
+          "body": "Diálogo aberto entre quem compra e quem vende."
+        },
+        "transparency": {
+          "title": "Transparência",
+          "body": "Informação completa e verificada em cada anúncio."
+        }
+      }
+    },
+    "business": {
+      "eyebrow": "Para empresas",
+      "title": "Solução integrada de gestão para o setor da construção.",
+      "body": "Na UProperty Market, terá acesso a um sistema integrado com ferramentas desenvolvidas especificamente para as necessidades do setor da construção. Centralize toda a informação da sua empresa num único local, sempre acessível e com dados atualizados em tempo real.",
+      "primaryCta": "Pré-inscrição",
+      "secondaryCta": "Contacte-nos",
+      "imageLabel": "fotografia · obra em construção"
+    },
+    "comingSoon": {
+      "eyebrow": "Em breve",
+      "title": "As primeiras propriedades estão a caminho",
+      "body": "Ainda não há propriedades publicadas. Estamos a preparar o arranque com os primeiros proprietários — faça a sua pré-inscrição agora e seja avisado assim que os anúncios abrirem.",
+      "primaryCta": "Quero ser avisado",
+      "secondaryCta": "Ver pré-visualização",
+      "cards": {
+        "launchAlert": {
+          "title": "Alerta de arranque",
+          "body": "Avisamos por email quando os primeiros anúncios entrarem."
+        },
+        "preLaunchPrice": {
+          "title": "Preço de pré-lançamento",
+          "body": "Quem se inscreve agora mantém o valor de lançamento."
+        },
+        "publishFirst": {
+          "title": "Publicar primeiro",
+          "body": "Proprietários inscritos publicam antes da abertura pública."
+        },
+        "directChat": {
+          "title": "Acesso ao chat direto",
+          "body": "Fale com quem vende assim que o primeiro anúncio abrir."
+        }
+      }
+    },
+    "recentListings": {
+      "eyebrow": "Propriedades",
+      "title": "Propriedades mais recentes",
+      "body": "Os últimos anúncios publicados pelos proprietários. Fale diretamente com quem vende, sem intermediários e sem comissões.",
+      "cta": "Ver todas as propriedades"
+    },
+    "audiences": {
+      "tabs": {
+        "particulares": "Particulares",
+        "empresas": "Empresas"
+      },
+      "particulares": {
+        "title": "Para particulares",
+        "cards": {
+          "bureaucracy": {
+            "title": "Apoio burocrático",
+            "body": "Informações claras e apoio personalizado para o orientar em cada passo da venda ou arrendamento."
+          },
+          "noCommission": {
+            "title": "Sem comissões",
+            "body": "Venda ao seu ritmo, sem intermediários. O valor da venda é 100% seu."
+          },
+          "visits": {
+            "title": "Agenda de visitas",
+            "body": "Todas as visitas centralizadas, com confirmação e lembretes automáticos."
+          },
+          "cloud": {
+            "title": "Documentação na cloud",
+            "body": "Certidões, plantas e contratos organizados por propriedade, sempre acessíveis."
+          },
+          "directChat": {
+            "title": "Conversas diretas",
+            "body": "Fale apenas com quem está realmente interessado, sem partilhar contactos."
+          },
+          "honestLocation": {
+            "title": "Localização honesta",
+            "body": "Mapa aproximado antes do contacto, morada exata depois de aceite."
+          }
+        }
+      },
+      "empresas": {
+        "title": "Para empresas",
+        "cards": {
+          "proximity": {
+            "title": "Proximidade",
+            "body": "Reduz intermediários entre o cliente final e as suas propriedades."
+          },
+          "centralized": {
+            "title": "Gestão centralizada",
+            "body": "Toda a informação da empresa num local só, atualizada em tempo real."
+          },
+          "contracts": {
+            "title": "Contratos digitais",
+            "body": "Modelos, versões e assinatura, sem sair da plataforma."
+          },
+          "docsPerProject": {
+            "title": "Documentação por obra",
+            "body": "Plantas, licenças e certidões organizadas por empreendimento."
+          },
+          "dataProtected": {
+            "title": "Dados protegidos",
+            "body": "Acessos por perfil e registo de quem consultou cada documento."
+          },
+          "noCommission": {
+            "title": "Sem comissões",
+            "body": "O preço é o do plano. Nada sai do valor de cada venda."
+          }
+        }
+      }
+    },
+    "pricing": {
+      "eyebrow": "Preços",
+      "title": "Planos claros, para diferentes necessidades",
+      "body": "Escolha o plano que precisa e mude quando quiser. Sem comissões sobre a venda, em qualquer plano.",
+      "audienceTabs": {
+        "owner": "Para proprietários",
+        "buyer": "Para compradores"
+      },
+      "billingLabel": "Periodicidade",
+      "billingTabs": {
+        "year": "Anual",
+        "month": "Mensal"
+      },
+      "audienceSoon": "Os planos para este público estão a ser preparados.",
+      "featuresSoon": "Funcionalidades por anunciar"
+    },
+    "faq": {
+      "title": "Esclareça as suas dúvidas antes de decidir",
+      "body": "Todos os pedidos enviados através do formulário são respondidos por ordem de chegada. Se preferir, contacte-nos por email: info@upropertymarket.pt",
+      "items": {
+        "availability": {
+          "q": "Quando estará a plataforma disponível?",
+          "a": "A plataforma está em pré-lançamento. Ao fazer a pré-inscrição agora garante acesso antecipado e os valores de lançamento."
+        },
+        "cost": {
+          "q": "Quanto custa usar a plataforma?",
+          "a": "Todos os planos são pagos e nenhum cobra comissão sobre a venda. Os valores de cada plano estão na secção Preços, com opção anual e mensal."
+        },
+        "professional": {
+          "q": "Preciso de ser profissional da área para utilizar?",
+          "a": "Não. A UProperty Market foi desenhada para ligar diretamente proprietários e compradores, sem intermediários."
+        },
+        "mobile": {
+          "q": "Posso usar a UProperty Market só no telemóvel?",
+          "a": "Sim. A plataforma é totalmente responsiva e mais tarde terá aplicação móvel dedicada."
+        },
+        "contactVisible": {
+          "q": "O meu contacto fica visível no anúncio?",
+          "a": "Nunca. Toda a comunicação acontece pelo chat da plataforma até que decida partilhar mais informação."
+        },
+        "bug": {
+          "q": "E se encontrar um erro na plataforma?",
+          "a": "Em qualquer painel tem o botão “Reportar problema”. Descreve o que aconteceu, anexa uma captura e a equipa de IT acompanha o estado consigo."
+        }
+      }
+    },
+    "contact": {
+      "title": "Tem dúvidas? Fale connosco.",
+      "body": "Respondemos com a maior brevidade possível, sempre com a atenção que cada questão merece.",
+      "reasons": {
+        "vender": "Quero vender uma propriedade",
+        "comprar": "Quero comprar uma propriedade",
+        "planos": "Questões sobre planos",
+        "suporte": "Suporte técnico"
+      }
+    },
+    "footer": {
+      "tagline": "Compra e venda de propriedades, sem comissões.",
+      "columns": {
+        "platform": {
+          "title": "A plataforma",
+          "links": {
+            "about": "Sobre nós",
+            "how": "Como funciona",
+            "business": "Para empresas",
+            "pricing": "Preços"
+          }
+        },
+        "start": {
+          "title": "Começar",
+          "links": {
+            "preRegistration": "Pré-inscrição",
+            "signIn": "Já tenho conta"
+          }
+        },
+        "support": {
+          "title": "Apoio",
+          "links": {
+            "faq": "Dúvidas",
+            "contact": "Contactos"
+          }
+        },
+        "terms": {
+          "title": "Termos",
+          "links": {
+            "terms": "Termos e condições",
+            "privacy": "Política de privacidade",
+            "cookies": "Política de cookies"
+          }
+        }
+      },
+      "copyright": "© 2026 UProperty Market — Todos os direitos reservados."
+    },
+    "nav": {
+      "plataforma": "A plataforma",
+      "sobre": "Sobre nós",
+      "empresas": "Empresas",
+      "precos": "Preços",
+      "duvidas": "Dúvidas",
+      "contactos": "Contactos",
+      "sections": "Secções"
+    }
+  },
   "cloud": {
     "title": "Cloud",
     "subtitleNoCloud": "A Cloud está incluída a partir do plano Essential",

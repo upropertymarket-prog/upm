@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { dealSchema, propertyTypeSchema, typologySchema } from "@upm/db/properties";
 
 import { pageMetadata } from "@/lib/seo-overrides";
@@ -12,7 +12,7 @@ import { SectionHeading, SiteSection } from "../../components/site/SiteSection";
 import { SiteFooter } from "../../components/site/SiteFooter";
 import { getLaunchMode } from "../../lib/launch-mode";
 import { LISTINGS_PAGE_SIZE, getPublicListings } from "../../lib/public-listings";
-import { COMING_SOON } from "../../lib/site-content";
+import { COMING_SOON_CARDS } from "../../lib/site-content";
 import { setLocalePreference } from "../actions/preferences";
 
 /**
@@ -75,10 +75,11 @@ export default async function ListingsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const [params, locale, launchMode] = await Promise.all([
+  const [params, locale, launchMode, t] = await Promise.all([
     searchParams,
     getLocale(),
     getLaunchMode(),
+    getTranslations("site.comingSoon"),
   ]);
 
   const header = (
@@ -93,15 +94,22 @@ export default async function ListingsPage({
           <SiteSection>
             <div style={{ display: "grid", gap: "var(--sp-6)" }}>
               <SectionHeading
-                eyebrow={COMING_SOON.eyebrow}
-                title={COMING_SOON.title}
-                body={COMING_SOON.body}
+                eyebrow={t("eyebrow")}
+                title={t("title")}
+                body={t("body")}
                 align="center"
               />
-              <FeatureGrid cards={COMING_SOON.cards} minColumn="14rem" />
+              <FeatureGrid
+                cards={COMING_SOON_CARDS.map((card) => ({
+                  icon: card.icon,
+                  title: t(`cards.${card.id}.title`),
+                  body: t(`cards.${card.id}.body`),
+                }))}
+                minColumn="14rem"
+              />
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Link href="/pre-inscricao" className="upm-btn upm-btn--primary upm-btn--md">
-                  {COMING_SOON.primaryCta}
+                  {t("primaryCta")}
                 </Link>
               </div>
             </div>

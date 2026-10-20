@@ -1,11 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2 } from "lucide-react";
 import { Button, Input, Select, Textarea } from "@upm/ui";
 
 import type { LeadFormState } from "../../app/pre-inscricao/leadFormState";
-import { CONTACT } from "../../lib/site-content";
+import { CONTACT_REASON_VALUES } from "../../lib/site-content";
 
 /**
  * Formulário de contacto da home (P2-02 · 04 §2.1 · fecha a secção `#contactos`)
@@ -37,6 +38,7 @@ export type ContactFormProps = {
 
 export function ContactForm({ onSubmit }: ContactFormProps) {
   const [state, action, pending] = useActionState<LeadFormState, FormData>(onSubmit, {});
+  const tc = useTranslations("site.contact");
 
   if (state.ok) {
     return (
@@ -104,7 +106,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         error={state.fieldErrors?.reason}
         options={[
           { value: "", label: "Selecione uma opção…" },
-          ...CONTACT.reasons.map((reason) => ({ value: reason.value, label: reason.label })),
+          ...CONTACT_REASON_VALUES.map((value) => ({ value, label: tc(`reasons.${value}`) })),
         ]}
       />
 
