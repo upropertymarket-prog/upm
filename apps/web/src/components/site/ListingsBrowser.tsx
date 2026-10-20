@@ -31,6 +31,7 @@ export type ListingsBrowserProps = {
 
 export function ListingsBrowser({ listings, total, page, pageCount, raw }: ListingsBrowserProps) {
   const t = useTranslations("publicListing");
+  const tp = useTranslations("pagination");
 
   // Um `UrlObject` e não uma cadeia: com `typedRoutes` ligado, o `Link` só
   // aceita uma rota literal ou um objeto — uma cadeia montada em runtime não
@@ -48,12 +49,10 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
       <SectionHeading
-        title="Propriedades"
-        body={
-          total === 0
-            ? "Nenhuma propriedade corresponde a esta pesquisa."
-            : `${total} ${total === 1 ? "propriedade disponível" : "propriedades disponíveis"}.`
-        }
+        title={t("browserTitle")}
+        // O plural sai do `plural` do ICU e não de um ternário: em inglês a
+        // escolha é outra, e o código não tem de saber que idiomas existem.
+        body={total === 0 ? t("browserEmpty") : t("browserCount", { count: total })}
       />
 
       <ListingFilters value={raw} />
@@ -71,8 +70,13 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
             background: "var(--surface)",
           }}
         >
-          Sem resultados para estes filtros. Tente alargar a pesquisa ou{" "}
-          <Link href="/propriedades">limpar os filtros</Link>.
+          {/* `t.rich` e não a frase partida em três pedaços de JSX: com o
+              texto cortado à volta do `<Link>`, a ordem das palavras ficava
+              fixada em português — em inglês a ligação cai noutro sítio da
+              frase. O `<link>` da mensagem é que diz onde ela entra. */}
+          {t.rich("noResultsFilters", {
+            link: (chunks) => <Link href="/propriedades">{chunks}</Link>,
+          })}
         </p>
       ) : (
         <ul
@@ -107,15 +111,15 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
         >
           {page > 1 ? (
             <Link href={pageHref(page - 1)} className="upm-btn upm-btn--secondary upm-btn--md">
-              Anterior
+              {tp("previous")}
             </Link>
           ) : null}
           <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-            Página {page} de {pageCount}
+            {t("pageOf", { page, total: pageCount })}
           </span>
           {page < pageCount ? (
             <Link href={pageHref(page + 1)} className="upm-btn upm-btn--secondary upm-btn--md">
-              Seguinte
+              {tp("next")}
             </Link>
           ) : null}
         </nav>
