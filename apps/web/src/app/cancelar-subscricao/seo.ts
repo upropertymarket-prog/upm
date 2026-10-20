@@ -1,15 +1,22 @@
-import type { PageSeo } from "@/lib/seo";
+import type { RouteSeo } from "@/lib/seo";
 
 /**
- * SEO de `/cancelar-subscricao` — fonte de verdade versionada (P2-06 · P10-08).
+ * SEO de `/cancelar-subscricao` (P10-09).
  *
- * `noindex`: é o destino do link de cancelar subscrição das campanhas (02
- * §4.3). Não tem conteúdo que sirva uma pesquisa, e indexá-la punha o
- * motor de busca a visitar URLs com tokens de destinatários.
+ * `noindex`: chega-se aqui por um link de um e-mail, com um token. Não é uma
+ * página para encontrar numa pesquisa.
  */
-export const seo: PageSeo = {
-  pageName: "Cancelar subscrição",
-  titleTag: "Cancelar subscrição · UProperty Market",
-  metaDescription: "Deixe de receber as comunicações de marketing da UProperty Market.",
-  noindex: true,
+export const seo: RouteSeo = {
+  pt: {
+    pageName: "Cancelar subscrição",
+    titleTag: "Cancelar subscrição · UProperty Market",
+    metaDescription: "Deixe de receber as comunicações de marketing da UProperty Market.",
+    noindex: true,
+  },
+  en: {
+    pageName: "Unsubscribe",
+    titleTag: "Unsubscribe · UProperty Market",
+    metaDescription: "Stop receiving marketing communications from UProperty Market.",
+    noindex: true,
+  },
 };

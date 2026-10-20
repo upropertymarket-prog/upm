@@ -1,21 +1,33 @@
-import type { PageSeo } from "@/lib/seo";
+import type { RouteSeo } from "@/lib/seo";
 
-export const seo: PageSeo = {
-  pageName: "Propriedades",
-  titleTag: "Propriedades sem comissões · UProperty Market",
-  metaDescription:
-    "Casas e apartamentos para comprar e arrendar, falando diretamente com quem vende. Sem comissões, sem intermediários e sem contactos indesejados.",
-  ogSameAsPage: true,
-  ogTitle: "",
-  ogDescription: "",
-  // Deliberadamente vazio, e não "/og/imoveis.jpg". **Nenhuma imagem OG existe
-  // neste projeto** — `apps/web/public/og/` não existe, e por isso até o
-  // `/og/default.jpg` a que o `buildMetadata` cai devolve 404. Apontar para um
-  // ficheiro inexistente não é melhor do que não apontar: é uma partilha sem
-  // imagem nos dois casos, com a diferença de que o caminho escrito dá a
-  // entender que está resolvido. Fica como **D63**.
-  ogImage: "",
-  ogImageAlt: "Propriedades na UProperty Market",
-  canonical: "https://upropertymarket.pt/imoveis",
-  noindex: false,
+/**
+ * SEO de `/imoveis` — o catálogo público (P2-05).
+ *
+ * O `canonical` fixo que aqui estava (`https://upropertymarket.pt/imoveis`)
+ * saiu a 20 out 2026. Eram dois defeitos num campo: anunciava o domínio de
+ * produção **a partir de staging**, contra o que o `siteUrl()` do
+ * `lib/seo.ts` existe para evitar, e prendia a página a um só URL agora que
+ * ela tem dois (`/imoveis` e `/en/imoveis`). Sem o campo, o
+ * `buildMetadata` calcula-o a partir da rota e do idioma — que é o que estava
+ * certo desde o início.
+ */
+export const seo: RouteSeo = {
+  pt: {
+    pageName: "Propriedades",
+    titleTag: "Propriedades sem comissões · UProperty Market",
+    metaDescription:
+      "Casas e apartamentos para comprar e arrendar, falando diretamente com quem vende. Sem comissões, sem intermediários e sem contactos indesejados.",
+    ogSameAsPage: true,
+    ogImageAlt: "Propriedades na UProperty Market",
+    noindex: false,
+  },
+  en: {
+    pageName: "Properties",
+    titleTag: "Property with no commission · UProperty Market",
+    metaDescription:
+      "Houses and flats to buy and to rent, talking directly to the seller. No commission, no middlemen and no unwanted calls.",
+    ogSameAsPage: true,
+    ogImageAlt: "Properties on UProperty Market",
+    noindex: false,
+  },
 };

@@ -1,15 +1,19 @@
-import type { PageSeo } from "@/lib/seo";
+import type { RouteSeo } from "@/lib/seo";
 
 /**
- * SEO de `/pre-inscricao` — fonte de verdade versionada (P2-06).
- *
- * Indexável, ao contrário das outras rotas de formulário: em pré-lançamento
- * é a página de conversão do site, e é por ela que uma pesquisa pela marca
- * deve poder entrar.
+ * SEO de `/pre-inscricao` — a porta do pré-lançamento (P2-02).
  */
-export const seo: PageSeo = {
-  pageName: "Pré-inscrição",
-  titleTag: "Pré-inscrição · UProperty Market",
-  metaDescription:
-    "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
+export const seo: RouteSeo = {
+  pt: {
+    pageName: "Pré-inscrição",
+    titleTag: "Pré-inscrição · UProperty Market",
+    metaDescription:
+      "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento. Sem comissões sobre a venda.",
+  },
+  en: {
+    pageName: "Pre-registration",
+    titleTag: "Pre-registration · UProperty Market",
+    metaDescription:
+      "Sign up to hear when the first properties open, and secure the launch prices. No commission on the sale.",
+  },
 };

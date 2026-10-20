@@ -1,17 +1,19 @@
-import type { PageSeo } from "@/lib/seo";
+import type { RouteSeo } from "@/lib/seo";
 
 /**
- * SEO de `/recuperar-palavra-passe` — fonte de verdade versionada (P2-06 · 04 §2.1.2).
- *
- * Editável nas storyboards do canvas e, em produção, sobreponível em
- * `/admin/seo` sem deploy (07 §24.5). `check-seo` falha o PR se uma rota
- * pública ficar sem este ficheiro.
- *
- * `noindex`: ecrã transacional, sem conteúdo indexável.
+ * SEO de `/recuperar-palavra-passe` (P3-03). `noindex`: passo de um fluxo.
  */
-export const seo: PageSeo = {
-  pageName: "Recuperar palavra-passe",
-  titleTag: "Recuperar palavra-passe · UProperty Market",
-  metaDescription: "Recupere o acesso à sua conta UProperty Market.",
-  noindex: true,
+export const seo: RouteSeo = {
+  pt: {
+    pageName: "Recuperar palavra-passe",
+    titleTag: "Recuperar palavra-passe · UProperty Market",
+    metaDescription: "Recupere o acesso à sua conta UProperty Market.",
+    noindex: true,
+  },
+  en: {
+    pageName: "Reset password",
+    titleTag: "Reset your password · UProperty Market",
+    metaDescription: "Get back into your UProperty Market account.",
+    noindex: true,
+  },
 };

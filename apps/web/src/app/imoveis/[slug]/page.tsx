@@ -1,6 +1,8 @@
 import { notFound, permanentRedirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { INTL_LOCALE, LOCALES } from "@upm/config";
 
+import type { RouteSeo } from "@/lib/seo";
 import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
 
@@ -38,13 +40,26 @@ import { setLocalePreference } from "../../actions/preferences";
  * o Google consolida o sinal num URL só, em vez de ver duas páginas iguais.
  */
 
-/** As variáveis do template de 04 §2.1.2, resolvidas com os dados do imóvel. */
-function fill(template: string, listing: PublicListingDetail): string {
+/**
+ * As variáveis do template de 04 §2.1.2, resolvidas com os dados do imóvel.
+ *
+ * **Recebe o idioma** desde 20 out 2026 (D72): o preço era formatado com um
+ * `"pt-PT"` fixo e os três valores de recurso estavam em português à mão. Num
+ * título em inglês, isso dava um preço com a pontuação portuguesa e um
+ * "Propriedade" a meio da frase — e um título é a primeira coisa que alguém lê
+ * de uma página partilhada.
+ */
+function fill(
+  template: string,
+  listing: PublicListingDetail,
+  intlLocale: string,
+  labels: { priceOnRequest: string; city: string; typology: string },
+): string {
   const price = (listing.deal === "rent" ? listing.rentCents : listing.priceCents) ?? null;
   const formatted =
     price === null
-      ? "preço sob consulta"
-      : new Intl.NumberFormat("pt-PT", {
+      ? labels.priceOnRequest
+      : new Intl.NumberFormat(intlLocale, {
           style: "currency",
           currency: "EUR",
           maximumFractionDigits: 0,
@@ -54,8 +69,8 @@ function fill(template: string, listing: PublicListingDetail): string {
     template
       .replaceAll("{titulo}", listing.title)
       .replaceAll("{preco}", formatted)
-      .replaceAll("{localidade}", listing.city ?? "Portugal")
-      .replaceAll("{tipologia}", listing.typology ?? "Propriedade")
+      .replaceAll("{localidade}", listing.city ?? labels.city)
+      .replaceAll("{tipologia}", listing.typology ?? labels.typology)
       // Um template que fique com um buraco ("· em ·") lê-se pior do que um
       // título curto: colapsa-se a pontuação que sobrou.
       .replace(/\s*·\s*·\s*/g, " · ")
@@ -74,32 +89,49 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // Google para a indexar. `noindex` nos dois casos — num anúncio encerrado é
   // o que substitui o 410 que o App Router não sabe devolver (ver a nota de
   // `ListingGone.tsx`).
+  const t = await getTranslations("publicListing");
+
   if (!listing) {
     const availability = id ? await getListingAvailability(id) : { outcome: "never" as const };
     return {
-      title:
-        availability.outcome === "gone"
-          ? "Anúncio encerrado · UProperty Market"
-          : "Propriedade não encontrada · UProperty Market",
+      title: availability.outcome === "gone" ? t("goneMetaTitle") : t("notFoundMetaTitle"),
       robots: { index: false, follow: true },
     };
   }
 
-  return pageMetadata(
-    {
-      ...seo,
-      titleTag: fill(seo.titleTag, listing),
-      metaDescription: fill(seo.metaDescription, listing),
-      ogImageAlt: fill(seo.ogImageAlt ?? "", listing),
-      // Sem imagem OG própria usa a foto de capa; sem capa, o `buildMetadata`
-      // cai para o cartão de omissão — que desde 13 out 2026 existe e é
-      // desenhado em `app/og/default.png` (fecha a D63). Até aí caía num
-      // ficheiro inexistente e a partilha saía sem imagem nenhuma.
-      ogImage: listing.coverUrl ?? undefined,
-      canonical: undefined,
-    },
-    `/imoveis/${listing.slug}`,
-  );
+  /**
+   * Os dois idiomas resolvidos de uma vez, e é o `pageMetadata` que escolhe o
+   * do pedido. Preencher só o idioma atual obrigava este sítio a descobri-lo —
+   * e era mais um caller a ter de saber que o produto é bilingue.
+   */
+  const labels = {
+    priceOnRequest: t("priceOnRequest"),
+    city: t("fallbackCity"),
+    typology: t("fallbackTypology"),
+  };
+  const preenchido = Object.fromEntries(
+    LOCALES.map((loc) => {
+      const base = seo[loc];
+      const intlLocale = INTL_LOCALE[loc];
+      return [
+        loc,
+        {
+          ...base,
+          titleTag: fill(base.titleTag, listing, intlLocale, labels),
+          metaDescription: fill(base.metaDescription, listing, intlLocale, labels),
+          ogImageAlt: fill(base.ogImageAlt ?? "", listing, intlLocale, labels),
+          // Sem imagem OG própria usa a foto de capa; sem capa, o
+          // `buildMetadata` cai para o cartão de omissão — que desde 13 out
+          // 2026 existe e é desenhado em `app/og/default.png` (fecha a D63).
+          // Até aí caía num ficheiro inexistente e a partilha saía sem imagem.
+          ogImage: listing.coverUrl ?? undefined,
+          canonical: undefined,
+        },
+      ];
+    }),
+  ) as RouteSeo;
+
+  return pageMetadata(preenchido, `/imoveis/${listing.slug}`);
 }
 
 /**

@@ -367,6 +367,25 @@ function ehRouteHandler(caminho) {
   return /\/src\/app\/api\//.test(caminho) && /\/route\.tsx?$/.test(caminho);
 }
 
+/**
+ * `app/<rota>/seo.ts` — metadados por rota, e **bilingues desde 20 out 2026**.
+ *
+ * Deixaram de contar aqui porque deixaram de ser o problema: cada um declara
+ * agora `{ pt: {…}, en: {…} }`, e quem exige os dois idiomas preenchidos é o
+ * `check-seo`, a cada PR. Continuarem nesta conta era contá-los duas vezes e,
+ * pior, dar a entender que a correção deles era movê-los para
+ * `messages/*.json` — que é precisamente o que **não** se deve fazer: um
+ * `seo.ts` é a fonte de verdade versionada que o `/admin/seo` sobrepõe por
+ * rota e que as storyboards do canvas leem e escrevem. Num ficheiro de
+ * mensagens perdia as três coisas.
+ *
+ * A fronteira é a mesma dos route handlers: este portão olha para texto
+ * escrito à mão **dentro de componentes**. Um `seo.ts` não desenha nada.
+ */
+function ehSeoDeRota(caminho) {
+  return /\/src\/app\/.*\/seo\.ts$/.test(caminho) || /\/src\/app\/seo\.ts$/.test(caminho);
+}
+
 /** A linha onde um índice cai, inteira — para a guarda do `z.` das raízes só-rótulos. */
 function linhaInteira(fonte, indice) {
   const antes = fonte.lastIndexOf("\n", indice) + 1;
@@ -408,7 +427,7 @@ for (const raiz of RAIZES) {
     const relativo = relative(process.cwd(), ficheiro).split(sep).join("/");
     if (ISENTOS.has(relativo)) continue;
 
-    if (ehRouteHandler(relativo)) continue;
+    if (ehRouteHandler(relativo) || ehSeoDeRota(relativo)) continue;
 
     const original = readFileSync(ficheiro, "utf8");
     const fonte = semComentarios(original);

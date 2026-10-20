@@ -16,7 +16,7 @@
     "db:types": "supabase gen types typescript --linked > packages/db/src/database.types.ts && prettier --write packages/db/src/database.types.ts",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff",
-    "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && node scripts/gate/check-responsive.mjs && pnpm gate:canvas && pnpm gate:seo && pnpm gate:db && pnpm gate:deps",
+    "gate": "node scripts/gate/check-public-env.mjs && node scripts/gate/check-client-bundle.mjs && node scripts/gate/check-responsive.mjs && pnpm gate:canvas && pnpm gate:seo && pnpm gate:i18n && pnpm gate:db && pnpm gate:deps",
     "gate:env": "node scripts/gate/check-public-env.mjs",
     "gate:i18n": "node scripts/gate/check-i18n.mjs",
     "gate:bundle": "node scripts/gate/check-client-bundle.mjs",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { getLocale } from "next-intl/server";
+import { resolveLocale } from "@upm/config";
 import { createAnonClient } from "@upm/db/server";
 
-import { buildMetadata, type PageSeo, type SeoOverride } from "./seo";
+import { buildMetadata, type RouteSeo, type SeoOverride } from "./seo";
 
 /**
  * A sobreposição de SEO vinda de `seo_pages` (P2-06 2.ª metade · 07 §24.5)
@@ -88,6 +90,15 @@ export async function getSeoOverride(route: string): Promise<SeoOverride> {
  * visível — em vez de ficar com metadados que o Admin não consegue corrigir,
  * que é um erro silencioso e que só aparece quando alguém tenta editá-los.
  */
-export async function pageMetadata(seo: PageSeo, route: string): Promise<Metadata> {
-  return buildMetadata(seo, route, await getSeoOverride(route));
+export async function pageMetadata(seo: RouteSeo, route: string): Promise<Metadata> {
+  /**
+   * O idioma descobre-se aqui e não em cada `page.tsx`. São treze rotas a
+   * chamar isto, e uma que se esquecesse de passar o locale ficava em
+   * português sem avisar — exatamente o tipo de falha silenciosa que levou
+   * nove meses a dar por si. Assim nenhuma rota tem de saber que o produto é
+   * bilingue: pede os metadados e recebe-os na língua em que está a ser
+   * servida.
+   */
+  const [locale, override] = await Promise.all([getLocale(), getSeoOverride(route)]);
+  return buildMetadata(seo, route, resolveLocale(locale), override);
 }

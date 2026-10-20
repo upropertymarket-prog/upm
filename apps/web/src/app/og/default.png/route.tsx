@@ -1,4 +1,7 @@
 import { ImageResponse } from "next/og";
+import { resolveLocale } from "@upm/config";
+import en from "@upm/config/messages/en.json";
+import pt from "@upm/config/messages/pt.json";
 
 /**
  * A imagem Open Graph por omissão — `/og/default.png` (P2-06 · fecha D63)
@@ -47,7 +50,18 @@ export const revalidate = 86400;
 const WIDTH = 1200;
 const HEIGHT = 630;
 
-export async function GET() {
+/**
+ * O idioma vem do URL e não do cookie, e isso não é uma escolha de estilo: um
+ * scraper de Open Graph — o do WhatsApp, o do LinkedIn, o do Slack — pede a
+ * imagem sem cookies nenhuns. Se o idioma viesse do cookie, o cartão saía
+ * sempre em português, mesmo partilhado a partir de `/en`. É por isso que o
+ * `buildMetadata` aponta para `/og/default.png?lang=<locale>`.
+ */
+export async function GET(request: Request) {
+  const lang = new URL(request.url).searchParams.get("lang");
+  const locale = resolveLocale(lang);
+  const texto = (locale === "en" ? en : pt).site;
+
   return new ImageResponse(
     <div
       style={{
@@ -93,7 +107,7 @@ export async function GET() {
             marginBottom: 24,
           }}
         >
-          Your property your choice
+          {texto.hero.eyebrow}
         </span>
         <span
           style={{
@@ -104,7 +118,7 @@ export async function GET() {
             letterSpacing: "-0.02em",
           }}
         >
-          Propriedades sem comissões,
+          {texto.ogCard.line1}
         </span>
         <span
           style={{
@@ -115,7 +129,7 @@ export async function GET() {
             letterSpacing: "-0.02em",
           }}
         >
-          nem contactos indesejados.
+          {texto.ogCard.line2}
         </span>
       </div>
 

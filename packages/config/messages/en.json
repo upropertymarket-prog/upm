@@ -406,6 +406,11 @@
     "createAccount": "Create account",
     "viewOnMap": "View on the map",
     "paginationLabel": "Pagination",
+    "goneMetaTitle": "Listing closed · UProperty Market",
+    "notFoundMetaTitle": "Property not found · UProperty Market",
+    "priceOnRequest": "price on request",
+    "fallbackCity": "Portugal",
+    "fallbackTypology": "Property",
     "gallery": {
       "empty": "This listing has no photographs yet.",
       "previous": "Previous photograph",
@@ -443,6 +448,10 @@
   },
   "site": {
     "preLaunchBanner": "Platform in pre-launch — pre-registration open",
+    "ogCard": {
+      "line1": "Properties with no commission",
+      "line2": "and no unwanted calls."
+    },
     "platformCta": {
       "pre": "Pre-register",
       "post": "Create account"

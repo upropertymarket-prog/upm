@@ -30,7 +30,9 @@
     ".next/*/types/**/*.ts",
     ".next/*/dev/types/**/*.ts",
     ".next/tempo/types/**/*.ts",
-    ".next/tempo/dev/types/**/*.ts"
+    ".next/tempo/dev/types/**/*.ts",
+    ".next/tempo-mvh498ofomz8/types/**/*.ts",
+    ".next/tempo-mvh498ofomz8/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -406,6 +406,11 @@
     "createAccount": "Criar conta",
     "viewOnMap": "Ver no mapa",
     "paginationLabel": "Paginação",
+    "goneMetaTitle": "Anúncio encerrado · UProperty Market",
+    "notFoundMetaTitle": "Propriedade não encontrada · UProperty Market",
+    "priceOnRequest": "preço sob consulta",
+    "fallbackCity": "Portugal",
+    "fallbackTypology": "Propriedade",
     "gallery": {
       "empty": "Este anúncio ainda não tem fotografias.",
       "previous": "Fotografia anterior",
@@ -443,6 +448,10 @@
   },
   "site": {
     "preLaunchBanner": "Plataforma em pré-lançamento — pré-inscrição disponível",
+    "ogCard": {
+      "line1": "Propriedades sem comissões,",
+      "line2": "nem contactos indesejados."
+    },
     "platformCta": {
       "pre": "Fazer pré-inscrição",
       "post": "Criar conta"
