@@ -74,7 +74,9 @@ function CampanhasDemo({
               <CampaignBuilder
                 campaigns={CAMPAIGN_ROWS}
                 selected={selected}
-                emails={selected ? CAMPAIGN_EMAILS.filter((e) => e.campaign_id === selected.id) : []}
+                emails={
+                  selected ? CAMPAIGN_EMAILS.filter((e) => e.campaign_id === selected.id) : []
+                }
                 blocksByEmail={CAMPAIGN_BLOCKS_BY_EMAIL}
                 delayByEmail={CAMPAIGN_DELAY_BY_EMAIL}
                 selectedEmailId={selected ? "eml-1" : null}
