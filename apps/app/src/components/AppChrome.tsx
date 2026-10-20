@@ -36,6 +36,15 @@ export type AppChromeProps = {
    * nunca fala com o Supabase (não há sessão no canvas).
    */
   liveNotifications?: boolean;
+  /**
+   * `false` numa storyboard: a porta das novidades não monta, e por isso não
+   * chama `myAppUpdates()`. Mesma razão que `liveNotifications` — a Server
+   * Action abre um cliente Supabase, e no canvas não há env nem sessão para
+   * isso. É um gate separado por ser uma ida ao servidor diferente: aquela é
+   * uma subscrição realtime a uma tabela, esta é uma chamada única a
+   * `app_updates_for_me()`.
+   */
+  appUpdates?: boolean;
   /** 04 §1.5 — `"full"` só para o Mapa; tudo o resto fica no limite de 1600 px. */
   contentWidth?: "default" | "full";
   /** Trava o shell no viewport e dá ao conteúdo a altura que sobra (Mensagens). */
@@ -74,6 +83,7 @@ export function AppChrome({
   counters = {},
   notifications = [],
   liveNotifications = true,
+  appUpdates = true,
   contentWidth = "default",
   fill = false,
   children,
@@ -148,7 +158,7 @@ export function AppChrome({
           não abrir uma rota concreta — por isso a porta é aqui e não em cada
           página. Decide sozinha se abre o modal, deixa a faixa, ou não mostra
           nada. */}
-      <AppUpdatesGate />
+      {appUpdates ? <AppUpdatesGate /> : null}
       {children}
       <ReportProblemModal
         open={reportOpen}
