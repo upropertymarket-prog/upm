@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { PublicHeader } from "../PublicHeader";
 import { ListingCard } from "./ListingCard";
@@ -44,19 +45,6 @@ import type { ListingAvailability, PublicListingCard } from "../../lib/public-li
  * catálogo a sério e URL indexados. Até lá, `noindex` resolve.
  */
 
-const TITLES: Record<"sold" | "rented" | "withdrawn", string> = {
-  sold: "Esta propriedade já foi vendida.",
-  rented: "Esta propriedade já foi arrendada.",
-  withdrawn: "Esta propriedade já não está disponível.",
-};
-
-const BODIES: Record<"sold" | "rented" | "withdrawn", string> = {
-  sold: "O negócio fez-se aqui, diretamente entre as duas partes e sem comissões. O anúncio deixou de estar publicado.",
-  rented:
-    "O negócio fez-se aqui, diretamente entre as duas partes e sem comissões. O anúncio deixou de estar publicado.",
-  withdrawn: "O proprietário retirou o anúncio. Pode ter mudado de ideias ou voltar mais tarde.",
-};
-
 export type ListingGoneProps = {
   availability: Extract<ListingAvailability, { outcome: "gone" }>;
   /** Mesmo negócio e mesma cidade. Vazio esconde a secção. */
@@ -73,6 +61,11 @@ export function ListingGone({
   launchMode,
   onLocaleChange,
 }: ListingGoneProps) {
+  // Os títulos e os corpos estavam em dois `Record` de módulo. Saíram daqui
+  // (D72): avaliados uma vez no arranque, ficavam presos ao idioma em que
+  // foram escritos — e este é o ecrã que um visitante alcança por uma
+  // partilha, que é a porta por onde entra quem ainda não escolheu língua.
+  const t = useTranslations("listingGone");
   const { reason, city } = availability;
 
   return (
@@ -83,9 +76,9 @@ export function ListingGone({
         <SiteSection>
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             <SectionHeading
-              eyebrow="Anúncio encerrado"
-              title={TITLES[reason]}
-              body={BODIES[reason]}
+              eyebrow={t("eyebrow")}
+              title={t(`title.${reason}`)}
+              body={t(`body.${reason}`)}
               align="center"
             />
 
@@ -98,10 +91,10 @@ export function ListingGone({
               }}
             >
               <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
-                Ver propriedades
+                {t("seeListings")}
               </Link>
               <Link href="/criar-conta" className="upm-btn upm-btn--secondary upm-btn--md">
-                Criar alerta para novas propriedades
+                {t("createAlert")}
               </Link>
             </div>
           </div>
@@ -111,8 +104,8 @@ export function ListingGone({
           <SiteSection tone="alt">
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-6)" }}>
               <SectionHeading
-                title={city ? `Outras propriedades em ${city}` : "Outras propriedades"}
-                body="Do mesmo tipo de negócio, publicadas por proprietários diretos."
+                title={city ? t("othersInCity", { city }) : t("others")}
+                body={t("othersBody")}
               />
               <ul
                 style={{

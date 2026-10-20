@@ -236,10 +236,14 @@
       "type": "Type",
       "typology": "Typology",
       "grossArea": "Gross area",
+      "netArea": "Net area",
       "bathrooms": "Bathrooms",
       "floor": "Floor",
       "yearBuilt": "Year built",
       "energyCert": "Energy certificate",
+      "condition": "Condition",
+      "condoFee": "Condo fee",
+      "amenities": "Amenities",
       "price": "Price",
       "city": "City"
     },
@@ -387,6 +391,34 @@
     "emptyTitle": "You have not saved any properties yet",
     "emptyDescription": "Browse the Market and save the properties you are interested in.",
     "exploreMarket": "Browse the Market"
+  },
+  "publicListing": {
+    "back": "Back to properties",
+    "onRequest": "On request",
+    "noApproxWithLocation": "{location}. The owner has not marked the area on the map yet.",
+    "noApprox": "The owner has not given a location yet.",
+    "talkToOwner": "Talk directly to the owner",
+    "talkToOwnerHint": "Contact happens inside the platform — no calls and no phone numbers shared.",
+    "signInToTalk": "Sign in to get in touch",
+    "createAccount": "Create account"
+  },
+  "listingGone": {
+    "eyebrow": "Listing closed",
+    "title": {
+      "sold": "This property has been sold.",
+      "rented": "This property has been rented.",
+      "withdrawn": "This property is no longer available."
+    },
+    "body": {
+      "sold": "The deal was done here, directly between both parties and with no commission. The listing is no longer published.",
+      "rented": "The deal was done here, directly between both parties and with no commission. The listing is no longer published.",
+      "withdrawn": "The owner withdrew the listing. They may have changed their mind, or they may come back later."
+    },
+    "seeListings": "Browse properties",
+    "createAlert": "Create an alert for new properties",
+    "othersInCity": "Other properties in {city}",
+    "others": "Other properties",
+    "othersBody": "Same type of deal, listed by owners directly."
   },
   "cloud": {
     "title": "Cloud",

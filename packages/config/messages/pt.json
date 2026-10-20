@@ -236,10 +236,14 @@
       "type": "Tipo",
       "typology": "Tipologia",
       "grossArea": "Área bruta",
+      "netArea": "Área útil",
       "bathrooms": "Casas de banho",
       "floor": "Piso",
       "yearBuilt": "Ano de construção",
       "energyCert": "Certificado energético",
+      "condition": "Estado",
+      "condoFee": "Condomínio",
+      "amenities": "Comodidades",
       "price": "Preço",
       "city": "Cidade"
     },
@@ -387,6 +391,34 @@
     "emptyTitle": "Ainda não guardou nenhum imóvel",
     "emptyDescription": "Explore o Market e guarde os imóveis que lhe interessam.",
     "exploreMarket": "Explorar Market"
+  },
+  "publicListing": {
+    "back": "Voltar às propriedades",
+    "onRequest": "Sob consulta",
+    "noApproxWithLocation": "{location}. O proprietário ainda não marcou a zona no mapa.",
+    "noApprox": "O proprietário ainda não indicou a localização.",
+    "talkToOwner": "Fala diretamente com o proprietário",
+    "talkToOwnerHint": "O contacto é feito dentro da plataforma — sem chamadas nem partilha de número.",
+    "signInToTalk": "Entrar para falar",
+    "createAccount": "Criar conta"
+  },
+  "listingGone": {
+    "eyebrow": "Anúncio encerrado",
+    "title": {
+      "sold": "Esta propriedade já foi vendida.",
+      "rented": "Esta propriedade já foi arrendada.",
+      "withdrawn": "Esta propriedade já não está disponível."
+    },
+    "body": {
+      "sold": "O negócio fez-se aqui, diretamente entre as duas partes e sem comissões. O anúncio deixou de estar publicado.",
+      "rented": "O negócio fez-se aqui, diretamente entre as duas partes e sem comissões. O anúncio deixou de estar publicado.",
+      "withdrawn": "O proprietário retirou o anúncio. Pode ter mudado de ideias ou voltar mais tarde."
+    },
+    "seeListings": "Ver propriedades",
+    "createAlert": "Criar alerta para novas propriedades",
+    "othersInCity": "Outras propriedades em {city}",
+    "others": "Outras propriedades",
+    "othersBody": "Do mesmo tipo de negócio, publicadas por proprietários diretos."
   },
   "cloud": {
     "title": "Cloud",
