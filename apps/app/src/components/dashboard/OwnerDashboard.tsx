@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { DashboardStats } from "./DashboardStats";
 import { QuickAccess } from "./QuickAccess";
 import { RecentActivity, type ActivityItem } from "./RecentActivity";
@@ -40,6 +41,7 @@ export function OwnerDashboard({
   recentContracts,
   recentContractsMeta,
 }: OwnerDashboardProps) {
+  const t = useTranslations("dashboard");
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
       <DashboardStats stats={stats} />
@@ -54,7 +56,7 @@ export function OwnerDashboard({
             margin: 0,
           }}
         >
-          Gráficos
+          {t("charts")}
         </h2>
         <div
           style={{
@@ -78,7 +80,7 @@ export function OwnerDashboard({
             margin: 0,
           }}
         >
-          Atividade recente
+          {t("recentActivity")}
         </h2>
         <RecentActivity
           messages={recentMessages}

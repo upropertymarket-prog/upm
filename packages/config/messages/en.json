@@ -326,6 +326,92 @@
       "versionRestored": "Version restored as a new version."
     }
   },
+  "dashboard": {
+    "statsTitle": "Your figures",
+    "charts": "Charts",
+    "recentActivity": "Recent activity",
+    "recentMessages": "Recent messages",
+    "noMessages": "No messages yet.",
+    "noContracts": "No contracts yet.",
+    "chartRange": "Chart range",
+    "viewsTitle": "Views of your properties",
+    "viewedTitle": "Properties you viewed",
+    "quickAccess": {
+      "title": "Quick access",
+      "market": {
+        "body": "See every property published on the platform."
+      },
+      "myProperties": {
+        "body": "Manage your portfolio, listings and drafts."
+      },
+      "publishProperty": {
+        "title": "Publish a new property",
+        "body": "Fill in the listing step by step — you can save it as a draft."
+      },
+      "map": {
+        "body": "See what is for sale and to let in your area."
+      },
+      "saved": {
+        "body": "The properties you saved and your search alerts."
+      },
+      "visitRequests": {
+        "title": "Viewing requests",
+        "body": "The viewings you asked for and where each one stands."
+      },
+      "messages": {
+        "body": "Your conversations with the owners."
+      }
+    },
+    "chart": {
+      "range7d": "7 days",
+      "range30d": "30 days",
+      "range12m": "12 months",
+      "weekOf": "Week of {start} to {end}",
+      "noViewsThisWeek": "no views this week",
+      "firstWeekWithViews": "first week with views",
+      "sameAsLastWeek": "same as last week",
+      "changeThisWeek": "{change}% this week"
+    },
+    "ownerSubtitle": "A summary of your activity and assets",
+    "buyerSubtitle": "Your search, all in one place",
+    "stats": {
+      "activeLabel": "Active properties",
+      "activeNone": "no published listings yet",
+      "activeTotal": "{count} in total",
+      "viewsLabel": "Views of your properties",
+      "leadsLabel": "New leads",
+      "leadsNone": "no interested parties yet",
+      "leadsSome": "to contact or in conversation",
+      "visitsLabel": "Viewings booked",
+      "visitsNoneAwaiting": "none awaiting confirmation",
+      "visitsAwaiting": "{count} awaiting confirmation",
+      "savedLabel": "Saved properties",
+      "savedNone": "no saved properties yet",
+      "savedSome": "on your list",
+      "requestedLabel": "Viewings requested",
+      "requestedNone": "no requests yet",
+      "requestedConfirmed": "{count} confirmed",
+      "requestedWaiting": "{count} awaiting a reply",
+      "chatsLabel": "Conversations",
+      "chatsNone": "no conversations yet",
+      "chatsAllRead": "all read",
+      "chatsUnread": "{count} with new messages",
+      "contractsLabel": "Contracts",
+      "contractsNone": "none shared with you",
+      "contractsSome": "shared with you"
+    },
+    "activity": {
+      "emptyConversation": "Conversation open, no messages yet",
+      "new": "New",
+      "read": "Read",
+      "allAnswered": "all answered",
+      "unanswered": "{count} to answer",
+      "noContracts": "no contracts",
+      "recentContracts": "{count} recent",
+      "allRead": "all read",
+      "unread": "{count} unread"
+    }
+  },
   "notifications": {
     "type": {
       "message": "New messages",

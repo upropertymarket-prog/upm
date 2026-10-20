@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { FileSignature, MessageSquare } from "lucide-react";
 import { Card, StatusTag, type StatusTone } from "@upm/ui";
 
@@ -41,6 +42,8 @@ export function RecentActivity({
   contracts,
   contractsMeta,
 }: RecentActivityProps) {
+  const t = useTranslations("dashboard");
+  const tNav = useTranslations("nav");
   return (
     <div
       style={{
@@ -51,17 +54,17 @@ export function RecentActivity({
     >
       <ActivityPanel
         icon={<MessageSquare size={16} aria-hidden="true" color="var(--accent)" />}
-        title="Mensagens recentes"
+        title={t("recentMessages")}
         meta={messagesMeta}
         items={messages}
-        empty="Ainda sem mensagens."
+        empty={t("noMessages")}
       />
       <ActivityPanel
         icon={<FileSignature size={16} aria-hidden="true" color="var(--accent)" />}
-        title="Contratos"
+        title={tNav("contracts")}
         meta={contractsMeta}
         items={contracts}
-        empty="Ainda sem contratos."
+        empty={t("noContracts")}
       />
     </div>
   );

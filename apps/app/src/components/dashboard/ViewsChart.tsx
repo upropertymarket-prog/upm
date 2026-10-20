@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Card, Tabs } from "@upm/ui";
 
@@ -28,11 +29,13 @@ export function ViewsChart({
    * O título nomeia a série, por isso muda com quem olha: o proprietário vê as
    * visitas aos imóveis dele, o comprador vê os imóveis que viu (04 §2.4).
    */
-  title = "Visitas às propriedades",
+  title,
 }: {
   series: ViewsSeries[];
+  /** Por omissão, as visitas aos imóveis do proprietário. */
   title?: string;
 }) {
+  const t = useTranslations("dashboard");
   const [rangeId, setRangeId] = useState(series[0]?.id ?? "");
   const active = series.find((s) => s.id === rangeId) ?? series[0];
   const buckets = active?.buckets ?? [];
@@ -43,11 +46,11 @@ export function ViewsChart({
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <h3 className="upm-card__title" style={{ margin: 0 }}>
-            {title}
+            {title ?? t("viewsTitle")}
           </h3>
           <div style={{ marginLeft: "auto" }}>
             <Tabs
-              label="Intervalo do gráfico"
+              label={t("chartRange")}
               items={series.map((s) => ({ id: s.id, label: s.label }))}
               value={active?.id ?? ""}
               onValueChange={setRangeId}

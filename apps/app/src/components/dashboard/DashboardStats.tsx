@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   Bookmark,
   Building2,
@@ -40,6 +41,7 @@ const TONE: Record<StatTone, string> = {
  * componente só desenha o que recebe.
  */
 export function DashboardStats({ stats }: { stats: DashboardStat[] }) {
+  const t = useTranslations("dashboard");
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <h2
@@ -50,7 +52,7 @@ export function DashboardStats({ stats }: { stats: DashboardStat[] }) {
           margin: 0,
         }}
       >
-        As suas estatísticas
+        {t("statsTitle")}
       </h2>
       <div
         style={{

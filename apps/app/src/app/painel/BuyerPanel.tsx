@@ -53,6 +53,14 @@ export async function BuyerPanel({
   const supabase = createClient(await cookies());
   const t = await getTranslations();
   const intlLocale = INTL_LOCALE[resolveLocale(locale)];
+  const tRoles = await getTranslations("roles");
+  const tDash = await getTranslations("dashboard");
+  const tStat = await getTranslations("dashboard.stats");
+  const tAct = await getTranslations("dashboard.activity");
+  const chartLabels = {
+    locale: intlLocale,
+    t: await getTranslations("dashboard.chart"),
+  };
   const tStatus = await getTranslations("contracts.status");
   const tActivity = await getTranslations("contracts.activity");
 
@@ -89,43 +97,43 @@ export async function BuyerPanel({
     {
       id: "saved",
       icon: "saved",
-      label: "Imóveis guardados",
+      label: tStat("savedLabel"),
       value: String(savedCount),
-      delta: savedCount === 0 ? "ainda sem imóveis guardados" : "na sua lista",
+      delta: savedCount === 0 ? tStat("savedNone") : tStat("savedSome"),
       deltaTone: savedCount === 0 ? "muted" : "ok",
     },
     {
       id: "visits",
       icon: "visits",
-      label: "Visitas pedidas",
+      label: tStat("requestedLabel"),
       value: String(visits.length),
       delta:
         visits.length === 0
-          ? "ainda sem pedidos"
+          ? tStat("requestedNone")
           : awaiting === 0
-            ? `${scheduled} confirmadas`
-            : `${awaiting} à espera de resposta`,
+            ? tStat("requestedConfirmed", { count: scheduled })
+            : tStat("requestedWaiting", { count: awaiting }),
       deltaTone: visits.length === 0 ? "muted" : awaiting === 0 ? "ok" : "warn",
     },
     {
       id: "messages",
       icon: "messages",
-      label: "Conversas",
+      label: tStat("chatsLabel"),
       value: String(conversations.length),
       delta:
         conversations.length === 0
-          ? "ainda sem conversas"
+          ? tStat("chatsNone")
           : unansweredCount === 0
-            ? "tudo lido"
-            : `${unansweredCount} com mensagens novas`,
+            ? tStat("chatsAllRead")
+            : tStat("chatsUnread", { count: unansweredCount }),
       deltaTone: conversations.length === 0 ? "muted" : unansweredCount === 0 ? "ok" : "warn",
     },
     {
       id: "contracts",
       icon: "contracts",
-      label: "Contratos",
+      label: tStat("contractsLabel"),
       value: String(contractsAll.length),
-      delta: contractsAll.length === 0 ? "nenhum partilhado consigo" : "partilhados consigo",
+      delta: contractsAll.length === 0 ? tStat("contractsNone") : tStat("contractsSome"),
       deltaTone: contractsAll.length === 0 ? "muted" : "ok",
     },
   ];
@@ -133,9 +141,9 @@ export async function BuyerPanel({
   const recentMessages: ActivityItem[] = conversations.slice(0, ACTIVITY_ROWS).map((item) => ({
     id: item.id,
     title: `${item.other.name} · ${item.propertyTitle}`,
-    subtitle: item.lastMessage ? `«${item.lastMessage}»` : "Conversa aberta, ainda sem mensagens",
+    subtitle: item.lastMessage ? `«${item.lastMessage}»` : tAct("emptyConversation"),
     href: `/mensagens?conversa=${item.id}`,
-    tag: item.unread > 0 ? "Novo" : "Lido",
+    tag: item.unread > 0 ? tAct("new") : tAct("read"),
     tone: item.unread > 0 ? "new" : "archived",
   }));
 
@@ -158,8 +166,8 @@ export async function BuyerPanel({
   return (
     <AppChrome
       role="buyer"
-      userName={fullName || "Comprador"}
-      userMeta="Comprador"
+      userName={fullName || tRoles("buyer")}
+      userMeta={tRoles("buyer")}
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
@@ -168,16 +176,20 @@ export async function BuyerPanel({
     >
       <PageHeader
         title={t(`greeting.${greetingKey()}`, { name: firstName })}
-        subtitle="A sua procura, num só lugar"
+        subtitle={tDash("buyerSubtitle")}
       />
       <BuyerDashboard
         stats={stats}
-        series={buildViewsSeries(views ?? [], new Date())}
+        series={buildViewsSeries(views ?? [], new Date(), chartLabels)}
         recentMessages={recentMessages}
-        recentMessagesMeta={unansweredCount === 0 ? "tudo lido" : `${unansweredCount} por ler`}
+        recentMessagesMeta={
+          unansweredCount === 0 ? tAct("allRead") : tAct("unread", { count: unansweredCount })
+        }
         recentContracts={recentContracts}
         recentContractsMeta={
-          contractsAll.length === 0 ? "sem contratos" : `${contracts.length} recentes`
+          contractsAll.length === 0
+            ? tAct("noContracts")
+            : tAct("recentContracts", { count: contracts.length })
         }
       />
     </AppChrome>

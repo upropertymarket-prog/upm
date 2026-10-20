@@ -326,6 +326,92 @@
       "versionRestored": "Versão restaurada como versão nova."
     }
   },
+  "dashboard": {
+    "statsTitle": "As suas estatísticas",
+    "charts": "Gráficos",
+    "recentActivity": "Atividade recente",
+    "recentMessages": "Mensagens recentes",
+    "noMessages": "Ainda sem mensagens.",
+    "noContracts": "Ainda sem contratos.",
+    "chartRange": "Intervalo do gráfico",
+    "viewsTitle": "Visitas às propriedades",
+    "viewedTitle": "Imóveis vistos",
+    "quickAccess": {
+      "title": "Acesso rápido",
+      "market": {
+        "body": "Veja todas as propriedades publicadas na plataforma."
+      },
+      "myProperties": {
+        "body": "Gira o seu portfólio, anúncios e rascunhos."
+      },
+      "publishProperty": {
+        "title": "Publicar novo imóvel",
+        "body": "Preencha o anúncio por passos — pode guardar como rascunho."
+      },
+      "map": {
+        "body": "Veja o que está à venda e para arrendar na sua zona."
+      },
+      "saved": {
+        "body": "Os imóveis que guardou e os seus alertas de pesquisa."
+      },
+      "visitRequests": {
+        "title": "Pedidos de visitas",
+        "body": "As visitas que pediu e o estado de cada uma."
+      },
+      "messages": {
+        "body": "As suas conversas com os proprietários."
+      }
+    },
+    "chart": {
+      "range7d": "7 dias",
+      "range30d": "30 dias",
+      "range12m": "12 meses",
+      "weekOf": "Semana de {start} a {end}",
+      "noViewsThisWeek": "sem visitas esta semana",
+      "firstWeekWithViews": "primeira semana com visitas",
+      "sameAsLastWeek": "igual à semana passada",
+      "changeThisWeek": "{change}% esta semana"
+    },
+    "ownerSubtitle": "Resumo da sua atividade e ativos",
+    "buyerSubtitle": "A sua procura, num só lugar",
+    "stats": {
+      "activeLabel": "Imóveis ativos",
+      "activeNone": "ainda sem anúncios publicados",
+      "activeTotal": "{count} no total",
+      "viewsLabel": "Visualizações dos imóveis",
+      "leadsLabel": "Leads novas",
+      "leadsNone": "ainda sem interessados",
+      "leadsSome": "por contactar ou em conversa",
+      "visitsLabel": "Visitas agendadas",
+      "visitsNoneAwaiting": "nenhuma por confirmar",
+      "visitsAwaiting": "{count} por confirmar",
+      "savedLabel": "Imóveis guardados",
+      "savedNone": "ainda sem imóveis guardados",
+      "savedSome": "na sua lista",
+      "requestedLabel": "Visitas pedidas",
+      "requestedNone": "ainda sem pedidos",
+      "requestedConfirmed": "{count} confirmadas",
+      "requestedWaiting": "{count} à espera de resposta",
+      "chatsLabel": "Conversas",
+      "chatsNone": "ainda sem conversas",
+      "chatsAllRead": "tudo lido",
+      "chatsUnread": "{count} com mensagens novas",
+      "contractsLabel": "Contratos",
+      "contractsNone": "nenhum partilhado consigo",
+      "contractsSome": "partilhados consigo"
+    },
+    "activity": {
+      "emptyConversation": "Conversa aberta, ainda sem mensagens",
+      "new": "Novo",
+      "read": "Lido",
+      "allAnswered": "tudo respondido",
+      "unanswered": "{count} por responder",
+      "noContracts": "sem contratos",
+      "recentContracts": "{count} recentes",
+      "allRead": "tudo lido",
+      "unread": "{count} por ler"
+    }
+  },
   "notifications": {
     "type": {
       "message": "Mensagens novas",

@@ -51,6 +51,14 @@ export async function OwnerPanel({
   const supabase = createClient(await cookies());
   const t = await getTranslations();
   const intlLocale = INTL_LOCALE[resolveLocale(locale)];
+  const tRoles = await getTranslations("roles");
+  const tDash = await getTranslations("dashboard");
+  const tStat = await getTranslations("dashboard.stats");
+  const tAct = await getTranslations("dashboard.activity");
+  const chartLabels = {
+    locale: intlLocale,
+    t: await getTranslations("dashboard.chart"),
+  };
   const tStatus = await getTranslations("contracts.status");
   const tActivity = await getTranslations("contracts.activity");
 
@@ -86,7 +94,7 @@ export async function OwnerPanel({
     loadNotifications(supabase, locale),
   ]);
 
-  const week = weeklyViews(viewRows, today);
+  const week = weeklyViews(viewRows, today, chartLabels);
 
   // "Próximas visitas": só o que ainda está para acontecer, do mais próximo
   // para o mais distante — o oposto da ordem da Agenda, que mostra histórico.
@@ -113,34 +121,36 @@ export async function OwnerPanel({
     {
       id: "active",
       icon: "building",
-      label: "Imóveis ativos",
+      label: tStat("activeLabel"),
       value: String(activeCount),
-      delta: activeCount === 0 ? "ainda sem anúncios publicados" : `${owned.length} no total`,
+      delta:
+        activeCount === 0 ? tStat("activeNone") : tStat("activeTotal", { count: owned.length }),
       deltaTone: activeCount === 0 ? "warn" : "muted",
     },
     {
       // 07 §5.8: "visualizações" são consultas da página; "visitas" são físicas.
       id: "views",
       icon: "eye",
-      label: "Visualizações dos imóveis",
-      value: week.total.toLocaleString("pt-PT"),
+      label: tStat("viewsLabel"),
+      value: week.total.toLocaleString(intlLocale),
       delta: week.delta,
       deltaTone: week.tone,
     },
     {
       id: "leads",
       icon: "leads",
-      label: "Leads novas",
+      label: tStat("leadsLabel"),
       value: String(newLeads),
-      delta: newLeads === 0 ? "ainda sem interessados" : "por contactar ou em conversa",
+      delta: newLeads === 0 ? tStat("leadsNone") : tStat("leadsSome"),
       deltaTone: newLeads === 0 ? "muted" : "ok",
     },
     {
       id: "visits",
       icon: "visits",
-      label: "Visitas agendadas",
+      label: tStat("visitsLabel"),
       value: String(scheduled),
-      delta: awaiting === 0 ? "nenhuma por confirmar" : `${awaiting} por confirmar`,
+      delta:
+        awaiting === 0 ? tStat("visitsNoneAwaiting") : tStat("visitsAwaiting", { count: awaiting }),
       deltaTone: awaiting === 0 ? "muted" : "warn",
     },
   ];
@@ -148,9 +158,9 @@ export async function OwnerPanel({
   const recentMessages: ActivityItem[] = conversations.slice(0, ACTIVITY_ROWS).map((item) => ({
     id: item.id,
     title: `${item.other.name} · ${item.propertyTitle}`,
-    subtitle: item.lastMessage ? `«${item.lastMessage}»` : "Conversa aberta, ainda sem mensagens",
+    subtitle: item.lastMessage ? `«${item.lastMessage}»` : tAct("emptyConversation"),
     href: `/mensagens?conversa=${item.id}`,
-    tag: item.unread > 0 ? "Novo" : "Lido",
+    tag: item.unread > 0 ? tAct("new") : tAct("read"),
     tone: item.unread > 0 ? "new" : "archived",
   }));
 
@@ -187,8 +197,8 @@ export async function OwnerPanel({
   return (
     <AppChrome
       role="owner"
-      userName={fullName || "Proprietário"}
-      userMeta="Proprietário"
+      userName={fullName || tRoles("owner")}
+      userMeta={tRoles("owner")}
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
@@ -197,7 +207,7 @@ export async function OwnerPanel({
     >
       <PageHeader
         title={t(`greeting.${greetingKey()}`, { name: firstName })}
-        subtitle="Resumo da sua atividade e ativos"
+        subtitle={tDash("ownerSubtitle")}
         actions={
           <Button variant="secondary" disabled>
             {t("common.export")}
@@ -206,15 +216,19 @@ export async function OwnerPanel({
       />
       <OwnerDashboard
         stats={stats}
-        series={buildViewsSeries(viewRows, today)}
+        series={buildViewsSeries(viewRows, today, chartLabels)}
         upcomingVisits={upcoming}
         recentMessages={recentMessages}
         recentMessagesMeta={
-          unansweredCount === 0 ? "tudo respondido" : `${unansweredCount} por responder`
+          unansweredCount === 0
+            ? tAct("allAnswered")
+            : tAct("unanswered", { count: unansweredCount })
         }
         recentContracts={recentContracts}
         recentContractsMeta={
-          contracts.length === 0 ? "sem contratos" : `${contracts.length} recentes`
+          contracts.length === 0
+            ? tAct("noContracts")
+            : tAct("recentContracts", { count: contracts.length })
         }
       />
     </AppChrome>

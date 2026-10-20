@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   Bookmark,
   Building2,
@@ -19,30 +20,10 @@ import {
  * que ainda não existe falha o typecheck — a mesma razão do `AppChrome`.
  */
 const OWNER_SHORTCUTS = [
-  {
-    href: "/market",
-    icon: Store,
-    title: "Market",
-    body: "Veja todas as propriedades publicadas na plataforma.",
-  },
-  {
-    href: "/propriedades",
-    icon: Building2,
-    title: "As minhas propriedades",
-    body: "Gira o seu portfólio, anúncios e rascunhos.",
-  },
-  {
-    href: "/propriedades/nova",
-    icon: PlusCircle,
-    title: "Publicar novo imóvel",
-    body: "Preencha o anúncio por passos — pode guardar como rascunho.",
-  },
-  {
-    href: "/mapa",
-    icon: Map,
-    title: "Mapa",
-    body: "Veja o que está à venda e para arrendar na sua zona.",
-  },
+  { href: "/market", icon: Store, key: "market", navKey: "market" },
+  { href: "/propriedades", icon: Building2, key: "myProperties", navKey: "myProperties" },
+  { href: "/propriedades/nova", icon: PlusCircle, key: "publishProperty" },
+  { href: "/mapa", icon: Map, key: "map", navKey: "map" },
 ] as const;
 
 /**
@@ -51,34 +32,25 @@ const OWNER_SHORTCUTS = [
  * isso nenhum destes é um beco como os da nota acima.
  */
 const BUYER_SHORTCUTS = [
-  {
-    href: "/market",
-    icon: Store,
-    title: "Market",
-    body: "Veja todas as propriedades publicadas na plataforma.",
-  },
-  {
-    href: "/guardados",
-    icon: Bookmark,
-    title: "Guardados",
-    body: "Os imóveis que guardou e os seus alertas de pesquisa.",
-  },
-  {
-    href: "/meus-pedidos",
-    icon: CalendarDays,
-    title: "Pedidos de visitas",
-    body: "As visitas que pediu e o estado de cada uma.",
-  },
-  {
-    href: "/mensagens",
-    icon: MessageSquare,
-    title: "Mensagens",
-    body: "As suas conversas com os proprietários.",
-  },
+  { href: "/market", icon: Store, key: "market", navKey: "market" },
+  { href: "/guardados", icon: Bookmark, key: "saved", navKey: "saved" },
+  { href: "/meus-pedidos", icon: CalendarDays, key: "visitRequests" },
+  { href: "/mensagens", icon: MessageSquare, key: "messages", navKey: "messages" },
 ] as const;
 
 export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
+  const t = useTranslations("dashboard.quickAccess");
+  const tNav = useTranslations("nav");
   const shortcuts = role === "buyer" ? BUYER_SHORTCUTS : OWNER_SHORTCUTS;
+  /**
+   * Cinco destes atalhos chamam-se exatamente como a entrada do menu, e por
+   * isso leem a mesma chave: duas traduções de "Guardados" era garantir que um
+   * dia ficavam diferentes. Os outros dois são uma chamada à ação e não um
+   * rótulo de menu ("Publicar novo imóvel", e não "Nova propriedade"), e têm
+   * título próprio.
+   */
+  const titleOf = (shortcut: (typeof shortcuts)[number]) =>
+    "navKey" in shortcut ? tNav(shortcut.navKey) : t(`${shortcut.key}.title`);
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <h2
@@ -89,7 +61,7 @@ export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
           margin: 0,
         }}
       >
-        Acesso rápido
+        {t("title")}
       </h2>
       <div
         style={{
@@ -128,7 +100,7 @@ export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
                   <Icon size={17} color="var(--accent)" aria-hidden="true" />
                 </span>
                 <strong style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}>
-                  {shortcut.title}
+                  {titleOf(shortcut)}
                 </strong>
               </span>
               <span
@@ -138,7 +110,7 @@ export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
                   lineHeight: "var(--lh-normal)",
                 }}
               >
-                {shortcut.body}
+                {t(`${shortcut.key}.body`)}
               </span>
             </a>
           );

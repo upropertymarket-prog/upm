@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import ptMessages from "@upm/config/messages/pt.json";
+
 import { buildViewsSeries, weeklyViews, type ViewRow } from "./dashboard";
 
 /** 29 de setembro de 2026, uma terça-feira. */
@@ -11,14 +13,30 @@ function rows(...entries: [string, number][]): ViewRow[] {
 
 /** Os baldes de um intervalo — falha com uma mensagem útil se o id mudar. */
 function bucketsOf(id: string, viewRows: ViewRow[]) {
-  const series = buildViewsSeries(viewRows, TODAY).find((s) => s.id === id);
+  const series = buildViewsSeries(viewRows, TODAY, LABELS).find((s) => s.id === id);
   if (!series) throw new Error(`intervalo "${id}" não existe`);
   return series.buckets;
 }
 
+/**
+ * Os rótulos saem do `pt.json` de verdade, não de um duplo inventado: assim as
+ * asserções continuam a ler-se em português — "+20% esta semana" — **e** o
+ * teste cai se alguém apagar a chave. A interpolação é a mínima que estas
+ * chaves precisam (`{x}`), não um ICU completo.
+ */
+const CHART = ptMessages.dashboard.chart as Record<string, string>;
+const LABELS = {
+  locale: "pt-PT",
+  t: (key: string, values?: Record<string, string | number>) =>
+    Object.entries(values ?? {}).reduce(
+      (text, [name, value]) => text.replace(`{${name}}`, String(value)),
+      CHART[key] ?? key,
+    ),
+};
+
 describe("buildViewsSeries", () => {
   it("dá sempre os três intervalos, pela ordem do seletor", () => {
-    const series = buildViewsSeries([], TODAY);
+    const series = buildViewsSeries([], TODAY, LABELS);
     expect(series.map((s) => s.id)).toEqual(["7d", "30d", "12m"]);
     expect(series.map((s) => s.buckets.length)).toEqual([7, 4, 12]);
   });
@@ -53,25 +71,25 @@ describe("buildViewsSeries", () => {
 
 describe("weeklyViews", () => {
   it("compara os últimos 7 dias com os 7 anteriores", () => {
-    const result = weeklyViews(rows(["2026-09-29", 120], ["2026-09-20", 100]), TODAY);
+    const result = weeklyViews(rows(["2026-09-29", 120], ["2026-09-20", 100]), TODAY, LABELS);
     expect(result.total).toBe(120);
     expect(result.delta).toBe("+20% esta semana");
     expect(result.tone).toBe("ok");
   });
 
   it("marca uma descida como aviso", () => {
-    const result = weeklyViews(rows(["2026-09-29", 50], ["2026-09-20", 100]), TODAY);
+    const result = weeklyViews(rows(["2026-09-29", 50], ["2026-09-20", 100]), TODAY, LABELS);
     expect(result.delta).toBe("-50% esta semana");
     expect(result.tone).toBe("warn");
   });
 
   it("não divide por zero quando não há semana anterior", () => {
-    expect(weeklyViews(rows(["2026-09-29", 10]), TODAY)).toMatchObject({
+    expect(weeklyViews(rows(["2026-09-29", 10]), TODAY, LABELS)).toMatchObject({
       total: 10,
       delta: "primeira semana com visitas",
       tone: "ok",
     });
-    expect(weeklyViews([], TODAY)).toMatchObject({
+    expect(weeklyViews([], TODAY, LABELS)).toMatchObject({
       total: 0,
       delta: "sem visitas esta semana",
       tone: "muted",

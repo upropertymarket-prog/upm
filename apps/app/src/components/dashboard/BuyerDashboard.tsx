@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { DashboardStats } from "./DashboardStats";
 import { QuickAccess } from "./QuickAccess";
 import { RecentActivity, type ActivityItem } from "./RecentActivity";
@@ -42,6 +43,7 @@ export function BuyerDashboard({
   recentContracts,
   recentContractsMeta,
 }: BuyerDashboardProps) {
+  const t = useTranslations("dashboard");
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-8)" }}>
       <DashboardStats stats={stats} />
@@ -50,7 +52,7 @@ export function BuyerDashboard({
       {/* "Imóveis vistos" (04 §2.4). O comprador não tem "Próximas visitas"
           ao lado — isso é do painel do proprietário (04 §8.3) —, por isso o
           gráfico ocupa a largura toda em vez de deixar meia coluna vazia. */}
-      <ViewsChart series={series} title="Imóveis vistos" />
+      <ViewsChart series={series} title={t("viewedTitle")} />
 
       <section style={{ display: "flex", flexDirection: "column", gap: "var(--sp-6)" }}>
         <h2
@@ -61,7 +63,7 @@ export function BuyerDashboard({
             margin: 0,
           }}
         >
-          Atividade recente
+          {t("recentActivity")}
         </h2>
         <RecentActivity
           messages={recentMessages}
