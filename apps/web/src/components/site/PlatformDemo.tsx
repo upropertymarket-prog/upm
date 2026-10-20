@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 
 /**
@@ -62,12 +63,14 @@ import dynamic from "next/dynamic";
  * letra, o mesmo que o produto usa.
  */
 
-const TABS = [
-  { id: "owner", label: "Proprietário" },
-  { id: "buyer", label: "Comprador" },
-] as const;
+/**
+ * Só os ids. Os rótulos são "Proprietário" e "Comprador", que já são o
+ * `roles` do ficheiro de mensagens — e uma constante de módulo ficava presa ao
+ * idioma em que foi escrita (D72).
+ */
+const TAB_IDS = ["owner", "buyer"] as const;
 
-export type TabId = (typeof TABS)[number]["id"];
+export type TabId = (typeof TAB_IDS)[number];
 
 /**
  * Os ecrãs vêm num chunk próprio, e só quando a secção se aproxima do ecrã.
@@ -122,6 +125,8 @@ function useNearViewport<T extends HTMLElement>() {
 }
 
 export function PlatformDemo() {
+  const t = useTranslations("site.demo");
+  const tRoles = useTranslations("roles");
   const [active, setActive] = useState<TabId>("owner");
   const { ref, near } = useNearViewport<HTMLDivElement>();
 
@@ -129,21 +134,21 @@ export function PlatformDemo() {
     <div ref={ref} style={{ display: "grid", gap: "var(--sp-5)" }}>
       <div
         role="tablist"
-        aria-label="Perfis da demonstração"
+        aria-label={t("profilesLabel")}
         style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}
       >
-        {TABS.map((tab) => (
+        {TAB_IDS.map((tabId) => (
           <button
-            key={tab.id}
+            key={tabId}
             type="button"
             role="tab"
-            id={`demo-tab-${tab.id}`}
-            aria-selected={active === tab.id}
-            aria-controls={`demo-panel-${tab.id}`}
-            onClick={() => setActive(tab.id)}
-            className={`upm-btn upm-btn--${active === tab.id ? "primary" : "secondary"} upm-btn--md`}
+            id={`demo-tab-${tabId}`}
+            aria-selected={active === tabId}
+            aria-controls={`demo-panel-${tabId}`}
+            onClick={() => setActive(tabId)}
+            className={`upm-btn upm-btn--${active === tabId ? "primary" : "secondary"} upm-btn--md`}
           >
-            {tab.label}
+            {tRoles(tabId)}
           </button>
         ))}
       </div>
@@ -168,7 +173,7 @@ export function PlatformDemo() {
       </div>
 
       <p style={{ margin: 0, fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-        Demonstração com dados de exemplo. Nada do que aqui vê é uma conta real.
+        {t("disclaimer")}
       </p>
     </div>
   );

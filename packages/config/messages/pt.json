@@ -98,6 +98,9 @@
       "title": "UProperty Market",
       "description": "Área de comprador e proprietário."
     },
+    "web": {
+      "description": "Compre, venda e arrende propriedades diretamente, sem comissões."
+    },
     "interno": {
       "title": "UProperty Market · Interno",
       "description": "Área interna de Administração e Suporte.",
@@ -400,7 +403,25 @@
     "talkToOwner": "Fala diretamente com o proprietário",
     "talkToOwnerHint": "O contacto é feito dentro da plataforma — sem chamadas nem partilha de número.",
     "signInToTalk": "Entrar para falar",
-    "createAccount": "Criar conta"
+    "createAccount": "Criar conta",
+    "viewOnMap": "Ver no mapa",
+    "paginationLabel": "Paginação",
+    "gallery": {
+      "empty": "Este anúncio ainda não tem fotografias.",
+      "previous": "Fotografia anterior",
+      "next": "Fotografia seguinte",
+      "viewLarge": "Ver fotografia {index} de {total} em tamanho grande",
+      "mainPhoto": "{title} — fotografia principal",
+      "dialogLabel": "{title} — fotografia {index} de {total}",
+      "photo": "{title} — fotografia {index}"
+    },
+    "filters": {
+      "priceMin": "Preço mínimo (€)",
+      "priceMax": "Preço máximo (€)",
+      "locality": "Localidade",
+      "clear": "Limpar",
+      "search": "Pesquisar"
+    }
   },
   "listingGone": {
     "eyebrow": "Anúncio encerrado",
@@ -620,6 +641,17 @@
     "contact": {
       "title": "Tem dúvidas? Fale connosco.",
       "body": "Respondemos com a maior brevidade possível, sempre com a atenção que cada questão merece.",
+      "reasonLabel": "Motivo do contacto",
+      "pickOption": "Selecione uma opção…",
+      "message": "Mensagem",
+      "messageHint": "Opcional. Quanto mais contexto der, mais útil é a resposta.",
+      "okTitle": "Mensagem recebida",
+      "okBody": "Obrigado pelo contacto. Respondemos para o endereço que indicou, por ordem de chegada.",
+      "name": "Nome",
+      "email": "E-mail",
+      "sending": "A enviar…",
+      "send": "Enviar mensagem",
+      "honeypot": "Não preencher",
       "reasons": {
         "vender": "Quero vender uma propriedade",
         "comprar": "Quero comprar uma propriedade",
@@ -672,6 +704,76 @@
       "duvidas": "Dúvidas",
       "contactos": "Contactos",
       "sections": "Secções"
+    },
+    "notFound": {
+      "metaTitle": "Página não encontrada · UProperty Market",
+      "eyebrow": "Erro 404",
+      "heading": "Esta página não existe.",
+      "body": "O link pode estar errado, ou a propriedade que procura já não está publicada. Quem a anunciou pode tê-la vendido, arrendado ou retirado.",
+      "home": "Voltar à página inicial"
+    },
+    "error": {
+      "eyebrow": "Erro",
+      "heading": "Alguma coisa correu mal.",
+      "body": "Não conseguimos mostrar esta página. Tente novamente — se continuar, o problema é nosso e já ficou registado.",
+      "retry": "Tentar novamente",
+      "home": "Voltar à página inicial",
+      "reference": "Referência do erro: {digest}"
+    },
+    "unsubscribe": {
+      "eyebrow": "Comunicações",
+      "okTitle": "Subscrição cancelada",
+      "okBody": "Não voltamos a enviar-lhe comunicações de marketing. Os e-mails que dizem respeito à sua conta — faturas, visitas, contratos — continuam a chegar, porque não são marketing e não se desligam aqui.",
+      "badTitle": "Este link já não é válido",
+      "badBody": "Pode ter sido usado antes, ou estar incompleto por ter sido partido pelo cliente de correio. Se continua a receber comunicações que não quer, responda a qualquer uma delas e tratamos disso."
+    },
+    "demo": {
+      "profilesLabel": "Perfis da demonstração",
+      "disclaimer": "Demonstração com dados de exemplo. Nada do que aqui vê é uma conta real.",
+      "greeting": "Bom dia, Marta.",
+      "summary": "Tem 2 leads por responder e uma visita marcada para quinta-feira.",
+      "visitBooked": "Visita marcada",
+      "lastLeads": "Últimas leads",
+      "lastLeadsCaption": "Últimas leads recebidas",
+      "buyerMatches": "4 propriedades a corresponder à sua procura guardada.",
+      "leadStatus": {
+        "new": "Nova",
+        "answered": "Respondida",
+        "scheduled": "Visita marcada"
+      },
+      "leadColumns": {
+        "name": "Interessado",
+        "property": "Propriedade",
+        "when": "Quando",
+        "state": "Estado"
+      }
+    },
+    "preRegistration": {
+      "back": "Voltar ao início",
+      "roleLabel": "O que o descreve?",
+      "pickOption": "Selecione uma opção…",
+      "roles": {
+        "owner": "Tenho uma propriedade para vender ou arrendar",
+        "buyer": "Procuro casa",
+        "company": "Represento uma empresa"
+      },
+      "area": "Zona de interesse",
+      "areaHint": "Opcional. Ajuda-nos a saber por onde começar.",
+      "honeypot": "Não preencher",
+      "terms": "Termos e Condições",
+      "privacy": "Política de Privacidade",
+      "alreadyTitle": "Já está inscrito",
+      "okTitle": "Pré-inscrição recebida",
+      "alreadyBody": "Este endereço já tinha a inscrição confirmada. Avisamos assim que os primeiros anúncios abrirem.",
+      "okBody": "Enviámos-lhe um e-mail para confirmar o endereço. A inscrição fica completa quando clicar no link.",
+      "name": "Nome",
+      "email": "E-mail",
+      "consents": "Consentimentos",
+      "acceptPrefix": "Li e aceito os",
+      "acceptMiddle": "e a",
+      "marketing": "Quero receber novidades sobre o lançamento. Pode cancelar a qualquer momento.",
+      "sending": "A enviar…",
+      "submit": "Quero ser avisado"
     }
   },
   "cloud": {

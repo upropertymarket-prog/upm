@@ -105,6 +105,10 @@ const ISENTOS = new Map([
     "apps/app/src/components/ComponentsPreview.tsx",
     "Mostruário de transição com dados fixos: existe para se verem os 14 componentes base num ecrã verdadeiro e para a Route Storyboard do design system ter onde apontar (07 §4.5). O próprio `apps/app/src/app/page.tsx` diz que desaparece quando o Painel do comprador nascer (04 §8.2). Traduzir dados de exemplo de um ecrã marcado para sair é trabalho que se deita fora.",
   ],
+  [
+    "packages/ui/src/support/breadcrumbs.ts",
+    "Captura técnica automática (P10-01 · 04 §2.7 #2): rota, build, browser, viewport e as últimas ações, anexadas a um relato de problema. Os rótulos daqui **não aparecem num ecrã** — vão num relatório que a equipa de suporte lê, e é por isso que não se traduzem: o mesmo defeito tem de se ler igual nos dois relatórios, senão deixa de se poder comparar. Esta isenção não tem data de fim porque a razão não é temporária — se um dia este ficheiro passar a escrever para o ecrã, cai com ela.",
+  ],
 ]);
 
 /** Props cujo valor o utilizador lê. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 /**
@@ -39,6 +40,7 @@ export const LISTING_MEDIA_HEIGHT = "clamp(220px, 46vw, 360px)";
 
 const GALLERY_HEIGHT = LISTING_MEDIA_HEIGHT;
 export function ListingGallery({ photos, title }: { photos: string[]; title: string }) {
+  const t = useTranslations("publicListing.gallery");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const close = useCallback(() => setOpenIndex(null), []);
@@ -82,7 +84,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
           fontSize: "var(--fs-body)",
         }}
       >
-        Este anúncio ainda não tem fotografias.
+        {t("empty")}
       </div>
     );
   }
@@ -105,7 +107,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
         <button
           type="button"
           onClick={() => setOpenIndex(0)}
-          aria-label={`Ver fotografia 1 de ${photos.length} em tamanho grande`}
+          aria-label={t("viewLarge", { index: 1, total: photos.length })}
           style={{
             padding: 0,
             border: 0,
@@ -120,7 +122,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
           {/* eslint-disable-next-line @next/next/no-img-element -- URL assinado, expira. */}
           <img
             src={cover}
-            alt={`${title} — fotografia principal`}
+            alt={t("mainPhoto", { title })}
             width={1280}
             height={720}
             style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
@@ -145,7 +147,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
               <button
                 type="button"
                 onClick={() => setOpenIndex(index + 1)}
-                aria-label={`Ver fotografia ${index + 2} de ${photos.length} em tamanho grande`}
+                aria-label={t("viewLarge", { index: index + 2, total: photos.length })}
                 style={{
                   padding: 0,
                   border: 0,
@@ -178,7 +180,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`${title} — fotografia ${openIndex + 1} de ${photos.length}`}
+          aria-label={t("dialogLabel", { title, index: openIndex + 1, total: photos.length })}
           onClick={close}
           style={{
             position: "fixed",
@@ -221,7 +223,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
               <button
                 type="button"
                 onClick={() => step(-1)}
-                aria-label="Fotografia anterior"
+                aria-label={t("previous")}
                 className="upm-btn upm-btn--secondary upm-btn--icon"
               >
                 <ChevronLeft size={18} />
@@ -233,7 +235,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
             {/* eslint-disable-next-line @next/next/no-img-element -- URL assinado, expira. */}
             <img
               src={photos[openIndex]}
-              alt={`${title} — fotografia ${openIndex + 1}`}
+              alt={t("photo", { title, index: openIndex + 1 })}
               style={{
                 display: "block",
                 maxWidth: "100%",
@@ -248,7 +250,7 @@ export function ListingGallery({ photos, title }: { photos: string[]; title: str
               <button
                 type="button"
                 onClick={() => step(1)}
-                aria-label="Fotografia seguinte"
+                aria-label={t("next")}
                 className="upm-btn upm-btn--secondary upm-btn--icon"
               >
                 <ChevronRight size={18} />

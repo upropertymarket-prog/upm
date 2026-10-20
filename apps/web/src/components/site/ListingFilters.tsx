@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button, Input, Select } from "@upm/ui";
 import { DEALS, PROPERTY_TYPES, TYPOLOGIES } from "@upm/db/properties";
 
@@ -24,10 +25,6 @@ import { DEALS, PROPERTY_TYPES, TYPOLOGIES } from "@upm/db/properties";
  * um tipo novo — e ninguém descobriria até alguém publicar um.
  */
 
-const DEAL_LABELS: Record<(typeof DEALS)[number], string> = {
-  sale: "Venda",
-  rent: "Arrendamento",
-};
 export type ListingFiltersValue = {
   negocio?: string;
   tipo?: string;
@@ -38,6 +35,10 @@ export type ListingFiltersValue = {
 };
 
 export function ListingFilters({ value }: { value: ListingFiltersValue }) {
+  const t = useTranslations("publicListing.filters");
+  const tf = useTranslations("property");
+  const tm = useTranslations("market.filters");
+
   return (
     <form
       method="get"
@@ -58,15 +59,15 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         background: "var(--surface)",
       }}
     >
-      <Input label="Localidade" name="cidade" defaultValue={value.cidade ?? ""} />
+      <Input label={t("locality")} name="cidade" defaultValue={value.cidade ?? ""} />
 
       <Select
-        label="Negócio"
+        label={tf("fields.deal")}
         name="negocio"
         defaultValue={value.negocio ?? ""}
         options={[
-          { value: "", label: "Todos" },
-          ...DEALS.map((deal) => ({ value: deal, label: DEAL_LABELS[deal] })),
+          { value: "", label: tm("any") },
+          ...DEALS.map((deal) => ({ value: deal, label: tf(`deal.${deal}`) })),
         ]}
       />
 
@@ -75,7 +76,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         name="tipo"
         defaultValue={value.tipo ?? ""}
         options={[
-          { value: "", label: "Todos" },
+          { value: "", label: tm("any") },
           ...PROPERTY_TYPES.map((type) => ({ value: type, label: type })),
         ]}
       />
@@ -85,7 +86,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         name="tipologia"
         defaultValue={value.tipologia ?? ""}
         options={[
-          { value: "", label: "Todas" },
+          { value: "", label: tm("anyTypology") },
           ...TYPOLOGIES.map((typology) => ({ value: typology, label: typology })),
         ]}
       />
@@ -93,7 +94,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
       {/* Em euros para quem escreve, em cêntimos na base de dados — a conversão
           é do lado do servidor. Pedir cêntimos a um visitante seria absurdo. */}
       <Input
-        label="Preço mínimo (€)"
+        label={t("priceMin")}
         name="preco_min"
         type="number"
         min={0}
@@ -101,7 +102,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         defaultValue={value.preco_min ?? ""}
       />
       <Input
-        label="Preço máximo (€)"
+        label={t("priceMax")}
         name="preco_max"
         type="number"
         min={0}
@@ -121,11 +122,11 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
           flexWrap: "wrap",
         }}
       >
-        <Button type="submit">Pesquisar</Button>
+        <Button type="submit">{t("search")}</Button>
         {/* Uma navegação e não um botão de `reset`: `reset` devolveria os campos
             aos valores que vieram do URL, que é o oposto de limpar a pesquisa. */}
         <Link href="/imoveis" className="upm-btn upm-btn--secondary upm-btn--md">
-          Limpar
+          {t("clear")}
         </Link>
       </div>
     </form>

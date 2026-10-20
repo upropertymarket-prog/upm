@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { Route } from "next";
 import { Pagination } from "@upm/ui";
 
@@ -19,11 +20,13 @@ export function MarketPagination({
   query: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("pagination");
 
   return (
     <Pagination
       page={page}
       pageCount={pageCount}
+      labels={{ previous: t("previous"), next: t("next"), page: t("page") }}
       onPageChange={(next) => {
         const params = new URLSearchParams(query);
         params.set("pagina", String(next));

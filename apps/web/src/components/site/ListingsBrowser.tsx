@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { ListingCard } from "./ListingCard";
 import { ListingFilters, type ListingFiltersValue } from "./ListingFilters";
@@ -29,6 +30,8 @@ export type ListingsBrowserProps = {
 };
 
 export function ListingsBrowser({ listings, total, page, pageCount, raw }: ListingsBrowserProps) {
+  const t = useTranslations("publicListing");
+
   // Um `UrlObject` e não uma cadeia: com `typedRoutes` ligado, o `Link` só
   // aceita uma rota literal ou um objeto — uma cadeia montada em runtime não
   // passa o typecheck, e é esse o ponto da opção (uma rota inexistente falha no
@@ -93,7 +96,7 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
 
       {pageCount > 1 ? (
         <nav
-          aria-label="Paginação"
+          aria-label={t("paginationLabel")}
           style={{
             display: "flex",
             gap: "var(--sp-3)",

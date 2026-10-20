@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { SectionHeading, SiteSection } from "../components/site/SiteSection";
 
@@ -29,14 +30,16 @@ export default function SiteError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("site.error");
+
   return (
     <main>
       <SiteSection>
         <div style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "center" }}>
           <SectionHeading
-            eyebrow="Erro"
-            title="Alguma coisa correu mal."
-            body="Não conseguimos mostrar esta página. Tente novamente — se continuar, o problema é nosso e já ficou registado."
+            eyebrow={t("eyebrow")}
+            title={t("heading")}
+            body={t("body")}
             align="center"
           />
           <div
@@ -48,15 +51,15 @@ export default function SiteError({
             }}
           >
             <button type="button" onClick={reset} className="upm-btn upm-btn--primary upm-btn--md">
-              Tentar novamente
+              {t("retry")}
             </button>
             <Link href="/" className="upm-btn upm-btn--secondary upm-btn--md">
-              Voltar à página inicial
+              {t("home")}
             </Link>
           </div>
           {error.digest ? (
             <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-              Referência do erro: {error.digest}
+              {t("reference", { digest: error.digest })}
             </span>
           ) : null}
         </div>

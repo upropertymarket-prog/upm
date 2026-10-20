@@ -36,7 +36,14 @@ export type PaginationProps = {
   onPageChange: (page: number) => void;
   /** Texto à esquerda, ex.: "1–20 de 248". Já traduzido por quem usa. */
   summary?: string;
-  labels?: { previous: string; next: string; page: string };
+  /**
+   * Obrigatório desde 20 out 2026 (D72). Era opcional, com
+   * `{ previous: "Anterior", next: "Seguinte", page: "Página" }` por omissão —
+   * e um valor por omissão em português dentro de `@upm/ui` é idioma escondido
+   * num pacote que não deve ter nenhum. Quem monta o componente é que sabe em
+   * que língua o ecrã está; as chaves estão em `pagination`.
+   */
+  labels: { previous: string; next: string; page: string };
   className?: string;
 };
 
@@ -58,7 +65,7 @@ export function Pagination({
   pageCount,
   onPageChange,
   summary,
-  labels = { previous: "Anterior", next: "Seguinte", page: "Página" },
+  labels,
   className,
 }: PaginationProps) {
   if (pageCount <= 1 && !summary) return null;

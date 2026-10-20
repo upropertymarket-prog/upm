@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 
 // A folha de estilo do maplibre, servida da nossa origem. É estática e não um
@@ -47,6 +48,7 @@ export function ListingMap({
   /** Raio da zona aproximada. Sem valor declarado, 500 m — o que 07 §1.2 usa. */
   radiusM: number | null;
 }) {
+  const t = useTranslations("publicListing");
   const [active, setActive] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const radius = radiusM && radiusM > 0 ? radiusM : 500;
@@ -147,7 +149,7 @@ export function ListingMap({
                 className="upm-btn upm-btn--secondary upm-btn--md"
                 onClick={() => setActive(true)}
               >
-                Ver no mapa
+                {t("viewOnMap")}
               </button>
             </div>
           </div>

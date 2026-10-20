@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { PublicHeader } from "../components/PublicHeader";
 import { SectionHeading, SiteSection } from "../components/site/SiteSection";
@@ -29,13 +29,26 @@ import { setLocalePreference } from "./actions/preferences";
  * não leva sobreposição de `seo_pages` nem entra no índice. O Next serve-a com
  * o estado 404 correto por ser `not-found.tsx` — não é preciso forçar nada.
  */
-export const metadata = {
-  title: "Página não encontrada · UProperty Market",
-  robots: { index: false, follow: true },
-};
+/**
+ * `generateMetadata` e não uma constante: o título é texto que alguém lê no
+ * separador, e segue o idioma como o resto do site. O `robots` é o único campo
+ * que não muda com a língua.
+ */
+export async function generateMetadata() {
+  const t = await getTranslations("site.notFound");
+  return {
+    title: t("metaTitle"),
+    robots: { index: false, follow: true },
+  };
+}
 
 export default async function NotFound() {
-  const [locale, launchMode] = await Promise.all([getLocale(), getLaunchMode()]);
+  const [locale, launchMode, t, tGone] = await Promise.all([
+    getLocale(),
+    getLaunchMode(),
+    getTranslations("site.notFound"),
+    getTranslations("listingGone"),
+  ]);
 
   return (
     <>
@@ -45,9 +58,9 @@ export default async function NotFound() {
         <SiteSection>
           <div style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "center" }}>
             <SectionHeading
-              eyebrow="Erro 404"
-              title="Esta página não existe."
-              body="O link pode estar errado, ou a propriedade que procura já não está publicada. Quem a anunciou pode tê-la vendido, arrendado ou retirado."
+              eyebrow={t("eyebrow")}
+              title={t("heading")}
+              body={t("body")}
               align="center"
             />
             <div
@@ -59,10 +72,10 @@ export default async function NotFound() {
               }}
             >
               <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
-                Ver propriedades
+                {tGone("seeListings")}
               </Link>
               <Link href="/" className="upm-btn upm-btn--secondary upm-btn--md">
-                Voltar à página inicial
+                {t("home")}
               </Link>
             </div>
           </div>

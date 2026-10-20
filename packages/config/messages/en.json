@@ -98,6 +98,9 @@
       "title": "UProperty Market",
       "description": "Buyer and owner area."
     },
+    "web": {
+      "description": "Buy, sell and let properties directly, with no commission."
+    },
     "interno": {
       "title": "UProperty Market · Internal",
       "description": "Internal area for Administration and Support.",
@@ -400,7 +403,25 @@
     "talkToOwner": "Talk directly to the owner",
     "talkToOwnerHint": "Contact happens inside the platform — no calls and no phone numbers shared.",
     "signInToTalk": "Sign in to get in touch",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "viewOnMap": "View on the map",
+    "paginationLabel": "Pagination",
+    "gallery": {
+      "empty": "This listing has no photographs yet.",
+      "previous": "Previous photograph",
+      "next": "Next photograph",
+      "viewLarge": "View photograph {index} of {total} at full size",
+      "mainPhoto": "{title} — main photograph",
+      "dialogLabel": "{title} — photograph {index} of {total}",
+      "photo": "{title} — photograph {index}"
+    },
+    "filters": {
+      "priceMin": "Minimum price (€)",
+      "priceMax": "Maximum price (€)",
+      "locality": "Locality",
+      "clear": "Clear",
+      "search": "Search"
+    }
   },
   "listingGone": {
     "eyebrow": "Listing closed",
@@ -620,6 +641,17 @@
     "contact": {
       "title": "Questions? Talk to us.",
       "body": "We reply as quickly as we can, always with the attention each question deserves.",
+      "reasonLabel": "Reason for contact",
+      "pickOption": "Pick an option…",
+      "message": "Message",
+      "messageHint": "Optional. The more context you give, the more useful the reply.",
+      "okTitle": "Message received",
+      "okBody": "Thank you for getting in touch. We reply to the address you gave, in the order requests arrive.",
+      "name": "Name",
+      "email": "Email",
+      "sending": "Sending…",
+      "send": "Send message",
+      "honeypot": "Do not fill in",
       "reasons": {
         "vender": "I want to sell a property",
         "comprar": "I want to buy a property",
@@ -672,6 +704,76 @@
       "duvidas": "FAQ",
       "contactos": "Contact",
       "sections": "Sections"
+    },
+    "notFound": {
+      "metaTitle": "Page not found · UProperty Market",
+      "eyebrow": "Error 404",
+      "heading": "This page does not exist.",
+      "body": "The link may be wrong, or the property you are looking for may no longer be published. Whoever listed it may have sold, let or withdrawn it.",
+      "home": "Back to the home page"
+    },
+    "error": {
+      "eyebrow": "Error",
+      "heading": "Something went wrong.",
+      "body": "We could not show this page. Try again — if it keeps happening, the problem is ours and it has already been logged.",
+      "retry": "Try again",
+      "home": "Back to the home page",
+      "reference": "Error reference: {digest}"
+    },
+    "unsubscribe": {
+      "eyebrow": "Communications",
+      "okTitle": "Subscription cancelled",
+      "okBody": "We will not send you marketing communications again. Emails about your account — invoices, viewings, contracts — will still reach you, because they are not marketing and they are not switched off here.",
+      "badTitle": "This link is no longer valid",
+      "badBody": "It may have been used before, or broken in half by your mail client. If you keep getting communications you do not want, reply to any one of them and we will take care of it."
+    },
+    "demo": {
+      "profilesLabel": "Demo profiles",
+      "disclaimer": "A demonstration with sample data. Nothing you see here is a real account.",
+      "greeting": "Good morning, Marta.",
+      "summary": "You have 2 leads to reply to and a viewing booked for Thursday.",
+      "visitBooked": "Viewing booked",
+      "lastLeads": "Latest leads",
+      "lastLeadsCaption": "Latest leads received",
+      "buyerMatches": "4 properties match your saved search.",
+      "leadStatus": {
+        "new": "New",
+        "answered": "Answered",
+        "scheduled": "Viewing booked"
+      },
+      "leadColumns": {
+        "name": "Interested party",
+        "property": "Property",
+        "when": "When",
+        "state": "Status"
+      }
+    },
+    "preRegistration": {
+      "back": "Back to the start",
+      "roleLabel": "What describes you?",
+      "pickOption": "Pick an option…",
+      "roles": {
+        "owner": "I have a property to sell or let",
+        "buyer": "I am looking for a home",
+        "company": "I represent a company"
+      },
+      "area": "Area of interest",
+      "areaHint": "Optional. It helps us know where to start.",
+      "honeypot": "Do not fill in",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "alreadyTitle": "You are already registered",
+      "okTitle": "Pre-registration received",
+      "alreadyBody": "This address had already confirmed its registration. We will let you know as soon as the first listings open.",
+      "okBody": "We have sent you an email to confirm the address. Your registration is complete once you click the link.",
+      "name": "Name",
+      "email": "Email",
+      "consents": "Consents",
+      "acceptPrefix": "I have read and accept the",
+      "acceptMiddle": "and the",
+      "marketing": "I want to receive news about the launch. You can unsubscribe at any time.",
+      "sending": "Sending…",
+      "submit": "Notify me"
     }
   },
   "cloud": {

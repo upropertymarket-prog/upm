@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AppShell, Card, CardBody, StatusTag, Table, type TableColumn } from "@upm/ui";
 import {
   DEMO_BUYER_LISTINGS,
@@ -43,33 +44,38 @@ import type { TabId } from "./PlatformDemo";
 /** Na demo nada acontece: os controlos desenham-se e não levam a lado nenhum. */
 const noop = () => undefined;
 
+/**
+ * Só os tons. As etiquetas saíram daqui (D72): esta demonstração está na home
+ * do site público, e um visitante a ver o site em inglês dava com a tabela da
+ * plataforma em português.
+ */
 const LEAD_TONES = {
-  new: { tone: "new", label: "Nova" },
-  answered: { tone: "active", label: "Respondida" },
-  scheduled: { tone: "visitAccepted", label: "Visita marcada" },
+  new: "new",
+  answered: "active",
+  scheduled: "visitAccepted",
 } as const;
 
-const LEAD_COLUMNS: TableColumn<DemoLead>[] = [
-  { id: "name", header: "Interessado", cell: (lead) => lead.name },
-  { id: "property", header: "Propriedade", cell: (lead) => lead.property },
-  { id: "when", header: "Quando", cell: (lead) => lead.when },
+const leadColumns = (t: (key: string) => string): TableColumn<DemoLead>[] => [
+  { id: "name", header: t("leadColumns.name"), cell: (lead) => lead.name },
+  { id: "property", header: t("leadColumns.property"), cell: (lead) => lead.property },
+  { id: "when", header: t("leadColumns.when"), cell: (lead) => lead.when },
   {
     id: "state",
-    header: "Estado",
+    header: t("leadColumns.state"),
     cell: (lead) => (
-      <StatusTag tone={LEAD_TONES[lead.state].tone}>{LEAD_TONES[lead.state].label}</StatusTag>
+      <StatusTag tone={LEAD_TONES[lead.state]}>{t(`leadStatus.${lead.state}`)}</StatusTag>
     ),
   },
 ];
 
 function OwnerScreen() {
+  const t = useTranslations("site.demo");
+
   return (
     <div style={{ display: "grid", gap: 20 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <h3 style={{ margin: 0, fontSize: 20 }}>Bom dia, Marta.</h3>
-        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-          Tem 2 leads por responder e uma visita marcada para quinta-feira.
-        </p>
+        <h3 style={{ margin: 0, fontSize: 20 }}>{t("greeting")}</h3>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>{t("summary")}</p>
       </div>
 
       <div
@@ -92,10 +98,10 @@ function OwnerScreen() {
 
       <Card>
         <CardBody style={{ gap: 12, padding: 16 }}>
-          <strong style={{ fontSize: 15 }}>Últimas leads</strong>
+          <strong style={{ fontSize: 15 }}>{t("lastLeads")}</strong>
           <Table
-            caption="Últimas leads recebidas"
-            columns={LEAD_COLUMNS}
+            caption={t("lastLeadsCaption")}
+            columns={leadColumns(t)}
             rows={DEMO_OWNER_LEADS}
             rowKey={(lead) => lead.id}
           />
@@ -106,13 +112,13 @@ function OwnerScreen() {
 }
 
 function BuyerScreen() {
+  const t = useTranslations("site.demo");
+
   return (
     <div style={{ display: "grid", gap: 20 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <h3 style={{ margin: 0, fontSize: 20 }}>Market</h3>
-        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>
-          4 propriedades a corresponder à sua procura guardada.
-        </p>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 14 }}>{t("buyerMatches")}</p>
       </div>
 
       <div

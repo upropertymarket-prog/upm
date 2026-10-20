@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createAnonClient } from "@upm/db/server";
 import { unsubscribeByToken } from "@upm/db/campaigns";
 
@@ -56,21 +56,14 @@ export default async function UnsubscribePage({
     getLaunchMode(),
     searchParams,
   ]);
+  const t = await getTranslations("site.unsubscribe");
 
   const token = (params.t ?? "").trim();
   const feito = token ? await unsubscribeByToken(createAnonClient(), token) : false;
 
   const texto = feito
-    ? {
-        eyebrow: "Comunicações",
-        title: "Subscrição cancelada",
-        body: "Não voltamos a enviar-lhe comunicações de marketing. Os e-mails que dizem respeito à sua conta — faturas, visitas, contratos — continuam a chegar, porque não são marketing e não se desligam aqui.",
-      }
-    : {
-        eyebrow: "Comunicações",
-        title: "Este link já não é válido",
-        body: "Pode ter sido usado antes, ou estar incompleto por ter sido partido pelo cliente de correio. Se continua a receber comunicações que não quer, responda a qualquer uma delas e tratamos disso.",
-      };
+    ? { eyebrow: t("eyebrow"), title: t("okTitle"), body: t("okBody") }
+    : { eyebrow: t("eyebrow"), title: t("badTitle"), body: t("badBody") };
 
   return (
     <>

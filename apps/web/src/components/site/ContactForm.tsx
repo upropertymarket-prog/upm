@@ -57,7 +57,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       >
         <CheckCircle2 size={28} style={{ color: "var(--ok)" }} aria-hidden="true" />
         <h3 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)", color: "var(--text)" }}>
-          Mensagem recebida
+          {tc("okTitle")}
         </h3>
         <p
           style={{
@@ -68,7 +68,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
             maxWidth: "28rem",
           }}
         >
-          Obrigado pelo contacto. Respondemos para o endereço que indicou, por ordem de chegada.
+          {tc("okBody")}
         </p>
       </div>
     );
@@ -78,12 +78,12 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
     <form action={action} style={{ display: "grid", gap: "var(--sp-5)" }}>
       {/* Honeypot. Nunca remover sem substituir por outra defesa. */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px" }}>
-        <label htmlFor="contact-website">Não preencher</label>
+        <label htmlFor="contact-website">{tc("honeypot")}</label>
         <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <Input
-        label="Nome"
+        label={tc("name")}
         name="name"
         autoComplete="name"
         required
@@ -91,7 +91,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       />
 
       <Input
-        label="E-mail"
+        label={tc("email")}
         name="email"
         type="email"
         autoComplete="email"
@@ -100,21 +100,21 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       />
 
       <Select
-        label="Motivo do contacto"
+        label={tc("reasonLabel")}
         name="reason"
         defaultValue=""
         error={state.fieldErrors?.reason}
         options={[
-          { value: "", label: "Selecione uma opção…" },
+          { value: "", label: tc("pickOption") },
           ...CONTACT_REASON_VALUES.map((value) => ({ value, label: tc(`reasons.${value}`) })),
         ]}
       />
 
       <Textarea
-        label="Mensagem"
+        label={tc("message")}
         name="message"
         rows={5}
-        hint="Opcional. Quanto mais contexto der, mais útil é a resposta."
+        hint={tc("messageHint")}
         error={state.fieldErrors?.message}
       />
 
@@ -126,7 +126,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
 
       <div>
         <Button type="submit" size="md" disabled={pending}>
-          {pending ? "A enviar…" : "Enviar mensagem"}
+          {pending ? tc("sending") : tc("send")}
         </Button>
       </div>
     </form>

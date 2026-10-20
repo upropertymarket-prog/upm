@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { CheckCircle2 } from "lucide-react";
 import { Button, Field, Input, Select } from "@upm/ui";
 
@@ -31,6 +32,7 @@ export type PreRegistrationFormProps = {
 };
 
 export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
+  const t = useTranslations("site.preRegistration");
   const [state, action, pending] = useActionState<LeadFormState, FormData>(onSubmit, {});
 
   if (state.ok) {
@@ -50,7 +52,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
       >
         <CheckCircle2 size={28} style={{ color: "var(--ok)" }} aria-hidden="true" />
         <h2 style={{ margin: 0, fontSize: "18px", color: "var(--text)" }}>
-          {state.alreadyConfirmed ? "Já está inscrito" : "Pré-inscrição recebida"}
+          {state.alreadyConfirmed ? t("alreadyTitle") : t("okTitle")}
         </h2>
         <p
           style={{
@@ -61,12 +63,10 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
             maxWidth: "28rem",
           }}
         >
-          {state.alreadyConfirmed
-            ? "Este endereço já tinha a inscrição confirmada. Avisamos assim que os primeiros anúncios abrirem."
-            : "Enviámos-lhe um e-mail para confirmar o endereço. A inscrição fica completa quando clicar no link."}
+          {state.alreadyConfirmed ? t("alreadyBody") : t("okBody")}
         </p>
         <Link href="/" className="upm-btn upm-btn--secondary upm-btn--md">
-          Voltar ao início
+          {t("back")}
         </Link>
       </div>
     );
@@ -76,25 +76,25 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
     <form action={action} style={{ display: "grid", gap: "var(--sp-5)" }}>
       {/* Honeypot. Nunca remover sem substituir por outra defesa. */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px" }}>
-        <label htmlFor="website">Não preencher</label>
+        <label htmlFor="website">{t("honeypot")}</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <Select
-        label="O que o descreve?"
+        label={t("roleLabel")}
         name="profileType"
         defaultValue=""
         error={state.fieldErrors?.profileType}
         options={[
-          { value: "", label: "Selecione uma opção…" },
-          { value: "owner", label: "Tenho uma propriedade para vender ou arrendar" },
-          { value: "buyer", label: "Procuro casa" },
-          { value: "empresa", label: "Represento uma empresa" },
+          { value: "", label: t("pickOption") },
+          { value: "owner", label: t("roles.owner") },
+          { value: "buyer", label: t("roles.buyer") },
+          { value: "empresa", label: t("roles.company") },
         ]}
       />
 
       <Input
-        label="Nome"
+        label={t("name")}
         name="name"
         autoComplete="name"
         required
@@ -102,7 +102,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
       />
 
       <Input
-        label="E-mail"
+        label={t("email")}
         name="email"
         type="email"
         autoComplete="email"
@@ -110,14 +110,9 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
         error={state.fieldErrors?.email}
       />
 
-      <Input
-        label="Zona de interesse"
-        name="zone"
-        hint="Opcional. Ajuda-nos a saber por onde começar."
-        autoComplete="address-level2"
-      />
+      <Input label={t("area")} name="zone" hint={t("areaHint")} autoComplete="address-level2" />
 
-      <Field label="Consentimentos" error={state.fieldErrors?.consentTerms}>
+      <Field label={t("consents")} error={state.fieldErrors?.consentTerms}>
         {({ describedBy, invalid }) => (
           <div style={{ display: "grid", gap: "var(--sp-3)" }}>
             <label
@@ -136,8 +131,8 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
                 style={{ marginTop: "3px", flexShrink: 0 }}
               />
               <span>
-                Li e aceito os <Link href="/termos">Termos e Condições</Link> e a{" "}
-                <Link href="/privacidade">Política de Privacidade</Link>.
+                {t("acceptPrefix")} <Link href="/termos">{t("terms")}</Link> {t("acceptMiddle")}{" "}
+                <Link href="/privacidade">{t("privacy")}</Link>.
               </span>
             </label>
             <label
@@ -153,9 +148,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
                 name="consentMarketing"
                 style={{ marginTop: "3px", flexShrink: 0 }}
               />
-              <span style={{ color: "var(--muted)" }}>
-                Quero receber novidades sobre o lançamento. Pode cancelar a qualquer momento.
-              </span>
+              <span style={{ color: "var(--muted)" }}>{t("marketing")}</span>
             </label>
           </div>
         )}
@@ -169,7 +162,7 @@ export function PreRegistrationForm({ onSubmit }: PreRegistrationFormProps) {
 
       <div>
         <Button type="submit" size="md" disabled={pending}>
-          {pending ? "A enviar…" : "Quero ser avisado"}
+          {pending ? t("sending") : t("submit")}
         </Button>
       </div>
     </form>
