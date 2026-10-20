@@ -55,7 +55,7 @@ export default async function MessagesPage({
   const [conversations, visits, notifications] = await Promise.all([
     loadConversations(supabase),
     loadVisits(supabase),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
   const leads = role === "owner" ? await loadLeads(supabase) : [];
 

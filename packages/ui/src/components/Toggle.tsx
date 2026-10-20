@@ -12,6 +12,8 @@ export type ToggleProps = {
   /** Esconde o texto (uso em barras de ferramentas). Mantém-se para leitores. */
   labelHidden?: boolean;
   disabled?: boolean;
+  /** `lg` (44 × 24) é o desenho base; `md` (36 × 20) para listas densas. */
+  size?: "md" | "lg";
   className?: string;
 };
 
@@ -24,8 +26,10 @@ export type ToggleProps = {
  * produto usa isto (localização aproximada, feature flags, "Open Graph igual
  * aos dados da página") aplicam na hora.
  *
- * O desenho tem 44 × 24 px, mas o invólucro garante os 40 px de alvo
- * (07 §5.14) sem inflar a pintura.
+ * O desenho tem 44 × 24 px (`lg`), mas o invólucro garante os 40 px de alvo
+ * (07 §5.14) sem inflar a pintura. `md` desce o desenho para 36 × 20 px sem
+ * tocar no invólucro — é o tamanho para listas de definições, onde a coluna de
+ * interruptores repetidos pesa mais do que cada interruptor isolado.
  *
  * O canvas deste componente está em tempo/designs/design-system/formularios/index.canvas.tsx.
  * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
@@ -37,13 +41,17 @@ export function Toggle({
   hint,
   labelHidden = false,
   disabled = false,
+  size = "lg",
   className,
 }: ToggleProps) {
   const labelId = useId();
   const hintId = hint ? `${labelId}-hint` : undefined;
 
   return (
-    <div className={cx("upm-toggle", className)} data-disabled={disabled ? "true" : undefined}>
+    <div
+      className={cx("upm-toggle", size === "md" && "upm-toggle--md", className)}
+      data-disabled={disabled ? "true" : undefined}
+    >
       <button
         type="button"
         role="switch"

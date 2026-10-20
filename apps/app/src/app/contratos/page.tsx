@@ -88,7 +88,7 @@ export default async function ContractsPage({
     loadConversations(supabase),
     loadVisits(supabase),
     role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   const chrome = {

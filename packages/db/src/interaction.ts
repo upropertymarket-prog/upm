@@ -26,15 +26,12 @@ export type VisitStatus = (typeof VISIT_STATUSES)[number];
 /** 07 §5.6 — máximo 3 no total, contador partilhado pelos dois lados. */
 export const MAX_RESCHEDULES = 3;
 
-/** Etiquetas de 04 §5.6 (cores de estado das visitas). */
-export const VISIT_STATUS_LABELS: Record<VisitStatus, string> = {
-  pending: "Pendente",
-  accepted: "Aceite",
-  rescheduled: "Reagendada",
-  cancelled: "Cancelada",
-  completed: "Realizada",
-  archived: "Arquivada",
-};
+/**
+ * As etiquetas de 04 §5.6 estão em `visits.status.*` nas mensagens, não aqui:
+ * este pacote fala com a base de dados e não sabe em que idioma o ecrã está
+ * (mesma razão do `SHARE_PERMISSION_LABELS` e dos rótulos de contrato, que
+ * saíram daqui a 19 out). O que fica é a lista de estados e os tons.
+ */
 
 /**
  * Pedido de visita (03 F6 passo 1, modal "Pedir visita" de 04 §8.4).
@@ -125,18 +122,7 @@ export const LEAD_OUTCOMES = ["won", "lost"] as const;
 export const leadOutcomeSchema = z.enum(LEAD_OUTCOMES);
 export type LeadOutcome = (typeof LEAD_OUTCOMES)[number];
 
-/** Nomes do pipeline, tal como a referência de design os escreve. */
-export const LEAD_STAGE_LABELS: Record<LeadStage, string> = {
-  new: "Novo",
-  contacted: "Contactado",
-  visit: "Visita",
-  closed: "Fechado",
-};
-
-export const LEAD_OUTCOME_LABELS: Record<LeadOutcome, string> = {
-  won: "Concretizado",
-  lost: "Não concretizado",
-};
+/** Os nomes do pipeline estão em `leads.stage.*` e `leads.outcome.*`. */
 
 /** 07 §18.2 — `outcome` é obrigatório ao fechar e proibido fora de `closed`. */
 export const leadStageUpdateSchema = z
@@ -178,16 +164,7 @@ export const ACTIVE_NOTIFICATION_TYPES = [
   "search_alert",
 ] as const satisfies readonly NotificationType[];
 
-export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
-  message: "Mensagens novas",
-  visit_request: "Pedidos de visita",
-  visit_update: "Alterações a visitas",
-  price_drop: "Descidas de preço em imóveis guardados",
-  search_alert: "Alertas de pesquisa",
-  document_shared: "Documentos partilhados",
-  ticket_update: "Atualizações dos meus reports",
-  invoice: "Faturas",
-};
+/** Os nomes dos tipos de notificação estão em `notifications.type.*`. */
 
 /**
  * `profiles.notification_prefs` (05 §6.1). Ausente = ligado: as preferências

@@ -853,6 +853,24 @@
   transform: translateX(20px);
 }
 
+/* Tamanho md — 36 × 20 px, o degrau abaixo do desenho de 44 × 24. Para listas
+   de definições com muitos interruptores seguidos, onde o tamanho grande pesa
+   mais do que a linha de texto que acompanha. O alvo de 40 px continua a ser
+   do invólucro, que não muda. */
+.upm-toggle--md .upm-toggle__track {
+  width: 36px;
+  height: 20px;
+}
+
+.upm-toggle--md .upm-toggle__knob {
+  width: 14px;
+  height: 14px;
+}
+
+.upm-toggle--md .upm-toggle__track[aria-checked="true"] .upm-toggle__knob {
+  transform: translateX(16px);
+}
+
 .upm-toggle__text {
   display: flex;
   flex-direction: column;

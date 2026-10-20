@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CalendarClock,
   CalendarDays,
@@ -23,7 +24,8 @@ import {
   useToast,
   type StatusTone,
 } from "@upm/ui";
-import { MAX_RESCHEDULES, VISIT_STATUS_LABELS, type VisitStatus } from "@upm/db/interaction";
+import { MAX_RESCHEDULES, VISIT_STATUSES, type VisitStatus } from "@upm/db/interaction";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 
 import { formatDate, formatTime, type VisitRow } from "../interaction/interactionTypes";
 
@@ -61,14 +63,13 @@ export type VisitsScreenProps = VisitActions & {
   highlightId?: string | null;
 };
 
-const FILTERS: { id: "all" | VisitStatus; label: string }[] = [
-  { id: "all", label: "Todas" },
-  { id: "pending", label: VISIT_STATUS_LABELS.pending },
-  { id: "accepted", label: VISIT_STATUS_LABELS.accepted },
-  { id: "rescheduled", label: VISIT_STATUS_LABELS.rescheduled },
-  { id: "completed", label: VISIT_STATUS_LABELS.completed },
-  { id: "cancelled", label: VISIT_STATUS_LABELS.cancelled },
-  { id: "archived", label: VISIT_STATUS_LABELS.archived },
+/**
+ * Só os ids, pela ordem em que os filtros se leem. A etiqueta de cada um vem
+ * de `visits.status.*` — ver a nota que ficou em `@upm/db/interaction`.
+ */
+const FILTERS: ("all" | VisitStatus)[] = [
+  "all",
+  ...VISIT_STATUSES.filter((status) => status !== "pending"),
 ];
 
 /**
@@ -94,6 +95,7 @@ export function VisitsScreen({
   onCancel,
   onArchive,
 }: VisitsScreenProps) {
+  const t = useTranslations("visits");
   const highlighted =
     highlightId && rows.some((row) => row.id === highlightId) ? highlightId : null;
   const [filter, setFilter] = useState<"all" | VisitStatus>("all");
@@ -107,11 +109,11 @@ export function VisitsScreen({
 
   const visible = filter === "all" ? rows : rows.filter((row) => row.status === filter);
 
-  const tabs = FILTERS.map((item) => ({
-    id: item.id,
-    label: item.label,
-    count: item.id === "all" ? rows.length : rows.filter((row) => row.status === item.id).length,
-    countTone: item.id === "all" ? undefined : VISIT_TONE[item.id],
+  const tabs = FILTERS.map((id) => ({
+    id,
+    label: id === "all" ? t("filterAll") : t(`status.${id}`),
+    count: id === "all" ? rows.length : rows.filter((row) => row.status === id).length,
+    countTone: id === "all" ? undefined : VISIT_TONE[id],
   }));
 
   function run(action: () => Promise<{ error?: string }>, success: string) {
@@ -125,17 +127,14 @@ export function VisitsScreen({
     if (!confirming) return;
     const row = confirming;
     setConfirming(null);
-    run(() => onAccept(row.id), "Visita confirmada. O comprador foi notificado.");
+    run(() => onAccept(row.id), t("acceptedToast"));
   }
 
   function confirmReschedule() {
     if (!rescheduling) return;
     const row = rescheduling;
     setRescheduling(null);
-    run(
-      () => onReschedule({ id: row.id, date, time }),
-      "Nova data proposta. O outro lado foi notificado.",
-    );
+    run(() => onReschedule({ id: row.id, date, time }), t("rescheduledToast"));
   }
 
   return (
@@ -150,14 +149,14 @@ export function VisitsScreen({
               onClick={() => setView("list")}
               leadingIcon={<List size={14} aria-hidden="true" />}
             >
-              Lista
+              {t("viewList")}
             </Button>
             <Button
               variant={view === "calendar" ? "primary" : "secondary"}
               onClick={() => setView("calendar")}
               leadingIcon={<CalendarDays size={14} aria-hidden="true" />}
             >
-              Calendário
+              {t("viewCalendar")}
             </Button>
           </div>
         }
@@ -173,7 +172,7 @@ export function VisitsScreen({
         >
           <div style={{ flex: 1, minWidth: 0 }}>
             <Tabs
-              label="Filtrar visitas por estado"
+              label={t("filterLabel")}
               items={tabs}
               value={filter}
               onValueChange={(id) => setFilter(id as "all" | VisitStatus)}
@@ -193,10 +192,8 @@ export function VisitsScreen({
               setDate("");
               setTime("");
             }}
-            onCancel={(row) =>
-              run(() => onCancel(row.id), "Visita cancelada. O outro lado foi notificado.")
-            }
-            onArchive={(row) => run(() => onArchive(row.id), "Visita arquivada.")}
+            onCancel={(row) => run(() => onCancel(row.id), t("cancelledToast"))}
+            onArchive={(row) => run(() => onArchive(row.id), t("archivedToast"))}
           />
         ) : (
           <VisitCalendar rows={visible} month={month} />
@@ -205,66 +202,70 @@ export function VisitsScreen({
         <Modal
           open={confirming !== null}
           onClose={() => setConfirming(null)}
-          title="Aceitar o pedido de visita"
+          title={t("acceptRequest")}
           size="sm"
           footer={
             <>
               <Button variant="secondary" onClick={() => setConfirming(null)}>
-                Voltar
+                {t("back")}
               </Button>
               <Button onClick={confirmAccept} disabled={pending}>
-                Aceitar e partilhar morada
+                {t("acceptAndShare")}
               </Button>
             </>
           }
         >
           <p style={{ margin: 0, lineHeight: 1.6 }}>
-            Ao aceitar, a morada exata de <strong>{confirming?.propertyTitle}</strong> fica visível
-            para <strong>{confirming?.other.name}</strong>. Apenas para este comprador.
+            {t.rich("acceptBody", {
+              b: (chunks) => <strong>{chunks}</strong>,
+              property: confirming?.propertyTitle ?? "",
+              person: confirming?.other.name ?? "",
+            })}
           </p>
           <p style={{ margin: "var(--sp-5) 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
-            Pode revogar esta permissão mais tarde, no detalhe do imóvel. Se preferir não partilhar,
-            cancele o pedido — não existe aceitar sem partilhar a morada.
+            {t("acceptNote")}
           </p>
         </Modal>
 
         <Modal
           open={rescheduling !== null}
           onClose={() => setRescheduling(null)}
-          title="Propor outra data"
+          title={t("proposeOtherDate")}
           size="sm"
           footer={
             <>
               <Button variant="secondary" onClick={() => setRescheduling(null)}>
-                Voltar
+                {t("back")}
               </Button>
               <Button onClick={confirmReschedule} disabled={pending || !date || !time}>
-                Propor data
+                {t("proposeDate")}
               </Button>
             </>
           }
         >
           <div style={{ display: "grid", gap: "var(--sp-5)" }}>
             <Input
-              label="Data"
+              label={t("dateLabel")}
               type="date"
               value={date}
               onChange={(event) => setDate(event.target.value)}
             />
             <Input
-              label="Hora"
+              label={t("timeLabel")}
               type="time"
               value={time}
               onChange={(event) => setTime(event.target.value)}
             />
             {rescheduling && rescheduling.rescheduleCount === MAX_RESCHEDULES - 1 ? (
               <p style={{ margin: 0, color: "var(--warn)", lineHeight: 1.6 }}>
-                Este é o último reagendamento possível. Depois disto, só resta aceitar a data ou
-                cancelar — e a visita pode perder-se.
+                {t("lastRescheduleWarning")}
               </p>
             ) : (
               <p style={{ margin: 0, color: "var(--muted)" }}>
-                Reagendamentos usados: {rescheduling?.rescheduleCount ?? 0} de {MAX_RESCHEDULES}.
+                {t("reschedulesUsed", {
+                  used: String(rescheduling?.rescheduleCount ?? 0),
+                  max: String(MAX_RESCHEDULES),
+                })}
               </p>
             )}
           </div>
@@ -295,6 +296,9 @@ function VisitList({
   onCancel,
   onArchive,
 }: ListProps) {
+  const t = useTranslations("visits");
+  const tCommon = useTranslations("common");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   // Chegar à lista pela notificação e ter de procurar a visita com os olhos é
   // o mesmo que não ter link. O destaque leva o ecrã até ela (D31).
   useEffect(() => {
@@ -306,12 +310,8 @@ function VisitList({
   if (rows.length === 0) {
     return (
       <EmptyState
-        title="Sem visitas neste filtro"
-        description={
-          role === "owner"
-            ? "Os pedidos de visita aos seus imóveis aparecem aqui assim que chegarem."
-            : "Peça uma visita a partir do detalhe de um imóvel no Market."
-        }
+        title={t("emptyFilter")}
+        description={role === "owner" ? t("emptyOwner") : t("emptyBuyer")}
       />
     );
   }
@@ -362,9 +362,7 @@ function VisitList({
                   }}
                 >
                   <strong style={{ fontSize: "var(--fs-body-lg)" }}>{row.propertyTitle}</strong>
-                  <StatusTag tone={VISIT_TONE[row.status]}>
-                    {VISIT_STATUS_LABELS[row.status]}
-                  </StatusTag>
+                  <StatusTag tone={VISIT_TONE[row.status]}>{t(`status.${row.status}`)}</StatusTag>
                 </div>
                 <span
                   style={{
@@ -404,7 +402,7 @@ function VisitList({
                     }}
                   >
                     <CalendarDays size={14} aria-hidden="true" color="var(--accent)" />
-                    {formatDate(row.proposedAt)}
+                    {formatDate(row.proposedAt, intlLocale)}
                   </span>
                   <span
                     style={{
@@ -415,14 +413,15 @@ function VisitList({
                     }}
                   >
                     <CalendarClock size={14} aria-hidden="true" color="var(--accent)" />
-                    {formatTime(row.proposedAt)}
+                    {formatTime(row.proposedAt, intlLocale)}
                   </span>
                 </div>
                 <span style={{ color: "var(--muted)" }}>
-                  Reagendamentos: {row.rescheduleCount}/{MAX_RESCHEDULES}
-                  {row.proposedByMe && row.rescheduleCount < MAX_RESCHEDULES
-                    ? " · a vez é do outro lado"
-                    : ""}
+                  {t("reschedulesLine", {
+                    used: String(row.rescheduleCount),
+                    max: String(MAX_RESCHEDULES),
+                  })}
+                  {row.proposedByMe && row.rescheduleCount < MAX_RESCHEDULES ? t("theirTurn") : ""}
                 </span>
                 <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
                   {canAccept ? (
@@ -431,7 +430,7 @@ function VisitList({
                       disabled={pending}
                       leadingIcon={<Check size={14} aria-hidden="true" />}
                     >
-                      Aceitar
+                      {t("accept")}
                     </Button>
                   ) : null}
                   {canReschedule ? (
@@ -441,7 +440,7 @@ function VisitList({
                       disabled={pending}
                       leadingIcon={<CalendarClock size={14} aria-hidden="true" />}
                     >
-                      Reagendar
+                      {t("reschedule")}
                     </Button>
                   ) : null}
                   {canCancel ? (
@@ -451,12 +450,12 @@ function VisitList({
                       disabled={pending}
                       leadingIcon={<X size={14} aria-hidden="true" />}
                     >
-                      Cancelar
+                      {tCommon("cancel")}
                     </Button>
                   ) : null}
                   {canArchive ? (
                     <Button variant="secondary" onClick={() => onArchive(row)} disabled={pending}>
-                      Arquivar
+                      {t("archive")}
                     </Button>
                   ) : null}
                   <a
@@ -465,7 +464,7 @@ function VisitList({
                     style={{ textDecoration: "none" }}
                   >
                     <MessageSquare size={14} aria-hidden="true" />
-                    Abrir conversa
+                    {t("openConversation")}
                   </a>
                 </div>
               </div>
@@ -477,9 +476,21 @@ function VisitList({
   );
 }
 
-const WEEKDAYS = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"];
+/**
+ * Os dias da semana saem do `Intl` e não de uma lista escrita à mão: eram
+ * "seg…dom" fixos, que num ecrã inglês ficavam em português. A semana começa à
+ * segunda, como no protótipo — daí o 1 de janeiro de 2024 como ponto de
+ * partida, que foi uma segunda-feira.
+ */
+function weekdayLabels(locale: string): string[] {
+  const format = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+  return Array.from({ length: 7 }, (_, index) =>
+    format.format(new Date(Date.UTC(2024, 0, 1 + index))),
+  );
+}
 
 function VisitCalendar({ rows, month }: { rows: VisitRow[]; month: string }) {
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   const [yearPart, monthPart] = month.split("-");
   const year = Number(yearPart);
   const monthIndex = Number(monthPart);
@@ -508,7 +519,7 @@ function VisitCalendar({ rows, month }: { rows: VisitRow[]; month: string }) {
     });
   }, [rows, year, monthIndex]);
 
-  const title = new Intl.DateTimeFormat("pt-PT", { month: "long", year: "numeric" }).format(
+  const title = new Intl.DateTimeFormat(intlLocale, { month: "long", year: "numeric" }).format(
     new Date(Date.UTC(year, monthIndex - 1, 1)),
   );
 
@@ -536,7 +547,7 @@ function VisitCalendar({ rows, month }: { rows: VisitRow[]; month: string }) {
             minWidth: "100%",
           }}
         >
-          {WEEKDAYS.map((label) => (
+          {weekdayLabels(intlLocale).map((label) => (
             <span
               key={label}
               style={{
@@ -574,7 +585,7 @@ function VisitCalendar({ rows, month }: { rows: VisitRow[]; month: string }) {
               </span>
               {cell.events.map((event) => (
                 <StatusTag key={event.id} tone={VISIT_TONE[event.status]}>
-                  {formatTime(event.proposedAt)} {event.other.name.split(" ")[0]}
+                  {formatTime(event.proposedAt, intlLocale)} {event.other.name.split(" ")[0]}
                 </StatusTag>
               ))}
             </div>

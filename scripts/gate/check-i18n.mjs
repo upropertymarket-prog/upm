@@ -357,11 +357,22 @@ for (const raiz of RAIZES) {
     const fonte = semComentarios(original);
     const servidor = ehServerAction(original, relativo);
 
-    const registar = (valor, indice, tipo) => {
+    const registar = (valor, indice, tipo, chave) => {
       if (!ehTexto(valor)) return;
       // Ver a nota de `RAIZES`: numa raiz só-rótulos, uma frase na linha de
-      // uma cadeia `z.` é mensagem de validação, e essa é D73.
-      if (raiz.soRotulos && /\bz\./.test(linhaInteira(fonte, indice))) return;
+      // uma cadeia `z.` é mensagem de validação, e essa é D73. A chave
+      // `message` entra pela mesma porta: num `.refine({ message, path })` a
+      // frase fica numa linha só dela, sem o `z.` à vista — e `message` é o
+      // nome que o zod lhe dá, não um rótulo de interface.
+      if (raiz.soRotulos && (/\bz\./.test(linhaInteira(fonte, indice)) || chave === "message")) {
+        paraD73.push({
+          ficheiro: relativo,
+          linha: linhaDe(fonte, indice),
+          texto: valor.trim().slice(0, 70),
+          tipo,
+        });
+        return;
+      }
       (servidor ? paraD73 : achados).push({
         ficheiro: relativo,
         linha: linhaDe(fonte, indice),
@@ -370,7 +381,7 @@ for (const raiz of RAIZES) {
       });
     };
 
-    for (const m of fonte.matchAll(VALOR_EM_OBJETO)) registar(m[2], m.index, "objeto");
+    for (const m of fonte.matchAll(VALOR_EM_OBJETO)) registar(m[2], m.index, "objeto", m[1]);
     if (raiz.soRotulos) continue;
 
     for (const m of fonte.matchAll(PROPS_VISIVEIS)) registar(m[2], m.index, "prop");

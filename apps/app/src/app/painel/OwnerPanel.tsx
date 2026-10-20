@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { CONTRACT_STATUS_TONES } from "@upm/db/cloud";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { createClient } from "@upm/db/server";
 import { Button, PageHeader, greetingKey } from "@upm/ui";
 
@@ -49,6 +50,7 @@ export async function OwnerPanel({
 }) {
   const supabase = createClient(await cookies());
   const t = await getTranslations();
+  const intlLocale = INTL_LOCALE[resolveLocale(locale)];
   const tStatus = await getTranslations("contracts.status");
   const tActivity = await getTranslations("contracts.activity");
 
@@ -81,7 +83,7 @@ export async function OwnerPanel({
     loadVisits(supabase),
     loadConversations(supabase),
     loadLeads(supabase),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   const week = weeklyViews(viewRows, today);
@@ -172,9 +174,9 @@ export async function OwnerPanel({
     subtitle: row.counterparty_name
       ? tActivity("withCounterparty", {
           name: row.counterparty_name,
-          when: formatRelative(row.updated_at),
+          when: formatRelative(row.updated_at, intlLocale),
         })
-      : formatRelative(row.updated_at),
+      : formatRelative(row.updated_at, intlLocale),
     href: `/contratos/${row.id}`,
     tag: tStatus(row.status),
     tone: CONTRACT_STATUS_TONES[row.status] as ActivityItem["tone"],

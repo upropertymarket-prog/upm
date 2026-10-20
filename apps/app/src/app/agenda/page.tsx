@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
@@ -32,7 +32,13 @@ export default async function AgendaPage({
 }) {
   const { visita } = await searchParams;
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, tNav, tVisits, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("nav"),
+    getTranslations("visits"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
 
   const user = authData.user;
   if (!user) redirect("/");
@@ -48,14 +54,14 @@ export default async function AgendaPage({
     loadVisits(supabase),
     loadConversations(supabase),
     loadLeads(supabase),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   return (
     <AppChrome
       role="owner"
-      userName={profile.full_name || "Proprietário"}
-      userMeta="Proprietário"
+      userName={profile.full_name || tRoles("owner")}
+      userMeta={tRoles("owner")}
       activeId="visitSchedule"
       locale={locale}
       onLocaleChange={setLocalePreference}
@@ -64,8 +70,8 @@ export default async function AgendaPage({
     >
       <VisitsScreen
         rows={visits}
-        pageTitle="Agenda de visitas"
-        pageSubtitle="Gira as visitas agendadas para os seus imóveis"
+        pageTitle={tNav("visitSchedule")}
+        pageSubtitle={tVisits("pageSubtitleOwner")}
         role="owner"
         month={currentMonth()}
         highlightId={visita ?? null}

@@ -106,10 +106,12 @@ export type LeadRow = {
 // Formatação — pt-PT em todo o lado (02 §12)
 // ---------------------------------------------------------------------------
 
-const TIME = new Intl.DateTimeFormat("pt-PT", { hour: "2-digit", minute: "2-digit" });
-const DAY = new Intl.DateTimeFormat("pt-PT", { day: "2-digit" });
-const MONTH = new Intl.DateTimeFormat("pt-PT", { month: "short" });
-const YEAR = new Intl.DateTimeFormat("pt-PT", { year: "numeric" });
+/**
+ * Os formatadores recebem a etiqueta `Intl` do idioma escolhido (02 §12).
+ * Estavam fixos em `pt-PT` — o que punha "set" e "há 2 horas" dentro de um
+ * ecrã inglês. Instanciam-se por chamada e não no módulo, porque agora
+ * dependem do idioma; o custo é desprezável ao lado de uma renderização.
+ */
 
 /**
  * "26 set 2026", como a referência escreve as datas das visitas.
@@ -118,37 +120,57 @@ const YEAR = new Intl.DateTimeFormat("pt-PT", { year: "numeric" });
  * em pt-PT, pedir dia + mês curto + ano devolve o padrão numérico do CLDR
  * ("26/09/2026") e o mês por extenso desaparece.
  */
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, locale: string): string {
   const date = new Date(iso);
-  return `${DAY.format(date)} ${MONTH.format(date).replace(".", "")} ${YEAR.format(date)}`;
-}
-
-export function formatTime(iso: string): string {
-  return TIME.format(new Date(iso)).replace(":", "h");
-}
-
-export function formatDay(iso: string): { day: string; month: string } {
-  const date = new Date(iso);
-  return { day: DAY.format(date), month: MONTH.format(date).replace(".", "") };
+  const day = new Intl.DateTimeFormat(locale, { day: "2-digit" }).format(date);
+  const month = new Intl.DateTimeFormat(locale, { month: "short" }).format(date).replace(".", "");
+  const year = new Intl.DateTimeFormat(locale, { year: "numeric" }).format(date);
+  return `${day} ${month} ${year}`;
 }
 
 /**
- * "há 2 horas", "ontem", "12 set" — a escala do protótipo na lista de
+ * "16h30" em português. O `h` no lugar dos dois pontos é a convenção
+ * portuguesa e sai errado em inglês, por isso só se troca em `pt`.
+ */
+export function formatTime(iso: string, locale: string): string {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+  return locale.startsWith("pt") ? formatted.replace(":", "h") : formatted;
+}
+
+export function formatDay(iso: string, locale: string): { day: string; month: string } {
+  const date = new Date(iso);
+  return {
+    day: new Intl.DateTimeFormat(locale, { day: "2-digit" }).format(date),
+    month: new Intl.DateTimeFormat(locale, { month: "short" }).format(date).replace(".", ""),
+  };
+}
+
+/**
+ * "há 2 horas", "ontem", "12 set 2026" — a escala do protótipo na lista de
  * conversas e na coluna "Recebido" das leads. `now` entra por parâmetro para
  * o resultado ser determinístico nos testes e nas storyboards (um componente
  * que lê o relógio faz a storyboard flutuar no VRT).
+ *
+ * **As frases vêm do `Intl.RelativeTimeFormat` e não de chaves de tradução**,
+ * de propósito: com `numeric: "auto"` ele já diz "agora", "há 2 horas" e
+ * "ontem" em pt e "now", "2 hours ago" e "yesterday" em en, e escrever isso à
+ * mão era reimplementar — com pior plural — o que o CLDR já sabe para as duas
+ * línguas.
  */
-export function formatRelative(iso: string, now: Date = new Date()): string {
+export function formatRelative(iso: string, locale: string, now: Date = new Date()): string {
+  const relative = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   const diff = now.getTime() - new Date(iso).getTime();
   const minutes = Math.round(diff / 60_000);
-  if (minutes < 1) return "agora";
-  if (minutes < 60) return `há ${minutes} min`;
+  if (minutes < 1) return relative.format(0, "second");
+  if (minutes < 60) return relative.format(-minutes, "minute");
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `há ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  if (hours < 24) return relative.format(-hours, "hour");
   const days = Math.round(hours / 24);
-  if (days === 1) return "ontem";
-  if (days < 7) return `há ${days} dias`;
-  return formatDate(iso);
+  if (days < 7) return relative.format(-days, "day");
+  return formatDate(iso, locale);
 }
 
 export function initialsOf(name: string): string {

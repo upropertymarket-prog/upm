@@ -94,7 +94,7 @@ export default async function CloudPage() {
     loadConversations(supabase),
     loadVisits(supabase),
     role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
     status.hasCloud ? Promise.resolve([]) : loadAddonOptions(supabase),
   ]);
 

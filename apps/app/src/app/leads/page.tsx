@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { PageHeader } from "@upm/ui";
 
@@ -27,7 +27,13 @@ export const dynamic = "force-dynamic";
  */
 export default async function LeadsPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, t, tNav, tRoles, { data: authData }] = await Promise.all([
+    getLocale(),
+    getTranslations("leads"),
+    getTranslations("nav"),
+    getTranslations("roles"),
+    supabase.auth.getUser(),
+  ]);
 
   const user = authData.user;
   if (!user) redirect("/");
@@ -43,7 +49,7 @@ export default async function LeadsPage() {
     loadLeads(supabase),
     loadConversations(supabase),
     loadVisits(supabase),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   const recent = leads.filter(
@@ -53,8 +59,8 @@ export default async function LeadsPage() {
   return (
     <AppChrome
       role="owner"
-      userName={profile.full_name || "Proprietário"}
-      userMeta="Proprietário"
+      userName={profile.full_name || tRoles("owner")}
+      userMeta={tRoles("owner")}
       activeId="leads"
       locale={locale}
       onLocaleChange={setLocalePreference}
@@ -62,12 +68,8 @@ export default async function LeadsPage() {
       notifications={notifications}
     >
       <PageHeader
-        title="Leads"
-        subtitle={
-          recent === 0
-            ? "Ainda sem contactos nos últimos 30 dias"
-            : `${recent} ${recent === 1 ? "contacto" : "contactos"} nos últimos 30 dias`
-        }
+        title={tNav("leads")}
+        subtitle={recent === 0 ? t("pageSubtitleNone") : t("pageSubtitle", { count: recent })}
       />
       <LeadsScreen rows={leads} onUpdateStage={updateLeadStage} />
     </AppChrome>

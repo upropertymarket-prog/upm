@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { CalendarPlus, MessageSquare } from "lucide-react";
 import {
   Button,
@@ -15,13 +17,7 @@ import {
   type StatusTone,
   type TableColumn,
 } from "@upm/ui";
-import {
-  LEAD_OUTCOME_LABELS,
-  LEAD_STAGES,
-  LEAD_STAGE_LABELS,
-  type LeadOutcome,
-  type LeadStage,
-} from "@upm/db/interaction";
+import { LEAD_STAGES, type LeadOutcome, type LeadStage } from "@upm/db/interaction";
 
 import { formatRelative, type LeadRow } from "../interaction/interactionTypes";
 
@@ -36,12 +32,7 @@ export const LEAD_TONE: Record<LeadStage, StatusTone> = {
   closed: "active",
 };
 
-const STAGE_NOTE: Record<LeadStage, string> = {
-  new: "à espera de resposta",
-  contacted: "diálogo em curso",
-  visit: "visita marcada",
-  closed: "negócio concluído",
-};
+/** A nota de cada cartão está em `leads.stageNote.*`. */
 
 export type LeadsScreenProps = {
   rows: LeadRow[];
@@ -64,6 +55,9 @@ export type LeadsScreenProps = {
  * e fechar obriga a dizer se o negócio se concretizou.
  */
 export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
+  const t = useTranslations("leads");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
+  const tCommon = useTranslations("common");
   const [stageFilter, setStageFilter] = useState<LeadStage | null>(null);
   const [open, setOpen] = useState<LeadRow | null>(null);
   const [stage, setStage] = useState<LeadStage>("new");
@@ -93,7 +87,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
         toast(result.error, "error");
         return;
       }
-      toast("Lead atualizada.", "success");
+      toast(t("updated"), "success");
       setOpen(null);
     });
   }
@@ -101,7 +95,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
   const columns: TableColumn<LeadRow>[] = [
     {
       id: "contact",
-      header: "Interessado",
+      header: t("columnContact"),
       width: "316px",
       cell: (row) => (
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)", minWidth: 0 }}>
@@ -131,7 +125,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
                 whiteSpace: "nowrap",
               }}
             >
-              {row.lastMessage || "Sem mensagens"}
+              {row.lastMessage || t("noMessages")}
             </span>
           </div>
         </div>
@@ -139,7 +133,7 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     },
     {
       id: "property",
-      header: "Propriedade",
+      header: t("columnProperty"),
       width: "220px",
       cell: (row) => (
         <span style={{ color: "var(--text)", fontWeight: "var(--fw-medium)" }}>
@@ -149,27 +143,29 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
     },
     {
       id: "when",
-      header: "Recebido",
+      header: t("columnWhen"),
       width: "167px",
       cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>{formatRelative(row.lastActivityAt)}</span>
+        <span style={{ color: "var(--muted)" }}>
+          {formatRelative(row.lastActivityAt, intlLocale)}
+        </span>
       ),
     },
     {
       id: "stage",
-      header: "Estado",
+      header: t("columnStage"),
       width: "158px",
       cell: (row) => (
         <StatusTag tone={LEAD_TONE[row.stage]}>
           {row.stage === "closed" && row.outcome
-            ? LEAD_OUTCOME_LABELS[row.outcome]
-            : LEAD_STAGE_LABELS[row.stage]}
+            ? t(`outcome.${row.outcome}`)
+            : t(`stage.${row.stage}`)}
         </StatusTag>
       ),
     },
     {
       id: "actions",
-      header: "Ações",
+      header: t("columnActions"),
       width: "310px",
       cell: (row) => (
         <div
@@ -189,18 +185,18 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
             style={{ textDecoration: "none", width: 124, minWidth: 32, padding: 0 }}
           >
             <MessageSquare size={16} aria-hidden="true" />
-            Responder
+            {t("reply")}
           </a>
           <a
             href="/agenda"
             className="upm-btn upm-btn--secondary upm-btn--icon"
             style={{ textDecoration: "none" }}
-            aria-label={`Ver agenda de ${row.contact.name}`}
+            aria-label={t("openSchedule", { name: row.contact.name })}
           >
             <CalendarPlus size={16} aria-hidden="true" />
           </a>
           <Button variant="secondary" size="md" onClick={() => openLead(row)}>
-            Detalhes
+            {t("details")}
           </Button>
         </div>
       ),
@@ -235,31 +231,28 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
               }}
             >
               <span style={{ color: "var(--muted)", fontWeight: "var(--fw-semibold)" }}>
-                {LEAD_STAGE_LABELS[value]}
+                {t(`stage.${value}`)}
               </span>
               <span style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)" }}>
                 <strong style={{ fontSize: "var(--fs-title-sm)" }}>{count}</strong>
                 <span style={{ color: "var(--muted)" }}>{Math.round((count / total) * 100)}%</span>
               </span>
-              <span style={{ color: "var(--muted)" }}>{STAGE_NOTE[value]}</span>
+              <span style={{ color: "var(--muted)" }}>{t(`stageNote.${value}`)}</span>
             </Card>
           );
         })}
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState
-          title="Ainda sem leads"
-          description="Uma lead aparece aqui assim que alguém lhe enviar a primeira mensagem ou pedir uma visita a um dos seus imóveis."
-        />
+        <EmptyState title={t("emptyTitle")} description={t("emptyBody")} />
       ) : (
         <Card>
           <Table
-            caption="Leads"
+            caption={t("tableCaption")}
             columns={columns}
             rows={visible}
             rowKey={(row) => row.id}
-            empty="Nenhuma lead neste estado."
+            empty={t("tableEmpty")}
           />
         </Card>
       )}
@@ -267,56 +260,53 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
       <Drawer
         open={open !== null}
         onClose={() => setOpen(null)}
-        title={open?.contact.name ?? "Lead"}
+        title={open?.contact.name ?? t("drawerFallback")}
         subtitle={open ? `${open.propertyTitle} · ${open.propertyLocation}` : undefined}
         footer={
           <>
             <Button variant="secondary" onClick={() => setOpen(null)}>
-              Fechar
+              {tCommon("close")}
             </Button>
             <Button onClick={save} disabled={pending || (stage === "closed" && !outcome)}>
-              Guardar
+              {tCommon("save")}
             </Button>
           </>
         }
       >
         <div style={{ display: "grid", gap: "var(--sp-7)" }}>
           <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-            <span style={{ color: "var(--muted)" }}>Última atividade</span>
-            <strong>{open ? formatRelative(open.lastActivityAt) : ""}</strong>
+            <span style={{ color: "var(--muted)" }}>{t("lastActivity")}</span>
+            <strong>{open ? formatRelative(open.lastActivityAt, intlLocale) : ""}</strong>
           </div>
           {open?.lastMessage ? (
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-              <span style={{ color: "var(--muted)" }}>Última mensagem</span>
+              <span style={{ color: "var(--muted)" }}>{t("lastMessage")}</span>
               <p style={{ margin: 0, lineHeight: 1.6 }}>«{open.lastMessage}»</p>
             </div>
           ) : null}
 
           <Select
-            label="Estado no funil"
+            label={t("stageLabel")}
             value={stage}
             onChange={(event) => {
               const next = event.target.value as LeadStage;
               setStage(next);
               if (next !== "closed") setOutcome("");
             }}
-            options={LEAD_STAGES.map((value) => ({
-              value,
-              label: LEAD_STAGE_LABELS[value],
-            }))}
+            options={LEAD_STAGES.map((value) => ({ value, label: t(`stage.${value}`) }))}
           />
 
           {stage === "closed" ? (
             <Select
-              label="O negócio concretizou-se?"
+              label={t("outcomeQuestion")}
               value={outcome}
               onChange={(event) => setOutcome(event.target.value as LeadOutcome)}
-              placeholder="Escolha o desfecho"
+              placeholder={t("outcomePlaceholder")}
               options={[
-                { value: "won", label: LEAD_OUTCOME_LABELS.won },
-                { value: "lost", label: LEAD_OUTCOME_LABELS.lost },
+                { value: "won", label: t("outcome.won") },
+                { value: "lost", label: t("outcome.lost") },
               ]}
-              hint="Só uma lead concretizada sugere marcar o imóvel como vendido ou arrendado."
+              hint={t("outcomeHint")}
             />
           ) : null}
         </div>

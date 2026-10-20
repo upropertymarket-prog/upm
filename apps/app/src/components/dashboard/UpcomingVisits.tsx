@@ -1,4 +1,6 @@
+import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays } from "lucide-react";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { Card, EmptyState } from "@upm/ui";
 
 import { formatDay, formatTime, type VisitRow } from "../interaction/interactionTypes";
@@ -18,27 +20,26 @@ export type UpcomingVisitsProps = {
  * `painel/page.tsx`.
  */
 export function UpcomingVisits({ rows }: UpcomingVisitsProps) {
+  const t = useTranslations("visits.upcoming");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   return (
     <Card padded style={{ display: "flex", flexDirection: "column", gap: "var(--sp-5)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
         <CalendarDays size={16} aria-hidden="true" color="var(--accent)" />
-        <strong style={{ fontSize: "var(--fs-body-lg)" }}>Próximas visitas</strong>
+        <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("title")}</strong>
         <a href="/agenda" style={{ marginLeft: "auto", fontWeight: "var(--fw-bold)" }}>
-          Ver agenda
+          {t("seeSchedule")}
         </a>
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState
-          title="Nenhuma visita marcada"
-          description="Os pedidos de visita aos seus imóveis aparecem aqui."
-        />
+        <EmptyState title={t("emptyTitle")} description={t("emptyBody")} />
       ) : (
         <ul
           style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-4)" }}
         >
           {rows.map((row) => {
-            const { day, month } = formatDay(row.proposedAt);
+            const { day, month } = formatDay(row.proposedAt, intlLocale);
             return (
               <li
                 key={row.id}
@@ -107,7 +108,7 @@ export function UpcomingVisits({ rows }: UpcomingVisitsProps) {
                     flex: "none",
                   }}
                 >
-                  {formatTime(row.proposedAt)}
+                  {formatTime(row.proposedAt, intlLocale)}
                 </span>
               </li>
             );

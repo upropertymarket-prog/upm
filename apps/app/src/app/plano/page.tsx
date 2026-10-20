@@ -77,7 +77,7 @@ export default async function PlanoPage({
       loadConversations(supabase),
       loadVisits(supabase),
       role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-      loadNotifications(supabase),
+      loadNotifications(supabase, locale),
     ]);
 
   // P9-04 — a decisão vem da porta única, lida aqui e passada ao ecrã. O

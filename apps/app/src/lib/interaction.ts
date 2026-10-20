@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import type { Database } from "@upm/db";
 import { parseAttachments } from "@upm/db/interaction";
 import type { Notification } from "@upm/ui";
@@ -126,8 +127,15 @@ export async function loadLeads(supabase: Client): Promise<LeadRow[]> {
   }));
 }
 
-/** O sino da topbar (04 §5.5). Traz as últimas; o contador vem das não lidas. */
-export async function loadNotifications(supabase: Client): Promise<Notification[]> {
+/**
+ * O sino da topbar (04 §5.5). Traz as últimas; o contador vem das não lidas.
+ *
+ * O `locale` entra por parâmetro porque o "há 2 horas" de cada linha é texto
+ * que alguém lê: esta função corre no servidor, onde não há hook, e o idioma
+ * é o da página que a chama. Recebe a etiqueta curta (`pt`/`en`) e resolve a
+ * do `Intl` aqui, para quem chama não ter de saber dessa distinção.
+ */
+export async function loadNotifications(supabase: Client, locale: string): Promise<Notification[]> {
   const { data } = await supabase
     .from("notifications")
     .select("id, title, body, link, read_at, created_at")
@@ -137,7 +145,7 @@ export async function loadNotifications(supabase: Client): Promise<Notification[
   return (data ?? []).map((row) => ({
     id: row.id,
     text: row.body ? `${row.title} — ${row.body}` : row.title,
-    when: formatRelative(row.created_at),
+    when: formatRelative(row.created_at, INTL_LOCALE[resolveLocale(locale)]),
     read: row.read_at !== null,
     href: row.link ?? undefined,
   }));

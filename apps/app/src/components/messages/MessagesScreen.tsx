@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { MapPin, Paperclip, Search, Send } from "lucide-react";
 import { Badge, Button, EmptyState, Input, useToast } from "@upm/ui";
 import { formatBytes } from "@upm/db/cloud";
@@ -57,6 +59,8 @@ export function MessagesScreen({
   onSelect,
   onRefresh,
 }: MessagesScreenProps) {
+  const t = useTranslations("messages");
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [pending, startTransition] = useTransition();
@@ -117,7 +121,7 @@ export function MessagesScreen({
     startTransition(async () => {
       const result = await onOpenAttachment(messageId, path, "download");
       if (result.error || !result.url) {
-        toast(result.error ?? "Não foi possível abrir o anexo.", "error");
+        toast(result.error ?? t("attachmentFailed"), "error");
         return;
       }
       // Ligação assinada de 60 s: abre-se já, e não se guarda em nenhum sítio.
@@ -129,7 +133,7 @@ export function MessagesScreen({
     if (!onSaveAttachmentToCloud) return;
     startTransition(async () => {
       const result = await onSaveAttachmentToCloud(messageId, path);
-      toast(result.error ?? "Anexo guardado na Cloud.", result.error ? "error" : "success");
+      toast(result.error ?? t("savedToCloud"), result.error ? "error" : "success");
     });
   }
 
@@ -138,7 +142,7 @@ export function MessagesScreen({
     startTransition(async () => {
       const result = await onShareAddress(active.propertyId, active.buyerId);
       toast(
-        result.error ?? `Morada exata partilhada com ${active.other.name}.`,
+        result.error ?? t("addressSharedToast", { name: active.other.name }),
         result.error ? "error" : "success",
       );
       onRefresh?.();
@@ -147,17 +151,17 @@ export function MessagesScreen({
 
   return (
     <div className="upm-messages">
-      <section aria-label="Conversas" className="upm-messages__list">
+      <section aria-label={t("listLabel")} className="upm-messages__list">
         <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
-          <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>Conversas</h2>
+          <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>{t("listTitle")}</h2>
           {unreadTotal > 0 ? (
-            <Badge srLabel={`${unreadTotal} conversas por ler`}>{unreadTotal}</Badge>
+            <Badge srLabel={t("unreadTotal", { count: unreadTotal })}>{unreadTotal}</Badge>
           ) : null}
         </div>
         <Input
-          label="Procurar conversa"
+          label={t("search")}
           labelHidden
-          placeholder="Procurar conversa"
+          placeholder={t("search")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           leadingIcon={<Search size={14} aria-hidden="true" />}
@@ -200,7 +204,7 @@ export function MessagesScreen({
                       {item.other.name}
                     </strong>
                     <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
-                      {item.lastMessageAt ? formatRelative(item.lastMessageAt) : ""}
+                      {item.lastMessageAt ? formatRelative(item.lastMessageAt, intlLocale) : ""}
                     </span>
                   </span>
                   <span
@@ -226,10 +230,12 @@ export function MessagesScreen({
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {item.lastMessage || "Sem mensagens"}
+                      {item.lastMessage || t("noMessages")}
                     </span>
                     {item.unread > 0 ? (
-                      <Badge srLabel={`${item.unread} mensagens por ler`}>{item.unread}</Badge>
+                      <Badge srLabel={t("unreadInConversation", { count: item.unread })}>
+                        {item.unread}
+                      </Badge>
                     ) : null}
                   </span>
                 </button>
@@ -239,19 +245,13 @@ export function MessagesScreen({
         </ul>
         {filtered.length === 0 ? (
           <EmptyState
-            title={
-              conversations.length === 0 ? "Ainda sem conversas" : "Nenhuma conversa encontrada"
-            }
-            description={
-              conversations.length === 0
-                ? "As conversas começam no detalhe de um imóvel, em «Contactar proprietário»."
-                : "Tente outro nome ou outro imóvel."
-            }
+            title={conversations.length === 0 ? t("emptyTitle") : t("noResultsTitle")}
+            description={conversations.length === 0 ? t("emptyBody") : t("noResultsBody")}
           />
         ) : null}
       </section>
 
-      <section aria-label="Conversa" className="upm-messages__thread">
+      <section aria-label={t("threadLabel")} className="upm-messages__thread">
         {active ? (
           <>
             <header
@@ -287,7 +287,7 @@ export function MessagesScreen({
                   href={`/market/${active.propertyId}`}
                   style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}
                 >
-                  Ver imóvel · {active.propertyTitle}
+                  {t("viewProperty", { title: active.propertyTitle })}
                 </a>
               </div>
               {active.canShareAddress ? (
@@ -297,7 +297,7 @@ export function MessagesScreen({
                   disabled={pending || active.addressShared}
                   leadingIcon={<MapPin size={14} aria-hidden="true" />}
                 >
-                  {active.addressShared ? "Morada partilhada" : "Partilhar morada exata"}
+                  {active.addressShared ? t("addressShared") : t("shareAddress")}
                 </Button>
               ) : null}
             </header>
@@ -386,7 +386,7 @@ export function MessagesScreen({
                             cursor: "pointer",
                           }}
                         >
-                          Guardar na Cloud
+                          {t("saveToCloud")}
                         </button>
                       </span>
                     ))}
@@ -397,7 +397,7 @@ export function MessagesScreen({
                         justifySelf: "end",
                       }}
                     >
-                      {formatTime(message.createdAt)}
+                      {formatTime(message.createdAt, intlLocale)}
                       {message.mine ? (message.read ? " ✓✓" : " ✓") : ""}
                     </span>
                   </div>
@@ -436,16 +436,16 @@ export function MessagesScreen({
               <Button
                 variant="ghost"
                 iconOnly
-                aria-label="Anexar ficheiro"
+                aria-label={t("attach")}
                 disabled={pending || !onSendAttachment}
                 onClick={() => filePicker.current?.click()}
                 leadingIcon={<Paperclip size={18} aria-hidden="true" />}
               />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <Input
-                  label="Escreva uma mensagem"
+                  label={t("compose")}
                   labelHidden
-                  placeholder="Escreva uma mensagem"
+                  placeholder={t("compose")}
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                 />
@@ -453,7 +453,7 @@ export function MessagesScreen({
               <Button
                 type="submit"
                 iconOnly
-                aria-label="Enviar mensagem"
+                aria-label={t("send")}
                 disabled={pending || draft.trim().length === 0}
                 leadingIcon={<Send size={17} aria-hidden="true" />}
               />
@@ -461,10 +461,7 @@ export function MessagesScreen({
           </>
         ) : (
           <div style={{ padding: "var(--sp-9)" }}>
-            <EmptyState
-              title="Escolha uma conversa"
-              description="À esquerda estão as conversas por imóvel. Nenhuma ainda? Abra o detalhe de um imóvel e use «Contactar proprietário»."
-            />
+            <EmptyState title={t("pickTitle")} description={t("pickBody")} />
           </div>
         )}
       </section>

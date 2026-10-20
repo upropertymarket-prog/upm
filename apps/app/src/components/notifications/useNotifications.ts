@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "next-intl";
+import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { createClient } from "@upm/db/client";
 import type { Notification } from "@upm/ui";
 
@@ -20,6 +22,7 @@ import { formatRelative } from "../interaction/interactionTypes";
  */
 export function useNotifications(initial: Notification[] = [], live = true) {
   const [items, setItems] = useState<Notification[]>(initial);
+  const intlLocale = INTL_LOCALE[resolveLocale(useLocale())];
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -34,12 +37,12 @@ export function useNotifications(initial: Notification[] = [], live = true) {
       data.map((row) => ({
         id: row.id,
         text: row.body ? `${row.title} — ${row.body}` : row.title,
-        when: formatRelative(row.created_at),
+        when: formatRelative(row.created_at, intlLocale),
         read: row.read_at !== null,
         href: row.link ?? undefined,
       })),
     );
-  }, []);
+  }, [intlLocale]);
 
   useEffect(() => {
     if (!live) return;

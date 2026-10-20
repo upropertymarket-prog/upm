@@ -66,7 +66,7 @@ export default async function ContratoPage({
     loadConversations(supabase),
     loadVisits(supabase),
     role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);

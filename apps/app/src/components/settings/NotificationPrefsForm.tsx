@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Card, Toggle, useToast } from "@upm/ui";
 import {
   ACTIVE_NOTIFICATION_TYPES,
-  NOTIFICATION_TYPE_LABELS,
   prefEnabled,
   type NotificationPrefs,
   type NotificationType,
@@ -29,6 +29,8 @@ export type NotificationPrefsFormProps = {
  * confirma, não decide (regra do design system para os dois componentes).
  */
 export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormProps) {
+  const t = useTranslations("notifications.prefs");
+  const tType = useTranslations("notifications.type");
   const [draft, setDraft] = useState<NotificationPrefs>(prefs);
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -46,17 +48,15 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
   function save() {
     startTransition(async () => {
       const result = await onSave(draft);
-      toast(result.error ?? "Preferências guardadas.", result.error ? "error" : "success");
+      toast(result.error ?? t("saved"), result.error ? "error" : "success");
     });
   }
 
   return (
     <Card padded style={{ display: "grid", gap: "var(--sp-7)" }}>
       <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-        <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>Notificações</h2>
-        <p style={{ margin: 0, color: "var(--muted)" }}>
-          Escolha o que quer receber no sino da aplicação e por e-mail.
-        </p>
+        <h2 style={{ margin: 0, fontSize: "var(--fs-subtitle-lg)" }}>{t("title")}</h2>
+        <p style={{ margin: 0, color: "var(--muted)" }}>{t("subtitle")}</p>
       </div>
 
       <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid" }}>
@@ -72,18 +72,20 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
               borderBottom: "1px solid var(--border)",
             }}
           >
-            <span style={{ flex: "1 1 240px", minWidth: 0 }}>{NOTIFICATION_TYPE_LABELS[type]}</span>
+            <span style={{ flex: "1 1 240px", minWidth: 0 }}>{tType(type)}</span>
             {/* Os dois canais lado a lado, com folga grande entre eles: a
                 separação é que os mantém a ler-se como dois interruptores
                 independentes e não como um par de opções da mesma pergunta. */}
             <span style={{ display: "flex", flexDirection: "row", gap: "48px" }}>
               <Toggle
-                label="Na aplicação"
+                size="md"
+                label={t("inapp")}
                 checked={prefEnabled(draft, type, "inapp")}
                 onCheckedChange={(value) => set(type, "inapp", value)}
               />
               <Toggle
-                label="Por e-mail"
+                size="md"
+                label={t("email")}
                 checked={prefEnabled(draft, type, "email")}
                 onCheckedChange={(value) => set(type, "email", value)}
               />
@@ -92,14 +94,11 @@ export function NotificationPrefsForm({ prefs, onSave }: NotificationPrefsFormPr
         ))}
       </ul>
 
-      <p style={{ margin: 0, color: "var(--muted)" }}>
-        Os e-mails entram numa fila e são enviados assim que o serviço de envio estiver ligado — a
-        escolha do fornecedor ficou para o fim do projeto (07 §16.1 e §18.4). O sino funciona já.
-      </p>
+      <p style={{ margin: 0, color: "var(--muted)" }}>{t("queueNote")}</p>
 
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={save} disabled={pending}>
-          Guardar preferências
+          {t("save")}
         </Button>
       </div>
     </Card>

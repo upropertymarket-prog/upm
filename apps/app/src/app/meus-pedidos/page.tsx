@@ -47,7 +47,7 @@ export default async function MyRequestsPage({
   const [visits, conversations, notifications] = await Promise.all([
     loadVisits(supabase),
     loadConversations(supabase),
-    loadNotifications(supabase),
+    loadNotifications(supabase, locale),
   ]);
 
   return (
