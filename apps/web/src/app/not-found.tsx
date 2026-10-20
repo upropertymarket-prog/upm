@@ -12,13 +12,13 @@ import { setLocalePreference } from "./actions/preferences";
  * =========================================================================
  * Até 13 out 2026 não havia ficheiro nenhum, e o Next servia o seu ecrã por
  * omissão: fundo branco, "404 | This page could not be found", em inglês, sem
- * navbar e sem rodapé. Não é um caso de laboratório — a `/imoveis/[slug]`
+ * navbar e sem rodapé. Não é um caso de laboratório — a `/propriedades/[slug]`
  * chama `notFound()` em dois caminhos reais (slug sem uuid e propriedade que
  * saiu de `active`), por isso é o que vê quem abre um link partilhado de um
  * anúncio entretanto removido. Essa pessoa veio de uma partilha, não sabe o
  * que correu mal, e o ecrã do Next não lhe dá saída nenhuma.
  *
- * O caminho continua a ser `/imoveis` enquanto a rota não for renomeada — o
+ * O caminho continua a ser `/propriedades` enquanto a rota não for renomeada — o
  * texto já diz "propriedades", o URL ainda não.
  *
  * Daí este ser uma página do site e não um aviso: tem a navbar, tem o rodapé e
@@ -71,7 +71,7 @@ export default async function NotFound() {
                 justifyContent: "center",
               }}
             >
-              <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
+              <Link href="/propriedades" className="upm-btn upm-btn--primary upm-btn--md">
                 {tGone("seeListings")}
               </Link>
               <Link href="/" className="upm-btn upm-btn--secondary upm-btn--md">

@@ -13,7 +13,7 @@ import type { PublicListingCard } from "../../lib/public-listings";
  *
  * **Separado do `PropertyCard` do Market da app, de propósito.** São duas
  * superfícies com públicos diferentes: aquele leva a `/market/{id}` dentro de
- * uma sessão e assume o shell da app; este leva a `/imoveis/{slug}` sem
+ * uma sessão e assume o shell da app; este leva a `/propriedades/{slug}` sem
  * sessão, tem de ser indexável e segue o ritmo de larguras do site (03 §1.1),
  * não o da app. Partilhar o componente obrigaria a passar o destino, o tamanho
  * da tipografia e o shell por prop — três condicionais dentro de um cartão —
@@ -62,7 +62,7 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
 
   return (
     <Link
-      href={`/imoveis/${listing.slug}`}
+      href={`/propriedades/${listing.slug}`}
       style={{
         display: "grid",
         gridTemplateRows: "auto 1fr",

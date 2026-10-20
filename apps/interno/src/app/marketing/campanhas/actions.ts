@@ -475,13 +475,13 @@ async function lerImovel(
     location: data.city ?? "",
     price: data.deal === "rent" ? `${price}/mês` : price,
     /**
-     * `/imoveis/{id}` e não o slug completo `titulo-em-kebab-{uuid}`: o slug
+     * `/propriedades/{id}` e não o slug completo `titulo-em-kebab-{uuid}`: o slug
      * resolve-se pelo uuid do fim (`listingIdFromSlug`), e a ficha pública
      * **redireciona** para a forma canónica — que é a razão por que esse
      * redireccionamento existe. O helper que compõe o slug vive em `apps/web`
      * e importá-lo daqui era atar o painel interno ao site público para ganhar
      * um redireccionamento a menos.
      */
-    url: `${process.env.WEB_URL ?? ""}/imoveis/${data.id}`,
+    url: `${process.env.WEB_URL ?? ""}/propriedades/${data.id}`,
   };
 }

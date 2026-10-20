@@ -8,7 +8,7 @@ import { SiteFooter } from "./SiteFooter";
 import type { ListingAvailability, PublicListingCard } from "../../lib/public-listings";
 
 /**
- * O anúncio saiu de circulação — `/imoveis/[slug]` (P2-05)
+ * O anúncio saiu de circulação — `/propriedades/[slug]` (P2-05)
  * =========================================================================
  * Não é um 404 com outra roupa. O 404 responde "esta página não existe", que
  * para quem clicou numa partilha de há duas semanas é **falso**: a página
@@ -38,7 +38,7 @@ import type { ListingAvailability, PublicListingCard } from "../../lib/public-li
  * caminho mais lento.
  *
  * O caminho para o 410, quando valer a pena: um `middleware.ts` que intercete
- * `/imoveis/:slug`, pergunte a disponibilidade e responda
+ * `/propriedades/:slug`, pergunte a disponibilidade e responda
  * `new NextResponse(html, { status: 410 })`. Fica por fazer por causa do custo
  * — o middleware corre em todos os pedidos da rota e teria de falar com a base
  * de dados antes de cada um — e porque o ganho só se mede quando houver
@@ -90,7 +90,7 @@ export function ListingGone({
                 justifyContent: "center",
               }}
             >
-              <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
+              <Link href="/propriedades" className="upm-btn upm-btn--primary upm-btn--md">
                 {t("seeListings")}
               </Link>
               <Link href="/criar-conta" className="upm-btn upm-btn--secondary upm-btn--md">

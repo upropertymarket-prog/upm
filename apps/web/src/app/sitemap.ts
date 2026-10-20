@@ -19,9 +19,9 @@ import { getPublicListings, LISTINGS_PAGE_SIZE } from "../lib/public-listings";
  *    `confirmar`) e `/criar-conta/verificacao` dizem ao robô para não as
  *    indexar; listá-las no sitemap seria pedir exatamente o contrário na mesma
  *    respiração. O campo `noindex` passou a vir no inventário por causa disto.
- *  - **As rotas dinâmicas como template.** `/imoveis/[slug]` não é um URL: é um
+ *  - **As rotas dinâmicas como template.** `/propriedades/[slug]` não é um URL: é um
  *    molde. O que entra são as propriedades concretas, logo abaixo.
- *  - **`/imoveis` em pré-lançamento.** Nesse modo a página existe mas não tem
+ *  - **`/propriedades` em pré-lançamento.** Nesse modo a página existe mas não tem
  *    catálogo, e a própria `generateMetadata` da rota põe-lhe `noindex` — é a
  *    mesma decisão, aplicada ao sitemap.
  *
@@ -64,7 +64,7 @@ function siteUrl(): string {
 /** A home é a única com prioridade distinta; o resto fica no valor por omissão. */
 function priorityFor(route: string): number {
   if (route === "/") return 1;
-  if (route === "/imoveis" || route === "/pre-inscricao") return 0.8;
+  if (route === "/propriedades" || route === "/pre-inscricao") return 0.8;
   return 0.5;
 }
 
@@ -76,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = SEO_ROUTES.filter((entry) => {
     if (entry.noindex || entry.dynamic) return false;
     // Ver a nota acima: em `pre` o Market vai com `noindex`.
-    if (entry.route === "/imoveis" && launchMode === "pre") return false;
+    if (entry.route === "/propriedades" && launchMode === "pre") return false;
     return true;
   }).map((entry) => ({
     url: `${base}${entry.route === "/" ? "" : entry.route}`,
@@ -94,7 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     for (const listing of listings) {
       listingEntries.push({
-        url: `${base}/imoveis/${listing.slug}`,
+        url: `${base}/propriedades/${listing.slug}`,
         // `publishedAt` e não "agora": dizer que todas as páginas mudaram
         // sempre que o sitemap é regenerado é ruído, e os robôs aprendem a
         // ignorar um `lastmod` que nunca corresponde a uma alteração real.

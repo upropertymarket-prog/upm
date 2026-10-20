@@ -1,7 +1,7 @@
 import type { RouteSeo } from "@/lib/seo";
 
 /**
- * SEO do detalhe de uma propriedade — `/imoveis/[slug]` (04 §2.1.2).
+ * SEO do detalhe de uma propriedade — `/propriedades/[slug]` (04 §2.1.2).
  *
  * As chaves entre chaves são o template de 04 §2.1.2, resolvido na
  * `page.tsx` com os dados do imóvel. **Os nomes das variáveis são os mesmos

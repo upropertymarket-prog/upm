@@ -42,7 +42,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
   return (
     <form
       method="get"
-      action="/imoveis"
+      action="/propriedades"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(min(11rem, 100%), 1fr))",
@@ -125,7 +125,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         <Button type="submit">{t("search")}</Button>
         {/* Uma navegação e não um botão de `reset`: `reset` devolveria os campos
             aos valores que vieram do URL, que é o oposto de limpar a pesquisa. */}
-        <Link href="/imoveis" className="upm-btn upm-btn--secondary upm-btn--md">
+        <Link href="/propriedades" className="upm-btn upm-btn--secondary upm-btn--md">
           {t("clear")}
         </Link>
       </div>

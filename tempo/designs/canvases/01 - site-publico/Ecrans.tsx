@@ -367,7 +367,7 @@ export function PosLancamentoEscuro() {
  * os componentes reais.
  */
 /**
- * `/imoveis` — o Market público (P2-05).
+ * `/propriedades` — o Market público (P2-05).
  *
  * `ListingsBrowser` é o mesmo componente que a `page.tsx` renderiza; o que ela
  * faz e aqui não se faz é validar os parâmetros do URL e consultar a base de
@@ -417,7 +417,7 @@ export function ImoveisSemResultadosEscuro() {
 }
 
 /**
- * `/imoveis` em **pré-lançamento** — o outro ramo inteiro da mesma rota.
+ * `/propriedades` em **pré-lançamento** — o outro ramo inteiro da mesma rota.
  *
  * A `page.tsx` tem dois retornos: com catálogo e, em `pre`, uma página que diz
  * que ainda não abriu e leva à pré-inscrição. Esse segundo ramo é o que
@@ -461,7 +461,7 @@ export function ImoveisPreLancamentoEscuro() {
 }
 
 /**
- * `/imoveis/[slug]` — o detalhe de propriedade (P2-05).
+ * `/propriedades/[slug]` — o detalhe de propriedade (P2-05).
  *
  * O mapa aparece como o visitante o vê de início: fechado, com o aviso de que
  * carregá-lo expõe o IP ao OpenFreeMap. É deliberado que a storyboard mostre
@@ -490,7 +490,7 @@ function PreInscricao({ theme }: { theme: "light" | "dark" }) {
       {/* Cabeçalho e rodapé reproduzidos como na `page.tsx`: a página de
           conversão do pré-lançamento tem navbar, e sem ela a storyboard
           mostrava o formulário a flutuar — o visitante nunca o vê assim. Em
-          `pre` o cabeçalho é o que dá a saída para a home e para `/imoveis`,
+          `pre` o cabeçalho é o que dá a saída para a home e para `/propriedades`,
           por isso é parte do que se revê, não moldura decorativa. */}
       <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
       <main>

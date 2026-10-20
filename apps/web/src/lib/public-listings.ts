@@ -84,7 +84,7 @@ export const LISTINGS_PAGE_SIZE = 12;
  * O slug de uma ficha: `titulo-em-kebab-{uuid}`.
  *
  * **Porque é que o id vai no fim e não há coluna `slug`.** 04 §2.1.2 pede a
- * rota `/imoveis/[slug]`, e um slug só com o título não serve: `properties`
+ * rota `/propriedades/[slug]`, e um slug só com o título não serve: `properties`
  * não tem coluna de slug, os títulos não são únicos (nem obrigatórios — em
  * staging estão todos vazios) e mudar um título partiria o link antigo.
  *
@@ -279,7 +279,7 @@ async function fetchPage(
   };
 }
 
-/** Uma página de `/imoveis`, com os filtros aplicados. */
+/** Uma página de `/propriedades`, com os filtros aplicados. */
 export async function getPublicListings(
   filters: PublicListingFilters,
   page = 1,

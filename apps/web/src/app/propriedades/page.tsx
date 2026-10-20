@@ -16,7 +16,7 @@ import { COMING_SOON_CARDS } from "../../lib/site-content";
 import { setLocalePreference } from "../actions/preferences";
 
 /**
- * `/imoveis` — o Market público (P2-05 · 04 §2.1)
+ * `/propriedades` — o Market público (P2-05 · 04 §2.1)
  * =========================================================================
  * Esta página valida os parâmetros e vai buscar; o que desenha é
  * `ListingsBrowser`, que recebe tudo por prop (mesmo corte do `HomeSections` e
@@ -24,7 +24,7 @@ import { setLocalePreference } from "../actions/preferences";
  * única porta segura, e serve-se de cache com cinco minutos de ISR.
  *
  * **Em pré-lançamento a página existe mas não finge ter catálogo.** 04 §2.1 põe
- * `/imoveis` no pós-lançamento; apagá-la em `pre` daria 404 a um link
+ * `/propriedades` no pós-lançamento; apagá-la em `pre` daria 404 a um link
  * partilhado, e mostrá-la vazia daria a impressão de um site sem imóveis. O que
  * faz é dizer a verdade — ainda não abriu — e levar à pré-inscrição. Nesse modo
  * vai com `noindex`: um Market vazio indexado pelo Google é a pior primeira
@@ -32,7 +32,7 @@ import { setLocalePreference } from "../actions/preferences";
  */
 export async function generateMetadata() {
   const launchMode = await getLaunchMode();
-  const base = await pageMetadata(seo, "/imoveis");
+  const base = await pageMetadata(seo, "/propriedades");
   if (launchMode === "post") return base;
   return { ...base, robots: { index: false, follow: true } };
 }

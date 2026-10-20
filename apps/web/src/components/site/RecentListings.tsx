@@ -10,7 +10,7 @@ import { SectionHeading } from "./SiteSection";
  * =========================================================================
  * 04 §2.1: em pós-lançamento esta secção **substitui** "Em breve". Os seis
  * últimos publicados, por `published_at desc`, com o CTA "Ver todos os
- * imóveis" para `/imoveis`.
+ * imóveis" para `/propriedades`.
  *
  * **Não se mostra vazia.** Se o catálogo ainda não tiver nada publicado — o
  * caso de staging hoje, onde os 23 imóveis estão todos em `draft` —, quem
@@ -50,7 +50,7 @@ export function RecentListings({ listings }: { listings: PublicListingCard[] }) 
       </ul>
 
       <div>
-        <Link href="/imoveis" className="upm-btn upm-btn--primary upm-btn--md">
+        <Link href="/propriedades" className="upm-btn upm-btn--primary upm-btn--md">
           {t("cta")}
         </Link>
       </div>

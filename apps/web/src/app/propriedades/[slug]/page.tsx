@@ -20,7 +20,7 @@ import {
 import { setLocalePreference } from "../../actions/preferences";
 
 /**
- * `/imoveis/[slug]` — a ficha pública de um imóvel (P2-05 · 04 §2.1)
+ * `/propriedades/[slug]` — a ficha pública de um imóvel (P2-05 · 04 §2.1)
  * =========================================================================
  * Esta página é só a camada que **resolve e vai buscar**: o slug, o imóvel, o
  * redirecionamento canónico e os metadados. O que desenha é `ListingDetail`,
@@ -131,7 +131,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }),
   ) as RouteSeo;
 
-  return pageMetadata(preenchido, `/imoveis/${listing.slug}`);
+  return pageMetadata(preenchido, `/propriedades/${listing.slug}`);
 }
 
 /**
@@ -151,7 +151,7 @@ function structuredData(listing: PublicListingDetail) {
     "@type": "RealEstateListing",
     name: listing.title,
     description: listing.description ?? undefined,
-    url: `/imoveis/${listing.slug}`,
+    url: `/propriedades/${listing.slug}`,
     image: listing.photoUrls.length > 0 ? listing.photoUrls : undefined,
     datePosted: listing.publishedAt ?? undefined,
     ...(listing.city
@@ -219,7 +219,7 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
 
   // Slug desatualizado (o título mudou) → 301 para o canónico.
   const canonicalSlug = listingSlug({ id: listing.id, title: listing.title });
-  if (slug !== canonicalSlug) permanentRedirect(`/imoveis/${canonicalSlug}`);
+  if (slug !== canonicalSlug) permanentRedirect(`/propriedades/${canonicalSlug}`);
 
   return (
     <>

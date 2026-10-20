@@ -42,7 +42,7 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
       if (key !== "pagina" && value) query[key] = value;
     }
     if (target > 1) query.pagina = String(target);
-    return { pathname: "/imoveis" as const, query };
+    return { pathname: "/propriedades" as const, query };
   };
 
   return (
@@ -72,7 +72,7 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
           }}
         >
           Sem resultados para estes filtros. Tente alargar a pesquisa ou{" "}
-          <Link href="/imoveis">limpar os filtros</Link>.
+          <Link href="/propriedades">limpar os filtros</Link>.
         </p>
       ) : (
         <ul

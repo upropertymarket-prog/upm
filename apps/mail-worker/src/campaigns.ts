@@ -435,7 +435,7 @@ class Caches {
       title: data.title ?? "",
       location: data.city ?? "",
       price: data.deal === "rent" ? `${preco}/mês` : preco,
-      url: `${this.env.WEB_URL}/imoveis/${data.id}`,
+      url: `${this.env.WEB_URL}/propriedades/${data.id}`,
       imageUrl: await this.cover(row.campaign_email_id, data.id),
     };
   }

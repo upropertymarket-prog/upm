@@ -11,14 +11,14 @@ import { getLaunchMode } from "../lib/launch-mode";
  * indexar isso significa que, no dia do lançamento, o resultado de pesquisa da
  * marca é uma página que diz que o produto ainda não abriu — e sai do índice
  * devagar, muito depois de deixar de ser verdade. A mesma lógica que já põe
- * `noindex` em `/imoveis` nesse modo, aplicada ao site todo.
+ * `noindex` em `/propriedades` nesse modo, aplicada ao site todo.
  *
  * Em pós-lançamento abre, com três exclusões:
  *
  *  - **`/entrar`, `/recuperar-palavra-passe`, `/criar-conta/verificacao`** —
  *    ecrãs transacionais, já `noindex` no respetivo `seo.ts`. O `noindex` é a
  *    instrução que conta; isto poupa ao robô o pedido.
- *  - **`/imoveis?...`** não se exclui. Os filtros geram combinações infinitas,
+ *  - **`/propriedades?...`** não se exclui. Os filtros geram combinações infinitas,
  *    mas quem resolve isso é o `canonical` da página, não um `Disallow` — uma
  *    página bloqueada no `robots.txt` não pode ser lida, e um robô que não a lê
  *    nunca vê o `canonical` que a aponta para a versão limpa.

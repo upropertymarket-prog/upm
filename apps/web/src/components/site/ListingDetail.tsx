@@ -152,7 +152,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
             {/* A mesma saída do `PropertyDetail` ("← Voltar ao Market"), para o
                 mesmo sítio desta banda: o catálogo público. */}
             <Link
-              href="/imoveis"
+              href="/propriedades"
               className="upm-btn upm-btn--secondary upm-btn--sm"
               style={{ alignSelf: "flex-start", textDecoration: "none" }}
             >

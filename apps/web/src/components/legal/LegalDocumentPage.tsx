@@ -27,7 +27,7 @@ import { LegalDocumentView } from "./LegalDocumentView";
  * **12 out 2026 — passou a ter a barra e o rodapé do site público.** As três
  * rotas serviam o documento sozinho, sem nada à volta: quem chegava ao fim dos
  * Termos não tinha forma de voltar ao site, e quem lá chegava por link não via
- * de que site se tratava. São páginas do `www` como `/imoveis` ou `/`, e levam
+ * de que site se tratava. São páginas do `www` como `/propriedades` ou `/`, e levam
  * a mesma moldura.
  *
  * O menu vem com as secções do site, apontadas à home (`/#precos`): a primeira

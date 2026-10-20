@@ -49,7 +49,7 @@ import {
  * exatamente o passo do canvas `legal`. Sem exceções: todas as molduras deste
  * canvas são páginas inteiras, e nenhuma linha foge ao passo.
  *
- * O Market público (`/imoveis`) e o detalhe entraram a 12 out 2026, com P2-05.
+ * O Market público (`/propriedades`) e o detalhe entraram a 12 out 2026, com P2-05.
  * "Sem propriedades" tem storyboard própria porque é o estado que um visitante
  * encontra ao filtrar por uma localidade sem anúncios — acontece desde o
  * primeiro dia e é o mais fácil de deixar feio.
@@ -72,8 +72,8 @@ import {
  *  - **Storyboard sem a navbar da página.** `/pre-inscricao` mostrava só o
  *    formulário e os cartões; a `page.tsx` tem `PublicHeader` e `SiteFooter`.
  *    A regra para páginas é reproduzir a moldura da rota — foi o que se fez em
- *    `/imoveis` e não se tinha feito aqui.
- *  - **Um ramo de rota inteiro sem storyboard.** `/imoveis` em `pre` devolve
+ *    `/propriedades` e não se tinha feito aqui.
+ *  - **Um ramo de rota inteiro sem storyboard.** `/propriedades` em `pre` devolve
  *    uma página diferente — "em breve" + CTA para a pré-inscrição —, que é o
  *    que **todos** os visitantes vão ver até ao lançamento. Era o ecrã mais
  *    visto do site e não existia no canvas.
@@ -132,52 +132,52 @@ export default function SitePublicoCanvas() {
           que o visitante vê até ao lançamento. */}
       <Storyboard
         id="ImoveisPreLancamentoClaro"
-        name="Market público · pré-lançamento · claro (/imoveis)"
+        name="Market público · pré-lançamento · claro (/propriedades)"
         component={ImoveisPreLancamentoClaro}
         layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"
-        name="Market público · pré-lançamento · escuro (/imoveis)"
+        name="Market público · pré-lançamento · escuro (/propriedades)"
         component={ImoveisPreLancamentoEscuro}
         layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisSemResultados"
-        name="Market público · sem propriedades · claro (/imoveis?cidade=Guarda)"
+        name="Market público · sem propriedades · claro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultados}
         layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisSemResultadosEscuro"
-        name="Market público · sem propriedades · escuro (/imoveis?cidade=Guarda)"
+        name="Market público · sem propriedades · escuro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultadosEscuro}
         layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisClaro"
-        name="Market público · com propriedades · claro (/imoveis)"
+        name="Market público · com propriedades · claro (/propriedades)"
         component={ImoveisClaro}
         layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisEscuro"
-        name="Market público · com propriedades · escuro (/imoveis)"
+        name="Market público · com propriedades · escuro (/propriedades)"
         component={ImoveisEscuro}
         layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="FichaClaro"
-        name="Detalhe de propriedade · claro (/imoveis/[slug])"
+        name="Detalhe de propriedade · claro (/propriedades/[slug])"
         component={FichaClaro}
         layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
         id="FichaEscuro"
-        name="Detalhe de propriedade · escuro (/imoveis/[slug])"
+        name="Detalhe de propriedade · escuro (/propriedades/[slug])"
         component={FichaEscuro}
         layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />

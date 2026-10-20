@@ -1,13 +1,13 @@
 import type { RouteSeo } from "@/lib/seo";
 
 /**
- * SEO de `/imoveis` — o catálogo público (P2-05).
+ * SEO de `/propriedades` — o catálogo público (P2-05).
  *
- * O `canonical` fixo que aqui estava (`https://upropertymarket.pt/imoveis`)
+ * O `canonical` fixo que aqui estava (`https://upropertymarket.pt/propriedades`)
  * saiu a 20 out 2026. Eram dois defeitos num campo: anunciava o domínio de
  * produção **a partir de staging**, contra o que o `siteUrl()` do
  * `lib/seo.ts` existe para evitar, e prendia a página a um só URL agora que
- * ela tem dois (`/imoveis` e `/en/imoveis`). Sem o campo, o
+ * ela tem dois (`/propriedades` e `/en/propriedades`). Sem o campo, o
  * `buildMetadata` calcula-o a partir da rota e do idioma — que é o que estava
  * certo desde o início.
  */

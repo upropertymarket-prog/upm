@@ -199,7 +199,7 @@ export function HomeSections({
             `RecentListings` devolve `null` e a secção desaparece: uma grelha
             vazia sob o título diria que o site está partido. */}
         {launchMode === "post" ? (
-          <SiteSection id="imoveis-recentes">
+          <SiteSection id="propriedades-recentes">
             <RecentListings listings={recentListings} />
           </SiteSection>
         ) : null}

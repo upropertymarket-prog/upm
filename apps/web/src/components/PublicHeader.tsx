@@ -23,7 +23,7 @@ import { NAV_ANCHOR_IDS } from "../lib/site-content";
  * só a home as mostrava, com o argumento de que "um menu que promete Preços e
  * não vai a lado nenhum é pior do que não ter menu". O argumento estava certo e
  * a conclusão errada: o problema era o `href`, não o menu. Quem abre `/termos`
- * ou `/imoveis` fica sem **nenhuma** forma de voltar às secções do site — e uma
+ * ou `/propriedades` fica sem **nenhuma** forma de voltar às secções do site — e uma
  * barra com marca e um botão só não é navegação.
  *
  * Daí `anchors`, que diz **para onde** a âncora aponta e não se existe:

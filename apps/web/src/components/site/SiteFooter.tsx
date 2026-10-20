@@ -15,7 +15,7 @@ import { SITE_MAX_WIDTH } from "./SiteSection";
  * este rodapé é o que cumpre essa ligação em todas as páginas do site.
  *
  * As âncoras (`#sobre`, `#precos`) só funcionam na home. Num site de uma
- * página só isso chega; quando houver `/imoveis`, passam a `/#sobre`.
+ * página só isso chega; quando houver `/propriedades`, passam a `/#sobre`.
  */
 export function SiteFooter() {
   const t = useTranslations("site.footer");
