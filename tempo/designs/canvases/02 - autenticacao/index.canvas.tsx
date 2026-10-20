@@ -27,7 +27,7 @@ import {
  */
 export default function AutenticacaoCanvas() {
   return (
-    <Canvas name="Autenticacao" backgroundColor="#232323">
+    <Canvas name="02 - autenticacao" backgroundColor="#232323">
       <Storyboard
         id="EntrarClaro"
         name="Entrar · Claro (/entrar)"

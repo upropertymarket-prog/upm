@@ -61,7 +61,7 @@ import {
  */
 export default function ProprietarioCanvas() {
   return (
-    <Canvas name="Proprietario" backgroundColor="#232323">
+    <Canvas name="06 - proprietario" backgroundColor="#232323">
       <Storyboard
         id="Painel"
         name="Painel · Claro (/painel)"

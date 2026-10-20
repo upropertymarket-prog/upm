@@ -293,7 +293,6 @@ function ModerationDemo({ theme, detail }: { theme: "light" | "dark"; detail: bo
             ? [
                 {
                   id: "media-1",
-                  path: "demo/apt.jpg",
                   kind: "photo",
                   position: 0,
                   is_cover: true,
@@ -311,7 +310,6 @@ function ModerationDemo({ theme, detail }: { theme: "light" | "dark"; detail: bo
                   mime: "application/pdf",
                   size: 200000,
                   kind: "energetico",
-                  storage_path: "demo/cert.pdf",
                   signedUrl: "",
                 },
               ]

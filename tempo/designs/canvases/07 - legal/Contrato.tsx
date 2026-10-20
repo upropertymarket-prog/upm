@@ -12,7 +12,10 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
 // vez de copiado: é o mesmo problema e a mesma solução. Se vier a ser preciso
 // num terceiro canvas, muda-se para uma pasta partilhada — a dois chamadores,
 // mover já seria mexer em seis ficheiros para arrumar um.
-import { NoNavigation } from "../proprietario/NoNavigation";
+// 20 out 2026: o caminho passou a ter o número da ordem do menu, com a
+// renomeação das pastas dos canvases. Um `import` entre canvases é a conta a
+// pagar por não copiar o componente — e paga-se num sítio só.
+import { NoNavigation } from "../06 - proprietario/NoNavigation";
 
 /**
  * Contrato de adesão — claro e escuro (doc 13).

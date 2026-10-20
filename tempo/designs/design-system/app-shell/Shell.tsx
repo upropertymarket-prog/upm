@@ -60,11 +60,19 @@ const LOCALES = [
   { value: "en", label: "English" },
 ];
 
+/**
+ * O tipo do ícone é o dos ícones do `lucide-react` — um componente que aceita
+ * `size`. Estava como `Parameters<typeof createElement>[0]`, que aceita
+ * qualquer coisa e por isso recusava o `size` que esta função passa: o
+ * `createElement` genérico não sabe que props é que o componente tem.
+ */
+type IconComponent = (props: { size?: number }) => React.ReactNode;
+
 function item(
   id: string,
   label: string,
   href: string,
-  icon: Parameters<typeof createElement>[0],
+  icon: IconComponent,
   count?: number,
 ): NavItem {
   return { id, label, href, icon: createElement(icon, { size: 17 }), count };

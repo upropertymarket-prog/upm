@@ -27,6 +27,15 @@ const DIA = "2026-09-29T";
 
 /** As ações de escrita não fazem nada no canvas — não há sessão nem servidor. */
 export const demoOk = async () => ({});
+
+/**
+ * O `SaveButton` quer saber **em que estado ficou** o imóvel, não só que
+ * correu bem: o `ToggleSavedResult` é `{ saved }` ou `{ error }`. O
+ * `demoOk` genérico não serve, e durante um tempo esteve lá — o botão ficava
+ * sem resposta na maqueta. Devolve sempre "guardado", que é o resultado de
+ * clicar num coração vazio.
+ */
+export const demoGuardar = async () => ({ saved: true });
 export const demoStartConversation = async () => ({ id: "c1" });
 
 export const demoDashboardStats: DashboardStat[] = [
@@ -226,6 +235,12 @@ export const demoConversations: ConversationSummary[] = [
   },
 ];
 
+/**
+ * `attachments` é obrigatório no `ChatMessage` desde que as Mensagens ganharam
+ * anexos (07 §19.6). Vazio nas três: o que esta conversa existe para mostrar é
+ * o fio e as bolhas, e um anexo numa maqueta de três mensagens rouba a
+ * atenção ao que se está a revê.
+ */
 export const demoConversation: ConversationDetail = {
   ...demoConversations[0]!,
   buyerId: "u1",
@@ -238,6 +253,7 @@ export const demoConversation: ConversationDetail = {
       createdAt: "2026-09-28T17:40:00Z",
       mine: false,
       read: true,
+      attachments: [],
     },
     {
       id: "m2",
@@ -245,6 +261,7 @@ export const demoConversation: ConversationDetail = {
       createdAt: "2026-09-28T18:02:00Z",
       mine: true,
       read: true,
+      attachments: [],
     },
     {
       id: "m3",
@@ -252,6 +269,7 @@ export const demoConversation: ConversationDetail = {
       createdAt: `${DIA}09:12:00Z`,
       mine: false,
       read: false,
+      attachments: [],
     },
   ],
 };

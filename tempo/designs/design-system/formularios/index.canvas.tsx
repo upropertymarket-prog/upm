@@ -87,7 +87,7 @@ defineAsset(Checkbox, {
 defineAsset(Toggle, {
   libraries: ["upm-base"],
   usageInstructions:
-    "Interruptor com role=switch, para definições que se aplicam de imediato: localização aproximada, feature flags, 'Open Graph igual aos dados da página'. NÃO usar em formulários que só gravam no Guardar — aí o componente é o Checkbox. O desenho tem 44 × 24 px mas o invólucro garante o alvo de 40 px (07 §5.14).",
+    "Interruptor com role=switch, para definições que se aplicam de imediato: localização aproximada, feature flags, 'Open Graph igual aos dados da página'. NÃO usar em formulários que só gravam no Guardar — aí o componente é o Checkbox. `size` escolhe o desenho: `lg` (omitido, 44 × 24 px) é o base, `md` (36 × 20 px) é para listas de definições com interruptores repetidos. Em ambos o invólucro garante o alvo de 40 px (07 §5.14).",
   variants: {
     Ligado: {
       props: {

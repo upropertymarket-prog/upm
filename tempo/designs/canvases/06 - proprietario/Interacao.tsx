@@ -67,6 +67,7 @@ function Shell({
                 counters={{ leads: 2, messages: 3, visitSchedule: 2, contracts: 1 }}
                 notifications={demoNotifications}
                 liveNotifications={false}
+                appUpdates={false}
               >
                 {hideHeader ? null : <PageHeader title={title} subtitle={subtitle} />}
                 {children}

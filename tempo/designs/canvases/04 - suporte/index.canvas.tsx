@@ -43,7 +43,7 @@ import {
  */
 export default function SuporteCanvas() {
   return (
-    <Canvas name="Suporte" backgroundColor="#232323">
+    <Canvas name="04 - suporte" backgroundColor="#232323">
       {/* Caixa de e-mail — 1.ª entrada do menu (P10-04) */}
       <Storyboard
         id="SuporteCaixaClaro"

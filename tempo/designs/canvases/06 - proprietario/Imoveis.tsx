@@ -13,7 +13,13 @@ import { OwnerListingBar } from "../../../../apps/app/src/components/market/Owne
 import { PropertyListing } from "../../../../apps/app/src/components/my-properties/PropertyListing";
 import { PropertyFormWizard } from "../../../../apps/app/src/components/properties/PropertyFormWizard";
 import ptMessages from "../../../../packages/config/messages/pt.json";
-import { demoLocaleChange, demoNotifications, demoOk, demoStartConversation } from "./demo";
+import {
+  demoGuardar,
+  demoLocaleChange,
+  demoNotifications,
+  demoOk,
+  demoStartConversation,
+} from "./demo";
 import { NoNavigation } from "./NoNavigation";
 import {
   demoDetail,
@@ -68,6 +74,7 @@ function Shell({
                 counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
                 notifications={demoNotifications}
                 liveNotifications={false}
+                appUpdates={false}
               >
                 {children}
               </AppChrome>
@@ -122,7 +129,7 @@ function DetalheDemo({ theme }: Tema) {
               /* A storyboard não navega: ver a nota em ContactActions. */
               onOpenConversation={() => {}}
             />
-            <SaveButton propertyId="p1" initialSaved={false} action={demoOk} />
+            <SaveButton propertyId="p1" initialSaved={false} action={demoGuardar} />
           </>
         }
       />

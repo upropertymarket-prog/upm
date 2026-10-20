@@ -95,6 +95,15 @@ function CaixaDemo({
                 onSaveDraft={semEscrita}
                 onSend={semEscrita}
                 onDiscardDraft={semEscrita}
+                /**
+                 * Os anexos (D66) chegaram ao ecrã depois desta storyboard, e
+                 * durante um tempo ela ficou a faltar-lhes — ninguém a
+                 * typechecava. Não devolvem URL de propósito: um URL assinado
+                 * sai de uma ida ao servidor, e a maqueta não tem servidor.
+                 * O botão aparece porque é parte do ecrã que se está a revê.
+                 */
+                onAttachmentLink={semEscrita}
+                onAttachmentToCloud={semEscrita}
               />
               {composer ? (
                 <Composer

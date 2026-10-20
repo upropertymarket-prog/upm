@@ -9,8 +9,8 @@ import type {
   InvoiceRow,
   PlanOption,
   PlanStatus,
-  TrialStatus,
 } from "../../../../apps/app/src/lib/billing";
+import type { CancelDecision } from "../../../../packages/db/src/subscription";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 
 const limits = {
@@ -128,13 +128,39 @@ const status: PlanStatus = {
   },
   cloudUsedBytes: 2100000000,
   cloudLimitBytes: 5000000000,
+  /**
+   * P9-03/P9-02 — chegaram ao `PlanStatus` na Fase 9 e esta storyboard ficou
+   * um ciclo atrás, porque nada a typechecava (ver a nota de topo do canvas).
+   * Os valores são os de uma subscrição a sério: três meses de período mínimo,
+   * já cumpridos, contratada com a v3 dos Termos.
+   */
+  minimumCommitmentMonths: 3,
+  commitmentEndsAt: "2026-12-30T10:00:00.000Z",
+  startedAt: "2026-09-30T10:00:00.000Z",
+  termsVersion: "3",
 };
-const trial: TrialStatus = {
-  eligible: false,
-  trialing: false,
-  trialEndsAt: null,
-  requestStatus: null,
-  requestReason: null,
+
+/**
+ * P9-02 — sem documento publicado não há contratação possível, e o ecrã
+ * desliga os botões. Aqui há, para se poder revê-los ligados.
+ */
+const terms = {
+  documentId: "doc-termos",
+  version: "3",
+  contentHash: "9f2c1b7ad4e6",
+  /** A minuta ainda não foi revista por advogado — é o estado real de hoje. */
+  pendingLegalReview: true,
+};
+
+/** P9-04 — o cancelamento permitido, com o fim do período à vista. */
+const cancelDecision: CancelDecision = {
+  allowed: true,
+  mode: "end_of_period",
+  reasonCode: null,
+  effectiveAt: "2026-10-30T10:00:00.000Z",
+  blockedUntil: null,
+  commitmentMonths: 3,
+  commitmentEndsAt: "2026-12-30T10:00:00.000Z",
 };
 
 function BillingDemo({ theme }: { theme: "light" | "dark" }) {
@@ -154,6 +180,7 @@ function BillingDemo({ theme }: { theme: "light" | "dark" }) {
                 counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
                 notifications={[]}
                 liveNotifications={false}
+                appUpdates={false}
               >
                 <PlanScreen
                   status={status}
@@ -164,8 +191,11 @@ function BillingDemo({ theme }: { theme: "light" | "dark" }) {
                   onOpenPortal={async () => ({ url: "#" })}
                   onExportInvoice={async () => ({ url: "#" })}
                   onSaveInvoice={async () => ({ ok: true })}
-                  trial={trial}
-                  onRequestExtension={async () => ({ ok: true })}
+                  terms={terms}
+                  termsHref="/termos"
+                  defaultCommitmentMonths={3}
+                  cancelDecision={cancelDecision}
+                  onCancelSubscription={async () => ({ ok: true, effectiveAt: null })}
                 />
               </AppChrome>
             </ToastProvider>

@@ -60,7 +60,7 @@ import { AdminTicketsClaro, AdminTicketsEscuro } from "./Tickets";
  */
 export default function AdminCanvas() {
   return (
-    <Canvas name="Admin" backgroundColor="#232323">
+    <Canvas name="03 - admin" backgroundColor="#232323">
       {/* Painel */}
       <Storyboard
         id="AdminDashboardClaro"

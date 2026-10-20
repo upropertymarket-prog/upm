@@ -88,7 +88,7 @@ import {
  */
 export default function SitePublicoCanvas() {
   return (
-    <Canvas name="site-publico" backgroundColor="#232323">
+    <Canvas name="01 - site-publico" backgroundColor="#232323">
       <Storyboard
         id="PreLancamentoClaro"
         name="Home · Pré-lançamento · claro (/)"

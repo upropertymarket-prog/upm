@@ -50,6 +50,7 @@ function MeusReportsConteudo() {
       counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
       notifications={demoNotifications}
       liveNotifications={false}
+      appUpdates={false}
     >
       <ReportsTimeline reports={MY_REPORTS} locale="pt" />
     </AppChrome>

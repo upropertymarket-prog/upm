@@ -308,8 +308,13 @@ export const demoFormActions: PropertyFormActions = {
 export const demoNotificationPrefs: NotificationPrefs = {
   message: { inapp: true, email: true },
   visit_request: { inapp: true, email: true },
-  lead: { inapp: true, email: false },
-  contract: { inapp: true, email: false },
+  // 20 out 2026: eram `lead` e `contract`, que **não são tipos de
+  // notificação** — o ecrã lista `ACTIVE_NOTIFICATION_TYPES` e estas duas
+  // chaves nunca lá estiveram. Trocadas por duas que existem, para a maqueta
+  // continuar a mostrar o que existe para mostrar: dois tipos com o e-mail
+  // desligado e o sino ligado.
+  price_drop: { inapp: true, email: false },
+  document_shared: { inapp: true, email: false },
 };
 
 export const demoSavePrefs = async () => ({});
