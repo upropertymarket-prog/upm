@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { Route } from "next";
 import { Button, Input, Select } from "@upm/ui";
 import { DEALS, PROPERTY_TYPES, TYPOLOGIES } from "@upm/db/properties";
@@ -14,8 +15,6 @@ export type PropertyFiltersValue = {
   price_max_cents?: string;
   city?: string;
 };
-
-const DEAL_LABEL: Record<string, string> = { sale: "Venda", rent: "Arrendamento" };
 
 /**
  * Campos de filtro partilhados pelo Market (P4-04a) e pelos Alertas (P4-04b)
@@ -36,6 +35,10 @@ export function PropertyFilters({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("market.filters");
+  // As etiquetas de negócio nascem aqui e não numa constante de módulo: uma
+  // constante fica presa ao idioma em que foi escrita.
+  const tf = useTranslations("property");
   const [deal, setDeal] = useState(initial?.deal ?? searchParams?.get("negocio") ?? "");
   const [propertyType, setPropertyType] = useState(
     initial?.property_type ?? searchParams?.get("tipo") ?? "",
@@ -99,44 +102,48 @@ export function PropertyFilters({
       }}
     >
       <Select
-        label="Negócio"
-        placeholder="Todos"
+        label={tf("fields.deal")}
+        placeholder={t("any")}
         value={deal}
         onChange={(event) => setDeal(event.target.value)}
-        options={DEALS.map((value) => ({ value, label: DEAL_LABEL[value] ?? value }))}
+        options={DEALS.map((value) => ({ value, label: tf(`deal.${value}`) }))}
       />
       <Select
-        label="Tipo"
-        placeholder="Todos"
+        label={tf("fields.type")}
+        placeholder={t("any")}
         value={propertyType}
         onChange={(event) => setPropertyType(event.target.value)}
         options={PROPERTY_TYPES.map((value) => ({ value, label: value }))}
       />
       <Select
-        label="Tipologia"
-        placeholder="Todas"
+        label={tf("fields.typology")}
+        placeholder={t("anyTypology")}
         value={typology}
         onChange={(event) => setTypology(event.target.value)}
         options={TYPOLOGIES.map((value) => ({ value, label: value }))}
       />
       <Input
-        label="Preço mín. (€)"
+        label={t("priceMin")}
         type="number"
         min={0}
         value={priceMin}
         onChange={(event) => setPriceMin(event.target.value)}
       />
       <Input
-        label="Preço máx. (€)"
+        label={t("priceMax")}
         type="number"
         min={0}
         value={priceMax}
         onChange={(event) => setPriceMax(event.target.value)}
       />
-      <Input label="Cidade" value={city} onChange={(event) => setCity(event.target.value)} />
+      <Input
+        label={tf("fields.city")}
+        value={city}
+        onChange={(event) => setCity(event.target.value)}
+      />
       <div style={{ alignSelf: "end" }}>
         <Button type="submit" fullWidth>
-          Filtrar
+          {t("submit")}
         </Button>
       </div>
     </form>

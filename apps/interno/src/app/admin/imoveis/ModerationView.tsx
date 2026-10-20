@@ -116,6 +116,14 @@ export function ModerationView({
   onVerifyPin: VerifyPinAction;
 }) {
   const t = useTranslations("admin.moderation");
+  /**
+   * O vocabulário do imóvel é o mesmo nos dois lados do produto, por isso vive
+   * em `property` e não aqui dentro (D72, 20 out 2026) — as mesmas chaves que o
+   * detalhe do Market lê. Foi a mudar isto que se viu que o `t("deal.…")` desta
+   * gaveta apontava para uma chave que era uma string: o negócio aparecia como
+   * `deal.sale` em vez de "Venda".
+   */
+  const tprop = useTranslations("property");
   const tc = useTranslations("common");
   const tp = useTranslations("pagination");
   const [actionTarget, setActionTarget] = useState<ActionName | null>(null);
@@ -127,7 +135,7 @@ export function ModerationView({
   const columns: TableColumn<ListRow>[] = [
     {
       id: "property",
-      header: t("property"),
+      header: tprop("fields.property"),
       cell: (row) => (
         <span className="flex items-center gap-3">
           {row.coverUrl ? (
@@ -166,7 +174,7 @@ export function ModerationView({
     },
     {
       id: "price",
-      header: t("price"),
+      header: tprop("fields.price"),
       numeric: true,
       cell: (row) => {
         const cents = row.deal === "rent" ? row.rent_cents : row.price_cents;
@@ -385,9 +393,12 @@ export function ModerationView({
           <section className="mt-6 grid gap-3">
             <h3 className="text-sm font-semibold text-text">{t("propertyDetails")}</h3>
             <DetailRow label={t("owner")} value={selectedProperty.owner_name} />
-            <DetailRow label={t("deal")} value={t("deal." + selectedProperty.deal)} />
-            <DetailRow label={t("type")} value={selectedProperty.property_type || "—"} />
-            <DetailRow label={t("typology")} value={selectedProperty.typology} />
+            <DetailRow
+              label={tprop("fields.deal")}
+              value={tprop(`deal.${selectedProperty.deal}`)}
+            />
+            <DetailRow label={tprop("fields.type")} value={selectedProperty.property_type || "—"} />
+            <DetailRow label={tprop("fields.typology")} value={selectedProperty.typology} />
             <DetailRow label={t("condition")} value={selectedProperty.condition || "—"} />
             <DetailRow
               label={t("area")}
@@ -407,9 +418,12 @@ export function ModerationView({
             />
             <DetailRow label={t("address")} value={address || "—"} />
             <DetailRow label={t("coordinates")} value={exactLocation || "—"} />
-            <DetailRow label={t("energy")} value={selectedProperty.energy_cert || "—"} />
             <DetailRow
-              label={t("price")}
+              label={tprop("fields.energyCert")}
+              value={selectedProperty.energy_cert || "—"}
+            />
+            <DetailRow
+              label={tprop("fields.price")}
               value={
                 selectedProperty.deal === "rent"
                   ? currency(selectedProperty.rent_cents)

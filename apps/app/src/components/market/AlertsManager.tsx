@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { Button, Card, CardBody, useToast } from "@upm/ui";
 import type { PropertyFilters } from "@upm/db/properties";
@@ -19,17 +20,24 @@ export type AlertsManagerProps = {
   deleteAlert: (id: string) => Promise<{ ok?: boolean; error?: string }>;
 };
 
-const DEAL_LABEL: Record<string, string> = { sale: "Venda", rent: "Arrendamento" };
-
-function describeFilters(filters: PropertyFilters): string {
+/**
+ * O resumo de um alerta em uma linha. Recebe os tradutores em vez de ler uma
+ * constante de módulo: as etiquetas de negócio vivem em `property.deal`, e uma
+ * constante aqui ficaria presa ao idioma em que foi escrita.
+ */
+function describeFilters(
+  filters: PropertyFilters,
+  t: (key: string, values?: Record<string, string | number>) => string,
+  tf: (key: string) => string,
+): string {
   const parts: string[] = [];
-  if (filters.deal) parts.push(DEAL_LABEL[filters.deal] ?? filters.deal);
+  if (filters.deal) parts.push(tf(`deal.${filters.deal}`));
   if (filters.property_type) parts.push(filters.property_type);
   if (filters.typology) parts.push(filters.typology);
   if (filters.city) parts.push(filters.city);
-  if (filters.price_min_cents) parts.push(`min ${filters.price_min_cents / 100} €`);
-  if (filters.price_max_cents) parts.push(`máx ${filters.price_max_cents / 100} €`);
-  return parts.length > 0 ? parts.join(" · ") : "Sem filtros (todos os imóveis)";
+  if (filters.price_min_cents) parts.push(t("priceFrom", { value: filters.price_min_cents / 100 }));
+  if (filters.price_max_cents) parts.push(t("priceTo", { value: filters.price_max_cents / 100 }));
+  return parts.length > 0 ? parts.join(" · ") : t("noFilters");
 }
 
 function toFormValue(filters: PropertyFilters) {
@@ -75,6 +83,8 @@ export function AlertsManager({
   const [creating, setCreating] = useState(false);
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
+  const t = useTranslations("market.alerts");
+  const tf = useTranslations("property");
 
   const handleCreate = (value: Parameters<typeof fromFormValue>[0]) => {
     const filters = fromFormValue(value);
@@ -84,7 +94,7 @@ export function AlertsManager({
         toast.toast(result.error, "error");
         return;
       }
-      toast.toast("Alerta criado.", "success");
+      toast.toast(t("created"), "success");
       setItems((current) => [...current, { id: crypto.randomUUID(), filters }]);
       setCreating(false);
     });
@@ -98,7 +108,7 @@ export function AlertsManager({
         toast.toast(result.error, "error");
         return;
       }
-      toast.toast("Alerta atualizado.", "success");
+      toast.toast(t("updated"), "success");
       setItems((current) => current.map((item) => (item.id === id ? { ...item, filters } : item)));
       setEditingId(null);
     });
@@ -118,7 +128,7 @@ export function AlertsManager({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {items.length === 0 ? (
-        <p>Ainda não criou nenhum alerta de pesquisa.</p>
+        <p>{t("empty")}</p>
       ) : (
         items.map((item) => (
           <Card key={item.id}>
@@ -137,7 +147,7 @@ export function AlertsManager({
                     gap: 12,
                   }}
                 >
-                  <span>{describeFilters(item.filters)}</span>
+                  <span>{describeFilters(item.filters, t, tf)}</span>
                   <div style={{ display: "flex", gap: 8 }}>
                     <Button
                       variant="secondary"
@@ -145,7 +155,7 @@ export function AlertsManager({
                       onClick={() => setEditingId(item.id)}
                       disabled={isPending}
                     >
-                      Editar
+                      {t("edit")}
                     </Button>
                     <Button
                       variant="danger"
@@ -154,7 +164,7 @@ export function AlertsManager({
                       onClick={() => handleDelete(item.id)}
                       disabled={isPending}
                     >
-                      Apagar
+                      {t("delete")}
                     </Button>
                   </div>
                 </div>
@@ -170,7 +180,7 @@ export function AlertsManager({
             <PropertyFiltersForm onApply={handleCreate} />
           ) : (
             <Button onClick={() => setCreating(true)} disabled={isPending}>
-              Novo alerta
+              {t("create")}
             </Button>
           )}
         </CardBody>

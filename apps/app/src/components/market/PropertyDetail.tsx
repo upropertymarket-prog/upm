@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Bath, BedDouble, CalendarDays, Layers, Ruler, Zap } from "lucide-react";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
@@ -86,6 +87,11 @@ export function PropertyDetail({
   fromOwner = [],
   nextListing = null,
 }: PropertyDetailProps) {
+  const t = useTranslations("market");
+  // Os rótulos dos factos são o vocabulário do imóvel, não deste ecrã: vivem em
+  // `property.fields` e são os mesmos que a moderação do Admin lê.
+  const tf = useTranslations("property");
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <Link
@@ -93,7 +99,7 @@ export function PropertyDetail({
         className="upm-btn upm-btn--secondary upm-btn--sm"
         style={{ alignSelf: "flex-start", textDecoration: "none" }}
       >
-        ← Voltar ao Market
+        <span aria-hidden="true">←</span> {t("back")}
       </Link>
       {management}
       {/* Ficha + barra de contacto. Abaixo de 900 px empilham (`.upm-split`),
@@ -173,7 +179,9 @@ export function PropertyDetail({
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <span style={{ color: "var(--muted)", fontSize: 12 }}>Ref. {property.ref}</span>
+            <span style={{ color: "var(--muted)", fontSize: 12 }}>
+              {t("ref", { ref: property.ref ?? "" })}
+            </span>
             <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>{property.title}</h1>
             <p style={{ margin: 0, color: "var(--muted)" }}>
               ⌖ {[property.typology, property.city, property.district].filter(Boolean).join(" · ")}
@@ -193,33 +201,37 @@ export function PropertyDetail({
           >
             <Detail
               icon={<BedDouble {...DETAIL_ICON} />}
-              label="Tipologia"
+              label={tf("fields.typology")}
               value={property.typology}
             />
             <Detail
               icon={<Ruler {...DETAIL_ICON} />}
-              label="Área bruta"
-              value={property.grossArea ? `${property.grossArea} m²` : null}
+              label={tf("fields.grossArea")}
+              value={property.grossArea ? t("area", { value: property.grossArea }) : null}
             />
             <Detail
               icon={<Bath {...DETAIL_ICON} />}
-              label="Casas de banho"
+              label={tf("fields.bathrooms")}
               value={property.bathrooms?.toString() ?? null}
             />
-            <Detail icon={<Layers {...DETAIL_ICON} />} label="Piso" value={property.floor} />
+            <Detail
+              icon={<Layers {...DETAIL_ICON} />}
+              label={tf("fields.floor")}
+              value={property.floor}
+            />
             <Detail
               icon={<CalendarDays {...DETAIL_ICON} />}
-              label="Ano de construção"
+              label={tf("fields.yearBuilt")}
               value={property.yearBuilt?.toString() ?? null}
             />
             <Detail
               icon={<Zap {...DETAIL_ICON} />}
-              label="Certificado energético"
+              label={tf("fields.energyCert")}
               value={property.energyCert}
             />
           </dl>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <h2 style={{ margin: 0, fontSize: 17 }}>Descrição do proprietário</h2>
+            <h2 style={{ margin: 0, fontSize: 17 }}>{t("ownerDescription")}</h2>
             <p style={{ margin: 0, lineHeight: 1.75, color: "var(--muted)" }}>
               {property.description}
             </p>
@@ -228,9 +240,9 @@ export function PropertyDetail({
             <Card>
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <strong>Localização aproximada</strong>
+                  <strong>{t("approxLocation")}</strong>
                   <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>
-                    morada exata após contacto
+                    {t("addressAfterContact")}
                   </span>
                 </div>
                 <PropertyLocationMap
@@ -265,13 +277,13 @@ export function PropertyDetail({
             >
               {property.deal ? (
                 <StatusTag tone={property.deal === "sale" ? "dealSale" : "dealRent"}>
-                  {property.deal === "sale" ? "Venda" : "Arrendamento"}
+                  {tf(`deal.${property.deal}`)}
                 </StatusTag>
               ) : null}
               <strong style={{ fontSize: 30 }}>{price}</strong>
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
                 <strong>{ownerName}</strong>
-                <div style={{ color: "var(--muted)", fontSize: 12 }}>Responde em ~2 h</div>
+                <div style={{ color: "var(--muted)", fontSize: 12 }}>{t("respondsIn")}</div>
               </div>
               {/* As ações num bloco só, encostado à base do cartão: 16 px entre
                   elas e 16 px até à borda, em vez do espaçamento geral do
@@ -285,7 +297,7 @@ export function PropertyDetail({
           {nextListing ? (
             <Card>
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span style={{ color: "var(--muted)", fontSize: 12 }}>Anúncio seguinte</span>
+                <span style={{ color: "var(--muted)", fontSize: 12 }}>{t("nextListing")}</span>
                 <Link
                   href={`/market/${nextListing.id}`}
                   style={{
@@ -310,8 +322,8 @@ export function PropertyDetail({
       {/* Fora do `.upm-split`, e não dentro da coluna da ficha: estas faixas
           são o rodapé da página, não parte do imóvel. Ganham a largura toda,
           que é o que deixa caber quatro cartões sem os espremer. */}
-      <ListingSection title="Anúncios semelhantes" items={similar} />
-      <ListingSection title={`Mais anúncios de ${ownerName}`} items={fromOwner} />
+      <ListingSection title={t("similar")} items={similar} />
+      <ListingSection title={t("moreFromOwner", { owner: ownerName })} items={fromOwner} />
     </div>
   );
 }

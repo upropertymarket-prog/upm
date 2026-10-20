@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { PropertyCard, type PropertyCardData } from "./PropertyCard";
 import { MarketPagination } from "./MarketPagination";
 
@@ -16,10 +18,12 @@ export type MarketResultsProps = {
  * incluídas) em vez de acesso direto ao Supabase.
  */
 export function MarketResults({ properties, page, pageCount, query }: MarketResultsProps) {
+  const t = useTranslations("market");
+
   return (
     <>
       {properties.length === 0 ? (
-        <p>Sem resultados para estes filtros.</p>
+        <p>{t("noResults")}</p>
       ) : (
         <div
           style={{

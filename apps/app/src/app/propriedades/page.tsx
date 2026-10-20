@@ -5,7 +5,7 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import {
-  PROPERTY_STATUS_LABEL,
+  PROPERTY_STATUS_VALUES,
   PropertyListing,
   type PropertyListingRow,
   type PropertyRow,
@@ -16,7 +16,7 @@ import { archiveProperty } from "../actions/property-listing";
 export const dynamic = "force-dynamic";
 
 function isPropertyStatus(value: string): value is PropertyRow["status"] {
-  return Object.prototype.hasOwnProperty.call(PROPERTY_STATUS_LABEL, value);
+  return (PROPERTY_STATUS_VALUES as readonly string[]).includes(value);
 }
 
 /**

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Input, Modal, Textarea, useToast } from "@upm/ui";
 
 export type ContactActionsProps = {
@@ -53,6 +54,8 @@ export function ContactActions({
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
+  const t = useTranslations("market.contact");
+  const tc = useTranslations("common");
 
   if (disabled) return null;
 
@@ -60,7 +63,7 @@ export function ContactActions({
     startTransition(async () => {
       const result = await onContact(propertyId);
       if (result.error || !result.id) {
-        toast(result.error ?? "Não foi possível abrir a conversa.", "error");
+        toast(result.error ?? t("conversationFailed"), "error");
         return;
       }
       if (onOpenConversation) {
@@ -87,56 +90,56 @@ export function ContactActions({
       setDate("");
       setTime("");
       setMessage("");
-      toast("Pedido de visita enviado. O proprietário foi notificado.", "success");
+      toast(t("visitRequested"), "success");
     });
   }
 
   return (
     <>
       <Button fullWidth onClick={contact} disabled={pending}>
-        Contactar proprietário
+        {t("contactOwner")}
       </Button>
       <Button variant="secondary" fullWidth onClick={() => setOpen(true)} disabled={pending}>
-        Solicitar visita
+        {t("requestVisit")}
       </Button>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Pedir visita"
+        title={t("modalTitle")}
         subtitle={propertyTitle}
         size="sm"
         footer={
           <>
             <Button variant="secondary" onClick={() => setOpen(false)}>
-              Cancelar
+              {tc("cancel")}
             </Button>
             <Button onClick={requestVisit} disabled={pending || !date || !time}>
-              Enviar pedido
+              {t("send")}
             </Button>
           </>
         }
       >
         <div style={{ display: "grid", gap: "var(--sp-5)" }}>
           <Input
-            label="Data"
+            label={t("date")}
             type="date"
             value={date}
             onChange={(event) => setDate(event.target.value)}
           />
           <Input
-            label="Hora"
+            label={t("time")}
             type="time"
             value={time}
             onChange={(event) => setTime(event.target.value)}
           />
           <Textarea
-            label="Mensagem (opcional)"
+            label={t("message")}
             rows={3}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="ex.: Seria possível visitar sábado de manhã?"
-            hint="Se o proprietário aceitar, passa a ver a morada exata deste imóvel."
+            placeholder={t("messagePlaceholder")}
+            hint={t("messageHint")}
           />
         </div>
       </Modal>

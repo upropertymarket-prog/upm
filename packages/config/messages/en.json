@@ -225,6 +225,114 @@
       "shared": "Contract shared. The version as it stands has been frozen."
     }
   },
+  "property": {
+    "fields": {
+      "property": "Property",
+      "deal": "Deal",
+      "type": "Type",
+      "typology": "Typology",
+      "grossArea": "Gross area",
+      "bathrooms": "Bathrooms",
+      "floor": "Floor",
+      "yearBuilt": "Year built",
+      "energyCert": "Energy certificate",
+      "price": "Price",
+      "city": "City"
+    },
+    "deal": {
+      "sale": "For sale",
+      "rent": "For rent"
+    },
+    "status": {
+      "draft": "Draft",
+      "pending_review": "Under review",
+      "active": "Active",
+      "featured": "Featured",
+      "rejected": "Rejected",
+      "archived": "Archived",
+      "rented": "Rented",
+      "sold": "Sold"
+    }
+  },
+  "market": {
+    "back": "Back to Market",
+    "ref": "Ref. {ref}",
+    "area": "{value} m²",
+    "ownerDescription": "Owner's description",
+    "approxLocation": "Approximate location",
+    "addressAfterContact": "exact address after contact",
+    "respondsIn": "Replies in ~2 h",
+    "nextListing": "Next listing",
+    "similar": "Similar listings",
+    "moreFromOwner": "More listings from {owner}",
+    "noResults": "No results for these filters.",
+    "viewProperty": "View property",
+    "inYourArea": "Properties listed in your area",
+    "filters": {
+      "any": "Any",
+      "anyTypology": "Any",
+      "priceMin": "Min. price (€)",
+      "priceMax": "Max. price (€)",
+      "submit": "Filter"
+    },
+    "contact": {
+      "contactOwner": "Contact owner",
+      "requestVisit": "Request a viewing",
+      "modalTitle": "Request a viewing",
+      "send": "Send request",
+      "date": "Date",
+      "time": "Time",
+      "message": "Message (optional)",
+      "messagePlaceholder": "e.g. Could I visit on Saturday morning?",
+      "messageHint": "If the owner accepts, you will see this property's exact address.",
+      "conversationFailed": "The conversation could not be opened.",
+      "visitRequested": "Viewing request sent. The owner has been notified."
+    },
+    "alerts": {
+      "title": "Search alerts",
+      "backToSaved": "Back to Saved",
+      "empty": "You have not created any search alerts yet.",
+      "noFilters": "No filters (all properties)",
+      "priceFrom": "from {value} €",
+      "priceTo": "up to {value} €",
+      "create": "New alert",
+      "edit": "Edit",
+      "delete": "Delete",
+      "created": "Alert created.",
+      "updated": "Alert updated."
+    },
+    "owner": {
+      "yourListing": "This listing is yours",
+      "views": "{count, plural, one {# view} other {# views}}",
+      "stats": "Statistics",
+      "edit": "Edit"
+    }
+  },
+  "myProperties": {
+    "title": "My properties",
+    "subtitle": "{count, plural, one {# property} other {# properties}} in your portfolio",
+    "caption": "My properties",
+    "empty": "You have no properties yet. Create your first one in «New property».",
+    "photo": "Photo",
+    "listingTitle": "Title",
+    "untitled": "(untitled)",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "price": "Price",
+    "views": "Views",
+    "actions": "Actions",
+    "stats": "Statistics",
+    "edit": "Edit",
+    "archive": {
+      "action": "Archive",
+      "pending": "Archiving…",
+      "modalTitle": "Archive property",
+      "alreadyArchived": "This property is already archived.",
+      "body": "The property stops appearing in the Market. This action has no «unarchive» at this stage — to publish it again you need to create a new listing."
+    },
+    "statsEmpty": "No views recorded yet.",
+    "dailyViews": "Daily views —"
+  },
   "cloud": {
     "title": "Cloud",
     "subtitleNoCloud": "Cloud storage is included from the Essential plan up",
@@ -986,7 +1094,6 @@
         "reopenTitle": "Return this listing to moderation?",
         "reopenBody": "The listing will go back to the queue for review."
       },
-      "deal": "Deal",
       "documentKind": {
         "certidao": "Registry certificate",
         "caderneta": "Property tax record",
@@ -994,10 +1101,8 @@
         "planta": "Floor plan",
         "outro": "Other"
       },
-      "property": "Property",
       "owner": "Owner",
       "location": "Location",
-      "price": "Price",
       "submittedAt": "Submitted",
       "tableCaption": "Properties for moderation",
       "loadFailed": "Could not load the moderation queue.",
@@ -1019,14 +1124,11 @@
       "photo": "Photo",
       "floorplan": "Floor plan",
       "propertyDetails": "Property information",
-      "type": "Type",
-      "typology": "Typology",
       "condition": "Condition",
       "area": "Gross / net area (m²)",
       "rooms": "Bedrooms / bathrooms",
       "address": "Exact address",
       "coordinates": "Exact coordinates",
-      "energy": "Energy certificate",
       "createdAt": "Created",
       "previousReason": "Previous rejection reason",
       "documents": "Documents",

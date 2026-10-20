@@ -1,11 +1,8 @@
+import { useTranslations } from "next-intl";
 import { BarChart3, Eye, SquarePen } from "lucide-react";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
-import {
-  PROPERTY_STATUS_LABEL,
-  PROPERTY_STATUS_TONE,
-  type PropertyRow,
-} from "../my-properties/PropertyListing";
+import { PROPERTY_STATUS_TONE, type PropertyRow } from "../my-properties/PropertyListing";
 
 export type OwnerListingBarProps = {
   /** Só chegam aqui `active` e `featured`: `properties_public` filtra o resto. */
@@ -30,6 +27,9 @@ export type OwnerListingBarProps = {
  * do comprador.
  */
 export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: OwnerListingBarProps) {
+  const t = useTranslations("market.owner");
+  const ts = useTranslations("property.status");
+
   return (
     <Card>
       <CardBody
@@ -42,8 +42,8 @@ export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: Own
           flexWrap: "wrap",
         }}
       >
-        <strong style={{ fontSize: "var(--fs-body-lg)" }}>Este anúncio é seu</strong>
-        <StatusTag tone={PROPERTY_STATUS_TONE[status]}>{PROPERTY_STATUS_LABEL[status]}</StatusTag>
+        <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("yourListing")}</strong>
+        <StatusTag tone={PROPERTY_STATUS_TONE[status]}>{ts(status)}</StatusTag>
         {viewsCount !== null ? (
           <span
             style={{
@@ -55,7 +55,7 @@ export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: Own
             }}
           >
             <Eye size={15} aria-hidden="true" />
-            {viewsCount} {viewsCount === 1 ? "visualização" : "visualizações"}
+            {t("views", { count: viewsCount })}
           </span>
         ) : null}
         <span style={{ display: "flex", gap: "var(--sp-4)", marginLeft: "auto" }}>
@@ -65,7 +65,7 @@ export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: Own
             style={{ textDecoration: "none" }}
           >
             <BarChart3 size={15} aria-hidden="true" />
-            Estatísticas
+            {t("stats")}
           </a>
           <a
             href={editHref}
@@ -73,7 +73,7 @@ export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: Own
             style={{ textDecoration: "none" }}
           >
             <SquarePen size={15} aria-hidden="true" />
-            Editar
+            {t("edit")}
           </a>
         </span>
       </CardBody>

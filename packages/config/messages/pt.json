@@ -225,6 +225,114 @@
       "shared": "Contrato partilhado. A versão desta altura ficou congelada."
     }
   },
+  "property": {
+    "fields": {
+      "property": "Imóvel",
+      "deal": "Negócio",
+      "type": "Tipo",
+      "typology": "Tipologia",
+      "grossArea": "Área bruta",
+      "bathrooms": "Casas de banho",
+      "floor": "Piso",
+      "yearBuilt": "Ano de construção",
+      "energyCert": "Certificado energético",
+      "price": "Preço",
+      "city": "Cidade"
+    },
+    "deal": {
+      "sale": "Venda",
+      "rent": "Arrendamento"
+    },
+    "status": {
+      "draft": "Rascunho",
+      "pending_review": "Em revisão",
+      "active": "Ativo",
+      "featured": "Destaque",
+      "rejected": "Rejeitado",
+      "archived": "Arquivado",
+      "rented": "Arrendado",
+      "sold": "Vendido"
+    }
+  },
+  "market": {
+    "back": "Voltar ao Market",
+    "ref": "Ref. {ref}",
+    "area": "{value} m²",
+    "ownerDescription": "Descrição do proprietário",
+    "approxLocation": "Localização aproximada",
+    "addressAfterContact": "morada exata após contacto",
+    "respondsIn": "Responde em ~2 h",
+    "nextListing": "Anúncio seguinte",
+    "similar": "Anúncios semelhantes",
+    "moreFromOwner": "Mais anúncios de {owner}",
+    "noResults": "Sem resultados para estes filtros.",
+    "viewProperty": "Ver imóvel",
+    "inYourArea": "Imóveis publicados na sua zona",
+    "filters": {
+      "any": "Todos",
+      "anyTypology": "Todas",
+      "priceMin": "Preço mín. (€)",
+      "priceMax": "Preço máx. (€)",
+      "submit": "Filtrar"
+    },
+    "contact": {
+      "contactOwner": "Contactar proprietário",
+      "requestVisit": "Solicitar visita",
+      "modalTitle": "Pedir visita",
+      "send": "Enviar pedido",
+      "date": "Data",
+      "time": "Hora",
+      "message": "Mensagem (opcional)",
+      "messagePlaceholder": "ex.: Seria possível visitar sábado de manhã?",
+      "messageHint": "Se o proprietário aceitar, passa a ver a morada exata deste imóvel.",
+      "conversationFailed": "Não foi possível abrir a conversa.",
+      "visitRequested": "Pedido de visita enviado. O proprietário foi notificado."
+    },
+    "alerts": {
+      "title": "Alertas de pesquisa",
+      "backToSaved": "Voltar a Guardados",
+      "empty": "Ainda não criou nenhum alerta de pesquisa.",
+      "noFilters": "Sem filtros (todos os imóveis)",
+      "priceFrom": "min {value} €",
+      "priceTo": "máx {value} €",
+      "create": "Novo alerta",
+      "edit": "Editar",
+      "delete": "Apagar",
+      "created": "Alerta criado.",
+      "updated": "Alerta atualizado."
+    },
+    "owner": {
+      "yourListing": "Este anúncio é seu",
+      "views": "{count, plural, one {# visualização} other {# visualizações}}",
+      "stats": "Estatísticas",
+      "edit": "Editar"
+    }
+  },
+  "myProperties": {
+    "title": "As minhas propriedades",
+    "subtitle": "{count, plural, one {# imóvel} other {# imóveis}} no seu portefólio",
+    "caption": "As minhas propriedades",
+    "empty": "Ainda não tem imóveis. Crie o primeiro em «Nova propriedade».",
+    "photo": "Foto",
+    "listingTitle": "Título",
+    "untitled": "(sem título)",
+    "status": "Estado",
+    "allStatuses": "Todos os estados",
+    "price": "Preço",
+    "views": "Visitas",
+    "actions": "Ações",
+    "stats": "Estatísticas",
+    "edit": "Editar",
+    "archive": {
+      "action": "Arquivar",
+      "pending": "A arquivar…",
+      "modalTitle": "Arquivar imóvel",
+      "alreadyArchived": "Este imóvel já está arquivado.",
+      "body": "O imóvel deixa de aparecer no Market. Esta ação não tem «desarquivar» nesta fase — para voltar a publicar é preciso criar um novo anúncio."
+    },
+    "statsEmpty": "Ainda sem visitas registadas.",
+    "dailyViews": "Visitas diárias —"
+  },
   "cloud": {
     "title": "Cloud",
     "subtitleNoCloud": "A Cloud está incluída a partir do plano Essential",
@@ -986,7 +1094,6 @@
         "reopenTitle": "Devolver à moderação?",
         "reopenBody": "O anúncio volta à fila para nova revisão."
       },
-      "deal": "Negócio",
       "documentKind": {
         "certidao": "Certidão",
         "caderneta": "Caderneta predial",
@@ -994,10 +1101,8 @@
         "planta": "Planta",
         "outro": "Outro"
       },
-      "property": "Imóvel",
       "owner": "Proprietário",
       "location": "Localização",
-      "price": "Preço",
       "submittedAt": "Submetido em",
       "tableCaption": "Imóveis para moderação",
       "loadFailed": "Não foi possível carregar a fila de moderação.",
@@ -1019,14 +1124,11 @@
       "photo": "Fotografia",
       "floorplan": "Planta",
       "propertyDetails": "Dados do imóvel",
-      "type": "Tipo",
-      "typology": "Tipologia",
       "condition": "Condição",
       "area": "Área bruta / útil (m²)",
       "rooms": "Quartos / casas de banho",
       "address": "Morada exata",
       "coordinates": "Coordenadas exatas",
-      "energy": "Certificado energético",
       "createdAt": "Criado em",
       "previousReason": "Motivo da rejeição anterior",
       "documents": "Documentos",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { Route } from "next";
 import { Select, type SelectOption } from "@upm/ui";
 
@@ -12,12 +13,13 @@ export type PropertyStatusFilterProps = {
 /** Filtro de estado de "As minhas propriedades" — navega por query param `?estado=`. */
 export function PropertyStatusFilter({ value, options }: PropertyStatusFilterProps) {
   const router = useRouter();
+  const t = useTranslations("myProperties");
 
   return (
     <Select
-      label="Estado"
+      label={t("status")}
       labelHidden
-      placeholder="Todos os estados"
+      placeholder={t("allStatuses")}
       options={options}
       value={value}
       onChange={(event) => {

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Archive } from "lucide-react";
 import { Button, Modal } from "@upm/ui";
 
@@ -38,6 +39,8 @@ export function ArchivePropertyButton({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const t = useTranslations("myProperties.archive");
+  const tc = useTranslations("common");
 
   const confirm = () => {
     setError(null);
@@ -58,32 +61,29 @@ export function ArchivePropertyButton({
         variant="danger"
         size="sm"
         disabled={disabled}
-        title={disabled ? "Este imóvel já está arquivado." : undefined}
+        title={disabled ? t("alreadyArchived") : undefined}
         leadingIcon={<Archive size={15} />}
         onClick={() => setOpen(true)}
       >
-        Arquivar
+        {t("action")}
       </Button>
       <Modal
         open={open}
         onClose={() => (isPending ? undefined : setOpen(false))}
-        title="Arquivar imóvel"
+        title={t("modalTitle")}
         subtitle={title}
         footer={
           <>
             <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending}>
-              Cancelar
+              {tc("cancel")}
             </Button>
             <Button variant="danger" onClick={confirm} disabled={isPending}>
-              {isPending ? "A arquivar…" : "Arquivar"}
+              {isPending ? t("pending") : t("action")}
             </Button>
           </>
         }
       >
-        <p>
-          O imóvel deixa de aparecer no Market. Esta ação não tem &ldquo;desarquivar&rdquo; nesta
-          fase — para voltar a publicar é preciso criar um novo anúncio.
-        </p>
+        <p>{t("body")}</p>
         {error ? (
           <p role="alert" style={{ color: "var(--state-rejected)" }}>
             {error}

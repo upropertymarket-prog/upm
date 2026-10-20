@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { Tables } from "@upm/db";
 import { Card, PageHeader, StatusTag, Table, type StatusTone, type TableColumn } from "@upm/ui";
 
@@ -19,20 +20,22 @@ export const PROPERTY_STATUS_TONE: Record<PropertyRow["status"], StatusTone> = {
   sold: "archived",
 };
 
-export const PROPERTY_STATUS_LABEL: Record<PropertyRow["status"], string> = {
-  draft: "Rascunho",
-  pending_review: "Em revisão",
-  active: "Ativo",
-  featured: "Destaque",
-  rejected: "Rejeitado",
-  archived: "Arquivado",
-  rented: "Arrendado",
-  sold: "Vendido",
-};
-
-export const PROPERTY_STATUS_OPTIONS = (
-  Object.keys(PROPERTY_STATUS_LABEL) as PropertyRow["status"][]
-).map((value) => ({ value, label: PROPERTY_STATUS_LABEL[value] }));
+/**
+ * Só os valores, pela ordem em que o filtro os mostra. As etiquetas saíram
+ * daqui a 20 out 2026 (D72): uma constante de módulo é avaliada uma vez, no
+ * arranque, e ficava presa ao idioma em que foi escrita. Hoje nascem dentro de
+ * quem as desenha, a partir de `property.status`.
+ */
+export const PROPERTY_STATUS_VALUES = [
+  "draft",
+  "pending_review",
+  "active",
+  "featured",
+  "rejected",
+  "archived",
+  "rented",
+  "sold",
+] as const satisfies readonly PropertyRow["status"][];
 
 export type PropertyListingProps = {
   rows: PropertyListingRow[];
@@ -48,10 +51,13 @@ export type PropertyListingProps = {
  * (signed URLs incluídas) em vez de acesso direto ao Supabase.
  */
 export function PropertyListing({ rows, statusValue, onArchive }: PropertyListingProps) {
+  const t = useTranslations("myProperties");
+  const ts = useTranslations("property.status");
+
   const columns: TableColumn<PropertyListingRow>[] = [
     {
       id: "cover",
-      header: "Foto",
+      header: t("photo"),
       width: "72px",
       cell: (row) =>
         row.coverUrl ? (
@@ -79,25 +85,23 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
     // folga fica repartida em vez de abrir um buraco numa coluna só.
     {
       id: "title",
-      header: "Título",
+      header: t("listingTitle"),
       width: "328px",
       cell: (row) => (
-        <span style={{ fontWeight: "var(--fw-medium)" }}>{row.title || "(sem título)"}</span>
+        <span style={{ fontWeight: "var(--fw-medium)" }}>{row.title || t("untitled")}</span>
       ),
     },
     {
       id: "status",
-      header: "Estado",
+      header: t("status"),
       width: "138px",
       cell: (row) => (
-        <StatusTag tone={PROPERTY_STATUS_TONE[row.status]}>
-          {PROPERTY_STATUS_LABEL[row.status]}
-        </StatusTag>
+        <StatusTag tone={PROPERTY_STATUS_TONE[row.status]}>{ts(row.status)}</StatusTag>
       ),
     },
     {
       id: "price",
-      header: "Preço",
+      header: t("price"),
       numeric: true,
       align: "left",
       width: "164px",
@@ -105,7 +109,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
     },
     {
       id: "views",
-      header: "Visitas",
+      header: t("views"),
       numeric: true,
       align: "left",
       width: "138px",
@@ -113,7 +117,7 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
     },
     {
       id: "actions",
-      header: "Ações",
+      header: t("actions"),
       align: "left",
       width: "290px",
       cell: (row) => (
@@ -130,14 +134,14 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
-            Estatísticas
+            {t("stats")}
           </a>
           <a
             href={`/propriedades/${row.id}/editar`}
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
-            Editar
+            {t("edit")}
           </a>
           <ArchivePropertyButton
             propertyId={row.id}
@@ -156,21 +160,24 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
           contextual desta página (04 §5.5), e assim o título fica igual ao das
           restantes em vez de ser um título de cartão. */}
       <PageHeader
-        title="As minhas propriedades"
-        subtitle={`${rows.length} ${rows.length === 1 ? "imóvel" : "imóveis"} no seu portefólio`}
+        title={t("title")}
+        subtitle={t("subtitle", { count: rows.length })}
         actions={
           <div style={{ minWidth: 220 }}>
-            <PropertyStatusFilter value={statusValue} options={PROPERTY_STATUS_OPTIONS} />
+            <PropertyStatusFilter
+              value={statusValue}
+              options={PROPERTY_STATUS_VALUES.map((value) => ({ value, label: ts(value) }))}
+            />
           </div>
         }
       />
       <Card>
         <Table
-          caption="As minhas propriedades"
+          caption={t("caption")}
           columns={columns}
           rows={rows}
           rowKey={(row) => row.id}
-          empty="Ainda não tem imóveis. Crie o primeiro em «Nova propriedade»."
+          empty={t("empty")}
         />
       </Card>
     </div>
