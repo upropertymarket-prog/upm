@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@upm/config";
 
+// Caminho relativo, e não `@/i18n/pathnames`: o `seo.test.ts` corre em Vitest
+// sem o plugin dos `paths` do tsconfig, e o alias não resolveria lá.
+import { pathnameFor, type SitePathname } from "../i18n/pathnames";
+
 /**
  * SEO e Open Graph por rota (P2-06 · 04 §2.1.2 · 07 §2.1 e §2.2)
  * =========================================================================
@@ -117,19 +121,59 @@ function absolute(path: string): string {
 }
 
 /**
- * O caminho de uma rota no idioma pedido.
+ * Uma rota, como o SEO precisa de a conhecer: o **molde** e, se tiver segmento
+ * dinâmico, os valores que o preenchem.
  *
- * Função pura e não o `getPathname` do `next-intl`, por uma razão de teste: o
- * `seo.test.ts` corre em Node sem React, e importar a navegação do `next-intl`
- * arrastava o runtime de cliente para dentro dele. A regra é uma linha e está
- * fixada por testes nos dois lados — se o `localePrefix` do `routing.ts` deixar
- * de ser `as-needed`, o teste de `hreflang` falha.
- *
- * `pt` não leva prefixo (é a língua-fonte); `en` entra debaixo de `/en`.
+ * Era uma `string` até 21 out 2026, e deixou de poder ser no dia em que os
+ * caminhos passaram a traduzir-se. A razão é só uma, e é decisiva: de um
+ * caminho concreto em português (`/propriedades/casa-do-moinho`) **não se
+ * deriva o inglês** — não se sabe onde acaba o molde e começa o valor, e
+ * portanto não se sabe o que traduzir. Do molde mais os parâmetros deriva-se
+ * qualquer idioma.
  */
-export function localizedPath(route: string, locale: Locale): string {
-  const clean = route === "/" ? "" : route.replace(/\/+$/, "");
+export type SeoPath = {
+  pathname: SitePathname;
+  params?: Record<string, string>;
+};
+
+/**
+ * O caminho de uma rota no idioma pedido, **com o caminho traduzido**.
+ *
+ * Lê o mapa de `i18n/pathnames.ts` à mão e não o `getPathname` do `next-intl`,
+ * por duas razões. A de teste: o `seo.test.ts` corre em Node sem React, e a
+ * navegação do `next-intl` arrastava o runtime de cliente para dentro dele. E a
+ * de facto: **não há `getPathname` fora do `createNavigation`** — a função só
+ * existe amarrada ao objeto de navegação, logo "usar a do next-intl" nunca foi
+ * uma opção sem pagar o acoplamento.
+ *
+ * O que se paga em troca é esta função ter de saber duas regras em vez de uma:
+ * o prefixo (`pt` sem, `en` com, por `localePrefix: "as-needed"`) e a tradução
+ * do caminho. Ambas estão fixadas por testes — se o `localePrefix` do
+ * `routing.ts` mudar, ou se alguém apagar a tradução de uma rota, o teste de
+ * `hreflang` falha.
+ */
+export function localizedPath(route: SeoPath, locale: Locale): string {
+  const template = pathnameFor(route.pathname, locale);
+
+  const filled = Object.entries(route.params ?? {}).reduce(
+    (path, [key, value]) => path.replaceAll(`[${key}]`, encodeURIComponent(value)),
+    template,
+  );
+
+  const clean = filled === "/" ? "" : filled.replace(/\/+$/, "");
   return locale === DEFAULT_LOCALE ? clean || "/" : `/${locale}${clean}`;
+}
+
+/**
+ * O URL absoluto de uma rota no idioma pedido — o mesmo que sai no canonical.
+ *
+ * Existe exportado porque o canonical não é o único sítio que precisa dele: os
+ * dados estruturados da ficha de imóvel declaram um `url`, e o schema.org
+ * espera ali um URL absoluto. Estava relativo e em português, o que em `/en`
+ * apontava para um caminho que deixou de existir.
+ */
+export function canonicalUrl(route: SeoPath, locale: Locale): string {
+  return absolute(localizedPath(route, locale));
 }
 
 /**
@@ -137,24 +181,26 @@ export function localizedPath(route: string, locale: Locale): string {
  * servida. Chamada pelo `generateMetadata()` de cada `page.tsx`, através do
  * `pageMetadata`, que é quem descobre o idioma.
  *
- * `route` é o caminho da página (`/`, `/termos`, …) e serve para o canonical e
- * o `og:url`. `override` é o registo de `seo_pages`, quando existir — campos
+ * `route` é o molde da página (`{ pathname: "/termos" }`) e serve para o
+ * canonical, o `hreflang` e o `og:url` — e tem de ser o molde, e não o caminho
+ * já feito, porque é dele que se derivam as duas línguas.
+ * `override` é o registo de `seo_pages`, quando existir — campos
  * vazios **não** sobrepõem: uma descrição apagada no Admin devolve o controlo
  * ao ficheiro, em vez de publicar uma descrição vazia.
  *
  * O `alternates.languages` sai com as duas entradas e com o `x-default`. É
- * isso que diz ao Google que `/termos` e `/en/termos` são a mesma página em
+ * isso que diz ao Google que `/termos` e `/en/terms` são a mesma página em
  * duas línguas, e não duas páginas a competir pela mesma consulta — sem ele, o
  * que se ganhava por traduzir era conteúdo duplicado. O `x-default` aponta para
  * a língua-fonte: é o que se serve a quem não casa com nenhuma das duas.
  *
- * O canonical passa a ser o da **própria** versão: `/en/termos` diz que o
- * canónico dele é `/en/termos`, não `/termos`. Um canonical cruzado dizia ao
+ * O canonical passa a ser o da **própria** versão: `/en/terms` diz que o
+ * canónico dele é `/en/terms`, não `/termos`. Um canonical cruzado dizia ao
  * Google para indexar só a portuguesa e deitava fora a tradução toda.
  */
 export function buildMetadata(
   routeSeo: RouteSeo,
-  route: string,
+  route: SeoPath,
   locale: Locale = DEFAULT_LOCALE,
   override: SeoOverride = null,
 ): Metadata {

@@ -9,7 +9,7 @@ import { seo } from "./seo";
 
 /** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return pageMetadata(seo, "/recuperar-palavra-passe/confirmar");
+  return pageMetadata(seo, { pathname: "/recuperar-palavra-passe/confirmar" });
 }
 
 export default async function ConfirmNewPasswordPage() {

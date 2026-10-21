@@ -11,7 +11,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { getLaunchMode } from "@/lib/launch-mode";
 
 export function generateMetadata() {
-  return pageMetadata(seo, "/cancelar-subscricao");
+  return pageMetadata(seo, { pathname: "/cancelar-subscricao" });
 }
 
 /**

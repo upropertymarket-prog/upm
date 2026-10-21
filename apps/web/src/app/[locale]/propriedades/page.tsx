@@ -31,7 +31,7 @@ import { COMING_SOON_CARDS } from "@/lib/site-content";
  */
 export async function generateMetadata() {
   const launchMode = await getLaunchMode();
-  const base = await pageMetadata(seo, "/propriedades");
+  const base = await pageMetadata(seo, { pathname: "/propriedades" });
   if (launchMode === "post") return base;
   return { ...base, robots: { index: false, follow: true } };
 }

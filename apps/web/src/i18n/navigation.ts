@@ -16,7 +16,7 @@ import { routing } from "./routing";
  * para sempre**.
  *
  * Com o segmento, este `Link` põe o prefixo sozinho: `href="/propriedades"`
- * dá `/propriedades` em português e `/en/propriedades` em inglês, e quem
+ * dá `/propriedades` em português e `/en/properties` em inglês, e quem
  * escreve o link não tem de pensar nisso. O custo foi mover ficheiros **uma
  * vez**.
  *

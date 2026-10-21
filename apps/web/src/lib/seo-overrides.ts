@@ -4,7 +4,7 @@ import { getLocale } from "next-intl/server";
 import { resolveLocale } from "@upm/config";
 import { createAnonClient } from "@upm/db/server";
 
-import { buildMetadata, type RouteSeo, type SeoOverride } from "./seo";
+import { buildMetadata, type RouteSeo, type SeoOverride, type SeoPath } from "./seo";
 
 /**
  * A sobreposição de SEO vinda de `seo_pages` (P2-06 2.ª metade · 07 §24.5)
@@ -90,7 +90,20 @@ export async function getSeoOverride(route: string): Promise<SeoOverride> {
  * visível — em vez de ficar com metadados que o Admin não consegue corrigir,
  * que é um erro silencioso e que só aparece quando alguém tenta editá-los.
  */
-export async function pageMetadata(seo: RouteSeo, route: string): Promise<Metadata> {
+export async function pageMetadata(seo: RouteSeo, route: SeoPath): Promise<Metadata> {
+  /**
+   * A sobreposição procura-se pelo **molde** (`/propriedades/[slug]`), não pelo
+   * caminho concreto. Até 21 out 2026 ia o concreto, e o efeito era que a
+   * página de imóvel nunca encontrava sobreposição nenhuma: o inventário e o
+   * `/admin/seo` guardam a rota como molde — é o que a coluna `route` de
+   * `seo_pages` contém — e `/propriedades/casa-do-moinho` não casa com isso.
+   * Ninguém deu por isso porque a falha é invisível: a página saía com o SEO do
+   * ficheiro, que é o resultado certo quando não há registo.
+   *
+   * O molde é também a única chave que faz sentido aqui. Uma sobreposição por
+   * imóvel concreto seria conteúdo, e conteúdo de imóvel vem da propriedade,
+   * não de um painel de SEO.
+   */
   /**
    * O idioma descobre-se aqui e não em cada `page.tsx`. São treze rotas a
    * chamar isto, e uma que se esquecesse de passar o locale ficava em
@@ -99,6 +112,6 @@ export async function pageMetadata(seo: RouteSeo, route: string): Promise<Metada
    * bilingue: pede os metadados e recebe-os na língua em que está a ser
    * servida.
    */
-  const [locale, override] = await Promise.all([getLocale(), getSeoOverride(route)]);
+  const [locale, override] = await Promise.all([getLocale(), getSeoOverride(route.pathname)]);
   return buildMetadata(seo, route, resolveLocale(locale), override);
 }

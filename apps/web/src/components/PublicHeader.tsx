@@ -80,7 +80,7 @@ export function PublicHeader({
      * `{ pathname, params }` e não só `pathname`: numa rota dinâmica o
      * `usePathname` do `next-intl` devolve o **molde**
      * (`/propriedades/[slug]`), não o caminho concreto. Sem os `params`, trocar
-     * de idioma na ficha de uma propriedade levava a `/en/propriedades/[slug]`
+     * de idioma na ficha de uma propriedade levava a `/en/properties/[slug]`
      * — com os cinco caracteres literais no URL.
      *
      * O `ts-expect-error` é o padrão que o próprio `next-intl` documenta para o

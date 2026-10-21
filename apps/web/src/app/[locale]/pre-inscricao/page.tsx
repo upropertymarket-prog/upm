@@ -14,7 +14,7 @@ import { PreRegistrationForm } from "./PreRegistrationForm";
 
 /** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return pageMetadata(seo, "/pre-inscricao");
+  return pageMetadata(seo, { pathname: "/pre-inscricao" });
 }
 
 /**

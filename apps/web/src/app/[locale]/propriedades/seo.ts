@@ -7,7 +7,7 @@ import type { RouteSeo } from "@/lib/seo";
  * saiu a 20 out 2026. Eram dois defeitos num campo: anunciava o domínio de
  * produção **a partir de staging**, contra o que o `siteUrl()` do
  * `lib/seo.ts` existe para evitar, e prendia a página a um só URL agora que
- * ela tem dois (`/propriedades` e `/en/propriedades`). Sem o campo, o
+ * ela tem dois (`/propriedades` e `/en/properties`). Sem o campo, o
  * `buildMetadata` calcula-o a partir da rota e do idioma — que é o que estava
  * certo desde o início.
  */

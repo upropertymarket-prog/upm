@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { INTL_LOCALE, LOCALES, resolveLocale } from "@upm/config";
+import { INTL_LOCALE, LOCALES, type Locale, resolveLocale } from "@upm/config";
 
-import type { RouteSeo } from "@/lib/seo";
+import { canonicalUrl, type RouteSeo } from "@/lib/seo";
 import { permanentRedirect } from "@/i18n/navigation";
 import { pageMetadata } from "@/lib/seo-overrides";
 import { seo } from "./seo";
@@ -131,7 +131,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }),
   ) as RouteSeo;
 
-  return pageMetadata(preenchido, `/propriedades/${listing.slug}`);
+  /**
+   * O molde e o `slug` à parte, e não o caminho já montado. É aqui que a
+   * mudança de 21 out 2026 se paga: de `/propriedades/casa-do-moinho` ninguém
+   * deriva `/en/properties/casa-do-moinho`, porque não se sabe que parte do
+   * caminho é a rota e que parte é o imóvel. Separados, o canonical e o
+   * `hreflang` desta página saem certos nos dois idiomas.
+   *
+   * O `slug` é o mesmo nas duas línguas: é a identidade do anúncio, não texto
+   * de interface. Traduzi-lo dava dois URL para o mesmo imóvel.
+   */
+  return pageMetadata(preenchido, {
+    pathname: "/propriedades/[slug]",
+    params: { slug: listing.slug },
+  });
 }
 
 /**
@@ -143,15 +156,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * Só com o que a view expõe — nada de morada exata nem de dados do dono. O
  * `offers` só entra quando há preço: um `price` nulo seria dados estruturados
  * inválidos, e um validador recusa o bloco inteiro por causa dele.
+ *
+ * **Recebe o idioma** desde 21 out 2026, pela mesma razão que o canonical: o
+ * `url` era `/propriedades/<slug>`, relativo e em português. Relativo já era
+ * errado — o schema.org pede um URL absoluto ali —, e com os caminhos
+ * traduzidos passava a apontar, numa página `/en`, para um caminho que não
+ * existe. É o mesmo `canonicalUrl` do `<head>`, para os dois não divergirem.
  */
-function structuredData(listing: PublicListingDetail) {
+function structuredData(listing: PublicListingDetail, locale: Locale) {
   const price = (listing.deal === "rent" ? listing.rentCents : listing.priceCents) ?? null;
   return {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     name: listing.title,
     description: listing.description ?? undefined,
-    url: `/propriedades/${listing.slug}`,
+    url: canonicalUrl({ pathname: "/propriedades/[slug]", params: { slug: listing.slug } }, locale),
     image: listing.photoUrls.length > 0 ? listing.photoUrls : undefined,
     datePosted: listing.publishedAt ?? undefined,
     ...(listing.city
@@ -217,8 +236,8 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
   }
 
   // Slug desatualizado (o título mudou) → 301 para o canónico, **no mesmo
-  // idioma**: de `/en/propriedades/<slug-antigo>` vai-se para
-  // `/en/propriedades/<slug-novo>`, e não para a versão portuguesa. É o
+  // idioma**: de `/en/properties/<slug-antigo>` vai-se para
+  // `/en/properties/<slug-novo>`, e não para a versão portuguesa. É o
   // `permanentRedirect` do `next-intl` que o garante.
   const canonicalSlug = listingSlug({ id: listing.id, title: listing.title });
   if (slug !== canonicalSlug) {
@@ -236,7 +255,9 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
           04 §2.1.2 AC #4 exige e o que os validadores leem. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(listing)) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData(listing, resolveLocale(locale))),
+        }}
       />
     </>
   );

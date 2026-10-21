@@ -1,6 +1,8 @@
 import { defineRouting } from "next-intl/routing";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES } from "@upm/config";
 
+import { pathnames } from "./pathnames";
+
 /**
  * Encaminhamento por idioma — **só no site público** (20 out 2026)
  * =========================================================================
@@ -21,7 +23,7 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES } from "@upm/config";
  * `localePrefix: "as-needed"` — o português não leva prefixo. **Nenhum URL que
  * já existe muda**, e é por isso que esta mudança não precisa de um único
  * redirect: `/termos` continua a ser `/termos`, e o inglês entra ao lado em
- * `/en/termos`.
+ * `/en/terms` — caminho traduzido incluído, ver `pathnames.ts`.
  *
  * `localeCookie: { name: LOCALE_COOKIE }` — o `next-intl` usa `NEXT_LOCALE`
  * por omissão, e o produto usa `upm-locale` desde P1-06. Deixá-los diferentes
@@ -34,35 +36,13 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES } from "@upm/config";
  * bilingue, e o cookie passa a mandar a partir da primeira escolha explícita.
  */
 /**
- * Os caminhos do site, declarados — **e iguais nos dois idiomas**.
- *
- * O `next-intl` deixa traduzir o próprio caminho (`/termos` ↔ `/terms`). Não se
- * faz, e por duas razões: os URL portugueses estão inventariados em 03 §1 e
- * traduzi-los duplicava o inventário; e o que se ganha é nada — ninguém procura
- * "terms" para chegar aos nossos termos.
- *
- * A lista existe por outro motivo, e esse é concreto: **sem ela o `href` do
- * `Link` passa a ser uma `string` qualquer**. O `typedRoutes` do Next deixa de
- * servir aqui (o union dele passou a ser `/[locale]/termos`), e o
- * `AuthShell.switchHref` tinha escrito, com razão, *"uma rota conhecida, não
- * uma string qualquer"*. Com os `pathnames`, quem escrever `/entar` leva um
- * erro de compilação em vez de um 404 em produção.
+ * Os caminhos vivem em `pathnames.ts`, e re-exportam-se daqui porque é por
+ * `@/i18n/routing` que o resto do site os importa desde que existem. A razão de
+ * estarem noutro ficheiro está lá explicada: o `lib/seo.ts` tem de os ler, e
+ * ler daqui arrastava o `next-intl` para dentro de um teste que corre em Node.
  */
-export const pathnames = {
-  "/": "/",
-  "/propriedades": "/propriedades",
-  "/propriedades/[slug]": "/propriedades/[slug]",
-  "/termos": "/termos",
-  "/privacidade": "/privacidade",
-  "/cookies": "/cookies",
-  "/pre-inscricao": "/pre-inscricao",
-  "/criar-conta": "/criar-conta",
-  "/criar-conta/verificacao": "/criar-conta/verificacao",
-  "/entrar": "/entrar",
-  "/recuperar-palavra-passe": "/recuperar-palavra-passe",
-  "/recuperar-palavra-passe/confirmar": "/recuperar-palavra-passe/confirmar",
-  "/cancelar-subscricao": "/cancelar-subscricao",
-} as const;
+export { pathnames } from "./pathnames";
+export type { SitePathname, StaticSitePathname } from "./pathnames";
 
 export const routing = defineRouting({
   locales: LOCALES,
@@ -71,16 +51,3 @@ export const routing = defineRouting({
   localeCookie: { name: LOCALE_COOKIE },
   pathnames,
 });
-
-/** Um caminho do site, incluindo os que têm segmento dinâmico. */
-export type SitePathname = keyof typeof pathnames;
-
-/**
- * Só os caminhos estáticos.
- *
- * Um `href` em string não serve para `/propriedades/[slug]` — esse precisa de
- * `{ pathname, params }`, senão o link apontava para a página com `[slug]`
- * literal no URL. Quem só aceita um caminho fixo (o `switchHref` do
- * `AuthShell`, por exemplo) usa este tipo e não o outro.
- */
-export type StaticSitePathname = Exclude<SitePathname, `${string}[${string}`>;

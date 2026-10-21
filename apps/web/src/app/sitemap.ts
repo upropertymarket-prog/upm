@@ -5,7 +5,8 @@ import { LOCALES } from "@upm/config";
 
 import { getLaunchMode } from "@/lib/launch-mode";
 import { getPublicListings, LISTINGS_PAGE_SIZE } from "@/lib/public-listings";
-import { localizedPath } from "@/lib/seo";
+import type { SitePathname } from "@/i18n/pathnames";
+import { localizedPath, type SeoPath } from "@/lib/seo";
 
 /**
  * `sitemap.xml` do site público (P2-06 · 04 §2.1.1)
@@ -79,9 +80,12 @@ function priorityFor(route: string): number {
  * fora é um URL que o Google pode levar meses a descobrir. Os `alternates`
  * dizem-lhe que as duas são a mesma página: é a mesma informação que o
  * `hreflang` do `<head>`, dada por outra via, e ele aceita as duas.
+ *
+ * Desde 21 out 2026 o caminho inglês é traduzido (`/en/terms`), e é o
+ * `localizedPath` que sabe disso — este ficheiro só lhe entrega o molde.
  */
 function localizedEntries(
-  route: string,
+  route: SeoPath,
   base: string,
   now: Date,
   diaria: boolean,
@@ -94,7 +98,7 @@ function localizedEntries(
     url: `${base}${localizedPath(route, locale)}`,
     lastModified: now,
     changeFrequency: (diaria ? "daily" : "monthly") as "daily" | "monthly",
-    priority: priorityFor(route),
+    priority: priorityFor(route.pathname),
     alternates: { languages },
   }));
 }
@@ -109,7 +113,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Ver a nota acima: em `pre` o Market vai com `noindex`.
     if (entry.route === "/propriedades" && launchMode === "pre") return false;
     return true;
-  }).flatMap((entry) => localizedEntries(entry.route, base, now, entry.route === "/"));
+  }).flatMap((entry) =>
+    // O inventário é gerado e tipa a rota como `string`; aqui sabe-se que é um
+    // molde declarado, porque o gerador o lê dos `seo.ts` das mesmas rotas que
+    // os `pathnames` declaram. Uma rota que escapasse à declaração sai com o
+    // caminho português nos dois idiomas em vez de `undefined` no `<loc>` — ver
+    // o `pathnameFor`.
+    localizedEntries({ pathname: entry.route as SitePathname }, base, now, entry.route === "/"),
+  );
 
   if (launchMode === "pre") return staticEntries;
 
@@ -119,7 +130,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (listings.length === 0) break;
 
     for (const listing of listings) {
-      const route = `/propriedades/${listing.slug}`;
+      const route: SeoPath = {
+        pathname: "/propriedades/[slug]",
+        params: { slug: listing.slug },
+      };
       const languages = Object.fromEntries(
         LOCALES.map((outro) => [outro, `${base}${localizedPath(route, outro)}`]),
       );

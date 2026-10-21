@@ -11,7 +11,7 @@ import { submitContact } from "./pre-inscricao/actions";
 
 /** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return pageMetadata(seo, "/");
+  return pageMetadata(seo, { pathname: "/" });
 }
 
 /**

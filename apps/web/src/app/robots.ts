@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
+import { LOCALES } from "@upm/config";
 
+import type { SitePathname } from "@/i18n/pathnames";
 import { getLaunchMode } from "@/lib/launch-mode";
+import { localizedPath } from "@/lib/seo";
 
 /**
  * `robots.txt` do site público (P2-06 · 04 §2.1.1)
@@ -17,7 +20,12 @@ import { getLaunchMode } from "@/lib/launch-mode";
  *
  *  - **`/entrar`, `/recuperar-palavra-passe`, `/criar-conta/verificacao`** —
  *    ecrãs transacionais, já `noindex` no respetivo `seo.ts`. O `noindex` é a
- *    instrução que conta; isto poupa ao robô o pedido.
+ *    instrução que conta; isto poupa ao robô o pedido. **Nos dois idiomas**: a
+ *    lista era escrita à mão em português e deixava `/en/sign-in` aberto — e já
+ *    deixava `/en/entrar` aberto antes dos caminhos se traduzirem, porque um
+ *    `Disallow: /entrar` não casa com um caminho que começa por `/en`. Agora
+ *    derivam-se do mesmo `localizedPath` que faz o canonical, e uma rota nova
+ *    nesta lista entra automaticamente nas duas línguas.
  *  - **`/propriedades?...`** não se exclui. Os filtros geram combinações infinitas,
  *    mas quem resolve isso é o `canonical` da página, não um `Disallow` — uma
  *    página bloqueada no `robots.txt` não pode ser lida, e um robô que não a lê
@@ -32,6 +40,17 @@ import { getLaunchMode } from "@/lib/launch-mode";
 function siteUrl(): string {
   return (process.env.WEB_URL ?? "http://localhost:4300").replace(/\/+$/, "");
 }
+
+/**
+ * Os ecrãs transacionais. `/recuperar-palavra-passe` cobre o `/confirmar` por
+ * ser prefixo — e cobre-o nas duas línguas, porque o inglês também aninha
+ * (`/reset-password/confirm`).
+ */
+const EXCLUIDAS: readonly SitePathname[] = [
+  "/entrar",
+  "/recuperar-palavra-passe",
+  "/criar-conta/verificacao",
+];
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const launchMode = await getLaunchMode();
@@ -48,7 +67,9 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/entrar", "/recuperar-palavra-passe", "/criar-conta/verificacao"],
+        disallow: EXCLUIDAS.flatMap((pathname) =>
+          LOCALES.map((locale) => localizedPath({ pathname }, locale)),
+        ),
       },
     ],
     sitemap: `${base}/sitemap.xml`,

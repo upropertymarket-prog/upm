@@ -60,8 +60,8 @@ export async function setNewPassword(
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: "Não foi possível guardar a nova palavra-passe. Peça um novo link." };
 
-  // O `redirect` do `next-intl` leva o idioma: de `/en/recuperar-palavra-passe`
-  // volta-se para `/en/entrar`, e não para a versão portuguesa.
+  // O `redirect` do `next-intl` leva o idioma: de `/en/reset-password`
+  // volta-se para `/en/sign-in`, e não para a versão portuguesa.
   // `return` e não só a chamada: o `redirect` devolve `never`, mas o TS perde
   // essa informação pelo destructuring genérico do `createNavigation` e passa
   // a dizer que a função não tem retorno. O `return` diz as duas coisas ao

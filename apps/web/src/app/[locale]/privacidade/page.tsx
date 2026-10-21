@@ -5,7 +5,7 @@ import { seo } from "./seo";
 
 /** `seo.ts` desta rota, com a sobreposição de `seo_pages` por cima (P2-06). */
 export function generateMetadata() {
-  return pageMetadata(seo, "/privacidade");
+  return pageMetadata(seo, { pathname: "/privacidade" });
 }
 
 export const dynamic = "force-dynamic";
