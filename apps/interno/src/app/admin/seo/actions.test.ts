@@ -63,8 +63,32 @@ describe("autorização", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
-  it("recusa um papel que não seja admin", async () => {
+  it("recusa um papel de fora da equipa", async () => {
     signedInAs("owner");
+
+    const result = await saveSeoPage({ route: "/", locale: "pt", titleTag: "Olá" });
+
+    expect(result).toEqual({ error: "Sem autorização." });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  /**
+   * O SEO tem duas portas desde 21 out 2026 (07 §24.5): `/admin/seo` e
+   * `/marketing/seo`. É a mesma action, e por isso é aqui que se vê quem entra.
+   */
+  it("aceita o marketing, que é quem corrige um título em produção", async () => {
+    signedInAs("marketing");
+
+    const result = await saveSeoPage({ route: "/", locale: "pt", titleTag: "Olá" });
+
+    expect(result.error).toBeUndefined();
+    expect(rpc).toHaveBeenCalled();
+  });
+
+  it("recusa o suporte, que não edita SEO", async () => {
+    // A lista é de dois papéis e não `is_internal()`: ser interno não é razão
+    // para ter a tabela.
+    signedInAs("support");
 
     const result = await saveSeoPage({ route: "/", locale: "pt", titleTag: "Olá" });
 

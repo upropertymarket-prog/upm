@@ -68,7 +68,18 @@ const saveSchema = z.object({
 export type SeoActionResult = { ok?: boolean; error?: string; notice?: string };
 export type SeoSaveInput = z.input<typeof saveSchema>;
 
-async function getAdminClient() {
+/**
+ * Admin **ou** marketing, desde 21 out 2026 — ver a nota do `MARKETING_NAV` e
+ * 07 §24.5: o SEO tem duas portas, e esta action serve as duas.
+ *
+ * A lista é de dois papéis e não um `is_internal()`: o suporte não edita SEO,
+ * e dar-lhe a tabela só por ser interno era alargar sem ninguém pedir. O mesmo
+ * par está dentro de `admin_save_seo_page`, que é `security definer` e por isso
+ * tem de se defender sozinha de quem chame o RPC diretamente.
+ */
+const SEO_EDITORS = ["admin", "marketing"] as const;
+
+async function getSeoEditorClient() {
   const supabase = createClient(await cookies());
   const {
     data: { user },
@@ -79,7 +90,9 @@ async function getAdminClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  return profile?.role === "admin" ? supabase : null;
+  return profile?.role && SEO_EDITORS.includes(profile.role as (typeof SEO_EDITORS)[number])
+    ? supabase
+    : null;
 }
 
 /** Cadeia vazia e `undefined` são a mesma coisa: "este campo não sobrepõe". */
@@ -91,7 +104,7 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
     return { error: parsed.error.issues[0]?.message ?? "Dados de SEO inválidos." };
   }
 
-  const supabase = await getAdminClient();
+  const supabase = await getSeoEditorClient();
   if (!supabase) return { error: "Sem autorização." };
 
   const data = parsed.data;
@@ -146,6 +159,10 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
     notice = "Guardado, mas o registo de auditoria falhou — avise a administração.";
   }
 
+  // **As duas portas.** Quem grava por `/marketing/seo` tem de ver a lista
+  // atualizada no painel onde está, e quem grava por um deles não pode deixar
+  // o outro a mostrar o valor antigo — é a mesma tabela.
   revalidatePath("/admin/seo");
+  revalidatePath("/marketing/seo");
   return { ok: true, notice };
 }
