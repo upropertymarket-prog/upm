@@ -443,20 +443,42 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
           {/* ------------------------------------------------------------- */}
           {/* Duas colunas: o e-mail à esquerda, a campanha à direita        */}
           {/* ------------------------------------------------------------- */}
+          {/* `.upm-split` de `@upm/ui`, e não um `flex` escrito aqui.
+              =====================================================
+              A primeira versão desta coluna foi um `flex` com `grow`
+              desproporcionado, e tinha dois defeitos que o utilitário do
+              projeto já não tem:
+
+              1. **Colava-se por baixo da topbar.** O `.upm-topbar` é `sticky`
+                 com 68 px (`--topbar-h`), e um `top` que não a desconte põe a
+                 coluna a passar-lhe por baixo — era isto que cortava o topo da
+                 lista de blocos e o seletor de campanha a meio do scroll. O
+                 `.upm-split__aside--sticky` já soma a topbar ao `top`, e tem o
+                 comentário a dizer porquê desde que nasceu.
+              2. **Não garantia o `minmax(0, …)`.** O `0` é o que impede um
+                 conteúdo largo de esticar a coluna e fazer a página rolar de
+                 lado — está escrito na nota da própria classe, a propósito de
+                 02 §13.
+
+              Também traz o ponto de quebra dos 900 px, igual ao do `fill` do
+              shell e ao da grelha das Mensagens, para os ecrãs mudarem de forma
+              todos ao mesmo tempo. Empilhada, a coluna deixa de ser `sticky` —
+              senão prendia-se por cima do que vem a seguir. */}
           <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "var(--sp-5)",
-              alignItems: "flex-start",
-            }}
+            className="upm-split"
+            style={
+              {
+                "--split-cols": "minmax(0, 1fr) minmax(300px, 340px)",
+                "--split-gap": "var(--sp-5)",
+              } as React.CSSProperties
+            }
           >
             <main
               style={{
-                flex: "999 1 min(100%, 560px)",
                 minWidth: 0,
                 display: "grid",
                 gap: "var(--sp-4)",
+                alignContent: "start",
               }}
             >
               {/* ------------------------------------------------------------- */}
@@ -621,7 +643,15 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 <aside
                   style={{
                     position: "sticky",
-                    top: "var(--sp-4)",
+                    // **A topbar entra na conta.** `--topbar-h` são os 68 px do
+                    // `.upm-topbar`, que é `sticky` no topo com `z-index: 20`:
+                    // um `top` que não a desconte põe a paleta a passar-lhe por
+                    // baixo, e era isso — não falta de espaço — que lhe cortava
+                    // os primeiros blocos a meio do scroll. É a mesma conta que
+                    // o `.upm-split__aside--sticky` faz; escrita aqui porque
+                    // esta coluna vive dentro da principal e não é o `aside` do
+                    // split.
+                    top: "calc(var(--topbar-h) + var(--sp-4))",
                     // Estreitada a 21 out 2026: a coluna principal passou a
                     // dividir a página com a da campanha, e uma paleta de
                     // 280 px aí dentro deixava o canvas do e-mail — que é o
@@ -629,13 +659,12 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                     // atalhos para o encher.
                     flex: "1 1 190px",
                     maxWidth: "min(100%, 220px)",
-                    // Um `sticky` mais alto do que a janela **não rola**: fica
-                    // preso pelo topo e a parte de cima torna-se inalcançável
-                    // — era o que cortava os primeiros blocos da paleta a meio
-                    // da página. O teto mais o `auto` devolvem-lhe o rolo
-                    // próprio: a paleta acompanha o scroll e, quando não cabe
-                    // toda, rola por dentro em vez de desaparecer por cima.
-                    maxHeight: "calc(100vh - var(--sp-4) * 2)",
+                    // Um `sticky` mais alto do que o espaço que lhe sobra **não
+                    // rola**: fica preso e a parte de cima torna-se
+                    // inalcançável. O teto mais o `auto` devolvem-lhe o rolo
+                    // próprio — e o teto desconta a topbar, senão prometia 68 px
+                    // de altura que não existem.
+                    maxHeight: "calc(100vh - var(--topbar-h) - var(--sp-4) * 2)",
                     overflowY: "auto",
                     display: "grid",
                     gap: "var(--sp-4)",
@@ -850,22 +879,21 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 ou ver o estado sem subir ao topo. */}
             <aside
               aria-label={t("bandCampaign")}
-              style={{
-                position: "sticky",
-                top: "var(--sp-4)",
-                flex: "1 1 300px",
-                maxWidth: "min(100%, 340px)",
-                minWidth: 0,
-                // O mesmo teto da paleta, e pela mesma razão: com a campanha, os
-                // recibos e as ações empilhados, esta coluna passa a altura da
-                // janela com facilidade — e um `sticky` que não cabe esconde o
-                // topo, que aqui é o seletor de campanha e o estado.
-                maxHeight: "calc(100vh - var(--sp-4) * 2)",
-                overflowY: "auto",
-                display: "grid",
-                gap: "var(--sp-4)",
-                alignContent: "start",
-              }}
+              className="upm-split__aside upm-split__aside--sticky"
+              style={
+                {
+                  // A altura que sobra depois da topbar e das margens da
+                  // página. Com ela, mais o `auto` abaixo, a coluna rola por
+                  // dentro quando a campanha, os recibos e as ações não cabem
+                  // de uma vez — em vez de esconder o topo, que é onde está o
+                  // seletor de campanha e o estado.
+                  "--split-aside-h": "calc(100vh - var(--topbar-h) - var(--sp-9) * 2)",
+                  overflowY: "auto",
+                  display: "grid",
+                  gap: "var(--sp-4)",
+                  alignContent: "start",
+                } as React.CSSProperties
+              }
             >
               {/* ------------------------------------------------------------- */}
               {/* Faixa 1 — a campanha                                          */}

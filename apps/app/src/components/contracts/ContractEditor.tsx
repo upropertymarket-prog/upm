@@ -368,7 +368,17 @@ export function ContractEditor(props: ContractEditorProps) {
         </div>
 
         <div
-          style={{ display: "grid", gap: "var(--sp-6)", position: "sticky", top: "var(--sp-6)" }}
+          style={{
+            display: "grid",
+            gap: "var(--sp-6)",
+            position: "sticky",
+            // A topbar é `sticky` com 68 px (`--topbar-h`) e `z-index: 20`: um
+            // `top` que não a desconte põe esta coluna a passar-lhe por baixo e
+            // esconde-lhe o topo a meio do scroll. Encontrado a 21 out 2026 ao
+            // corrigir o mesmo defeito no construtor de campanhas — é a conta
+            // que o `.upm-split__aside--sticky` já faz por quem usa a classe.
+            top: "calc(var(--topbar-h) + var(--sp-6))",
+          }}
         >
           <Card padded style={{ display: "grid", gap: "var(--sp-4)" }}>
             <strong>{t("dataTitle")}</strong>
