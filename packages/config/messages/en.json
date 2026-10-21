@@ -1225,7 +1225,9 @@
         "submitting": "Opening payment…",
         "noTerms": "No published version of the Terms is available. Sign-up cannot continue — please contact support.",
         "commitmentMonths": "{months} months",
-        "cancellationWithCommitment": "Any time; takes effect at the end of the minimum period"
+        "cancellationWithCommitment": "Any time; takes effect at the end of the minimum period",
+        "marketing": "I want to receive news, tips and campaigns by email.",
+        "marketingHint": "Optional, and separate from the Terms. You can opt out through the link in every email we send."
       }
     },
     "login": {

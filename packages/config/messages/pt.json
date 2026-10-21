@@ -1225,7 +1225,9 @@
         "submitting": "A abrir o pagamento…",
         "noTerms": "Não há uma versão dos Termos publicada. A inscrição não pode continuar — contacte o suporte.",
         "commitmentMonths": "{months} meses",
-        "cancellationWithCommitment": "A qualquer momento; produz efeitos no fim do período mínimo"
+        "cancellationWithCommitment": "A qualquer momento; produz efeitos no fim do período mínimo",
+        "marketing": "Quero receber novidades, dicas e campanhas por e-mail.",
+        "marketingHint": "Opcional, e independente dos Termos. Pode cancelar pelo link que vai em cada e-mail que receba."
       }
     },
     "login": {

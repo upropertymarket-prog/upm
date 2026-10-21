@@ -232,6 +232,42 @@ export async function registerAccount(
     return { fieldErrors: { taxId: GENERIC_IDENTITY_ERROR }, step: "account" };
   }
 
+  /**
+   * D69 — o consentimento de marketing, que até aqui ninguém recolhia.
+   *
+   * `profiles.marketing_consent` existe desde `20261015090000` e **nascia
+   * sempre `false`**, porque não havia campo que o perguntasse. O efeito não
+   * era visível no registo: era na área do Marketing, onde as audiências
+   * `all`, `owners` e `buyers` davam zero — não por não haver contas, mas por
+   * nenhuma delas ter dado consentimento. Uma campanha a registados não podia
+   * ser enviada a ninguém.
+   *
+   * **Só se escreve quando é sim.** O `false` com data nula é o estado em que a
+   * linha já nasce, e um `update` para o repetir era trabalho a mais e uma
+   * escrita a menos de ser verdade — "não consentiu" e "consentiu que não" são
+   * a mesma coisa aqui, e nenhuma das duas precisa de data.
+   *
+   * Os dois campos vão juntos por obrigação do esquema: a constraint
+   * `profiles_marketing_consent_timestamp` exige
+   * `marketing_consent = (marketing_consent_at is not null)`. É a data que faz
+   * do consentimento prova, e não o booleano.
+   *
+   * Uma falha aqui **não** desfaz o registo. A conta está criada e paga; o pior
+   * caso é uma pessoa que disse sim e não recebe campanhas — recuperável nas
+   * Definições. Perder a conta por causa de uma caixa opcional não era.
+   */
+  if (formData.get("marketingConsent") !== null) {
+    const { error: consentError } = await service
+      .from("profiles")
+      .update({ marketing_consent: true, marketing_consent_at: new Date().toISOString() })
+      .eq("id", profileId);
+    if (consentError) {
+      console.error(
+        `[criar-conta] consentimento de marketing não gravado: ${consentError.message}`,
+      );
+    }
+  }
+
   // P9-02 — a aceitação fica registada ANTES do pagamento: é a aceitação que
   // autoriza o contrato, não o contrário.
   const userAgent = (await headers()).get("user-agent");

@@ -382,6 +382,20 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
               }
             />
 
+            {/*
+              D69 — o consentimento de marketing, que o registo nunca recolheu.
+              `profiles.marketing_consent` existe desde `20261015090000` e nascia
+              sempre `false`, e por isso as audiências de campanha a registados
+              davam zero: não havia uma única conta que o tivesse dado.
+
+              **Separado dos Termos e sem `required`.** Os Termos autorizam o
+              tratamento e são obrigatórios; isto é opcional e tem de o ser,
+              senão não é consentimento. Nunca pré-selecionado — P11-07 é
+              explícito ("sem caixas pré-selecionadas"), e é a mesma regra que o
+              formulário de pré-inscrição já cumpre.
+            */}
+            <Checkbox name="marketingConsent" label={tc("marketing")} hint={tc("marketingHint")} />
+
             {state.error ? (
               <p className="text-sm text-danger" role="alert">
                 {state.error}
