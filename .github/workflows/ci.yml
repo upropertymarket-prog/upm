@@ -65,8 +65,79 @@ jobs:
       - name: Portão · SEO por rota pública
         run: pnpm gate:seo
 
+      # Nenhum texto visível escrito à mão nos componentes. O mesmo portão que
+      # corre no `pnpm gate` local, e que faltava aqui: uma frase em português
+      # dentro de um componente não parte nada — só nunca se traduz.
+      - name: Portão · i18n
+        run: pnpm gate:i18n
+
+      # As storyboards montam os componentes de produção, e é o `tsc` do sidecar
+      # que responde se ainda compilam. **Precisa do `pnpm install` dentro de
+      # `tempo/`**: o sidecar não é um workspace do monorepo (ver a nota em
+      # `tempo/package.json`), e o `pnpm install` da raiz não passa por lá.
+      #
+      # **`--ignore-workspace` não é decoração.** Sem ele, o `pnpm` sobe a
+      # árvore, encontra o `pnpm-workspace.yaml` da raiz e instala *o monorepo*
+      # outra vez — "Scope: all 8 workspace projects" —, sem tocar no
+      # `tempo/pnpm-lock.yaml` e sem criar `tempo/node_modules`. O portão
+      # seguinte falharia a dizer que lhe falta o TypeScript, e o motivo
+      # verdadeiro estaria neste passo, a dar verde. Medido, e depois provado
+      # com um teste negativo: com uma dependência a mais no
+      # `tempo/package.json`, este comando sai com `ERR_PNPM_OUTDATED_LOCKFILE`
+      # e nomeia os specifiers do lockfile do sidecar — logo é esse que lê.
+      - name: Dependências do sidecar dos canvases
+        run: pnpm install --frozen-lockfile --ignore-workspace
+        working-directory: tempo
+
+      - name: Portão · storyboards compilam
+        run: pnpm gate:canvas
+
       - name: Portão · dependências vulneráveis
         run: pnpm gate:deps
+
+  # ---------------------------------------------------------------------------
+  # Esquema — o oitavo portão (doc 08 §8)
+  #
+  # O `pnpm gate:db` local corre `--linked`, contra o projeto remoto. Aqui não
+  # há projeto ligado — `supabase/.temp/` está no `.gitignore` — e a escolha foi
+  # arrancar um Supabase local em vez de pôr credenciais de produção nos
+  # secrets. Não é só evitar segredos: é **outra pergunta, e a melhor das duas**.
+  # O `--linked` analisaria o esquema que já está implantado; isto analisa as
+  # migrações tal como estão **neste PR**.
+  #
+  # E dá uma segunda coisa de graça, que agora conta: o `supabase start` aplica
+  # as migrações todas por ordem, e portanto **falha quando uma está partida**.
+  # Há três por aplicar, e até hoje nada no CI as tocava.
+  #
+  # Em job próprio para o `verify` não esperar pelo Docker: os dois correm ao
+  # mesmo tempo e quem falha diz logo qual foi.
+  # ---------------------------------------------------------------------------
+  schema:
+    name: Portão · esquema da base de dados
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Aplica as 93 migrações por ordem. Uma migração partida morre aqui.
+      - name: Supabase local
+        run: pnpm exec supabase start
+
+      - name: Portão · lint do esquema
+        run: pnpm exec supabase db lint --local --schema public --level warning --fail-on error
+
+      # `always()`: um lint vermelho não pode deixar contentores de pé.
+      - name: Parar o Supabase local
+        if: always()
+        run: pnpm exec supabase stop --no-backup
 
   secrets:
     name: segredos no histórico
