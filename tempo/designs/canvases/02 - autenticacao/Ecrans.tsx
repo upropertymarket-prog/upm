@@ -1,11 +1,11 @@
 import { NextIntlClientProvider } from "next-intl";
 
 import { AuthShell } from "../../../../apps/web/src/components/auth/AuthLayout";
-import { LoginForm } from "../../../../apps/web/src/app/entrar/LoginForm";
-import { RegisterWizard } from "../../../../apps/web/src/app/criar-conta/RegisterWizard";
-import { ResendVerificationForm } from "../../../../apps/web/src/app/criar-conta/verificacao/ResendVerificationForm";
-import { RequestForm } from "../../../../apps/web/src/app/recuperar-palavra-passe/RequestForm";
-import { NewPasswordForm } from "../../../../apps/web/src/app/recuperar-palavra-passe/confirmar/NewPasswordForm";
+import { LoginForm } from "../../../../apps/web/src/app/[locale]/entrar/LoginForm";
+import { RegisterWizard } from "../../../../apps/web/src/app/[locale]/criar-conta/RegisterWizard";
+import { ResendVerificationForm } from "../../../../apps/web/src/app/[locale]/criar-conta/verificacao/ResendVerificationForm";
+import { RequestForm } from "../../../../apps/web/src/app/[locale]/recuperar-palavra-passe/RequestForm";
+import { NewPasswordForm } from "../../../../apps/web/src/app/[locale]/recuperar-palavra-passe/confirmar/NewPasswordForm";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 
 /**

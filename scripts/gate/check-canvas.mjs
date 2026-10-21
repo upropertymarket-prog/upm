@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 /**
@@ -42,10 +42,31 @@ import { spawnSync } from "node:child_process";
  * responde a uma pergunta diferente da que importa.
  */
 
-const SIDECAR = "tempo";
-const TSC = join(SIDECAR, "node_modules", "typescript", "bin", "tsc");
+/**
+ * ---------------------------------------------------------------------------
+ * O PORTÃO ESTEVE CEGO, E ERA UM CARÁTER (21 out 2026)
+ * ---------------------------------------------------------------------------
+ * `TSC` era um caminho **relativo** (`tempo/node_modules/...`) e o `spawnSync`
+ * corre com `cwd: "tempo"`. O Node procurava-o em `tempo/tempo/node_modules/`,
+ * não o encontrava, e morria antes de compilar o que fosse. O que saía era um
+ * `Error: Cannot find module` no stderr — e esse texto **não contém
+ * `error TS`**, que é o que o filtro abaixo procura. Zero linhas filtradas,
+ * zero erros, portão verde.
+ *
+ * Verde a dizer "as storyboards compilam", sem nunca ter compilado nada. É
+ * precisamente a falha que este ficheiro existe para impedir, com o portão
+ * dela própria a ser a vítima — e explica porque a migração das rotas para
+ * `app/[locale]/` partiu dois canvases sem o portão dizer nada.
+ *
+ * Absoluto desde agora. E, para que isto não se repita em silêncio: **a
+ * ausência de erros deixou de bastar**. Se o `tsc` não arrancar — qualquer
+ * saída diferente de zero sem uma única linha de `error TS` — o portão falha e
+ * diz que falhou a arrancar, em vez de dar o verde por omissão.
+ */
+const SIDECAR = resolve("tempo");
+const TSC = resolve(SIDECAR, "node_modules", "typescript", "bin", "tsc");
 
-if (!existsSync(join(SIDECAR, "tsconfig.json"))) {
+if (!existsSync(resolve(SIDECAR, "tsconfig.json"))) {
   console.log("✓ canvas: não há sidecar `tempo/` neste checkout — nada a verificar");
   process.exit(0);
 }
@@ -64,6 +85,14 @@ const resultado = spawnSync(process.execPath, [TSC, "--noEmit", "--pretty", "fal
 
 const saida = `${resultado.stdout ?? ""}${resultado.stderr ?? ""}`;
 const erros = saida.split("\n").filter((linha) => linha.includes("error TS"));
+
+// O `tsc` não arrancou: saiu com erro e não disse uma única coisa sobre tipos.
+// Sem este ramo, é exatamente aqui que o portão dava o verde por omissão.
+if (erros.length === 0 && resultado.status !== 0) {
+  console.error("✗ canvas: o `tsc` do sidecar não arrancou — o portão não verificou nada.\n");
+  console.error(saida.trim().split("\n").slice(0, 10).join("\n"));
+  process.exit(1);
+}
 
 if (erros.length === 0) {
   console.log("✓ canvas: as storyboards compilam contra os componentes de hoje");

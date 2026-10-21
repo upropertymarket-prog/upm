@@ -53,9 +53,25 @@ defineAsset(Pagination, {
   usageInstructions:
     "Controlo de paginação. 08 §3.4 torna a paginação OBRIGATÓRIA em toda a listagem, logo toda a tabela e toda a grelha de cartões leva um destes. É só o controlo: o corte dos dados é do servidor (keyset nas listas grandes). `summary` recebe o texto já traduzido ('1–20 de 397'); `labels` recebe as traduções dos botões.",
   variants: {
-    Inicio: { props: { page: 1, pageCount: 20, onPageChange: () => undefined } },
+    // `labels` é obrigatória desde D72 — ver a nota em `Navigation.tsx`. Uma
+    // variante inserível sem ela dava um componente a rebentar no `aria-label`
+    // à primeira inserção.
+    Inicio: {
+      props: {
+        page: 1,
+        pageCount: 20,
+        onPageChange: () => undefined,
+        labels: { previous: "Anterior", next: "Seguinte", page: "Página" },
+      },
+    },
     AMeio: {
-      props: { page: 10, pageCount: 20, onPageChange: () => undefined, summary: "181–200 de 397" },
+      props: {
+        page: 10,
+        pageCount: 20,
+        onPageChange: () => undefined,
+        summary: "181–200 de 397",
+        labels: { previous: "Anterior", next: "Seguinte", page: "Página" },
+      },
     },
   },
 });

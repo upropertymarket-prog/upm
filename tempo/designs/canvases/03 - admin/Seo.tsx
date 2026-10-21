@@ -22,10 +22,24 @@ import { SEO_ROUTES } from "../../../../packages/config/seo-routes.generated";
  * vive só em `/admin/seo`, com a RLS de 05 §1.9.
  *
  * As linhas saem de `SEO_ROUTES`, o inventário gerado dos `seo.ts` — as mesmas
- * rotas que o ecrã verdadeiro lista. Três levam sobreposição inventada, para a
- * coluna de estado mostrar os três casos que 07 obriga a distinguir: *usa
+ * rotas que o ecrã verdadeiro lista. Algumas levam sobreposição inventada, para
+ * a coluna de estado mostrar os três casos que 07 obriga a distinguir: *usa
  * predefinições*, *completo* e *incompleto*. Com todas as linhas no mesmo
  * estado, a coluna que mais importa neste ecrã não se revia.
+ *
+ * ---------------------------------------------------------------------------
+ * DOIS IDIOMAS (21 out 2026 · D72 fase C)
+ * ---------------------------------------------------------------------------
+ * `SeoPageRow` passou a ter um estado por idioma, e os dados daqui acompanham.
+ * **O caso que esta storyboard existe para mostrar é o misto**: uma rota
+ * corrigida em português e a usar o ficheiro em inglês. É a diferença que a
+ * coluna de estado passou a poder dizer, e com os dois idiomas no mesmo estado
+ * não se via nada de novo em relação a ontem.
+ *
+ * Os dados de demonstração usavam `/imoveis`, que deixou de existir a 20 out
+ * quando o catálogo passou a `/propriedades`: as sobreposições dessa rota nunca
+ * apareciam na lista. Ninguém reparou porque o `gate:canvas` estava cego — ver
+ * a nota em `scripts/gate/check-canvas.mjs`.
  */
 
 const EMPTY_OVERRIDE = {
@@ -38,52 +52,95 @@ const EMPTY_OVERRIDE = {
   noindex: false,
 };
 
-/** Sobreposições de demonstração, por rota. O resto fica em "usa predefinições". */
-const OVERRIDES: Record<string, SeoPageRow["override"]> = {
+type Override = NonNullable<SeoPageRow["locales"]["pt"]["override"]>;
+
+/**
+ * Sobreposições de demonstração, por rota **e idioma**. O resto fica em "usa
+ * predefinições".
+ */
+const OVERRIDES: Record<string, Partial<Record<"pt" | "en", Override>>> = {
+  // Corrigida nas duas línguas: o estado que se espera de uma home cuidada.
   "/": {
-    ...EMPTY_OVERRIDE,
-    titleTag: "Propriedades sem comissões em Portugal · UProperty Market",
-    metaDescription:
-      "Compre e venda diretamente com o proprietário, sem comissões e sem contactos indesejados. Veja as propriedades disponíveis.",
+    pt: {
+      ...EMPTY_OVERRIDE,
+      titleTag: "Propriedades sem comissões em Portugal · UProperty Market",
+      metaDescription:
+        "Compre e venda diretamente com o proprietário, sem comissões e sem contactos indesejados. Veja as propriedades disponíveis.",
+    },
+    en: {
+      ...EMPTY_OVERRIDE,
+      titleTag: "Commission-free property in Portugal · UProperty Market",
+      metaDescription:
+        "Buy and sell directly with the owner — no commissions, no unwanted calls. See what is available today.",
+    },
   },
-  // Incompleta de propósito: tem título e não tem descrição, que é o caso que
-  // o aviso de "incompleto" existe para apanhar.
-  "/imoveis": {
-    ...EMPTY_OVERRIDE,
-    titleTag: "Propriedades à venda e para arrendar · UProperty Market",
-    metaDescription: "",
+  // O caso misto, e o mais importante desta lista: corrigida em português,
+  // a usar o ficheiro em inglês. Antes da fase C isto era impossível de
+  // representar, porque uma sobreposição valia para as duas línguas.
+  "/propriedades": {
+    pt: {
+      ...EMPTY_OVERRIDE,
+      titleTag: "Propriedades à venda e para arrendar · UProperty Market",
+      // Incompleta de propósito: tem título e não tem descrição, que é o caso
+      // que o aviso de "incompleto" existe para apanhar.
+      metaDescription: "",
+    },
   },
   "/pre-inscricao": {
-    ...EMPTY_OVERRIDE,
-    titleTag: "Pré-inscrição · UProperty Market",
-    metaDescription:
-      "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento.",
-    noindex: false,
+    pt: {
+      ...EMPTY_OVERRIDE,
+      titleTag: "Pré-inscrição · UProperty Market",
+      metaDescription:
+        "Inscreva-se para ser avisado quando as primeiras propriedades abrirem, e garanta os valores de lançamento.",
+    },
   },
 };
 
 /**
- * Última alteração, por rota — os três casos que a coluna tem de distinguir.
+ * Última alteração, por rota e idioma — os três casos que a coluna tem de
+ * distinguir.
  *
- * As três rotas personalizadas trazem data e autor. `/termos` não tem
- * sobreposição e **tem** rasto: é a página que alguém devolveu ao ficheiro, o
- * caso que se perderia se a coluna lesse só a tabela. O resto nunca passou pelo
- * painel e mostra "nunca editada aqui".
+ * As rotas personalizadas trazem data e autor. `/termos` não tem sobreposição
+ * e **tem** rasto: é a página que alguém devolveu ao ficheiro, o caso que se
+ * perderia se a coluna lesse só a tabela. O resto nunca passou pelo painel e
+ * mostra "nunca editada aqui".
  */
-const LAST_CHANGES: Record<string, SeoPageRow["lastChange"]> = {
-  "/": { at: "2026-10-12T09:30:00.000Z", by: "Helena Matos" },
-  "/imoveis": { at: "2026-10-11T16:05:00.000Z", by: "Rui Esteves" },
-  "/pre-inscricao": { at: "2026-09-28T11:20:00.000Z", by: "Helena Matos" },
-  "/termos": { at: "2026-10-06T08:45:00.000Z", by: "Rui Esteves", reset: true },
+const LAST_CHANGES: Record<
+  string,
+  Partial<Record<"pt" | "en", SeoPageRow["locales"]["pt"]["lastChange"]>>
+> = {
+  "/": {
+    pt: { at: "2026-10-12T09:30:00.000Z", by: "Helena Matos" },
+    en: { at: "2026-10-20T14:10:00.000Z", by: "Helena Matos" },
+  },
+  "/propriedades": { pt: { at: "2026-10-11T16:05:00.000Z", by: "Rui Esteves" } },
+  "/pre-inscricao": { pt: { at: "2026-09-28T11:20:00.000Z", by: "Helena Matos" } },
+  "/termos": { pt: { at: "2026-10-06T08:45:00.000Z", by: "Rui Esteves", reset: true } },
 };
 
 const ROWS: SeoPageRow[] = SEO_ROUTES.map((entry) => ({
   route: entry.route,
-  pageName: entry.pageName,
+  pageName: entry.text.pt.pageName,
   dynamic: entry.dynamic,
-  defaults: { titleTag: entry.titleTag, metaDescription: entry.metaDescription },
-  override: OVERRIDES[entry.route] ?? null,
-  lastChange: LAST_CHANGES[entry.route] ?? null,
+  path: entry.path,
+  locales: {
+    pt: {
+      defaults: {
+        titleTag: entry.text.pt.titleTag,
+        metaDescription: entry.text.pt.metaDescription,
+      },
+      override: OVERRIDES[entry.route]?.pt ?? null,
+      lastChange: LAST_CHANGES[entry.route]?.pt ?? null,
+    },
+    en: {
+      defaults: {
+        titleTag: entry.text.en.titleTag,
+        metaDescription: entry.text.en.metaDescription,
+      },
+      override: OVERRIDES[entry.route]?.en ?? null,
+      lastChange: LAST_CHANGES[entry.route]?.en ?? null,
+    },
+  },
 }));
 
 function AdminSeoDemo({ theme }: { theme: "light" | "dark" }) {

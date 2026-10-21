@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 
 import { HomeSections } from "../../../../apps/web/src/components/site/HomeSections";
-import { PreRegistrationForm } from "../../../../apps/web/src/app/pre-inscricao/PreRegistrationForm";
+import { PreRegistrationForm } from "../../../../apps/web/src/app/[locale]/pre-inscricao/PreRegistrationForm";
 import { FeatureGrid } from "../../../../apps/web/src/components/site/FeatureGrid";
 import { SectionHeading, SiteSection } from "../../../../apps/web/src/components/site/SiteSection";
 import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";

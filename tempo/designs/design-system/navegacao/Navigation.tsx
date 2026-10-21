@@ -59,6 +59,20 @@ export function Separadores() {
   );
 }
 
+/**
+ * Os rótulos do `Pagination`, que são uma prop **obrigatória** desde D72.
+ *
+ * Tinha valores por omissão em português dentro do componente — um rótulo de
+ * interface a viver num pacote que não deve ter nenhum. Ao passar a
+ * obrigatória, estas três chamadas deixaram de compilar; que isso só se
+ * descubra agora é o `gate:canvas` cego, não o componente.
+ *
+ * Escritos aqui e não lidos de `messages/pt.json`: a narração do design system
+ * mostra o controlo, e para isso o texto é um dado da demonstração como os
+ * `summary` ao lado. As chaves a sério estão em `pagination`.
+ */
+const PAGINATION_LABELS = { previous: "Anterior", next: "Seguinte", page: "Página" };
+
 function PaginacaoDemo() {
   const [inicio, setInicio] = useState(1);
   const [meio, setMeio] = useState(10);
@@ -67,13 +81,31 @@ function PaginacaoDemo() {
   return (
     <>
       <Row label="Primeira página · Anterior desativado">
-        <Pagination page={inicio} pageCount={20} onPageChange={setInicio} summary="1–20 de 397" />
+        <Pagination
+          page={inicio}
+          pageCount={20}
+          onPageChange={setInicio}
+          summary="1–20 de 397"
+          labels={PAGINATION_LABELS}
+        />
       </Row>
       <Row label="A meio · elipses dos dois lados">
-        <Pagination page={meio} pageCount={20} onPageChange={setMeio} summary="181–200 de 397" />
+        <Pagination
+          page={meio}
+          pageCount={20}
+          onPageChange={setMeio}
+          summary="181–200 de 397"
+          labels={PAGINATION_LABELS}
+        />
       </Row>
       <Row label="Última página · Seguinte desativado">
-        <Pagination page={fim} pageCount={20} onPageChange={setFim} summary="381–397 de 397" />
+        <Pagination
+          page={fim}
+          pageCount={20}
+          onPageChange={setFim}
+          summary="381–397 de 397"
+          labels={PAGINATION_LABELS}
+        />
       </Row>
       <Note>
         O componente é só o controlo: quem corta os dados é o servidor, com keyset nas listas

@@ -13,6 +13,10 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../apps/web/src/*"]
+    },
     "plugins": [
       {
         "name": "next"
@@ -28,7 +32,9 @@
     "designs/**/*",
     ".next/dev/types/**/*.ts",
     ".next/*/types/**/*.ts",
-    ".next/*/dev/types/**/*.ts"
+    ".next/*/dev/types/**/*.ts",
+    ".next/tempo/types/**/*.ts",
+    ".next/tempo/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
