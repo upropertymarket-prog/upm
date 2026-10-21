@@ -137,7 +137,7 @@ export function MetricsView(props: MetricsViewProps) {
     {
       id: "status",
       header: t("columns.status"),
-      width: "130px",
+      width: "118px",
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
           <span>
@@ -157,21 +157,24 @@ export function MetricsView(props: MetricsViewProps) {
       id: "recipients",
       header: t("columns.recipients"),
       numeric: true,
-      width: "110px",
+      width: "104px",
+      align: "left",
       cell: (row) => row.recipients,
     },
     {
       id: "delivered",
       header: t("columns.delivered"),
       numeric: true,
-      width: "100px",
+      width: "92px",
+      align: "left",
       cell: (row) => deliveredOf(row),
     },
     {
       id: "opens",
       header: t("columns.opens"),
       numeric: true,
-      width: "104px",
+      width: "92px",
+      align: "left",
       cell: (row) => (
         <span title={t("countOf", { count: row.opens })}>
           {percent(row.opens, deliveredOf(row))}
@@ -182,7 +185,8 @@ export function MetricsView(props: MetricsViewProps) {
       id: "clicks",
       header: t("columns.clicks"),
       numeric: true,
-      width: "96px",
+      width: "84px",
+      align: "left",
       cell: (row) => (
         <span title={t("countOf", { count: row.clicks })}>
           {percent(row.clicks, deliveredOf(row))}
@@ -193,7 +197,8 @@ export function MetricsView(props: MetricsViewProps) {
       id: "bounces",
       header: t("columns.bounces"),
       numeric: true,
-      width: "112px",
+      width: "98px",
+      align: "left",
       cell: (row) => (
         <span title={t("countOf", { count: row.bounces })}>
           {percent(row.bounces, row.recipients)}
@@ -204,7 +209,8 @@ export function MetricsView(props: MetricsViewProps) {
       id: "unsubscribes",
       header: t("columns.unsubscribes"),
       numeric: true,
-      width: "124px",
+      width: "104px",
+      align: "left",
       cell: (row) => row.unsubscribes,
     },
   ];

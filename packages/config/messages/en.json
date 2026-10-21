@@ -2504,7 +2504,7 @@
         "clickRate": "Click rate",
         "bounces": "Bounces",
         "bounceRate": "Bounce rate",
-        "unsubscribes": "Unsubscribes",
+        "unsubscribes": "Unsubscribed",
         "sentAt": "Sent at"
       },
       "noReceiptsDetail": "Until the Resend webhook points at the mail worker and RESEND_WEBHOOK_SECRET is set, these numbers stay at zero — which does not mean the emails did not arrive. See doc 09, Deliverability.",

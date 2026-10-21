@@ -629,8 +629,20 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                     // atalhos para o encher.
                     flex: "1 1 190px",
                     maxWidth: "min(100%, 220px)",
+                    // Um `sticky` mais alto do que a janela **não rola**: fica
+                    // preso pelo topo e a parte de cima torna-se inalcançável
+                    // — era o que cortava os primeiros blocos da paleta a meio
+                    // da página. O teto mais o `auto` devolvem-lhe o rolo
+                    // próprio: a paleta acompanha o scroll e, quando não cabe
+                    // toda, rola por dentro em vez de desaparecer por cima.
+                    maxHeight: "calc(100vh - var(--sp-4) * 2)",
+                    overflowY: "auto",
                     display: "grid",
                     gap: "var(--sp-4)",
+                    // `start` e não o `stretch` implícito: sem isto os dois
+                    // painéis esticavam para encher o teto que acabámos de
+                    // lhes dar.
+                    alignContent: "start",
                   }}
                 >
                   <Panel label={t("blocksLabel")}>
@@ -843,8 +855,16 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 top: "var(--sp-4)",
                 flex: "1 1 300px",
                 maxWidth: "min(100%, 340px)",
+                minWidth: 0,
+                // O mesmo teto da paleta, e pela mesma razão: com a campanha, os
+                // recibos e as ações empilhados, esta coluna passa a altura da
+                // janela com facilidade — e um `sticky` que não cabe esconde o
+                // topo, que aqui é o seletor de campanha e o estado.
+                maxHeight: "calc(100vh - var(--sp-4) * 2)",
+                overflowY: "auto",
                 display: "grid",
                 gap: "var(--sp-4)",
+                alignContent: "start",
               }}
             >
               {/* ------------------------------------------------------------- */}

@@ -17,39 +17,46 @@ import { existsSync } from "node:fs";
 
 const WIDTH = Number(process.argv[2] ?? 360);
 const HEIGHT = 900;
-const HOST = process.env.TEMPO_HOST ?? "http://127.0.0.1:54222";
+const HOST = process.env.TEMPO_HOST ?? "http://127.0.0.1:60737";
 const PORT = 9333;
 
 /** Storyboard por ecrã — a lista cobre as três apps. */
 const SCREENS = [
   // Proprietário, pela ordem da sidebar (07 §4.3) — a mesma do canvas.
-  ["canvases/proprietario", "Painel"],
-  ["canvases/proprietario", "MarketClaro"],
-  ["canvases/proprietario", "DetalheClaro"],
-  ["canvases/proprietario", "PropriedadesClaro"],
-  ["canvases/proprietario", "NovaPropriedadeClaro"],
-  ["canvases/proprietario", "Leads"],
-  ["canvases/proprietario", "Mensagens"],
-  ["canvases/proprietario", "Agenda"],
-  ["canvases/proprietario", "MapaClaro"],
-  ["canvases/proprietario", "CloudClaro"],
-  ["canvases/proprietario", "ContratosClaro"],
-  ["canvases/proprietario", "Plano"],
-  ["canvases/proprietario", "DefinicoesClaro"],
-  ["canvases/admin", "AdminDashboardClaro"],
-  ["canvases/admin", "AdminUtilizadoresClaro"],
-  ["canvases/admin", "AdminModeracaoClaro"],
-  ["canvases/admin", "AdminTrafegoClaro"],
-  ["canvases/admin", "AdminPlanosClaro"],
-  ["canvases/admin", "AdminContratosClaro"],
-  ["canvases/admin", "AdminLeadsClaro"],
-  ["canvases/admin", "AdminDefinicoesClaro"],
-  ["canvases/autenticacao", "EntrarClaro"],
-  ["canvases/autenticacao", "CriarContaClaro"],
-  ["canvases/autenticacao", "VerificacaoClaro"],
-  ["canvases/autenticacao", "PlanoClaro"],
-  ["canvases/autenticacao", "PedirRecuperacaoClaro"],
-  ["canvases/autenticacao", "NovaPalavraPasseClaro"],
+  ["canvases/06 - proprietario", "Painel"],
+  ["canvases/06 - proprietario", "MarketClaro"],
+  ["canvases/06 - proprietario", "DetalheClaro"],
+  ["canvases/06 - proprietario", "PropriedadesClaro"],
+  ["canvases/06 - proprietario", "NovaPropriedadeClaro"],
+  ["canvases/06 - proprietario", "Leads"],
+  ["canvases/06 - proprietario", "Mensagens"],
+  ["canvases/06 - proprietario", "Agenda"],
+  ["canvases/06 - proprietario", "MapaClaro"],
+  ["canvases/06 - proprietario", "CloudClaro"],
+  ["canvases/06 - proprietario", "ContratosClaro"],
+  ["canvases/06 - proprietario", "Plano"],
+  ["canvases/06 - proprietario", "DefinicoesClaro"],
+  ["canvases/03 - admin", "AdminDashboardClaro"],
+  ["canvases/03 - admin", "AdminUtilizadoresClaro"],
+  ["canvases/03 - admin", "AdminModeracaoClaro"],
+  ["canvases/03 - admin", "AdminTrafegoClaro"],
+  ["canvases/03 - admin", "AdminPlanosClaro"],
+  ["canvases/03 - admin", "AdminContratosClaro"],
+  ["canvases/03 - admin", "AdminLeadsClaro"],
+  ["canvases/03 - admin", "AdminDefinicoesClaro"],
+  ["canvases/02 - autenticacao", "EntrarClaro"],
+  ["canvases/02 - autenticacao", "CriarContaClaro"],
+  ["canvases/02 - autenticacao", "VerificacaoClaro"],
+  ["canvases/02 - autenticacao", "PlanoClaro"],
+  ["canvases/02 - autenticacao", "PedirRecuperacaoClaro"],
+  ["canvases/02 - autenticacao", "NovaPalavraPasseClaro"],
+  // O Marketing (P10-07 a P10-10), acrescentado a 21 out 2026 — a área nasceu
+  // depois desta lista e nunca tinha sido medida.
+  ["canvases/05 - marketing", "MarketingAtualizacoesClaro"],
+  ["canvases/05 - marketing", "MarketingCampanhasClaro"],
+  ["canvases/05 - marketing", "MarketingCampanhasAgendamentoFalhado"],
+  ["canvases/05 - marketing", "MarketingMetricasClaro"],
+  ["canvases/05 - marketing", "MarketingCloudClaro"],
   ["canvases/home", "Home"],
 ];
 
@@ -174,7 +181,12 @@ for (const [canvas, storyboard] of SCREENS) {
   const out = JSON.parse(res?.result?.value ?? '{"offenders":[],"scrollWidth":0,"clientWidth":1}');
   const over = out.scrollWidth - out.clientWidth;
 
-  if (over > 1) {
+  // Uma página vazia não tem rolo horizontal — e era assim que os URLs
+  // partidos pela renomeação das pastas passavam no silêncio.
+  if (out.clientWidth <= 1 || out.scrollWidth === 0) {
+    failures++;
+    console.log(`\n  VAZIA  ${storyboard}  — a storyboard não carregou (host ou caminho errado)`);
+  } else if (over > 1) {
     failures++;
     console.log(`\n  FALHA  ${storyboard}  (+${over} px)`);
     for (const o of out.offenders) {
