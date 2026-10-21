@@ -605,6 +605,50 @@
   margin-left: auto;
 }
 
+/* Os modelos do Marketing (21 out 2026).
+   =====================================
+   Entre a barra da janela e os campos, que é onde se escolhe antes de
+   escrever — e é o que a referência do cliente faz. Separado dos campos por
+   uma borda porque não é um campo: não guarda valor nenhum, é uma ação com
+   uma lista. */
+.upm-composer__templates {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.upm-composer__templatesLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: none;
+  font-size: var(--fs-label);
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+}
+
+.upm-composer__templatesPicker {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 320px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+
+.upm-composer__templatesPicker:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .upm-composer__fields {
   display: grid;
 }

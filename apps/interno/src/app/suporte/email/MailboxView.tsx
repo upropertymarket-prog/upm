@@ -38,6 +38,8 @@ import { mailAttachmentsOf } from "@upm/db/mail";
 import { MAIL_ATTACHMENT_PRINTABLE } from "@upm/db/mail-attachments";
 
 import type { MailActionResult } from "./actions";
+import type { MessageTemplateRow } from "@upm/db/message-templates";
+
 import { Composer, type ComposerDraft } from "./Composer";
 
 /**
@@ -127,6 +129,8 @@ export type MailboxViewProps = {
   onSync: () => Promise<MailActionResult>;
   /** A assinatura da caixa escolhida, já com as variáveis resolvidas (05 §1.8). */
   signature: string;
+  /** Os modelos de e-mail ativos (21 out 2026). Vazio é normal — ver o Composer. */
+  templates?: MessageTemplateRow[];
   onSaveDraft: (input: Record<string, unknown>) => Promise<MailActionResult & { draftId?: string }>;
   onSend: (input: Record<string, unknown>) => Promise<MailActionResult>;
   onDiscardDraft: (draftId: string) => Promise<MailActionResult>;
@@ -461,6 +465,7 @@ export function MailboxView(props: MailboxViewProps) {
           mailboxes={props.mailboxes}
           mailboxId={props.mailboxId}
           signature={props.signature}
+          templates={props.templates}
           initial={composer ?? undefined}
           onClose={() => {
             setComposer(null);

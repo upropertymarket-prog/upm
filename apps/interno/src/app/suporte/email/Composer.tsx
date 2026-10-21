@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Maximize2, Minus, Paperclip, Send, X } from "lucide-react";
+import { FileText, Maximize2, Minus, Paperclip, Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, useToast } from "@upm/ui";
 import { RichText, richTextLabels } from "@upm/ui/editor";
 import type { MailboxOption } from "@upm/db/mail";
+import type { MessageTemplateRow } from "@upm/db/message-templates";
 
 import type { MailActionResult } from "./actions";
 import { htmlToText, parseAddresses } from "./mail-text";
@@ -63,6 +64,14 @@ export type ComposerProps = {
   mailboxes: MailboxOption[];
   mailboxId: string;
   signature: string;
+  /**
+   * Os modelos de e-mail ativos, escritos pelo Marketing (21 out 2026).
+   *
+   * Vazio é um estado normal e não um erro: enquanto o Marketing não escrever
+   * nenhum, o seletor não aparece — um controlo que abre uma lista vazia é pior
+   * do que não existir.
+   */
+  templates?: MessageTemplateRow[];
   initial?: ComposerDraft;
   onClose: () => void;
   onSave: (input: Record<string, unknown>) => Promise<MailActionResult & { draftId?: string }>;
@@ -89,6 +98,36 @@ export function Composer(props: ComposerProps) {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  /**
+   * Inserir um modelo — o ponto em que isto serve para alguma coisa.
+   *
+   * O modelo traz **assunto e corpo**, e os dois comportam-se de maneira
+   * diferente de propósito: o assunto só se escreve se estiver vazio, porque
+   * quem já o escreveu escreveu-o para esta mensagem; o corpo substitui, e por
+   * isso pergunta antes quando há texto — inserir por cima do que alguém
+   * escreveu sem avisar é a forma mais rápida de perder trabalho.
+   *
+   * **As variáveis entram como estão.** `{{nome}}` fica à vista para quem
+   * escreve substituir, porque é quem escreve que sabe a quem está a escrever.
+   * A alternativa — resolvê-las aqui — exigia saber o destinatário antes de o
+   * endereço estar preenchido.
+   */
+  function inserirModelo(id: string) {
+    const modelo = (props.templates ?? []).find((row) => row.id === id);
+    if (!modelo) return;
+
+    const temCorpo = htmlToText(html).trim().length > 0;
+    if (temCorpo && !window.confirm(t("templateReplace"))) return;
+
+    if (!subject.trim() && modelo.subject) setSubject(modelo.subject);
+    setHtml(modelo.body_html);
+    // `opened` já é o `resetKey` do editor: ele guarda o seu próprio estado e
+    // só relê o `value` quando a chave muda. Inserir um modelo é exatamente
+    // esse caso, por isso reaproveita-se em vez de um segundo contador.
+    setOpened((value) => value + 1);
+    setDirty(true);
+  }
 
   /**
    * O conteúdo inicial entra **uma vez por abertura**, e é o `resetKey` do
@@ -200,6 +239,37 @@ export function Composer(props: ComposerProps) {
 
       {size === "minimized" ? null : (
         <>
+          {/* Os modelos do Marketing. Só aparece quando há algum — ver a prop. */}
+          {(props.templates ?? []).length > 0 ? (
+            <div className="upm-composer__templates">
+              <label className="upm-composer__templatesLabel">
+                <FileText size={14} aria-hidden="true" />
+                <span>{t("templates")}</span>
+              </label>
+              {/* Um `select` nativo e não o `Select` do design system: este não
+                  guarda valor nenhum — é uma ação com uma lista, e volta a
+                  vazio assim que insere. Um controlo de formulário com estado
+                  prometeria que o modelo "ficou escolhido", e não fica. */}
+              <select
+                className="upm-composer__templatesPicker"
+                value=""
+                aria-label={t("templates")}
+                onChange={(event) => {
+                  const id = event.target.value;
+                  event.target.value = "";
+                  if (id) inserirModelo(id);
+                }}
+              >
+                <option value="">{t("templatesPlaceholder")}</option>
+                {(props.templates ?? []).map((modelo) => (
+                  <option key={modelo.id} value={modelo.id}>
+                    {modelo.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
           <div className="upm-composer__fields">
             <label className="upm-composer__field">
               <span className="upm-composer__label">{t("to")}</span>

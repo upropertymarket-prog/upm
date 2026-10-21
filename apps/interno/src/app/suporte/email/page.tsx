@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
+import { listActiveTemplates } from "@upm/db/message-templates";
 import {
   getMailMessage,
   listMail,
@@ -104,6 +105,16 @@ export default async function SupportMailboxPage({
       ])
     : [[], [], { inbox: 0, sent: 0, drafts: 0, archive: 0, unread: 0, starred: 0 }, null, ""];
 
+  /**
+   * Os modelos de e-mail do Marketing (21 out 2026).
+   *
+   * **Só os ativos**, e fora do `Promise.all` de cima porque não dependem da
+   * caixa escolhida: são os mesmos em todas. Uma leitura a mais por abertura da
+   * caixa, de uma tabela com dezenas de linhas — o que se ganha é o Suporte
+   * deixar de redigir do zero a resposta que o Marketing já aprovou.
+   */
+  const templates = await listActiveTemplates(supabase);
+
   return (
     <InternalChrome
       role="support"
@@ -133,6 +144,7 @@ export default async function SupportMailboxPage({
         onToggleLabel={toggleMailLabel}
         onCreateTicket={ticketFromMail}
         onSync={syncNow}
+        templates={templates}
         signature={signature}
         onSaveDraft={saveDraft}
         onSend={sendMail}

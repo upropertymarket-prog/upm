@@ -4,6 +4,7 @@ import {
   Building2,
   CreditCard,
   FileSignature,
+  FileText,
   Inbox,
   LayoutDashboard,
   LifeBuoy,
@@ -123,6 +124,21 @@ export const SUPPORT_NAV: NavEntry[] = [
 export const MARKETING_NAV: NavEntry[] = [
   { id: "updates", titleKey: "updates", href: "/marketing/atualizacoes", icon: Sparkles },
   { id: "campaigns", titleKey: "campaigns", href: "/marketing/campanhas", icon: Megaphone },
+  /**
+   * **Modelos de e-mail** (21 out 2026), e o lugar tem razão de ser.
+   *
+   * Entra **depois das Campanhas e antes das Métricas**, porque é aí que cabe
+   * na leitura que o menu já faz de cima para baixo: as Atualizações e as
+   * Campanhas são o que se diz **a um público**; os Modelos são o que se diz
+   * **a uma pessoa**; as Métricas medem o que saiu. Pô-los no fim separava-os
+   * das Campanhas, que é o vizinho de que estão mais perto — os dois são texto
+   * que o Marketing escreve para sair por e-mail.
+   *
+   * Não vai para o `SUPPORT_NAV`, apesar de ser o Suporte quem mais os usa: o
+   * Suporte **usa-os no compositor**, não os escreve. Quem escreve é esta área,
+   * e o menu diz quem é dono de quê.
+   */
+  { id: "templates", titleKey: "templates", href: "/marketing/modelos", icon: FileText },
   { id: "emailMetrics", titleKey: "emailMetrics", href: "/marketing/metricas", icon: BarChart3 },
   { id: "seo", titleKey: "seo", href: "/marketing/seo", icon: Search },
   { id: "internalCloud", titleKey: "internalCloud", href: "/marketing/cloud", icon: Cloud },

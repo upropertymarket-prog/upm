@@ -87,7 +87,8 @@
     "internalCloud": "Cloud interna",
     "seo": "SEO",
     "signatures": "Assinaturas de e-mail",
-    "marketing": "Marketing"
+    "marketing": "Marketing",
+    "templates": "Modelos de e-mail"
   },
   "roles": {
     "owner": "Proprietário",
@@ -2222,7 +2223,10 @@
         "saveDraft": "Guardar rascunho",
         "send": "Enviar",
         "saving": "A guardar…",
-        "sent": "Mensagem enviada."
+        "sent": "Mensagem enviada.",
+        "templates": "Modelos",
+        "templatesPlaceholder": "Inserir modelo…",
+        "templateReplace": "Já escreveu texto. Inserir o modelo substitui o corpo da mensagem. Continuar?"
       },
       "quotedIntro": "{name} escreveu:",
       "attachmentsCount": "{count, plural, one {# anexo} other {# anexos}}",
@@ -2509,6 +2513,59 @@
       },
       "noReceiptsDetail": "Enquanto o webhook do Resend não estiver apontado ao mail-worker e o RESEND_WEBHOOK_SECRET definido, estes números ficam a zero — o que não quer dizer que os e-mails não tenham chegado. Ver o doc 09, Entregabilidade.",
       "noReceiptsMore": "Porque é que está tudo a zero?"
+    },
+    "templates": {
+      "title": "Modelos de e-mail",
+      "subtitle": "{count, plural, =0 {Ainda não há modelos} one {# modelo} other {# modelos}} que toda a equipa usa para responder.",
+      "new": "Novo modelo",
+      "newTitle": "Novo modelo",
+      "newSubtitle": "O texto que toda a equipa vai usar",
+      "editTitle": "Editar modelo",
+      "saving": "A guardar…",
+      "saved": "Modelo guardado.",
+      "deleted": "Modelo apagado.",
+      "delete": "Apagar modelo",
+      "deleteConfirm": "Apagar «{name}»? Os e-mails que já saíram ficam sem a explicação do texto que levam. Para o tirar de circulação sem o perder, desligue-o em vez de o apagar.",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "activeLabel": "Disponível no compositor",
+      "activeHint": "Desligado, o modelo continua aqui mas deixa de aparecer a quem está a escrever um e-mail.",
+      "filterLabel": "Filtrar por categoria",
+      "filterAll": "Todas",
+      "empty": "Ainda não há modelos",
+      "emptyHint": "Um modelo é o texto aprovado para uma situação que se repete: a resposta a uma lead, o pedido de documentos, a confirmação de uma visita.",
+      "emptyFilter": "Nenhum modelo nesta categoria",
+      "noSubject": "Sem assunto",
+      "noBody": "Sem corpo",
+      "nameLabel": "Nome do modelo",
+      "categoryLabel": "Categoria",
+      "subjectLabel": "Assunto",
+      "subjectHint": "É o que o destinatário vê na caixa de entrada.",
+      "bodyLabel": "Corpo da mensagem",
+      "variablesTitle": "Variáveis",
+      "variablesNote": "Ficam no texto tal como estão e são preenchidas por quem envia, no compositor — que é quem sabe a quem está a escrever.",
+      "categories": {
+        "lead": "Lead do site",
+        "property": "Imóvel",
+        "visit": "Visita",
+        "contract": "Contrato",
+        "billing": "Subscrição",
+        "support": "Apoio"
+      },
+      "variableGroups": {
+        "recipient": "Destinatário",
+        "property": "Imóvel",
+        "operator": "Quem assina"
+      },
+      "variables": {
+        "nome": "Nome",
+        "email": "E-mail",
+        "imovel": "Título do imóvel",
+        "imovel_preco": "Preço",
+        "imovel_localidade": "Localidade",
+        "operador": "Nome de quem assina",
+        "operador_cargo": "Cargo"
+      }
     }
   },
   "editor": {

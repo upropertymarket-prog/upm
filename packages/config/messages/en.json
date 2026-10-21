@@ -87,7 +87,8 @@
     "internalCloud": "Internal cloud",
     "seo": "SEO",
     "signatures": "Email signatures",
-    "marketing": "Marketing"
+    "marketing": "Marketing",
+    "templates": "Email templates"
   },
   "roles": {
     "owner": "Owner",
@@ -2222,7 +2223,10 @@
         "saveDraft": "Save draft",
         "send": "Send",
         "saving": "Saving…",
-        "sent": "Message sent."
+        "sent": "Message sent.",
+        "templates": "Templates",
+        "templatesPlaceholder": "Insert template…",
+        "templateReplace": "You have already written text. Inserting the template replaces the message body. Continue?"
       },
       "quotedIntro": "{name} wrote:",
       "attachmentsCount": "{count, plural, one {# attachment} other {# attachments}}",
@@ -2509,6 +2513,59 @@
       },
       "noReceiptsDetail": "Until the Resend webhook points at the mail worker and RESEND_WEBHOOK_SECRET is set, these numbers stay at zero — which does not mean the emails did not arrive. See doc 09, Deliverability.",
       "noReceiptsMore": "Why is everything at zero?"
+    },
+    "templates": {
+      "title": "Email templates",
+      "subtitle": "{count, plural, =0 {No templates yet} one {# template} other {# templates}} the whole team uses to reply.",
+      "new": "New template",
+      "newTitle": "New template",
+      "newSubtitle": "The text the whole team will use",
+      "editTitle": "Edit template",
+      "saving": "Saving…",
+      "saved": "Template saved.",
+      "deleted": "Template deleted.",
+      "delete": "Delete template",
+      "deleteConfirm": "Delete “{name}”? Emails already sent lose the explanation for the text they carry. To take it out of circulation without losing it, switch it off instead.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "activeLabel": "Available in the composer",
+      "activeHint": "Switched off, the template stays here but no longer appears to whoever is writing.",
+      "filterLabel": "Filter by category",
+      "filterAll": "All",
+      "empty": "No templates yet",
+      "emptyHint": "A template is the approved text for a situation that repeats: replying to a lead, asking for documents, confirming a viewing.",
+      "emptyFilter": "No templates in this category",
+      "noSubject": "No subject",
+      "noBody": "No body",
+      "nameLabel": "Template name",
+      "categoryLabel": "Category",
+      "subjectLabel": "Subject",
+      "subjectHint": "This is what the recipient sees in their inbox.",
+      "bodyLabel": "Message body",
+      "variablesTitle": "Variables",
+      "variablesNote": "They stay in the text as they are and are filled in by whoever sends it, in the composer — the person who knows who they are writing to.",
+      "categories": {
+        "lead": "Site lead",
+        "property": "Property",
+        "visit": "Viewing",
+        "contract": "Contract",
+        "billing": "Subscription",
+        "support": "Support"
+      },
+      "variableGroups": {
+        "recipient": "Recipient",
+        "property": "Property",
+        "operator": "Signed by"
+      },
+      "variables": {
+        "nome": "Name",
+        "email": "Email",
+        "imovel": "Property title",
+        "imovel_preco": "Price",
+        "imovel_localidade": "Location",
+        "operador": "Sender name",
+        "operador_cargo": "Role"
+      }
     }
   },
   "editor": {

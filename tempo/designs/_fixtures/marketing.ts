@@ -6,6 +6,7 @@ import type {
   CampaignRow,
   ScheduledSendRow,
 } from "../../../packages/db/src/campaigns";
+import type { MessageTemplateRow } from "../../../packages/db/src/message-templates";
 import type { StaffFile, StaffFolder } from "../../../apps/interno/src/lib/staff-cloud";
 
 /**
@@ -298,5 +299,88 @@ export const STAFF_FILES: StaffFile[] = [
     ownerName: "Helena Matos",
     createdAt: "2026-10-05T14:00:00.000Z",
     deletedAt: "2026-10-18T09:00:00.000Z",
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Modelos de e-mail — `/marketing/modelos` (21 out 2026)
+// ---------------------------------------------------------------------------
+
+/**
+ * Quatro modelos, escolhidos para cobrir o que a lista tem de distinguir.
+ *
+ * - **categorias diferentes** (lead, imóvel, visita, contrato), porque é por
+ *   elas que o filtro corta e com todos na mesma não se via se corta;
+ * - **um inativo**, que é o estado que o cartão recua e a etiqueta anuncia —
+ *   e o que separa "tirar de circulação" de "apagar";
+ * - **um com variáveis e outro sem**, porque o chip é o que distingue um
+ *   modelo de um texto escrito à mão;
+ * - **um sem assunto**, que é o caso em que o cartão mostra "Sem assunto" em
+ *   vez de uma linha vazia.
+ */
+export const TEMPLATE_ROWS: MessageTemplateRow[] = [
+  {
+    id: "tpl-lead",
+    name: "Primeiro contacto — lead do site",
+    category: "lead",
+    subject: "Recebemos o seu pedido na UProperty Market",
+    body_html:
+      '<p>Olá <span data-variable="nome" data-label="Nome" class="upm-chip">Nome</span>,</p>' +
+      "<p>Obrigado pelo interesse. Recebemos o seu pedido e vamos acompanhá-lo " +
+      "diretamente, sem intermediários e sem comissões.</p>" +
+      "<p>Respondemos no prazo de um dia útil. Se entretanto quiser falar " +
+      "connosco, basta responder a este e-mail.</p>" +
+      '<p><span data-variable="operador" data-label="Nome de quem assina" class="upm-chip">Nome de quem assina</span></p>',
+    is_active: true,
+    created_by: null,
+    updated_by: null,
+    created_at: "2026-10-16T09:00:00.000Z",
+    updated_at: "2026-10-20T11:30:00.000Z",
+  },
+  {
+    id: "tpl-imovel",
+    name: "Resposta a interesse num imóvel",
+    category: "property",
+    subject: "Sobre o imóvel que viu na UProperty Market",
+    body_html:
+      '<p>Olá <span data-variable="nome" data-label="Nome" class="upm-chip">Nome</span>,</p>' +
+      '<p>Sobre o <span data-variable="imovel" data-label="Título do imóvel" class="upm-chip">Título do imóvel</span>, ' +
+      'em <span data-variable="imovel_localidade" data-label="Localidade" class="upm-chip">Localidade</span>: ' +
+      "o proprietário está disponível para falar consigo diretamente.</p>" +
+      "<p>Quer que marquemos uma visita?</p>",
+    is_active: true,
+    created_by: null,
+    updated_by: null,
+    created_at: "2026-10-17T10:00:00.000Z",
+    updated_at: "2026-10-17T10:00:00.000Z",
+  },
+  {
+    id: "tpl-visita",
+    name: "Confirmação de visita",
+    category: "visit",
+    subject: "A sua visita está confirmada",
+    body_html:
+      "<p>A visita ficou confirmada. O proprietário recebe-o no local à hora " +
+      "combinada.</p><p>Se precisar de remarcar, avise-nos com antecedência.</p>",
+    is_active: true,
+    created_by: null,
+    updated_by: null,
+    created_at: "2026-10-18T08:00:00.000Z",
+    updated_at: "2026-10-18T08:00:00.000Z",
+  },
+  {
+    // Inativo e sem assunto: os dois casos que o cartão tem de saber mostrar.
+    id: "tpl-contrato",
+    name: "Pedido de documentos para contrato",
+    category: "contract",
+    subject: "",
+    body_html:
+      "<p>Para avançarmos com o contrato, precisamos dos documentos de " +
+      "identificação e da caderneta predial.</p>",
+    is_active: false,
+    created_by: null,
+    updated_by: null,
+    created_at: "2026-10-12T15:00:00.000Z",
+    updated_at: "2026-10-19T16:20:00.000Z",
   },
 ];

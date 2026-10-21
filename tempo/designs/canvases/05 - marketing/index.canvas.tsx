@@ -14,6 +14,12 @@ import {
   MarketingCampanhasSemSelecaoEscuro,
 } from "./Campanhas";
 import {
+  MarketingModelosClaro,
+  MarketingModelosEscuro,
+  MarketingModelosVazio,
+  MarketingModelosVazioEscuro,
+} from "./Modelos";
+import {
   MarketingMetricasClaro,
   MarketingMetricasEscuro,
   MarketingMetricasSemRecibos,
@@ -32,8 +38,8 @@ import {
  * A área `/marketing` nasceu na Fase 10, por decisão do cliente de 13 out 2026
  * (07 §24.6): o Suporte responde a uma pessoa que pediu ajuda, o Marketing fala
  * com um público. **A ordem vertical segue `MARKETING_NAV`**
- * (`apps/interno/src/lib/navigation.ts`): Atualizações, Campanhas, Métricas de
- * e-mail, SEO, Cloud interna. Percorrer o canvas de cima a baixo é percorrer o
+ * (`apps/interno/src/lib/navigation.ts`): Atualizações, Campanhas, Modelos de
+ * e-mail, Métricas de e-mail, SEO, Cloud interna. Percorrer o canvas de cima a baixo é percorrer o
  * menu de cima a baixo, como nos canvases do Admin, do Suporte e do
  * Proprietário.
  *
@@ -48,6 +54,11 @@ import {
  * ecrã que não existe seria UI escrita dentro da pasta do canvas: é o erro que
  * já custou as storyboards do Proprietário na Fase 4. Entra quando a rota
  * existir — e, quando entrar, fica entre as Métricas e a Cloud.
+ *
+ * **Os Modelos de e-mail entraram a 21 out 2026**, entre as Campanhas e as
+ * Métricas, e com eles tudo o que estava abaixo desceu: a ordem do canvas é a
+ * do menu, e o menu pô-los aí porque as Campanhas falam a um público e os
+ * Modelos a uma pessoa.
  *
  * Claro à esquerda (`x: 0`), escuro à direita (`x: 1520`), e os estados do
  * mesmo ecrã por baixo do par a que pertencem. Sem `intrinsicSizing`: o
@@ -141,18 +152,48 @@ export default function MarketingCanvas() {
         layout={{ x: 1520, y: 4220, width: 1440, height: 900 }}
       />
 
-      {/* Métricas de e-mail — 3.ª entrada do menu (P10-10) */}
+      {/* Modelos de e-mail — 3.ª entrada do menu (21 out 2026).
+          O texto aprovado que toda a equipa usa para responder: o Marketing
+          escreve aqui, o Suporte insere-o no compositor. */}
+      <Storyboard
+        id="MarketingModelosClaro"
+        name="Modelos de e-mail · Claro (/marketing/modelos)"
+        component={MarketingModelosClaro}
+        layout={{ x: 0, y: 5200, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="MarketingModelosEscuro"
+        name="Modelos de e-mail · Escuro (/marketing/modelos)"
+        component={MarketingModelosEscuro}
+        layout={{ x: 1520, y: 5200, width: 1440, height: 900 }}
+      />
+
+      {/* O primeiro dia: ainda não há modelo nenhum escrito */}
+      <Storyboard
+        id="MarketingModelosVazio"
+        name="Modelos de e-mail · Sem modelos · Claro"
+        component={MarketingModelosVazio}
+        layout={{ x: 0, y: 6180, width: 1440, height: 700 }}
+      />
+      <Storyboard
+        id="MarketingModelosVazioEscuro"
+        name="Modelos de e-mail · Sem modelos · Escuro"
+        component={MarketingModelosVazioEscuro}
+        layout={{ x: 1520, y: 6180, width: 1440, height: 700 }}
+      />
+
+      {/* Métricas de e-mail — 4.ª entrada do menu (P10-10) */}
       <Storyboard
         id="MarketingMetricasClaro"
         name="Métricas de e-mail · Claro (/marketing/metricas)"
         component={MarketingMetricasClaro}
-        layout={{ x: 0, y: 5200, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 6960, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MarketingMetricasEscuro"
         name="Métricas de e-mail · Escuro (/marketing/metricas)"
         component={MarketingMetricasEscuro}
-        layout={{ x: 1520, y: 5200, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6960, width: 1440, height: 900 }}
       />
 
       {/* O estado real de hoje: campanhas enviadas e zero recibos */}
@@ -160,28 +201,28 @@ export default function MarketingCanvas() {
         id="MarketingMetricasSemRecibos"
         name="Métricas de e-mail · Sem recibos (webhook por apontar) · Claro"
         component={MarketingMetricasSemRecibos}
-        layout={{ x: 0, y: 6180, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 7940, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MarketingMetricasSemRecibosEscuro"
         name="Métricas de e-mail · Sem recibos (webhook por apontar) · Escuro"
         component={MarketingMetricasSemRecibosEscuro}
-        layout={{ x: 1520, y: 6180, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 7940, width: 1440, height: 900 }}
       />
 
-      {/* Cloud interna — 5.ª entrada do menu (P10-10). A 4.ª, o SEO, não tem
+      {/* Cloud interna — 6.ª entrada do menu (P10-10). A 5.ª, o SEO, não tem
           rota: ver a nota de topo. */}
       <Storyboard
         id="MarketingCloudClaro"
         name="Cloud interna · Claro (/marketing/cloud)"
         component={MarketingCloudClaro}
-        layout={{ x: 0, y: 7160, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 8920, width: 1440, height: 900 }}
       />
       <Storyboard
         id="MarketingCloudEscuro"
         name="Cloud interna · Escuro (/marketing/cloud)"
         component={MarketingCloudEscuro}
-        layout={{ x: 1520, y: 7160, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 8920, width: 1440, height: 900 }}
       />
 
       {/* O primeiro dia da gaveta da equipa */}
@@ -189,13 +230,13 @@ export default function MarketingCanvas() {
         id="MarketingCloudVazia"
         name="Cloud interna · Gaveta vazia · Claro"
         component={MarketingCloudVazia}
-        layout={{ x: 0, y: 8140, width: 1440, height: 700 }}
+        layout={{ x: 0, y: 9900, width: 1440, height: 700 }}
       />
       <Storyboard
         id="MarketingCloudVaziaEscuro"
         name="Cloud interna · Gaveta vazia · Escuro"
         component={MarketingCloudVaziaEscuro}
-        layout={{ x: 1520, y: 8140, width: 1440, height: 700 }}
+        layout={{ x: 1520, y: 9900, width: 1440, height: 700 }}
       />
     </Canvas>
   );

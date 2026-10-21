@@ -1712,6 +1712,60 @@ export type Database = {
           },
         ];
       };
+      message_templates: {
+        Row: {
+          body_html: string;
+          category: Database["public"]["Enums"]["message_template_category"];
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          is_active: boolean;
+          name: string;
+          subject: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          body_html?: string;
+          category?: Database["public"]["Enums"]["message_template_category"];
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          subject: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          body_html?: string;
+          category?: Database["public"]["Enums"]["message_template_category"];
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          subject?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "message_templates_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       messages: {
         Row: {
           attachments: Json;
@@ -5202,6 +5256,18 @@ export type Database = {
         }[];
       };
       staff_cloud_folder: { Args: { p_name: string }; Returns: string };
+      template_delete: { Args: { p_id: string }; Returns: undefined };
+      template_save: {
+        Args: {
+          p_body_html: string;
+          p_category: Database["public"]["Enums"]["message_template_category"];
+          p_id: string;
+          p_is_active: boolean;
+          p_name: string;
+          p_subject: string;
+        };
+        Returns: string;
+      };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
       submit_site_lead: {
@@ -5414,6 +5480,7 @@ export type Database = {
       mail_folder: "inbox" | "sent" | "drafts" | "archive";
       mail_protocol: "imap" | "pop3";
       mail_security: "ssl_tls" | "starttls" | "none";
+      message_template_category: "lead" | "property" | "visit" | "contract" | "billing" | "support";
       mailbox_status: "active" | "paused" | "error";
       plan_audience: "owner" | "buyer" | "both";
       profile_status: "pending" | "active" | "suspended" | "deleted";
@@ -6113,6 +6180,7 @@ export const Constants = {
       mail_folder: ["inbox", "sent", "drafts", "archive"],
       mail_protocol: ["imap", "pop3"],
       mail_security: ["ssl_tls", "starttls", "none"],
+      message_template_category: ["lead", "property", "visit", "contract", "billing", "support"],
       mailbox_status: ["active", "paused", "error"],
       plan_audience: ["owner", "buyer", "both"],
       profile_status: ["pending", "active", "suspended", "deleted"],

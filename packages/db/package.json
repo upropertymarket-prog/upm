@@ -29,7 +29,8 @@
     "./campaigns": "./src/campaigns.ts",
     "./campaign-blocks": "./src/campaign-blocks.ts",
     "./campaign-render": "./src/campaign-render.tsx",
-    "./campaign-report": "./src/campaign-report.ts"
+    "./campaign-report": "./src/campaign-report.ts",
+    "./message-templates": "./src/message-templates.ts"
   },
   "scripts": {
     "lint": "eslint src",
