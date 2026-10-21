@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { getLocale } from "next-intl/server";
-import { resolveLocale } from "@upm/config";
+import { resolveLocale, type Locale } from "@upm/config";
 import { createAnonClient } from "@upm/db/server";
 
 import { buildMetadata, type RouteSeo, type SeoOverride, type SeoPath } from "./seo";
@@ -35,9 +35,16 @@ import { buildMetadata, type RouteSeo, type SeoOverride, type SeoPath } from "./
  * metadados versionados — que é exatamente o que tinha antes desta camada.
  */
 
-export const seoTag = (route: string) => `seo:${route}`;
+/**
+ * A tag de cache inclui o idioma desde 21 out 2026 (D72 fase C).
+ *
+ * Sem ele, invalidar o título inglês de `/termos` deitava abaixo a cache da
+ * versão portuguesa também — e, pior, a cache de uma versão podia servir o
+ * texto da outra, porque a chave era a mesma para as duas leituras.
+ */
+export const seoTag = (route: string, locale: Locale) => `seo:${locale}:${route}`;
 
-async function fetchOverride(route: string): Promise<SeoOverride> {
+async function fetchOverride(route: string, locale: Locale): Promise<SeoOverride> {
   const supabase = createAnonClient();
   const { data, error } = await supabase
     .from("seo_pages")
@@ -45,6 +52,7 @@ async function fetchOverride(route: string): Promise<SeoOverride> {
       "title_tag, meta_description, og_same_as_page, og_title, og_description, og_image, og_image_alt, canonical, noindex",
     )
     .eq("route", route)
+    .eq("locale", locale)
     .maybeSingle();
 
   if (error || !data) return null;
@@ -70,12 +78,16 @@ async function fetchOverride(route: string): Promise<SeoOverride> {
  * A sobreposição de uma rota, ou `null` quando não há registo — que é o caso
  * normal: a tabela só tem linhas para as páginas que alguém editou.
  */
-export async function getSeoOverride(route: string): Promise<SeoOverride> {
+export async function getSeoOverride(route: string, locale: Locale): Promise<SeoOverride> {
   try {
-    const cached = unstable_cache(() => fetchOverride(route), ["seo-override", route], {
-      tags: [seoTag(route)],
-      revalidate: 60,
-    });
+    const cached = unstable_cache(
+      () => fetchOverride(route, locale),
+      ["seo-override", route, locale],
+      {
+        tags: [seoTag(route, locale)],
+        revalidate: 60,
+      },
+    );
     return await cached();
   } catch {
     return null;
@@ -112,6 +124,14 @@ export async function pageMetadata(seo: RouteSeo, route: SeoPath): Promise<Metad
    * bilingue: pede os metadados e recebe-os na língua em que está a ser
    * servida.
    */
-  const [locale, override] = await Promise.all([getLocale(), getSeoOverride(route.pathname)]);
-  return buildMetadata(seo, route, resolveLocale(locale), override);
+  /**
+   * As duas leituras eram um `Promise.all` e deixaram de poder ser: desde a
+   * fase C a sobreposição é por rota **e idioma**, logo é preciso saber o
+   * idioma antes de a ir buscar. O custo é uma ida ao cookie antes da consulta,
+   * que é leitura de memória; o que se ganha é o Admin poder corrigir um título
+   * inglês sem reescrever o português.
+   */
+  const locale = resolveLocale(await getLocale());
+  const override = await getSeoOverride(route.pathname, locale);
+  return buildMetadata(seo, route, locale, override);
 }

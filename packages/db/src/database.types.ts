@@ -2144,6 +2144,7 @@ export type Database = {
         Row: {
           canonical: string | null;
           created_at: string;
+          locale: string;
           meta_description: string | null;
           noindex: boolean | null;
           og_description: string | null;
@@ -2159,6 +2160,7 @@ export type Database = {
         Insert: {
           canonical?: string | null;
           created_at?: string;
+          locale: string;
           meta_description?: string | null;
           noindex?: boolean | null;
           og_description?: string | null;
@@ -2174,6 +2176,7 @@ export type Database = {
         Update: {
           canonical?: string | null;
           created_at?: string;
+          locale?: string;
           meta_description?: string | null;
           noindex?: boolean | null;
           og_description?: string | null;
@@ -3527,6 +3530,7 @@ export type Database = {
       admin_save_seo_page: {
         Args: {
           p_canonical?: string;
+          p_locale: string;
           p_meta_description?: string;
           p_noindex?: boolean;
           p_og_description?: string;

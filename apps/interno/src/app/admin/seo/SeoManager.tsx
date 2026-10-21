@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@upm/config";
 import { Card, Checkbox, Drawer, Input, StatusTag, Table, Textarea, Button } from "@upm/ui";
 import type { TableColumn } from "@upm/ui";
 
@@ -36,6 +37,28 @@ import type { SeoActionResult, SeoSaveInput } from "./actions";
  * trunca por largura em píxeis e não por número de caracteres, e muda as
  * regras sem avisar. Servem para ver o texto no formato certo e apanhar um
  * título que não cabe — e é por isso que o contador é o que manda.
+ *
+ * ---------------------------------------------------------------------------
+ * DOIS IDIOMAS, UMA LINHA (21 OUT 2026 · D72 fase C)
+ * ---------------------------------------------------------------------------
+ * `seo_pages` passou a ter a chave `(route, locale)`. Até aqui uma edição
+ * aplicava-se às duas línguas ao mesmo tempo, o que significa que **quem
+ * corrigisse um título em produção escrevia-o nos dois idiomas** — português
+ * na versão inglesa, sem nada que o dissesse.
+ *
+ * A lista continua com uma linha por rota e as línguas vivem em **abas dentro
+ * do painel**. As duas razões, por ordem:
+ *
+ *  - um título e a sua tradução comparam-se a olhar um para o outro, e em duas
+ *    linhas da tabela isso obrigava a abrir e fechar o painel;
+ *  - a coluna de estado passa a poder dizer o estado de cada idioma, que é a
+ *    informação que a decisão de abrir uma linha precisa. Em vinte e seis
+ *    linhas, metade delas diria "usa predefinições" para sempre.
+ *
+ * **O botão guarda os idiomas que foram mexidos**, não só o da aba aberta.
+ * Trocar de aba, escrever nas duas e guardar é o gesto natural aqui; gravar só
+ * a visível perdia silenciosamente o trabalho da outra — e perder texto que
+ * alguém escreveu é bem pior do que uma gravação a mais.
  */
 
 export type SeoOverrideFields = {
@@ -64,14 +87,26 @@ export type SeoLastChange = {
   reset?: boolean;
 };
 
-export type SeoPageRow = {
-  route: string;
-  pageName: string;
-  dynamic: boolean;
-  /** O que o `seo.ts` da rota diz — o valor em vigor quando não há registo. */
+/** O que uma rota tem num idioma: o ficheiro, a sobreposição e o rasto. */
+export type SeoLocaleState = {
+  /** O que o `seo.ts` da rota diz **neste idioma** — o valor em vigor sem registo. */
   defaults: { titleTag: string; metaDescription: string };
   override: SeoOverrideFields | null;
   lastChange: SeoLastChange | null;
+};
+
+export type SeoPageRow = {
+  route: string;
+  /** No idioma de quem está a ver o painel — ver a nota no `page.tsx`. */
+  pageName: string;
+  dynamic: boolean;
+  /**
+   * O URL público em cada idioma (`/termos`, `/en/terms`), para a
+   * pré-visualização mostrar o endereço que o visitante vê. Vem do inventário
+   * gerado, porque o mapa de caminhos vive no `apps/web` e isto é outra app.
+   */
+  path: Record<Locale, string>;
+  locales: Record<Locale, SeoLocaleState>;
 };
 
 /** Os limites de 04 §2.1.1. Conselho, não regra — ver a nota em `actions.ts`. */
@@ -91,20 +126,37 @@ const EMPTY: SeoOverrideFields = {
 
 type Status = "defaults" | "complete" | "partial";
 
-function statusOf(row: SeoPageRow): Status {
-  if (!row.override) return "defaults";
-  const { titleTag, metaDescription } = row.override;
+function statusOf(state: SeoLocaleState): Status {
+  if (!state.override) return "defaults";
+  const { titleTag, metaDescription } = state.override;
   return titleTag.trim() && metaDescription.trim() ? "complete" : "partial";
 }
 
 /** O que o visitante vê: a sobreposição quando existe, o ficheiro quando não. */
-function effective(row: SeoPageRow, draft: SeoOverrideFields | null) {
-  const source = draft ?? row.override;
+function effective(state: SeoLocaleState, draft: SeoOverrideFields | null) {
+  const source = draft ?? state.override;
   return {
-    title: source?.titleTag.trim() || row.defaults.titleTag,
-    description: source?.metaDescription.trim() || row.defaults.metaDescription,
+    title: source?.titleTag.trim() || state.defaults.titleTag,
+    description: source?.metaDescription.trim() || state.defaults.metaDescription,
   };
 }
+
+/** Dois rascunhos abertos ao mesmo tempo, um por aba. */
+type Drafts = Record<Locale, SeoOverrideFields>;
+
+const draftsFrom = (row: SeoPageRow): Drafts =>
+  Object.fromEntries(LOCALES.map((loc) => [loc, row.locales[loc].override ?? EMPTY])) as Drafts;
+
+/**
+ * Se um rascunho difere do que estava. É isto que decide o que o botão grava.
+ *
+ * Comparação por JSON e não campo a campo: os campos são nove e planos, e uma
+ * comparação escrita à mão passava a ter de ser atualizada ao lado de cada
+ * campo novo — e quem se esquecesse dela via o campo novo deixar de ser
+ * gravado, em silêncio.
+ */
+const changed = (a: SeoOverrideFields, b: SeoOverrideFields) =>
+  JSON.stringify(a) !== JSON.stringify(b);
 
 /**
  * Data e hora de uma alteração.
@@ -258,20 +310,32 @@ export function SeoManager({
   onSave: (input: SeoSaveInput) => Promise<SeoActionResult>;
 }) {
   const t = useTranslations("admin.seo");
+  const tLocale = useTranslations("locale");
   const tCommon = useTranslations("common");
   const [editing, setEditing] = useState<SeoPageRow | null>(null);
-  const [draft, setDraft] = useState<SeoOverrideFields>(EMPTY);
+  const [drafts, setDrafts] = useState<Drafts | null>(null);
+  /** A aba aberta. Começa no idioma do painel, que é o que quem abre está a ler. */
+  const [tab, setTab] = useState<Locale>(DEFAULT_LOCALE);
   const [result, setResult] = useState<SeoActionResult>({});
   const [saving, startSaving] = useTransition();
 
+  const viewerLocale: Locale = LOCALES.includes(locale as Locale)
+    ? (locale as Locale)
+    : DEFAULT_LOCALE;
+
   function open(row: SeoPageRow) {
     setEditing(row);
-    setDraft(row.override ?? EMPTY);
+    setDrafts(draftsFrom(row));
+    setTab(viewerLocale);
     setResult({});
   }
 
+  const draft = drafts?.[tab] ?? EMPTY;
+
   const set = <K extends keyof SeoOverrideFields>(key: K, value: SeoOverrideFields[K]) =>
-    setDraft((previous) => ({ ...previous, [key]: value }));
+    setDrafts((previous) =>
+      previous ? { ...previous, [tab]: { ...previous[tab], [key]: value } } : previous,
+    );
 
   const columns: TableColumn<SeoPageRow>[] = [
     {
@@ -289,34 +353,73 @@ export function SeoManager({
     },
     {
       id: "title",
+      // O título **no idioma do painel**. Mostrar os dois aqui duplicava a
+      // altura de cada linha por uma informação que o painel dá melhor; qual
+      // dos dois está em vigor lê-se na coluna de estado, ao lado.
       header: t("columns.title"),
-      cell: (row) => effective(row, null).title,
+      cell: (row) => effective(row.locales[viewerLocale], null).title,
     },
     {
       id: "lastChange",
       header: t("columns.lastChange"),
       width: "190px",
-      cell: (row) => <LastChangeCell change={row.lastChange} locale={locale} />,
+      // A mais recente das duas: a pergunta que esta coluna responde é "esta
+      // página andou a ser mexida?", e essa não se divide por idioma.
+      cell: (row) => {
+        const changes = LOCALES.map((loc) => row.locales[loc].lastChange).filter(
+          (change): change is SeoLastChange => change !== null,
+        );
+        const latest = changes.sort((a, b) => b.at.localeCompare(a.at))[0] ?? null;
+        return <LastChangeCell change={latest} locale={locale} />;
+      },
     },
     {
       id: "status",
       header: t("columns.status"),
-      width: "170px",
-      cell: (row) => {
-        // Tons do ciclo de vida genérico de `STATUS_TONES`, não cores novas:
-        // 04 §1.6 é explícito em "cores nunca repetidas para significados
-        // diferentes", e uma quarta família de verdes seria exatamente isso.
-        const status = statusOf(row);
-        if (status === "complete")
-          return <StatusTag tone="active">{t("status.complete")}</StatusTag>;
-        if (status === "partial")
-          return <StatusTag tone="pending">{t("status.partial")}</StatusTag>;
-        return <StatusTag tone="draft">{t("status.defaults")}</StatusTag>;
-      },
+      width: "210px",
+      // Um estado por idioma, desde a fase C. "Personalizada" deixou de ser
+      // uma resposta completa: uma página pode estar corrigida em português e
+      // a usar o ficheiro em inglês, e é essa diferença que vale a pena ver
+      // antes de abrir a linha.
+      //
+      // Tons do ciclo de vida genérico de `STATUS_TONES`, não cores novas:
+      // 04 §1.6 é explícito em "cores nunca repetidas para significados
+      // diferentes", e uma quarta família de verdes seria exatamente isso.
+      cell: (row) => (
+        <span style={{ display: "grid", gap: "var(--sp-1)" }}>
+          {LOCALES.map((loc) => {
+            const status = statusOf(row.locales[loc]);
+            return (
+              <span key={loc} style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
+                {/* O código do idioma, não um rótulo: `PT`/`EN` é o mesmo nas
+                    duas línguas do painel e deriva do próprio valor. */}
+                <span
+                  style={{
+                    fontSize: "var(--fs-label)",
+                    fontWeight: 700,
+                    color: "var(--muted)",
+                    minWidth: "22px",
+                  }}
+                >
+                  {loc.toUpperCase()}
+                </span>
+                {status === "complete" ? (
+                  <StatusTag tone="active">{t("status.complete")}</StatusTag>
+                ) : status === "partial" ? (
+                  <StatusTag tone="pending">{t("status.partial")}</StatusTag>
+                ) : (
+                  <StatusTag tone="draft">{t("status.defaults")}</StatusTag>
+                )}
+              </span>
+            );
+          })}
+        </span>
+      ),
     },
   ];
 
-  const preview = editing ? effective(editing, draft) : null;
+  const editingState = editing ? editing.locales[tab] : null;
+  const preview = editingState ? effective(editingState, draft) : null;
   const ogTitle = draft.ogSameAsPage
     ? (preview?.title ?? "")
     : draft.ogTitle || (preview?.title ?? "");
@@ -356,11 +459,39 @@ export function SeoManager({
           <Button
             disabled={saving}
             onClick={() => {
-              if (!editing) return;
+              if (!editing || !drafts) return;
               startSaving(async () => {
-                const outcome = await onSave({ route: editing.route, ...draft });
-                setResult(outcome);
-                if (outcome.ok) setEditing(null);
+                /**
+                 * Os idiomas mexidos, e o da aba aberta quando nenhum o foi —
+                 * esse caso é uma gravação idempotente, e é o que o botão fazia
+                 * antes das abas existirem.
+                 *
+                 * Sequencial e não em paralelo: se a segunda falhar, a primeira
+                 * já está guardada, e o que o utilizador precisa de ver é **qual**
+                 * falhou. Em paralelo as duas mensagens de erro corriam uma por
+                 * cima da outra.
+                 */
+                const mexidos = LOCALES.filter((loc) =>
+                  changed(drafts[loc], editing.locales[loc].override ?? EMPTY),
+                );
+                const aGravar = mexidos.length > 0 ? mexidos : [tab];
+
+                for (const loc of aGravar) {
+                  const outcome = await onSave({
+                    route: editing.route,
+                    locale: loc,
+                    ...drafts[loc],
+                  });
+                  if (!outcome.ok) {
+                    // A aba salta para o idioma que falhou: a mensagem fala dos
+                    // campos que estão à frente de quem a lê.
+                    setTab(loc);
+                    setResult(outcome);
+                    return;
+                  }
+                  setResult(outcome);
+                }
+                setEditing(null);
               });
             }}
           >
@@ -368,8 +499,60 @@ export function SeoManager({
           </Button>
         }
       >
-        {editing ? (
+        {editing && editingState && drafts ? (
           <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+            {/* As abas de idioma. `role="tablist"` e não botões soltos: o que
+                isto é, para quem navega por teclado ou leitor de ecrã, são
+                duas vistas do mesmo formulário — e é isso que a semântica
+                tem de dizer. A seta por baixo marca a ativa sem depender só
+                da cor (04 §1.6). */}
+            <div
+              role="tablist"
+              aria-label={t("localeTabs")}
+              style={{
+                display: "flex",
+                gap: "var(--sp-1)",
+                borderBottom: "1px solid var(--border)",
+              }}
+            >
+              {LOCALES.map((loc) => {
+                const ativa = loc === tab;
+                const mexida = changed(drafts[loc], editing.locales[loc].override ?? EMPTY);
+                return (
+                  <button
+                    key={loc}
+                    type="button"
+                    role="tab"
+                    aria-selected={ativa}
+                    onClick={() => setTab(loc)}
+                    style={{
+                      appearance: "none",
+                      background: "transparent",
+                      border: "none",
+                      borderBottom: `2px solid ${ativa ? "var(--accent)" : "transparent"}`,
+                      color: ativa ? "var(--text)" : "var(--muted)",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      fontSize: "var(--fs-body)",
+                      fontWeight: ativa ? 700 : 400,
+                      padding: "var(--sp-3) var(--sp-4)",
+                      marginBottom: "-1px",
+                    }}
+                  >
+                    {tLocale(loc)}
+                    {/* Um ponto para dizer "há aqui coisa por guardar". Sem
+                        ele, trocar de aba e guardar parecia não ter feito nada
+                        à aba que ficou atrás. */}
+                    {mexida ? (
+                      <span aria-hidden="true" style={{ color: "var(--accent)" }}>
+                        {" •"}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
             <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
               {t.rich("fieldsHint", {
                 file: `app${editing.route === "/" ? "" : editing.route}/seo.ts`,
@@ -381,7 +564,7 @@ export function SeoManager({
               <Input
                 label={t("titleTag")}
                 value={draft.titleTag}
-                placeholder={editing.defaults.titleTag}
+                placeholder={editingState.defaults.titleTag}
                 onChange={(event) => set("titleTag", event.target.value)}
               />
               <Counter value={draft.titleTag} limit={LIMITS.titleTag} />
@@ -392,7 +575,7 @@ export function SeoManager({
                 label={t("metaDescription")}
                 rows={3}
                 value={draft.metaDescription}
-                placeholder={editing.defaults.metaDescription}
+                placeholder={editingState.defaults.metaDescription}
                 onChange={(event) => set("metaDescription", event.target.value)}
               />
               <Counter value={draft.metaDescription} limit={LIMITS.metaDescription} />
@@ -453,8 +636,10 @@ export function SeoManager({
                 {t("googlePreview")}
               </strong>
               <Card padded>
+                {/* O caminho do idioma da aba, não a chave da rota: é o URL
+                    que o visitante vê, e é o que o Google mostra. */}
                 <GooglePreview
-                  route={editing.route}
+                  route={editing.path[tab]}
                   title={preview?.title ?? ""}
                   description={preview?.description ?? ""}
                 />
@@ -485,12 +670,15 @@ export function SeoManager({
               </p>
             ) : null}
 
+            {/* O rodapé fala do idioma aberto, não da rota: uma página pode
+                estar personalizada numa língua e a usar o ficheiro na outra, e
+                dizer "personalizado" sem dizer de qual era meia-verdade. */}
             <span style={{ fontSize: "var(--fs-label)", color: "var(--muted)" }}>
-              {editing.override ? t("overrideOn") : t("overrideOff")}
-              {editing.lastChange
+              {editingState.override ? t("overrideOn") : t("overrideOff")}
+              {editingState.lastChange
                 ? t("lastChangeBy", {
-                    when: formatWhen(editing.lastChange.at, locale),
-                    who: editing.lastChange.by ?? t("authorRemovedInline"),
+                    when: formatWhen(editingState.lastChange.at, locale),
+                    who: editingState.lastChange.by ?? t("authorRemovedInline"),
                   })
                 : t("neverEdited")}
             </span>

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
+import { LOCALES, type Locale } from "@upm/config";
 import { createClient } from "@upm/db/server";
 import { SEO_ROUTES } from "@upm/config/seo-routes";
 
@@ -36,15 +37,41 @@ import { SeoManager, type SeoLastChange, type SeoPageRow } from "./SeoManager";
  *
  * `force-dynamic` porque a lista muda com cada gravação e é uma página de
  * administração — não há nada a ganhar em servi-la de cache.
+ *
+ * ---------------------------------------------------------------------------
+ * BILINGUE DESDE 21 OUT 2026 (D72 fase C)
+ * ---------------------------------------------------------------------------
+ * `seo_pages` passou a ter a chave `(route, locale)`, e por isso **uma rota
+ * tem agora até duas sobreposições**. A lista continua com uma linha por rota
+ * — treze e não vinte e seis — porque os dois idiomas de uma página editam-se
+ * a olhar um para o outro, e separá-los em duas linhas da tabela obrigaria a
+ * abrir e fechar o painel para comparar um título com a sua tradução.
+ *
+ * O que muda na lista é a coluna de estado: passa a dizer o estado de **cada**
+ * idioma, porque "personalizada" deixou de ser uma resposta completa.
  */
 export const dynamic = "force-dynamic";
 
-/** A rota a que um registo de `seo.updated` se refere, guardada no `diff`. */
-function auditedRoute(diff: unknown): string | null {
+/**
+ * A rota e o idioma a que um registo de `seo.updated` se refere, guardados no
+ * `diff` (ver `actions.ts`).
+ *
+ * Um registo anterior a 21 out 2026 não tem `locale` — foi escrito quando a
+ * sobreposição se aplicava às duas línguas. Esses contam para o português, que
+ * é a língua-fonte e a que a migração atribuiu as linhas existentes: é a
+ * leitura honesta do que aconteceu, e não um palpite.
+ */
+function auditedKey(diff: unknown): { route: string; locale: Locale } | null {
   if (!diff || typeof diff !== "object" || Array.isArray(diff)) return null;
-  const route = (diff as Record<string, unknown>).route;
-  return typeof route === "string" && route.length > 0 ? route : null;
+  const record = diff as Record<string, unknown>;
+  const route = record.route;
+  if (typeof route !== "string" || route.length === 0) return null;
+  const locale = LOCALES.includes(record.locale as Locale) ? (record.locale as Locale) : "pt";
+  return { route, locale };
 }
+
+/** A chave composta como string, para servir de chave de `Map`. */
+const keyOf = (route: string, locale: Locale) => `${locale}:${route}`;
 
 export default async function SeoPage() {
   const supabase = createClient(await cookies());
@@ -54,7 +81,7 @@ export default async function SeoPage() {
     supabase
       .from("seo_pages")
       .select(
-        "route, title_tag, meta_description, og_same_as_page, og_title, og_description, og_image, og_image_alt, canonical, noindex, updated_at, updated_by",
+        "route, locale, title_tag, meta_description, og_same_as_page, og_title, og_description, og_image, og_image_alt, canonical, noindex, updated_at, updated_by",
       ),
     // Só o suficiente para a última alteração de cada rota: há uma dúzia de
     // rotas públicas, e um limite fixo impede esta leitura de crescer com o
@@ -68,15 +95,19 @@ export default async function SeoPage() {
     getAdminSidebarCounters(supabase),
   ]);
 
-  const overrides = new Map((overridesResult.data ?? []).map((row) => [row.route, row]));
+  const overrides = new Map(
+    (overridesResult.data ?? []).map((row) => [keyOf(row.route, row.locale as Locale), row]),
+  );
 
   // Vem ordenado do mais recente para o mais antigo: o primeiro registo de cada
-  // rota é o que interessa, e os seguintes ignoram-se.
+  // rota **e idioma** é o que interessa, e os seguintes ignoram-se.
   const lastAudited = new Map<string, { at: string; actorId: string | null }>();
   for (const entry of auditResult.data ?? []) {
-    const route = auditedRoute(entry.diff);
-    if (!route || lastAudited.has(route)) continue;
-    lastAudited.set(route, { at: entry.created_at, actorId: entry.actor_id });
+    const audited = auditedKey(entry.diff);
+    if (!audited) continue;
+    const key = keyOf(audited.route, audited.locale);
+    if (lastAudited.has(key)) continue;
+    lastAudited.set(key, { at: entry.created_at, actorId: entry.actor_id });
   }
 
   // Os nomes de quem alterou, numa leitura só. Um `id` sem perfil — apagado
@@ -99,42 +130,6 @@ export default async function SeoPage() {
     return name || null;
   };
 
-  const rows: SeoPageRow[] = SEO_ROUTES.map((entry) => {
-    const override = overrides.get(entry.route);
-    const audited = lastAudited.get(entry.route);
-
-    // Com linha, a linha manda: `updated_at` é da própria gravação e nunca
-    // fica atrás do registo. Sem linha, o registo é o único rasto que resta —
-    // e o que ele conta é precisamente a devolução ao ficheiro.
-    let lastChange: SeoLastChange | null = null;
-    if (override) {
-      lastChange = { at: override.updated_at, by: nameOf(override.updated_by) };
-    } else if (audited) {
-      lastChange = { at: audited.at, by: nameOf(audited.actorId), reset: true };
-    }
-
-    return {
-      route: entry.route,
-      pageName: entry.pageName,
-      dynamic: entry.dynamic,
-      defaults: { titleTag: entry.titleTag, metaDescription: entry.metaDescription },
-      override: override
-        ? {
-            titleTag: override.title_tag ?? "",
-            metaDescription: override.meta_description ?? "",
-            ogSameAsPage: override.og_same_as_page ?? true,
-            ogTitle: override.og_title ?? "",
-            ogDescription: override.og_description ?? "",
-            ogImage: override.og_image ?? "",
-            ogImageAlt: override.og_image_alt ?? "",
-            canonical: override.canonical ?? "",
-            noindex: override.noindex ?? false,
-          }
-        : null,
-      lastChange,
-    };
-  });
-
   const userId = auth.data.user?.id ?? null;
   const [{ data: profile }, { data: staff }] = await Promise.all([
     userId
@@ -151,6 +146,63 @@ export default async function SeoPage() {
   const userMeta = staff?.department
     ? `${t("sidebar.groups.admin")} · ${staff.department}`
     : t("sidebar.groups.admin");
+
+  /**
+   * Uma linha por rota, com os dois idiomas dentro dela.
+   *
+   * O `pageName` da lista vem no idioma **de quem está a ver o painel**, e não
+   * no idioma que se está a editar: é o nome da página nesta lista, e trocá-lo
+   * ao mudar de aba fazia a linha parecer outra linha. Os textos que se editam
+   * são os de dentro de cada aba, e esses são por idioma.
+   */
+  const viewerLocale: Locale = LOCALES.includes(locale as Locale) ? (locale as Locale) : "pt";
+
+  const rows: SeoPageRow[] = SEO_ROUTES.map((entry) => ({
+    route: entry.route,
+    pageName: entry.text[viewerLocale].pageName || entry.text.pt.pageName,
+    dynamic: entry.dynamic,
+    path: entry.path,
+    locales: Object.fromEntries(
+      LOCALES.map((loc) => {
+        const override = overrides.get(keyOf(entry.route, loc));
+        const audited = lastAudited.get(keyOf(entry.route, loc));
+
+        // Com linha, a linha manda: `updated_at` é da própria gravação e nunca
+        // fica atrás do registo. Sem linha, o registo é o único rasto que
+        // resta — e o que ele conta é precisamente a devolução ao ficheiro.
+        let lastChange: SeoLastChange | null = null;
+        if (override) {
+          lastChange = { at: override.updated_at, by: nameOf(override.updated_by) };
+        } else if (audited) {
+          lastChange = { at: audited.at, by: nameOf(audited.actorId), reset: true };
+        }
+
+        return [
+          loc,
+          {
+            defaults: {
+              titleTag: entry.text[loc].titleTag,
+              metaDescription: entry.text[loc].metaDescription,
+            },
+            override: override
+              ? {
+                  titleTag: override.title_tag ?? "",
+                  metaDescription: override.meta_description ?? "",
+                  ogSameAsPage: override.og_same_as_page ?? true,
+                  ogTitle: override.og_title ?? "",
+                  ogDescription: override.og_description ?? "",
+                  ogImage: override.og_image ?? "",
+                  ogImageAlt: override.og_image_alt ?? "",
+                  canonical: override.canonical ?? "",
+                  noindex: override.noindex ?? false,
+                }
+              : null,
+            lastChange,
+          },
+        ];
+      }),
+    ) as SeoPageRow["locales"],
+  }));
 
   return (
     <InternalChrome

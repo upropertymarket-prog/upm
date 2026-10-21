@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { LOCALES } from "@upm/config";
 import { createClient } from "@upm/db/server";
 import { writeAuditLog } from "@upm/db/audit";
 
@@ -37,6 +38,16 @@ const saveSchema = z.object({
     .refine((value) => value === "*" || /^\/\S*$/.test(value), {
       message: "A rota tem de começar por / (ou ser * para as predefinições).",
     }),
+  /**
+   * Metade da chave desde a fase C de D72, e **obrigatório**.
+   *
+   * Sem valor por omissão de propósito. Um `locale` que caísse em português
+   * quando o cliente se esquecesse de o mandar escrevia texto inglês na linha
+   * portuguesa — a confusão de línguas que a migração existe para acabar, a
+   * entrar pela única porta de escrita que sobra. A função SQL recusa-o
+   * igualmente; aqui recusa-se mais cedo e com mensagem útil.
+   */
+  locale: z.enum(LOCALES),
   titleTag: optionalText(200),
   metaDescription: optionalText(400),
   ogSameAsPage: z.boolean().optional(),
@@ -86,6 +97,7 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
   const data = parsed.data;
   const { error } = await supabase.rpc("admin_save_seo_page", {
     p_route: data.route,
+    p_locale: data.locale,
     p_title_tag: orNull(data.titleTag) as unknown as string,
     p_meta_description: orNull(data.metaDescription) as unknown as string,
     p_og_same_as_page: (data.ogSameAsPage ?? null) as unknown as boolean,
@@ -117,13 +129,18 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
   // SEO acabar com o aviso de "o registo de auditoria falhou" — era isso que
   // acontecia, e é porque essa falha é visível que não passou em claro. O
   // painel de `/admin/seo` lê a rota daqui para dizer quem alterou o quê.
+  //
+  // **E o idioma ao lado dela**, desde a fase C. O painel lê este registo para
+  // saber quem devolveu uma página ao ficheiro — a única alteração que não
+  // deixa linha na tabela. Sem o idioma no `diff`, limpar a versão inglesa
+  // aparecia no painel como se tivesse sido a portuguesa.
   let notice: string | undefined;
   try {
     await writeAuditLog(supabase, {
       action: "seo.updated",
       entity: "seo_pages",
       entityId: null,
-      diff: { route: data.route, after: data },
+      diff: { route: data.route, locale: data.locale, after: data },
     });
   } catch {
     notice = "Guardado, mas o registo de auditoria falhou — avise a administração.";

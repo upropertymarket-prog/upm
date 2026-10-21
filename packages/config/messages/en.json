@@ -942,7 +942,6 @@
       "sameAsLastWeek": "same as last week",
       "changeThisWeek": "{change}% this week"
     },
-    "ownerSubtitle": "A summary of your activity and assets",
     "buyerSubtitle": "Your search, all in one place",
     "stats": {
       "activeLabel": "Active properties",
@@ -1915,7 +1914,7 @@
         "partial": "Incomplete",
         "defaults": "Uses defaults"
       },
-      "fieldsHint": "Fields left blank use the value from <code>{file}</code>. Clearing everything returns the whole page to the file.",
+      "fieldsHint": "Fields left blank use the value from <code>{file}</code> for this tab’s language. Clearing everything returns this version to the file — the other language is untouched.",
       "titleTag": "Title tag",
       "metaDescription": "Meta description",
       "ogSameAsPage": "Open Graph same as the page data",
@@ -1935,7 +1934,8 @@
       "neverEdited": "Never edited from here.",
       "authorRemovedInline": "author removed",
       "neverEditedShort": "never edited here",
-      "resetToFile": " · returned to the file"
+      "resetToFile": " · returned to the file",
+      "localeTabs": "SEO language for this page"
     },
     "contractTemplates": {
       "title": "Contract templates",

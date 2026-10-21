@@ -942,7 +942,6 @@
       "sameAsLastWeek": "igual à semana passada",
       "changeThisWeek": "{change}% esta semana"
     },
-    "ownerSubtitle": "Resumo da sua atividade e ativos",
     "buyerSubtitle": "A sua procura, num só lugar",
     "stats": {
       "activeLabel": "Imóveis ativos",
@@ -1915,7 +1914,7 @@
         "partial": "Incompleto",
         "defaults": "Usa predefinições"
       },
-      "fieldsHint": "Campos deixados em branco usam o valor do ficheiro <code>{file}</code>. Limpar tudo devolve a página inteira ao ficheiro.",
+      "fieldsHint": "Campos deixados em branco usam o valor do ficheiro <code>{file}</code> no idioma desta aba. Limpar tudo devolve esta versão ao ficheiro — a outra língua não é afetada.",
       "titleTag": "Title Tag",
       "metaDescription": "Meta Description",
       "ogSameAsPage": "Open Graph igual aos dados da página",
@@ -1935,7 +1934,8 @@
       "neverEdited": "Nunca editada a partir daqui.",
       "authorRemovedInline": "autor removido",
       "neverEditedShort": "nunca editada aqui",
-      "resetToFile": " · devolveu ao ficheiro"
+      "resetToFile": " · devolveu ao ficheiro",
+      "localeTabs": "Idioma do SEO desta página"
     },
     "contractTemplates": {
       "title": "Templates de contrato",
