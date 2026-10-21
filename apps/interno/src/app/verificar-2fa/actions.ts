@@ -10,6 +10,8 @@ import {
   totpCodeSchema,
 } from "@upm/db/auth";
 
+import { RECOVERY_VERIFIED_COOKIE } from "../../lib/session";
+
 export type ChallengeState = { error?: string };
 
 export async function verifyChallenge(
@@ -95,7 +97,7 @@ export async function verifyRecoveryCode(
   // este cookie assinado pelo servidor como prova de posse equivalente,
   // válido pelo resto da sessão (mesma janela de 8h de 07 §6).
   const store = await cookies();
-  store.set("interno_recovery_verified", "1", {
+  store.set(RECOVERY_VERIFIED_COOKIE, "1", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

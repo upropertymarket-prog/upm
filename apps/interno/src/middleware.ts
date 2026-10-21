@@ -9,6 +9,12 @@ import {
 } from "@upm/config/security";
 
 import { createMiddlewareClient } from "./lib/supabase-middleware";
+import {
+  LAST_ACTIVITY_COOKIE,
+  RECOVERY_VERIFIED_COOKIE,
+  SESSION_COOKIES,
+  SESSION_STARTED_COOKIE,
+} from "./lib/session";
 
 /**
  * As três áreas internas, e cada uma só para o seu papel (07 §24.6).
@@ -25,8 +31,6 @@ const AREA_PREFIX = {
   "/marketing": "marketing",
 } as const;
 
-const SESSION_STARTED_COOKIE = "interno_session_started_at";
-const LAST_ACTIVITY_COOKIE = "interno_last_activity_at";
 const SESSION_MAX_MS = 8 * 60 * 60 * 1000;
 const INACTIVITY_MAX_MS = 30 * 60 * 1000;
 
@@ -41,9 +45,7 @@ async function signOutAndRedirectToLogin(request: NextRequest, suspended = false
   const redirectResponse = NextResponse.redirect(loginUrl);
   const supabase = createMiddlewareClient(request, redirectResponse);
   await supabase.auth.signOut();
-  redirectResponse.cookies.delete(SESSION_STARTED_COOKIE);
-  redirectResponse.cookies.delete(LAST_ACTIVITY_COOKIE);
-  redirectResponse.cookies.delete("interno_recovery_verified");
+  for (const name of SESSION_COOKIES) redirectResponse.cookies.delete(name);
   return redirectResponse;
 }
 
@@ -100,7 +102,7 @@ export async function middleware(request: NextRequest) {
   // Um código de recuperação (verificar-2fa/actions.ts) não eleva o AAL do
   // Supabase — aceita-se em alternativa o cookie que essa via assina.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  const recoveryVerified = request.cookies.get("interno_recovery_verified")?.value === "1";
+  const recoveryVerified = request.cookies.get(RECOVERY_VERIFIED_COOKIE)?.value === "1";
   const onEnrollPage = pathname === "/configurar-2fa" || pathname.startsWith("/configurar-2fa/");
   if (aal?.nextLevel === "aal1" && !onEnrollPage) {
     return NextResponse.redirect(new URL("/configurar-2fa", request.url));

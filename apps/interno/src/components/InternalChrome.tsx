@@ -14,6 +14,7 @@ import { LOCALES } from "@upm/config";
 
 import { navFor, type InternalRole } from "../lib/navigation";
 import { submitProblemReport } from "../app/actions/support";
+import { signOut } from "../app/actions/auth";
 
 export type InternalChromeProps = {
   role: InternalRole;
@@ -96,8 +97,7 @@ export function InternalChrome({
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
         onReport: () => setReportOpen(true),
-        // TODO (Fase 3): terminar sessão de `interno` — 2FA + PIN (07 §6).
-        onSignOut: () => undefined,
+        onSignOut: () => void signOut(),
         labels: {
           collapse: t("sidebar.collapse"),
           expand: t("sidebar.expand"),

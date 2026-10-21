@@ -16,6 +16,7 @@ import { navFor } from "../lib/navigation";
 import { AppUpdatesGate } from "./notifications/AppUpdatesGate";
 import { useNotifications } from "./notifications/useNotifications";
 import { submitProblemReport } from "../app/actions/support";
+import { signOut } from "../app/actions/auth";
 
 export type AppChromeProps = {
   role: "buyer" | "owner";
@@ -120,8 +121,7 @@ export function AppChrome({
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
         onReport: () => setReportOpen(true),
-        // TODO (Fase 3): terminar sessão no Supabase Auth (03 F3).
-        onSignOut: () => undefined,
+        onSignOut: () => void signOut(),
         labels: {
           collapse: t("sidebar.collapse"),
           expand: t("sidebar.expand"),
