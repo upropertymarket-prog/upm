@@ -1821,7 +1821,10 @@ export type Database = {
           last_error: string | null;
           notification_id: string | null;
           payload: Json;
-          profile_id: string;
+          // À MÃO, até `20261021110000_lead_confirmation_delivery.sql` subir:
+          // `profile_id` deixou de ser `not null` (quem se pré-inscreve não tem
+          // conta). CADA `pnpm db:types` apaga estas três linhas — repor.
+          profile_id: string | null;
           recipient: string;
           sent_at: string | null;
           status: Database["public"]["Enums"]["delivery_status"];
@@ -1837,7 +1840,7 @@ export type Database = {
           last_error?: string | null;
           notification_id?: string | null;
           payload?: Json;
-          profile_id: string;
+          profile_id?: string | null;
           recipient: string;
           sent_at?: string | null;
           status?: Database["public"]["Enums"]["delivery_status"];
@@ -1853,7 +1856,7 @@ export type Database = {
           last_error?: string | null;
           notification_id?: string | null;
           payload?: Json;
-          profile_id?: string;
+          profile_id?: string | null;
           recipient?: string;
           sent_at?: string | null;
           status?: Database["public"]["Enums"]["delivery_status"];

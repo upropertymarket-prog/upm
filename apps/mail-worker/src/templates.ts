@@ -27,13 +27,35 @@ const BORDER = "#e4e7ec"; // --border
 const SURFACE = "#ffffff"; // --surface
 const BACKGROUND = "#f6f7f9"; // --bg
 
+/**
+ * O `cta`, o `footer` e o `lang` entraram com a confirmação de pré-inscrição
+ * (P2-02) e são todos **opcionais**, com as predefinições de sempre: as
+ * entregas que o `notify()` enfileira não mudam uma letra.
+ *
+ * Existem porque o destinatário deixou de ser necessariamente um utilizador.
+ * Os dois textos por omissão dizem "Abrir na app" e "tem uma conta na
+ * UProperty Market" — e as duas coisas são falsas para quem acabou de deixar
+ * o e-mail num formulário público: não tem app para abrir nem conta nenhuma.
+ *
+ * Vêm por `payload`, e não de um `if` por tipo de template aqui dentro, pela
+ * mesma razão por que os componentes de `@upm/ui` recebem rótulos por props: o
+ * worker não sabe falar duas línguas — quem enfileira sabe em que língua a
+ * pessoa estava.
+ */
 export type DeliveryPayload = {
   title?: unknown;
   body?: unknown;
   link?: unknown;
+  cta?: unknown;
+  footer?: unknown;
+  lang?: unknown;
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
+
+const DEFAULT_CTA = "Abrir na app";
+const DEFAULT_FOOTER =
+  "Recebeu este e-mail porque tem uma conta na UProperty Market. Pode escolher que avisos recebe em Definições › Notificações.";
 
 export function renderNotificationEmail(
   payload: DeliveryPayload,
@@ -42,16 +64,33 @@ export function renderNotificationEmail(
   const title = text(payload.title) || "Novidade na UProperty Market";
   const body = text(payload.body);
   const link = absolute(text(payload.link), options.appUrl);
+  const cta = text(payload.cta) || DEFAULT_CTA;
+  const footer = text(payload.footer) || DEFAULT_FOOTER;
+  const lang = /^[a-z]{2}$/i.test(text(payload.lang)) ? text(payload.lang).toLowerCase() : "pt";
 
-  const plain = [title, body, link ? `Abrir: ${link}` : ""].filter(Boolean).join("\n\n");
+  const plain = [title, body, link ? `${cta}: ${link}` : "", footer].filter(Boolean).join("\n\n");
 
-  return { subject: title, html: layout({ title, body, link }), text: plain };
+  return { subject: title, html: layout({ title, body, link, cta, footer, lang }), text: plain };
 }
 
-function layout({ title, body, link }: { title: string; body: string; link: string }): string {
+function layout({
+  title,
+  body,
+  link,
+  cta,
+  footer,
+  lang,
+}: {
+  title: string;
+  body: string;
+  link: string;
+  cta: string;
+  footer: string;
+  lang: string;
+}): string {
   const button = link
     ? `<tr><td style="padding:24px 32px 0 32px">
-         <a href="${escape(link)}" style="display:inline-block;background:${ACCENT};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 20px;border-radius:10px">Abrir na app</a>
+         <a href="${escape(link)}" style="display:inline-block;background:${ACCENT};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 20px;border-radius:10px">${escape(cta)}</a>
        </td></tr>`
     : "";
 
@@ -60,7 +99,7 @@ function layout({ title, body, link }: { title: string; body: string; link: stri
     : "";
 
   return `<!doctype html>
-<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title></head>
+<html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title></head>
 <body style="margin:0;padding:0;background:${BACKGROUND};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BACKGROUND};padding:32px 16px">
     <tr><td align="center">
@@ -69,7 +108,7 @@ function layout({ title, body, link }: { title: string; body: string; link: stri
         ${paragraph}
         ${button}
         <tr><td style="padding:28px 32px 32px 32px;font-size:12.5px;line-height:1.5;color:${MUTED};border-top:1px solid ${BORDER};margin-top:24px">
-          Recebeu este e-mail porque tem uma conta na UProperty Market. Pode escolher que avisos recebe em Definições › Notificações.
+          ${escape(footer)}
         </td></tr>
       </table>
     </td></tr>

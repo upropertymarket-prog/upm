@@ -792,7 +792,25 @@
       "acceptMiddle": "and the",
       "marketing": "I want to receive news about the launch. You can unsubscribe at any time.",
       "sending": "Sending…",
-      "submit": "Notify me"
+      "submit": "Notify me",
+      "confirmEmail": {
+        "title": "Confirm your email address",
+        "body": "Hello {name},\n\nWe have received your early-access sign-up for UProperty Market. One step is left: confirming that this address is yours. That is what makes the sign-up valid, and what lets us tell you when the first listings go live.",
+        "cta": "Confirm my email",
+        "footer": "You received this email because this address was entered in the UProperty Market early-access form. If that was not you, there is nothing to do: without confirmation, the address is deleted after 30 days."
+      },
+      "confirmPage": {
+        "title": "Confirm your early access",
+        "body": "All that is left is to confirm that this email address is yours.",
+        "confirm": "Confirm my sign-up",
+        "confirming": "Confirming…",
+        "okTitle": "Sign-up confirmed",
+        "okBody": "Thank you. Your early-access sign-up is complete, and we will let you know as soon as the first listings go live.",
+        "failTitle": "This link no longer works",
+        "failBody": "It may have been used already, or it may have expired. Sign up again and we will send you a new link.",
+        "retry": "Sign up again",
+        "back": "Back to home"
+      }
     }
   },
   "cloud": {

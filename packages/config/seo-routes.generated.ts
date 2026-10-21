@@ -191,6 +191,27 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     noindex: false,
   },
   {
+    route: "/pre-inscricao/confirmar",
+    text: {
+      pt: {
+        pageName: "Confirmar a pré-inscrição",
+        titleTag: "Confirmar a pré-inscrição · UProperty Market",
+        metaDescription: "Confirme o seu endereço de e-mail para completar a pré-inscrição.",
+      },
+      en: {
+        pageName: "Confirm your early access",
+        titleTag: "Confirm your early access · UProperty Market",
+        metaDescription: "Confirm your email address to complete your early-access sign-up.",
+      },
+    },
+    path: {
+      pt: "/pre-inscricao/confirmar",
+      en: "/en/early-access/confirm",
+    },
+    dynamic: false,
+    noindex: true,
+  },
+  {
     route: "/privacidade",
     text: {
       pt: {

@@ -45,6 +45,10 @@ export const pathnames = {
   // simétrica dava dois URL para a mesma coisa sem ninguém ganhar nada.
   "/cookies": { pt: "/cookies", en: "/cookies" },
   "/pre-inscricao": { pt: "/pre-inscricao", en: "/early-access" },
+  "/pre-inscricao/confirmar": {
+    pt: "/pre-inscricao/confirmar",
+    en: "/early-access/confirm",
+  },
   "/criar-conta": { pt: "/criar-conta", en: "/sign-up" },
   "/criar-conta/verificacao": { pt: "/criar-conta/verificacao", en: "/sign-up/verify" },
   "/entrar": { pt: "/entrar", en: "/sign-in" },

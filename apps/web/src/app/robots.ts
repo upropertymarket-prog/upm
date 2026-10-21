@@ -50,6 +50,10 @@ const EXCLUIDAS: readonly SitePathname[] = [
   "/entrar",
   "/recuperar-palavra-passe",
   "/criar-conta/verificacao",
+  // Entra sozinha e **não** por prefixo de `/pre-inscricao`: essa é a página
+  // de conversão do pré-lançamento e tem de continuar a ser indexada. Esta é
+  // só o destino do link do e-mail, e traz um token no URL.
+  "/pre-inscricao/confirmar",
 ];
 
 export default async function robots(): Promise<MetadataRoute.Robots> {

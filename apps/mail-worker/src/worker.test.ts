@@ -95,4 +95,50 @@ group("renderNotificationEmail", () => {
     const email = renderNotificationEmail({ title: "Aviso" }, { appUrl: "https://app.exemplo.pt" });
     expect(email.html).not.toContain("Abrir na app");
   });
+
+  /**
+   * O destinatário deixou de ser necessariamente um utilizador (P2-02): a
+   * confirmação de pré-inscrição vai para quem **não** tem conta. Os dois
+   * textos por omissão — "Abrir na app" e "tem uma conta na UProperty Market"
+   * — são falsos para essa pessoa, e é isso que estes casos guardam.
+   */
+  it("deixa quem enfileira escolher o botão, o rodapé e a língua", () => {
+    const email = renderNotificationEmail(
+      {
+        title: "Confirm your email address",
+        link: "https://www.exemplo.pt/en/early-access/confirm?token=abc",
+        cta: "Confirm my email",
+        footer: "You received this email because this address was entered in the form.",
+        lang: "en",
+      },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+
+    expect(email.html).toContain('<html lang="en"');
+    expect(email.html).toContain("Confirm my email");
+    expect(email.html).toContain("this address was entered in the form");
+    // E nada do texto que pressupõe uma conta.
+    expect(email.html).not.toContain("Abrir na app");
+    expect(email.html).not.toContain("tem uma conta");
+  });
+
+  it("mantém os textos de sempre para as entregas do notify()", () => {
+    const email = renderNotificationEmail(
+      { title: "Pedido de visita", link: "/agenda/123" },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+
+    expect(email.html).toContain("Abrir na app");
+    expect(email.html).toContain("tem uma conta na UProperty Market");
+    expect(email.html).toContain('<html lang="pt"');
+  });
+
+  it("não aceita um `lang` que não seja um código de duas letras", () => {
+    const email = renderNotificationEmail(
+      { title: "Aviso", lang: '"><script>alert(1)</script>' },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+
+    expect(email.html).toContain('<html lang="pt"');
+  });
 });

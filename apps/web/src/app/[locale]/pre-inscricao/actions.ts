@@ -1,9 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import { z } from "zod";
-import { createAnonClient } from "@upm/db/server";
+import { createAnonClient, createServiceClient } from "@upm/db/server";
+import type { Locale } from "@upm/config";
 
+import { canonicalUrl } from "@/lib/seo";
 import type { LeadFormState } from "@/lib/leadFormState";
 
 export type { LeadFormState };
@@ -74,6 +77,91 @@ function messageFor(hint: string | null | undefined): string {
   return "Não foi possível enviar o pedido. Tente novamente.";
 }
 
+/**
+ * O `template` da entrega. Não é um enum na base de dados (a coluna é `text`),
+ * mas é a chave por que se cancela a entrega anterior — por isso vive numa
+ * constante e não em duas strings iguais.
+ */
+const CONFIRMATION_TEMPLATE = "site_lead_confirmation";
+
+/**
+ * O e-mail de confirmação do double opt-in (P2-02)
+ * -------------------------------------------------------------------------
+ * Aqui estava um TODO, e com ele uma promessa quebrada: a página dizia
+ * "enviámos-lhe um e-mail" e nunca saía nenhum. Pior do que o e-mail que falta
+ * é a consequência silenciosa — `20261007150100_site_lead_intake.sql` diz que
+ * a inscrição só conta como lead depois de confirmada, e portanto **nenhuma
+ * pré-inscrição contava**. O CRM mostrava linhas que não eram contactos.
+ *
+ * **Enfileira, não envia.** A entrega vai para `notification_deliveries` e é o
+ * `mail-worker` que a leva ao Resend — a mesma fila do `notify()`, com o
+ * marcar-antes-de-enviar e as cinco tentativas que `outbox.ts` já implementa.
+ * Enviar daqui era pedir ao visitante que esperasse por um relay e perder o
+ * e-mail quando ele estivesse em baixo.
+ *
+ * **O texto vem daqui e não do worker.** O worker não sabe em que língua a
+ * pessoa estava; esta action sabe. É a mesma regra dos componentes de
+ * `@upm/ui`: quem tem o contexto é que passa os rótulos.
+ *
+ * **Falhar aqui é falhar o pedido.** Devolve `false` e o visitante vê o erro
+ * genérico, em vez de uma página a prometer um e-mail que não foi enfileirado.
+ * Reenviar o formulário é seguro: a função SQL deduplica por (e-mail,
+ * formulário) e devolve um token novo.
+ */
+async function enqueueConfirmationEmail(lead: {
+  recipient: string;
+  name: string;
+  token: string;
+}): Promise<boolean> {
+  try {
+    const locale = (await getLocale()) as Locale;
+    const t = await getTranslations({
+      locale,
+      namespace: "site.preRegistration.confirmEmail",
+    });
+
+    // O caminho é o inglês em `/en` (D72) e o URL é absoluto: um link de
+    // e-mail não tem página de onde ser relativo.
+    const link = `${canonicalUrl({ pathname: "/pre-inscricao/confirmar" }, locale)}?token=${encodeURIComponent(lead.token)}`;
+
+    const service = createServiceClient();
+
+    // Cada submissão gera um token novo e apaga o hash do anterior: uma
+    // entrega ainda em fila levaria um link já morto. Cancela-se, em vez de se
+    // agrupar — ver a nota no fim de `20261021110000_lead_confirmation_delivery.sql`.
+    await service
+      .from("notification_deliveries")
+      .update({ status: "cancelled" })
+      .eq("recipient", lead.recipient)
+      .eq("template", CONFIRMATION_TEMPLATE)
+      .eq("status", "queued");
+
+    const { error } = await service.from("notification_deliveries").insert({
+      // Sem `profile_id`: quem se pré-inscreve não tem conta. A entrega vale
+      // pelo `recipient`, que é o que o `outbox.ts` lê.
+      channel: "email",
+      recipient: lead.recipient,
+      template: CONFIRMATION_TEMPLATE,
+      payload: {
+        title: t("title"),
+        body: t("body", { name: lead.name }),
+        link,
+        cta: t("cta"),
+        footer: t("footer"),
+        lang: locale,
+      },
+    });
+
+    if (error) throw new Error(error.message);
+    return true;
+  } catch (error) {
+    // O motivo nunca vai para o visitante — para ele é o erro genérico.
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[pre-inscricao] confirmação não enfileirada: ${message}`);
+    return false;
+  }
+}
+
 async function submit(
   form: "preinscricao" | "contacto",
   payload: {
@@ -109,11 +197,22 @@ async function submit(
     return { ok: true, alreadyConfirmed: Boolean(row?.already_confirmed) };
   }
 
-  // TODO (P10-03): enviar o e-mail de confirmação com `row.confirm_token`.
-  // O relay existe (Resend, D27) mas o `mail-worker` é da Parte 2 da Fase 10.
-  // Até lá o token fica gravado em hash e a confirmação faz-se pelo link que
-  // o Suporte consegue reemitir — e a inscrição por confirmar é purgada aos
-  // 30 dias, como qualquer outra.
+  // Sem token não há nada a enviar: ou a função não gravou (honeypot), ou a
+  // inscrição já estava confirmada — os dois casos saíram acima.
+  // **Só a pré-inscrição confirma por e-mail.** O formulário de contacto gera
+  // token igual (é a mesma função SQL), mas quem faz uma pergunta não espera
+  // um passo a mais para a fazer chegar — e o Suporte responde à mensagem, não
+  // ao consentimento. O que a pré-inscrição pede confirmação para fazer é
+  // outra coisa: guardar um endereço para o avisar mais tarde.
+  if (form === "preinscricao" && row.confirm_token) {
+    const queued = await enqueueConfirmationEmail({
+      recipient: payload.email,
+      name: payload.name,
+      token: row.confirm_token,
+    });
+    if (!queued) return { error: messageFor(null) };
+  }
+
   return { ok: true };
 }
 
