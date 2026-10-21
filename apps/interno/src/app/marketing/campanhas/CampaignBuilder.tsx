@@ -441,244 +441,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
       {campaign ? (
         <>
           {/* ------------------------------------------------------------- */}
-          {/* Faixa 1 — a campanha                                          */}
-          {/* ------------------------------------------------------------- */}
-          <Panel label={t("bandCampaign")}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
-                gap: "var(--sp-4)",
-                alignItems: "end",
-              }}
-            >
-              <Select
-                label={t("campaignLabel")}
-                value={campaign.id}
-                options={props.campaigns.map((row) => ({ value: row.id, label: row.name }))}
-                onChange={(event) => navegar({ campanha: event.target.value })}
-              />
-              <Input
-                label={t("nameLabel")}
-                value={name}
-                maxLength={160}
-                disabled={locked}
-                onChange={(event) => setName(event.target.value)}
-              />
-              <div style={{ display: "grid", gap: "var(--sp-1)" }}>
-                <Select
-                  label={t("audienceLabel")}
-                  value={audience}
-                  disabled={locked}
-                  options={CAMPAIGN_AUDIENCES.map((value) => ({
-                    value,
-                    label: t(`audience.${value}`),
-                  }))}
-                  onChange={(event) => {
-                    const next = event.target.value as CampaignAudience;
-                    setAudience(next);
-                    setCount(null);
-                    startTransition(async () => {
-                      const result = await props.onCountAudience(next);
-                      setCount(result.count ?? null);
-                    });
-                  }}
-                />
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                  {count === null ? t("audienceUnknown") : t("audienceCount", { count })}
-                </span>
-                {/* D69: zero é a resposta certa até o registo recolher o
-                    consentimento, e dizê-lo aqui evita que alguém "arranje" o
-                    default da coluna. */}
-                {count === 0 && audience !== "site_leads_pre" && audience !== "site_leads_post" ? (
-                  <span style={{ fontSize: "12px", color: "var(--warn)" }}>
-                    {t("audienceConsentNote")}
-                  </span>
-                ) : null}
-              </div>
-              <Select
-                label={t("senderLabel")}
-                hint={t("senderHint")}
-                value={fromMailboxId}
-                disabled={locked}
-                options={[
-                  { value: "", label: t("senderNone") },
-                  ...props.senders.map((sender) => ({
-                    value: sender.id,
-                    label: sender.displayName
-                      ? `${sender.displayName} · ${sender.address}`
-                      : sender.address,
-                  })),
-                ]}
-                onChange={(event) => setFromMailboxId(event.target.value)}
-              />
-              <div style={{ display: "grid", gap: "var(--sp-1)" }}>
-                <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
-                  {t("statusLabel")}
-                </span>
-                <span>
-                  <StatusTag
-                    tone={CAMPAIGN_STATUS_TONES[campaign.status as CampaignStatus] as StatusTone}
-                  >
-                    {t(`status.${campaign.status}`)}
-                  </StatusTag>
-                </span>
-                {campaign.scheduled_at ? (
-                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                    {dateFormat.format(new Date(campaign.scheduled_at))}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </Panel>
-
-          {/* ------------------------------------------------------------- */}
-          {/* O disparo que falhou — o único estado que a campanha não diz   */}
-          {/* ------------------------------------------------------------- */}
-          {props.scheduled?.status === "failed" ? (
-            <p
-              role="alert"
-              style={{
-                margin: 0,
-                padding: "var(--sp-3) var(--sp-4)",
-                border: "1px solid var(--danger)",
-                borderRadius: "var(--r-md)",
-                background: "var(--danger-soft)",
-                color: "var(--danger)",
-                fontSize: "13px",
-                lineHeight: 1.5,
-              }}
-            >
-              {/* Sem isto a campanha ficava "Agendada" com uma data que já
-                  passou e nenhuma explicação: o disparo tenta três vezes e
-                  desiste, e as razões por que desiste — sem remetente, um
-                  e-mail vazio, audiência a zero — são todas corrigíveis por
-                  quem está a ler isto. */}
-              {t("scheduleFailed", {
-                when: dateFormat.format(new Date(props.scheduled.send_at)),
-                attempts: props.scheduled.attempts,
-              })}
-              {props.scheduled.last_error ? ` — ${props.scheduled.last_error}` : ""}
-            </p>
-          ) : null}
-
-          {/* ------------------------------------------------------------- */}
-          {/* Faixa 2 — a sequência                                         */}
-          {/* ------------------------------------------------------------- */}
-          <Panel label={t("bandSequence")}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: "var(--sp-2)",
-              }}
-            >
-              {props.emails.map((row, index) => {
-                const active = row.id === email?.id;
-                return (
-                  <span
-                    key={row.id}
-                    style={{ display: "flex", alignItems: "center", gap: "var(--sp-1)" }}
-                  >
-                    {index > 0 ? (
-                      <ChevronRight size={14} aria-hidden="true" color="var(--muted)" />
-                    ) : null}
-                    <Button
-                      size="sm"
-                      variant={active ? "secondary" : "ghost"}
-                      aria-current={active ? "true" : undefined}
-                      onClick={() => navegar({ campanha: campaign.id, email: row.id })}
-                    >
-                      {row.name || t("emailTab", { position: row.position })}
-                      {/* A espera de cada e-mail da sequência, à vista no
-                          separador: é o que distingue o segundo e-mail de uma
-                          sequência de um segundo e-mail qualquer. */}
-                      {index > 0 && (props.delayByEmail[row.id] ?? 0) > 0
-                        ? ` · +${props.delayByEmail[row.id]}d`
-                        : ""}
-                    </Button>
-                  </span>
-                );
-              })}
-              <Button
-                size="sm"
-                variant="ghost"
-                leadingIcon={<Plus size={14} />}
-                disabled={locked || pending}
-                onClick={adicionarEmail}
-              >
-                {t("addEmail")}
-              </Button>
-              {props.emails.length > 1 && email ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  leadingIcon={<Trash2 size={14} />}
-                  disabled={locked || pending}
-                  title={t("removeEmail")}
-                  onClick={() =>
-                    run(
-                      () => props.onDeleteEmail(email.id),
-                      () => navegar({ campanha: campaign.id }),
-                    )
-                  }
-                >
-                  {t("removeEmail")}
-                </Button>
-              ) : null}
-            </div>
-          </Panel>
-
-          {/* ------------------------------------------------------------- */}
-          {/* Faixa 3 — o e-mail selecionado                                */}
-          {/* ------------------------------------------------------------- */}
-          {email ? (
-            <Panel label={t("bandEmail")}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
-                  gap: "var(--sp-4)",
-                }}
-              >
-                <Input
-                  label={t("subjectLabel")}
-                  value={subject}
-                  maxLength={300}
-                  disabled={locked}
-                  onChange={(event) => setSubject(event.target.value)}
-                />
-                <Input
-                  label={t("preheaderLabel")}
-                  hint={t("preheaderHint")}
-                  value={preheader}
-                  maxLength={300}
-                  disabled={locked}
-                  onChange={(event) => setPreheader(event.target.value)}
-                />
-                {/* A espera só existe a partir do segundo: o primeiro e-mail de
-                    uma sequência sai quando a campanha sai. */}
-                {email.position > 1 ? (
-                  <Input
-                    label={t("delayLabel")}
-                    hint={t("delayHint")}
-                    type="number"
-                    min={0}
-                    max={365}
-                    value={String(delayDays)}
-                    disabled={locked}
-                    onChange={(event) =>
-                      setDelayDays(Math.max(0, Math.min(365, Number(event.target.value) || 0)))
-                    }
-                  />
-                ) : null}
-              </div>
-            </Panel>
-          ) : null}
-
-          {/* ------------------------------------------------------------- */}
-          {/* Os blocos e o canvas                                          */}
+          {/* Duas colunas: o e-mail à esquerda, a campanha à direita        */}
           {/* ------------------------------------------------------------- */}
           <div
             style={{
@@ -688,347 +451,686 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
               alignItems: "flex-start",
             }}
           >
-            {/* A coluna esquerda é `sticky`: o canvas de um e-mail com dez
-                blocos é mais alto do que o ecrã, e a paleta tem de estar à mão
-                em qualquer ponto dele (04 §2.6). */}
-            <aside
+            <main
               style={{
-                position: "sticky",
-                top: "var(--sp-4)",
-                flex: "1 1 240px",
-                maxWidth: "min(100%, 280px)",
+                flex: "999 1 min(100%, 560px)",
+                minWidth: 0,
                 display: "grid",
                 gap: "var(--sp-4)",
               }}
             >
-              <Panel label={t("blocksLabel")}>
-                <div style={{ display: "grid", gap: "var(--sp-1)" }}>
-                  {CAMPAIGN_BLOCK_TYPES.map((type) => (
+              {/* ------------------------------------------------------------- */}
+              {/* O disparo que falhou — o único estado que a campanha não diz   */}
+              {/* ------------------------------------------------------------- */}
+              {props.scheduled?.status === "failed" ? (
+                <p
+                  role="alert"
+                  style={{
+                    margin: 0,
+                    padding: "var(--sp-3) var(--sp-4)",
+                    border: "1px solid var(--danger)",
+                    borderRadius: "var(--r-md)",
+                    background: "var(--danger-soft)",
+                    color: "var(--danger)",
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {/* Sem isto a campanha ficava "Agendada" com uma data que já
+                  passou e nenhuma explicação: o disparo tenta três vezes e
+                  desiste, e as razões por que desiste — sem remetente, um
+                  e-mail vazio, audiência a zero — são todas corrigíveis por
+                  quem está a ler isto. */}
+                  {t("scheduleFailed", {
+                    when: dateFormat.format(new Date(props.scheduled.send_at)),
+                    attempts: props.scheduled.attempts,
+                  })}
+                  {props.scheduled.last_error ? ` — ${props.scheduled.last_error}` : ""}
+                </p>
+              ) : null}
+
+              {/* ------------------------------------------------------------- */}
+              {/* Faixa 2 — a sequência                                         */}
+              {/* ------------------------------------------------------------- */}
+              <Panel label={t("bandSequence")}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: "var(--sp-2)",
+                  }}
+                >
+                  {props.emails.map((row, index) => {
+                    const active = row.id === email?.id;
+                    return (
+                      <span
+                        key={row.id}
+                        style={{ display: "flex", alignItems: "center", gap: "var(--sp-1)" }}
+                      >
+                        {index > 0 ? (
+                          <ChevronRight size={14} aria-hidden="true" color="var(--muted)" />
+                        ) : null}
+                        <Button
+                          size="sm"
+                          variant={active ? "secondary" : "ghost"}
+                          aria-current={active ? "true" : undefined}
+                          onClick={() => navegar({ campanha: campaign.id, email: row.id })}
+                        >
+                          {row.name || t("emailTab", { position: row.position })}
+                          {/* A espera de cada e-mail da sequência, à vista no
+                          separador: é o que distingue o segundo e-mail de uma
+                          sequência de um segundo e-mail qualquer. */}
+                          {index > 0 && (props.delayByEmail[row.id] ?? 0) > 0
+                            ? ` · +${props.delayByEmail[row.id]}d`
+                            : ""}
+                        </Button>
+                      </span>
+                    );
+                  })}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    leadingIcon={<Plus size={14} />}
+                    disabled={locked || pending}
+                    onClick={adicionarEmail}
+                  >
+                    {t("addEmail")}
+                  </Button>
+                  {props.emails.length > 1 && email ? (
                     <Button
-                      key={type}
                       size="sm"
                       variant="ghost"
-                      leadingIcon={BLOCK_ICONS[type]}
-                      disabled={locked || !email}
-                      onClick={() => inserirBloco(type)}
+                      leadingIcon={<Trash2 size={14} />}
+                      disabled={locked || pending}
+                      title={t("removeEmail")}
+                      onClick={() =>
+                        run(
+                          () => props.onDeleteEmail(email.id),
+                          () => navegar({ campanha: campaign.id }),
+                        )
+                      }
                     >
-                      {t(`blocks.${type}`)}
+                      {t("removeEmail")}
                     </Button>
-                  ))}
+                  ) : null}
                 </div>
               </Panel>
 
-              <Panel label={t("styleLabel")}>
-                <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                  <label
+              {/* ------------------------------------------------------------- */}
+              {/* Faixa 3 — o e-mail selecionado                                */}
+              {/* ------------------------------------------------------------- */}
+              {email ? (
+                <Panel label={t("bandEmail")}>
+                  <div
                     style={{
                       display: "grid",
-                      gap: "var(--sp-1)",
-                      fontSize: "12.5px",
-                      fontWeight: 700,
-                      color: "var(--text)",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+                      gap: "var(--sp-4)",
                     }}
                   >
-                    {t("backgroundLabel")}
-                    <span style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
-                      <input
-                        type="color"
-                        value={emailBg}
+                    <Input
+                      label={t("subjectLabel")}
+                      value={subject}
+                      maxLength={300}
+                      disabled={locked}
+                      onChange={(event) => setSubject(event.target.value)}
+                    />
+                    <Input
+                      label={t("preheaderLabel")}
+                      hint={t("preheaderHint")}
+                      value={preheader}
+                      maxLength={300}
+                      disabled={locked}
+                      onChange={(event) => setPreheader(event.target.value)}
+                    />
+                    {/* A espera só existe a partir do segundo: o primeiro e-mail de
+                    uma sequência sai quando a campanha sai. */}
+                    {email.position > 1 ? (
+                      <Input
+                        label={t("delayLabel")}
+                        hint={t("delayHint")}
+                        type="number"
+                        min={0}
+                        max={365}
+                        value={String(delayDays)}
                         disabled={locked}
-                        onChange={(event) => setEmailBg(event.target.value)}
-                        style={{
-                          width: "44px",
-                          height: "32px",
-                          padding: 0,
-                          border: "1px solid var(--border)",
-                          borderRadius: "var(--r-sm)",
-                          background: "var(--surface)",
-                        }}
+                        onChange={(event) =>
+                          setDelayDays(Math.max(0, Math.min(365, Number(event.target.value) || 0)))
+                        }
                       />
-                      <span
-                        style={{
-                          fontFamily: "ui-monospace, monospace",
-                          fontSize: "12px",
-                          fontWeight: 400,
-                          color: "var(--muted)",
-                        }}
-                      >
-                        {emailBg}
-                      </span>
-                    </span>
-                  </label>
-                  {/* 04 §5.1 proíbe cores fixas; esta é a terceira exceção
-                      viva, e a razão está escrita no renderizador — um cliente
-                      de e-mail não tem as `custom properties` do design
-                      system. O campo é hexadecimal porque a coluna o é. */}
-                  <p
-                    style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}
-                  >
-                    {t("backgroundNote")}
-                  </p>
-                </div>
-              </Panel>
-            </aside>
+                    ) : null}
+                  </div>
+                </Panel>
+              ) : null}
 
-            <section
-              aria-label={t("canvasLabel")}
-              style={{
-                flex: "5 1 min(100%, 420px)",
-                minWidth: 0,
-                display: "grid",
-                gap: "var(--sp-3)",
-              }}
-            >
+              {/* ------------------------------------------------------------- */}
+              {/* Os blocos e o canvas                                          */}
+              {/* ------------------------------------------------------------- */}
               <div
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: "var(--sp-3)",
+                  gap: "var(--sp-5)",
+                  alignItems: "flex-start",
                 }}
               >
-                <div
-                  role="toolbar"
-                  aria-label={t("viewLabel")}
-                  style={{ display: "flex", flexWrap: "wrap", gap: "2px" }}
+                {/* A coluna esquerda é `sticky`: o canvas de um e-mail com dez
+                blocos é mais alto do que o ecrã, e a paleta tem de estar à mão
+                em qualquer ponto dele (04 §2.6). */}
+                <aside
+                  style={{
+                    position: "sticky",
+                    top: "var(--sp-4)",
+                    // Estreitada a 21 out 2026: a coluna principal passou a
+                    // dividir a página com a da campanha, e uma paleta de
+                    // 280 px aí dentro deixava o canvas do e-mail — que é o
+                    // que se está a desenhar — com menos espaço do que os
+                    // atalhos para o encher.
+                    flex: "1 1 190px",
+                    maxWidth: "min(100%, 220px)",
+                    display: "grid",
+                    gap: "var(--sp-4)",
+                  }}
                 >
-                  <Button
-                    size="sm"
-                    variant={view === "edit" ? "secondary" : "ghost"}
-                    leadingIcon={<Pencil size={14} />}
-                    aria-pressed={view === "edit"}
-                    onClick={() => setView("edit")}
-                  >
-                    {t("viewEdit")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={view === "desktop" ? "secondary" : "ghost"}
-                    leadingIcon={<Monitor size={14} />}
-                    aria-pressed={view === "desktop"}
-                    onClick={() => setView("desktop")}
-                  >
-                    {t("viewDesktop")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={view === "mobile" ? "secondary" : "ghost"}
-                    leadingIcon={<Smartphone size={14} />}
-                    aria-pressed={view === "mobile"}
-                    onClick={() => setView("mobile")}
-                  >
-                    {t("viewMobile")}
-                  </Button>
-                </div>
+                  <Panel label={t("blocksLabel")}>
+                    <div style={{ display: "grid", gap: "var(--sp-1)" }}>
+                      {CAMPAIGN_BLOCK_TYPES.map((type) => (
+                        <Button
+                          key={type}
+                          size="sm"
+                          variant="ghost"
+                          fullWidth
+                          leadingIcon={BLOCK_ICONS[type]}
+                          disabled={locked || !email}
+                          onClick={() => inserirBloco(type)}
+                          // O `.upm-btn` centra o conteúdo, que é o que um botão
+                          // solto quer — mas isto é uma **lista** de dez ações, e
+                          // dez textos centrados de larguras diferentes não dão
+                          // coluna nenhuma: os ícones ficavam em zigue-zague e o
+                          // olho não tinha onde descer. Alinhados à esquerda, os
+                          // ícones formam a margem e a lista lê-se de uma vez.
+                          //
+                          // Escape hatch local e não uma prop nova no `Button`: é
+                          // o único sítio do produto com uma paleta destas. No dia
+                          // em que houver um segundo, promove-se a variante.
+                          style={{ justifyContent: "flex-start" }}
+                        >
+                          {t(`blocks.${type}`)}
+                        </Button>
+                      ))}
+                    </div>
+                  </Panel>
 
-                {/* O "Com dados" de 04 §2.6. Os valores são uma amostra e não um
+                  <Panel label={t("styleLabel")}>
+                    <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                      <label
+                        style={{
+                          display: "grid",
+                          gap: "var(--sp-1)",
+                          fontSize: "12.5px",
+                          fontWeight: 700,
+                          color: "var(--text)",
+                        }}
+                      >
+                        {t("backgroundLabel")}
+                        <span style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
+                          <input
+                            type="color"
+                            value={emailBg}
+                            disabled={locked}
+                            onChange={(event) => setEmailBg(event.target.value)}
+                            style={{
+                              width: "44px",
+                              height: "32px",
+                              padding: 0,
+                              border: "1px solid var(--border)",
+                              borderRadius: "var(--r-sm)",
+                              background: "var(--surface)",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontFamily: "ui-monospace, monospace",
+                              fontSize: "12px",
+                              fontWeight: 400,
+                              color: "var(--muted)",
+                            }}
+                          >
+                            {emailBg}
+                          </span>
+                        </span>
+                      </label>
+                      {/* 04 §5.1 proíbe cores fixas; esta é a terceira exceção
+                      viva, e a razão está escrita no renderizador — um cliente
+                      de e-mail não tem as `custom properties` do design
+                      system. O campo é hexadecimal porque a coluna o é. */}
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "12px",
+                          lineHeight: 1.5,
+                          color: "var(--muted)",
+                        }}
+                      >
+                        {t("backgroundNote")}
+                      </p>
+                    </div>
+                  </Panel>
+                </aside>
+
+                <section
+                  aria-label={t("canvasLabel")}
+                  style={{
+                    flex: "5 1 min(100%, 420px)",
+                    minWidth: 0,
+                    display: "grid",
+                    gap: "var(--sp-3)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      gap: "var(--sp-3)",
+                    }}
+                  >
+                    <div
+                      role="toolbar"
+                      aria-label={t("viewLabel")}
+                      style={{ display: "flex", flexWrap: "wrap", gap: "2px" }}
+                    >
+                      <Button
+                        size="sm"
+                        variant={view === "edit" ? "secondary" : "ghost"}
+                        leadingIcon={<Pencil size={14} />}
+                        aria-pressed={view === "edit"}
+                        onClick={() => setView("edit")}
+                      >
+                        {t("viewEdit")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={view === "desktop" ? "secondary" : "ghost"}
+                        leadingIcon={<Monitor size={14} />}
+                        aria-pressed={view === "desktop"}
+                        onClick={() => setView("desktop")}
+                      >
+                        {t("viewDesktop")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={view === "mobile" ? "secondary" : "ghost"}
+                        leadingIcon={<Smartphone size={14} />}
+                        aria-pressed={view === "mobile"}
+                        onClick={() => setView("mobile")}
+                      >
+                        {t("viewMobile")}
+                      </Button>
+                    </div>
+
+                    {/* O "Com dados" de 04 §2.6. Os valores são uma amostra e não um
                     destinatário real — 07 §24.6 #5 não deixa o Marketing ler a
                     lista, e ir buscar "o primeiro da audiência" era isso por
                     outra porta. */}
-                <Toggle label={t("withData")} checked={withData} onCheckedChange={setWithData} />
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                  {t("variablesHint", {
-                    list: CAMPAIGN_VARIABLES.map((name) => `{${name}}`).join(" "),
-                  })}
-                </span>
-              </div>
+                    <Toggle
+                      label={t("withData")}
+                      checked={withData}
+                      onCheckedChange={setWithData}
+                    />
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      {t("variablesHint", {
+                        list: CAMPAIGN_VARIABLES.map((name) => `{${name}}`).join(" "),
+                      })}
+                    </span>
+                  </div>
 
-              {view === "edit" ? (
-                <BlockCanvas
-                  blocks={blocks}
-                  selectedId={selectedBlockId}
-                  onSelect={setSelectedBlockId}
-                  onChange={setBlocks}
-                  senders={props.senders}
-                  properties={props.properties}
-                  onUploadImage={props.onUploadImage}
-                  disabled={locked}
-                />
-              ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    justifyItems: "center",
-                    padding: "var(--sp-4)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "var(--r-lg)",
-                    background: "var(--surface2)",
-                  }}
-                >
-                  {/* Um `iframe` e não uma `div`: o HTML de um e-mail traz
+                  {view === "edit" ? (
+                    <BlockCanvas
+                      blocks={blocks}
+                      selectedId={selectedBlockId}
+                      onSelect={setSelectedBlockId}
+                      onChange={setBlocks}
+                      senders={props.senders}
+                      properties={props.properties}
+                      onUploadImage={props.onUploadImage}
+                      disabled={locked}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        display: "grid",
+                        justifyItems: "center",
+                        padding: "var(--sp-4)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "var(--r-lg)",
+                        background: "var(--surface2)",
+                      }}
+                    >
+                      {/* Um `iframe` e não uma `div`: o HTML de um e-mail traz
                       `<html>`, `<body>` e estilos em linha pensados para um
                       cliente de correio, e injetá-lo na página punha-o a herdar
                       a folha do painel — que é precisamente o que a
                       pré-visualização não pode fazer. É a mesma decisão do
                       leitor de e-mail do Suporte. */}
-                  <iframe
-                    title={t("previewTitle")}
-                    srcDoc={previewHtml}
-                    sandbox=""
-                    style={{
-                      width: `min(100%, ${PREVIEW_WIDTH[view]}px)`,
-                      minHeight: "520px",
-                      border: "1px solid var(--border)",
-                      borderRadius: "var(--r-md)",
-                      background: "var(--surface)",
-                    }}
+                      <iframe
+                        title={t("previewTitle")}
+                        srcDoc={previewHtml}
+                        sandbox=""
+                        style={{
+                          width: `min(100%, ${PREVIEW_WIDTH[view]}px)`,
+                          minHeight: "520px",
+                          border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)",
+                          background: "var(--surface)",
+                        }}
+                      />
+                    </div>
+                  )}
+                </section>
+              </div>
+            </main>
+
+            {/* A coluna da campanha. `sticky` pela mesma razão que a paleta de
+                blocos o é: o canvas de um e-mail com dez blocos é mais alto do
+                que o ecrã, e quem está a escrever tem de poder guardar, agendar
+                ou ver o estado sem subir ao topo. */}
+            <aside
+              aria-label={t("bandCampaign")}
+              style={{
+                position: "sticky",
+                top: "var(--sp-4)",
+                flex: "1 1 300px",
+                maxWidth: "min(100%, 340px)",
+                display: "grid",
+                gap: "var(--sp-4)",
+              }}
+            >
+              {/* ------------------------------------------------------------- */}
+              {/* Faixa 1 — a campanha                                          */}
+              {/* ------------------------------------------------------------- */}
+              {/* Empilhada desde 21 out 2026: ver a nota de topo do ficheiro. */}
+              <Panel
+                label={t("bandCampaign")}
+                meta={
+                  <span style={{ display: "flex", alignItems: "center", gap: "var(--sp-2)" }}>
+                    <StatusTag
+                      tone={CAMPAIGN_STATUS_TONES[campaign.status as CampaignStatus] as StatusTone}
+                    >
+                      {t(`status.${campaign.status}`)}
+                    </StatusTag>
+                  </span>
+                }
+              >
+                <div style={{ display: "grid", gap: "var(--sp-4)" }}>
+                  <Select
+                    label={t("campaignLabel")}
+                    value={campaign.id}
+                    options={props.campaigns.map((row) => ({ value: row.id, label: row.name }))}
+                    onChange={(event) => navegar({ campanha: event.target.value })}
+                  />
+                  <Input
+                    label={t("nameLabel")}
+                    value={name}
+                    maxLength={160}
+                    disabled={locked}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                  <div style={{ display: "grid", gap: "var(--sp-1)" }}>
+                    <Select
+                      label={t("audienceLabel")}
+                      value={audience}
+                      disabled={locked}
+                      options={CAMPAIGN_AUDIENCES.map((value) => ({
+                        value,
+                        label: t(`audience.${value}`),
+                      }))}
+                      onChange={(event) => {
+                        const next = event.target.value as CampaignAudience;
+                        setAudience(next);
+                        setCount(null);
+                        startTransition(async () => {
+                          const result = await props.onCountAudience(next);
+                          setCount(result.count ?? null);
+                        });
+                      }}
+                    />
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      {count === null ? t("audienceUnknown") : t("audienceCount", { count })}
+                    </span>
+                    {/* D69: zero é a resposta certa até o registo recolher o
+                    consentimento, e dizê-lo aqui evita que alguém "arranje" o
+                    default da coluna. */}
+                    {count === 0 &&
+                    audience !== "site_leads_pre" &&
+                    audience !== "site_leads_post" ? (
+                      <span style={{ fontSize: "12px", color: "var(--warn)" }}>
+                        {t("audienceConsentNote")}
+                      </span>
+                    ) : null}
+                  </div>
+                  <Select
+                    label={t("senderLabel")}
+                    hint={t("senderHint")}
+                    value={fromMailboxId}
+                    disabled={locked}
+                    options={[
+                      { value: "", label: t("senderNone") },
+                      ...props.senders.map((sender) => ({
+                        value: sender.id,
+                        label: sender.displayName
+                          ? `${sender.displayName} · ${sender.address}`
+                          : sender.address,
+                      })),
+                    ]}
+                    onChange={(event) => setFromMailboxId(event.target.value)}
                   />
                 </div>
-              )}
-            </section>
-          </div>
+              </Panel>
 
-          {/* ------------------------------------------------------------- */}
-          {/* Os recibos (P10-09)                                           */}
-          {/* ------------------------------------------------------------- */}
-          {props.receipts.length > 0 ? (
-            <Panel label={t("receiptsLabel")}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 140px), 1fr))",
-                  gap: "var(--sp-4)",
-                }}
-              >
-                {props.receipts.map((receipt) => (
-                  <div key={receipt.type} style={{ display: "grid", gap: "var(--sp-1)" }}>
-                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                      {t(`receipts.${receipt.type}`)}
-                    </span>
-                    <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--text)" }}>
-                      {receipt.people}
-                    </span>
-                    {/* Duas contagens e não uma: "300 aberturas de 100 pessoas"
-                        diz algo; "300 aberturas" numa campanha de 100
-                        destinatários parece um erro. O número grande é o de
-                        pessoas, que é o que se usa; o total fica ao lado. */}
-                    <span style={{ fontSize: "11.5px", color: "var(--muted)" }}>
-                      {t("receiptsTotal", { count: receipt.total })}
-                    </span>
+              {/* ------------------------------------------------------------- */}
+              {/* Os recibos (P10-09)                                           */}
+              {/* ------------------------------------------------------------- */}
+              {props.receipts.length > 0 ? (
+                <Panel label={t("receiptsLabel")}>
+                  <div style={{ display: "grid", gap: "var(--sp-3)" }}>
+                    {props.receipts.map((receipt) => (
+                      <div
+                        key={receipt.type}
+                        // Duas contagens e não uma: "300 aberturas de 100
+                        // pessoas" diz algo; "300 aberturas" numa campanha de
+                        // 100 destinatários parece um erro. O número à vista é
+                        // o de pessoas, que é o que se usa; o total de eventos
+                        // era uma terceira linha por recibo — cinco linhas de
+                        // cinza numa coluna estreita — e passou para aqui.
+                        title={t("receiptsTotal", { count: receipt.total })}
+                        style={{
+                          display: "flex",
+                          alignItems: "baseline",
+                          justifyContent: "space-between",
+                          gap: "var(--sp-3)",
+                        }}
+                      >
+                        <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                          {t(`receipts.${receipt.type}`)}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "var(--fs-subtitle-lg)",
+                            fontWeight: 800,
+                            color: "var(--text)",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        >
+                          {receipt.people}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}>
-                {t("receiptsNote")}
-              </p>
-            </Panel>
-          ) : null}
+                  <p
+                    style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}
+                  >
+                    {t("receiptsNote")}
+                  </p>
+                </Panel>
+              ) : null}
 
-          {/* ------------------------------------------------------------- */}
-          {/* As ações de 04 §2.6                                           */}
-          {/* ------------------------------------------------------------- */}
-          <Panel label={t("actionsLabel")}>
-            <div style={{ display: "grid", gap: "var(--sp-3)" }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sp-3)" }}>
-                <Button disabled={locked || pending} onClick={guardar}>
-                  {pending ? t("saving") : t("save")}
-                </Button>
-                <Button
-                  variant="secondary"
-                  leadingIcon={<Download size={15} />}
-                  disabled={pending || blocks.length === 0}
-                  onClick={exportarHtml}
-                >
-                  {t("exportHtml")}
-                </Button>
-                {/* O teste: pede o endereço e manda-o ao worker, que lê o que
+              {/* ------------------------------------------------------------- */}
+              {/* As ações de 04 §2.6                                           */}
+              {/* ------------------------------------------------------------- */}
+              <Panel label={t("actionsLabel")}>
+                <div style={{ display: "grid", gap: "var(--sp-3)" }}>
+                  <Button fullWidth disabled={locked || pending} onClick={guardar}>
+                    {pending ? t("saving") : t("save")}
+                  </Button>
+
+                  {/* Os dois que não têm consequência nenhuma: exportar o HTML e
+                  mandar um teste para um endereço nosso. */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 130px), 1fr))",
+                      gap: "var(--sp-2)",
+                    }}
+                  >
+                    <Button
+                      variant="secondary"
+                      leadingIcon={<Download size={15} />}
+                      disabled={pending || blocks.length === 0}
+                      onClick={exportarHtml}
+                    >
+                      {t("exportHtml")}
+                    </Button>
+                    {/* O teste: pede o endereço e manda-o ao worker, que lê o que
                     está **guardado** — por isso só está disponível depois de
                     gravar, e o `title` di-lo. */}
-                <Button
-                  variant="secondary"
-                  leadingIcon={<Send size={15} />}
-                  disabled={pending || !email || blocks.length === 0}
-                  title={email ? t("sendTestHint") : t("sendTestNeedsSave")}
-                  onClick={enviarTeste}
-                >
-                  {t("sendTest")}
-                </Button>
-                <Button
-                  variant="secondary"
-                  leadingIcon={<Send size={15} />}
-                  disabled={locked || pending || campaign.status === "sending"}
-                  title={t("sendHint")}
-                  onClick={() => {
-                    // Uma campanha sai uma vez. A confirmação é por isso, e não
-                    // por cautela genérica: não há "desenviar".
-                    if (!window.confirm(t("sendConfirm", { name: name || t("newName") }))) return;
-                    run(() => props.onSend(campaign.id));
-                  }}
-                >
-                  {t("send")}
-                </Button>
-                {campaign.status === "draft" ? (
-                  <Button
-                    variant="secondary"
-                    leadingIcon={<Trash2 size={15} />}
-                    disabled={pending}
-                    onClick={() =>
-                      run(
-                        () => props.onDeleteCampaign(campaign.id),
-                        () => navegar({}),
-                      )
-                    }
-                  >
-                    {t("deleteCampaign")}
-                  </Button>
-                ) : null}
-              </div>
+                    <Button
+                      variant="secondary"
+                      leadingIcon={<Send size={15} />}
+                      disabled={pending || !email || blocks.length === 0}
+                      title={email ? t("sendTestHint") : t("sendTestNeedsSave")}
+                      onClick={enviarTeste}
+                    >
+                      {t("sendTest")}
+                    </Button>
+                  </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "flex-end",
-                  gap: "var(--sp-3)",
-                }}
-              >
-                <Input
-                  label={t("scheduleLabel")}
-                  type="datetime-local"
-                  value={scheduledFor}
-                  disabled={locked}
-                  onChange={(event) => setScheduledFor(event.target.value)}
-                />
-                {campaign.status === "scheduled" ? (
-                  <Button
-                    variant="secondary"
-                    disabled={pending}
-                    onClick={() => run(() => props.onUnschedule(campaign.id))}
-                  >
-                    {t("unschedule")}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    leadingIcon={<Calendar size={15} />}
-                    disabled={locked || pending || !scheduledFor}
-                    onClick={() =>
-                      run(() =>
-                        props.onSchedule({
-                          id: campaign.id,
-                          at: new Date(scheduledFor).toISOString(),
-                        }),
-                      )
-                    }
-                  >
-                    {t("schedule")}
-                  </Button>
-                )}
-              </div>
+                  {/* A linha que separa o reversível do que não é. */}
+                  <hr
+                    style={{
+                      width: "100%",
+                      height: "1px",
+                      margin: 0,
+                      border: 0,
+                      background: "var(--border)",
+                    }}
+                  />
 
-              <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}>
-                {t("sendPendingNote")}
-              </p>
-            </div>
-          </Panel>
+                  <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                    <Button
+                      fullWidth
+                      leadingIcon={<Send size={15} />}
+                      disabled={locked || pending || campaign.status === "sending"}
+                      title={t("sendHint")}
+                      onClick={() => {
+                        // Uma campanha sai uma vez. A confirmação é por isso, e não
+                        // por cautela genérica: não há "desenviar".
+                        if (!window.confirm(t("sendConfirm", { name: name || t("newName") })))
+                          return;
+                        run(() => props.onSend(campaign.id));
+                      }}
+                    >
+                      {t("send")}
+                    </Button>
+                    {campaign.status === "draft" ? (
+                      <Button
+                        fullWidth
+                        variant="secondary"
+                        leadingIcon={<Trash2 size={15} />}
+                        disabled={pending}
+                        onClick={() =>
+                          run(
+                            () => props.onDeleteCampaign(campaign.id),
+                            () => navegar({}),
+                          )
+                        }
+                      >
+                        {t("deleteCampaign")}
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                    <Input
+                      label={t("scheduleLabel")}
+                      type="datetime-local"
+                      value={scheduledFor}
+                      disabled={locked}
+                      onChange={(event) => setScheduledFor(event.target.value)}
+                    />
+                    {campaign.status === "scheduled" ? (
+                      <Button
+                        fullWidth
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() => run(() => props.onUnschedule(campaign.id))}
+                      >
+                        {t("unschedule")}
+                      </Button>
+                    ) : (
+                      <Button
+                        fullWidth
+                        variant="secondary"
+                        leadingIcon={<Calendar size={15} />}
+                        disabled={locked || pending || !scheduledFor}
+                        onClick={() =>
+                          run(() =>
+                            props.onSchedule({
+                              id: campaign.id,
+                              at: new Date(scheduledFor).toISOString(),
+                            }),
+                          )
+                        }
+                      >
+                        {t("schedule")}
+                      </Button>
+                    )}
+                  </div>
+
+                  <p
+                    style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}
+                  >
+                    {t("sendPendingNote")}
+                  </p>
+                </div>
+              </Panel>
+            </aside>
+          </div>
         </>
       ) : null}
     </div>
   );
 }
 
-/** A moldura de cada faixa e de cada painel — a mesma em todos. */
-function Panel({ label, children }: { label?: string; children: React.ReactNode }) {
+/**
+ * A moldura de cada painel — a mesma em todos.
+ *
+ * `meta` entra no cabeçalho, à direita do título (21 out 2026). Nasceu para o
+ * estado da campanha, que até aqui era o quinto campo de uma grelha de campos
+ * — com rótulo "ESTADO" e uma etiqueta por baixo, no sítio onde todos os
+ * vizinhos eram editáveis. Lia-se como um controlo e não era: é informação
+ * sobre o painel inteiro, e é esse o seu lugar.
+ */
+function Panel({
+  label,
+  meta,
+  children,
+}: {
+  label?: string;
+  meta?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section
       aria-label={label}
@@ -1041,19 +1143,30 @@ function Panel({ label, children }: { label?: string; children: React.ReactNode 
         background: "var(--surface)",
       }}
     >
-      {label ? (
-        <h2
+      {label || meta ? (
+        <header
           style={{
-            margin: 0,
-            fontSize: "12px",
-            fontWeight: 800,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "var(--sp-3)",
+            minHeight: "22px",
           }}
         >
-          {label}
-        </h2>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              color: "var(--muted)",
+            }}
+          >
+            {label}
+          </h2>
+          {meta}
+        </header>
       ) : null}
       {children}
     </section>

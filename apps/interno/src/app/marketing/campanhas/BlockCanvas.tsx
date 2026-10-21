@@ -121,7 +121,25 @@ export function BlockCanvas(props: BlockCanvasProps) {
   }
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-3)" }}>
+    // A tela, desde 21 out 2026.
+    //
+    // Os blocos são cartões `--surface` e estavam soltos sobre o fundo da
+    // página, que também é claro: um e-mail de seis blocos lia-se como seis
+    // caixas a flutuar sem nada que as juntasse. Com a tela a `--surface2` por
+    // baixo, os cartões passam a estar **dentro** de alguma coisa — e essa
+    // coisa é o corpo do e-mail, que é exatamente o modelo mental certo para
+    // quem o está a montar. É o mesmo tom que a pré-visualização já usava à
+    // volta do `iframe`, pela mesma razão.
+    <div
+      style={{
+        display: "grid",
+        gap: "var(--sp-3)",
+        padding: "var(--sp-4)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--r-lg)",
+        background: "var(--surface2)",
+      }}
+    >
       {props.blocks.map((block, index) => {
         const selected = block.id === props.selectedId;
         const isFooter = block.type === "footer";

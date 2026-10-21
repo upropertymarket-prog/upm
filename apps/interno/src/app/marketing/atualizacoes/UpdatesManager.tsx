@@ -213,10 +213,21 @@ export function UpdatesManager(props: UpdatesManagerProps) {
 
       <div
         style={{
-          display: "grid",
-          // Grelha intrínseca: duas colunas quando cabem, uma quando não —
-          // sem media queries (regra do projeto).
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
+          // Lista estreita + editor largo, sem media queries (21 out 2026).
+          //
+          // Era uma grelha `auto-fit` de colunas **iguais** com a lista travada
+          // em 420 px por dentro. Numa janela de 1400 px cada coluna ficava com
+          // ~690, a lista encolhia para 420 e sobravam ~270 px de vazio a meio
+          // do ecrã — um buraco que não existe em mais nenhuma página da app.
+          //
+          // O padrão é o mesmo que o construtor de campanhas já usa: `flex`
+          // com `flex-grow` desproporcionado. A lista pede 300 px e não cresce
+          // além de 340; o editor pede 460 e tem `grow: 999`, por isso absorve
+          // **todo** o espaço que sobra. Quando os dois não cabem lado a lado,
+          // o `wrap` põe-nos um debaixo do outro, cada um a 100 % — que é a
+          // responsividade intrínseca que o projeto exige em vez de breakpoints.
+          display: "flex",
+          flexWrap: "wrap",
           gap: "var(--sp-5)",
           alignItems: "start",
         }}
@@ -227,13 +238,14 @@ export function UpdatesManager(props: UpdatesManagerProps) {
         <aside
           aria-label={t("listLabel")}
           style={{
+            flex: "1 1 300px",
+            maxWidth: "min(100%, 340px)",
             display: "grid",
             gap: "var(--sp-2)",
             padding: "var(--sp-3)",
             border: "1px solid var(--border)",
             borderRadius: "var(--r-lg)",
             background: "var(--surface)",
-            maxWidth: "min(100%, 420px)",
           }}
         >
           {props.updates.length === 0 ? (
@@ -307,6 +319,13 @@ export function UpdatesManager(props: UpdatesManagerProps) {
           <section
             aria-label={t("editorLabel")}
             style={{
+              // `grow: 999` contra o `grow: 1` da lista: o editor fica com todo
+              // o espaço que sobra em vez de o dividir ao meio com ela.
+              // `minWidth: 0` porque um item de flex não encolhe abaixo do
+              // conteúdo sem isto, e um `<textarea>` lá dentro empurrava a
+              // coluna para fora da janela.
+              flex: "999 1 min(100%, 460px)",
+              minWidth: 0,
               display: "grid",
               gap: "var(--sp-4)",
               padding: "var(--sp-5)",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { CloudUpload, Download } from "lucide-react";
+import { CloudUpload, Download, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Button,
@@ -103,6 +103,24 @@ export function MetricsView(props: MetricsViewProps) {
     });
   }
 
+  /**
+   * As colunas, com largura desde 21 out 2026.
+   *
+   * Eram oito sem largura nenhuma, e o `<table>` reparte por conteúdo: os
+   * cabeçalhos longos ("Taxa de abertura", "Cancelamentos") levavam a largura
+   * toda, o nome da campanha ficava espremido em três linhas e a última coluna
+   * saía cortada fora do cartão.
+   *
+   * Agora as sete colunas de valor pedem uma largura fixa e pequena — são
+   * números, ocupam o que ocupam — e **o nome fica sem largura**, por isso
+   * absorve tudo o que sobra. É a mesma ideia do `grow: 999` do construtor,
+   * aplicada a uma tabela.
+   *
+   * Os cabeçalhos das taxas passam a ser os curtos que já existiam no ficheiro
+   * de mensagens (`opens`, `clicks`, `bounces`). O "%" está no valor e diz o
+   * que a coluna é sem precisar de o repetir no título — e um cabeçalho que
+   * cabe numa linha vale mais do que um que é exato e parte em duas.
+   */
   const columns: TableColumn<CampaignRow>[] = [
     {
       id: "name",
@@ -119,6 +137,7 @@ export function MetricsView(props: MetricsViewProps) {
     {
       id: "status",
       header: t("columns.status"),
+      width: "130px",
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
           <span>
@@ -138,18 +157,21 @@ export function MetricsView(props: MetricsViewProps) {
       id: "recipients",
       header: t("columns.recipients"),
       numeric: true,
+      width: "110px",
       cell: (row) => row.recipients,
     },
     {
       id: "delivered",
       header: t("columns.delivered"),
       numeric: true,
+      width: "100px",
       cell: (row) => deliveredOf(row),
     },
     {
       id: "opens",
-      header: t("columns.openRate"),
+      header: t("columns.opens"),
       numeric: true,
+      width: "104px",
       cell: (row) => (
         <span title={t("countOf", { count: row.opens })}>
           {percent(row.opens, deliveredOf(row))}
@@ -158,8 +180,9 @@ export function MetricsView(props: MetricsViewProps) {
     },
     {
       id: "clicks",
-      header: t("columns.clickRate"),
+      header: t("columns.clicks"),
       numeric: true,
+      width: "96px",
       cell: (row) => (
         <span title={t("countOf", { count: row.clicks })}>
           {percent(row.clicks, deliveredOf(row))}
@@ -168,8 +191,9 @@ export function MetricsView(props: MetricsViewProps) {
     },
     {
       id: "bounces",
-      header: t("columns.bounceRate"),
+      header: t("columns.bounces"),
       numeric: true,
+      width: "112px",
       cell: (row) => (
         <span title={t("countOf", { count: row.bounces })}>
           {percent(row.bounces, row.recipients)}
@@ -180,6 +204,7 @@ export function MetricsView(props: MetricsViewProps) {
       id: "unsubscribes",
       header: t("columns.unsubscribes"),
       numeric: true,
+      width: "124px",
       cell: (row) => row.unsubscribes,
     },
   ];
@@ -216,23 +241,46 @@ export function MetricsView(props: MetricsViewProps) {
         }
       />
 
-      {/* O aviso que impede a conclusão errada — ver a nota de topo. */}
+      {/* O aviso que impede a conclusão errada — ver a nota de topo.
+          Compacto desde 21 out 2026: ocupava seis linhas no topo da página e
+          empurrava a tabela — que é o que a página existe para mostrar — para
+          baixo da dobra. O que ficou à vista é a conclusão; o porquê e o que
+          fazer abrem num `<details>`, que é um controlo nativo e por isso
+          acessível por teclado sem uma linha de JavaScript. */}
       {enviadas.length > 0 && props.receiptCount === 0 ? (
-        <p
-          role="status"
+        <details
           style={{
-            margin: 0,
             padding: "var(--sp-3) var(--sp-4)",
             border: "1px solid var(--warn)",
             borderRadius: "var(--r-md)",
             background: "var(--warn-soft)",
             color: "var(--warn)",
-            fontSize: "13px",
+            fontSize: "var(--fs-body)",
             lineHeight: 1.5,
           }}
         >
-          {t("noReceiptsNote")}
-        </p>
+          <summary
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--sp-3)",
+              cursor: "pointer",
+              fontWeight: 700,
+              // O marcador nativo é um triângulo que cada browser desenha à sua
+              // maneira; o `TriangleAlert` ao lado diz o mesmo e diz melhor.
+              listStyle: "none",
+            }}
+          >
+            <TriangleAlert size={16} aria-hidden="true" style={{ flexShrink: 0 }} />
+            <span style={{ flex: "1 1 auto", minWidth: 0 }}>{t("noReceiptsNote")}</span>
+            <span style={{ fontWeight: 400, textDecoration: "underline", whiteSpace: "nowrap" }}>
+              {t("noReceiptsMore")}
+            </span>
+          </summary>
+          <p style={{ margin: "var(--sp-3) 0 0", paddingLeft: "calc(16px + var(--sp-3))" }}>
+            {t("noReceiptsDetail")}
+          </p>
+        </details>
       ) : null}
 
       {props.campaigns.length === 0 ? (

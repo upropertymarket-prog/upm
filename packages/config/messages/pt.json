@@ -2491,7 +2491,7 @@
       "emptyHint": "As métricas aparecem aqui assim que a primeira campanha sair.",
       "tableCaption": "Métricas por campanha",
       "countOf": "{count, plural, one {# evento} other {# eventos}}",
-      "noReceiptsNote": "Há campanhas enviadas e nenhum recibo recebido. Enquanto o webhook do Resend não estiver apontado ao mail-worker e o RESEND_WEBHOOK_SECRET definido, estes números ficam a zero — o que não quer dizer que os e-mails não tenham chegado. Ver o doc 09, Entregabilidade.",
+      "noReceiptsNote": "Há campanhas enviadas e nenhum recibo recebido.",
       "columns": {
         "name": "Campanha",
         "audience": "Público",
@@ -2506,7 +2506,9 @@
         "bounceRate": "Taxa de devolução",
         "unsubscribes": "Cancelamentos",
         "sentAt": "Enviada em"
-      }
+      },
+      "noReceiptsDetail": "Enquanto o webhook do Resend não estiver apontado ao mail-worker e o RESEND_WEBHOOK_SECRET definido, estes números ficam a zero — o que não quer dizer que os e-mails não tenham chegado. Ver o doc 09, Entregabilidade.",
+      "noReceiptsMore": "Porque é que está tudo a zero?"
     }
   },
   "editor": {
