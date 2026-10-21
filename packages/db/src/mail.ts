@@ -1,15 +1,8 @@
 import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./database.types";
+import { Constants, type Database, type Tables } from "./database.types";
 import { readMailAttachments, type MailAttachment } from "./mail-attachments";
-import {
-  MAIL_FOLDERS,
-  type MailDatabase,
-  type MailFolder,
-  type MailLabelRow,
-  type MailMessageRow,
-} from "./pending-types";
 
 /**
  * Caixa de e-mail do Suporte (P10-04 · 04 §2.5 · 05 §1.8)
@@ -30,17 +23,22 @@ import {
 type AnySupabaseClient = SupabaseClient<Database>;
 
 /**
- * O único cast do correio, e está aqui. Os tipos gerados ainda não conhecem as
- * tabelas do correio (D64); `pending-types.ts` declara-as, e esta função é a
- * costura entre o cliente que a app cria e esse tipo. Desaparece com o
- * `db:types`.
+ * O cast do correio saiu a 21 out 2026, com a D64 fechada.
+ *
+ * Existia uma função `mailClient()` aqui, a costurar o cliente que a app cria
+ * com o `MailDatabase` de `pending-types.ts` — as tabelas do correio escritas
+ * à mão porque o `database.types.ts` não as conhecia. O `pnpm db:types` passou
+ * a correr e passou a conhecê-las; o tipo à mão deixou de ser preciso e, mais
+ * do que isso, deixou de ser verdade: tinha divergido do esquema real.
+ *
+ * As tabelas e os enums vêm agora do ficheiro gerado, e é por isso que estes
+ * nomes continuam a ser exportados daqui — é esta a porta do correio para o
+ * resto do produto, e quem os importa não tem de saber de onde vêm.
  */
-function mailClient(client: AnySupabaseClient): SupabaseClient<MailDatabase> {
-  return client as unknown as SupabaseClient<MailDatabase>;
-}
-
-export { MAIL_FOLDERS };
-export type { MailFolder, MailLabelRow, MailMessageRow };
+export const MAIL_FOLDERS = Constants.public.Enums.mail_folder;
+export type MailFolder = (typeof MAIL_FOLDERS)[number];
+export type MailLabelRow = Tables<"mail_labels">;
+export type MailMessageRow = Tables<"mail_messages">;
 export { readMailAttachments };
 export type { MailAttachment };
 
@@ -100,7 +98,7 @@ export async function listMail(
   client: AnySupabaseClient,
   filters: MailListFilters,
 ): Promise<MailListItem[]> {
-  let query = mailClient(client)
+  let query = client
     .from("mail_messages")
     .select(LIST_COLUMNS)
     .eq("mailbox_id", filters.mailboxId)
@@ -146,11 +144,7 @@ export async function getMailMessage(
   client: AnySupabaseClient,
   messageId: string,
 ): Promise<MailMessageRow | null> {
-  const { data } = await mailClient(client)
-    .from("mail_messages")
-    .select("*")
-    .eq("id", messageId)
-    .maybeSingle();
+  const { data } = await client.from("mail_messages").select("*").eq("id", messageId).maybeSingle();
 
   return data ?? null;
 }
@@ -159,7 +153,7 @@ export async function listMailLabels(
   client: AnySupabaseClient,
   mailboxId: string,
 ): Promise<MailLabelRow[]> {
-  const { data } = await mailClient(client)
+  const { data } = await client
     .from("mail_labels")
     .select("*")
     .eq("mailbox_id", mailboxId)
@@ -182,7 +176,7 @@ export async function mailFolderCounts(
     starred: 0,
   };
 
-  const { data } = await mailClient(client)
+  const { data } = await client
     .from("mail_messages")
     .select("folder, is_read, is_starred")
     .eq("mailbox_id", mailboxId)
@@ -198,7 +192,7 @@ export async function mailFolderCounts(
 }
 
 export async function mailUnreadCount(client: AnySupabaseClient): Promise<number> {
-  const { data, error } = await mailClient(client).rpc("mail_unread_count");
+  const { data, error } = await client.rpc("mail_unread_count");
   if (error || typeof data !== "number") return 0;
   return data;
 }
@@ -217,7 +211,7 @@ export async function setMailFlags(
   client: AnySupabaseClient,
   input: z.infer<typeof mailFlagsSchema>,
 ): Promise<void> {
-  const { error } = await mailClient(client).rpc("mail_set_flags", {
+  const { error } = await client.rpc("mail_set_flags", {
     p_message_id: input.messageId,
     p_is_read: input.isRead,
     p_is_starred: input.isStarred,
@@ -236,7 +230,7 @@ export async function moveMail(
   client: AnySupabaseClient,
   input: z.infer<typeof mailMoveSchema>,
 ): Promise<void> {
-  const { error } = await mailClient(client).rpc("mail_move", {
+  const { error } = await client.rpc("mail_move", {
     p_message_id: input.messageId,
     p_folder: input.folder,
   });
@@ -252,7 +246,7 @@ export async function setMailLabels(
   client: AnySupabaseClient,
   input: z.infer<typeof mailLabelsSchema>,
 ): Promise<void> {
-  const { error } = await mailClient(client).rpc("mail_set_labels", {
+  const { error } = await client.rpc("mail_set_labels", {
     p_message_id: input.messageId,
     p_labels: input.labelIds,
   });
@@ -270,7 +264,7 @@ export async function createMailLabel(
   client: AnySupabaseClient,
   input: z.infer<typeof mailLabelCreateSchema>,
 ): Promise<MailLabelRow | null> {
-  const { data, error } = await mailClient(client)
+  const { data, error } = await client
     .from("mail_labels")
     .insert({ mailbox_id: input.mailboxId, name: input.name, color: input.color })
     .select("*")
@@ -312,7 +306,7 @@ export async function markMailAttachmentSaved(
   client: AnySupabaseClient,
   input: z.infer<typeof mailAttachmentSchema> & { fileId: string },
 ): Promise<void> {
-  const { error } = await mailClient(client).rpc("mail_attachment_saved_to_cloud", {
+  const { error } = await client.rpc("mail_attachment_saved_to_cloud", {
     p_message_id: input.messageId,
     p_index: input.index,
     p_file_id: input.fileId,
@@ -333,7 +327,7 @@ export async function mailboxSignature(
   client: AnySupabaseClient,
   mailboxId: string,
 ): Promise<string> {
-  const { data, error } = await mailClient(client).rpc("mailbox_signature", {
+  const { data, error } = await client.rpc("mailbox_signature", {
     p_mailbox_id: mailboxId,
   });
   if (error || typeof data !== "string") return "";
@@ -358,16 +352,16 @@ export async function saveMailDraft(
   client: AnySupabaseClient,
   input: MailDraftInput,
 ): Promise<string> {
-  const { data, error } = await mailClient(client).rpc("mail_save_draft", {
+  const { data, error } = await client.rpc("mail_save_draft", {
     p_mailbox_id: input.mailboxId,
-    p_draft_id: input.draftId ?? null,
+    p_draft_id: input.draftId ?? undefined,
     p_to: input.to,
     p_cc: input.cc,
     p_bcc: input.bcc,
     p_subject: input.subject,
     p_html: input.html,
     p_text: input.text,
-    p_in_reply_to: input.inReplyTo ?? null,
+    p_in_reply_to: input.inReplyTo ?? undefined,
   });
 
   if (error) throw new Error(error.message);
@@ -375,7 +369,7 @@ export async function saveMailDraft(
 }
 
 export async function discardMailDraft(client: AnySupabaseClient, draftId: string): Promise<void> {
-  const { error } = await mailClient(client).rpc("mail_discard_draft", {
+  const { error } = await client.rpc("mail_discard_draft", {
     p_draft_id: draftId,
   });
   if (error) throw new Error(error.message);
@@ -392,7 +386,7 @@ export async function createTicketFromMail(
   client: AnySupabaseClient,
   messageId: string,
 ): Promise<TicketFromMail> {
-  const { data, error } = await mailClient(client).rpc("create_ticket_from_mail", {
+  const { data, error } = await client.rpc("create_ticket_from_mail", {
     p_message_id: messageId,
   });
 

@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
-import { asPendingRole } from "@upm/db/pending";
 import {
   ALLOWED_FILE_MIMES,
   MAX_FILE_BYTES,
@@ -55,9 +54,7 @@ async function getInternalClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-
-  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
-  const role = asPendingRole(profile?.role);
+  const role = profile?.role ?? null;
   const internal = role === "admin" || role === "support" || role === "marketing";
   return internal ? { supabase, userId: user.id } : null;
 }

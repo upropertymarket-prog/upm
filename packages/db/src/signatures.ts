@@ -2,8 +2,8 @@ import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./database.types";
-import type { EmailSignatureRow, MailDatabase } from "./pending-types";
+import type { Database, Tables } from "./database.types";
+import { nullableArg } from "./rpc-args";
 
 /**
  * Assinaturas de e-mail (P10-06 · 04 §2.6 · 05 §1.8 · 02 §4.3)
@@ -48,14 +48,10 @@ export const SIGNATURE_VARIABLES = [
 
 export type SignatureVariable = (typeof SIGNATURE_VARIABLES)[number];
 
-export type { EmailSignatureRow };
+/** Do ficheiro gerado desde 21 out 2026 (D64): era um tipo à mão em `pending-types.ts`. */
+export type EmailSignatureRow = Tables<"email_signatures">;
 
 type AnySupabaseClient = SupabaseClient<Database>;
-
-/** A mesma costura de `mail.ts`, e desaparece com o mesmo `db:types` (D64). */
-function signatureClient(client: AnySupabaseClient): SupabaseClient<MailDatabase> {
-  return client as unknown as SupabaseClient<MailDatabase>;
-}
 
 /**
  * `style` em linha passa; `class` e `id` não
@@ -214,7 +210,7 @@ export type SignatureSaveInput = z.infer<typeof signatureSaveSchema>;
 // ---------------------------------------------------------------------------
 
 export async function listSignatures(client: AnySupabaseClient): Promise<EmailSignatureRow[]> {
-  const { data } = await signatureClient(client)
+  const { data } = await client
     .from("email_signatures")
     .select("*")
     .order("created_at", { ascending: true });
@@ -227,8 +223,8 @@ export async function saveSignature(
   client: AnySupabaseClient,
   input: SignatureSaveInput & { html: string },
 ): Promise<string> {
-  const { data, error } = await signatureClient(client).rpc("email_signature_save", {
-    p_id: input.id ?? null,
+  const { data, error } = await client.rpc("email_signature_save", {
+    p_id: nullableArg(input.id),
     p_name: input.name,
     p_html: input.html,
     p_mailbox_ids: input.mailboxIds,
@@ -239,7 +235,7 @@ export async function saveSignature(
 }
 
 export async function deleteSignature(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await signatureClient(client).rpc("email_signature_delete", { p_id: id });
+  const { error } = await client.rpc("email_signature_delete", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
@@ -254,7 +250,7 @@ export async function previewSignature(
   client: AnySupabaseClient,
   input: { html: string; mailboxId: string },
 ): Promise<string> {
-  const { data, error } = await signatureClient(client).rpc("resolve_signature_variables", {
+  const { data, error } = await client.rpc("resolve_signature_variables", {
     p_html: input.html,
     p_mailbox_id: input.mailboxId,
   });

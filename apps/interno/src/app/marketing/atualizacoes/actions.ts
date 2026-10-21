@@ -4,7 +4,6 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
-import { asPendingRole } from "@upm/db/pending";
 import {
   appUpdateSaveSchema,
   archiveAppUpdate,
@@ -49,8 +48,7 @@ async function getMarketingClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
-  return asPendingRole(profile?.role) === "marketing" ? supabase : null;
+  return (profile?.role ?? null) === "marketing" ? supabase : null;
 }
 
 /**

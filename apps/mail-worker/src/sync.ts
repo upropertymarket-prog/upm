@@ -4,7 +4,7 @@ import { simpleParser, type AddressObject, type ParsedMail } from "mailparser";
 
 import { discardUploads, storeAttachments } from "./attachments.ts";
 import { describe, imapOptions } from "./connection.ts";
-import type { MailMessageRow } from "@upm/db/pending";
+import type { TablesInsert } from "@upm/db";
 import {
   getMailboxPassword,
   listSyncableMailboxes,
@@ -172,7 +172,15 @@ async function storeMessage(
     parsed.attachments,
   );
 
-  const row: Partial<MailMessageRow> & { mailbox_id: string; message_id: string } = {
+  /**
+   * O tipo de inserção gerado, desde 21 out 2026 (D64).
+   *
+   * Era `Partial<MailMessageRow>` com duas chaves obrigatórias à mão — um
+   * molde escrito quando o `database.types.ts` não conhecia a tabela. O
+   * `TablesInsert` diz a mesma coisa e diz a verdade: é o Postgres a declarar
+   * o que é obrigatório, em vez de nós a adivinhar.
+   */
+  const row: TablesInsert<"mail_messages"> = {
     id,
     mailbox_id: mailbox.id,
     thread_id: threadId,

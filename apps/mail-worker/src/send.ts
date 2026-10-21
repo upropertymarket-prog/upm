@@ -85,8 +85,12 @@ export async function sendMail(
     p_html: request.html,
     p_text: request.text ?? stripHtml(request.html),
     p_from_name: request.fromName ?? "",
-    p_draft_id: request.draftId ?? null,
-    p_in_reply_to: request.inReplyTo ?? null,
+    // `undefined` e não `null`, pela mesma razão do `receipts.ts`: são
+    // opcionais na função SQL, o cliente omite o que vem `undefined`, e o
+    // resultado no Postgres é o mesmo `NULL`. O `null` só compilava porque
+    // estas funções não existiam no `database.types.ts`.
+    p_draft_id: request.draftId ?? undefined,
+    p_in_reply_to: request.inReplyTo ?? undefined,
   });
 
   if (error) {

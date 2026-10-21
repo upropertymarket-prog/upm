@@ -2,8 +2,8 @@ import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./database.types";
-import type { AppUpdateRow, MailDatabase } from "./pending-types";
+import type { Database, Tables } from "./database.types";
+import { nullableArg } from "./rpc-args";
 
 /**
  * Atualizações — as novidades das apps (P10-07 · 04 §2.6 e §8.1.3)
@@ -27,12 +27,8 @@ import type { AppUpdateRow, MailDatabase } from "./pending-types";
 
 type AnySupabaseClient = SupabaseClient<Database>;
 
-/** A mesma costura de `mail.ts` e `signatures.ts`; sai com o `db:types` (D64). */
-function updateClient(client: AnySupabaseClient): SupabaseClient<MailDatabase> {
-  return client as unknown as SupabaseClient<MailDatabase>;
-}
-
-export type { AppUpdateRow };
+/** Do ficheiro gerado desde 21 out 2026 (D64): era um tipo à mão em `pending-types.ts`. */
+export type AppUpdateRow = Tables<"app_updates">;
 
 export const APP_UPDATE_STATUSES = ["draft", "scheduled", "published", "archived"] as const;
 export type AppUpdateStatus = (typeof APP_UPDATE_STATUSES)[number];
@@ -149,7 +145,7 @@ export const appUpdateSaveSchema = z.object({
 export type AppUpdateSaveInput = z.infer<typeof appUpdateSaveSchema>;
 
 export async function listAppUpdates(client: AnySupabaseClient): Promise<AppUpdateRow[]> {
-  const { data } = await updateClient(client)
+  const { data } = await client
     .from("app_updates")
     .select("*")
     .order("created_at", { ascending: false });
@@ -164,7 +160,7 @@ export async function listAppUpdates(client: AnySupabaseClient): Promise<AppUpda
  * são meia dúzia de novidades e uma leitura só.
  */
 export async function appUpdateReach(client: AnySupabaseClient): Promise<Record<string, number>> {
-  const { data, error } = await updateClient(client).rpc("app_update_reach");
+  const { data, error } = await client.rpc("app_update_reach");
   if (error || !Array.isArray(data)) return {};
 
   const reach: Record<string, number> = {};
@@ -176,17 +172,17 @@ export async function saveAppUpdate(
   client: AnySupabaseClient,
   input: AppUpdateSaveInput & { bodyHtml: string },
 ): Promise<string> {
-  const { data, error } = await updateClient(client).rpc("app_update_save", {
-    p_id: input.id ?? null,
+  const { data, error } = await client.rpc("app_update_save", {
+    p_id: nullableArg(input.id),
     p_version: input.version,
     p_title: input.title,
     p_body_html: input.bodyHtml,
     p_points: input.points,
-    p_image_path: input.imagePath ?? null,
+    p_image_path: nullableArg(input.imagePath),
     p_image_alt: input.imageAlt,
     p_audience: input.audience,
     p_delivery: input.delivery,
-    p_scheduled_for: input.scheduledFor ?? null,
+    p_scheduled_for: nullableArg(input.scheduledFor),
   });
 
   if (error) throw new Error(error.message);
@@ -194,17 +190,17 @@ export async function saveAppUpdate(
 }
 
 export async function publishAppUpdate(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await updateClient(client).rpc("app_update_publish", { p_id: id });
+  const { error } = await client.rpc("app_update_publish", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
 export async function archiveAppUpdate(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await updateClient(client).rpc("app_update_archive", { p_id: id });
+  const { error } = await client.rpc("app_update_archive", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
 export async function deleteAppUpdate(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await updateClient(client).rpc("app_update_delete", { p_id: id });
+  const { error } = await client.rpc("app_update_delete", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
@@ -233,7 +229,7 @@ export type AppUpdateForMe = {
  * nem a faixa aparecer sem conteúdo.
  */
 export async function appUpdatesForMe(client: AnySupabaseClient): Promise<AppUpdateForMe[]> {
-  const { data, error } = await updateClient(client).rpc("app_updates_for_me");
+  const { data, error } = await client.rpc("app_updates_for_me");
   if (error || !Array.isArray(data)) return [];
 
   return data.map((row) => ({
@@ -249,6 +245,6 @@ export async function appUpdatesForMe(client: AnySupabaseClient): Promise<AppUpd
 }
 
 export async function markAppUpdateSeen(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await updateClient(client).rpc("mark_app_update_seen", { p_update_id: id });
+  const { error } = await client.rpc("mark_app_update_seen", { p_update_id: id });
   if (error) throw new Error(error.message);
 }

@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@upm/db";
-import { asPendingDepartment } from "@upm/db/pending";
 
 /**
  * Dados do shell do Marketing (P10-07 · 07 §24.6)
@@ -47,8 +46,7 @@ export async function getMarketingShellData(
   ]);
 
   const profile = profileResult.data;
-  // `asPendingDepartment`: o enum gerado ainda não conhece `marketing` (D64).
-  const department = asPendingDepartment(staffResult.data?.department);
+  const department = staffResult.data?.department ?? null;
 
   return {
     userName: profile?.full_name?.trim() || user?.email || "—",

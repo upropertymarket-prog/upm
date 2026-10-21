@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import type { Enums, Json } from "@upm/db";
 
 import type { MailWorkerClient } from "./supabase.ts";
 
@@ -87,7 +88,16 @@ export function verifyResendSignature(
  * sozinho para entregue ou devolvido, e um recibo que não é um desfecho não
  * pertence a uma tabela de desfechos.
  */
-const TIPOS: Record<string, string> = {
+/**
+ * O tipo era `Record<string, string>` e passou a ser o enum (21 out 2026).
+ *
+ * `record_email_event` recebe um `email_event_type`, e com o valor em `string`
+ * qualquer palavra passava o compilador para ir morrer no Postgres. Só se viu
+ * agora porque o `database.types.ts` não tinha esta tabela nem esta função — o
+ * worker compilava contra tipos largos. Ver a nota de topo de
+ * `scripts/gate/check-canvas.mjs`: é o mesmo tipo de cegueira, noutro portão.
+ */
+const TIPOS: Record<string, Enums<"email_event_type">> = {
   "email.delivered": "delivered",
   "email.bounced": "bounced",
   "email.opened": "opened",
@@ -149,10 +159,15 @@ export async function recordResendEvent(
       p_message_ref: messageRef,
       p_recipient: destinatario,
       p_type: tipo,
-      p_url: parsed.data?.click?.link ?? null,
-      p_occurred_at: quando,
+      // `undefined` e não `null`: os três são opcionais na função SQL, e o
+      // cliente omite o que vem `undefined` em vez de mandar um `null`
+      // explícito. No Postgres dá no mesmo — ambos acabam em `NULL` — mas o
+      // contrato gerado pede `string | undefined`, e era aqui que o `null`
+      // passava sem ninguém ver.
+      p_url: parsed.data?.click?.link ?? undefined,
+      p_occurred_at: quando ?? undefined,
       // O corpo como veio, para quando a conta não bater.
-      p_payload: parsed as unknown,
+      p_payload: parsed as unknown as Json,
     });
 
     if (error) throw new Error(`Não foi possível registar o recibo: ${error.message}`);

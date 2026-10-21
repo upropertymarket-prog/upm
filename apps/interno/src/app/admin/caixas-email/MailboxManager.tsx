@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { Constants, type Enums } from "@upm/db";
 import { Button, Card, Drawer, Input, Select, StatusTag, Table } from "@upm/ui";
 import type { TableColumn } from "@upm/ui";
 
@@ -38,21 +39,35 @@ import type { MailboxActionResult, MailboxSaveInput } from "./actions";
  * recusá-los seria decidir pelo administrador.
  */
 
+/**
+ * A linha como o ecrã a quer: em camelCase e sem o `secret_id`.
+ *
+ * **Os campos de enum vêm dos tipos gerados desde 21 out 2026 (D64).** Estavam
+ * escritos à mão como uniões de literais, e o `department` tinha ficado atrás:
+ * faltava-lhe `marketing`, que entrou no enum a 14 out com a área do Marketing
+ * (`20261014120000`). Uma caixa do Marketing não era representável aqui — e o
+ * compilador não dizia nada, porque o `database.types.ts` também não conhecia
+ * o valor.
+ *
+ * Os outros três estavam certos e passam a ser derivados pela mesma razão: uma
+ * união de literais escrita à mão ao lado de um enum do Postgres é uma cópia
+ * que envelhece, e nenhuma destas envelheceu com aviso.
+ */
 export type MailboxRow = {
   id: string;
   address: string;
   displayName: string;
-  protocol: "imap" | "pop3";
+  protocol: Enums<"mail_protocol">;
   inHost: string;
   inPort: number;
-  inSecurity: "ssl_tls" | "starttls" | "none";
+  inSecurity: Enums<"mail_security">;
   smtpHost: string;
   smtpPort: number;
-  smtpSecurity: "ssl_tls" | "starttls" | "none";
+  smtpSecurity: Enums<"mail_security">;
   username: string;
-  department: "suporte" | "financeiro" | "moderacao" | "admin";
+  department: Enums<"staff_department">;
   ownerProfileId: string | null;
-  status: "active" | "paused" | "error";
+  status: Enums<"mailbox_status">;
   /** Derivado de `secret_id is not null` — nunca o segredo. */
   hasSecret: boolean;
   lastSyncAt: string | null;
@@ -85,8 +100,15 @@ const EMPTY: MailboxSaveInput = {
  * Só os valores — as etiquetas são chaves de tradução e por isso nascem dentro
  * do componente, onde o `useTranslations` existe.
  */
-const SECURITY_VALUES = ["ssl_tls", "starttls", "none"] as const;
-const DEPARTMENT_VALUES = ["suporte", "financeiro", "moderacao", "admin"] as const;
+const SECURITY_VALUES = Constants.public.Enums.mail_security;
+/**
+ * Do enum, e por isso com `marketing` desde 21 out 2026 (D64).
+ *
+ * A lista estava escrita à mão com quatro valores e o enum tem cinco desde
+ * 14 out (`20261014120000`, com a área do Marketing). O efeito era o
+ * departamento que mais e-mail manda ser o único que não podia ter caixa.
+ */
+const DEPARTMENT_VALUES = Constants.public.Enums.staff_department;
 
 const STATUS_TONE = {
   active: "active",

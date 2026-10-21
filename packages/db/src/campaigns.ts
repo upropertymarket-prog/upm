@@ -3,15 +3,8 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { campaignBlocksSchema, type CampaignBlock } from "./campaign-blocks";
-import type { Database } from "./database.types";
-import {
-  EMAIL_EVENT_TYPES,
-  type CampaignEmailRow,
-  type CampaignRow,
-  type EmailEventType,
-  type MailDatabase,
-  type ScheduledSendRow,
-} from "./pending-types";
+import { Constants, type Database, type Tables } from "./database.types";
+import { nullableArg } from "./rpc-args";
 
 /**
  * Campanhas — leitura, escrita e sanitização (P10-08 · 04 §2.6 · 05 §1.9)
@@ -50,13 +43,22 @@ import {
 
 type AnySupabaseClient = SupabaseClient<Database>;
 
-/** A mesma costura de `mail.ts`, `signatures.ts` e `updates.ts`; sai com o `db:types` (D64). */
-function campaignClient(client: AnySupabaseClient): SupabaseClient<MailDatabase> {
-  return client as unknown as SupabaseClient<MailDatabase>;
-}
-
-export type { CampaignEmailRow, CampaignRow, EmailEventType, ScheduledSendRow };
-export { EMAIL_EVENT_TYPES };
+/**
+ * As tabelas e o enum vêm do ficheiro gerado desde 21 out 2026 (D64 fechada).
+ *
+ * Estavam escritos à mão em `pending-types.ts` — e a costura
+ * `campaignClient()` existia só para casar o cliente da app com esse tipo.
+ * O `pnpm db:types` passou a conhecê-las; o tipo à mão deixou de ser
+ * necessário e tinha divergido do esquema real.
+ *
+ * `EMAIL_EVENT_TYPES` deriva do `Constants` gerado e não de uma lista escrita:
+ * uma lista de valores de enum à mão fica atrás do Postgres sem ninguém notar.
+ */
+export const EMAIL_EVENT_TYPES = Constants.public.Enums.email_event_type;
+export type EmailEventType = (typeof EMAIL_EVENT_TYPES)[number];
+export type CampaignRow = Tables<"campaigns">;
+export type CampaignEmailRow = Tables<"campaign_emails">;
+export type ScheduledSendRow = Tables<"scheduled_sends">;
 
 export const CAMPAIGN_AUDIENCES = [
   "all",
@@ -246,7 +248,7 @@ export const campaignScheduleSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export async function listCampaigns(client: AnySupabaseClient): Promise<CampaignRow[]> {
-  const { data } = await campaignClient(client)
+  const { data } = await client
     .from("campaigns")
     .select("*")
     .order("created_at", { ascending: false });
@@ -259,7 +261,7 @@ export async function listCampaignEmails(
   client: AnySupabaseClient,
   campaignId: string,
 ): Promise<CampaignEmailRow[]> {
-  const { data } = await campaignClient(client)
+  const { data } = await client
     .from("campaign_emails")
     .select("*")
     .eq("campaign_id", campaignId)
@@ -280,7 +282,7 @@ export async function campaignAudienceCount(
   client: AnySupabaseClient,
   audience: CampaignAudience,
 ): Promise<number | null> {
-  const { data, error } = await campaignClient(client).rpc("campaign_audience_count", {
+  const { data, error } = await client.rpc("campaign_audience_count", {
     p_audience: audience,
   });
 
@@ -292,7 +294,7 @@ export type CampaignSender = { id: string; address: string; displayName: string 
 
 /** As caixas activas como identidade de remetente (07 §24.6 #2). */
 export async function campaignSenderOptions(client: AnySupabaseClient): Promise<CampaignSender[]> {
-  const { data, error } = await campaignClient(client).rpc("campaign_sender_options");
+  const { data, error } = await client.rpc("campaign_sender_options");
   if (error || !Array.isArray(data)) return [];
 
   return data.map((row) => ({
@@ -307,7 +309,7 @@ export async function campaignSignatureHtml(
   client: AnySupabaseClient,
   mailboxId: string,
 ): Promise<string> {
-  const { data, error } = await campaignClient(client).rpc("mailbox_signature", {
+  const { data, error } = await client.rpc("mailbox_signature", {
     p_mailbox_id: mailboxId,
   });
 
@@ -323,11 +325,11 @@ export async function saveCampaign(
   client: AnySupabaseClient,
   input: CampaignSaveInput,
 ): Promise<string> {
-  const { data, error } = await campaignClient(client).rpc("campaign_save", {
-    p_id: input.id ?? null,
+  const { data, error } = await client.rpc("campaign_save", {
+    p_id: nullableArg(input.id),
     p_name: input.name,
     p_audience: input.audience,
-    p_from_mailbox_id: input.fromMailboxId ?? null,
+    p_from_mailbox_id: nullableArg(input.fromMailboxId),
     p_email_bg: input.emailBg,
   });
 
@@ -339,8 +341,8 @@ export async function saveCampaignEmail(
   client: AnySupabaseClient,
   input: CampaignEmailSaveInput,
 ): Promise<string> {
-  const { data, error } = await campaignClient(client).rpc("campaign_email_save", {
-    p_id: input.id ?? null,
+  const { data, error } = await client.rpc("campaign_email_save", {
+    p_id: nullableArg(input.id),
     p_campaign_id: input.campaignId,
     p_name: input.name,
     p_subject: input.subject,
@@ -356,7 +358,7 @@ export async function saveCampaignEmail(
 }
 
 export async function deleteCampaignEmail(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await campaignClient(client).rpc("campaign_email_delete", { p_id: id });
+  const { error } = await client.rpc("campaign_email_delete", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
@@ -365,7 +367,7 @@ export async function scheduleCampaign(
   id: string,
   at: string,
 ): Promise<void> {
-  const { error } = await campaignClient(client).rpc("campaign_schedule", {
+  const { error } = await client.rpc("campaign_schedule", {
     p_id: id,
     p_at: at,
   });
@@ -373,12 +375,12 @@ export async function scheduleCampaign(
 }
 
 export async function unscheduleCampaign(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await campaignClient(client).rpc("campaign_unschedule", { p_id: id });
+  const { error } = await client.rpc("campaign_unschedule", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
 export async function deleteCampaign(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await campaignClient(client).rpc("campaign_delete", { p_id: id });
+  const { error } = await client.rpc("campaign_delete", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
@@ -392,7 +394,7 @@ export async function deleteCampaign(client: AnySupabaseClient, id: string): Pro
  * (07 §24.6 #5).
  */
 export async function sendCampaignNow(client: AnySupabaseClient, id: string): Promise<number> {
-  const { data, error } = await campaignClient(client).rpc("campaign_send_now", { p_id: id });
+  const { data, error } = await client.rpc("campaign_send_now", { p_id: id });
   if (error) throw new Error(error.message);
   return typeof data === "number" ? data : 0;
 }
@@ -410,7 +412,7 @@ export async function latestScheduledSend(
   client: AnySupabaseClient,
   campaignId: string,
 ): Promise<ScheduledSendRow | null> {
-  const { data } = await campaignClient(client)
+  const { data } = await client
     .from("scheduled_sends")
     .select("*")
     .eq("kind", "campaign_email")
@@ -434,7 +436,7 @@ export async function campaignReceipts(
   client: AnySupabaseClient,
   campaignId: string,
 ): Promise<{ type: EmailEventType; total: number; people: number }[]> {
-  const { data, error } = await campaignClient(client).rpc("campaign_receipts", {
+  const { data, error } = await client.rpc("campaign_receipts", {
     p_campaign_id: campaignId,
   });
 
@@ -453,9 +455,7 @@ export async function campaignReceipts(
  * seria trazer endereços para a app sem razão nenhuma (07 §24.6 #5).
  */
 export async function countEmailEvents(client: AnySupabaseClient): Promise<number> {
-  const { count } = await campaignClient(client)
-    .from("email_events")
-    .select("id", { count: "exact", head: true });
+  const { count } = await client.from("email_events").select("id", { count: "exact", head: true });
 
   return count ?? 0;
 }
@@ -471,7 +471,7 @@ export async function unsubscribeByToken(
   client: AnySupabaseClient,
   token: string,
 ): Promise<boolean> {
-  const { data, error } = await campaignClient(client).rpc("campaign_unsubscribe", {
+  const { data, error } = await client.rpc("campaign_unsubscribe", {
     p_token: token,
   });
   if (error) return false;

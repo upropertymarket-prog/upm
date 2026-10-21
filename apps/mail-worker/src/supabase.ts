@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import type { Env } from "./env.ts";
-import type { MailDatabase } from "@upm/db/pending";
+import type { Database } from "@upm/db";
 
 /**
  * O cliente do worker — `service_role`, sem sessão e sem refresh.
@@ -10,15 +10,15 @@ import type { MailDatabase } from "@upm/db/pending";
  * nenhum: a chave é a identidade, e um refresh em background num processo de
  * longa duração só acrescenta uma coisa que pode falhar às três da manhã.
  */
-export type MailWorkerClient = SupabaseClient<MailDatabase>;
+export type MailWorkerClient = SupabaseClient<Database>;
 
 export function createServiceClient(env: Env): MailWorkerClient {
-  return createClient<MailDatabase>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  return createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
-export type MailboxRow = MailDatabase["public"]["Tables"]["mailboxes"]["Row"];
+export type MailboxRow = Database["public"]["Tables"]["mailboxes"]["Row"];
 
 /** As caixas que o worker tenta sincronizar: ativas e já com credencial. */
 export async function listSyncableMailboxes(client: MailWorkerClient): Promise<MailboxRow[]> {

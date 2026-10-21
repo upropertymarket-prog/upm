@@ -156,6 +156,104 @@ export type Database = {
         };
         Relationships: [];
       };
+      app_update_views: {
+        Row: {
+          id: string;
+          profile_id: string;
+          seen_at: string;
+          update_id: string;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          seen_at?: string;
+          update_id: string;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          seen_at?: string;
+          update_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "app_update_views_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "app_update_views_update_id_fkey";
+            columns: ["update_id"];
+            isOneToOne: false;
+            referencedRelation: "app_updates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      app_updates: {
+        Row: {
+          audience: Database["public"]["Enums"]["app_update_audience"];
+          body_html: string;
+          created_at: string;
+          created_by: string | null;
+          delivery: Database["public"]["Enums"]["app_update_delivery"];
+          id: string;
+          image_alt: string;
+          image_path: string | null;
+          points: string[];
+          published_at: string | null;
+          scheduled_for: string | null;
+          status: Database["public"]["Enums"]["app_update_status"];
+          title: string;
+          updated_at: string;
+          version: string;
+        };
+        Insert: {
+          audience?: Database["public"]["Enums"]["app_update_audience"];
+          body_html?: string;
+          created_at?: string;
+          created_by?: string | null;
+          delivery?: Database["public"]["Enums"]["app_update_delivery"];
+          id?: string;
+          image_alt?: string;
+          image_path?: string | null;
+          points?: string[];
+          published_at?: string | null;
+          scheduled_for?: string | null;
+          status?: Database["public"]["Enums"]["app_update_status"];
+          title: string;
+          updated_at?: string;
+          version?: string;
+        };
+        Update: {
+          audience?: Database["public"]["Enums"]["app_update_audience"];
+          body_html?: string;
+          created_at?: string;
+          created_by?: string | null;
+          delivery?: Database["public"]["Enums"]["app_update_delivery"];
+          id?: string;
+          image_alt?: string;
+          image_path?: string | null;
+          points?: string[];
+          published_at?: string | null;
+          scheduled_for?: string | null;
+          status?: Database["public"]["Enums"]["app_update_status"];
+          title?: string;
+          updated_at?: string;
+          version?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "app_updates_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -220,6 +318,201 @@ export type Database = {
           succeeded?: boolean;
         };
         Relationships: [];
+      };
+      campaign_emails: {
+        Row: {
+          blocks: Json;
+          campaign_id: string;
+          created_at: string;
+          delay: string;
+          id: string;
+          materialized_at: string | null;
+          name: string;
+          position: number;
+          preheader: string;
+          send_at: string | null;
+          subject: string;
+          updated_at: string;
+        };
+        Insert: {
+          blocks?: Json;
+          campaign_id: string;
+          created_at?: string;
+          delay?: string;
+          id?: string;
+          materialized_at?: string | null;
+          name?: string;
+          position: number;
+          preheader?: string;
+          send_at?: string | null;
+          subject?: string;
+          updated_at?: string;
+        };
+        Update: {
+          blocks?: Json;
+          campaign_id?: string;
+          created_at?: string;
+          delay?: string;
+          id?: string;
+          materialized_at?: string | null;
+          name?: string;
+          position?: number;
+          preheader?: string;
+          send_at?: string | null;
+          subject?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "campaign_emails_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "campaigns";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      campaign_recipients: {
+        Row: {
+          attempts: number;
+          campaign_email_id: string | null;
+          campaign_id: string;
+          clicked_at: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          last_error: string | null;
+          opened_at: string | null;
+          profile_id: string | null;
+          provider_message_id: string | null;
+          status: Database["public"]["Enums"]["campaign_recipient_status"];
+          unsubscribe_token: string;
+        };
+        Insert: {
+          attempts?: number;
+          campaign_email_id?: string | null;
+          campaign_id: string;
+          clicked_at?: string | null;
+          created_at?: string;
+          email: string;
+          id?: string;
+          last_error?: string | null;
+          opened_at?: string | null;
+          profile_id?: string | null;
+          provider_message_id?: string | null;
+          status?: Database["public"]["Enums"]["campaign_recipient_status"];
+          unsubscribe_token?: string;
+        };
+        Update: {
+          attempts?: number;
+          campaign_email_id?: string | null;
+          campaign_id?: string;
+          clicked_at?: string | null;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          last_error?: string | null;
+          opened_at?: string | null;
+          profile_id?: string | null;
+          provider_message_id?: string | null;
+          status?: Database["public"]["Enums"]["campaign_recipient_status"];
+          unsubscribe_token?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_email_id_fkey";
+            columns: ["campaign_email_id"];
+            isOneToOne: false;
+            referencedRelation: "campaign_emails";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "campaigns";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "campaign_recipients_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      campaigns: {
+        Row: {
+          audience: Database["public"]["Enums"]["campaign_audience"];
+          bounces: number;
+          clicks: number;
+          created_at: string;
+          created_by: string | null;
+          email_bg: string;
+          from_mailbox_id: string | null;
+          id: string;
+          name: string;
+          opens: number;
+          recipients: number;
+          scheduled_at: string | null;
+          sent_at: string | null;
+          status: Database["public"]["Enums"]["campaign_status"];
+          unsubscribes: number;
+          updated_at: string;
+        };
+        Insert: {
+          audience?: Database["public"]["Enums"]["campaign_audience"];
+          bounces?: number;
+          clicks?: number;
+          created_at?: string;
+          created_by?: string | null;
+          email_bg?: string;
+          from_mailbox_id?: string | null;
+          id?: string;
+          name: string;
+          opens?: number;
+          recipients?: number;
+          scheduled_at?: string | null;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["campaign_status"];
+          unsubscribes?: number;
+          updated_at?: string;
+        };
+        Update: {
+          audience?: Database["public"]["Enums"]["campaign_audience"];
+          bounces?: number;
+          clicks?: number;
+          created_at?: string;
+          created_by?: string | null;
+          email_bg?: string;
+          from_mailbox_id?: string | null;
+          id?: string;
+          name?: string;
+          opens?: number;
+          recipients?: number;
+          scheduled_at?: string | null;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["campaign_status"];
+          unsubscribes?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "campaigns_from_mailbox_id_fkey";
+            columns: ["from_mailbox_id"];
+            isOneToOne: false;
+            referencedRelation: "mailboxes";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       contract_shares: {
         Row: {
@@ -600,6 +893,119 @@ export type Database = {
             columns: ["actor_profile_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      email_events: {
+        Row: {
+          campaign_id: string | null;
+          created_at: string;
+          id: string;
+          message_ref: string;
+          occurred_at: string;
+          payload: Json;
+          recipient: string;
+          recipient_id: string | null;
+          type: Database["public"]["Enums"]["email_event_type"];
+          url: string | null;
+        };
+        Insert: {
+          campaign_id?: string | null;
+          created_at?: string;
+          id?: string;
+          message_ref: string;
+          occurred_at?: string;
+          payload?: Json;
+          recipient: string;
+          recipient_id?: string | null;
+          type: Database["public"]["Enums"]["email_event_type"];
+          url?: string | null;
+        };
+        Update: {
+          campaign_id?: string | null;
+          created_at?: string;
+          id?: string;
+          message_ref?: string;
+          occurred_at?: string;
+          payload?: Json;
+          recipient?: string;
+          recipient_id?: string | null;
+          type?: Database["public"]["Enums"]["email_event_type"];
+          url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "email_events_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "campaigns";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "email_events_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "campaign_recipients";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      email_signatures: {
+        Row: {
+          created_at: string;
+          html: string;
+          id: string;
+          mailbox_ids: string[];
+          name: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          html?: string;
+          id?: string;
+          mailbox_ids?: string[];
+          name: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          html?: string;
+          id?: string;
+          mailbox_ids?: string[];
+          name?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      email_suppressions: {
+        Row: {
+          campaign_id: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          reason: Database["public"]["Enums"]["suppression_reason"];
+        };
+        Insert: {
+          campaign_id?: string | null;
+          created_at?: string;
+          email: string;
+          id?: string;
+          reason: Database["public"]["Enums"]["suppression_reason"];
+        };
+        Update: {
+          campaign_id?: string | null;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          reason?: Database["public"]["Enums"]["suppression_reason"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "email_suppressions_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "campaigns";
             referencedColumns: ["id"];
           },
         ];
@@ -1055,6 +1461,179 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mail_labels: {
+        Row: {
+          color: string;
+          created_at: string;
+          id: string;
+          mailbox_id: string;
+          name: string;
+        };
+        Insert: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          mailbox_id: string;
+          name: string;
+        };
+        Update: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          mailbox_id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mail_labels_mailbox_id_fkey";
+            columns: ["mailbox_id"];
+            isOneToOne: false;
+            referencedRelation: "mailboxes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mail_messages: {
+        Row: {
+          attachments: Json;
+          bcc_addresses: string[];
+          cc_addresses: string[];
+          created_at: string;
+          folder: Database["public"]["Enums"]["mail_folder"];
+          from_address: string;
+          from_name: string;
+          html: string | null;
+          id: string;
+          in_reply_to: string | null;
+          is_read: boolean;
+          is_starred: boolean;
+          labels: string[];
+          mailbox_id: string;
+          message_id: string;
+          received_at: string;
+          sent_at: string | null;
+          subject: string;
+          text_body: string | null;
+          thread_id: string | null;
+          ticket_id: string | null;
+          to_addresses: string[];
+          updated_at: string;
+        };
+        Insert: {
+          attachments?: Json;
+          bcc_addresses?: string[];
+          cc_addresses?: string[];
+          created_at?: string;
+          folder?: Database["public"]["Enums"]["mail_folder"];
+          from_address?: string;
+          from_name?: string;
+          html?: string | null;
+          id?: string;
+          in_reply_to?: string | null;
+          is_read?: boolean;
+          is_starred?: boolean;
+          labels?: string[];
+          mailbox_id: string;
+          message_id: string;
+          received_at?: string;
+          sent_at?: string | null;
+          subject?: string;
+          text_body?: string | null;
+          thread_id?: string | null;
+          ticket_id?: string | null;
+          to_addresses?: string[];
+          updated_at?: string;
+        };
+        Update: {
+          attachments?: Json;
+          bcc_addresses?: string[];
+          cc_addresses?: string[];
+          created_at?: string;
+          folder?: Database["public"]["Enums"]["mail_folder"];
+          from_address?: string;
+          from_name?: string;
+          html?: string | null;
+          id?: string;
+          in_reply_to?: string | null;
+          is_read?: boolean;
+          is_starred?: boolean;
+          labels?: string[];
+          mailbox_id?: string;
+          message_id?: string;
+          received_at?: string;
+          sent_at?: string | null;
+          subject?: string;
+          text_body?: string | null;
+          thread_id?: string | null;
+          ticket_id?: string | null;
+          to_addresses?: string[];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mail_messages_mailbox_id_fkey";
+            columns: ["mailbox_id"];
+            isOneToOne: false;
+            referencedRelation: "mailboxes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mail_messages_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "mail_threads";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mail_messages_ticket_id_fkey";
+            columns: ["ticket_id"];
+            isOneToOne: false;
+            referencedRelation: "tickets";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mail_threads: {
+        Row: {
+          created_at: string;
+          id: string;
+          last_message_at: string;
+          mailbox_id: string;
+          message_count: number;
+          subject: string;
+          thread_key: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string;
+          mailbox_id: string;
+          message_count?: number;
+          subject?: string;
+          thread_key: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string;
+          mailbox_id?: string;
+          message_count?: number;
+          subject?: string;
+          thread_key?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mail_threads_mailbox_id_fkey";
+            columns: ["mailbox_id"];
+            isOneToOne: false;
+            referencedRelation: "mailboxes";
             referencedColumns: ["id"];
           },
         ];
@@ -1536,6 +2115,8 @@ export type Database = {
           full_name: string;
           id: string;
           locale: string;
+          marketing_consent: boolean;
+          marketing_consent_at: string | null;
           notification_prefs: Json;
           person_identity_id: string | null;
           phone: string | null;
@@ -1556,6 +2137,8 @@ export type Database = {
           full_name?: string;
           id: string;
           locale?: string;
+          marketing_consent?: boolean;
+          marketing_consent_at?: string | null;
           notification_prefs?: Json;
           person_identity_id?: string | null;
           phone?: string | null;
@@ -1576,6 +2159,8 @@ export type Database = {
           full_name?: string;
           id?: string;
           locale?: string;
+          marketing_consent?: boolean;
+          marketing_consent_at?: string | null;
           notification_prefs?: Json;
           person_identity_id?: string | null;
           phone?: string | null;
@@ -2099,6 +2684,56 @@ export type Database = {
           {
             foreignKeyName: "saved_properties_user_id_fkey";
             columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      scheduled_sends: {
+        Row: {
+          attempts: number;
+          created_at: string;
+          created_by: string | null;
+          fired_at: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["scheduled_send_kind"];
+          last_error: string | null;
+          ref_id: string;
+          send_at: string;
+          status: Database["public"]["Enums"]["scheduled_send_status"];
+          updated_at: string;
+        };
+        Insert: {
+          attempts?: number;
+          created_at?: string;
+          created_by?: string | null;
+          fired_at?: string | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["scheduled_send_kind"];
+          last_error?: string | null;
+          ref_id: string;
+          send_at: string;
+          status?: Database["public"]["Enums"]["scheduled_send_status"];
+          updated_at?: string;
+        };
+        Update: {
+          attempts?: number;
+          created_at?: string;
+          created_by?: string | null;
+          fired_at?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["scheduled_send_kind"];
+          last_error?: string | null;
+          ref_id?: string;
+          send_at?: string;
+          status?: Database["public"]["Enums"]["scheduled_send_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_sends_created_by_fkey";
+            columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -3639,6 +4274,45 @@ export type Database = {
         Args: { p_assigned_to: string; p_lead_id: string; p_status: string };
         Returns: undefined;
       };
+      app_update_archive: { Args: { p_id: string }; Returns: undefined };
+      app_update_delete: { Args: { p_id: string }; Returns: undefined };
+      app_update_publish: { Args: { p_id: string }; Returns: undefined };
+      app_update_reach: {
+        Args: never;
+        Returns: {
+          seen: number;
+          update_id: string;
+        }[];
+      };
+      app_update_save: {
+        Args: {
+          p_audience: Database["public"]["Enums"]["app_update_audience"];
+          p_body_html: string;
+          p_delivery: Database["public"]["Enums"]["app_update_delivery"];
+          p_id: string;
+          p_image_alt: string;
+          p_image_path: string;
+          p_points: string[];
+          p_scheduled_for: string;
+          p_title: string;
+          p_version: string;
+        };
+        Returns: string;
+      };
+      app_updates_for_me: {
+        Args: never;
+        Returns: {
+          body_html: string;
+          delivery: Database["public"]["Enums"]["app_update_delivery"];
+          id: string;
+          image_alt: string;
+          image_path: string;
+          points: string[];
+          published_at: string;
+          title: string;
+          version: string;
+        }[];
+      };
       apply_plan_downgrade: { Args: { p_profile_id: string }; Returns: number };
       archive_visit_request: { Args: { p_id: string }; Returns: undefined };
       at_limit_ratio: {
@@ -3660,6 +4334,95 @@ export type Database = {
           version: number;
         }[];
       };
+      campaign_advance_sequence: { Args: never; Returns: number };
+      campaign_audience_count: {
+        Args: { p_audience: Database["public"]["Enums"]["campaign_audience"] };
+        Returns: number;
+      };
+      campaign_blocks_are_safe: { Args: { p_blocks: Json }; Returns: boolean };
+      campaign_claim_recipients: {
+        Args: { p_limit?: number };
+        Returns: {
+          blocks: Json;
+          campaign_email_id: string;
+          campaign_id: string;
+          email: string;
+          email_bg: string;
+          from_mailbox_id: string;
+          preheader: string;
+          recipient_id: string;
+          subject: string;
+          unsubscribe_token: string;
+          var_apelido: string;
+          var_nome: string;
+          var_plano: string;
+        }[];
+      };
+      campaign_delete: { Args: { p_id: string }; Returns: undefined };
+      campaign_email_delete: { Args: { p_id: string }; Returns: undefined };
+      campaign_email_save: {
+        Args: {
+          p_blocks: Json;
+          p_campaign_id: string;
+          p_delay_days: number;
+          p_id: string;
+          p_name: string;
+          p_preheader: string;
+          p_subject: string;
+        };
+        Returns: string;
+      };
+      campaign_materialize_recipients: {
+        Args: { p_campaign_email_id: string };
+        Returns: number;
+      };
+      campaign_receipts: {
+        Args: { p_campaign_id: string };
+        Returns: {
+          pessoas: number;
+          total: number;
+          type: Database["public"]["Enums"]["email_event_type"];
+        }[];
+      };
+      campaign_recipient_failed: {
+        Args: { p_error: string; p_id: string };
+        Returns: undefined;
+      };
+      campaign_recipient_provider_id: {
+        Args: { p_id: string; p_provider_message_id: string };
+        Returns: undefined;
+      };
+      campaign_recipient_sent: { Args: { p_id: string }; Returns: undefined };
+      campaign_save: {
+        Args: {
+          p_audience: Database["public"]["Enums"]["campaign_audience"];
+          p_email_bg: string;
+          p_from_mailbox_id: string;
+          p_id: string;
+          p_name: string;
+        };
+        Returns: string;
+      };
+      campaign_schedule: {
+        Args: { p_at: string; p_id: string };
+        Returns: undefined;
+      };
+      campaign_send_now: { Args: { p_id: string }; Returns: number };
+      campaign_sender_options: {
+        Args: never;
+        Returns: {
+          address: string;
+          display_name: string;
+          id: string;
+        }[];
+      };
+      campaign_signature_html: {
+        Args: { p_campaign_email_id: string };
+        Returns: string;
+      };
+      campaign_start_sending: { Args: { p_id: string }; Returns: number };
+      campaign_unschedule: { Args: { p_id: string }; Returns: undefined };
+      campaign_unsubscribe: { Args: { p_token: string }; Returns: boolean };
       can_cancel_subscription: {
         Args: { p_subscription_id: string };
         Returns: Json;
@@ -3691,8 +4454,24 @@ export type Database = {
         Returns: number;
       };
       cloud_delete_file: { Args: { p_file_id: string }; Returns: undefined };
+      cloud_delete_staff_file: {
+        Args: { p_file_id: string };
+        Returns: undefined;
+      };
       cloud_empty_recycle_bin: { Args: never; Returns: number };
       cloud_limit_bytes: { Args: { p_profile_id: string }; Returns: number };
+      cloud_register_staff_file: {
+        Args: {
+          p_checksum: string;
+          p_folder_id?: string;
+          p_mime: string;
+          p_name: string;
+          p_size: number;
+          p_source?: Database["public"]["Enums"]["file_source"];
+          p_storage_path: string;
+        };
+        Returns: string;
+      };
       cloud_register_upload: {
         Args: {
           p_checksum: string;
@@ -3709,6 +4488,10 @@ export type Database = {
       cloud_restore_file_version: {
         Args: { p_file_id: string; p_version: number };
         Returns: number;
+      };
+      cloud_restore_staff_file: {
+        Args: { p_file_id: string };
+        Returns: undefined;
       };
       cloud_status: {
         Args: never;
@@ -3768,6 +4551,14 @@ export type Database = {
         };
         Returns: string;
       };
+      create_ticket_from_mail: {
+        Args: { p_message_id: string };
+        Returns: {
+          created: boolean;
+          id: string;
+          ref: string;
+        }[];
+      };
       current_legal_document: {
         Args: {
           p_kind: Database["public"]["Enums"]["legal_document_kind"];
@@ -3795,6 +4586,16 @@ export type Database = {
         Returns: string;
       };
       effective_limits: { Args: { p_profile_id: string }; Returns: Json };
+      email_signature_delete: { Args: { p_id: string }; Returns: undefined };
+      email_signature_save: {
+        Args: {
+          p_html: string;
+          p_id: string;
+          p_mailbox_ids: string[];
+          p_name: string;
+        };
+        Returns: string;
+      };
       ensure_property_folders: {
         Args: { p_profile_id: string };
         Returns: number;
@@ -3834,7 +4635,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_internal: { Args: never; Returns: boolean };
+      is_marketing: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
+      is_support: { Args: never; Returns: boolean };
       is_valid_pt_nif: { Args: { p_value: string }; Returns: boolean };
       listing_availability: {
         Args: { p_property_id: string };
@@ -3863,6 +4667,78 @@ export type Database = {
           p_action?: Database["public"]["Enums"]["document_action"];
           p_invoice_id: string;
         };
+        Returns: undefined;
+      };
+      mail_attachment_purged: {
+        Args: { p_message_id: string };
+        Returns: undefined;
+      };
+      mail_attachment_saved_to_cloud: {
+        Args: { p_file_id: string; p_index: number; p_message_id: string };
+        Returns: undefined;
+      };
+      mail_attachments_expired: {
+        Args: { p_limit?: number };
+        Returns: {
+          message_id: string;
+          paths: string[];
+        }[];
+      };
+      mail_discard_draft: { Args: { p_draft_id: string }; Returns: undefined };
+      mail_move: {
+        Args: {
+          p_folder: Database["public"]["Enums"]["mail_folder"];
+          p_message_id: string;
+        };
+        Returns: undefined;
+      };
+      mail_record_sent: {
+        Args: {
+          p_bcc: string[];
+          p_cc: string[];
+          p_draft_id?: string;
+          p_from_name?: string;
+          p_html: string;
+          p_in_reply_to?: string;
+          p_mailbox_id: string;
+          p_message_id: string;
+          p_subject: string;
+          p_text: string;
+          p_to: string[];
+        };
+        Returns: string;
+      };
+      mail_save_draft: {
+        Args: {
+          p_bcc?: string[];
+          p_cc?: string[];
+          p_draft_id?: string;
+          p_html?: string;
+          p_in_reply_to?: string;
+          p_mailbox_id: string;
+          p_subject?: string;
+          p_text?: string;
+          p_to?: string[];
+        };
+        Returns: string;
+      };
+      mail_set_flags: {
+        Args: {
+          p_is_read?: boolean;
+          p_is_starred?: boolean;
+          p_message_id: string;
+        };
+        Returns: undefined;
+      };
+      mail_set_labels: {
+        Args: { p_labels: string[]; p_message_id: string };
+        Returns: undefined;
+      };
+      mail_unread_count: { Args: never; Returns: number };
+      mailbox_credential: { Args: { p_mailbox_id: string }; Returns: string };
+      mailbox_signature: { Args: { p_mailbox_id: string }; Returns: string };
+      mark_app_update_seen: {
+        Args: { p_update_id: string };
         Returns: undefined;
       };
       mark_conversation_read: {
@@ -4086,6 +4962,7 @@ export type Database = {
         Args: { p_template_id: string };
         Returns: string;
       };
+      publish_due_app_updates: { Args: never; Returns: number };
       purge_cloud_recycle_bin: { Args: never; Returns: number };
       purge_document_access_log: { Args: never; Returns: number };
       purge_property_view_events: { Args: never; Returns: number };
@@ -4095,6 +4972,17 @@ export type Database = {
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;
+      };
+      record_email_event: {
+        Args: {
+          p_message_ref: string;
+          p_occurred_at?: string;
+          p_payload?: Json;
+          p_recipient: string;
+          p_type: Database["public"]["Enums"]["email_event_type"];
+          p_url?: string;
+        };
+        Returns: boolean;
       };
       record_personal_data_access: {
         Args: {
@@ -4199,6 +5087,10 @@ export type Database = {
           size: number;
         }[];
       };
+      resolve_signature_variables: {
+        Args: { p_html: string; p_mailbox_id: string };
+        Returns: string;
+      };
       revoke_address_grant: { Args: { p_grant_id: string }; Returns: undefined };
       revoke_contract_share: {
         Args: { p_share_id: string };
@@ -4224,6 +5116,7 @@ export type Database = {
         Args: { p_mailbox_id: string; p_password: string };
         Returns: undefined;
       };
+      scheduled_sends_run: { Args: { p_limit?: number }; Returns: number };
       seed_demo_site_analytics: { Args: { p_days?: number }; Returns: number };
       set_app_setting: {
         Args: { p_key: string; p_value: Json };
@@ -4308,6 +5201,7 @@ export type Database = {
           site_mode: string;
         }[];
       };
+      staff_cloud_folder: { Args: { p_name: string }; Returns: string };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
       submit_site_lead: {
@@ -4475,11 +5369,18 @@ export type Database = {
       };
     };
     Enums: {
+      app_update_audience: "all" | "owners" | "buyers";
+      app_update_delivery: "banner" | "next_login" | "mandatory";
+      app_update_status: "draft" | "scheduled" | "published" | "archived";
+      campaign_audience: "all" | "owners" | "buyers" | "site_leads_pre" | "site_leads_post";
+      campaign_recipient_status:
+        "pending" | "sending" | "sent" | "delivered" | "bounced" | "failed";
+      campaign_status: "draft" | "scheduled" | "sending" | "sent";
       cloud_scope: "personal" | "staff";
       contract_kind: "sale" | "rent";
       contract_status: "draft" | "shared" | "awaiting_signature" | "signed" | "completed";
       contract_template_status: "draft" | "published" | "archived";
-      delivery_status: "queued" | "sent" | "failed" | "cancelled";
+      delivery_status: "queued" | "sent" | "failed" | "cancelled" | "sending";
       document_action:
         "view" | "download" | "export_pdf" | "print" | "share_created" | "share_revoked";
       document_subject:
@@ -4489,12 +5390,28 @@ export type Database = {
         | "contract_template"
         | "invoice"
         | "chat_attachment";
-      file_source: "upload" | "property_document" | "message_attachment" | "contract" | "invoice";
+      email_event_type:
+        | "delivered"
+        | "bounced"
+        | "opened"
+        | "read_receipt"
+        | "clicked"
+        | "unsubscribed"
+        | "complained";
+      file_source:
+        | "upload"
+        | "property_document"
+        | "message_attachment"
+        | "contract"
+        | "invoice"
+        | "mail_attachment"
+        | "campaign_report";
       folder_kind: "user" | "property" | "property_documents";
       lead_outcome: "won" | "lost";
       lead_stage: "new" | "contacted" | "visit" | "closed";
       legal_document_kind: "terms" | "privacy" | "cookies" | "data_protection";
       legal_review_state: "draft_pending_legal_review" | "legally_reviewed";
+      mail_folder: "inbox" | "sent" | "drafts" | "archive";
       mail_protocol: "imap" | "pop3";
       mail_security: "ssl_tls" | "starttls" | "none";
       mailbox_status: "active" | "paused" | "error";
@@ -4510,12 +5427,15 @@ export type Database = {
         | "sold"
         | "rejected"
         | "archived";
+      scheduled_send_kind: "direct" | "campaign_email";
+      scheduled_send_status: "scheduled" | "sent" | "cancelled" | "failed";
       share_permission: "view" | "download";
-      staff_department: "suporte" | "financeiro" | "moderacao" | "admin";
+      staff_department: "suporte" | "financeiro" | "moderacao" | "admin" | "marketing";
+      suppression_reason: "unsubscribe" | "bounce" | "complaint";
       ticket_origin: "auto" | "report" | "both";
       ticket_severity: "critical" | "high" | "medium" | "low";
       ticket_status: "new" | "triage" | "in_progress" | "awaiting_confirmation" | "closed";
-      user_role: "buyer" | "owner" | "admin" | "support";
+      user_role: "buyer" | "owner" | "admin" | "support" | "marketing";
       visit_status: "pending" | "accepted" | "rescheduled" | "cancelled" | "completed" | "archived";
     };
     CompositeTypes: {
@@ -5140,11 +6060,17 @@ export const Constants = {
   },
   public: {
     Enums: {
+      app_update_audience: ["all", "owners", "buyers"],
+      app_update_delivery: ["banner", "next_login", "mandatory"],
+      app_update_status: ["draft", "scheduled", "published", "archived"],
+      campaign_audience: ["all", "owners", "buyers", "site_leads_pre", "site_leads_post"],
+      campaign_recipient_status: ["pending", "sending", "sent", "delivered", "bounced", "failed"],
+      campaign_status: ["draft", "scheduled", "sending", "sent"],
       cloud_scope: ["personal", "staff"],
       contract_kind: ["sale", "rent"],
       contract_status: ["draft", "shared", "awaiting_signature", "signed", "completed"],
       contract_template_status: ["draft", "published", "archived"],
-      delivery_status: ["queued", "sent", "failed", "cancelled"],
+      delivery_status: ["queued", "sent", "failed", "cancelled", "sending"],
       document_action: [
         "view",
         "download",
@@ -5161,12 +6087,30 @@ export const Constants = {
         "invoice",
         "chat_attachment",
       ],
-      file_source: ["upload", "property_document", "message_attachment", "contract", "invoice"],
+      email_event_type: [
+        "delivered",
+        "bounced",
+        "opened",
+        "read_receipt",
+        "clicked",
+        "unsubscribed",
+        "complained",
+      ],
+      file_source: [
+        "upload",
+        "property_document",
+        "message_attachment",
+        "contract",
+        "invoice",
+        "mail_attachment",
+        "campaign_report",
+      ],
       folder_kind: ["user", "property", "property_documents"],
       lead_outcome: ["won", "lost"],
       lead_stage: ["new", "contacted", "visit", "closed"],
       legal_document_kind: ["terms", "privacy", "cookies", "data_protection"],
       legal_review_state: ["draft_pending_legal_review", "legally_reviewed"],
+      mail_folder: ["inbox", "sent", "drafts", "archive"],
       mail_protocol: ["imap", "pop3"],
       mail_security: ["ssl_tls", "starttls", "none"],
       mailbox_status: ["active", "paused", "error"],
@@ -5183,12 +6127,15 @@ export const Constants = {
         "rejected",
         "archived",
       ],
+      scheduled_send_kind: ["direct", "campaign_email"],
+      scheduled_send_status: ["scheduled", "sent", "cancelled", "failed"],
       share_permission: ["view", "download"],
-      staff_department: ["suporte", "financeiro", "moderacao", "admin"],
+      staff_department: ["suporte", "financeiro", "moderacao", "admin", "marketing"],
+      suppression_reason: ["unsubscribe", "bounce", "complaint"],
       ticket_origin: ["auto", "report", "both"],
       ticket_severity: ["critical", "high", "medium", "low"],
       ticket_status: ["new", "triage", "in_progress", "awaiting_confirmation", "closed"],
-      user_role: ["buyer", "owner", "admin", "support"],
+      user_role: ["buyer", "owner", "admin", "support", "marketing"],
       visit_status: ["pending", "accepted", "rescheduled", "cancelled", "completed", "archived"],
     },
   },

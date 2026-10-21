@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@upm/db/server";
-import { asPendingRole } from "@upm/db/pending";
 
 /**
  * A raiz de `interno` — encaminha cada papel para a sua área
@@ -30,7 +29,7 @@ export default async function InternalIndexPage() {
   // Os dois `as never` são o que o `typedRoutes` obriga enquanto as rotas não
   // estiverem no mapa gerado — a mesma nota que está no `InternalChrome`, que
   // usa `<a>` em vez de `next/link` pela mesma razão.
-  const role = asPendingRole(profile?.role);
+  const role = profile?.role ?? null;
   if (role === "support") redirect("/suporte/email" as never);
   if (role === "marketing") redirect("/marketing/atualizacoes" as never);
   redirect("/admin/painel");

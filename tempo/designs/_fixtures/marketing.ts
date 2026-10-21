@@ -1,11 +1,11 @@
 import type { CampaignBlock } from "../../../packages/db/src/campaign-blocks";
 import type { CampaignSender } from "../../../packages/db/src/campaigns";
+import type { AppUpdateRow } from "../../../packages/db/src/updates";
 import type {
-  AppUpdateRow,
   CampaignEmailRow,
   CampaignRow,
   ScheduledSendRow,
-} from "../../../packages/db/src/pending-types";
+} from "../../../packages/db/src/campaigns";
 import type { StaffFile, StaffFolder } from "../../../apps/interno/src/lib/staff-cloud";
 
 /**

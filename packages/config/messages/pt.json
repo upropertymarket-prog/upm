@@ -1999,7 +1999,8 @@
         "suporte": "Suporte",
         "financeiro": "Financeiro",
         "moderacao": "Moderação",
-        "admin": "Administração"
+        "admin": "Administração",
+        "marketing": "Marketing"
       },
       "address": "Endereço",
       "addressPlaceholder": "suporte@upropertymarket.pt",

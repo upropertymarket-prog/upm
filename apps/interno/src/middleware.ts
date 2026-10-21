@@ -8,8 +8,6 @@ import {
   isIpAllowed,
 } from "@upm/config/security";
 
-import { asPendingRole } from "@upm/db/pending";
-
 import { createMiddlewareClient } from "./lib/supabase-middleware";
 
 /**
@@ -89,9 +87,7 @@ export async function middleware(request: NextRequest) {
     .select("role, status")
     .eq("id", user.id)
     .single();
-
-  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
-  const role = asPendingRole(profile?.role);
+  const role = profile?.role ?? null;
   if (profile?.status === "suspended") {
     return signOutAndRedirectToLogin(request, true);
   }

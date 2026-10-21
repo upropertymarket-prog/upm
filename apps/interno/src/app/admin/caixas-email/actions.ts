@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Constants } from "@upm/db";
 import { createClient } from "@upm/db/server";
 import { writeAuditLog } from "@upm/db/audit";
 
@@ -41,9 +42,10 @@ const saveSchema = z.object({
   smtpPort: z.coerce.number().int().min(1).max(65535),
   smtpSecurity: securitySchema,
   username: z.string().trim().min(1, "O utilizador é obrigatório.").max(320),
-  department: z.enum(["suporte", "financeiro", "moderacao", "admin"]),
+  // Do enum gerado: a lista à mão não tinha `marketing` (D64, 21 out 2026).
+  department: z.enum(Constants.public.Enums.staff_department),
   ownerProfileId: z.string().uuid().nullable().optional(),
-  status: z.enum(["active", "paused", "error"]).optional(),
+  status: z.enum(Constants.public.Enums.mailbox_status).optional(),
 });
 
 const secretSchema = z.object({

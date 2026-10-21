@@ -1,4 +1,4 @@
-import type { CampaignRow } from "./pending-types";
+import type { CampaignRow } from "./campaigns";
 
 /**
  * O relatório das campanhas em CSV (P10-10 · 04 §2.6)

@@ -6,7 +6,6 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
-import { asPendingRole } from "@upm/db/pending";
 import {
   campaignAudienceCount,
   campaignEmailSaveSchema,
@@ -69,8 +68,7 @@ async function getMarketingClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
-  return asPendingRole(profile?.role) === "marketing" ? supabase : null;
+  return (profile?.role ?? null) === "marketing" ? supabase : null;
 }
 
 /**

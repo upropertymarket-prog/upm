@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
-import { asPendingRole } from "@upm/db/pending";
 import { registerStaffCloudFile, staffCloudFolder } from "@upm/db/cloud";
 import { listCampaigns } from "@upm/db/campaigns";
 import { campaignReportCsv, type CampaignReportLabels } from "@upm/db/campaign-report";
@@ -47,9 +46,7 @@ async function getMarketingClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-
-  // `asPendingRole`: o enum gerado ainda não conhece `marketing` (D64).
-  return asPendingRole(profile?.role) === "marketing" ? { supabase, userId: user.id } : null;
+  return (profile?.role ?? null) === "marketing" ? { supabase, userId: user.id } : null;
 }
 
 /**

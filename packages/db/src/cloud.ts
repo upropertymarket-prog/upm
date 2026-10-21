@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./database.types";
-import type { MailDatabase } from "./pending-types";
+import { Constants, type Database } from "./database.types";
 
 /**
  * Cloud e contratos (Fase 6) — 05 §6.4 e §6.5, 07 §13, 07 §19.
@@ -44,13 +43,20 @@ export function sniffMime(bytes: Uint8Array): AllowedFileMime | null {
   return null;
 }
 
-export const FILE_SOURCES = [
-  "upload",
-  "property_document",
-  "message_attachment",
-  "contract",
-  "invoice",
-] as const;
+/**
+ * As origens de um ficheiro, do enum `file_source` — e não de uma lista à mão.
+ *
+ * Estava escrita aqui com cinco valores, e o Postgres tem sete: `mail_attachment`
+ * entrou com os anexos do correio (`20261014100000`) e `campaign_report` com os
+ * relatórios de campanha (`20261015200000`). A lista ficou atrás duas vezes sem
+ * dar um único sinal — e um `FileSource` incompleto é um tipo que diz que um
+ * valor real é impossível.
+ *
+ * Derivada do `Constants` gerado desde 21 out 2026 (D64). É o mesmo princípio
+ * do `MAIL_FOLDERS` e do `EMAIL_EVENT_TYPES`: a única lista de valores de enum
+ * que não envelhece é a que o Postgres escreve.
+ */
+export const FILE_SOURCES = Constants.public.Enums.file_source;
 export type FileSource = (typeof FILE_SOURCES)[number];
 
 // ---------------------------------------------------------------------------
@@ -227,10 +233,9 @@ export const cloudStaffFileSchema = z.object({
  */
 export async function registerStaffCloudFile(
   client: SupabaseClient<Database>,
-  input: z.infer<typeof cloudStaffFileSchema> & { source: string },
+  input: z.infer<typeof cloudStaffFileSchema> & { source: FileSource },
 ): Promise<string> {
-  // A mesma costura de `mail.ts` e `campaigns.ts`: sai com o `db:types` (D64).
-  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const staff = client;
 
   const { data, error } = await staff.rpc("cloud_register_staff_file", {
     p_name: input.name,
@@ -239,7 +244,7 @@ export async function registerStaffCloudFile(
     p_storage_path: input.storagePath,
     p_checksum: input.checksum,
     p_source: input.source,
-    p_folder_id: input.folderId ?? null,
+    p_folder_id: input.folderId ?? undefined,
   });
 
   if (error) throw new Error(error.message);
@@ -249,15 +254,18 @@ export async function registerStaffCloudFile(
 /**
  * As outras três portas da Cloud interna (P10-10).
  *
- * A costura com `MailDatabase` fica aqui e não em cada chamador, que é a lição
- * de D52 e a razão de `pending-types.ts` existir: os `as` dispersos sobrevivem
- * à regeneração que os torna desnecessários, porque ninguém sabe onde estão.
+ * Tinham um `as unknown as SupabaseClient<MailDatabase>` por função, porque o
+ * `database.types.ts` não conhecia estas funções SQL. Saíram todos a 21 out
+ * 2026 com a D64 — e a aposta de D52 pagou-se: os casts estavam **com nome e
+ * num sítio só**, por isso foi possível encontrá-los todos no dia em que
+ * deixaram de ser necessários. Espalhados em `as never` pelos chamadores, teriam
+ * sobrevivido à regeneração que os tornou inúteis.
  */
 export async function staffCloudFolder(
   client: SupabaseClient<Database>,
   name: string,
 ): Promise<string> {
-  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const staff = client;
   const { data, error } = await staff.rpc("staff_cloud_folder", { p_name: name });
   if (error) throw new Error(error.message);
   return String(data);
@@ -267,7 +275,7 @@ export async function deleteStaffCloudFile(
   client: SupabaseClient<Database>,
   fileId: string,
 ): Promise<void> {
-  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const staff = client;
   const { error } = await staff.rpc("cloud_delete_staff_file", { p_file_id: fileId });
   if (error) throw new Error(error.message);
 }
@@ -276,7 +284,7 @@ export async function restoreStaffCloudFile(
   client: SupabaseClient<Database>,
   fileId: string,
 ): Promise<void> {
-  const staff = client as unknown as SupabaseClient<MailDatabase>;
+  const staff = client;
   const { error } = await staff.rpc("cloud_restore_staff_file", { p_file_id: fileId });
   if (error) throw new Error(error.message);
 }
