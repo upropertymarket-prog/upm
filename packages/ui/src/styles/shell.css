@@ -342,7 +342,12 @@
   background: var(--accent-solid);
   color: var(--on-solid);
   font-size: var(--fs-body-lg);
-  font-weight: var(--fw-black);
+  /* Medium e não black (22 out 2026, pedido do cliente): duas letras em 800
+     sobre o sólido de marca ficam com mais peso visual do que o nome que estão
+     ao lado de identificar — o avatar passa a gritar mais alto do que a pessoa.
+     Em 500 continuam legíveis no contraste de `--on-solid` sobre
+     `--accent-solid` e deixam de competir. */
+  font-weight: var(--fw-medium);
 }
 
 .upm-avatar--lg {

@@ -1821,9 +1821,6 @@ export type Database = {
           last_error: string | null;
           notification_id: string | null;
           payload: Json;
-          // À MÃO, até `20261021110000_lead_confirmation_delivery.sql` subir:
-          // `profile_id` deixou de ser `not null` (quem se pré-inscreve não tem
-          // conta). CADA `pnpm db:types` apaga estas três linhas — repor.
           profile_id: string | null;
           recipient: string;
           sent_at: string | null;
@@ -5259,18 +5256,6 @@ export type Database = {
         }[];
       };
       staff_cloud_folder: { Args: { p_name: string }; Returns: string };
-      template_delete: { Args: { p_id: string }; Returns: undefined };
-      template_save: {
-        Args: {
-          p_body_html: string;
-          p_category: Database["public"]["Enums"]["message_template_category"];
-          p_id: string;
-          p_is_active: boolean;
-          p_name: string;
-          p_subject: string;
-        };
-        Returns: string;
-      };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
       submit_site_lead: {
@@ -5384,6 +5369,18 @@ export type Database = {
           viewport: string;
         }[];
       };
+      template_delete: { Args: { p_id: string }; Returns: undefined };
+      template_save: {
+        Args: {
+          p_body_html: string;
+          p_category: Database["public"]["Enums"]["message_template_category"];
+          p_id: string;
+          p_is_active: boolean;
+          p_name: string;
+          p_subject: string;
+        };
+        Returns: string;
+      };
       terms_acceptance_status: {
         Args: { p_locale?: string };
         Returns: {
@@ -5483,8 +5480,8 @@ export type Database = {
       mail_folder: "inbox" | "sent" | "drafts" | "archive";
       mail_protocol: "imap" | "pop3";
       mail_security: "ssl_tls" | "starttls" | "none";
-      message_template_category: "lead" | "property" | "visit" | "contract" | "billing" | "support";
       mailbox_status: "active" | "paused" | "error";
+      message_template_category: "lead" | "property" | "visit" | "contract" | "billing" | "support";
       plan_audience: "owner" | "buyer" | "both";
       profile_status: "pending" | "active" | "suspended" | "deleted";
       property_deal: "sale" | "rent";
@@ -6183,8 +6180,8 @@ export const Constants = {
       mail_folder: ["inbox", "sent", "drafts", "archive"],
       mail_protocol: ["imap", "pop3"],
       mail_security: ["ssl_tls", "starttls", "none"],
-      message_template_category: ["lead", "property", "visit", "contract", "billing", "support"],
       mailbox_status: ["active", "paused", "error"],
+      message_template_category: ["lead", "property", "visit", "contract", "billing", "support"],
       plan_audience: ["owner", "buyer", "both"],
       profile_status: ["pending", "active", "suspended", "deleted"],
       property_deal: ["sale", "rent"],

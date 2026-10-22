@@ -109,7 +109,9 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontWeight: "var(--fw-black)",
+              // Medium, igual ao `.upm-avatar` da barra lateral: este círculo é
+              // uma cópia à mão dele e tem de pesar o mesmo.
+              fontWeight: "var(--fw-medium)",
               flex: "none",
             }}
           >
