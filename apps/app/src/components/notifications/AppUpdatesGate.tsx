@@ -4,7 +4,23 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AppUpdatesModal, appUpdatesLabels, type AppUpdate } from "@upm/ui";
 
-import { acknowledgeAppUpdate, myAppUpdates } from "../../app/actions/updates";
+/**
+ * **`app/actions/updates` entra por `import()`, nunca no topo** (22 out 2026).
+ *
+ * É um módulo `"use server"` e importa `next/headers`. Este componente é
+ * montado pelo `AppChrome`, que envolve todos os ecrãs da app, por isso um
+ * `import` estático aqui arrastava o `next/headers` para o pacote do browser —
+ * e no canvas, que é um host Vite sem compilador do Next, o módulo corre a
+ * sério e atira `ReferenceError: process is not defined`.
+ *
+ * As storyboards passam `appUpdates={false}` e este componente **nem monta**,
+ * mas isso não bastava: o que parte não é a renderização, é o `import`. Um
+ * módulo no grafo é avaliado ainda que ninguém o use.
+ *
+ * Ver `server-actions-fora-do-grafo-do-canvas` e o `AppChrome`, que levou a
+ * mesma correção nos seus dois caminhos.
+ */
+const updatesActions = () => import("../../app/actions/updates");
 
 /**
  * A porta das novidades (P10-07 · 04 §8.1.3)
@@ -37,12 +53,14 @@ export function AppUpdatesGate() {
 
   useEffect(() => {
     let alive = true;
-    void myAppUpdates().then((rows) => {
-      // A resposta pode chegar depois de o componente sair do ecrã (uma
-      // navegação rápida), e escrever estado aí é um aviso do React e nada mais
-      // — mas é um aviso que alguém vai perseguir daqui a seis meses.
-      if (alive) setUpdates(rows);
-    });
+    void updatesActions()
+      .then(({ myAppUpdates }) => myAppUpdates())
+      .then((rows) => {
+        // A resposta pode chegar depois de o componente sair do ecrã (uma
+        // navegação rápida), e escrever estado aí é um aviso do React e nada
+        // mais — mas é um aviso que alguém vai perseguir daqui a seis meses.
+        if (alive) setUpdates(rows);
+      });
     return () => {
       alive = false;
     };
@@ -64,6 +82,7 @@ export function AppUpdatesGate() {
       labels={appUpdatesLabels(t)}
       openOnMount={openOnMount}
       onAcknowledge={async (id) => {
+        const { acknowledgeAppUpdate } = await updatesActions();
         await acknowledgeAppUpdate(id);
       }}
     />

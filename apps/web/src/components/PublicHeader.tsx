@@ -1,12 +1,13 @@
 "use client";
 
-import { Link, useRouter, usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Brand, LanguageMenu, ThemeToggle } from "@upm/ui";
 import { LOCALES } from "@upm/config";
 
 import { NAV_ANCHOR_IDS } from "../lib/site-content";
+import { useCanvasSafeRouter } from "@/lib/useCanvasSafeRouter";
 
 /**
  * Cabeçalho do site público (P1-03 · P1-05 · completado em P2-01)
@@ -64,7 +65,8 @@ export function PublicHeader({
   anchors?: "none" | "same-page" | "home";
 }) {
   const t = useTranslations();
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do next-intl atira.
+  const router = useCanvasSafeRouter();
   const pathname = usePathname();
   const params = useParams();
   const ctaHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
@@ -93,7 +95,7 @@ export function PublicHeader({
      * `replace` e não `push`: trocar de idioma não é um passo no histórico, é a
      * mesma página noutra língua.
      */
-    router.replace(
+    router?.replace(
       // @ts-expect-error -- ver acima: `pathname` e `params` são genéricos aqui.
       { pathname, params },
       { locale: next as (typeof LOCALES)[number] },

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Archive } from "lucide-react";
 import { Button, Modal } from "@upm/ui";
+import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 
 export type ArchivePropertyAction = (propertyId: string) => Promise<{ error?: string }>;
 
@@ -38,7 +38,8 @@ export function ArchivePropertyButton({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const t = useTranslations("myProperties.archive");
   const tc = useTranslations("common");
 
@@ -51,7 +52,7 @@ export function ArchivePropertyButton({
         return;
       }
       setOpen(false);
-      router.refresh();
+      router?.refresh();
     });
   };
 

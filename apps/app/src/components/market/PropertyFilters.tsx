@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { Route } from "next";
 import { Button, Input, Select } from "@upm/ui";
 import { DEALS, PROPERTY_TYPES, TYPOLOGIES } from "@upm/db/properties";
+import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 
 export type PropertyFiltersValue = {
   deal?: string;
@@ -33,7 +34,8 @@ export function PropertyFilters({
   /** Alternativa ao `router.push`, para reutilizar os campos fora do Market (Alertas). */
   onApply?: (value: PropertyFiltersValue) => void;
 }) {
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("market.filters");
   // As etiquetas de negócio nascem aqui e não numa constante de módulo: uma
@@ -89,7 +91,7 @@ export function PropertyFilters({
     if (value.price_max_cents) params.set("preco_max", value.price_max_cents);
     if (value.city) params.set("cidade", value.city);
     const query = params.toString();
-    router.push((query ? `${basePath}?${query}` : basePath) as Route);
+    router?.push((query ? `${basePath}?${query}` : basePath) as Route);
   };
 
   return (

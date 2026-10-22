@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Bath, BedDouble, CalendarDays, Layers, Ruler, Zap } from "lucide-react";
@@ -23,6 +22,28 @@ import { PropertyCard, type PropertyCardData } from "./PropertyCard";
  *
  * `actions` é um buraco de propósito: guardar e contactar são Server Actions,
  * que vivem na página. Aqui só se reserva o lugar onde eles entram.
+ *
+ * ---------------------------------------------------------------------------
+ * A GALERIA USA `<img>` E NÃO `next/image` (22 out 2026)
+ * ---------------------------------------------------------------------------
+ * As duas chamadas que aqui estavam passavam **`unoptimized`**, e não há bloco
+ * `images` no `next.config.ts`. Ou seja: o otimizador já estava desligado, e o
+ * `next/image` só servia de atalho de layout — `fill` para preencher o
+ * contentor e `objectFit` por `style`. Não dava nada que um `<img>` posicionado
+ * não dê, e o `sizes` que acompanhava só conta para o `srcset` que o otimizador
+ * desligado nunca gerou.
+ *
+ * O que dava era um defeito, e grande: `next/image` lê `process` no topo do seu
+ * módulo de cliente. No canvas — host **Vite**, sem compilador do Next — isso
+ * corre a sério e atira `ReferenceError: process is not defined`. Como o
+ * `index.canvas.tsx` importa todas as storyboards do canvas, um único módulo
+ * assim deixava em branco **as 24 storyboards do `06 - proprietario`**, não só
+ * as duas do Detalhe. Medido no host: `06/Painel` ficava com 17 elementos e
+ * zero texto, e o erro nem aparecia na consola — o host engole-o na fronteira
+ * de erro do import.
+ *
+ * Foi este o último dos quatro sintomas da passagem do sidecar a Vite, e o
+ * único que não tinha nada a ver com Server Actions nem com o router.
  */
 
 export type PropertyDetailData = {
@@ -135,13 +156,23 @@ export function PropertyDetail({
                   borderRadius: 16,
                 }}
               >
-                <Image
+                {/* `fill` do next/image era isto: absoluto a preencher o
+                    contentor, que já é `position: relative`. */}
+                {/* eslint-disable-next-line @next/next/no-img-element --
+                    o `next/image` daqui passava `unoptimized`: o aviso recomenda
+                    uma otimização que nunca esteve ligada. Ver a nota de topo. */}
+                <img
                   src={photos[0]}
                   alt=""
-                  fill
-                  unoptimized
-                  sizes="(max-width: 900px) 100vw, 70vw"
-                  style={{ objectFit: "cover" }}
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
                 />
               </div>
             ) : (
@@ -166,13 +197,21 @@ export function PropertyDetail({
                     borderRadius: 10,
                   }}
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element --
+                    o `next/image` daqui passava `unoptimized`: o aviso recomenda
+                    uma otimização que nunca esteve ligada. Ver a nota de topo. */}
+                  <img
                     src={url}
                     alt=""
-                    fill
-                    unoptimized
-                    sizes="120px"
-                    style={{ objectFit: "cover" }}
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 </div>
               ))}

@@ -15,8 +15,6 @@ import { LOCALES } from "@upm/config";
 import { navFor } from "../lib/navigation";
 import { AppUpdatesGate } from "./notifications/AppUpdatesGate";
 import { useNotifications } from "./notifications/useNotifications";
-import { submitProblemReport } from "../app/actions/support";
-import { signOut } from "../app/actions/auth";
 
 export type AppChromeProps = {
   role: "buyer" | "owner";
@@ -121,7 +119,25 @@ export function AppChrome({
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
         onReport: () => setReportOpen(true),
-        onSignOut: () => void signOut(),
+        /**
+         * A ação entra **ao clicar**, e não no topo do módulo (22 out 2026).
+         * =================================================================
+         * `app/actions/auth.ts` é `"use server"` e importa `next/headers`. Um
+         * `import` estático daqui — de um componente `"use client"` que
+         * envolve todos os ecrãs da app — arrastava o `next/headers` para o
+         * pacote do browser. No Next isso resolve-se por magia do compilador;
+         * **no canvas não há compilador do Next**, e o módulo corre a sério:
+         * `ReferenceError: process is not defined`, e as storyboards com
+         * `AppChrome` ficam em branco. Eram onze, em três canvases — todo o
+         * `06 - proprietario`, mais `02 - autenticacao` e `07 - legal`.
+         *
+         * Medido antes e depois no host do canvas: `06/Painel` tinha 17
+         * elementos e zero texto; com isto, renderiza. Mesma armadilha e mesma
+         * saída do `InternalChrome`, que a levou primeiro.
+         */
+        onSignOut: () => {
+          void import("../app/actions/auth").then(({ signOut }) => signOut());
+        },
         labels: {
           collapse: t("sidebar.collapse"),
           expand: t("sidebar.expand"),
@@ -169,6 +185,11 @@ export function AppChrome({
           form.set("description", description);
           form.set("snapshot", JSON.stringify(snapshot));
           if (screenshot) form.set("screenshot", screenshot);
+          // Pelo mesmo motivo do `onSignOut` acima: `app/actions/support.ts`
+          // também é `"use server"` e também importa `next/headers`. Este era
+          // o mais antigo dos dois caminhos, e os dois tinham de sair para as
+          // storyboards voltarem.
+          const { submitProblemReport } = await import("../app/actions/support");
           const outcome = await submitProblemReport(form);
           return "error" in outcome ? outcome : { ref: outcome.ref, merged: outcome.merged };
         }}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { FilePlus2, FileSignature } from "lucide-react";
@@ -26,6 +25,7 @@ import {
   type ContractSharedWithMeRow,
   type TemplateRow,
 } from "./contractTypes";
+import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 
 export type ContractsScreenProps = {
   contracts: ContractRow[];
@@ -75,11 +75,12 @@ export function ContractsScreen({
   const [propertyId, setPropertyId] = useState("");
   const [counterparty, setCounterparty] = useState("");
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const { toast } = useToast();
 
   function open(contractId: string) {
-    router.push(`/contratos?contrato=${contractId}`);
+    router?.push(`/contratos?contrato=${contractId}`);
   }
 
   function create() {

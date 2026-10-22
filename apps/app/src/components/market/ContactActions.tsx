@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Modal, Textarea, useToast } from "@upm/ui";
+import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 
 export type ContactActionsProps = {
   propertyId: string;
@@ -53,7 +53,8 @@ export function ContactActions({
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
   const { toast } = useToast();
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const t = useTranslations("market.contact");
   const tc = useTranslations("common");
 
@@ -70,7 +71,7 @@ export function ContactActions({
         onOpenConversation(result.id);
         return;
       }
-      router.push(`/mensagens?conversa=${result.id}`);
+      router?.push(`/mensagens?conversa=${result.id}`);
     });
   }
 
