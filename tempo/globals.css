@@ -25,6 +25,26 @@
  * utilitários não geram nada e o defeito reaparece só nalguns ecrãs — que é
  * pior do que reaparecer em todos.
  */
+/**
+ * As apps também, senão metade das utilidades não existe (22 out 2026).
+ * ---------------------------------------------------------------------------
+ * O bloco gerido acima manda o Tailwind varrer `../packages` e `./designs` —
+ * e **não** `../apps`. As storyboards montam componentes de `apps/web`,
+ * `apps/app` e `apps/interno`, e as classes que só lá aparecem nunca chegavam a
+ * ser geradas.
+ *
+ * O resultado não era um ecrã sem estilo nenhum, que se via logo: era um ecrã
+ * **meio** estilizado, que é pior. O `flex` existia — porque `packages/ui`
+ * também o usa — e o `flex-col` não, por isso o ecrã de Entrar punha título,
+ * campos e botão todos em linha; as páginas legais perdiam o `mx-auto` e a
+ * largura máxima e encostavam o texto às margens; e no Painel do Admin os
+ * atalhos saltavam para fora da coluna.
+ *
+ * Fora do bloco `tempo:managed`, de propósito: aquele é reescrito a cada
+ * regeneração do sidecar.
+ */
+@source "../apps";
+
 @import "../packages/ui/src/styles/index.css";
 
 @theme inline {
