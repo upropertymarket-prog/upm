@@ -207,3 +207,65 @@ describe("o fundo do e-mail (campaigns.email_bg)", () => {
     expect(html).toContain("#f6f7f9");
   });
 });
+
+/**
+ * A tela do editor (21 out 2026)
+ * =========================================================================
+ * O editor das campanhas clica no HTML **a sério** em vez de imitar o e-mail.
+ * O que torna isso possível é o `editing` — e o que o torna seguro é este
+ * bloco de testes: os marcadores existem quando o editor os pede e **não
+ * existem** em mais lado nenhum.
+ *
+ * O envio é o caso que importa. `mail-worker` chama `renderCampaignHtml` sem
+ * `editing`, e se um dia alguém o ligar por engano no caminho do envio, é aqui
+ * que se sabe — antes de milhares de caixas de entrada receberem um `<style>`
+ * e um `data-block-id` que não lhes dizem nada.
+ */
+describe("a tela do editor (`editing`)", () => {
+  const blocks: CampaignBlock[] = [
+    { id: "h", type: "heading", align: "left", level: 1, text: "Olá" },
+    footer,
+  ];
+
+  it("sem `editing`, o HTML do envio não leva marcadores nem folha de estilos", async () => {
+    const html = await renderCampaignHtml(blocks, context);
+    expect(html).not.toContain("data-block-id");
+    expect(html).not.toContain("data-selected");
+    expect(html).not.toContain("[data-block-id]");
+  });
+
+  it("com `editing`, cada bloco diz quem é", async () => {
+    const html = await renderCampaignHtml(blocks, { ...context, editing: true });
+    expect(html).toContain('data-block-id="h"');
+    expect(html).toContain('data-block-id="f"');
+  });
+
+  it("só o bloco escolhido leva `data-selected`", async () => {
+    const html = await renderCampaignHtml(blocks, {
+      ...context,
+      editing: true,
+      selectedBlockId: "h",
+    });
+    // O **atributo** aparece uma vez só — senão a tela contornava dois blocos
+    // e deixava de dizer onde está o cursor. A busca é por `data-selected="`
+    // e não por `data-selected` porque a folha de estilos da tela também o
+    // nomeia, no seletor: contá-la era contar duas coisas diferentes.
+    expect(html.match(/data-selected="/g) ?? []).toHaveLength(1);
+    expect(html).toMatch(/data-block-id="h"[^>]*data-selected/);
+  });
+
+  it("o conteúdo do e-mail é o mesmo com e sem a tela", async () => {
+    // A promessa inteira numa linha: tirar os embrulhos ao HTML do editor dá
+    // exatamente o HTML do envio. Se um dia deixar de dar, a tela passou a
+    // mostrar uma coisa e o envio a fazer outra — que é o defeito que esta
+    // arquitetura existe para impedir.
+    const enviado = await renderCampaignHtml(blocks, context);
+    const editado = await renderCampaignHtml(blocks, { ...context, editing: true });
+    const semEmbrulhos = editado
+      .replace(/<style[\s\S]*?<\/style>/g, "")
+      .replace(/<div data-block-id="[^"]*"(?: data-selected="true")?>/g, "")
+      .replace(/<\/div>/g, "");
+    const normaliza = (html: string) => html.replace(/\s+/g, " ").trim();
+    expect(normaliza(semEmbrulhos)).toBe(normaliza(enviado));
+  });
+});

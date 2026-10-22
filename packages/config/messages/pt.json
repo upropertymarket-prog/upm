@@ -9,7 +9,8 @@
     "search": "Pesquisar",
     "loading": "A carregar…",
     "understood": "Entendi",
-    "later": "Mais tarde"
+    "later": "Mais tarde",
+    "edit": "Editar"
   },
   "pagination": {
     "previous": "Anterior",
@@ -2365,7 +2366,6 @@
     },
     "campaigns": {
       "title": "Campanhas",
-      "subtitle": "O construtor dos e-mails de marketing, por sequência.",
       "new": "Nova campanha",
       "newName": "Campanha sem nome",
       "empty": "Ainda não há campanhas. Crie a primeira.",
@@ -2415,7 +2415,6 @@
       "viewMobile": "Telemóvel",
       "previewTitle": "Pré-visualização do e-mail",
       "withData": "Com dados",
-      "variablesHint": "Variáveis: {list}",
       "actionsLabel": "Ações",
       "save": "Guardar",
       "saving": "A guardar…",
@@ -2502,7 +2501,22 @@
         "unsubscribed": "Cancelaram",
         "complained": "Queixaram-se"
       },
-      "scheduleFailed": "O envio agendado para {when} falhou {attempts, plural, one {# vez} other {# vezes}} e deixou de ser tentado. Corrija o que falta e agende outra vez."
+      "scheduleFailed": "O envio agendado para {when} falhou {attempts, plural, one {# vez} other {# vezes}} e deixou de ser tentado. Corrija o que falta e agende outra vez.",
+      "subtitleList": "Os e-mails que o Marketing envia a um público.",
+      "listLabel": "Campanhas",
+      "listOpen": "Abrir",
+      "listBack": "Campanhas",
+      "listNever": "Por enviar",
+      "listSentAt": "Enviada a {when}",
+      "listScheduledAt": "Agendada para {when}",
+      "listDraftSince": "Rascunho, mexido a {when}",
+      "listRecipients": "{count, plural, =0 {sem destinatários} one {# destinatário} other {# destinatários}}",
+      "scheduleFailedButton": "Agendamento falhado",
+      "scheduleFailedTitle": "O agendamento não disparou",
+      "scheduleFailedSubtitle": "O que o servidor respondeu, e o que se pode corrigir.",
+      "scheduleFailedServer": "Resposta do servidor",
+      "scheduleFailedFixes": "As causas habituais são corrigíveis aqui: falta de remetente, um e-mail sem blocos, ou a audiência a zero.",
+      "scheduleFailedClose": "Fechar"
     },
     "metrics": {
       "title": "Métricas de e-mail",

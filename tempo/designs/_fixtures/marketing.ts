@@ -175,6 +175,24 @@ export const CAMPAIGN_EMAILS: CampaignEmailRow[] = [
     created_at: "2026-10-12T14:10:00.000Z",
     updated_at: "2026-10-12T14:10:00.000Z",
   },
+  /**
+   * O e-mail do rascunho `cmp-2` — o que faz o construtor existir em storyboard.
+   * Ver a nota de `CAMPAIGN_BLOCKS_RASCUNHO`.
+   */
+  {
+    id: "eml-3",
+    campaign_id: "cmp-2",
+    position: 0,
+    name: "Anúncio",
+    subject: "Os primeiros anúncios já estão no ar",
+    preheader: "Inscreveu-se antes de abrirmos — agora há imóveis para ver.",
+    blocks: null,
+    delay: "0 minutes",
+    send_at: null,
+    materialized_at: null,
+    created_at: "2026-10-19T15:30:00.000Z",
+    updated_at: AGORA,
+  },
 ];
 
 /**
@@ -208,12 +226,52 @@ export const CAMPAIGN_BLOCKS: CampaignBlock[] = [
   },
 ];
 
+/**
+ * Os blocos do rascunho que se está a construir (`cmp-2` / `eml-3`).
+ * =========================================================================
+ * A campanha `cmp-1` está `sent`, e `sent` tranca o construtor inteiro: sem
+ * Guardar, sem paleta de blocos, com todos os campos desativados. Até 22 out
+ * 2026 **todas** as storyboards de Campanhas apontavam para ela, por isso o
+ * construtor nunca se via a construir — só se via o depois.
+ *
+ * Este e-mail é deliberadamente mais curto do que o `eml-1`: é um rascunho a
+ * meio, não um e-mail acabado. Três blocos e o rodapé — o suficiente para a
+ * tela ter conteúdo e para se ver que ainda falta.
+ */
+export const CAMPAIGN_BLOCKS_RASCUNHO: CampaignBlock[] = [
+  { id: "d1", type: "header", align: "center", logoPath: "", logoAlt: "UProperty Market" },
+  {
+    id: "d2",
+    type: "heading",
+    align: "left",
+    text: "Os primeiros anúncios já estão no ar",
+    level: 1,
+  },
+  {
+    id: "d3",
+    type: "text",
+    align: "left",
+    html: "<p>Inscreveu-se antes de abrirmos. Agora há imóveis para ver — e continua a falar diretamente com quem vende.</p>",
+  },
+  {
+    id: "d4",
+    type: "footer",
+    align: "center",
+    text: "Recebe este e-mail porque se inscreveu no UProperty Market.",
+  },
+];
+
 export const CAMPAIGN_BLOCKS_BY_EMAIL: Record<string, CampaignBlock[]> = {
   "eml-1": CAMPAIGN_BLOCKS,
   "eml-2": [],
+  "eml-3": CAMPAIGN_BLOCKS_RASCUNHO,
 };
 
-export const CAMPAIGN_DELAY_BY_EMAIL: Record<string, number> = { "eml-1": 0, "eml-2": 4320 };
+export const CAMPAIGN_DELAY_BY_EMAIL: Record<string, number> = {
+  "eml-1": 0,
+  "eml-2": 3,
+  "eml-3": 0,
+};
 
 export const CAMPAIGN_SENDERS: CampaignSender[] = [
   { id: "mbx-1", address: "noticias@upropertymarket.pt", displayName: "UProperty Market" },
@@ -265,7 +323,11 @@ export const STAFF_FILES: StaffFile[] = [
     size: 18_400,
     bucket: "staff-cloud",
     storagePath: "staff/relatorio-abertura.csv",
-    source: "metrics",
+    // `campaign_report` e não `"metrics"`: este último não existe na coluna
+    // nem nas traduções, e dava `MISSING_MESSAGE: internalCloud.source.metrics`
+    // a cada desenho da tabela. Uma fixture só vale se usar os valores que a
+    // base de dados produz — senão a storyboard revê um estado impossível.
+    source: "campaign_report",
     ownerId: "u-mkt",
     ownerName: "Marta Nunes",
     createdAt: "2026-10-17T10:12:00.000Z",

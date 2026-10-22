@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -15,6 +15,7 @@ import {
   Link2,
   List,
   ListOrdered,
+  Plus,
   Quote,
   Redo2,
   Strikethrough,
@@ -124,6 +125,8 @@ export type RichTextLabels = {
   redo: string;
   /** "Inserir {label}" — o título do botão de cada variável. */
   insertVariable: (label: string) => string;
+  addVariable: string;
+  insertVariableTitle: string;
 };
 
 export type RichTextProps = {
@@ -161,6 +164,38 @@ export function RichText({
   className,
   minHeight = 200,
 }: RichTextProps) {
+  /**
+   * O painel das variáveis — ver a nota junto ao "+", na barra.
+   *
+   * Fecha ao clicar fora e ao `Escape`, como o dos contratos. O `mousedown` e
+   * não o `click`: um clique que começa fora e acaba dentro do painel não é
+   * uma saída, e com `click` o painel fechava-se a meio de o usar.
+   */
+  const [variableMenuOpen, setVariableMenuOpen] = useState(false);
+  const variableMenuRef = useRef<HTMLSpanElement>(null);
+  const variableMenuId = useId();
+
+  useEffect(() => {
+    if (!variableMenuOpen) return;
+
+    function onPointerDown(event: MouseEvent) {
+      const target = event.target;
+      if (target instanceof Node && !variableMenuRef.current?.contains(target)) {
+        setVariableMenuOpen(false);
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setVariableMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [variableMenuOpen]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -372,35 +407,77 @@ export function RichText({
         </>
       ) : null}
 
-      {/* As variáveis, como botões e não como menu: são três (04 §2.6) e um
-          menu para três opções é um clique a mais para ver o que já cabia na
-          barra. Entram **onde está o cursor**, que é o que uma variável
-          precisa — inserir no fim é quase nunca onde se quer. */}
+      {/* As variáveis: um "+" que abre o painel — a mesma peça dos modelos de
+          contrato (`TemplateBodyEditor`), por decisão do cliente a 21 out 2026.
+          ===================================================================
+          Eram botões soltos, um por variável, e o argumento escrito aqui era
+          que "um menu para três opções é um clique a mais". O argumento estava
+          certo sobre os cliques e errado sobre o que importa: o produto tem
+          **dois** sítios onde se inserem variáveis num texto — os contratos e
+          as campanhas — e tinha-os com duas interfaces diferentes. Quem
+          aprendeu num não reconhecia o outro.
+
+          Além disso, a barra cresce com a lista: três variáveis cabiam, as sete
+          dos contratos não cabem. Uma peça só, que serve as duas listas, vale
+          o clique.
+
+          Continuam a entrar **onde está o cursor** — o `onMouseDown` com
+          `preventDefault` é o que impede o botão de roubar a seleção ao
+          editor, e sem ele a variável ia parar ao fim do texto. */}
       {variables.length > 0 ? (
         <>
           <Divider />
-          {variables.map((variable) => (
+          <span ref={variableMenuRef} style={{ position: "relative", display: "inline-flex" }}>
             <Button
-              key={variable.name}
               size="sm"
               variant="ghost"
-              title={labels.insertVariable(variable.label)}
-              aria-label={labels.insertVariable(variable.label)}
+              iconOnly
+              title={labels.addVariable}
+              aria-label={labels.addVariable}
+              aria-expanded={variableMenuOpen}
+              aria-controls={variableMenuOpen ? variableMenuId : undefined}
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .insertContent({
-                    type: "variable",
-                    attrs: { name: variable.name, label: variable.label },
-                  })
-                  .run()
-              }
+              onClick={() => setVariableMenuOpen((open) => !open)}
             >
-              {variable.label}
+              <Plus size={14} strokeWidth={2.5} />
             </Button>
-          ))}
+
+            {variableMenuOpen ? (
+              <div
+                id={variableMenuId}
+                role="group"
+                aria-label={labels.insertVariableTitle}
+                className="upm-richtext__variables"
+              >
+                <span className="upm-richtext__variables-title">{labels.insertVariableTitle}</span>
+                {variables.map((variable) => (
+                  <Button
+                    key={variable.name}
+                    size="sm"
+                    variant="ghost"
+                    fullWidth
+                    // Alinhado à esquerda pela mesma razão da paleta de blocos:
+                    // uma lista de rótulos centrados não forma coluna nenhuma.
+                    style={{ justifyContent: "flex-start" }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      editor
+                        .chain()
+                        .focus()
+                        .insertContent({
+                          type: "variable",
+                          attrs: { name: variable.name, label: variable.label },
+                        })
+                        .run();
+                      setVariableMenuOpen(false);
+                    }}
+                  >
+                    {variable.label}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+          </span>
         </>
       ) : null}
     </div>

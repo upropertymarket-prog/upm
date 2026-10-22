@@ -28,5 +28,9 @@ export function richTextLabels(t: (key: never) => string): RichTextLabels {
     undo: translate("editor.undo"),
     redo: translate("editor.redo"),
     insertVariable: (label: string) => translateWith("editor.insertVariable", { label }),
+    // O "+" e o título do painel — as mesmas chaves que os modelos de contrato
+    // já usavam, porque é a mesma peça.
+    addVariable: translate("editor.addVariable"),
+    insertVariableTitle: translate("editor.insertVariableTitle"),
   };
 }

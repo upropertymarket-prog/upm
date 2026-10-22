@@ -30,12 +30,14 @@ import {
  * servidor não há HTML — devolve vazio em vez de inventar uma maqueta do
  * e-mail, que divergiria do que o renderizador faz de verdade.
  *
- * ## Porque são três estados
+ * ## Porque são quatro estados
  *
+ * - **O construtor, num rascunho** — o estado em que o ecrã se usa, e o que
+ *   faltava até 22 out 2026. Só num rascunho é que o `locked` o destranca.
  * - **Campanha enviada, com recibos** — é a única moldura em que as métricas
- *   existem, e é por isso a que mostra o ecrã completo. Os recibos não fecham
- *   a conta de propósito (180 entregues de 184): um recibo pode não chegar, e o
- *   ecrã tem de mostrar a percentagem sobre o que sabe.
+ *   existem. Os recibos não fecham a conta de propósito (180 entregues de
+ *   184): um recibo pode não chegar, e o ecrã tem de mostrar a percentagem
+ *   sobre o que sabe. Tudo nela está trancado — é o *depois*, não o fazer.
  * - **Agendamento falhado** — o único estado de `scheduled_sends` que obriga o
  *   ecrã a dizer algo a alguém (P10-09). Sem ele, o aviso nunca se revê.
  * - **Sem campanha escolhida** — o ecrã de quem acaba de entrar, e o mais
@@ -58,8 +60,18 @@ function CampanhasDemo({
   scheduled: typeof CAMPAIGN_SCHEDULED | null;
 }) {
   const enviada = selected?.status === "sent";
+  /**
+   * O e-mail aberto é o **primeiro da campanha escolhida**, e não um id fixo.
+   *
+   * Era `"eml-1"` à força, que pertence à `cmp-1`. Enquanto todas as
+   * storyboards apontavam para essa campanha ninguém dava por isso — mas
+   * bastou a do construtor abrir a `cmp-2` para o ecrã ficar com a sequência
+   * de uma campanha e o e-mail de outra. O `?.id` é a mesma conta que a
+   * `page.tsx` faz quando o URL não traz `?email=`.
+   */
+  const emails = selected ? CAMPAIGN_EMAILS.filter((e) => e.campaign_id === selected.id) : [];
   return (
-    <div data-theme={theme} style={{ minHeight: "1100px", background: "var(--bg)" }}>
+    <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <ToastProvider>
@@ -74,12 +86,10 @@ function CampanhasDemo({
               <CampaignBuilder
                 campaigns={CAMPAIGN_ROWS}
                 selected={selected}
-                emails={
-                  selected ? CAMPAIGN_EMAILS.filter((e) => e.campaign_id === selected.id) : []
-                }
+                emails={emails}
                 blocksByEmail={CAMPAIGN_BLOCKS_BY_EMAIL}
                 delayByEmail={CAMPAIGN_DELAY_BY_EMAIL}
-                selectedEmailId={selected ? "eml-1" : null}
+                selectedEmailId={emails[0]?.id ?? null}
                 senders={CAMPAIGN_SENDERS}
                 properties={CAMPAIGN_PROPERTIES}
                 audienceCount={selected ? 184 : null}
@@ -112,6 +122,32 @@ export function MarketingCampanhasClaro() {
 
 export function MarketingCampanhasEscuro() {
   return <CampanhasDemo theme="dark" selected={CAMPAIGN_ROWS[0]!} scheduled={null} />;
+}
+
+/**
+ * O construtor a construir — a storyboard que faltava (22 out 2026).
+ * =========================================================================
+ * `cmp-2` é um **rascunho**, e é essa a única coisa que a distingue: o
+ * `locked` do `CampaignBuilder` é `status === "sending" || "sent"`, por isso
+ * só num rascunho é que o ecrã se vê inteiro — o Guardar, a paleta dos dez
+ * blocos clicável, os campos a aceitar texto, o "Adicionar e-mail", o
+ * "Apagar campanha".
+ *
+ * Todas as outras cinco storyboards apontavam para a `cmp-1`, que está
+ * `sent`. O que se revia era sempre o **depois**: campos cinzentos, paleta
+ * desativada, recibos. P10-08 é o construtor, e o construtor não tinha
+ * moldura nenhuma onde se visse a funcionar.
+ *
+ * Sem recibos de propósito: um rascunho nunca saiu, e `receipts` vem de
+ * `email_events` — inventá-los aqui era desenhar um estado que a base de
+ * dados não produz.
+ */
+export function MarketingCampanhasConstrutor() {
+  return <CampanhasDemo theme="light" selected={CAMPAIGN_ROWS[1]!} scheduled={null} />;
+}
+
+export function MarketingCampanhasConstrutorEscuro() {
+  return <CampanhasDemo theme="dark" selected={CAMPAIGN_ROWS[1]!} scheduled={null} />;
 }
 
 /** P10-09 — o agendamento que não disparou, com o erro do servidor à vista. */

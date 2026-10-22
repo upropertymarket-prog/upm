@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { Route } from "next";
+
+import { useCanvasSafeRouter } from "../../../lib/useCanvasSafeRouter";
 
 import {
   TrafficDashboard,
@@ -32,7 +34,8 @@ export function TrafficView(props: {
   series: TrafficPoint[];
   breakdown: TrafficBreakdown;
 }) {
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -41,7 +44,7 @@ export function TrafficView(props: {
       const params = new URLSearchParams(searchParams.toString());
       if (next.scope) params.set("scope", next.scope);
       if (next.range) params.set("range", String(next.range));
-      router.push(`${pathname}?${params.toString()}` as Route);
+      router?.push(`${pathname}?${params.toString()}` as Route);
     },
     [router, pathname, searchParams],
   );

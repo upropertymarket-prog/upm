@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tempo-host</title>
+    <!--
+      `process` para os módulos de cliente do Next (22 out 2026)
+      =====================================================================
+      O sidecar passou a ser um host **Vite**. O `next/link`, o `next/image` e
+      meia dúzia de módulos de `next/dist/client/*` leem `process.env.__NEXT_*`
+      no topo do ficheiro, e num browser sem compilador do Next isso corre a
+      sério: `ReferenceError: process is not defined`.
+
+      O estrago não é local. O `index.canvas.tsx` de cada canvas importa todas
+      as suas storyboards, por isso **um** módulo destes deixa o canvas inteiro
+      em branco — foram as 24 storyboards do `06 - proprietario` de uma vez, com
+      a consola limpa, porque o host engole o erro na fronteira do import.
+
+      ## Porque é aqui e não no `vite.config.ts`
+
+      Porque o código que falha vive nas dependências **pré-empacotadas**
+      (`node_modules/.vite/deps/*`), e o `define` do Vite só reescreve o código
+      de origem — não lhes toca. Um `<script>` normal antes do `<script
+      type="module">` corre antes de qualquer módulo, pré-empacotado ou não, e
+      não mexe em resolução nem em bundling.
+
+      Não é um `process` a fingir que é Node: é um objeto vazio, que é
+      exactamente o que estes módulos precisam de encontrar para lerem
+      `undefined` em vez de atirarem. Nada aqui chega à app real.
+
+      ## ATENÇÃO: ficheiro gerado
+
+      O Tempo reescreve este `index.html` quando regenera o sidecar, e não há
+      bloco `tempo:managed` para proteger o que é nosso (ao contrário do
+      `globals.css`). Se as storyboards voltarem a ficar em branco com
+      `process is not defined`, é isto que desapareceu.
+    -->
+    <script>
+      window.process = window.process || { env: {} };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

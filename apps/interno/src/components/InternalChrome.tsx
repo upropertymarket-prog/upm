@@ -13,8 +13,6 @@ import {
 import { LOCALES } from "@upm/config";
 
 import { navFor, type InternalRole } from "../lib/navigation";
-import { submitProblemReport } from "../app/actions/support";
-import { signOut } from "../app/actions/auth";
 
 export type InternalChromeProps = {
   role: InternalRole;
@@ -97,7 +95,25 @@ export function InternalChrome({
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
         onReport: () => setReportOpen(true),
-        onSignOut: () => void signOut(),
+        /**
+         * A ação entra **ao clicar**, e não no topo do módulo (22 out 2026).
+         * =================================================================
+         * `app/actions/auth.ts` é `"use server"` e importa `next/headers`. Um
+         * `import` estático daqui — de um componente `"use client"` que
+         * envolve todos os ecrãs do interno — arrastava o `next/headers` para
+         * o pacote do browser. No Next isso resolve-se por magia do
+         * compilador; **no canvas não há compilador do Next**, e o módulo
+         * corria a sério: `ReferenceError: process is not defined`, e todas as
+         * storyboards com `InternalChrome` ficavam em branco.
+         *
+         * É a mesma armadilha que o `stepUpTypes.ts` documenta, e a mesma
+         * saída: o módulo da action nunca entra no grafo de render. Com o
+         * `import()` aqui dentro, só é pedido quando alguém carrega em Sair —
+         * o que numa storyboard não acontece.
+         */
+        onSignOut: () => {
+          void import("../app/actions/auth").then(({ signOut }) => signOut());
+        },
         labels: {
           collapse: t("sidebar.collapse"),
           expand: t("sidebar.expand"),
@@ -140,6 +156,11 @@ export function InternalChrome({
           form.set("description", description);
           form.set("snapshot", JSON.stringify(snapshot));
           if (screenshot) form.set("screenshot", screenshot);
+          // Pelo mesmo motivo do `onSignOut` acima: `app/actions/support.ts`
+          // também é `"use server"` e também importa `next/headers`. Este era
+          // o caminho mais antigo dos dois — estava cá desde que o modal
+          // nasceu, e foi preciso tirar os dois para as storyboards voltarem.
+          const { submitProblemReport } = await import("../app/actions/support");
           const outcome = await submitProblemReport(form);
           return "error" in outcome ? outcome : { ref: outcome.ref, merged: outcome.merged };
         }}

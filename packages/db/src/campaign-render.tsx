@@ -95,6 +95,26 @@ export type CampaignRenderContext = {
    * properties` do design system.
    */
   background?: string;
+  /**
+   * A tela do editor — e a razão por que o `BlockCanvas` deixou de existir.
+   * =========================================================================
+   * Com `editing`, cada bloco sai embrulhado num `<div data-block-id>` e o
+   * selecionado leva `data-selected`. Mais nada muda: é o **mesmo** HTML, pelo
+   * **mesmo** renderizador, com um atributo a dizer onde começa cada bloco.
+   *
+   * É isto que resolve a tensão que o `BlockCanvas` tinha escrita na nota de
+   * topo. Ele recusava imitar o e-mail porque "uma imitação é um segundo
+   * renderizador, e divergia do primeiro à primeira alteração" — e tinha razão.
+   * A saída não é imitar melhor: é **clicar no verdadeiro**. O editor mostra o
+   * que o destinatário vai receber porque é literalmente o que o envio produz.
+   *
+   * **Nunca entra num envio.** Só a pré-visualização o liga; o `mail-worker`
+   * chama `renderCampaignHtml` sem contexto de edição, e o
+   * `campaign-render.test.ts` prende essa promessa.
+   */
+  editing?: boolean;
+  /** O bloco com o cursor, para a tela o contornar. Só conta com `editing`. */
+  selectedBlockId?: string | null;
 };
 
 const ALIGN_STYLE = (align?: string) => ({ textAlign: (align ?? "left") as "left" });
@@ -292,7 +312,28 @@ export function CampaignEmail({
 }) {
   return (
     <Html lang="pt">
-      <Head />
+      <Head>
+        {/* Só na tela do editor. Um e-mail a sério não leva folha de estilos
+            (metade dos clientes de correio deita-a fora), e é por isso que
+            tudo o resto neste ficheiro é estilo em linha — esta é a única
+            excepção, e existe porque nunca sai daqui. */}
+        {context.editing ? (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                [data-block-id] { position: relative; cursor: pointer; }
+                [data-block-id]::after {
+                  content: ""; position: absolute; inset: -4px;
+                  border: 2px solid transparent; border-radius: 6px;
+                  pointer-events: none; transition: border-color .12s;
+                }
+                [data-block-id]:hover::after { border-color: #f9bfa0; }
+                [data-block-id][data-selected]::after { border-color: #ea580c; }
+              `,
+            }}
+          />
+        ) : null}
+      </Head>
       {/* O pré-cabeçalho: a linha que o cliente de correio mostra ao lado do
           assunto. Sem ele, o Gmail mostra o início do primeiro bloco — que é
           quase sempre o logótipo, logo nada. */}
@@ -314,9 +355,23 @@ export function CampaignEmail({
             borderRadius: "12px",
           }}
         >
-          {blocks.map((block) => (
-            <Block key={block.id} block={block} context={context} />
-          ))}
+          {blocks.map((block) =>
+            context.editing ? (
+              // O embrulho da tela. `display: block` e sem margem para não
+              // mexer no espaçamento que o bloco já traz: o que o editor mostra
+              // tem de ser medida a medida o que sai no envio, senão a tela
+              // volta a ser uma aproximação — que é o que não queremos.
+              <div
+                key={block.id}
+                data-block-id={block.id}
+                data-selected={block.id === context.selectedBlockId ? "true" : undefined}
+              >
+                <Block block={block} context={context} />
+              </div>
+            ) : (
+              <Block key={block.id} block={block} context={context} />
+            ),
+          )}
         </Container>
       </Body>
     </Html>

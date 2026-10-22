@@ -9,7 +9,8 @@
     "search": "Search",
     "loading": "Loading…",
     "understood": "Got it",
-    "later": "Later"
+    "later": "Later",
+    "edit": "Edit"
   },
   "pagination": {
     "previous": "Previous",
@@ -2365,7 +2366,6 @@
     },
     "campaigns": {
       "title": "Campaigns",
-      "subtitle": "The marketing email builder, by sequence.",
       "new": "New campaign",
       "newName": "Untitled campaign",
       "empty": "No campaigns yet. Create the first one.",
@@ -2415,7 +2415,6 @@
       "viewMobile": "Mobile",
       "previewTitle": "Email preview",
       "withData": "With data",
-      "variablesHint": "Variables: {list}",
       "actionsLabel": "Actions",
       "save": "Save",
       "saving": "Saving…",
@@ -2502,7 +2501,22 @@
         "unsubscribed": "Unsubscribed",
         "complained": "Complained"
       },
-      "scheduleFailed": "The send scheduled for {when} failed {attempts, plural, one {# time} other {# times}} and is no longer being retried. Fix what is missing and schedule it again."
+      "scheduleFailed": "The send scheduled for {when} failed {attempts, plural, one {# time} other {# times}} and is no longer being retried. Fix what is missing and schedule it again.",
+      "subtitleList": "The emails Marketing sends to an audience.",
+      "listLabel": "Campaigns",
+      "listOpen": "Open",
+      "listBack": "Campaigns",
+      "listNever": "Not sent",
+      "listSentAt": "Sent {when}",
+      "listScheduledAt": "Scheduled for {when}",
+      "listDraftSince": "Draft, edited {when}",
+      "listRecipients": "{count, plural, =0 {no recipients} one {# recipient} other {# recipients}}",
+      "scheduleFailedButton": "Scheduling failed",
+      "scheduleFailedTitle": "The scheduled send did not fire",
+      "scheduleFailedSubtitle": "What the server replied, and what can be fixed.",
+      "scheduleFailedServer": "Server response",
+      "scheduleFailedFixes": "The usual causes are fixable here: no sender, an email with no blocks, or an audience of zero.",
+      "scheduleFailedClose": "Close"
     },
     "metrics": {
       "title": "Email metrics",

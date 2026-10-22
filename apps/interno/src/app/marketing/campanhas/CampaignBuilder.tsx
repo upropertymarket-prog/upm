@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
+  AlertTriangle,
+  ArrowLeft,
   Building2,
   Calendar,
   ChevronRight,
@@ -27,6 +28,7 @@ import { useTranslations } from "next-intl";
 import {
   Button,
   Input,
+  Modal,
   PageHeader,
   Select,
   StatusTag,
@@ -48,7 +50,6 @@ import {
 } from "@upm/db/campaigns";
 import {
   CAMPAIGN_BLOCK_TYPES,
-  CAMPAIGN_VARIABLES,
   createCampaignBlock,
   defaultCampaignBlocks,
   type CampaignBlock,
@@ -56,6 +57,8 @@ import {
 } from "@upm/db/campaign-blocks";
 
 import { BlockCanvas } from "./BlockCanvas";
+import { useCanvasSafeRouter } from "../../../lib/useCanvasSafeRouter";
+import { CampaignList, campaignSummary } from "./CampaignList";
 import type { CampaignActionResult, PreviewInput } from "./actions";
 
 /**
@@ -151,7 +154,8 @@ type View = "edit" | "desktop" | "mobile";
 export function CampaignBuilder(props: CampaignBuilderProps) {
   const t = useTranslations("marketing.campaigns");
   const { toast } = useToast();
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const [pending, startTransition] = useTransition();
 
   const campaign = props.selected;
@@ -178,6 +182,9 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
     email ? (props.blocksByEmail[email.id] ?? []) : [],
   );
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+
+  /** O detalhe do agendamento falhado — ver a nota junto ao botão, no cabeçalho. */
+  const [falhaAberta, setFalhaAberta] = useState(false);
 
   /**
    * Trocar de campanha ou de e-mail é uma navegação (o estado está no URL), e o
@@ -257,7 +264,8 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
     if (next.campanha) params.set("campanha", next.campanha);
     if (next.email) params.set("email", next.email);
     const query = params.toString();
-    router.replace(query ? `?${query}` : "?", { scroll: false });
+    // Sem router (canvas), navegar não faz nada — uma maqueta não muda de URL.
+    router?.replace(query ? `?${query}` : "?", { scroll: false });
   }
 
   function run(
@@ -422,21 +430,71 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
 
   return (
     <div style={{ display: "grid", gap: "var(--sp-5)" }}>
+      {/* O cabeçalho diz em que ecrã se está, e são dois ecrãs.
+          =====================================================
+          Com uma campanha aberta, o título é **o nome dela** e o subtítulo
+          descreve o construtor; sem nenhuma, o título é "Campanhas" e o
+          subtítulo descreve a lista. Antes era sempre "O construtor dos
+          e-mails de marketing, por sequência." — uma frase sobre o editor por
+          cima de uma página que não tinha editor nenhum. */}
       <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
+        title={campaign ? name || t("newName") : t("title")}
+        // Com a campanha aberta, o subtítulo é **a campanha** — o mesmo resumo
+        // que a lista mostra — e não uma frase sobre o construtor. Debaixo de
+        // "Abertura do Market — proprietários", "O construtor dos e-mails de
+        // marketing, por sequência." não dizia nada sobre o que se está a ver.
+        subtitle={campaign ? campaignSummary(campaign, t, dateFormat) : t("subtitleList")}
         actions={
-          <Button leadingIcon={<Plus size={15} />} disabled={pending} onClick={novaCampanha}>
-            {t("new")}
-          </Button>
+          campaign ? (
+            <>
+              {/* O disparo que falhou mora aqui, num botão — decisão do
+                  cliente a 22 out 2026.
+                  ===========================================================
+                  Era uma faixa vermelha permanente no topo da coluna
+                  principal. O estado é real e tem de ser dito, mas dizê-lo
+                  **sempre**, em cima do que se está a editar, custava uma
+                  faixa de altura a cada visita a uma campanha cujo
+                  agendamento falhou — e o texto do servidor é longo de mais
+                  para uma linha que ninguém pode fechar.
+
+                  O botão fica onde o olho já vai buscar o estado da campanha
+                  (ao lado do "← Campanhas"), em tom de perigo para não passar
+                  despercebido, e o detalhe — a data, as tentativas, a
+                  resposta do servidor — abre no modal. */}
+              {props.scheduled?.status === "failed" ? (
+                <Button
+                  variant="danger"
+                  leadingIcon={<AlertTriangle size={15} />}
+                  onClick={() => setFalhaAberta(true)}
+                >
+                  {t("scheduleFailedButton")}
+                </Button>
+              ) : null}
+              <Button
+                variant="secondary"
+                leadingIcon={<ArrowLeft size={15} />}
+                onClick={() => navegar({})}
+              >
+                {t("listBack")}
+              </Button>
+            </>
+          ) : (
+            <Button leadingIcon={<Plus size={15} />} disabled={pending} onClick={novaCampanha}>
+              {t("new")}
+            </Button>
+          )
         }
       />
 
-      {props.campaigns.length === 0 ? (
-        <Panel>
-          <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)" }}>{t("empty")}</p>
-        </Panel>
-      ) : null}
+      {/* Sem campanha aberta, a página **é** a lista. Ver `CampaignList`: até
+          21 out 2026 não era nada, e era este o estado em que a página abria. */}
+      {campaign ? null : (
+        <CampaignList
+          campaigns={props.campaigns}
+          locale={props.locale}
+          onOpen={(id) => navegar({ campanha: id })}
+        />
+      )}
 
       {campaign ? (
         <>
@@ -481,36 +539,6 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 alignContent: "start",
               }}
             >
-              {/* ------------------------------------------------------------- */}
-              {/* O disparo que falhou — o único estado que a campanha não diz   */}
-              {/* ------------------------------------------------------------- */}
-              {props.scheduled?.status === "failed" ? (
-                <p
-                  role="alert"
-                  style={{
-                    margin: 0,
-                    padding: "var(--sp-3) var(--sp-4)",
-                    border: "1px solid var(--danger)",
-                    borderRadius: "var(--r-md)",
-                    background: "var(--danger-soft)",
-                    color: "var(--danger)",
-                    fontSize: "13px",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {/* Sem isto a campanha ficava "Agendada" com uma data que já
-                  passou e nenhuma explicação: o disparo tenta três vezes e
-                  desiste, e as razões por que desiste — sem remetente, um
-                  e-mail vazio, audiência a zero — são todas corrigíveis por
-                  quem está a ler isto. */}
-                  {t("scheduleFailed", {
-                    when: dateFormat.format(new Date(props.scheduled.send_at)),
-                    attempts: props.scheduled.attempts,
-                  })}
-                  {props.scheduled.last_error ? ` — ${props.scheduled.last_error}` : ""}
-                </p>
-              ) : null}
-
               {/* ------------------------------------------------------------- */}
               {/* Faixa 2 — a sequência                                         */}
               {/* ------------------------------------------------------------- */}
@@ -820,11 +848,13 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                       checked={withData}
                       onCheckedChange={setWithData}
                     />
-                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                      {t("variablesHint", {
-                        list: CAMPAIGN_VARIABLES.map((name) => `{${name}}`).join(" "),
-                      })}
-                    </span>
+                    {/* A linha "Variáveis: {nome} {apelido} {plano}" saiu a
+                        21 out 2026. Ensinava a escrever chavetas à mão — e as
+                        chavetas não funcionam: uma variável é um chip
+                        (`<span data-variable>`), e o que o renderizador
+                        substitui é o chip. Quem seguisse a dica via "{nome}"
+                        sair no e-mail tal e qual. Agora inserem-se pelo "+" do
+                        editor, como nos modelos de contrato. */}
                   </div>
 
                   {view === "edit" ? (
@@ -912,12 +942,11 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                 }
               >
                 <div style={{ display: "grid", gap: "var(--sp-4)" }}>
-                  <Select
-                    label={t("campaignLabel")}
-                    value={campaign.id}
-                    options={props.campaigns.map((row) => ({ value: row.id, label: row.name }))}
-                    onChange={(event) => navegar({ campanha: event.target.value })}
-                  />
+                  {/* O seletor de campanha saiu daqui a 21 out 2026.
+                      Era navegação no meio de edição — e, agora que a página
+                      sem campanha aberta é a lista e o cabeçalho tem
+                      "← Campanhas", trocar de campanha já tem dois caminhos
+                      melhores do que uma caixa entre o nome e o público. */}
                   <Input
                     label={t("nameLabel")}
                     value={name}
@@ -1155,6 +1184,68 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
               </Panel>
             </aside>
           </div>
+
+          {/* O detalhe do disparo que falhou (P10-09).
+              ==============================================================
+              Aqui cabe o que a faixa não comportava: a data a que devia ter
+              saído, quantas vezes se tentou, e a resposta do servidor em
+              monoespaçado — é texto de máquina, e lê-se mal em texto de
+              leitura. A última linha diz o que fazer a seguir, porque as
+              causas habituais corrigem-se neste mesmo ecrã. */}
+          {props.scheduled?.status === "failed" ? (
+            <Modal
+              open={falhaAberta}
+              onClose={() => setFalhaAberta(false)}
+              title={t("scheduleFailedTitle")}
+              subtitle={t("scheduleFailedSubtitle")}
+              icon={<AlertTriangle size={18} />}
+              closeLabel={t("scheduleFailedClose")}
+              footer={
+                <Button variant="secondary" onClick={() => setFalhaAberta(false)}>
+                  {t("scheduleFailedClose")}
+                </Button>
+              }
+            >
+              <div style={{ display: "grid", gap: "var(--sp-4)" }}>
+                <p style={{ margin: 0, fontSize: "14px", lineHeight: 1.6, color: "var(--text)" }}>
+                  {t("scheduleFailed", {
+                    when: dateFormat.format(new Date(props.scheduled.send_at)),
+                    attempts: props.scheduled.attempts,
+                  })}
+                </p>
+
+                {props.scheduled.last_error ? (
+                  <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                    <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+                      {t("scheduleFailedServer")}
+                    </span>
+                    <p
+                      style={{
+                        margin: 0,
+                        padding: "var(--sp-3)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "var(--r-md)",
+                        background: "var(--surface2)",
+                        // Texto de máquina em tipo de máquina: uma mensagem de
+                        // erro com caminhos e códigos lê-se mal em proporcional.
+                        fontFamily: "ui-monospace, monospace",
+                        fontSize: "12.5px",
+                        lineHeight: 1.6,
+                        color: "var(--muted)",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {props.scheduled.last_error}
+                    </p>
+                  </div>
+                ) : null}
+
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: 1.6, color: "var(--muted)" }}>
+                  {t("scheduleFailedFixes")}
+                </p>
+              </div>
+            </Modal>
+          ) : null}
         </>
       ) : null}
     </div>

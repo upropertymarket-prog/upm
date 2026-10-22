@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { ClipboardCopy, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useCanvasSafeRouter } from "../../../lib/useCanvasSafeRouter";
 import {
   Button,
   Card,
@@ -95,7 +95,8 @@ export function TicketsManager({
   onSave,
 }: TicketsManagerProps) {
   const t = useTranslations("support.tickets");
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const { toast } = useToast();
   const [query, setQuery] = useState(search);
   const [status, setStatus] = useState<TicketStatus>(selected?.status ?? "new");
@@ -117,7 +118,7 @@ export function TicketsManager({
     if (q) params.set("q", q);
     const id = next.id === undefined ? (selected?.id ?? null) : next.id;
     if (id) params.set("id", id);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    router?.replace(`?${params.toString()}`, { scroll: false });
   }
 
   async function copyForAgent() {
@@ -143,7 +144,7 @@ export function TicketsManager({
         return;
       }
       toast(t("saved"), "success");
-      router.refresh();
+      router?.refresh();
     });
   }
 

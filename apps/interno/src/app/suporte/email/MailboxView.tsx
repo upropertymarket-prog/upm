@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   Archive,
@@ -25,6 +24,7 @@ import {
   Star,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useCanvasSafeRouter } from "../../../lib/useCanvasSafeRouter";
 import { Button, EmptyState, Input, StatusTag, useToast, type StatusTone } from "@upm/ui";
 import type {
   MailAttachment,
@@ -145,7 +145,8 @@ export type MailboxViewProps = {
 
 export function MailboxView(props: MailboxViewProps) {
   const t = useTranslations("support.mailbox");
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const { toast } = useToast();
   const [query, setQuery] = useState(props.search);
   const [newLabel, setNewLabel] = useState("");
@@ -181,7 +182,7 @@ export function MailboxView(props: MailboxViewProps) {
     for (const [key, value] of Object.entries(base)) {
       if (value) params.set(key, value);
     }
-    router.replace(`?${params.toString()}`, { scroll: false });
+    router?.replace(`?${params.toString()}`, { scroll: false });
   }
 
   /** Toda a escrita passa por aqui: o mesmo erro, o mesmo refresh. */
@@ -194,7 +195,7 @@ export function MailboxView(props: MailboxViewProps) {
       }
       const message = success ?? result.notice;
       if (message) toast(message, "success");
-      router.refresh();
+      router?.refresh();
     });
   }
 
@@ -469,7 +470,7 @@ export function MailboxView(props: MailboxViewProps) {
           initial={composer ?? undefined}
           onClose={() => {
             setComposer(null);
-            router.refresh();
+            router?.refresh();
           }}
           onSave={props.onSaveDraft}
           onSend={props.onSend}

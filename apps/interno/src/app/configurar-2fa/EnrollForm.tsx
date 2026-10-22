@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { useTranslations } from "next-intl";
+import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 import { Button, Input } from "@upm/ui";
 
 import { verifyEnrollment, type VerifyEnrollmentState } from "./actions";
@@ -19,7 +20,8 @@ export function EnrollForm({
   secret: string;
 }) {
   const t = useTranslations("auth.mfa.enroll");
-  const router = useRouter();
+  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
+  const router = useCanvasSafeRouter();
   const [state, formAction, pending] = useActionState(verifyEnrollment, initialState);
   const [confirmed, setConfirmed] = useState(false);
 
@@ -37,7 +39,7 @@ export function EnrollForm({
           fullWidth
           onClick={() => {
             setConfirmed(true);
-            router.push("/");
+            router?.push("/");
           }}
         >
           {t("recoveryCodesConfirm")}

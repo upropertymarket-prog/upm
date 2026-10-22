@@ -380,6 +380,13 @@ export type PreviewInput = {
   background?: string;
   /** O "Com dados" de 04 §2.6. */
   withData?: boolean;
+  /**
+   * A tela do editor pede o mesmo HTML com os blocos marcados, para se poder
+   * clicar neles. Ver `CampaignRenderContext.editing`: é o único sítio que o
+   * liga, e o envio nunca passa por aqui.
+   */
+  editing?: boolean;
+  selectedBlockId?: string | null;
 };
 
 export async function preverCampanha(
@@ -425,6 +432,8 @@ export async function preverCampanha(
     labels: { unsubscribe: t("unsubscribeLink") },
     preheader: input.preheader,
     background: input.background,
+    editing: input.editing,
+    selectedBlockId: input.selectedBlockId,
   });
 
   return { html };

@@ -213,19 +213,26 @@ export function UpdatesManager(props: UpdatesManagerProps) {
 
       <div
         style={{
-          // Lista estreita + editor largo, sem media queries (21 out 2026).
+          // Duas metades iguais, sem media queries (22 out 2026).
           //
-          // Era uma grelha `auto-fit` de colunas **iguais** com a lista travada
-          // em 420 px por dentro. Numa janela de 1400 px cada coluna ficava com
-          // ~690, a lista encolhia para 420 e sobravam ~270 px de vazio a meio
-          // do ecrã — um buraco que não existe em mais nenhuma página da app.
+          // Houve aqui três desenhos, e vale a pena saber porque é que este é
+          // diferente dos dois anteriores.
           //
-          // O padrão é o mesmo que o construtor de campanhas já usa: `flex`
-          // com `flex-grow` desproporcionado. A lista pede 300 px e não cresce
-          // além de 340; o editor pede 460 e tem `grow: 999`, por isso absorve
-          // **todo** o espaço que sobra. Quando os dois não cabem lado a lado,
-          // o `wrap` põe-nos um debaixo do outro, cada um a 100 % — que é a
-          // responsividade intrínseca que o projeto exige em vez de breakpoints.
+          // 1. Grelha `auto-fit` de colunas iguais, com a lista travada em
+          //    420 px **por dentro**: as colunas ficavam iguais mas a lista não
+          //    as enchia, e sobravam ~270 px de vazio a meio do ecrã.
+          // 2. `flex` com `grow` desproporcionado (1 contra 999) e a lista
+          //    travada em 340 px: tirou o buraco, mas deixou a página a ~30/70
+          //    — que é o que o cliente apontou.
+          //
+          // Agora os dois pedem a **mesma** base e crescem na **mesma**
+          // proporção, e nenhum tem teto. Daí sair 50/50 exacto: o buraco do
+          // desenho 1 não volta porque o que o causava era o teto de dentro da
+          // lista, e esse desapareceu com ele.
+          //
+          // O `wrap` mantém-se: quando as duas metades não cabem lado a lado,
+          // passam a uma por linha, a 100 % cada. É a responsividade
+          // intrínseca que o projeto exige em vez de breakpoints.
           display: "flex",
           flexWrap: "wrap",
           gap: "var(--sp-5)",
@@ -238,8 +245,12 @@ export function UpdatesManager(props: UpdatesManagerProps) {
         <aside
           aria-label={t("listLabel")}
           style={{
-            flex: "1 1 300px",
-            maxWidth: "min(100%, 340px)",
+            // Metade. Ver a nota do contentor: mesma base e mesmo `grow` que o
+            // editor, e sem teto — era o teto que fazia os 30/70.
+            flex: "1 1 min(100%, 320px)",
+            // Um item de flex não encolhe abaixo do conteúdo sem isto, e os
+            // títulos da lista não quebram linha.
+            minWidth: 0,
             display: "grid",
             gap: "var(--sp-2)",
             padding: "var(--sp-3)",
@@ -261,6 +272,15 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                   display: "grid",
                   gap: "var(--sp-1)",
                   width: "100%",
+                  // Um item de grelha não encolhe abaixo do seu conteúdo sem
+                  // isto. O título tem `nowrap`, por isso o seu *min-content* é
+                  // a linha inteira (~300 px): a coluna da `aside` esticava até
+                  // 399 px e o `StatusTag` ia parar por baixo do editor, que
+                  // começa 12 px à direita do painel. `minWidth: 0` devolve a
+                  // decisão ao `maxWidth` da `aside`, e o título passa a cortar
+                  // com reticências — que é o que o `overflow: hidden` abaixo
+                  // sempre quis fazer.
+                  minWidth: 0,
                   minHeight: "48px",
                   padding: "var(--sp-2) var(--sp-3)",
                   border: 0,
@@ -276,6 +296,10 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: "var(--sp-2)",
+                    // Pela mesma razão do `minWidth` do botão: esta linha é um
+                    // item da grelha dele, e sem isto herdava o mesmo chão de
+                    // ~300 px que empurrava o estado para fora do painel.
+                    minWidth: 0,
                   }}
                 >
                   <span
@@ -319,12 +343,11 @@ export function UpdatesManager(props: UpdatesManagerProps) {
           <section
             aria-label={t("editorLabel")}
             style={{
-              // `grow: 999` contra o `grow: 1` da lista: o editor fica com todo
-              // o espaço que sobra em vez de o dividir ao meio com ela.
+              // A outra metade: a mesma base e o mesmo `grow` da lista.
               // `minWidth: 0` porque um item de flex não encolhe abaixo do
               // conteúdo sem isto, e um `<textarea>` lá dentro empurrava a
               // coluna para fora da janela.
-              flex: "999 1 min(100%, 460px)",
+              flex: "1 1 min(100%, 320px)",
               minWidth: 0,
               display: "grid",
               gap: "var(--sp-4)",
@@ -590,6 +613,12 @@ export function UpdatesManager(props: UpdatesManagerProps) {
           <section
             aria-label={t("editorLabel")}
             style={{
+              // A mesma metade do editor a sério: sem isto, o convite a
+              // escolher uma novidade ficava do tamanho da frase e a lista
+              // esticava-se para o resto da linha — os 50/50 só valem se
+              // valerem também no ecrã vazio, que é o primeiro que se vê.
+              flex: "1 1 min(100%, 320px)",
+              minWidth: 0,
               display: "grid",
               placeItems: "center",
               minHeight: "280px",

@@ -122,3 +122,34 @@
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
+
+/*
+ * O painel das variáveis — a mesma peça dos modelos de contrato
+ * ===========================================================================
+ * Medidas copiadas do `TemplateBodyEditor.module.css` de propósito: são a
+ * mesma coisa em dois sítios do produto, e dois painéis parecidos mas
+ * diferentes são piores do que dois iguais. O dia em que estas medidas
+ * divergirem é o dia em que esta peça devia ter sido promovida a componente.
+ */
+.upm-richtext__variables {
+  position: absolute;
+  top: calc(100% + var(--sp-2));
+  left: 0;
+  z-index: 30;
+  display: grid;
+  width: 230px;
+  max-width: calc(100vw - 48px);
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.upm-richtext__variables-title {
+  padding: 0 var(--sp-2) var(--sp-1);
+  color: var(--muted);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+}
