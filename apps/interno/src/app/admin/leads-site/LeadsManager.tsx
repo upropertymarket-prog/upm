@@ -236,6 +236,7 @@ export function LeadsManager({
             <Select
               name="status"
               label={t("statusFilter")}
+              labelStyle={{ fontWeight: 600 }}
               defaultValue={filters.status ?? ""}
               placeholder={t("allStatuses")}
               options={(["new", "contacted", "qualified", "converted", "discarded"] as const).map(
