@@ -59,6 +59,17 @@ jobs:
       - name: Portão · grelhas e ellipsis responsivos
         run: pnpm gate:responsive
 
+      # 04 §5.3 — pesos por token, escala até 700, cabeçalhos com regra de
+      # elemento. A 26 out 2026 a app tinha o cromado a 800 e os títulos a 400,
+      # e nada no CI reparava: um peso errado não parte compilação nem teste.
+      # O teste corre antes do portão de propósito — um portão que não sabe
+      # recusar passa em silêncio, que foi como o `gate:canvas` esteve cego.
+      - name: Portão · tipografia (teste negativo)
+        run: pnpm gate:typography:test
+
+      - name: Portão · pesos de letra
+        run: pnpm gate:typography
+
       # 04 §2.1.2 AC #5 — uma rota pública sem `seo.ts` falha o PR. Uma página
       # que entra em produção sem título nem cartão de partilha só se descobre
       # quando alguém partilha o link, que é tarde.

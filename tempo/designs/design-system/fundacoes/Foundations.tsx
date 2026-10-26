@@ -178,11 +178,65 @@ const TYPE_SCALE: [string, string, string][] = [
   ["--fs-label", "var(--font-mono)", "Etiquetas, contadores e refs · 13 px"],
 ];
 
+/**
+ * Peso ↔ papel (04 §5.3). A escala de pesos acaba nos 700, e esse topo é dos
+ * títulos — a Bricolage, que os escreve, está declarada em 500–700, e um token
+ * acima disso só seria alcançável pelo texto em Manrope, ou seja pelo cromado.
+ * Foi exatamente o que aconteceu até 26 out 2026: labels e cabeçalhos de tabela
+ * a 800, títulos a 400, e nenhum título capaz de responder.
+ */
+const WEIGHT_SCALE: [string, string, string][] = [
+  ["--fw-regular", "400", "Corpo"],
+  ["--fw-medium", "500", "Contadores, avatares, texto secundário"],
+  ["--fw-pill", "550", "Tags de estado"],
+  ["--fw-semibold", "600", "Labels, cabeçalhos de tabela, botões, navegação, ênfase"],
+  ["--fw-bold", "700", "Títulos — h1–h3 e `.upm-pagehead__title`, e mais nada"],
+];
+
 /** 07 §3 — a escala revista. Os níveis de 12 px e 12,5 px foram eliminados. */
 export function Tipografia() {
   return (
     <Pair>
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-6)" }}>
+        {/* Os pesos primeiro: a escala de tamanhos abaixo desenha-se toda ao
+            mesmo peso, e sem isto o canvas não dizia qual pertence a quê. */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)" }}>
+          {WEIGHT_SCALE.map(([token, valor, papel]) => (
+            <div
+              key={token}
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "var(--sp-5)",
+                flexWrap: "wrap",
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--fs-subtitle)",
+                  fontWeight: `var(${token})`,
+                  flex: "none",
+                }}
+              >
+                Imóveis sem comissões
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--fs-label)",
+                  color: "var(--muted)",
+                  flex: "1 1 auto",
+                  minWidth: 0,
+                }}
+              >
+                {token} · {valor} · {papel}
+              </span>
+            </div>
+          ))}
+        </div>
+
         {TYPE_SCALE.map(([token, family, note]) => (
           <div key={token} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <span

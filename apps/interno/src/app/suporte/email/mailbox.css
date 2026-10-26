@@ -82,7 +82,7 @@
 .upm-mail__folder[aria-current="true"] {
   background: var(--accent-soft);
   color: var(--accent-ink);
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .upm-mail__folder-label {
@@ -113,7 +113,7 @@
   justify-content: space-between;
   width: 100%;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   color: var(--text);
 }
 
@@ -252,7 +252,7 @@
 
 .upm-mail__row[data-unread="true"] .upm-mail__row-from,
 .upm-mail__row[data-unread="true"] .upm-mail__row-subject {
-  font-weight: 700;
+  font-weight: var(--fw-semibold);
 }
 
 .upm-mail__row-date {
@@ -344,7 +344,7 @@
   flex: 1;
   margin: 0;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text);
 }
 
@@ -380,7 +380,7 @@
 
 .upm-mail__reader-sender {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   color: var(--text);
 }
 
@@ -768,6 +768,6 @@
   background: var(--accent-soft);
   color: var(--accent-ink);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--fw-medium);
   letter-spacing: 0.02em;
 }
