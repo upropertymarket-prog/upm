@@ -29,8 +29,6 @@ export type TableProps<Row> = {
   selectedKey?: string;
   /** Mostrado no corpo da tabela quando `rows` está vazio. */
   empty?: React.ReactNode;
-  /** Ajuste pontual dos cabeçalhos desta tabela, sem mexer no estilo partilhado. */
-  headerStyle?: React.CSSProperties;
   className?: string;
 };
 
@@ -59,7 +57,6 @@ export function Table<Row>({
   onRowClick,
   selectedKey,
   empty,
-  headerStyle,
   className,
 }: TableProps<Row>) {
   return (
@@ -73,11 +70,7 @@ export function Table<Row>({
                 key={column.id}
                 scope="col"
                 className={cx(column.numeric && "upm-table__num", alignClass(column))}
-                style={
-                  column.width || headerStyle
-                    ? { ...headerStyle, ...(column.width ? { width: column.width } : null) }
-                    : undefined
-                }
+                style={column.width ? { width: column.width } : undefined}
               >
                 {column.header}
               </th>

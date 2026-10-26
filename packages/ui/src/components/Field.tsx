@@ -7,8 +7,6 @@ export type FieldProps = {
   label: string;
   /** Esconde o label visualmente, mantendo-o para leitores de ecrã. */
   labelHidden?: boolean;
-  /** Ajuste pontual do label de uma instância, sem mexer no estilo partilhado. */
-  labelStyle?: React.CSSProperties;
   hint?: string;
   error?: string;
   className?: string;
@@ -23,15 +21,7 @@ export type FieldProps = {
  * prop obrigatória e os ids são gerados aqui, não à mão em cada ecrã
  * (04 §5.7). O erro liga-se por `aria-describedby` e `aria-invalid`.
  */
-export function Field({
-  label,
-  labelHidden,
-  labelStyle,
-  hint,
-  error,
-  className,
-  children,
-}: FieldProps) {
+export function Field({ label, labelHidden, hint, error, className, children }: FieldProps) {
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
@@ -39,11 +29,7 @@ export function Field({
 
   return (
     <div className={cx("upm-field", className)}>
-      <label
-        className={cx("upm-field__label", labelHidden && "upm-sr-only")}
-        htmlFor={id}
-        style={labelStyle}
-      >
+      <label className={cx("upm-field__label", labelHidden && "upm-sr-only")} htmlFor={id}>
         {label}
       </label>
       {children({ id, describedBy, invalid: Boolean(error) })}

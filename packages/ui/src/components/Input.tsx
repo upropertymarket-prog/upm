@@ -8,7 +8,6 @@ type NativeInput = Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"
 export type InputProps = NativeInput & {
   label: string;
   labelHidden?: boolean;
-  labelStyle?: React.CSSProperties;
   hint?: string;
   error?: string;
   /** Ícone à esquerda dentro da moldura (protótipos: lupa na pesquisa). */
@@ -28,29 +27,11 @@ export type InputProps = NativeInput & {
  * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  {
-    label,
-    labelHidden,
-    labelStyle,
-    hint,
-    error,
-    leadingIcon,
-    trailingSlot,
-    className,
-    disabled,
-    ...rest
-  },
+  { label, labelHidden, hint, error, leadingIcon, trailingSlot, className, disabled, ...rest },
   ref,
 ) {
   return (
-    <Field
-      label={label}
-      labelHidden={labelHidden}
-      labelStyle={labelStyle}
-      hint={hint}
-      error={error}
-      className={className}
-    >
+    <Field label={label} labelHidden={labelHidden} hint={hint} error={error} className={className}>
       {({ id, describedBy, invalid }) => (
         <div
           className="upm-control"

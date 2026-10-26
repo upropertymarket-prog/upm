@@ -13,7 +13,6 @@ export type SelectOption = {
 export type SelectProps = Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "className"> & {
   label: string;
   labelHidden?: boolean;
-  labelStyle?: React.CSSProperties;
   hint?: string;
   error?: string;
   options: SelectOption[];
@@ -34,29 +33,11 @@ export type SelectProps = Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "c
  * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  {
-    label,
-    labelHidden,
-    labelStyle,
-    hint,
-    error,
-    options,
-    placeholder,
-    className,
-    disabled,
-    ...rest
-  },
+  { label, labelHidden, hint, error, options, placeholder, className, disabled, ...rest },
   ref,
 ) {
   return (
-    <Field
-      label={label}
-      labelHidden={labelHidden}
-      labelStyle={labelStyle}
-      hint={hint}
-      error={error}
-      className={className}
-    >
+    <Field label={label} labelHidden={labelHidden} hint={hint} error={error} className={className}>
       {({ id, describedBy, invalid }) => (
         <div
           className={cx("upm-control", "upm-select")}
