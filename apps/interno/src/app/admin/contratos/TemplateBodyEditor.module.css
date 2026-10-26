@@ -213,7 +213,9 @@
   color: var(--variable-action);
   font-family: inherit;
   font-size: inherit;
-  font-weight: var(--fw-medium);
+  /* Igual ao editor de contratos da app (`contract-editor.css`): o mesmo chip
+     não pode ter dois pesos conforme o lado da plataforma em que se abre. */
+  font-weight: var(--fw-semibold);
   white-space: nowrap;
   cursor: default;
 }

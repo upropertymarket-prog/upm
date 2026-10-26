@@ -86,7 +86,9 @@
   color: var(--variable-action);
   font-family: inherit;
   font-size: inherit;
-  font-weight: var(--fw-medium);
+  /* 600 e não 500: a variável é um marcador dentro do corpo do contrato, e a
+     500 ficava a um passo do texto à volta — a cor sozinha não a separava. */
+  font-weight: var(--fw-semibold);
   white-space: nowrap;
   cursor: default;
 }
