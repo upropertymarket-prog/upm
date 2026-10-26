@@ -172,7 +172,13 @@ export function BlockCanvas(props: BlockCanvasProps) {
                 gap: "var(--sp-2)",
               }}
             >
-              <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "var(--fw-semibold)",
+                  color: "var(--muted)",
+                }}
+              >
                 {t(`blocks.${block.type}`)}
               </span>
 

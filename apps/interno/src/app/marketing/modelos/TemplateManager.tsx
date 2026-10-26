@@ -270,7 +270,7 @@ export function TemplateManager(props: TemplateManagerProps) {
                     alignItems: "center",
                     gap: "var(--sp-2)",
                     fontSize: "var(--fs-body)",
-                    fontWeight: 700,
+                    fontWeight: "var(--fw-semibold)",
                     color: "var(--text)",
                   }}
                 >
@@ -416,7 +416,7 @@ export function TemplateManager(props: TemplateManagerProps) {
                   <span
                     style={{
                       fontSize: "var(--fs-label)",
-                      fontWeight: 800,
+                      fontWeight: "var(--fw-semibold)",
                       letterSpacing: "0.04em",
                       textTransform: "uppercase",
                       color: "var(--muted)",

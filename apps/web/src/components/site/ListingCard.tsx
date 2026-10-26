@@ -156,7 +156,13 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
         >
           {money(price)}
           {listing.deal === "rent" ? (
-            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", fontWeight: 400 }}>
+            <span
+              style={{
+                fontSize: "var(--fs-body)",
+                color: "var(--muted)",
+                fontWeight: "var(--fw-regular)",
+              }}
+            >
               {" "}
               / mês
             </span>

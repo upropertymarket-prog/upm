@@ -341,7 +341,7 @@ export function PropertyDetail({
                   href={`/market/${nextListing.id}`}
                   style={{
                     color: "var(--text)",
-                    fontWeight: 600,
+                    fontWeight: "var(--fw-semibold)",
                     textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
@@ -422,7 +422,7 @@ function Detail({
         {icon}
         {label}
       </dt>
-      <dd style={{ margin: "4px 0 0", fontWeight: 700 }}>{value}</dd>
+      <dd style={{ margin: "4px 0 0", fontWeight: "var(--fw-semibold)" }}>{value}</dd>
     </div>
   );
 }

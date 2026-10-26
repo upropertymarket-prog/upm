@@ -91,7 +91,7 @@ export function SiteFooter() {
                 <strong
                   style={{
                     fontSize: "var(--fs-label)",
-                    fontWeight: 800,
+                    fontWeight: "var(--fw-semibold)",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     color: "var(--muted)",

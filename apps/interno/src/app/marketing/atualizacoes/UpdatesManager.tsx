@@ -414,7 +414,13 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                 abre a toda a gente, e uma imagem sem alternativa textual falha
                 o AA de 04 §1.7 na cara de quem usa leitor de ecrã. */}
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-              <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+              <span
+                style={{
+                  fontSize: "12.5px",
+                  fontWeight: "var(--fw-semibold)",
+                  color: "var(--text)",
+                }}
+              >
                 {t("imageLabel")}
               </span>
               <div
@@ -506,7 +512,13 @@ export function UpdatesManager(props: UpdatesManagerProps) {
               />
             ) : (
               <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+                <span
+                  style={{
+                    fontSize: "12.5px",
+                    fontWeight: "var(--fw-semibold)",
+                    color: "var(--text)",
+                  }}
+                >
                   {t("bodyLabel")}
                 </span>
                 <RichText

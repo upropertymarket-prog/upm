@@ -271,7 +271,7 @@ export function MetricsView(props: MetricsViewProps) {
               alignItems: "center",
               gap: "var(--sp-3)",
               cursor: "pointer",
-              fontWeight: 700,
+              fontWeight: "var(--fw-semibold)",
               // O marcador nativo é um triângulo que cada browser desenha à sua
               // maneira; o `TriangleAlert` ao lado diz o mesmo e diz melhor.
               listStyle: "none",
@@ -279,7 +279,13 @@ export function MetricsView(props: MetricsViewProps) {
           >
             <TriangleAlert size={16} aria-hidden="true" style={{ flexShrink: 0 }} />
             <span style={{ flex: "1 1 auto", minWidth: 0 }}>{t("noReceiptsNote")}</span>
-            <span style={{ fontWeight: 400, textDecoration: "underline", whiteSpace: "nowrap" }}>
+            <span
+              style={{
+                fontWeight: "var(--fw-regular)",
+                textDecoration: "underline",
+                whiteSpace: "nowrap",
+              }}
+            >
               {t("noReceiptsMore")}
             </span>
           </summary>

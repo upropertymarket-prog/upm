@@ -209,12 +209,16 @@ export function LegalDocumentBody({ markdown }: { markdown: string }) {
             return block.level === 2 ? (
               <h2
                 key={key}
-                style={{ fontSize: "1.0625rem", fontWeight: 600, marginTop: "var(--sp-4)" }}
+                style={{
+                  fontSize: "1.0625rem",
+                  fontWeight: "var(--fw-semibold)",
+                  marginTop: "var(--sp-4)",
+                }}
               >
                 {inline(block.text, key)}
               </h2>
             ) : (
-              <h3 key={key} style={{ fontSize: "0.9375rem", fontWeight: 600 }}>
+              <h3 key={key} style={{ fontSize: "0.9375rem", fontWeight: "var(--fw-semibold)" }}>
                 {inline(block.text, key)}
               </h3>
             );

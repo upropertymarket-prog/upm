@@ -738,7 +738,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                           display: "grid",
                           gap: "var(--sp-1)",
                           fontSize: "12.5px",
-                          fontWeight: 700,
+                          fontWeight: "var(--fw-semibold)",
                           color: "var(--text)",
                         }}
                       >
@@ -762,7 +762,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                             style={{
                               fontFamily: "ui-monospace, monospace",
                               fontSize: "12px",
-                              fontWeight: 400,
+                              fontWeight: "var(--fw-regular)",
                               color: "var(--muted)",
                             }}
                           >
@@ -1035,7 +1035,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                         <span
                           style={{
                             fontSize: "var(--fs-subtitle-lg)",
-                            fontWeight: 800,
+                            fontWeight: "var(--fw-semibold)",
                             color: "var(--text)",
                             fontVariantNumeric: "tabular-nums",
                           }}
@@ -1216,7 +1216,13 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
 
                 {props.scheduled.last_error ? (
                   <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                    <span style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text)" }}>
+                    <span
+                      style={{
+                        fontSize: "12.5px",
+                        fontWeight: "var(--fw-semibold)",
+                        color: "var(--text)",
+                      }}
+                    >
                       {t("scheduleFailedServer")}
                     </span>
                     <p
@@ -1296,7 +1302,7 @@ function Panel({
             style={{
               margin: 0,
               fontSize: "12px",
-              fontWeight: 800,
+              fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.04em",
               textTransform: "uppercase",
               color: "var(--muted)",

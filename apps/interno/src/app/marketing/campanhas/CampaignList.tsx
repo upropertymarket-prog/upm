@@ -141,7 +141,7 @@ export function CampaignList(props: CampaignListProps) {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 fontSize: "14px",
-                fontWeight: 600,
+                fontWeight: "var(--fw-semibold)",
                 color: "var(--text)",
               }}
             >

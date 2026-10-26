@@ -235,12 +235,32 @@
   --fs-title: clamp(24px, 3vw, 32px);
   --fs-title-lg: clamp(32px, 5vw, 56px);
 
+  /**
+   * Pesos — o teto é 700, e é dos títulos (26 out 2026)
+   * -----------------------------------------------------------------------
+   * Havia um `--fw-black: 800`, e ele era a causa de metade das incoerências
+   * da app. A Bricolage, que escreve os títulos, está declarada em 500–700;
+   * a Manrope, que escreve o texto e o cromado, em 400–800. Com um token de
+   * 800 ao alcance do cromado, um label de campo ou um cabeçalho de tabela
+   * renderizava **mais pesado do que o título da página** — e nenhum título
+   * podia responder, porque a sua fonte acaba nos 700.
+   *
+   * O 800 foi eliminado em vez de se alargar a Bricolage: um ecrã lê-se pela
+   * hierarquia, e 400 → 700 chegam para a construir. Cada peso tem um papel:
+   *
+   *   regular   corpo
+   *   medium    contadores, avatares, texto secundário de chrome
+   *   pill      tags de estado (550 — a meio caminho, medido nos protótipos)
+   *   semibold  labels, cabeçalhos de tabela, botões, navegação, ênfase
+   *   bold      títulos (h1–h3 e `.upm-pagehead__title`), e nada mais
+   *
+   * Quem precisar de mais destaque muda o tamanho ou a cor, não o peso.
+   */
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-pill: 550;
   --fw-semibold: 600;
   --fw-bold: 700;
-  --fw-black: 800;
 
   --lh-tight: 1.1;
   --lh-snug: 1.35;

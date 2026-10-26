@@ -120,7 +120,7 @@ function Fact({
         {icon}
         {label}
       </dt>
-      <dd style={{ margin: "4px 0 0", fontWeight: 700 }}>{value}</dd>
+      <dd style={{ margin: "4px 0 0", fontWeight: "var(--fw-semibold)" }}>{value}</dd>
     </div>
   );
 }
@@ -374,7 +374,13 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                     <strong style={{ fontSize: 30 }}>
                       {asMoney(price)}
                       {listing.deal === "rent" ? (
-                        <span style={{ fontSize: 15, color: "var(--muted)", fontWeight: 400 }}>
+                        <span
+                          style={{
+                            fontSize: 15,
+                            color: "var(--muted)",
+                            fontWeight: "var(--fw-regular)",
+                          }}
+                        >
                           {tPlan("perMonth")}
                         </span>
                       ) : null}

@@ -74,7 +74,7 @@ export function SectionHeading({
             // 14 px por `[data-app="web"]`. O sobretítulo distingue-se pelo
             // peso, pelas maiúsculas e pela cor de acento — não por ser menor.
             fontSize: "var(--fs-label)",
-            fontWeight: 800,
+            fontWeight: "var(--fw-semibold)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--accent)",

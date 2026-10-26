@@ -19,6 +19,37 @@
  */
 
 /* =========================================================================
+ * Cabeçalhos
+ * ====================================================================== */
+
+/**
+ * O preflight do Tailwind v4 põe `h1…h6 { font-size: inherit; font-weight:
+ * inherit }` — de propósito, para obrigar a estilizar por opção e não por
+ * omissão. Só que o design system nunca exerceu essa opção ao nível do
+ * elemento: havia classes (`.upm-pagehead__title`, `.upm-card__title`) e mais
+ * nada. Todo o `<h1>` escrito à mão herdava os 400 do `body`, e eram 36 em
+ * código de produto — incluindo o do hero do site público, que ficava mais
+ * leve do que o eyebrow em cima dele.
+ *
+ * Isto é a omissão, não uma imposição: as três apps importam esta folha
+ * depois do `tailwindcss`, logo um `h1` sem mais nada cai aqui, e qualquer
+ * classe — do design system ou um `font-medium` do Tailwind — ganha por
+ * especificidade. O tamanho continua a ser escolha de quem escreve o ecrã;
+ * só o peso deixa de ser esquecível.
+ */
+h1,
+h2,
+h3 {
+  font-weight: var(--fw-bold);
+}
+
+h4,
+h5,
+h6 {
+  font-weight: var(--fw-semibold);
+}
+
+/* =========================================================================
  * Button
  * ====================================================================== */
 
@@ -31,7 +62,7 @@
   border-radius: var(--r-lg);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -150,7 +181,7 @@
 
 .upm-field__label {
   font-size: var(--fs-label);
-  font-weight: var(--fw-black);
+  font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--muted);
@@ -267,7 +298,7 @@
 .upm-select__input {
   appearance: none;
   cursor: pointer;
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-regular);
   padding-right: var(--sp-8);
 }
 
@@ -304,7 +335,7 @@
   background: var(--surface2);
   color: var(--muted);
   font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -358,7 +389,7 @@
   background: transparent;
   color: var(--muted);
   font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -489,7 +520,7 @@
 .upm-card__title {
   font-family: var(--font-display);
   font-size: var(--fs-subtitle);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   margin: 0;
 }
 
@@ -537,7 +568,7 @@
   border-bottom: 1px solid var(--border);
   text-align: left;
   font-size: var(--fs-label);
-  font-weight: var(--fw-black);
+  font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--muted);
@@ -709,7 +740,7 @@
 .upm-panel__title {
   font-family: var(--font-display);
   font-size: var(--fs-subtitle-lg);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   margin: 0;
   min-width: 0;
 }
@@ -880,7 +911,7 @@
 
 .upm-toggle__label {
   font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
 }
 
 .upm-toggle__hint {
@@ -1002,7 +1033,7 @@
 .upm-empty__title {
   font-family: var(--font-display);
   font-size: var(--fs-subtitle-lg);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   margin: 0;
 }
 

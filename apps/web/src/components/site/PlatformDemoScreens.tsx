@@ -153,7 +153,9 @@ function BuyerScreen() {
                 {listing.saved ? <StatusTag tone="primary">Guardado</StatusTag> : null}
               </div>
               <strong style={{ fontSize: 14, lineHeight: 1.3 }}>{listing.title}</strong>
-              <span style={{ fontSize: 18, fontWeight: 700 }}>{listing.price}</span>
+              <span style={{ fontSize: 18, fontWeight: "var(--fw-semibold)" }}>
+                {listing.price}
+              </span>
               <span style={{ color: "var(--muted)", fontSize: 12 }}>
                 {listing.typology} · {listing.area} m² · {listing.city}
               </span>

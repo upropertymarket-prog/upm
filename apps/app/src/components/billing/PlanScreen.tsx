@@ -383,7 +383,7 @@ export function PlanScreen({
           <span
             style={{
               fontSize: "var(--fs-pill)",
-              fontWeight: 800,
+              fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--accent)",
@@ -619,7 +619,7 @@ export function PlanScreen({
             )}
           </p>
           <label style={{ display: "grid", gap: "var(--sp-2)" }}>
-            <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>
+            <span style={{ fontSize: "var(--fs-body)", fontWeight: "var(--fw-semibold)" }}>
               {t("cancel.reasonLabel")}
             </span>
             <textarea
@@ -832,7 +832,7 @@ export function PlanScreen({
               style={{
                 fontSize: "var(--fs-body)",
                 color: "var(--muted)",
-                fontWeight: 600,
+                fontWeight: "var(--fw-semibold)",
               }}
             >
               {interval === "month" ? t("perMonth") : t("perYear")}
@@ -905,7 +905,7 @@ function UsageMeter({
       <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>{label}</span>
       <strong style={{ fontSize: "var(--fs-subtitle)" }}>
         {format(used)}
-        <span style={{ color: "var(--muted)", fontWeight: 600 }}>
+        <span style={{ color: "var(--muted)", fontWeight: "var(--fw-semibold)" }}>
           {unlimited ? (
             t("meterOfUnlimited")
           ) : (

@@ -43,7 +43,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               // `--fs-label` nos 14 px que 07 §3 fixa como mínimo do site
               // público. Escrever "12px" aqui furava esse piso.
               fontSize: "var(--fs-label)",
-              fontWeight: 800,
+              fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--accent)",
@@ -107,7 +107,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                   alignItems: "center",
                   gap: "var(--sp-2)",
                   fontSize: "var(--fs-body)",
-                  fontWeight: 700,
+                  fontWeight: "var(--fw-semibold)",
                   color: "var(--text)",
                 }}
               >

@@ -141,7 +141,11 @@ export function Pricing({
                   >
                     {money(cents, locale)}
                     <span
-                      style={{ fontSize: "var(--fs-body)", color: "var(--muted)", fontWeight: 400 }}
+                      style={{
+                        fontSize: "var(--fs-body)",
+                        color: "var(--muted)",
+                        fontWeight: "var(--fw-regular)",
+                      }}
                     >
                       {billing === "year" ? " / ano" : " / mês"}
                     </span>

@@ -295,7 +295,7 @@
   background: transparent;
   color: var(--muted);
   font-size: var(--fs-label);
-  font-weight: var(--fw-black);
+  font-weight: var(--fw-semibold);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
@@ -377,7 +377,7 @@
 
 .upm-usercard__name {
   font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -469,7 +469,7 @@
   padding: var(--sp-5) var(--sp-6);
   border-bottom: 1px solid var(--border);
   font-size: var(--fs-label);
-  font-weight: var(--fw-black);
+  font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--muted);

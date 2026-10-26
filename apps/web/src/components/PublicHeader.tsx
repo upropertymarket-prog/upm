@@ -113,7 +113,7 @@ export function PublicHeader({
             color: "var(--on-solid)",
             textAlign: "center",
             fontSize: "var(--fs-label)",
-            fontWeight: 700,
+            fontWeight: "var(--fw-semibold)",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             padding: "8px 16px",

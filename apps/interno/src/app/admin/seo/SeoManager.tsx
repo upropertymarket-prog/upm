@@ -207,7 +207,7 @@ function Counter({ value, limit }: { value: string; limit: number }) {
     <span
       style={{
         fontSize: "var(--fs-label)",
-        fontWeight: 700,
+        fontWeight: "var(--fw-semibold)",
         // Vermelho é aviso, não impedimento: o botão de guardar continua
         // ativo, porque o limite é conselho de SEO e a decisão é do marketing.
         color: over ? "var(--danger)" : "var(--muted)",
@@ -396,7 +396,7 @@ export function SeoManager({
                 <span
                   style={{
                     fontSize: "var(--fs-label)",
-                    fontWeight: 700,
+                    fontWeight: "var(--fw-semibold)",
                     color: "var(--muted)",
                     minWidth: "22px",
                   }}

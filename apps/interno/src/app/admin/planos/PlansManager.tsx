@@ -503,7 +503,13 @@ function Health({
     <div style={{ display: "grid", gap: "var(--sp-2)", marginBottom: "var(--sp-6)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
         <strong style={{ fontSize: "var(--fs-body)" }}>{label}</strong>
-        <span style={{ marginLeft: "auto", fontSize: "var(--fs-body)", fontWeight: 700 }}>
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: "var(--fs-body)",
+            fontWeight: "var(--fw-semibold)",
+          }}
+        >
           {value}
         </span>
       </div>
@@ -641,7 +647,9 @@ function PlanForm({
       <fieldset
         style={{ border: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}
       >
-        <legend style={{ fontSize: "var(--fs-body)", fontWeight: 700, padding: 0 }}>
+        <legend
+          style={{ fontSize: "var(--fs-body)", fontWeight: "var(--fw-semibold)", padding: 0 }}
+        >
           {t("limitsLegend")}
         </legend>
         <div

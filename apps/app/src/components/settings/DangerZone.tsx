@@ -130,7 +130,9 @@ export function DangerZone({ onExport, onDelete, afterDeleteUrl }: DangerZonePro
           </p>
 
           <label style={{ display: "grid", gap: "var(--sp-2)" }}>
-            <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>{t("reasonLabel")}</span>
+            <span style={{ fontSize: "var(--fs-body)", fontWeight: "var(--fw-semibold)" }}>
+              {t("reasonLabel")}
+            </span>
             <textarea
               name="reason"
               rows={2}

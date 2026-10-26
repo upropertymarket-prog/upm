@@ -84,7 +84,7 @@ export function Faq() {
                     border: "none",
                     font: "inherit",
                     fontSize: "14.5px",
-                    fontWeight: 600,
+                    fontWeight: "var(--fw-semibold)",
                     color: "var(--text)",
                     cursor: "pointer",
                   }}
