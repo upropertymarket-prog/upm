@@ -230,6 +230,7 @@ export function LeadsManager({
             <Input
               name="search"
               label={t("search")}
+              labelStyle={{ fontWeight: 600 }}
               placeholder={t("searchHint")}
               defaultValue={filters.search}
             />
@@ -237,6 +238,7 @@ export function LeadsManager({
               name="status"
               label={t("statusFilter")}
               labelStyle={{ fontWeight: 600 }}
+              style={{ fontWeight: 500 }}
               defaultValue={filters.status ?? ""}
               placeholder={t("allStatuses")}
               options={(["new", "contacted", "qualified", "converted", "discarded"] as const).map(
@@ -246,6 +248,8 @@ export function LeadsManager({
             <Select
               name="source"
               label={t("sourceFilter")}
+              labelStyle={{ fontWeight: 600 }}
+              style={{ fontWeight: 500 }}
               defaultValue={filters.source ?? ""}
               placeholder={t("allSources")}
               options={(["pre_launch", "post_launch"] as const).map((key) => ({
@@ -256,6 +260,8 @@ export function LeadsManager({
             <Select
               name="form"
               label={t("formFilter")}
+              labelStyle={{ fontWeight: 600 }}
+              style={{ fontWeight: 500 }}
               defaultValue={filters.form ?? ""}
               placeholder={t("allForms")}
               options={(["preinscricao", "contacto", "empresas"] as const).map((key) => ({
@@ -266,6 +272,8 @@ export function LeadsManager({
             <Select
               name="assigned_to"
               label={t("assignedTo")}
+              labelStyle={{ fontWeight: 600 }}
+              style={{ fontWeight: 500 }}
               defaultValue={filters.assignedTo ?? ""}
               placeholder={t("allStaff")}
               options={staff.map((member) => ({ value: member.id, label: member.full_name }))}
@@ -296,6 +304,7 @@ export function LeadsManager({
             <>
               <Table
                 caption={t("tableCaption")}
+                headerStyle={{ fontWeight: 600 }}
                 columns={columns}
                 rows={rows}
                 rowKey={(row) => row.id}
