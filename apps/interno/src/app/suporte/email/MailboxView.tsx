@@ -125,7 +125,17 @@ export type MailboxViewProps = {
   onMove: (input: { messageId: string; folder: "inbox" | "archive" }) => Promise<MailActionResult>;
   onCreateLabel: (input: { mailboxId: string; name: string }) => Promise<MailActionResult>;
   onToggleLabel: (input: { messageId: string; labelId: string }) => Promise<MailActionResult>;
-  onCreateTicket: (messageId: string) => Promise<MailActionResult>;
+  /**
+   * **Opcional desde 26 out 2026**, e é o que distingue as duas portas da
+   * caixa. Criar um ticket é a única ação daqui que sai do correio para a fila
+   * de outra pessoa, e continua a ser só do Suporte (07 §5.10) — `/admin/email`
+   * não a passa, e sem ela o botão não se desenha.
+   *
+   * Omitir é melhor do que desativar: um botão cinzento com um `title` a
+   * explicar-se convida a pessoa a tentar, e a resposta é sempre não. O que o
+   * Admin não pode fazer não lhe aparece.
+   */
+  onCreateTicket?: (messageId: string) => Promise<MailActionResult>;
   onSync: () => Promise<MailActionResult>;
   /** A assinatura da caixa escolhida, já com as variáveis resolvidas (05 §1.8). */
   signature: string;
@@ -439,7 +449,11 @@ export function MailboxView(props: MailboxViewProps) {
             onToggleLabel={(labelId) =>
               run(() => props.onToggleLabel({ messageId: props.selected!.id, labelId }))
             }
-            onCreateTicket={() => run(() => props.onCreateTicket(props.selected!.id))}
+            onCreateTicket={
+              props.onCreateTicket
+                ? () => run(() => props.onCreateTicket!(props.selected!.id))
+                : undefined
+            }
             onReply={() => setComposer(replyDraft(props.selected!, t))}
             onForward={() => setComposer(forwardDraft(props.selected!, t))}
             onAttachmentLink={props.onAttachmentLink}
@@ -958,7 +972,7 @@ function MailReader({
   onToggleStar: () => void;
   onArchive: () => void;
   onToggleLabel: (labelId: string) => void;
-  onCreateTicket: () => void;
+  onCreateTicket?: () => void;
   onReply: () => void;
   onForward: () => void;
   onAttachmentLink: MailboxViewProps["onAttachmentLink"];
@@ -1071,14 +1085,16 @@ function MailReader({
         <Button variant="secondary" leadingIcon={<Forward size={15} />} onClick={onForward}>
           {t("forward")}
         </Button>
-        <Button
-          variant="secondary"
-          leadingIcon={<LifeBuoy size={15} />}
-          disabled={pending}
-          onClick={onCreateTicket}
-        >
-          {message.ticket_id ? t("openTicket") : t("createTicket")}
-        </Button>
+        {onCreateTicket ? (
+          <Button
+            variant="secondary"
+            leadingIcon={<LifeBuoy size={15} />}
+            disabled={pending}
+            onClick={onCreateTicket}
+          >
+            {message.ticket_id ? t("openTicket") : t("createTicket")}
+          </Button>
+        ) : null}
       </footer>
     </>
   );

@@ -6,7 +6,7 @@ import { Check, Copy, Link2, UserPlus } from "lucide-react";
 import { Button, Input, Modal, Select, useToast } from "@upm/ui";
 import { SHARE_EXPIRY_OPTIONS, SHARE_PERMISSIONS, type SharePermission } from "@upm/db/cloud";
 
-import type { ShareContact } from "../cloud/cloudTypes";
+import type { ShareContact } from "@upm/cloud";
 import type { ContractDetail } from "./contractTypes";
 
 export type ContractShareState = {

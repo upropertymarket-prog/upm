@@ -1,0 +1,106 @@
+/*
+ * Demonstração da home — as formas que um `style` em linha não consegue
+ * =========================================================================
+ * Os ecrãs da demonstração usam estilos em linha, como o resto do produto, e
+ * duas coisas ficam fora do que isso dá: um ponto de corte entre duas colunas e
+ * uma coluna só, e o rolo interno dos painéis das Mensagens.
+ *
+ * **Container queries e não media queries, e a razão é a caixa.** Os ecrãs do
+ * produto medem-se contra a janela, e por isso `.upm-messages` e `.upm-split`
+ * cortam aos 900 px do viewport. Aqui não servem: a demonstração vive numa
+ * caixa dentro da home, e dentro dela ainda há uma barra lateral de 240 px.
+ * Numa janela de 1100 px o painel da conversa tem menos de 600 px, e um corte
+ * medido na janela dava duas colunas onde não cabem duas colunas. O que decide
+ * é a largura **do conteúdo da demonstração**, que é exatamente o que uma
+ * container query mede.
+ *
+ * Sem uma única cor escrita à mão: tudo o que aqui está são tokens.
+ */
+
+/* O contentor de medida: é a área de conteúdo de cada ecrã da demonstração. */
+.upm-demo-screen {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+/* Conteúdo + coluna lateral (Mensagens, Cloud). Empilhado por omissão. */
+.upm-demo-panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: var(--demo-panes-align, start);
+  min-width: 0;
+}
+
+@container (min-width: 620px) {
+  .upm-demo-panes {
+    grid-template-columns: var(--demo-panes, minmax(180px, 240px) minmax(0, 1fr));
+  }
+}
+
+/* --- Mensagens -------------------------------------------------------- */
+
+.upm-demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  padding: var(--sp-5);
+  min-width: 0;
+}
+
+/* Rola a lista, não o painel: o título e a pesquisa ficam sempre à vista. */
+.upm-demo-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+  align-content: start;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.upm-demo-thread {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.upm-demo-thread__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-6);
+  background: var(--surface2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* --- Mapa ------------------------------------------------------------- */
+
+/*
+ * O lugar do mapa. Não é um mapa: é a moldura onde ele vive, com os pinos dos
+ * imóveis por cima — o Leaflet do produto não entra na home (07 §7 tirou a
+ * demonstração de qualquer dependência de dados reais) e uma tile layer vinda
+ * da internet num ecrã de demonstração é um pedido de rede que a home não
+ * precisa de fazer. A grelha é a malha de ruas estilizada.
+ */
+.upm-demo-map {
+  position: relative;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background-color: var(--surface2);
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  min-height: 260px;
+  overflow: hidden;
+}

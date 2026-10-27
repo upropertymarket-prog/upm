@@ -480,7 +480,7 @@
       "stats": {
         "commission": "0 % de comissão",
         "privacy": "100 % contactos privados",
-        "profiles": "4 perfis numa só plataforma"
+        "everything": "Tudo o que precisa"
       },
       "imageLabel": "fotografia principal · interior"
     },
@@ -750,22 +750,37 @@
     "demo": {
       "profilesLabel": "Perfis da demonstração",
       "disclaimer": "Demonstração com dados de exemplo. Nada do que aqui vê é uma conta real.",
-      "greeting": "Bom dia, Marta.",
-      "summary": "Tem 2 leads por responder e uma visita marcada para quinta-feira.",
-      "visitBooked": "Visita marcada",
-      "lastLeads": "Últimas leads",
-      "lastLeadsCaption": "Últimas leads recebidas",
-      "buyerMatches": "4 propriedades a corresponder à sua procura guardada.",
-      "leadStatus": {
-        "new": "Nova",
-        "answered": "Respondida",
-        "scheduled": "Visita marcada"
+      "toggleSaved": "Guardar imóvel",
+      "mapNote": "Mapa ilustrativo. Na plataforma, cada pino é um imóvel publicado e pode desenhar a zona onde quer procurar.",
+      "subtitle": {
+        "contracts": "Modelos, versões e assinatura, sem sair da plataforma."
       },
-      "leadColumns": {
-        "name": "Interessado",
-        "property": "Propriedade",
-        "when": "Quando",
-        "state": "Estado"
+      "shortcut": {
+        "leads": "Quem se interessou pelos seus imóveis e em que ponto está cada conversa.",
+        "visitSchedule": "As visitas pedidas aos seus imóveis, para aceitar ou propor outra data."
+      },
+      "notifications": {
+        "visitRequest": "Novo pedido de visita para o {property}",
+        "messageAnswered": "{name} respondeu à sua mensagem",
+        "listingApproved": "O anúncio «{property}» foi aprovado",
+        "priceDrop": "Desceu o preço do {property}, que guardou",
+        "visitConfirmed": "A visita ao {property} foi confirmada"
+      },
+      "thread": {
+        "askVisit": "Boa tarde! Seria possível visitar este fim de semana?",
+        "ownerProposes": "Claro. Tenho sábado às 15h30 ou domingo de manhã — qual lhe dá mais jeito?",
+        "buyerAccepts": "Sábado às 15h30 é perfeito, obrigado.",
+        "confirmVisit": "Combinado, sábado às 15h30. Até lá!",
+        "askCondo": "Qual é o valor do condomínio e o que inclui?",
+        "ownerAnswersCondo": "São 48 € por mês e incluem a limpeza das zonas comuns e o seguro.",
+        "askDocuments": "Pode partilhar a certidão e a planta do imóvel?",
+        "ownerSharesDocuments": "Partilhei os dois documentos na Cloud. Já lhe devem aparecer.",
+        "thanks": "Recebi, muito obrigado pela rapidez."
+      },
+      "reports": {
+        "photoUpload": "Não consigo carregar fotografias no anúncio pelo telemóvel",
+        "calendarTimezone": "A agenda mostrava as visitas uma hora adiantadas",
+        "calendarTimezoneFix": "As horas passaram a ser sempre as de Lisboa, para as duas partes da visita, independentemente do fuso do telemóvel."
       }
     },
     "preRegistration": {
@@ -830,10 +845,19 @@
     "columns": {
       "file": "Ficheiro",
       "share": "Partilha",
+      "owner": "Carregado por",
       "added": "Adicionado",
       "actions": "Ações",
       "sharedBy": "De",
       "expires": "Expira"
+    },
+    "source": {
+      "property_document": "Documento de imóvel",
+      "message_attachment": "Anexo de mensagem",
+      "contract": "Contrato",
+      "invoice": "Fatura",
+      "mail_attachment": "Anexo de correio",
+      "campaign_report": "Relatório de campanha"
     },
     "readonlyHint": "Documento do imóvel — só de leitura aqui",
     "readonlyBadge": "Só de leitura",
@@ -842,6 +866,7 @@
     "downloadFile": "Transferir {name}",
     "shareFile": "Partilhar {name}",
     "deleteFile": "Eliminar {name}",
+    "restoreFile": "Repor {name}",
     "details": "Detalhes",
     "newFolder": "Nova pasta",
     "newFolderIn": "Dentro da pasta selecionada",
@@ -910,6 +935,7 @@
       "folderCreated": "Pasta criada.",
       "uploaded": "Ficheiro carregado.",
       "binned": "Ficheiro movido para a reciclagem.",
+      "restored": "Ficheiro reposto.",
       "recycleEmptied": "Reciclagem esvaziada.",
       "versionSaved": "Versão nova guardada.",
       "versionRestored": "Versão restaurada como versão nova."
@@ -2645,35 +2671,7 @@
   },
   "internalCloud": {
     "title": "Cloud interna",
-    "subtitle": "Cloud de todas as equipas internas.",
-    "upload": "Carregar",
-    "uploading": "A carregar…",
-    "newFolder": "Nova pasta",
-    "folderPrompt": "Nome da pasta",
-    "allFiles": "Todos ({count})",
-    "recycleBin": "Reciclagem ({count})",
-    "empty": "Ainda não há ficheiros aqui.",
-    "emptyHint": "Carregue um PDF, JPG ou PNG até 25 MB.",
-    "emptyBin": "A reciclagem está vazia.",
-    "tableCaption": "Ficheiros da Cloud interna",
-    "download": "Transferir",
-    "downloadFailed": "Não foi possível abrir o ficheiro.",
-    "delete": "Apagar",
-    "restore": "Repor",
-    "columns": {
-      "file": "Ficheiro",
-      "owner": "Carregado por",
-      "size": "Tamanho",
-      "added": "Adicionado",
-      "actions": "Ações"
-    },
-    "source": {
-      "mail_attachment": "Anexo de correio",
-      "invoice": "Fatura",
-      "contract": "Contrato",
-      "property_document": "Documento de imóvel",
-      "campaign_report": "Relatório de campanha"
-    }
+    "subtitle": "A gaveta da equipa. O que está aqui é de todos — Admin, Suporte e Marketing."
   },
   "errors": {
     "unexpectedTitle": "Ocorreu um erro inesperado.",

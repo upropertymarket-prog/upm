@@ -36,6 +36,12 @@ import {
   AdminCaixasEmailVazioEscuro,
 } from "./Mailboxes";
 import { AdminTicketsClaro, AdminTicketsEscuro } from "./Tickets";
+import {
+  AdminCaixaEmailClaro,
+  AdminCaixaEmailEscuro,
+  AdminCaixaEmailSemCaixas,
+  AdminCaixaEmailSemCaixasEscuro,
+} from "./Email";
 
 /**
  * Canvas do Admin — pela ordem do menu
@@ -54,6 +60,14 @@ import { AdminTicketsClaro, AdminTicketsEscuro } from "./Tickets";
  * Desde 13 out 2026 **todas as entradas do menu têm storyboard**: as últimas
  * duas que faltavam eram as Caixas de e-mail (`/admin/caixas-email`) e os
  * Tickets (`/admin/tickets`, vista só de leitura).
+ *
+ * A 27 out 2026 entrou a **Caixa de e-mail** (`/admin/email`), e entrou no sítio
+ * que o menu lhe dá: *antes* da Configuração de e-mail, porque `ADMIN_NAV` tem
+ * `mailbox` antes de `mailboxes` — lê-se "a caixa, e as caixas que a servem".
+ * Pôr a storyboard no fim, por ser a mais recente, era desalinhá-la do menu.
+ *
+ * **Fica a faltar uma:** a Cloud interna (`/admin/cloud`), a terceira porta da
+ * Cloud da equipa, entre a Configuração de e-mail e as Definições.
  *
  * A Confirmação de PIN fica no fim de propósito: não é uma entrada do menu, é
  * um diálogo transversal às ações sensíveis de várias páginas.
@@ -241,18 +255,51 @@ export default function AdminCanvas() {
         layout={{ x: 1520, y: 13390, width: 1440, height: 1000 }}
       />
 
+      {/* Caixa de e-mail (26 out 2026). Entra entre os Tickets e a Configuração
+          de e-mail porque é essa a posição no menu: `ADMIN_NAV` tem `tickets`,
+          `mailbox`, `mailboxes`. É o `MailboxView` do Suporte sem o
+          `onCreateTicket` — ver a nota de `Email.tsx`. */}
+      <Storyboard
+        id="AdminCaixaEmailClaro"
+        name="Caixa de e-mail · Claro (/admin/email)"
+        component={AdminCaixaEmailClaro}
+        layout={{ x: 0, y: 14470, width: 1440, height: 1000 }}
+      />
+      <Storyboard
+        id="AdminCaixaEmailEscuro"
+        name="Caixa de e-mail · Escuro (/admin/email)"
+        component={AdminCaixaEmailEscuro}
+        layout={{ x: 1520, y: 14470, width: 1440, height: 1000 }}
+      />
+
+      {/* O estado real de hoje: nenhuma caixa criada na Amen. No Admin este
+          vazio vale mais do que em qualquer outro papel — a Configuração que ele
+          manda consultar é a entrada seguinte do seu próprio menu. */}
+      <Storyboard
+        id="AdminCaixaEmailSemCaixas"
+        name="Caixa de e-mail · Sem caixas configuradas · Claro"
+        component={AdminCaixaEmailSemCaixas}
+        layout={{ x: 0, y: 15550, width: 1440, height: 700 }}
+      />
+      <Storyboard
+        id="AdminCaixaEmailSemCaixasEscuro"
+        name="Caixa de e-mail · Sem caixas configuradas · Escuro"
+        component={AdminCaixaEmailSemCaixasEscuro}
+        layout={{ x: 1520, y: 15550, width: 1440, height: 700 }}
+      />
+
       {/* Configuração de e-mail (P10-03) */}
       <Storyboard
         id="AdminCaixasEmailClaro"
         name="Configuração de e-mail · Claro (/admin/caixas-email)"
         component={AdminCaixasEmailClaro}
-        layout={{ x: 0, y: 14470, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 16330, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminCaixasEmailEscuro"
         name="Configuração de e-mail · Escuro (/admin/caixas-email)"
         component={AdminCaixasEmailEscuro}
-        layout={{ x: 1520, y: 14470, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 16330, width: 1440, height: 1150 }}
       />
 
       {/* O estado que hoje é o único real: nenhuma caixa criada ainda. É o ecrã
@@ -261,13 +308,13 @@ export default function AdminCanvas() {
         id="AdminCaixasEmailVazio"
         name="Configuração de e-mail · Sem caixas · Claro"
         component={AdminCaixasEmailVazio}
-        layout={{ x: 0, y: 15700, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 17560, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminCaixasEmailVazioEscuro"
         name="Configuração de e-mail · Sem caixas · Escuro"
         component={AdminCaixasEmailVazioEscuro}
-        layout={{ x: 1520, y: 15700, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 17560, width: 1440, height: 900 }}
       />
 
       {/* Definições */}
@@ -275,13 +322,13 @@ export default function AdminCanvas() {
         id="AdminDefinicoesClaro"
         name="Definições · Claro"
         component={AdminDefinicoesClaro}
-        layout={{ x: 0, y: 16680, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 18540, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminDefinicoesEscuro"
         name="Definições · Escuro"
         component={AdminDefinicoesEscuro}
-        layout={{ x: 1520, y: 16680, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 18540, width: 1440, height: 1150 }}
       />
 
       {/* Diálogo transversal às ações sensíveis */}
@@ -289,13 +336,13 @@ export default function AdminCanvas() {
         id="AdminStepUpClaro"
         name="Confirmação de PIN · Claro"
         component={AdminStepUpClaro}
-        layout={{ x: 0, y: 17910, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 19770, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminStepUpEscuro"
         name="Confirmação de PIN · Escuro"
         component={AdminStepUpEscuro}
-        layout={{ x: 1520, y: 17910, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 19770, width: 1440, height: 900 }}
       />
     </Canvas>
   );

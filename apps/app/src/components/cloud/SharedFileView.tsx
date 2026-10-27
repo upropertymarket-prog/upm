@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { Download, FileText, Lock } from "lucide-react";
 import { Button, Card, Input } from "@upm/ui";
 import { formatBytes } from "@upm/db/cloud";
-
-import { mimeLabel } from "./cloudTypes";
+import { mimeLabel } from "@upm/cloud";
 
 export type SharedLinkResult =
   | { error: string }

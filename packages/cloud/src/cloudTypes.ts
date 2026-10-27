@@ -1,12 +1,18 @@
 import type { FileSource, SharePermission } from "@upm/db/cloud";
 
 /**
- * Modelos de vista da Cloud (P6-01 · P6-02)
+ * Modelos de vista da Cloud (P6-01 · P6-02 · D71)
  * =========================================================================
  * O mesmo padrão de `interactionTypes.ts` da Fase 5: as funções SQL devolvem
  * `snake_case` com as colunas que a RLS deixa sair, e é aqui que isso vira o
  * que os componentes consomem. Nenhum componente da Cloud sabe que o Supabase
  * existe.
+ *
+ * **Vivia em `apps/app` e mudou-se para cá a 26 out 2026 (D71)**, quando a
+ * Cloud da equipa deixou de ter ecrã próprio. As três rotas que mostram uma
+ * Cloud — `/cloud`, `/suporte/cloud` e `/marketing/cloud` — passaram a montar
+ * o mesmo `CloudScreen`, e um modelo de vista partilhado por duas apps não
+ * podia continuar a viver dentro de uma delas.
  */
 
 export type FolderKind = "user" | "property" | "property_documents";
@@ -32,10 +38,20 @@ export type CloudFileRow = {
   currentVersion: number;
   /** 07 §19.5 — documento do imóvel: vê-se e partilha-se, não se mexe daqui. */
   readonly: boolean;
-  /** "Só para si" · "Com João Costa" · "Com 2 pessoas". */
+  /**
+   * "Só para si" · "Com João Costa" · "Com 2 pessoas". Vazio na Cloud da
+   * equipa, onde não há partilhas para descrever — `scope = 'staff'` **é** a
+   * partilha, e a coluna nem aparece.
+   */
   sharedLabel: string;
   shareCount: number;
   hasLink: boolean;
+  /**
+   * Quem o carregou. Só a Cloud da equipa o preenche (D71): numa gaveta
+   * partilhada é metade da informação útil, e na Cloud pessoal seria sempre a
+   * mesma pessoa — o próprio.
+   */
+  ownerName: string | null;
   createdAt: string;
   /** Não-nulo = está na reciclagem (07 §13.1). */
   deletedAt: string | null;
@@ -73,6 +89,14 @@ export type ShareContact = {
   id: string;
   name: string;
 };
+
+/**
+ * O que uma escrita da Cloud devolve. `notice` existe porque as escritas da
+ * Cloud interna já traziam a sua própria frase de sucesso (D73 ainda as tem em
+ * português dentro da action); quando vem, é ela que se diz, e não o rótulo
+ * genérico que o ecrã tinha à mão.
+ */
+export type CloudWriteResult = { error?: string; notice?: string };
 
 /**
  * Monta a árvore a partir da lista plana de `my_cloud_folders`. A função SQL já

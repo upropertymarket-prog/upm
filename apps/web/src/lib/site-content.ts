@@ -92,7 +92,7 @@ export const AUDIENCE_CARDS: Record<AudienceId, readonly FeatureCardRef[]> = {
 export const ABOUT_POINT_IDS = ["fairMarket", "freedom", "transparency"] as const;
 
 /** Os três números do hero. */
-export const HERO_STAT_IDS = ["commission", "privacy", "profiles"] as const;
+export const HERO_STAT_IDS = ["commission", "privacy", "everything"] as const;
 
 /** As abas de público e de periodicidade da secção de preços. */
 export const PRICING_AUDIENCE_IDS = ["owner", "buyer"] as const;

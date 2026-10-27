@@ -1,0 +1,36 @@
+{
+  "name": "@upm/cloud",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@upm/config": "workspace:*",
+    "@upm/db": "workspace:*",
+    "@upm/ui": "workspace:*",
+    "lucide-react": "^0.469.0"
+  },
+  "peerDependencies": {
+    "next-intl": "^4",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "next-intl": "^4.14.7",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.11"
+  }
+}

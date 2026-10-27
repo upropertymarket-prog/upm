@@ -21,6 +21,7 @@
     "@tiptap/extension-underline": "^2",
     "@tiptap/react": "^2",
     "@tiptap/starter-kit": "^2",
+    "@upm/cloud": "workspace:*",
     "@upm/config": "workspace:*",
     "@upm/db": "workspace:*",
     "@upm/ui": "workspace:*",

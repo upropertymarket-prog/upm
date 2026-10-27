@@ -8,6 +8,13 @@ import { SHARE_EXPIRY_OPTIONS, SHARE_PERMISSIONS, type SharePermission } from "@
 
 import type { CloudFileRow, ShareContact } from "./cloudTypes";
 
+/**
+ * Mudou-se de `apps/app` para `@upm/cloud` a 26 out 2026 (D71), com o
+ * `CloudScreen` que o abre. O modal só existe onde há partilhas, isto é, na
+ * Cloud das pessoas: a Cloud da equipa não passa `onShare`, e sem ela nem o
+ * botão nem este ficheiro chegam ao ecrã.
+ */
+
 export type ShareState = {
   id: string;
   sharedWith: string | null;

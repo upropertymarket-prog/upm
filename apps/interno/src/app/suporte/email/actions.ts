@@ -52,7 +52,7 @@ export type MailActionResult = { ok?: boolean; error?: string; notice?: string }
  */
 const mailAttachmentModeSchema = z.enum(["download", "view"]);
 
-async function getSupportClient() {
+async function clientForRoles(roles: readonly string[]) {
   const supabase = createClient(await cookies());
   const {
     data: { user },
@@ -63,16 +63,55 @@ async function getSupportClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  // Só o Suporte: `/admin/tickets` é de leitura e a caixa do Admin é a de
-  // configuração, não esta (07 §5.10 · 07 §24.6).
-  return profile?.role === "support" ? supabase : null;
+  return profile?.role && roles.includes(profile.role) ? supabase : null;
+}
+
+/**
+ * O portão do correio — Admin **e** Suporte (26 out 2026)
+ * =========================================================================
+ * Nasceu `getSupportClient`, só com `support`, por analogia com
+ * `/admin/tickets`: o Admin lê, o Suporte trabalha (07 §5.10). O cliente pediu
+ * ao Admin uma caixa a sério, e a analogia não resistiu ao pedido — uma caixa
+ * partilhada não tem fila nem atribuição, e era o Admin quem configurava as
+ * caixas em `/admin/caixas-email` sem poder responder a uma mensagem que lá
+ * caísse. Ver `20261026120000_mail_admin_door.sql`, que abre o mesmo portão do
+ * lado da base de dados — sem ele, isto deixaria passar e o RPC recusava.
+ *
+ * O marketing continua fora, por 07 §24.6: é `is_staff()`, não `is_internal()`.
+ */
+async function getMailClient() {
+  return clientForRoles(["admin", "support"]);
+}
+
+/**
+ * E o portão estreito, que ficou estreito de propósito: criar um ticket é a
+ * única escrita do correio que **sai** do correio para a fila de outra pessoa,
+ * e aí o 07 §5.10 vale pela razão com que nasceu. O ecrã do Admin não mostra o
+ * botão; esta verificação é o que torna isso uma regra e não uma decoração.
+ */
+async function getSupportClient() {
+  return clientForRoles(["support"]);
+}
+
+/**
+ * As duas portas da mesma caixa (26 out 2026).
+ *
+ * Uma escrita feita a partir de `/admin/email` muda exatamente as mesmas linhas
+ * que uma feita a partir de `/suporte/email`. Revalidar só a rota de onde veio
+ * deixava a outra a mostrar o estado anterior até alguém lá carregar em F5 — e
+ * "o Admin arquivou e no Suporte continua na entrada" é o género de divergência
+ * que se diagnostica como bug de base de dados durante uma hora.
+ */
+function revalidateMail() {
+  revalidatePath("/suporte/email");
+  revalidatePath("/admin/email");
 }
 
 export async function setFlags(input: unknown): Promise<MailActionResult> {
   const parsed = mailFlagsSchema.safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para alterar o correio." };
 
   try {
@@ -81,7 +120,7 @@ export async function setFlags(input: unknown): Promise<MailActionResult> {
     return { error: "Não foi possível atualizar a mensagem." };
   }
 
-  revalidatePath("/suporte/email");
+  revalidateMail();
   return { ok: true };
 }
 
@@ -89,7 +128,7 @@ export async function moveMessage(input: unknown): Promise<MailActionResult> {
   const parsed = mailMoveSchema.safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para arquivar correio." };
 
   try {
@@ -98,7 +137,7 @@ export async function moveMessage(input: unknown): Promise<MailActionResult> {
     return { error: "Não foi possível mover a mensagem." };
   }
 
-  revalidatePath("/suporte/email");
+  revalidateMail();
   return { ok: true };
 }
 
@@ -108,7 +147,7 @@ export async function addLabel(input: unknown): Promise<MailActionResult> {
     return { error: parsed.error.issues[0]?.message ?? "Marcador inválido." };
   }
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para criar marcadores." };
 
   try {
@@ -121,7 +160,7 @@ export async function addLabel(input: unknown): Promise<MailActionResult> {
     return { error: "Não foi possível criar o marcador." };
   }
 
-  revalidatePath("/suporte/email");
+  revalidateMail();
   return { ok: true };
 }
 
@@ -133,7 +172,7 @@ export async function toggleMailLabel(input: unknown): Promise<MailActionResult>
     .safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para etiquetar correio." };
 
   const message = await getMailMessage(supabase, parsed.data.messageId);
@@ -152,7 +191,7 @@ export async function toggleMailLabel(input: unknown): Promise<MailActionResult>
     return { error: "Não foi possível alterar os marcadores." };
   }
 
-  revalidatePath("/suporte/email");
+  revalidateMail();
   return { ok: true };
 }
 
@@ -167,12 +206,12 @@ export async function saveDraft(input: unknown): Promise<MailActionResult & { dr
     return { error: parsed.error.issues[0]?.message ?? "Rascunho inválido." };
   }
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para escrever correio." };
 
   try {
     const draftId = await saveMailDraft(supabase, parsed.data);
-    revalidatePath("/suporte/email");
+    revalidateMail();
     return { ok: true, draftId };
   } catch {
     return { error: "Não foi possível guardar o rascunho." };
@@ -182,12 +221,12 @@ export async function saveDraft(input: unknown): Promise<MailActionResult & { dr
 export async function discardDraft(draftId: unknown): Promise<MailActionResult> {
   if (typeof draftId !== "string") return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para apagar rascunhos." };
 
   try {
     await discardMailDraft(supabase, draftId);
-    revalidatePath("/suporte/email");
+    revalidateMail();
     return { ok: true };
   } catch {
     return { error: "Não foi possível apagar o rascunho." };
@@ -209,7 +248,7 @@ export async function sendMail(input: unknown): Promise<MailActionResult> {
     return { error: parsed.error.issues[0]?.message ?? "Mensagem inválida." };
   }
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para enviar correio." };
 
   const workerUrl = process.env.MAIL_WORKER_URL;
@@ -234,7 +273,7 @@ export async function sendMail(input: unknown): Promise<MailActionResult> {
       return { error: body?.error ?? `O mail-worker respondeu ${response.status}.` };
     }
 
-    revalidatePath("/suporte/email");
+    revalidateMail();
     return { ok: true, notice: "Mensagem enviada." };
   } catch {
     return { error: "Não foi possível falar com o mail-worker." };
@@ -250,7 +289,7 @@ export async function sendMail(input: unknown): Promise<MailActionResult> {
  * é quem tem a credencial.
  */
 export async function syncNow(): Promise<MailActionResult> {
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para sincronizar o correio." };
 
   const workerUrl = process.env.MAIL_WORKER_URL;
@@ -278,7 +317,7 @@ export async function syncNow(): Promise<MailActionResult> {
     const failed = reports.filter((report) => report.error);
     const inserted = reports.reduce((total, report) => total + (report.inserted ?? 0), 0);
 
-    revalidatePath("/suporte/email");
+    revalidateMail();
 
     if (failed.length > 0) {
       return { error: `${failed[0]!.address}: ${failed[0]!.error}` };
@@ -319,7 +358,7 @@ export async function attachmentLink(
   const parsed = mailAttachmentSchema.extend({ mode: mailAttachmentModeSchema }).safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para abrir anexos." };
 
   const message = await getMailMessage(supabase, parsed.data.messageId);
@@ -361,7 +400,7 @@ export async function attachmentToCloud(input: unknown): Promise<MailActionResul
   const parsed = mailAttachmentSchema.safeParse(input);
   if (!parsed.success) return { error: "Pedido inválido." };
 
-  const supabase = await getSupportClient();
+  const supabase = await getMailClient();
   if (!supabase) return { error: "Sem permissão para guardar anexos." };
 
   const {
@@ -414,7 +453,7 @@ export async function attachmentToCloud(input: unknown): Promise<MailActionResul
     return { error: "Não foi possível guardar na Cloud." };
   }
 
-  revalidatePath("/suporte/email");
+  revalidateMail();
   return { ok: true, notice: "Anexo guardado na Cloud interna." };
 }
 
@@ -430,7 +469,7 @@ export async function ticketFromMail(messageId: unknown): Promise<MailActionResu
 
   try {
     const ticket = await createTicketFromMail(supabase, messageId);
-    revalidatePath("/suporte/email");
+    revalidateMail();
     revalidatePath("/suporte/tickets");
     return {
       ok: true,

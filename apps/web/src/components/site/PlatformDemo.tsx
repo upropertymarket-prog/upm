@@ -27,7 +27,8 @@ import dynamic from "next/dynamic";
  * renderizado: um `{activo === "x" ? <A/> : <B/>}` desmonta a árvore e a troca
  * passa a ter um instante em branco enquanto o shell volta a montar. O custo é
  * montar dois shells; o ganho é a troca ser instantânea, que é precisamente o
- * que a decisão pede.
+ * que a decisão pede — e, desde que o menu da demonstração navega, é também o
+ * que faz cada perfil guardar a secção onde ia.
  *
  * `hidden` (o atributo) e não `display: none` à mão: tira o conteúdo da árvore
  * de acessibilidade e da ordem de tabulação ao mesmo tempo, que é o que impede
@@ -160,7 +161,11 @@ export function PlatformDemo() {
       <div
         data-theme="light"
         style={{
-          height: "clamp(420px, 56vw, 620px)",
+          /* Subiu de `clamp(420px, 56vw, 620px)` a 27 out 2026, com os ecrãs
+             navegáveis: o Painel tem quatro blocos e, na altura anterior, o
+             primeiro que se via era meia fila de KPI. Continua a rolar por
+             dentro — o que não pode é obrigar a rolar para ver o início. */
+          height: "clamp(460px, 60vw, 700px)",
           overflow: "hidden",
           borderRadius: "var(--r-lg)",
           border: "1px solid var(--border)",

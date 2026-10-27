@@ -215,6 +215,46 @@ export function formatBytes(bytes: number) {
 // Cloud a importar correio.
 // ---------------------------------------------------------------------------
 
+/**
+ * O tecto de exemplo da Cloud da equipa — **uma linha, para subir** (26 out 2026)
+ * ---------------------------------------------------------------------------
+ * Decisão do cliente: a Cloud interna **não se cobra a ninguém**. Toda a gente
+ * com acesso interno a tem, e o custo é da empresa — não há plano, não há
+ * extra, não há fatura. Ficava a pergunta de o que mostrar no cartão de
+ * armazenamento, e a resposta foi "nenhum limite, ou um de exemplo que possa
+ * aumentar".
+ *
+ * É este número, e é só isso: **um tecto de referência, que ninguém impõe**.
+ * `cloud_register_staff_file` não consulta plano nenhum e continua a não
+ * consultar — nenhum upload é recusado por se passar daqui. O que o número faz
+ * é dar à equipa a conta do que está a ocupar, e à barra uma escala; acima dos
+ * 90 % fica âmbar, que é o sinal para o subir, não para parar de carregar.
+ *
+ * **Para subir, muda-se aqui.** `null` quer dizer ilimitado, e o cartão passa a
+ * dizer "X usados · armazenamento ilimitado" — é a outra metade da decisão,
+ * à distância de uma palavra. Se um dia o limite tiver de ser *imposto*, isso é
+ * outra coisa: uma verificação dentro de `cloud_register_staff_file`, por
+ * migração, com a decisão de quem fica de fora quando se esgota.
+ */
+export const STAFF_CLOUD_LIMIT_BYTES: number | null = 100 * 1024 * 1024 * 1024;
+
+/**
+ * O `CloudStatus` da Cloud da equipa, a partir do que está lá guardado.
+ *
+ * `hasCloud` é sempre verdadeiro — é o que faz o ecrã mostrar os ficheiros em
+ * vez do convite de plano de 07 §19.4, e a razão é a decisão acima: quem entra
+ * no painel interno tem esta Cloud, sem condição. `nearPlanLimit` é sempre
+ * falso porque não há plano de onde estar perto.
+ */
+export function staffCloudStatus(usedBytes: number): CloudStatus {
+  return {
+    hasCloud: true,
+    usedBytes,
+    limitBytes: STAFF_CLOUD_LIMIT_BYTES,
+    nearPlanLimit: false,
+  };
+}
+
 export const cloudStaffFileSchema = z.object({
   name: z.string().trim().min(1).max(200),
   mime: z.string().min(1).max(200),

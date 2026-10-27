@@ -10,7 +10,12 @@
  *     prova numa caixa que serve para resolver disputas com clientes.
  *  2. **A credencial não é alcançável a partir de uma sessão.**
  *     `mailbox_credential()` tem `grant` só para a `service_role`.
- *  3. **O Admin lê, o Suporte trabalha.** Como em `/admin/tickets` (07 §5.10).
+ *  3. **O Admin trabalha a caixa, menos os tickets** (26 out 2026). Até aí
+ *     lia e não escrevia, por analogia com `/admin/tickets` (07 §5.10). A
+ *     analogia caiu com `/admin/email`: uma caixa partilhada não tem fila nem
+ *     atribuição, e era o Admin quem configurava as caixas sem poder responder
+ *     ao que lá caísse. O que **continua** só do Suporte é a única escrita que
+ *     sai do correio para a fila de outra pessoa — `create_ticket_from_mail`.
  *
  * Os fixtures nascem com `service_role`; as tentativas são feitas com sessões
  * `anon`, `buyer`, `support` e `admin`. Salta inteiro sem credenciais de
@@ -186,10 +191,31 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 2 — caixa de e-mail: matriz RLS e r
     expect(data?.is_read).toBe(true);
   });
 
-  it("o Admin não escreve na caixa — o trabalho é do Suporte", async () => {
+  it("o Admin trabalha a caixa — tem /admin/email desde 26 out 2026", async () => {
     const { error } = await clients.admin.rpc("mail_set_flags", {
       p_message_id: messageId,
       p_is_starred: true,
+    });
+    expect(error).toBeNull();
+
+    const { data } = await service
+      .from("mail_messages")
+      .select("is_starred")
+      .eq("id", messageId)
+      .single();
+    expect(data?.is_starred).toBe(true);
+
+    // Reposto para não deixar a estrela a influenciar os testes seguintes, que
+    // contam mensagens por `is_starred`.
+    await service.from("mail_messages").update({ is_starred: false }).eq("id", messageId);
+  });
+
+  it("o Admin não cria tickets a partir do correio — a fila é do Suporte", async () => {
+    // A única escrita que **sai** do correio. 07 §5.10 inteiro e pela razão com
+    // que nasceu: um admin a abrir tickets por cima do turno estraga a fila de
+    // quem está nela.
+    const { error } = await clients.admin.rpc("create_ticket_from_mail", {
+      p_message_id: messageId,
     });
     expect(error).not.toBeNull();
   });

@@ -15,6 +15,7 @@ import {
   Image as ImageIcon,
   Inbox,
   Lock,
+  RotateCcw,
   Share2,
   Trash2,
   Users,
@@ -39,6 +40,7 @@ import {
   formatDate,
   mimeLabel,
   type CloudFileRow,
+  type CloudWriteResult,
   type FileAccessRow,
   type FileVersionRow,
   type FolderNode,
@@ -54,8 +56,21 @@ export type CloudFileDetails = {
 };
 
 export type CloudScreenProps = {
+  /** Omitido = "Cloud" (`cloud.title`). A Cloud da equipa chama-se outra coisa. */
+  title?: string;
   subtitle: string;
-  status: CloudStatus;
+  /**
+   * O consumo e, quando existe, o limite. Omitido = sem cartão de
+   * armazenamento.
+   *
+   * As duas Clouds passam-no, e querem dizer coisas diferentes: na do cliente
+   * o limite vem do plano e é **imposto** por `cloud_register_upload`; na da
+   * equipa é o tecto de exemplo de `STAFF_CLOUD_LIMIT_BYTES`, que ninguém
+   * impõe — o custo é da empresa (decisão de 26 out 2026). O ecrã não
+   * distingue os dois, e não tem de: mostra a conta e a escala. O que o
+   * distingue é `hasCloud`, que na da equipa é sempre verdadeiro.
+   */
+  status?: CloudStatus;
   /**
    * Preço do extra Cloud, já formatado, vindo de `addons` (P7-02). Nulo quando
    * o extra não está visível. Nunca se escreve um valor em euros neste
@@ -64,19 +79,31 @@ export type CloudScreenProps = {
   cloudAddonPrice?: string | null;
   folders: FolderNode[];
   files: CloudFileRow[];
-  sharedWithMe: SharedWithMeRow[];
-  contacts: ShareContact[];
-  onCreateFolder: (name: string, parentId?: string) => Promise<{ error?: string }>;
-  onDeleteFolder: (folderId: string) => Promise<{ error?: string }>;
-  onUpload: (formData: FormData) => Promise<{ error?: string }>;
-  onReplace: (formData: FormData) => Promise<{ error?: string }>;
-  onDelete: (fileId: string) => Promise<{ error?: string }>;
-  onEmptyRecycleBin: () => Promise<{ error?: string }>;
+  /** Omitido = sem separador "Partilhados comigo". */
+  sharedWithMe?: SharedWithMeRow[];
+  contacts?: ShareContact[];
+  /**
+   * `false` = pastas a um nível só, e então o modal de nova pasta não promete
+   * criá-la "dentro da pasta selecionada" nem passa `parentId`. É o caso da
+   * Cloud da equipa: `staff_cloud_folder` não tem parâmetro de pasta-mãe, e um
+   * subtítulo a dizer o contrário era o ecrã a prometer o que a escrita não faz.
+   */
+  canNestFolders?: boolean;
+  onCreateFolder: (name: string, parentId?: string) => Promise<CloudWriteResult>;
+  onUpload: (formData: FormData) => Promise<CloudWriteResult>;
+  onDelete: (fileId: string) => Promise<CloudWriteResult>;
   onDownloadUrl: (
     fileId: string,
     action?: "view" | "download",
   ) => Promise<{ url?: string; error?: string }>;
-  onShare: (input: {
+  /** Omitido = sem botão "Substituir" na gaveta de detalhe. */
+  onReplace?: (formData: FormData) => Promise<CloudWriteResult>;
+  /** Omitido = a reciclagem só se esvazia, ficheiro a ficheiro não se repõe. */
+  onRestore?: (fileId: string) => Promise<CloudWriteResult>;
+  /** Omitido = sem botão "Esvaziar reciclagem". */
+  onEmptyRecycleBin?: () => Promise<CloudWriteResult>;
+  /** Omitido = sem coluna nem botão de partilha. Ver a nota de topo. */
+  onShare?: (input: {
     fileId: string;
     permission: SharePermission;
     sharedWith?: string;
@@ -84,9 +111,10 @@ export type CloudScreenProps = {
     expiresInHours?: number | null;
     accessCode?: string;
   }) => Promise<{ ok?: boolean; url?: string; error?: string }>;
-  onRevokeShare: (shareId: string) => Promise<{ error?: string }>;
-  onLoadDetails: (fileId: string) => Promise<CloudFileDetails>;
-  onRestoreVersion: (fileId: string, version: number) => Promise<{ error?: string }>;
+  onRevokeShare?: (shareId: string) => Promise<CloudWriteResult>;
+  /** Omitido = sem botão "Detalhes" e sem gaveta. */
+  onLoadDetails?: (fileId: string) => Promise<CloudFileDetails>;
+  onRestoreVersion?: (fileId: string, version: number) => Promise<CloudWriteResult>;
 };
 
 /** `null` = "Todos os ficheiros"; os dois literais são as vistas especiais. */
@@ -94,13 +122,38 @@ type View =
   { kind: "all" } | { kind: "folder"; id: string } | { kind: "recycle" } | { kind: "shared" };
 
 /**
- * Cloud — `/cloud` (P6-01 · P6-02 · 07 §19)
+ * Cloud — o ecrã, um só (P6-01 · P6-02 · 07 §19 · D71)
  * =========================================================================
  * Três colunas de leitura: as pastas à esquerda, os ficheiros ao centro, o
  * armazenamento em cima à direita.
  *
- * Duas coisas que este ecrã faz ao contrário da referência visual, ambas por
- * decisão registada:
+ * ## Um ecrã, quatro rotas (D71, 26 out 2026)
+ *
+ * `/cloud` na app, e `/suporte/cloud`, `/marketing/cloud` e `/admin/cloud` no
+ * acesso interno — as três portas da **mesma** gaveta da equipa, uma por papel
+ * de `is_internal()`. Todas montam **este** componente. Até aqui o lado interno
+ * tinha ecrã próprio — o
+ * `StaffCloud`, uma tabela sem pastas, sem detalhes e com outro cabeçalho — e
+ * a razão era concreta: este ficheiro tinha ~200 frases em português escritas à
+ * mão e não usava `next-intl`, logo não podia entrar num painel bilingue. D72
+ * traduziu-o entre 19 e 21 out, e o motivo caiu. Ficava uma divergência sem
+ * razão: duas Clouds que se pareciam cada vez menos, sobre a mesma tabela.
+ *
+ * ## O que muda entre elas são as *props*, nunca o desenho
+ *
+ * Cada diferença é a ausência de uma capacidade, não um ramo de código:
+ *
+ * - **Sem `onShare`**: não há coluna "Partilha" nem botão de partilhar. Na
+ *   Cloud das pessoas partilhar é dar acesso a quem não o tinha; na da equipa
+ *   toda a gente já o tem — `scope = 'staff'` **é** a partilha. Um botão ali só
+ *   podia significar "para fora", que é outra funcionalidade.
+ * - **Com `onRestore`**: a reciclagem repõe ficheiro a ficheiro. É o que o lado
+ *   interno sabe fazer (`restore_staff_cloud_file`) e o lado do cliente não.
+ * - **Com `ownerName` nas linhas**: a coluna "Carregado por". Numa gaveta
+ *   partilhada é metade da informação útil; na Cloud de uma pessoa seria
+ *   sempre o próprio nome, repetido em todas as linhas.
+ *
+ * ## Duas coisas que este ecrã faz ao contrário da referência visual
  *
  * 1. O cartão de armazenamento **não reparte o consumo por tipo** (07 §19.9).
  *    Fica a barra e "2,1 GB de 5 GB". Repartir era o sistema a arrumar o que é
@@ -131,6 +184,16 @@ export function CloudScreen(props: CloudScreenProps) {
   const live = files.filter((file) => file.deletedAt === null);
   const binned = files.filter((file) => file.deletedAt !== null);
 
+  // As capacidades do ecrã, lidas das props. Cada uma é uma ausência possível,
+  // e nenhuma é um `if` sobre *quem* está a ver — o ecrã não sabe se é a Cloud
+  // de uma pessoa ou a da equipa, e é isso que o mantém um só.
+  const canShare = Boolean(props.onShare);
+  const canRestore = Boolean(props.onRestore);
+  const canOpenDetails = Boolean(props.onLoadDetails);
+  const canNestFolders = props.canNestFolders ?? true;
+  const showStorage = status !== undefined;
+  const showOwner = files.some((file) => file.ownerName);
+
   const visible = useMemo(() => {
     if (view.kind === "recycle") return binned;
     if (view.kind === "all" || view.kind === "shared") return live;
@@ -147,18 +210,26 @@ export function CloudScreen(props: CloudScreenProps) {
       ? view.id
       : undefined;
 
-  function run(work: () => Promise<{ error?: string }>, done: string) {
+  /**
+   * `done` é o rótulo que o ecrã tem à mão; `notice` é a frase que a escrita
+   * trouxe. Quando as duas existem ganha a da escrita, que sabe o que
+   * aconteceu — "Ficheiro na reciclagem — fica lá 30 dias" diz mais do que
+   * "Ficheiro movido para a reciclagem".
+   */
+  function run(work: () => Promise<CloudWriteResult>, done: string) {
     startTransition(async () => {
       const result = await work();
       if (result.error) toast(result.error, "error");
-      else toast(done, "success");
+      else toast(result.notice ?? done, "success");
     });
   }
 
   function openFile(file: CloudFileRow) {
+    const load = props.onLoadDetails;
+    if (!load) return;
     setDetail(file);
     setDetails(null);
-    startTransition(async () => setDetails(await props.onLoadDetails(file.id)));
+    startTransition(async () => setDetails(await load(file.id)));
   }
 
   function download(file: CloudFileRow, action: "view" | "download") {
@@ -175,11 +246,11 @@ export function CloudScreen(props: CloudScreenProps) {
   // -------------------------------------------------------------------------
   // Sem Cloud no plano — 07 §19.1 e §19.4
   // -------------------------------------------------------------------------
-  if (!status.hasCloud) {
+  if (status && !status.hasCloud) {
     const nearLimit = status.nearPlanLimit;
     return (
       <>
-        <PageHeader title={t("title")} subtitle={props.subtitle} />
+        <PageHeader title={props.title ?? t("title")} subtitle={props.subtitle} />
         <Card padded style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "start" }}>
           <span
             aria-hidden="true"
@@ -256,6 +327,12 @@ export function CloudScreen(props: CloudScreenProps) {
               {row.currentVersion > 1 ? ` · v${row.currentVersion}` : ""}
             </span>
           </div>
+          {/* De onde veio. Um anexo de correio guardado aqui (D66) não é a
+              mesma coisa que um ficheiro que alguém carregou à mão, e a lista
+              não devia obrigar a abrir para perceber a diferença. */}
+          {row.source !== "upload" && FILE_SOURCE_LABELS.has(row.source) ? (
+            <StatusTag tone="draft">{t(`source.${row.source}`)}</StatusTag>
+          ) : null}
           {row.readonly ? (
             <span title={t("readonlyHint")} style={{ color: "var(--muted)" }}>
               <Lock size={13} aria-label={t("readonlyBadge")} />
@@ -264,16 +341,31 @@ export function CloudScreen(props: CloudScreenProps) {
         </div>
       ),
     },
-    {
-      id: "share",
-      header: t("columns.share"),
-      cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>
-          {row.sharedLabel}
-          {row.hasLink ? t("sharedViaLink") : ""}
-        </span>
-      ),
-    },
+    ...(showOwner
+      ? [
+          {
+            id: "owner",
+            header: t("columns.owner"),
+            cell: (row: CloudFileRow) => (
+              <span style={{ color: "var(--muted)" }}>{row.ownerName || "—"}</span>
+            ),
+          },
+        ]
+      : []),
+    ...(canShare
+      ? [
+          {
+            id: "share",
+            header: t("columns.share"),
+            cell: (row: CloudFileRow) => (
+              <span style={{ color: "var(--muted)" }}>
+                {row.sharedLabel}
+                {row.hasLink ? t("sharedViaLink") : ""}
+              </span>
+            ),
+          },
+        ]
+      : []),
     {
       id: "date",
       header: t("columns.added"),
@@ -306,48 +398,70 @@ export function CloudScreen(props: CloudScreenProps) {
           >
             <Download size={16} />
           </Button>
-          <Button
-            variant="secondary"
-            iconOnly
-            aria-label={t("shareFile", { name: row.name })}
-            onClick={() => setShare(row)}
-          >
-            <Share2 size={16} />
-          </Button>
-          <Button
-            variant="secondary"
-            iconOnly
-            disabled={row.readonly}
-            aria-label={t("deleteFile", { name: row.name })}
-            title={row.readonly ? t("cannotDelete") : undefined}
-            onClick={() => run(() => props.onDelete(row.id), t("toast.binned"))}
-          >
-            <Trash2 size={16} />
-          </Button>
+          {/* Na reciclagem não se partilha nem se elimina outra vez — o que lá
+              faz sentido é trazer de volta, e só onde isso existe. */}
+          {row.deletedAt ? (
+            canRestore ? (
+              <Button
+                variant="secondary"
+                iconOnly
+                disabled={pending}
+                aria-label={t("restoreFile", { name: row.name })}
+                onClick={() => run(() => props.onRestore!(row.id), t("toast.restored"))}
+              >
+                <RotateCcw size={16} />
+              </Button>
+            ) : null
+          ) : (
+            <>
+              {canShare ? (
+                <Button
+                  variant="secondary"
+                  iconOnly
+                  aria-label={t("shareFile", { name: row.name })}
+                  onClick={() => setShare(row)}
+                >
+                  <Share2 size={16} />
+                </Button>
+              ) : null}
+              <Button
+                variant="secondary"
+                iconOnly
+                disabled={row.readonly}
+                aria-label={t("deleteFile", { name: row.name })}
+                title={row.readonly ? t("cannotDelete") : undefined}
+                onClick={() => run(() => props.onDelete(row.id), t("toast.binned"))}
+              >
+                <Trash2 size={16} />
+              </Button>
+            </>
+          )}
           {/* Afasta-se do trio de ícones: o `gap` que chega entre ícones deixa
               o botão com rótulo demasiado colado a eles. */}
-          <Button
-            variant="secondary"
-            size="md"
-            style={{ marginLeft: "var(--sp-3)" }}
-            onClick={() => openFile(row)}
-          >
-            {t("details")}
-          </Button>
+          {canOpenDetails ? (
+            <Button
+              variant="secondary"
+              size="md"
+              style={{ marginLeft: "var(--sp-3)" }}
+              onClick={() => openFile(row)}
+            >
+              {t("details")}
+            </Button>
+          ) : null}
         </div>
       ),
     },
   ];
 
   const usedRatio =
-    status.limitBytes && status.limitBytes > 0
+    status?.limitBytes && status.limitBytes > 0
       ? Math.min(1, status.usedBytes / status.limitBytes)
       : 0;
 
   return (
     <>
       <PageHeader
-        title={t("title")}
+        title={props.title ?? t("title")}
         subtitle={props.subtitle}
         actions={
           <>
@@ -404,7 +518,7 @@ export function CloudScreen(props: CloudScreenProps) {
               "--split-aside-h":
                 "calc(100vh - var(--topbar-h) - var(--sp-9) - var(--sp-7) - var(--sp-9) - 6rem)",
               display: "grid",
-              gridTemplateRows: "1fr auto",
+              gridTemplateRows: showStorage ? "1fr auto" : "1fr",
               gap: "var(--sp-6)",
             } as React.CSSProperties
           }
@@ -420,13 +534,15 @@ export function CloudScreen(props: CloudScreenProps) {
             {folders.map((node) => (
               <FolderRow key={node.id} node={node} view={view} onSelect={setView} depth={0} />
             ))}
-            <NavRow
-              label={t("navShared")}
-              icon={<Inbox size={15} />}
-              count={sharedWithMe.length}
-              active={view.kind === "shared"}
-              onClick={() => setView({ kind: "shared" })}
-            />
+            {sharedWithMe ? (
+              <NavRow
+                label={t("navShared")}
+                icon={<Inbox size={15} />}
+                count={sharedWithMe.length}
+                active={view.kind === "shared"}
+                onClick={() => setView({ kind: "shared" })}
+              />
+            ) : null}
             <NavRow
               label={t("navRecycle")}
               icon={<Trash2 size={15} />}
@@ -437,39 +553,42 @@ export function CloudScreen(props: CloudScreenProps) {
           </div>
 
           {/* 07 §19.9 — barra e total, sem repartição por tipo. */}
-          <div
-            style={{
-              display: "grid",
-              gap: "var(--sp-4)",
-              borderTop: "1px solid var(--border)",
-              paddingTop: "var(--sp-6)",
-            }}
-          >
-            <strong>{t("storage")}</strong>
+          {showStorage ? (
             <div
-              aria-hidden="true"
               style={{
-                height: 8,
-                borderRadius: "var(--r-pill)",
-                background: "var(--surface3)",
-                overflow: "hidden",
+                display: "grid",
+                gap: "var(--sp-4)",
+                borderTop: "1px solid var(--border)",
+                paddingTop: "var(--sp-6)",
               }}
             >
+              <strong>{t("storage")}</strong>
               <div
+                aria-hidden="true"
                 style={{
-                  width: `${Math.round(usedRatio * 100)}%`,
-                  height: "100%",
-                  background: usedRatio > 0.9 ? "var(--warn)" : "var(--accent)",
+                  height: 8,
+                  borderRadius: "var(--r-pill)",
+                  background: "var(--surface3)",
+                  overflow: "hidden",
                 }}
-              />
+              >
+                <div
+                  style={{
+                    width: `${Math.round(usedRatio * 100)}%`,
+                    height: "100%",
+                    background: usedRatio > 0.9 ? "var(--warn)" : "var(--accent)",
+                  }}
+                />
+              </div>
+              <span style={{ color: "var(--muted)" }}>
+                {t("storageUsed", {
+                  used: formatBytes(status!.usedBytes),
+                  limit:
+                    status!.limitBytes === null ? t("unlimited") : formatBytes(status!.limitBytes),
+                })}
+              </span>
             </div>
-            <span style={{ color: "var(--muted)" }}>
-              {t("storageUsed", {
-                used: formatBytes(status.usedBytes),
-                limit: status.limitBytes === null ? t("unlimited") : formatBytes(status.limitBytes),
-              })}
-            </span>
-          </div>
+          ) : null}
         </Card>
 
         <div
@@ -481,11 +600,11 @@ export function CloudScreen(props: CloudScreenProps) {
           }}
         >
           <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
-            {view.kind === "recycle" && binned.length > 0 ? (
+            {view.kind === "recycle" && binned.length > 0 && props.onEmptyRecycleBin ? (
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => run(props.onEmptyRecycleBin, t("toast.recycleEmptied"))}
+                onClick={() => run(props.onEmptyRecycleBin!, t("toast.recycleEmptied"))}
               >
                 {t("emptyRecycleBin")}
               </Button>
@@ -494,7 +613,7 @@ export function CloudScreen(props: CloudScreenProps) {
 
           {view.kind === "shared" ? (
             <SharedWithMeList
-              rows={sharedWithMe}
+              rows={sharedWithMe ?? []}
               onOpen={(fileId) => download({ id: fileId } as CloudFileRow, "download")}
             />
           ) : visible.length === 0 ? (
@@ -519,7 +638,7 @@ export function CloudScreen(props: CloudScreenProps) {
           open={newFolder}
           onClose={() => setNewFolder(false)}
           title={t("newFolder")}
-          subtitle={view.kind === "folder" ? t("newFolderIn") : undefined}
+          subtitle={view.kind === "folder" && canNestFolders ? t("newFolderIn") : undefined}
           size="sm"
           footer={
             <>
@@ -530,7 +649,7 @@ export function CloudScreen(props: CloudScreenProps) {
                 disabled={pending || folderName.trim().length === 0}
                 onClick={() => {
                   const name = folderName.trim();
-                  const parent = view.kind === "folder" ? view.id : undefined;
+                  const parent = view.kind === "folder" && canNestFolders ? view.id : undefined;
                   setNewFolder(false);
                   setFolderName("");
                   run(() => props.onCreateFolder(name, parent), t("toast.folderCreated"));
@@ -550,14 +669,16 @@ export function CloudScreen(props: CloudScreenProps) {
           />
         </Modal>
 
-        <ShareFileModal
-          file={share}
-          contacts={contacts}
-          shares={share && detail?.id === share.id ? (details?.shares ?? []) : []}
-          onClose={() => setShare(null)}
-          onShare={props.onShare}
-          onRevoke={props.onRevokeShare}
-        />
+        {props.onShare && props.onRevokeShare ? (
+          <ShareFileModal
+            file={share}
+            contacts={contacts ?? []}
+            shares={share && detail?.id === share.id ? (details?.shares ?? []) : []}
+            onClose={() => setShare(null)}
+            onShare={props.onShare}
+            onRevoke={props.onRevokeShare}
+          />
+        ) : null}
 
         <Drawer
           open={detail !== null}
@@ -573,7 +694,7 @@ export function CloudScreen(props: CloudScreenProps) {
               <Button variant="secondary" onClick={() => setDetail(null)}>
                 {tCommon("close")}
               </Button>
-              {detail && !detail.readonly ? (
+              {detail && !detail.readonly && props.onReplace ? (
                 <Button disabled={pending} onClick={() => replaceRef.current?.click()}>
                   {t("replace")}
                 </Button>
@@ -581,22 +702,24 @@ export function CloudScreen(props: CloudScreenProps) {
             </>
           }
         >
-          <input
-            ref={replaceRef}
-            type="file"
-            accept="application/pdf,image/jpeg,image/png"
-            hidden
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = "";
-              if (!file || !detail) return;
-              const form = new FormData();
-              form.set("file", file);
-              form.set("fileId", detail.id);
-              run(() => props.onReplace(form), t("toast.versionSaved"));
-              setDetail(null);
-            }}
-          />
+          {props.onReplace ? (
+            <input
+              ref={replaceRef}
+              type="file"
+              accept="application/pdf,image/jpeg,image/png"
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (!file || !detail) return;
+                const form = new FormData();
+                form.set("file", file);
+                form.set("fileId", detail.id);
+                run(() => props.onReplace!(form), t("toast.versionSaved"));
+                setDetail(null);
+              }}
+            />
+          ) : null}
 
           <div style={{ display: "grid", gap: "var(--sp-7)" }}>
             {detail?.readonly ? (
@@ -648,7 +771,10 @@ export function CloudScreen(props: CloudScreenProps) {
                           {version.note ? ` · ${version.note}` : ""}
                         </span>
                       </div>
-                      {detail && !detail.readonly && version.version !== detail.currentVersion ? (
+                      {detail &&
+                      !detail.readonly &&
+                      props.onRestoreVersion &&
+                      version.version !== detail.currentVersion ? (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -656,7 +782,7 @@ export function CloudScreen(props: CloudScreenProps) {
                             const id = detail.id;
                             setDetail(null);
                             run(
-                              () => props.onRestoreVersion(id, version.version),
+                              () => props.onRestoreVersion!(id, version.version),
                               t("toast.versionRestored"),
                             );
                           }}
@@ -726,6 +852,21 @@ const ACCESS_ACTIONS = new Set([
   "print",
   "share_created",
   "share_revoked",
+]);
+
+/**
+ * As origens que têm chave em `cloud.source.*` — a mesma guarda, pela mesma
+ * razão: `file_source` é um enum da base de dados e ganha valores sem passar
+ * por aqui. Sem rótulo, não há etiqueta; uma etiqueta a dizer
+ * `cloud.source.whatever` era pior do que nenhuma.
+ */
+const FILE_SOURCE_LABELS = new Set([
+  "property_document",
+  "message_attachment",
+  "contract",
+  "invoice",
+  "mail_attachment",
+  "campaign_report",
 ]);
 
 function flatten(node: FolderNode): FolderNode[] {

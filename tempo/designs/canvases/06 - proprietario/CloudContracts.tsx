@@ -4,14 +4,14 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
-import { CloudScreen } from "../../../../apps/app/src/components/cloud/CloudScreen";
+import { CloudScreen } from "../../../../packages/cloud/src/CloudScreen";
 import { ContractsScreen } from "../../../../apps/app/src/components/contracts/ContractsScreen";
 import type {
   CloudFileRow,
   FolderNode,
   ShareContact,
   SharedWithMeRow,
-} from "../../../../apps/app/src/components/cloud/cloudTypes";
+} from "../../../../packages/cloud/src/cloudTypes";
 import type {
   ContractRow,
   ContractSharedWithMeRow,
@@ -62,6 +62,9 @@ const files: CloudFileRow[] = [
     sharedLabel: "Só para si",
     shareCount: 0,
     hasLink: false,
+    // Nulo em todas: numa Cloud pessoal o dono é sempre o próprio, e a coluna
+    // "Carregado por" só aparece onde alguma linha a preenche (D71).
+    ownerName: null,
     createdAt: "2026-09-29T10:00:00.000Z",
     deletedAt: null,
   },
@@ -77,6 +80,7 @@ const files: CloudFileRow[] = [
     sharedLabel: "Com 2 pessoas",
     shareCount: 2,
     hasLink: false,
+    ownerName: null,
     createdAt: "2026-09-28T10:00:00.000Z",
     deletedAt: null,
   },
@@ -92,6 +96,7 @@ const files: CloudFileRow[] = [
     sharedLabel: "Só para si",
     shareCount: 0,
     hasLink: false,
+    ownerName: null,
     createdAt: "2026-09-25T10:00:00.000Z",
     deletedAt: null,
   },
@@ -216,7 +221,6 @@ function CloudDemo({ theme }: { theme: "light" | "dark" }) {
         sharedWithMe={sharedWithMe}
         contacts={contacts}
         onCreateFolder={noop}
-        onDeleteFolder={noop}
         onUpload={noop}
         onReplace={noop}
         onDelete={noop}

@@ -10,7 +10,7 @@ import {
   type FolderNode,
   type ShareContact,
   type SharedWithMeRow,
-} from "../components/cloud/cloudTypes";
+} from "@upm/cloud";
 
 /**
  * Leituras da Cloud, do lado do servidor (P6-01 · P6-02)
@@ -68,6 +68,9 @@ export async function loadFiles(supabase: Client, folderId?: string): Promise<Cl
     sharedLabel: row.shared_label ?? "Só para si",
     shareCount: row.share_count ?? 0,
     hasLink: row.has_link ?? false,
+    // Nulo de propósito: numa Cloud pessoal o dono é sempre o próprio, e a
+    // coluna "Carregado por" só aparece quando alguma linha a preenche (D71).
+    ownerName: null,
     createdAt: row.created_at,
     deletedAt: row.deleted_at,
   }));

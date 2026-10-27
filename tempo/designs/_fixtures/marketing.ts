@@ -7,7 +7,7 @@ import type {
   ScheduledSendRow,
 } from "../../../packages/db/src/campaigns";
 import type { MessageTemplateRow } from "../../../packages/db/src/message-templates";
-import type { StaffFile, StaffFolder } from "../../../apps/interno/src/lib/staff-cloud";
+import type { CloudFileRow, FolderNode } from "../../../packages/cloud/src/cloudTypes";
 
 /**
  * Marketing — os dados das storyboards de `/marketing` (P10-07 a P10-10)
@@ -309,26 +309,50 @@ export const CAMPAIGN_SCHEDULED: ScheduledSendRow = {
 
 /* --- Cloud interna (/marketing/cloud) ------------------------------------ */
 
-export const STAFF_FOLDERS: StaffFolder[] = [
-  { id: "fld-1", name: "Campanhas" },
-  { id: "fld-2", name: "Marca" },
+/**
+ * Desde D71 (26 out 2026) estas fixtures têm a forma que o `CloudScreen` lê, e
+ * não a de um `StaffFile` que já não existe: a Cloud da equipa deixou de ter
+ * ecrã próprio. `sharedLabel`/`shareCount`/`hasLink` ficam vazios de propósito
+ * — a coluna "Partilha" não aparece numa Cloud sem `onShare`.
+ */
+export const STAFF_FOLDERS: FolderNode[] = [
+  {
+    id: "fld-1",
+    parentId: null,
+    name: "Campanhas",
+    kind: "user",
+    propertyId: null,
+    fileCount: 1,
+    children: [],
+  },
+  {
+    id: "fld-2",
+    parentId: null,
+    name: "Marca",
+    kind: "user",
+    propertyId: null,
+    fileCount: 1,
+    children: [],
+  },
 ];
 
-export const STAFF_FILES: StaffFile[] = [
+export const STAFF_FILES: CloudFileRow[] = [
   {
     id: "stf-1",
     folderId: "fld-1",
     name: "Relatório da campanha de abertura.csv",
     mime: "text/csv",
     size: 18_400,
-    bucket: "staff-cloud",
-    storagePath: "staff/relatorio-abertura.csv",
     // `campaign_report` e não `"metrics"`: este último não existe na coluna
-    // nem nas traduções, e dava `MISSING_MESSAGE: internalCloud.source.metrics`
-    // a cada desenho da tabela. Uma fixture só vale se usar os valores que a
-    // base de dados produz — senão a storyboard revê um estado impossível.
+    // nem nas traduções, e dava `MISSING_MESSAGE: cloud.source.metrics` a cada
+    // desenho da tabela. Uma fixture só vale se usar os valores que a base de
+    // dados produz — senão a storyboard revê um estado impossível.
     source: "campaign_report",
-    ownerId: "u-mkt",
+    currentVersion: 1,
+    readonly: false,
+    sharedLabel: "",
+    shareCount: 0,
+    hasLink: false,
     ownerName: "Marta Nunes",
     createdAt: "2026-10-17T10:12:00.000Z",
     deletedAt: null,
@@ -339,10 +363,12 @@ export const STAFF_FILES: StaffFile[] = [
     name: "Wordmark UProperty.svg",
     mime: "image/svg+xml",
     size: 4_200,
-    bucket: "staff-cloud",
-    storagePath: "staff/wordmark.svg",
     source: "upload",
-    ownerId: "u-mkt",
+    currentVersion: 1,
+    readonly: false,
+    sharedLabel: "",
+    shareCount: 0,
+    hasLink: false,
     ownerName: "Marta Nunes",
     createdAt: "2026-10-10T08:30:00.000Z",
     deletedAt: null,
@@ -354,10 +380,12 @@ export const STAFF_FILES: StaffFile[] = [
     name: "Rascunho do e-mail de lançamento.pdf",
     mime: "application/pdf",
     size: 96_000,
-    bucket: "staff-cloud",
-    storagePath: "staff/rascunho-lancamento.pdf",
     source: "upload",
-    ownerId: "u-sup",
+    currentVersion: 1,
+    readonly: false,
+    sharedLabel: "",
+    shareCount: 0,
+    hasLink: false,
     ownerName: "Helena Matos",
     createdAt: "2026-10-05T14:00:00.000Z",
     deletedAt: "2026-10-18T09:00:00.000Z",

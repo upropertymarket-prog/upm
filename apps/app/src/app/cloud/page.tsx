@@ -4,9 +4,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
 import { createClient } from "@upm/db/server";
 import { formatBytes } from "@upm/db/cloud";
+import { CloudScreen } from "@upm/cloud";
 
 import { AppChrome } from "../../components/AppChrome";
-import { CloudScreen } from "../../components/cloud/CloudScreen";
 import { loadAddonOptions } from "../../lib/billing";
 import {
   loadCloudStatus,
@@ -25,7 +25,6 @@ import {
 import {
   createFolder,
   deleteFile,
-  deleteFolder,
   emptyRecycleBin,
   fileDetails,
   fileDownloadUrl,
@@ -53,6 +52,11 @@ export const dynamic = "force-dynamic";
  * Quem não tem Cloud no plano chega aqui na mesma e vê o convite de 07 §19.4,
  * nunca uma Cloud vazia que não explica porque está vazia. Por isso a página
  * carrega sempre o estado primeiro e só depois o resto.
+ *
+ * O ecrã vive em `@upm/cloud` desde 26 out 2026 (D71): é o mesmo que
+ * `/suporte/cloud` e `/marketing/cloud` montam. Esta página é a que lhe passa
+ * **todas** as capacidades — quota, partilhas, versões, substituir; é o que
+ * distingue a Cloud de uma pessoa da gaveta da equipa.
  */
 export default async function CloudPage() {
   const supabase = createClient(await cookies());
@@ -138,7 +142,6 @@ export default async function CloudPage() {
         sharedWithMe={sharedWithMe}
         contacts={contacts}
         onCreateFolder={createFolder}
-        onDeleteFolder={deleteFolder}
         onUpload={uploadFile}
         onReplace={replaceFile}
         onDelete={deleteFile}

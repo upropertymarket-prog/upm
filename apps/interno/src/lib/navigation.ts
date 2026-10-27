@@ -76,7 +76,29 @@ export const ADMIN_NAV: NavEntry[] = [
   { id: "seo", titleKey: "seo", href: "/admin/seo", icon: Search },
   // Só leitura (07 §5.10).
   { id: "tickets", titleKey: "tickets", href: "/admin/tickets", icon: LifeBuoy },
+  /**
+   * **A caixa de e-mail do Admin** (26 out 2026), e entra *antes* da
+   * Configuração de e-mail de propósito: lê-se "a caixa, e as caixas que a
+   * servem". O Admin tinha a segunda sem a primeira — podia criar a caixa
+   * `geral@` e ligar-lhe o IMAP, e não tinha onde ler o que lá caísse.
+   *
+   * É a mesma caixa do Suporte, pela mesma porta de código (ver
+   * `/admin/email/page.tsx`), com uma ação de menos: criar um ticket a partir
+   * de um e-mail continua a ser só do Suporte (07 §5.10).
+   */
+  { id: "mailbox", titleKey: "mailbox", href: "/admin/email", icon: Inbox, counter: true },
   { id: "mailboxes", titleKey: "mailboxes", href: "/admin/caixas-email", icon: Mail },
+  /**
+   * **A Cloud da equipa, pela terceira porta** (26 out 2026).
+   *
+   * O Admin tinha a permissão e não tinha entrada: `is_internal()` — o
+   * predicado das políticas de `scope = 'staff'` desde `20261015180000` — são
+   * admin, suporte e marketing, e só os dois últimos tinham linha de menu.
+   * Decisão do cliente: quem tem acesso interno tem esta Cloud, sem custo, que
+   * é da empresa. Aponta ao mesmo `CloudScreen` e às mesmas server actions de
+   * `/suporte/cloud`, como o SEO e a caixa de e-mail já fazem.
+   */
+  { id: "internalCloud", titleKey: "internalCloud", href: "/admin/cloud", icon: Cloud },
   { id: "settings", titleKey: "settings", href: "/admin/definicoes", icon: Settings },
 ];
 

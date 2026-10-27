@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { LifeBuoy, LogOut, PanelLeftClose } from "lucide-react";
 
 import { cx } from "../lib/cx";
@@ -48,8 +49,16 @@ export type SidebarProps = {
   onReport: () => void;
   onSignOut: () => void;
   labels: SidebarLabels;
-  /** Componente de link da app (`next/link`). Por omissão, `<a>`. */
+  /**
+   * Componente de link da app (`next/link`). Por omissão, `<a>`.
+   *
+   * Recebe também o `id` do item, e não só o `href`, para quem encaminha por
+   * **estado** em vez de por rota — a demonstração do site público, que troca
+   * de ecrã dentro de uma caixa e não tem rotas para onde ir. Sem o `id`, a
+   * única via era adivinhá-lo a partir do `href`.
+   */
   renderLink?: (props: {
+    id: string;
     href: string;
     className: string;
     children: React.ReactNode;
@@ -136,8 +145,15 @@ export function Sidebar({
               ...(active ? ({ "aria-current": "page" } as const) : {}),
             };
 
+            /* `Fragment` e não um `<span>` em volta: `.upm-nav` é uma coluna
+               flex, e com o invólucro era ele o item da coluna — o elemento
+               devolvido deixava de esticar à largura do menu e passava a ter a
+               largura do seu conteúdo. A `key` continua a ser precisa, e é o
+               que o fragmento leva. */
             return renderLink ? (
-              <span key={item.id}>{renderLink({ ...linkProps, children: content })}</span>
+              <Fragment key={item.id}>
+                {renderLink({ ...linkProps, id: item.id, children: content })}
+              </Fragment>
             ) : (
               <a key={item.id} {...linkProps}>
                 {content}

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
 import type { Database, Json } from "@upm/db";
+import { mailUnreadCount } from "@upm/db/mail";
 
 export type AdminDashboardPayload = {
   summary: {
@@ -71,9 +72,14 @@ function parseDashboard(value: Json | null | undefined): AdminDashboardPayload |
 export async function getAdminShellData(
   supabase: SupabaseClient<Database>,
 ): Promise<AdminShellData> {
-  const [auth, metrics] = await Promise.all([
+  const [auth, metrics, unread] = await Promise.all([
     supabase.auth.getUser(),
     supabase.rpc("admin_dashboard_metrics"),
+    // O badge da Caixa de e-mail do Admin (26 out 2026). Fica fora de
+    // `admin_dashboard_metrics` porque não é uma métrica do negócio: é trabalho
+    // à espera de quem está a olhar, e a função do painel é partilhada com o
+    // próprio painel, que não tem nada que mostrar e-mails por ler.
+    mailUnreadCount(supabase),
   ]);
   const profileId = auth.data.user?.id ?? null;
   const [{ data: profile }, { data: staff }] = await Promise.all([
@@ -99,25 +105,36 @@ export async function getAdminShellData(
     userMeta,
     locale,
     dashboard,
-    counters: dashboard
-      ? {
-          propertyModeration: dashboard.summary.pending_moderation,
-          siteLeads: dashboard.summary.new_leads,
-        }
-      : {},
+    counters: {
+      ...(dashboard
+        ? {
+            propertyModeration: dashboard.summary.pending_moderation,
+            siteLeads: dashboard.summary.new_leads,
+          }
+        : {}),
+      mailbox: unread,
+    },
   };
 }
 
 export async function getAdminSidebarCounters(
   supabase: SupabaseClient<Database>,
 ): Promise<Record<string, number>> {
-  const { data, error } = await supabase.rpc("admin_dashboard_metrics");
-  if (error) return {};
-  const dashboard = parseDashboard(data);
-  return dashboard
-    ? {
-        propertyModeration: dashboard.summary.pending_moderation,
-        siteLeads: dashboard.summary.new_leads,
-      }
-    : {};
+  // As duas leituras são independentes: um erro nas métricas do painel não pode
+  // apagar o badge do correio, que vem de outra função e continua a saber
+  // responder. Era o que acontecia com o `return {}` à cabeça.
+  const [{ data, error }, unread] = await Promise.all([
+    supabase.rpc("admin_dashboard_metrics"),
+    mailUnreadCount(supabase),
+  ]);
+  const dashboard = error ? null : parseDashboard(data);
+  return {
+    ...(dashboard
+      ? {
+          propertyModeration: dashboard.summary.pending_moderation,
+          siteLeads: dashboard.summary.new_leads,
+        }
+      : {}),
+    mailbox: unread,
+  };
 }

@@ -12,7 +12,9 @@ const nextConfig: NextConfig = {
   // `@upm/config` entra aqui por causa do i18n e `@upm/ui` por causa dos
   // componentes e do `next/font/local` das fontes auto-hospedadas (P1-02):
   // o loader de fontes do Next só corre em código que o Next compila.
-  transpilePackages: ["@upm/ui", "@upm/db", "@upm/config"],
+  // `@upm/cloud` entrou com D71: é o ecrã da Cloud, em TSX e com `next-intl`,
+  // partilhado com o acesso interno — publicado como fonte, como os outros.
+  transpilePackages: ["@upm/ui", "@upm/db", "@upm/config", "@upm/cloud"],
   typedRoutes: true,
   // P7-03 — o SDK do Stripe fica FORA do bundle do servidor.
   //

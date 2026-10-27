@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { CloudScreen } from "@upm/cloud";
 
 import { InternalChrome } from "../../../components/InternalChrome";
-import { StaffCloud } from "../../../components/StaffCloud";
 import { getMarketingShellData } from "../../../lib/marketing-shell";
-import { listStaffFiles, listStaffFolders } from "../../../lib/staff-cloud";
+import { loadStaffCloud } from "../../../lib/staff-cloud";
 import {
   apagarFicheiro,
   carregarFicheiro,
@@ -16,10 +16,11 @@ import {
 import { setLocalePreference } from "../../actions/preferences";
 
 /**
- * `/marketing/cloud` — a Cloud interna, pela porta do Marketing (P10-10)
+ * `/marketing/cloud` — a Cloud interna, pela porta do Marketing (P10-10 · D71)
  * =========================================================================
- * A segunda porta da mesma gaveta; a primeira é `/suporte/cloud`. Ver a nota
- * de topo dessa, que é onde a decisão está escrita.
+ * Uma das três portas da mesma gaveta; a nota de topo está em `/suporte/cloud`,
+ * e é onde a decisão está escrita — incluindo a lista das capacidades que esta
+ * Cloud não passa ao `CloudScreen`, e porquê. A terceira é `/admin/cloud`.
  *
  * Esta rota é a razão por que `20261015180000` existe: até lá, as políticas de
  * `folders` e `files` para `scope = 'staff'` diziam `is_staff()`, que por
@@ -33,9 +34,8 @@ export default async function MarketingCloudPage() {
   const supabase = createClient(await cookies());
   const t = await getTranslations();
 
-  const [folders, files, shell] = await Promise.all([
-    listStaffFolders(supabase),
-    listStaffFiles(supabase),
+  const [cloud, shell] = await Promise.all([
+    loadStaffCloud(supabase),
     getMarketingShellData(supabase, t("sidebar.groups.marketing")),
   ]);
 
@@ -49,12 +49,15 @@ export default async function MarketingCloudPage() {
       onLocaleChange={setLocalePreference}
       counters={shell.counters}
     >
-      <StaffCloud
-        folders={folders}
-        files={files}
-        locale={shell.locale}
-        onUpload={carregarFicheiro}
+      <CloudScreen
+        title={t("internalCloud.title")}
+        subtitle={t("internalCloud.subtitle")}
+        status={cloud.status}
+        folders={cloud.folders}
+        files={cloud.files}
+        canNestFolders={false}
         onCreateFolder={criarPasta}
+        onUpload={carregarFicheiro}
         onDelete={apagarFicheiro}
         onRestore={reporFicheiro}
         onDownloadUrl={urlDeDescarga}

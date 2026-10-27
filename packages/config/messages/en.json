@@ -480,7 +480,7 @@
       "stats": {
         "commission": "0 % commission",
         "privacy": "100 % private contacts",
-        "profiles": "4 profiles in one platform"
+        "everything": "Everything you need"
       },
       "imageLabel": "main photograph · interior"
     },
@@ -750,22 +750,37 @@
     "demo": {
       "profilesLabel": "Demo profiles",
       "disclaimer": "A demonstration with sample data. Nothing you see here is a real account.",
-      "greeting": "Good morning, Marta.",
-      "summary": "You have 2 leads to reply to and a viewing booked for Thursday.",
-      "visitBooked": "Viewing booked",
-      "lastLeads": "Latest leads",
-      "lastLeadsCaption": "Latest leads received",
-      "buyerMatches": "4 properties match your saved search.",
-      "leadStatus": {
-        "new": "New",
-        "answered": "Answered",
-        "scheduled": "Viewing booked"
+      "toggleSaved": "Save property",
+      "mapNote": "Illustrative map. On the platform each pin is a published property, and you can draw the area you want to search in.",
+      "subtitle": {
+        "contracts": "Templates, versions and signing, without leaving the platform."
       },
-      "leadColumns": {
-        "name": "Interested party",
-        "property": "Property",
-        "when": "When",
-        "state": "Status"
+      "shortcut": {
+        "leads": "Who showed interest in your properties, and where each conversation stands.",
+        "visitSchedule": "The viewings requested for your properties, to accept or propose another date."
+      },
+      "notifications": {
+        "visitRequest": "New viewing request for the {property}",
+        "messageAnswered": "{name} replied to your message",
+        "listingApproved": "The “{property}” listing was approved",
+        "priceDrop": "The price of the {property} you saved has dropped",
+        "visitConfirmed": "The viewing of the {property} was confirmed"
+      },
+      "thread": {
+        "askVisit": "Good afternoon! Would it be possible to visit this weekend?",
+        "ownerProposes": "Of course. I have Saturday at 3.30pm or Sunday morning — which suits you better?",
+        "buyerAccepts": "Saturday at 3.30pm is perfect, thank you.",
+        "confirmVisit": "All set for Saturday at 3.30pm. See you then!",
+        "askCondo": "How much is the service charge, and what does it cover?",
+        "ownerAnswersCondo": "It is €48 a month and covers cleaning of the common areas and insurance.",
+        "askDocuments": "Could you share the land registry certificate and the floor plan?",
+        "ownerSharesDocuments": "I shared both documents on the Cloud. They should be with you now.",
+        "thanks": "Got them, thank you for being so quick."
+      },
+      "reports": {
+        "photoUpload": "I cannot upload photos to my listing from my phone",
+        "calendarTimezone": "The schedule showed viewings an hour early",
+        "calendarTimezoneFix": "Times are now always Lisbon times, for both sides of a viewing, whatever the time zone of the phone."
       }
     },
     "preRegistration": {
@@ -830,10 +845,19 @@
     "columns": {
       "file": "File",
       "share": "Sharing",
+      "owner": "Uploaded by",
       "added": "Added",
       "actions": "Actions",
       "sharedBy": "From",
       "expires": "Expires"
+    },
+    "source": {
+      "property_document": "Property document",
+      "message_attachment": "Message attachment",
+      "contract": "Contract",
+      "invoice": "Invoice",
+      "mail_attachment": "Mail attachment",
+      "campaign_report": "Campaign report"
     },
     "readonlyHint": "Property document — read-only here",
     "readonlyBadge": "Read-only",
@@ -842,6 +866,7 @@
     "downloadFile": "Download {name}",
     "shareFile": "Share {name}",
     "deleteFile": "Delete {name}",
+    "restoreFile": "Restore {name}",
     "details": "Details",
     "newFolder": "New folder",
     "newFolderIn": "Inside the selected folder",
@@ -910,6 +935,7 @@
       "folderCreated": "Folder created.",
       "uploaded": "File uploaded.",
       "binned": "File moved to the recycle bin.",
+      "restored": "File restored.",
       "recycleEmptied": "Recycle bin emptied.",
       "versionSaved": "New version saved.",
       "versionRestored": "Version restored as a new version."
@@ -2645,35 +2671,7 @@
   },
   "internalCloud": {
     "title": "Internal Cloud",
-    "subtitle": "The team's file drawer. What is here belongs to everyone — Admin, Support and Marketing.",
-    "upload": "Upload",
-    "uploading": "Uploading…",
-    "newFolder": "New folder",
-    "folderPrompt": "Folder name",
-    "allFiles": "All ({count})",
-    "recycleBin": "Recycle bin ({count})",
-    "empty": "No files here yet.",
-    "emptyHint": "Upload a PDF, JPG or PNG up to 25 MB.",
-    "emptyBin": "The recycle bin is empty.",
-    "tableCaption": "Internal Cloud files",
-    "download": "Download",
-    "downloadFailed": "The file could not be opened.",
-    "delete": "Delete",
-    "restore": "Restore",
-    "columns": {
-      "file": "File",
-      "owner": "Uploaded by",
-      "size": "Size",
-      "added": "Added",
-      "actions": "Actions"
-    },
-    "source": {
-      "mail_attachment": "Mail attachment",
-      "invoice": "Invoice",
-      "contract": "Contract",
-      "property_document": "Property document",
-      "campaign_report": "Campaign report"
-    }
+    "subtitle": "The team's file drawer. What is here belongs to everyone — Admin, Support and Marketing."
   },
   "errors": {
     "unexpectedTitle": "Something went wrong.",

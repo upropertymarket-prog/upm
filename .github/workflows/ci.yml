@@ -70,6 +70,18 @@ jobs:
       - name: Portão · pesos de letra
         run: pnpm gate:typography
 
+      # Um `href` que não leva a lado nenhum. A 27 out 2026 os doze itens do
+      # menu da demonstração da home eram `href="#"`, e clicar em qualquer um
+      # atirava o visitante para o topo do site — na secção que promete
+      # "navegue pelo painel real da plataforma". Não parte compilação, não dá
+      # erro de consola: só se vê a usar. O teste negativo corre primeiro, pela
+      # mesma razão do da tipografia.
+      - name: Portão · ligações mortas (teste negativo)
+        run: pnpm gate:links:test
+
+      - name: Portão · ligações mortas
+        run: pnpm gate:links
+
       # 04 §2.1.2 AC #5 — uma rota pública sem `seo.ts` falha o PR. Uma página
       # que entra em produção sem título nem cartão de partilha só se descobre
       # quando alguém partilha o link, que é tarde.

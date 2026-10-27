@@ -89,6 +89,10 @@ const RAIZES = [
   { dir: "apps/app/src" },
   { dir: "apps/interno/src" },
   { dir: "packages/ui/src" },
+  // Entrou a 26 out 2026 com D71: o ecrã da Cloud saiu de `apps/app` para um
+  // pacote partilhado, e um pacote fora desta lista é um ponto cego — foi
+  // exatamente assim que 38 ficheiros ficaram monolingues até 15 out.
+  { dir: "packages/cloud/src" },
   { dir: "packages/db/src", soRotulos: true },
 ];
 

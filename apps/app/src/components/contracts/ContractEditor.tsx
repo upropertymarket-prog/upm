@@ -37,7 +37,7 @@ import {
 } from "@upm/db/cloud";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
 
-import type { ShareContact } from "../cloud/cloudTypes";
+import type { ShareContact } from "@upm/cloud";
 import {
   formatDateTime,
   variableLabel,

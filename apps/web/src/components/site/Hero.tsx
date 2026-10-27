@@ -107,7 +107,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                   alignItems: "center",
                   gap: "var(--sp-2)",
                   fontSize: "var(--fs-body)",
-                  fontWeight: "var(--fw-semibold)",
+                  // `--fw-medium` (500) e não `--fw-semibold` (600): estes três
+                  // números acompanham o hero, não competem com ele. O token e
+                  // não um `500` à mão, pela mesma razão do `--fs-label` acima.
+                  fontWeight: "var(--fw-medium)",
                   color: "var(--text)",
                 }}
               >

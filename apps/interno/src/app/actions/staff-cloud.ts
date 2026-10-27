@@ -17,10 +17,11 @@ import {
 /**
  * A Cloud interna — escritas (P10-10 · 07 §24.6)
  * =========================================================================
- * **Partilhadas pelas duas rotas**, `/suporte/cloud` e `/marketing/cloud`, que
- * são o mesmo ecrã sobre a mesma gaveta. É a figura que 07 §24.5 e §24.6 já
- * usaram para o SEO: duas portas, um editor. Duas cópias divergiam à primeira
- * alteração, e aqui seria pior do que no SEO — divergiriam sobre ficheiros.
+ * **Partilhadas pelas três rotas** — `/suporte/cloud`, `/marketing/cloud` e
+ * `/admin/cloud` — que são o mesmo ecrã sobre a mesma gaveta. É a figura que
+ * 07 §24.5 e §24.6 já usaram para o SEO: portas, um editor. Cópias divergiam à
+ * primeira alteração, e aqui seria pior do que no SEO — divergiriam sobre
+ * ficheiros.
  *
  * ## O papel é `is_internal()`, não `is_staff()`
  *
@@ -28,6 +29,11 @@ import {
  * para este caso e que `20261015180000` pôs nas políticas de `folders` e
  * `files`. A verificação é nos dois lados (07 §20.5): aqui e dentro de cada
  * função `security definer`.
+ *
+ * Três papéis, e desde 26 out 2026 **três portas**: a decisão do cliente é que
+ * quem tem acesso interno tem esta Cloud, sem custo — o custo é da empresa.
+ * O Admin estava neste predicado desde o primeiro dia e era o único sem entrada
+ * de menu, o que o obrigava a entrar pelo painel do Suporte.
  *
  * ## O que não está aqui
  *
@@ -59,10 +65,18 @@ async function getInternalClient() {
   return internal ? { supabase, userId: user.id } : null;
 }
 
-/** As duas rotas que mostram esta gaveta — revalidam-se as duas, sempre. */
-function revalidateBoth() {
+/**
+ * As **três** rotas que mostram esta gaveta — revalidam-se as três, sempre.
+ *
+ * Eram duas até 26 out 2026, quando `/admin/cloud` nasceu: o Admin tinha a
+ * permissão de `is_internal()` desde `20261015180000` e não tinha porta. Uma
+ * das três a ficar de fora daqui era a mais traiçoeira das falhas — os
+ * ficheiros certos, numa lista velha.
+ */
+function revalidarPortas() {
   revalidatePath("/suporte/cloud");
   revalidatePath("/marketing/cloud");
+  revalidatePath("/admin/cloud");
 }
 
 export async function carregarFicheiro(formData: FormData): Promise<StaffCloudResult> {
@@ -108,7 +122,7 @@ export async function carregarFicheiro(formData: FormData): Promise<StaffCloudRe
     return { error: explain(error, "Não foi possível registar o ficheiro.") };
   }
 
-  revalidateBoth();
+  revalidarPortas();
   return { ok: true, notice: "Ficheiro guardado na Cloud interna." };
 }
 
@@ -127,7 +141,7 @@ export async function criarPasta(name: unknown): Promise<StaffCloudResult> {
     return { error: explain(error, "Não foi possível criar a pasta.") };
   }
 
-  revalidateBoth();
+  revalidarPortas();
   return { ok: true, notice: "Pasta criada." };
 }
 
@@ -143,7 +157,7 @@ export async function apagarFicheiro(id: unknown): Promise<StaffCloudResult> {
     return { error: explain(error, "Não foi possível apagar o ficheiro.") };
   }
 
-  revalidateBoth();
+  revalidarPortas();
   // Soft delete (07 §13.1): diz-se que vai para a reciclagem, porque é o que
   // acontece e porque é o que diz a quem se enganou que ainda dá para voltar.
   return { ok: true, notice: "Ficheiro na reciclagem — fica lá 30 dias." };
@@ -161,7 +175,7 @@ export async function reporFicheiro(id: unknown): Promise<StaffCloudResult> {
     return { error: explain(error, "Não foi possível repor o ficheiro.") };
   }
 
-  revalidateBoth();
+  revalidarPortas();
   return { ok: true, notice: "Ficheiro reposto." };
 }
 
