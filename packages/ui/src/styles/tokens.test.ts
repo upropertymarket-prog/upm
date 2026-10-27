@@ -384,6 +384,44 @@ describe("04 §1.8 — alturas dos controlos e alvos de toque", () => {
   });
 });
 
+/**
+ * O peso do rótulo de um CTA (27 out 2026)
+ * =========================================================================
+ * O portão `check-typography.mjs` garante que nenhum peso é um literal e que
+ * nenhum passa de 700. Não diz nada sobre *qual* peso cada papel leva — e o
+ * rótulo de um CTA é o papel em que isso se decidiu explicitamente: 550.
+ *
+ * O que se verifica aqui não é só o valor: é que `.upm-btn` continua a ser a
+ * **única** declaração de peso em toda a família de botões. Enquanto for, a
+ * app, o site público e as storyboards herdam a decisão sem a repetir; basta
+ * uma variante declarar o seu próprio `font-weight` para "todo o sistema"
+ * deixar de ser verdade sem que nada mais falhe.
+ */
+describe("04 §5.3 — o rótulo de um CTA pesa 550", () => {
+  it("declara o peso dos botões em `.upm-btn`, por token", () => {
+    expect(rootTokens["--fw-mid"]).toBe("550");
+    expect(only(componentsCss, ".upm-btn")).toMatch(/font-weight:\s*var\(--fw-mid\)/);
+  });
+
+  it("não deixa nenhuma variante de botão redeclarar o peso", () => {
+    const clean = stripCssComments(componentsCss + shellCss);
+    const culpados: string[] = [];
+
+    for (const match of clean.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selectores = match[1]!
+        .split(",")
+        .map((part) => part.slice(part.lastIndexOf("{") + 1).trim())
+        .filter(Boolean);
+      // A base é a dona da decisão; qualquer outro seletor que mencione
+      // `upm-btn` e declare peso está a competir com ela.
+      const variante = selectores.filter((s) => s.includes("upm-btn") && s !== ".upm-btn");
+      if (variante.length > 0 && /font-weight:/.test(match[2]!)) culpados.push(...variante);
+    }
+
+    expect(culpados).toEqual([]);
+  });
+});
+
 describe("04 §5.5 — geometria do shell", () => {
   it("usa 256 px de sidebar, 84 px de rail, 68 px de topbar e 460 px de drawer", () => {
     expect(rootTokens["--sidebar-w"]).toBe("256px");

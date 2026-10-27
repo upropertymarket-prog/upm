@@ -154,7 +154,7 @@ if (tokensAltos.length > 0) {
 if (literaisJs.length > 0) {
   console.error("✗ Peso escrito a literal em JSX (04 §5.3):\n");
   for (const hit of literaisJs) console.error(`      ${hit}`);
-  console.error("\n  Use `var(--fw-regular|medium|pill|semibold|bold)`. Um número não se liga");
+  console.error("\n  Use `var(--fw-regular|medium|mid|semibold|bold)`. Um número não se liga");
   console.error("  à escala: não acompanha mudanças e não aparece numa busca por `--fw-`.\n");
 }
 

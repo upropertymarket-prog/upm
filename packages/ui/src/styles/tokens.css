@@ -250,15 +250,21 @@
    *
    *   regular   corpo
    *   medium    contadores, avatares, texto secundário de chrome
-   *   pill      tags de estado (550 — a meio caminho, medido nos protótipos)
-   *   semibold  labels, cabeçalhos de tabela, botões, navegação, ênfase
+   *   mid       rótulos de CTA e tags de estado (550)
+   *   semibold  labels, cabeçalhos de tabela, navegação, ênfase
    *   bold      títulos (h1–h3 e `.upm-pagehead__title`), e nada mais
    *
    * Quem precisar de mais destaque muda o tamanho ou a cor, não o peso.
+   *
+   * O 550 chamava-se `--fw-pill` enquanto só as tags o usavam. Desde 27 out
+   * 2026 os rótulos dos CTAs usam o mesmo degrau, e um nome de papel passaria
+   * a mentir a um dos dois consumidores — daí `--fw-mid`, que é o que o valor
+   * é: o meio caminho entre `medium` e `semibold`, medido nos protótipos.
+   * `--fs-pill` continua a chamar-se assim: é um tamanho, e só as tags o têm.
    */
   --fw-regular: 400;
   --fw-medium: 500;
-  --fw-pill: 550;
+  --fw-mid: 550;
   --fw-semibold: 600;
   --fw-bold: 700;
 

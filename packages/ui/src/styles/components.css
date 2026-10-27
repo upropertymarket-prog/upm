@@ -62,7 +62,14 @@ h6 {
   border-radius: var(--r-lg);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
+  /* 550, não 600 (27 out 2026). O que distingue um CTA não é o peso do rótulo
+     — é o preenchimento, a cor e o espaço em volta. A 600 o texto competia com
+     esse desenho e, nos botões secundários e ghost, lia-se mais pesado do que
+     o título que os encima; a 500 o rótulo perdia presença a mais. 550 é o
+     degrau que as tags já usavam, medido nos protótipos.
+     Esta é a única declaração de peso dos botões: toda a app, o site e as
+     storyboards consomem-na por `.upm-btn`. */
+  font-weight: var(--fw-mid);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -464,7 +471,7 @@ h6 {
   background: var(--tag-bg, var(--state-draft));
   color: var(--on-solid);
   font-size: var(--fs-pill);
-  font-weight: var(--fw-pill);
+  font-weight: var(--fw-mid);
   line-height: 1.3;
   white-space: nowrap;
 }

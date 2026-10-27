@@ -188,8 +188,8 @@ const TYPE_SCALE: [string, string, string][] = [
 const WEIGHT_SCALE: [string, string, string][] = [
   ["--fw-regular", "400", "Corpo"],
   ["--fw-medium", "500", "Contadores, avatares, texto secundário"],
-  ["--fw-pill", "550", "Tags de estado"],
-  ["--fw-semibold", "600", "Labels, cabeçalhos de tabela, botões, navegação, ênfase"],
+  ["--fw-mid", "550", "Rótulos de CTA e tags de estado"],
+  ["--fw-semibold", "600", "Labels, cabeçalhos de tabela, navegação, ênfase"],
   ["--fw-bold", "700", "Títulos — h1–h3 e `.upm-pagehead__title`, e mais nada"],
 ];
 
