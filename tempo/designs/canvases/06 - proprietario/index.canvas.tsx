@@ -56,8 +56,9 @@ import {
  * sidebar — entre Contratos e Plano. A rota `/reports` nasceu com P10-02 e era
  * a única entrada do menu sem storyboard.
  *
- * No fim, e fora da ordem do menu de propósito, o modal **Reportar problema**:
- * não é uma página, é o botão do rodapé da sidebar, igual nos quatro perfis.
+ * O modal **Reportar problema** não é uma página — é o botão do rodapé da
+ * sidebar, igual nos quatro perfis — mas é desenhado por cima de `/reports`,
+ * por isso fica logo a seguir a "Os meus reports" (pedido a 28 out 2026).
  */
 export default function ProprietarioCanvas() {
   return (
@@ -66,7 +67,7 @@ export default function ProprietarioCanvas() {
         id="Painel"
         name="Painel · Claro (/painel)"
         component={Painel}
-        layout={{ x: 0, y: 0, width: 1440, height: 900 }}
+        layout={{ x: 1, y: 0, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PainelEscuro"
@@ -230,44 +231,44 @@ export default function ProprietarioCanvas() {
         component={MeusReportsEscuro}
         layout={{ x: 1520, y: 11760, width: 1440, height: 900 }}
       />
+      {/* Transversal aos quatro perfis (o botão do rodapé da sidebar), mas
+          desenhado por cima de /reports — fica colado a "Os meus reports". */}
+      <Storyboard
+        id="ReportarProblemaClaro"
+        name="Reportar problema · Claro"
+        component={ReportarProblemaClaro}
+        layout={{ x: 0, y: 12740, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ReportarProblemaEscuro"
+        name="Reportar problema · Escuro"
+        component={ReportarProblemaEscuro}
+        layout={{ x: 1520, y: 12740, width: 1440, height: 900 }}
+      />
 
       <Storyboard
         id="Plano"
         name="Plano e faturação · Claro (/plano)"
         component={PlanoClaro}
-        layout={{ x: 0, y: 12740, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 13720, width: 1440, height: 900 }}
       />
       <Storyboard
         id="PlanoEscuro"
         name="Plano e faturação · Escuro (/plano)"
         component={PlanoEscuro}
-        layout={{ x: 1520, y: 12740, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 13720, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="DefinicoesClaro"
         name="Definições · Claro (/definicoes)"
         component={DefinicoesClaro}
-        layout={{ x: 0, y: 13720, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 14700, width: 1440, height: 900 }}
       />
       <Storyboard
         id="DefinicoesEscuro"
         name="Definições · Escuro (/definicoes)"
         component={DefinicoesEscuro}
-        layout={{ x: 1520, y: 13720, width: 1440, height: 900 }}
-      />
-
-      {/* Transversal aos quatro perfis: o botão do rodapé da sidebar */}
-      <Storyboard
-        id="ReportarProblemaClaro"
-        name="Reportar problema · Claro"
-        component={ReportarProblemaClaro}
-        layout={{ x: 0, y: 14700, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="ReportarProblemaEscuro"
-        name="Reportar problema · Escuro"
-        component={ReportarProblemaEscuro}
         layout={{ x: 1520, y: 14700, width: 1440, height: 900 }}
       />
     </Canvas>

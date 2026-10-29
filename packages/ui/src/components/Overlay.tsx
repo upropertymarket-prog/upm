@@ -26,13 +26,21 @@ import { Button } from "./Button";
  * É propositadamente um atributo e não uma prop: assim o componente de produto
  * continua a ser chamado exatamente como é chamado na app, que é a única forma
  * de a storyboard provar alguma coisa sobre ele.
+ *
+ * **A raiz é a mais próxima, não a primeira do documento** (28 out 2026). O
+ * canvas monta todas as storyboards no mesmo documento: com `querySelector`, o
+ * modal do Claro e o do Escuro caíam os dois na primeira raiz e uma das
+ * molduras ficava sem nenhum. Um âncora escondido no sítio onde o overlay é
+ * declarado sobe com `closest` até à raiz da sua própria storyboard.
  */
-function usePortalTarget(): HTMLElement | null {
+function usePortalTarget() {
+  const [anchor, setAnchor] = useState<HTMLSpanElement | null>(null);
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    setTarget(document.querySelector<HTMLElement>("[data-upm-overlay-root]") ?? document.body);
-  }, []);
-  return target;
+    if (!anchor) return;
+    setTarget(anchor.closest<HTMLElement>("[data-upm-overlay-root]") ?? document.body);
+  }, [anchor]);
+  return { anchor: <span ref={setAnchor} hidden />, target };
 }
 
 type PanelChrome = {
@@ -110,40 +118,45 @@ export function Drawer({
   footerStyle,
 }: DrawerProps) {
   const ref = useDismissable({ open, onClose });
-  const target = usePortalTarget();
+  const { anchor, target } = usePortalTarget();
   const theme = useOptionalTheme()?.resolved;
   const titleId = `upm-drawer-${title.replace(/\W+/g, "-").toLowerCase()}`;
 
-  if (!open || !target) return null;
+  if (!open || !target) return anchor;
 
-  return createPortal(
-    <div className="upm-overlay upm-overlay--right" data-theme={theme} onClick={onClose}>
-      <div
-        ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        tabIndex={-1}
-        className={cx("upm-drawer", className)}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <PanelHeader
-          title={title}
-          subtitle={subtitle}
-          icon={icon}
-          titleId={titleId}
-          onClose={onClose}
-          closeLabel={closeLabel}
-        />
-        <div className="upm-panel__body">{children}</div>
-        {footer ? (
-          <div className="upm-panel__footer" style={footerStyle}>
-            {footer}
+  return (
+    <>
+      {anchor}
+      {createPortal(
+        <div className="upm-overlay upm-overlay--right" data-theme={theme} onClick={onClose}>
+          <div
+            ref={ref}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+            className={cx("upm-drawer", className)}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <PanelHeader
+              title={title}
+              subtitle={subtitle}
+              icon={icon}
+              titleId={titleId}
+              onClose={onClose}
+              closeLabel={closeLabel}
+            />
+            <div className="upm-panel__body">{children}</div>
+            {footer ? (
+              <div className="upm-panel__footer" style={footerStyle}>
+                {footer}
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
-    </div>,
-    target,
+        </div>,
+        target,
+      )}
+    </>
   );
 }
 
@@ -178,35 +191,40 @@ export function Modal({
   className,
 }: ModalProps) {
   const ref = useDismissable({ open, onClose });
-  const target = usePortalTarget();
+  const { anchor, target } = usePortalTarget();
   const theme = useOptionalTheme()?.resolved;
   const titleId = `upm-modal-${title.replace(/\W+/g, "-").toLowerCase()}`;
 
-  if (!open || !target) return null;
+  if (!open || !target) return anchor;
 
-  return createPortal(
-    <div className="upm-overlay upm-overlay--center" data-theme={theme} onClick={onClose}>
-      <div
-        ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        tabIndex={-1}
-        className={cx("upm-modal", `upm-modal--${size}`, className)}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <PanelHeader
-          title={title}
-          subtitle={subtitle}
-          icon={icon}
-          titleId={titleId}
-          onClose={onClose}
-          closeLabel={closeLabel}
-        />
-        <div className="upm-panel__body">{children}</div>
-        {footer ? <div className="upm-panel__footer">{footer}</div> : null}
-      </div>
-    </div>,
-    target,
+  return (
+    <>
+      {anchor}
+      {createPortal(
+        <div className="upm-overlay upm-overlay--center" data-theme={theme} onClick={onClose}>
+          <div
+            ref={ref}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+            className={cx("upm-modal", `upm-modal--${size}`, className)}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <PanelHeader
+              title={title}
+              subtitle={subtitle}
+              icon={icon}
+              titleId={titleId}
+              onClose={onClose}
+              closeLabel={closeLabel}
+            />
+            <div className="upm-panel__body">{children}</div>
+            {footer ? <div className="upm-panel__footer">{footer}</div> : null}
+          </div>
+        </div>,
+        target,
+      )}
+    </>
   );
 }

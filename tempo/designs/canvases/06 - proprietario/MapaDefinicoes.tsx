@@ -6,6 +6,7 @@ import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { ThemeToggle } from "../../../../packages/ui/src/theme/ThemeToggle";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { PropertyMap } from "../../../../apps/app/src/components/map/PropertyMap";
 import { NotificationPrefsForm } from "../../../../apps/app/src/components/settings/NotificationPrefsForm";
 import ptMessages from "../../../../packages/config/messages/pt.json";

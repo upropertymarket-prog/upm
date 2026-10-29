@@ -173,7 +173,9 @@ function Block({ block, context }: { block: CampaignBlock; context: CampaignRend
         <Section style={ALIGN_STYLE(block.align)}>
           {/* O HTML vem do `RichText` e foi sanitizado na gravação (02 §4.3).
               Aqui entra como marcação porque é isso que ele é — e o React Email
-              não tem um componente de HTML arbitrário. */}
+              não tem um componente de HTML arbitrário.
+              html-ok: sanitizado na escrita em `packages/db/src/campaigns.ts`,
+              com allowlist. */}
           <div
             style={{ fontSize: "15px", lineHeight: 1.6, color: TEXT }}
             dangerouslySetInnerHTML={{ __html: substitute(block.html, context) }}
@@ -266,6 +268,9 @@ function Block({ block, context }: { block: CampaignBlock; context: CampaignRend
       if (!context.signatureHtml) return null;
       return (
         <Section style={{ padding: "16px 0 0", ...ALIGN_STYLE(block.align) }}>
+          {/* html-ok: a assinatura é sanitizada na escrita por
+              `packages/db/src/signatures.ts`, que tem a política explícita das
+              20 tags — sem `script`, sem `style`, sem iframes. */}
           <div
             style={{ fontSize: "13px", lineHeight: 1.5, color: TEXT }}
             dangerouslySetInnerHTML={{ __html: context.signatureHtml }}
@@ -318,6 +323,8 @@ export function CampaignEmail({
             tudo o resto neste ficheiro é estilo em linha — esta é a única
             excepção, e existe porque nunca sai daqui. */}
         {context.editing ? (
+          // html-ok: folha de estilos escrita neste ficheiro, só para a tela do
+          // editor. Não leva nada de fora e nunca sai num e-mail.
           <style
             dangerouslySetInnerHTML={{
               __html: `

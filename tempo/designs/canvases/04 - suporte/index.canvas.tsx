@@ -17,14 +17,22 @@ import {
   SuporteTicketsSemSelecao,
   SuporteTicketsSemSelecaoEscuro,
 } from "./Tickets";
+import {
+  SuporteAssinaturasAvisos,
+  SuporteAssinaturasAvisosEscuro,
+  SuporteAssinaturasClaro,
+  SuporteAssinaturasEscuro,
+  SuporteAssinaturasVazio,
+  SuporteAssinaturasVazioEscuro,
+} from "./Signatures";
 
 /**
  * Canvas do Suporte — pela ordem do menu
  * =========================================================================
  * A área `/suporte` nasceu na Fase 10 e este é o seu canvas. **A ordem vertical
  * segue `SUPPORT_NAV`** (`apps/interno/src/lib/navigation.ts`): Caixa de
- * e-mail, Tickets, Atualizações, Campanhas, Métricas de e-mail, Cloud interna,
- * Assinaturas. Percorrer o canvas de cima a baixo é percorrer o menu de cima a
+ * e-mail, Tickets, Cloud interna, Assinaturas. A Cloud interna é a mesma do
+ * Marketing e tem a moldura no canvas `05 - marketing`. Percorrer o canvas de cima a baixo é percorrer o menu de cima a
  * baixo, como no canvas do Admin e no do Proprietário.
  *
  * **Entram à medida que as rotas nascem.** A Caixa de e-mail (P10-04) e os
@@ -105,7 +113,7 @@ export default function SuporteCanvas() {
         id="SuporteTicketsClaro"
         name="Tickets · Claro (/suporte/tickets)"
         component={SuporteTicketsClaro}
-        layout={{ x: 0, y: 3920, width: 1440, height: 1000 }}
+        layout={{ x: 0, y: 3921, width: 1440, height: 1000 }}
       />
       <Storyboard
         id="SuporteTicketsEscuro"
@@ -140,6 +148,49 @@ export default function SuporteCanvas() {
         name="Tickets · Fila vazia · Escuro"
         component={SuporteTicketsFilaVaziaEscuro}
         layout={{ x: 1520, y: 5980, width: 1440, height: 900 }}
+      />
+
+      {/* Assinaturas — última entrada do menu (P10-06). A Cloud interna, que
+          vem antes no menu, tem a moldura no canvas do Marketing: é a mesma. */}
+      <Storyboard
+        id="SuporteAssinaturasClaro"
+        name="Assinaturas · Claro (/suporte/assinaturas)"
+        component={SuporteAssinaturasClaro}
+        layout={{ x: 0, y: 6960, width: 1440, height: 1000 }}
+      />
+      <Storyboard
+        id="SuporteAssinaturasEscuro"
+        name="Assinaturas · Escuro (/suporte/assinaturas)"
+        component={SuporteAssinaturasEscuro}
+        layout={{ x: 1520, y: 6960, width: 1440, height: 1000 }}
+      />
+
+      {/* HTML colado com <script>, onerror= e uma variável inventada */}
+      <Storyboard
+        id="SuporteAssinaturasAvisos"
+        name="Assinaturas · Avisos de HTML · Claro"
+        component={SuporteAssinaturasAvisos}
+        layout={{ x: 0, y: 8040, width: 1440, height: 1000 }}
+      />
+      <Storyboard
+        id="SuporteAssinaturasAvisosEscuro"
+        name="Assinaturas · Avisos de HTML · Escuro"
+        component={SuporteAssinaturasAvisosEscuro}
+        layout={{ x: 1520, y: 8040, width: 1440, height: 1000 }}
+      />
+
+      {/* Antes da primeira assinatura */}
+      <Storyboard
+        id="SuporteAssinaturasVazio"
+        name="Assinaturas · Antes da primeira · Claro"
+        component={SuporteAssinaturasVazio}
+        layout={{ x: 0, y: 9120, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="SuporteAssinaturasVazioEscuro"
+        name="Assinaturas · Antes da primeira · Escuro"
+        component={SuporteAssinaturasVazioEscuro}
+        layout={{ x: 1520, y: 9120, width: 1440, height: 900 }}
       />
     </Canvas>
   );

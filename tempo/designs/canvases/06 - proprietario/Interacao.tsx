@@ -5,6 +5,7 @@ import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { MessagesScreen } from "../../../../apps/app/src/components/messages/MessagesScreen";
 import { VisitsScreen } from "../../../../apps/app/src/components/visits/VisitsScreen";
 import { LeadsScreen } from "../../../../apps/app/src/components/leads/LeadsScreen";

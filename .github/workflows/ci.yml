@@ -88,6 +88,44 @@ jobs:
       - name: Portão · SEO por rota pública
         run: pnpm gate:seo
 
+      # A cerca do Postgres (12 §4.1, §4.3, §5.2). O `anon key` está, por
+      # desenho, no browser de qualquer visitante: uma tabela nova sem RLS não
+      # parte compilação nem teste nenhum — fica legível para o mundo, em
+      # silêncio. A 28 out 2026 eram 67 tabelas, 67 com RLS, 254 funções
+      # `security definer` e nenhuma sem `search_path`. Este portão não melhora
+      # esses números; impede que piorem.
+      #
+      # O teste negativo corre primeiro, pela razão do `gate:canvas` — e aqui
+      # com um motivo extra: duas das primeiras versões deste portão acusaram o
+      # inocente (ver o cabeçalho de `check-rls.test.mjs`), e são esses os dois
+      # casos que ele agora obriga a aceitar.
+      - name: Portão · cerca do Postgres (teste negativo)
+        run: pnpm gate:rls:test
+
+      - name: Portão · RLS, definer e injeção de SQL
+        run: pnpm gate:rls
+
+      # A chave que ignora todo o RLS, os logs que levam dados pessoais para um
+      # subprocessador, e o HTML em bruto sem dizer quem o sanitizou (12 §4.2,
+      # §9.3, §5.3). Nenhum dos três parte compilação.
+      - name: Portão · fronteira do servidor (teste negativo)
+        run: pnpm gate:server:test
+
+      - name: Portão · service_role, logs e HTML em bruto
+        run: pnpm gate:server
+
+      # O guarda de rotas do `app` e do `interno` é por prefixo, a partir de
+      # listas escritas à mão. A falha dele é sempre a mesma e é por omissão:
+      # uma rota nova que ninguém acrescentou à lista fica alcançável por quem
+      # não devia, e a linha que não foi escrita não aparece em diff nenhum.
+      # Este portão lê as listas da fonte do middleware, para não poder
+      # divergir dela.
+      - name: Portão · rotas por papel (teste negativo)
+        run: pnpm gate:rotas:test
+
+      - name: Portão · nenhuma rota sem papel decidido
+        run: pnpm gate:rotas
+
       # Nenhum texto visível escrito à mão nos componentes. O mesmo portão que
       # corre no `pnpm gate` local, e que faltava aqui: uma frase em português
       # dentro de um componente não parte nada — só nunca se traduz.
@@ -117,6 +155,15 @@ jobs:
 
       - name: Portão · dependências vulneráveis
         run: pnpm gate:deps
+
+      # O sidecar tem lockfile próprio e instala-se com `--ignore-workspace`,
+      # o que significa que o `pnpm audit` da raiz **não passa por lá** — um
+      # pacote vulnerável em `tempo/` não aparecia em portão nenhum (12 §13).
+      # Corre depois do `pnpm install` do sidecar, mais acima, que é o que lhe
+      # dá o `node_modules`.
+      - name: Portão · dependências do sidecar
+        run: pnpm audit --audit-level high
+        working-directory: tempo
 
   # ---------------------------------------------------------------------------
   # Esquema — o oitavo portão (doc 08 §8)

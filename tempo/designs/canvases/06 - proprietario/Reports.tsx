@@ -7,6 +7,7 @@ import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { ReportProblemModal } from "../../../../packages/ui/src/support/ReportProblemModal";
 import { reportProblemLabels } from "../../../../packages/ui/src/support/labels";
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { ReportsTimeline } from "../../../../apps/app/src/app/reports/ReportsTimeline";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import { MY_REPORTS } from "../../_fixtures/tickets";

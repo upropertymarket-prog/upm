@@ -6,9 +6,9 @@
  *  1. **Escrever é do Suporte, e por função.** `email_signatures` continua sem
  *     policy de `insert`/`update`/`delete`: nem o Admin nem o Suporte escrevem
  *     direto. A assinatura é de quem responde ao cliente (07 §24.6 #3).
- *  2. **Uma caixa, uma assinatura** (05 §1.8). `mailbox_signature()` escolhe a
- *     primeira que reclama a caixa; com duas a reclamá-la, o composer inseria
- *     uma delas sem ninguém poder dizer qual.
+ *  2. **Uma assinatura para toda a empresa** (29 out 2026). A tabela tem no
+ *     máximo uma linha, e `mailbox_signature()` devolve-a resolvida com os dados
+ *     do dono de cada caixa.
  *  3. **O HTML inseguro é recusado pela função.** Não é a defesa — a
  *     sanitização é do servidor Node (02 §4.3) — é a prova de que a defesa
  *     correu. Se isto passar, há um caminho de escrita que não passou pela action.
@@ -41,13 +41,16 @@ const ADDRESS = `assinaturas-${STAMP}@upropertymarket.test`;
 const HTML = `<p>{{nome}} · {{cargo}}</p><p>{{email}}</p>`;
 
 describe.skipIf(!hasEnv)(
-  "Fase 10 · assinaturas: escrita por função e uma caixa por assinatura",
+  "Fase 10 · assinaturas: escrita por função e uma só para a empresa",
   () => {
     let service: SupabaseClient;
     const clients = {} as Record<Role, SupabaseClient>;
     let mailboxId = "";
     let supportId = "";
     const created: string[] = [];
+    // A assinatura da empresa que já estava em staging, para a repor no fim:
+    // com uma linha só, o teste escreve por cima da verdadeira.
+    let original: { id: string; html: string } | null = null;
 
     async function getOrCreateUser(email: string, role: string) {
       const { data: users, error } = await service.auth.admin.listUsers();
@@ -114,11 +117,22 @@ describe.skipIf(!hasEnv)(
         .single();
       if (mailbox.error) throw new Error(`Falha a criar a caixa: ${mailbox.error.message}`);
       mailboxId = mailbox.data.id;
+
+      const { data: existing } = await service
+        .from("email_signatures")
+        .select("id, html")
+        .limit(1)
+        .maybeSingle();
+      original = existing ?? null;
     });
 
     afterAll(async () => {
       if (!service) return;
-      for (const id of created) await service.from("email_signatures").delete().eq("id", id);
+      if (original) {
+        await service.from("email_signatures").update({ html: original.html }).eq("id", original.id);
+      } else {
+        for (const id of created) await service.from("email_signatures").delete().eq("id", id);
+      }
       await service.from("mailboxes").delete().eq("id", mailboxId);
     });
 
@@ -144,38 +158,34 @@ describe.skipIf(!hasEnv)(
     });
 
     // -------------------------------------------------------------------------
-    // email_signature_save
+    // email_signature_save — a linha única
     // -------------------------------------------------------------------------
 
-    it("o Suporte guarda, e a função devolve o id para continuar a editar", async () => {
-      const { data, error } = await clients.support.rpc("email_signature_save", {
-        p_id: null,
-        p_name: `Suporte ${STAMP}`,
-        p_html: HTML,
-        p_mailbox_ids: [mailboxId],
-      });
+    it("o Suporte guarda, e voltar a guardar reescreve a mesma linha", async () => {
+      const { data, error } = await clients.support.rpc("email_signature_save", { p_html: HTML });
       expect(error).toBeNull();
       expect(typeof data).toBe("string");
       created.push(data as string);
 
-      // Guardar outra vez com o mesmo id reescreve a linha; não cria uma segunda.
       const again = await clients.support.rpc("email_signature_save", {
-        p_id: data as string,
-        p_name: `Suporte ${STAMP}`,
         p_html: `${HTML}<p>{{telefone}}</p>`,
-        p_mailbox_ids: [mailboxId],
       });
       expect(again.error).toBeNull();
       expect(again.data).toBe(data);
     });
 
-    it("o Admin não edita assinaturas — elas vivem no Suporte (07 §24.6 #3)", async () => {
-      const { error } = await clients.admin.rpc("email_signature_save", {
-        p_id: null,
-        p_name: `Admin ${STAMP}`,
-        p_html: "<p>x</p>",
-        p_mailbox_ids: [],
-      });
+    it("uma assinatura para toda a empresa — a tabela recusa uma segunda linha", async () => {
+      const { error } = await service
+        .from("email_signatures")
+        .insert({ name: `Segunda ${STAMP}`, html: "<p>a</p>" });
+      expect(error).not.toBeNull();
+
+      const { data } = await service.from("email_signatures").select("id");
+      expect(data ?? []).toHaveLength(1);
+    });
+
+    it("o Admin não edita a assinatura — ela vive no Suporte (07 §24.6 #3)", async () => {
+      const { error } = await clients.admin.rpc("email_signature_save", { p_html: "<p>x</p>" });
       expect(error).not.toBeNull();
     });
 
@@ -186,36 +196,9 @@ describe.skipIf(!hasEnv)(
         '<a href="javascript:alert(1)">x</a>',
         "<style>p{color:red}</style>",
       ]) {
-        const { error } = await clients.support.rpc("email_signature_save", {
-          p_id: null,
-          p_name: `Inseguro ${STAMP}`,
-          p_html: html,
-          p_mailbox_ids: [],
-        });
+        const { error } = await clients.support.rpc("email_signature_save", { p_html: html });
         expect(error, `devia ter recusado: ${html}`).not.toBeNull();
       }
-    });
-
-    it("recusa uma caixa inexistente, que ficaria a reclamá-la para sempre", async () => {
-      const { error } = await clients.support.rpc("email_signature_save", {
-        p_id: null,
-        p_name: `Fantasma ${STAMP}`,
-        p_html: "<p>a</p>",
-        p_mailbox_ids: ["00000000-0000-0000-0000-000000000000"],
-      });
-      expect(error).not.toBeNull();
-    });
-
-    it("uma caixa, uma assinatura — e o erro diz qual caixa", async () => {
-      const { data, error } = await clients.support.rpc("email_signature_save", {
-        p_id: null,
-        p_name: `Segunda ${STAMP}`,
-        p_html: "<p>a</p>",
-        p_mailbox_ids: [mailboxId],
-      });
-      expect(error).not.toBeNull();
-      expect(error?.message).toContain(ADDRESS);
-      if (typeof data === "string") created.push(data);
     });
 
     // -------------------------------------------------------------------------
@@ -255,15 +238,11 @@ describe.skipIf(!hasEnv)(
     });
 
     // -------------------------------------------------------------------------
-    // email_signature_delete
+    // Tirar a assinatura
     // -------------------------------------------------------------------------
 
-    it("apagar é do Suporte, e deixa a caixa sem assinatura em vez de com a de outro", async () => {
-      const id = created[0]!;
-      const nope = await clients.buyer.rpc("email_signature_delete", { p_id: id });
-      expect(nope.error).not.toBeNull();
-
-      const ok = await clients.support.rpc("email_signature_delete", { p_id: id });
+    it("gravar o HTML vazio tira a assinatura de todas as caixas", async () => {
+      const ok = await clients.support.rpc("email_signature_save", { p_html: "" });
       expect(ok.error).toBeNull();
 
       const { data } = await clients.support.rpc("mailbox_signature", { p_mailbox_id: mailboxId });

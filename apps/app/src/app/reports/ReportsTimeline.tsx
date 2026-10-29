@@ -28,6 +28,15 @@ const STATUS_TONE: Record<TicketStatus, StatusTone> = {
   closed: "ticketClosed",
 };
 
+/** Cada passo cumprido leva a cor do seu estado — a mesma da tag acima. */
+const STEP_COLOR: Record<TicketStatus, string> = {
+  new: "var(--state-ticket-new)",
+  triage: "var(--state-ticket-triage)",
+  in_progress: "var(--state-ticket-progress)",
+  awaiting_confirmation: "var(--state-ticket-awaiting)",
+  closed: "var(--state-ticket-closed)",
+};
+
 export function ReportsTimeline({ reports, locale }: { reports: MyReportRow[]; locale: string }) {
   const t = useTranslations("support.myReports");
   const dateFormat = new Intl.DateTimeFormat(locale === "en" ? "en-IE" : "pt-PT", {
@@ -103,7 +112,7 @@ export function ReportsTimeline({ reports, locale }: { reports: MyReportRow[]; l
                               width: "8px",
                               height: "8px",
                               borderRadius: "var(--r-pill)",
-                              background: done ? "var(--accent)" : "var(--border2)",
+                              background: done ? STEP_COLOR[step] : "var(--border2)",
                             }}
                           />
                           {t(`steps.${REPORTER_TIMELINE[step]}`)}

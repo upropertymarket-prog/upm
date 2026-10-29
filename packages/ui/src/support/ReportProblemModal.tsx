@@ -238,7 +238,15 @@ export function ReportProblemModal({
           ) : null}
         </div>
 
-        {/* O que vai com o relato, à vista. */}
+        {/* O que vai com o relato — dito, não despejado.
+            Esta caixa listava os valores recolhidos (`route`, `viewport`,
+            `browser`, `os`, `network`, contagem de `breadcrumbs`). Saíram a 28
+            out 2026: quem reporta um problema não precisa de ler a sua própria
+            resolução de ecrã para confiar no que envia, e a lista empurrava os
+            botões para fora do primeiro ecrã do modal. O que a pessoa precisa
+            de saber é o que a nota diz — que vai contexto do ecrã e nunca o
+            conteúdo do que escreveu. O `snapshot` continua a seguir inteiro no
+            `onSubmit`; o que mudou foi mostrá-lo. */}
         <div
           style={{
             background: "var(--surface2)",
@@ -252,50 +260,6 @@ export function ReportProblemModal({
           <strong style={{ fontSize: "13px", color: "var(--text)" }}>
             {labels.technicalTitle}
           </strong>
-          <dl
-            style={{
-              margin: 0,
-              display: "grid",
-              gridTemplateColumns: "minmax(5rem, auto) 1fr",
-              gap: "var(--sp-2) var(--sp-4)",
-              fontSize: "13px",
-            }}
-          >
-            {[
-              ["route", snapshot.route],
-              ["viewport", snapshot.viewport],
-              ["browser", snapshot.browser],
-              ["os", snapshot.os],
-              ["network", snapshot.network],
-              [
-                "breadcrumbs",
-                snapshot.breadcrumbs?.length ? String(snapshot.breadcrumbs.length) : undefined,
-              ],
-            ]
-              .filter(([, value]) => Boolean(value))
-              .map(([key, value]) => (
-                <div key={key} style={{ display: "contents" }}>
-                  <dt
-                    style={{
-                      color: "var(--muted)",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "12px",
-                    }}
-                  >
-                    {key}
-                  </dt>
-                  <dd
-                    style={{
-                      margin: 0,
-                      color: "var(--text)",
-                      overflowWrap: "anywhere",
-                    }}
-                  >
-                    {value}
-                  </dd>
-                </div>
-              ))}
-          </dl>
           <p style={{ margin: 0, fontSize: "12.5px", color: "var(--muted)", lineHeight: 1.5 }}>
             {labels.technicalNote}
           </p>

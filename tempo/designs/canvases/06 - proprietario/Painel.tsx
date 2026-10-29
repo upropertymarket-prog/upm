@@ -6,6 +6,7 @@ import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { Button } from "../../../../packages/ui/src/components/Button";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { OwnerDashboard } from "../../../../apps/app/src/components/dashboard/OwnerDashboard";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import {

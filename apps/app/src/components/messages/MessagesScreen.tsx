@@ -210,6 +210,7 @@ export function MessagesScreen({
                   <span
                     style={{
                       fontSize: "var(--fs-body)",
+                      fontWeight: "var(--fw-medium)",
                       color: "var(--accent)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",

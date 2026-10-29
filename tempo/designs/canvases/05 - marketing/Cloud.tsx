@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { CloudScreen } from "../../../../packages/cloud/src/CloudScreen";
 import { staffCloudStatus } from "../../../../packages/db/src/cloud";
 import ptMessages from "../../../../packages/config/messages/pt.json";

@@ -176,7 +176,14 @@ export const notificationChannelPrefsSchema = z.object({
   email: z.boolean(),
 });
 
-export const notificationPrefsSchema = z.record(
+/**
+ * `partialRecord` e não `record`: na v4 do `zod`, um `record` com chaves de um
+ * `enum` passou a exigir **todas** as chaves presentes. Aqui isso estaria ao
+ * contrário do que a coluna significa — a nota acima diz que ausente é
+ * ligado, porque as preferências são opt-out — e uma conta nova, cujo
+ * `notification_prefs` é `{}`, deixaria de validar.
+ */
+export const notificationPrefsSchema = z.partialRecord(
   notificationTypeSchema,
   notificationChannelPrefsSchema,
 );

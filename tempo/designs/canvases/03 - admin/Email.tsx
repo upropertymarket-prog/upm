@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { MailboxView } from "../../../../apps/interno/src/app/suporte/email/MailboxView";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 // A folha do cliente de correio. Sem ela a storyboard mostrava três colunas sem

@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { MailboxView } from "../../../../apps/interno/src/app/suporte/email/MailboxView";
 import { Composer } from "../../../../apps/interno/src/app/suporte/email/Composer";
 import ptMessages from "../../../../packages/config/messages/pt.json";

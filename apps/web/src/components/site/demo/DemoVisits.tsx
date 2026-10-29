@@ -136,7 +136,13 @@ export function DemoVisits({ role }: { role: DemoRole }) {
                       </span>
                     </div>
                     <span style={{ color: "var(--muted)" }}>
-                      {t("reschedulesLine", { used: "0", max: "2" })}
+                      {t.rich("reschedulesLine", {
+                        used: "0",
+                        max: "2",
+                        count: (chunks) => (
+                          <span style={{ fontWeight: "var(--fw-semibold)" }}>{chunks}</span>
+                        ),
+                      })}
                     </span>
                     {open ? (
                       <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>

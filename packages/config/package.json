@@ -14,6 +14,7 @@
     "./tsconfig/next.json": "./tsconfig/next.json",
     "./server": "./server.ts",
     "./security": "./security.ts",
+    "./sentry": "./sentry.ts",
     "./seo-routes": "./seo-routes.generated.ts"
   },
   "files": [
@@ -22,6 +23,7 @@
     "i18n.ts",
     "server.ts",
     "security.ts",
+    "sentry.ts",
     "seo-routes.generated.ts"
   ],
   "scripts": {
@@ -31,7 +33,7 @@
   },
   "devDependencies": {
     "@types/react": "^19",
-    "next": "15.5.26",
+    "next": "15.5.28",
     "next-intl": "^4.14.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",

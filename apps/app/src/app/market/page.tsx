@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { coverUrlsFor } from "@upm/db/property-covers";
 import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
@@ -67,37 +68,24 @@ export default async function MarketPage({
   const list = data ?? [];
   const pageCount = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
-  const properties: PropertyCardData[] = await Promise.all(
-    list.map(async (property) => {
-      let coverUrl: string | null = null;
-      if (property.id) {
-        const { data: media } = await supabase
-          .from("property_media")
-          .select("path")
-          .eq("property_id", property.id)
-          .order("is_cover", { ascending: false })
-          .order("position", { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        if (media) {
-          const { data: signed } = await supabase.storage
-            .from("property-media")
-            .createSignedUrl(media.path, 3600);
-          coverUrl = signed?.signedUrl ?? null;
-        }
-      }
-      return {
-        id: property.id ?? "",
-        title: property.title,
-        deal: property.deal,
-        typology: property.typology,
-        city: property.city,
-        price_cents: property.price_cents,
-        rent_cents: property.rent_cents,
-        coverUrl,
-      };
-    }),
+  // Duas ida-e-volta para a página inteira, não duas por cartão: com o
+  // `PAGE_SIZE` de 20, a versão anterior fazia 40 pedidos ao Supabase para
+  // desenhar esta grelha. Ver a nota em `@upm/db/property-covers`.
+  const capas = await coverUrlsFor(
+    supabase,
+    list.map((property) => property.id),
   );
+
+  const properties: PropertyCardData[] = list.map((property) => ({
+    id: property.id ?? "",
+    title: property.title,
+    deal: property.deal,
+    typology: property.typology,
+    city: property.city,
+    price_cents: property.price_cents,
+    rent_cents: property.rent_cents,
+    coverUrl: property.id ? (capas.get(property.id) ?? null) : null,
+  }));
 
   const currentQuery = new URLSearchParams();
   if (params.negocio) currentQuery.set("negocio", params.negocio);

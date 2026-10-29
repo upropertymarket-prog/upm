@@ -54,5 +54,8 @@ export function ThemeScript({
     `d.setAttribute(${JSON.stringify(THEME_CHOICE_ATTR)},c);` +
     `}catch(e){document.documentElement.setAttribute(${JSON.stringify(THEME_ATTR)},"light");}})();`;
 
+  // html-ok: o `script` é construído aqui em cima, linha a linha, e tudo o que
+  // nele vem de fora passa por `JSON.stringify`. Não há entrada de utilizador
+  // neste caminho; corre sob a CSP pelo `nonce` do pedido.
   return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: script }} />;
 }

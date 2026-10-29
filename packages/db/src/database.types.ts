@@ -956,7 +956,6 @@ export type Database = {
           created_at: string;
           html: string;
           id: string;
-          mailbox_ids: string[];
           name: string;
           updated_at: string;
         };
@@ -964,15 +963,13 @@ export type Database = {
           created_at?: string;
           html?: string;
           id?: string;
-          mailbox_ids?: string[];
-          name: string;
+          name?: string;
           updated_at?: string;
         };
         Update: {
           created_at?: string;
           html?: string;
           id?: string;
-          mailbox_ids?: string[];
           name?: string;
           updated_at?: string;
         };
@@ -4640,16 +4637,7 @@ export type Database = {
         Returns: string;
       };
       effective_limits: { Args: { p_profile_id: string }; Returns: Json };
-      email_signature_delete: { Args: { p_id: string }; Returns: undefined };
-      email_signature_save: {
-        Args: {
-          p_html: string;
-          p_id: string;
-          p_mailbox_ids: string[];
-          p_name: string;
-        };
-        Returns: string;
-      };
+      email_signature_save: { Args: { p_html: string }; Returns: string };
       ensure_property_folders: {
         Args: { p_profile_id: string };
         Returns: number;

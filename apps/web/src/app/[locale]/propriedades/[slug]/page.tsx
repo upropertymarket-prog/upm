@@ -252,7 +252,9 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
       <ListingDetail listing={listing} locale={locale} launchMode={launchMode} />
 
       {/* Dados estruturados no HTML servido, não injetados no cliente — é o que
-          04 §2.1.2 AC #4 exige e o que os validadores leem. */}
+          04 §2.1.2 AC #4 exige e o que os validadores leem.
+          html-ok: JSON-LD gerado por nós a partir do `listing`, por
+          `JSON.stringify`. Não há HTML de origem humana neste caminho. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

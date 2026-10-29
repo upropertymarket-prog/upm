@@ -5,6 +5,7 @@ import {
   applySecurityHeaders,
   clientIpFrom,
   generateNonce,
+  invalidCidrsIn,
   isIpAllowed,
 } from "@upm/config/security";
 
@@ -65,6 +66,22 @@ export async function middleware(request: NextRequest) {
     .eq("key", "interno_ip_allowlist")
     .maybeSingle();
   const allowlist = Array.isArray(allowlistFlag?.value) ? (allowlistFlag.value as string[]) : [];
+
+  // Uma entrada que a allowlist não entende é descartada — e é preciso que se
+  // ouça. Caso contrário quem a escreveu fica a contar com uma proteção que
+  // tem menos redes do que ele pensa, que foi exatamente o que aconteceu
+  // enquanto os CIDRs IPv6 eram ignorados em silêncio (12 §2.3).
+  if (allowlist.length > 0) {
+    const invalidos = invalidCidrsIn(allowlist);
+    if (invalidos.length > 0) {
+      // A lista vai como argumento à parte e não interpolada: o `gate:i18n`
+      // varre o texto dentro de template literals, e um fragmento em português
+      // ali é indistinguível de uma frase de ecrã. Os outros logs desta base
+      // escrevem-se da mesma forma.
+      console.error("[interno] interno_ip_allowlist: entradas inválidas ignoradas", invalidos);
+    }
+  }
+
   const clientIp = clientIpFrom(request.headers);
   if (allowlist.length > 0 && (!clientIp || !isIpAllowed(clientIp, allowlist))) {
     return new NextResponse("Acesso não permitido a partir desta rede.", { status: 403 });

@@ -4,6 +4,7 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { CloudScreen } from "../../../../packages/cloud/src/CloudScreen";
 import { ContractsScreen } from "../../../../apps/app/src/components/contracts/ContractsScreen";
 import type {

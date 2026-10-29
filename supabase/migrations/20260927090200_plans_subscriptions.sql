@@ -68,6 +68,8 @@ alter table public.subscriptions enable row level security;
 -- plans: preços são públicos (página de preços, site sem sessão) — leitura
 -- livre; escrita só admin (Admin › Planos, 04 §2.5). Sem Stripe ainda,
 -- nenhuma escrita automática existe nesta fase.
+-- rls-ok: catálogo de preços. A página de preços do site lê-o sem sessão, e
+-- não há aqui nada que não esteja já publicado. A escrita é só de admin.
 create policy plans_select_public on public.plans
   for select using (true);
 

@@ -1,0 +1,58 @@
+/**
+ * O shell dentro do canvas — prender a sidebar à sua moldura
+ * =========================================================================
+ * Dívida temporária. Sai quando a `shell.css` resolver isto na origem.
+ *
+ * `.upm-sidebar` é `position: fixed` (`packages/ui/src/styles/shell.css`), e em
+ * produção está certo: uma página, um shell, uma sidebar que não se mexe com o
+ * scroll (04 §5.5 e 04 §8.4). A `.upm-shell__gutter` reserva-lhe a largura na
+ * grelha.
+ *
+ * No canvas há um shell por storyboard — 163 ao todo. O bloco de contenção de
+ * um `fixed` não é a janela mas o antepassado transformado mais próximo, que
+ * aqui é o plano do canvas. Todas as sidebars resolvem contra esse mesmo plano
+ * e aterram na origem dele, empilhadas umas sobre as outras: vê-se a de quem
+ * ocupa `x: 0, y: 0` e as outras molduras ficam com a coluna-fantasma a
+ * reservar a largura e nada lá dentro. Confirmado a 28 out 2026 nos quatro
+ * canvases com chrome — a storyboard com menu era sempre a da origem.
+ *
+ * Duas regras chegam: dar ao shell um bloco de contenção próprio, e passar a
+ * sidebar a `absolute` para a ele se prender. A sidebar continua a cobrir a
+ * coluna-fantasma, porque `left: 0` e a largura vêm da regra original.
+ *
+ * **Nada disto toca no CSS de produção.** A folha vive no canvas e só entra nas
+ * storyboards que a importam.
+ */
+
+.upm-shell {
+  position: relative;
+}
+
+.upm-shell .upm-sidebar {
+  position: absolute;
+}
+
+/*
+ * O mesmo defeito, nos modais e drawers (28 out 2026)
+ * -------------------------------------------------------------------------
+ * `.upm-overlay` também é `position: fixed; inset: 0`. Com
+ * `data-upm-overlay-root` o portal já nasce dentro da storyboard, mas o
+ * `fixed` continua a resolver contra o plano do canvas: o véu e o modal saíam
+ * da moldura e a storyboard "Reportar problema" mostrava só o ecrã de fundo.
+ * Medido isolado (a storyboard sozinha no host), o modal estava lá e visível —
+ * só o canvas o perdia.
+ *
+ * A raiz passa a ser o bloco de contenção, e o véu prende-se a ela. O drawer
+ * usa `100vh`, que no canvas é a janela e não a moldura — daí o `100%`.
+ */
+[data-upm-overlay-root] {
+  position: relative;
+}
+
+[data-upm-overlay-root] .upm-overlay {
+  position: absolute;
+}
+
+[data-upm-overlay-root] .upm-drawer {
+  height: 100%;
+}

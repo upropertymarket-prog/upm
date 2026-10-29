@@ -41,7 +41,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@upm/config": "workspace:*",
-    "next": "15.5.26",
+    "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "typescript": "^5.7.3",

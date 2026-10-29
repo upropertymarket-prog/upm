@@ -3,6 +3,7 @@ import { NoNavigation } from "./NoNavigation";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { PlanScreen } from "../../../../apps/app/src/components/billing/PlanScreen";
 import type {
   AddonOption,

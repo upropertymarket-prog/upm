@@ -36,13 +36,14 @@ const baseSchema = z.object({
 
 const preRegistrationSchema = baseSchema.extend({
   profileType: z.enum(["owner", "buyer", "empresa"], {
-    errorMap: () => ({ message: "Escolha o perfil que o descreve." }),
+    // `error` e não `errorMap` — ver a nota em `packages/db/src/legal.ts`.
+    error: () => "Escolha o perfil que o descreve.",
   }),
   zone: z.string().trim().max(160).optional(),
   consentMarketing: z.literal("on").optional(),
   // 04 §2.1: o consentimento dos Termos é separado e nunca pré-selecionado.
   consentTerms: z.literal("on", {
-    errorMap: () => ({ message: "Tem de aceitar os Termos para continuar." }),
+    error: () => "Tem de aceitar os Termos para continuar.",
   }),
 });
 

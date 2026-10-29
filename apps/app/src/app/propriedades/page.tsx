@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { coverUrlsFor } from "@upm/db/property-covers";
 
 import { AppChrome } from "../../components/AppChrome";
 import {
@@ -62,26 +63,19 @@ export default async function MyPropertiesPage({
   const list = properties ?? [];
 
   // Fotos de capa: bucket privado, sempre signed URL (nunca `getPublicUrl`).
-  const rows: PropertyListingRow[] = await Promise.all(
-    list.map(async (property) => {
-      const { data: media } = await supabase
-        .from("property_media")
-        .select("path")
-        .eq("property_id", property.id)
-        .order("is_cover", { ascending: false })
-        .order("position", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (!media) return { ...property, coverUrl: null };
-
-      const { data: signed } = await supabase.storage
-        .from("property-media")
-        .createSignedUrl(media.path, 3600);
-
-      return { ...property, coverUrl: signed?.signedUrl ?? null };
-    }),
+  //
+  // Em duas ida-e-volta para a lista toda, e não duas por imóvel: um
+  // proprietário com 40 imóveis fazia 80 pedidos para abrir esta página. Ver a
+  // nota em `@upm/db/property-covers`.
+  const capas = await coverUrlsFor(
+    supabase,
+    list.map((property) => property.id),
   );
+
+  const rows: PropertyListingRow[] = list.map((property) => ({
+    ...property,
+    coverUrl: capas.get(property.id) ?? null,
+  }));
 
   return (
     <AppChrome

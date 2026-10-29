@@ -194,10 +194,11 @@ describe("04 §5.6 — uma cor, um significado", () => {
     }
 
     // Exceções legítimas: famílias de estado que nunca aparecem no mesmo ecrã,
-    // logo a cor não fica ambígua para quem olha. Ex.: `ticket-new` e
-    // `ticket-triage` são o mesmo âmbar porque 07 §5.11 mapeia ambos para "Por
-    // tratar"; o roxo de `ticket-awaiting` e o de `deal-rent` vêm os dois de
-    // 04 §5.6 e vivem em produtos diferentes (Suporte vs Market).
+    // logo a cor não fica ambígua para quem olha. Ex.: o roxo de
+    // `ticket-awaiting` e o de `deal-rent` vêm os dois de 04 §5.6 e vivem em
+    // produtos diferentes (Suporte vs Market). `ticket-new` e `ticket-triage`
+    // já foram exceção e deixaram de ser: a timeline de "Os meus reports"
+    // mostra-os lado a lado como passos distintos ("Recebido", "Em análise").
     // Uma exceção nova só entra aqui com a justificação escrita.
     const allowed = new Set([
       "--state-visit-pending,--state-severity-high,--state-pending",
@@ -206,7 +207,6 @@ describe("04 §5.6 — uma cor, um significado", () => {
       "--state-visit-cancelled,--state-severity-critical,--state-rejected",
       "--state-visit-completed,--state-ticket-closed",
       "--state-visit-archived,--state-severity-medium,--state-archived",
-      "--state-ticket-new,--state-ticket-triage",
       "--state-ticket-awaiting,--state-deal-rent",
       "--state-severity-low,--state-draft",
     ]);

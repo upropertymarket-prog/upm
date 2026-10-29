@@ -127,15 +127,20 @@ describe("inspectSignature", () => {
 });
 
 describe("signatureSaveSchema", () => {
-  it("exige nome", () => {
-    const result = signatureSaveSchema.safeParse({ name: "   ", html: "<p>a</p>" });
-    expect(result.success).toBe(false);
+  // Uma assinatura para toda a empresa (29 out 2026): só o HTML entra. Nome e
+  // caixas deixaram de existir no ecrã e na função.
+  it("aceita só o HTML", () => {
+    const result = signatureSaveSchema.safeParse({ html: "<p>a</p>" });
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ html: "<p>a</p>" });
   });
 
-  it("aceita sem caixas associadas — uma assinatura pode nascer antes de ter caixa", () => {
-    const result = signatureSaveSchema.safeParse({ name: "Suporte", html: "<p>a</p>" });
-    expect(result.success).toBe(true);
-    expect(result.data?.mailboxIds).toEqual([]);
+  it("aceita o HTML vazio — é assim que se tira a assinatura dos e-mails", () => {
+    expect(signatureSaveSchema.safeParse({ html: "" }).success).toBe(true);
+  });
+
+  it("recusa uma página inteira colada por engano", () => {
+    expect(signatureSaveSchema.safeParse({ html: "x".repeat(200_001) }).success).toBe(false);
   });
 
   it("as seis variáveis de 05 §1.8, e só estas", () => {

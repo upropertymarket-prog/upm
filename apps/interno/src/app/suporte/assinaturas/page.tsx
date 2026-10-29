@@ -2,12 +2,12 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 import { listMailboxOptions } from "@upm/db/mail";
-import { listSignatures } from "@upm/db/signatures";
+import { getCompanySignature } from "@upm/db/signatures";
 
 import { InternalChrome } from "../../../components/InternalChrome";
 import { getSupportShellData } from "../../../lib/support-shell";
 import { setLocalePreference } from "../../actions/preferences";
-import { deleteSignatureAction, inspectSignatureAction, saveSignatureAction } from "./actions";
+import { inspectSignatureAction, saveSignatureAction } from "./actions";
 import { SignatureManager } from "./SignatureManager";
 import "./signatures.css";
 
@@ -19,9 +19,9 @@ import "./signatures.css";
  * porque sem elas o composer teria de inventar uma assinatura ou não ter
  * nenhuma. O que faltava era **o ecrã**, e é este.
  *
- * Sem estado no URL, ao contrário dos tickets e da caixa: uma assinatura não é
- * uma coisa que se passe a um colega por link, e a lista tem meia dúzia de
- * linhas. Quando houver razão para partilhar uma, há dado para a pôr no URL.
+ * **Uma assinatura para toda a empresa** (29 out 2026): o ecrã edita a linha
+ * única de `email_signatures`. As caixas só servem à pré-visualização — para
+ * ver as variáveis resolvidas com os dados de uma pessoa concreta.
  */
 
 export const dynamic = "force-dynamic";
@@ -30,8 +30,8 @@ export default async function SupportSignaturesPage() {
   const supabase = createClient(await cookies());
   const t = await getTranslations();
 
-  const [signatures, mailboxes, shell] = await Promise.all([
-    listSignatures(supabase),
+  const [signature, mailboxes, shell] = await Promise.all([
+    getCompanySignature(supabase),
     listMailboxOptions(supabase),
     getSupportShellData(supabase, t("sidebar.groups.support")),
   ]);
@@ -47,10 +47,9 @@ export default async function SupportSignaturesPage() {
       counters={shell.counters}
     >
       <SignatureManager
-        signatures={signatures}
+        signature={signature}
         mailboxes={mailboxes}
         onSave={saveSignatureAction}
-        onDelete={deleteSignatureAction}
         onInspect={inspectSignatureAction}
       />
     </InternalChrome>

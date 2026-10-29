@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
 import {
-  deleteSignature,
   inspectSignature,
   previewSignature,
   saveSignature,
@@ -62,9 +61,9 @@ export async function saveSignatureAction(
   const { clean, findings } = inspectSignature(parsed.data.html);
 
   try {
-    const id = await saveSignature(supabase, { ...parsed.data, html: clean });
+    const id = await saveSignature(supabase, clean);
     revalidatePath("/suporte/assinaturas");
-    // A assinatura entra no composer da caixa associada: sem isto, a caixa
+    // A assinatura entra no composer de todas as caixas: sem isto, a caixa
     // continuava a inserir a versão anterior até alguém recarregar.
     revalidatePath("/suporte/email");
 
@@ -75,31 +74,8 @@ export async function saveSignatureAction(
       findings,
       notice: removed > 0 ? "Assinatura guardada, com HTML inseguro retirado." : undefined,
     };
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : "";
-    // A mensagem desta vem com os endereços das caixas em causa, e é a única
-    // informação que resolve o problema de quem está a gravar.
-    if (detail.includes("já têm assinatura")) return { error: detail };
-    if (detail.includes("já não existe")) {
-      return { error: "Esta assinatura já não existe — alguém a apagou." };
-    }
-    return { error: "Não foi possível guardar a assinatura." };
-  }
-}
-
-export async function deleteSignatureAction(id: unknown): Promise<SignatureActionResult> {
-  if (typeof id !== "string") return { error: "Pedido inválido." };
-
-  const supabase = await getSupportClient();
-  if (!supabase) return { error: "Sem permissão para apagar assinaturas." };
-
-  try {
-    await deleteSignature(supabase, id);
-    revalidatePath("/suporte/assinaturas");
-    revalidatePath("/suporte/email");
-    return { ok: true, notice: "Assinatura apagada." };
   } catch {
-    return { error: "Não foi possível apagar a assinatura." };
+    return { error: "Não foi possível guardar a assinatura." };
   }
 }
 

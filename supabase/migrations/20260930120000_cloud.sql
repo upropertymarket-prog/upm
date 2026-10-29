@@ -414,6 +414,8 @@ alter table public.document_access_log enable row level security;
 
 -- addons: como `plans`, o catálogo é público (a página de preços mostra o
 -- extra sem sessão). Escrita só admin.
+-- rls-ok: catálogo de extras, pelas mesmas razões de `plans` — preço
+-- publicado, lido sem sessão, escrita só de admin.
 create policy addons_select_public on public.addons
   for select using (true);
 

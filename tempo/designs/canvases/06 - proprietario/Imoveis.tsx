@@ -4,6 +4,7 @@ import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 
 import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { PropertyFilters } from "../../../../apps/app/src/components/market/PropertyFilters";
 import { MarketResults } from "../../../../apps/app/src/components/market/MarketResults";
 import { PropertyDetail } from "../../../../apps/app/src/components/market/PropertyDetail";

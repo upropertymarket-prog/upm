@@ -417,9 +417,12 @@ function VisitList({
                   </span>
                 </div>
                 <span style={{ color: "var(--muted)" }}>
-                  {t("reschedulesLine", {
+                  {t.rich("reschedulesLine", {
                     used: String(row.rescheduleCount),
                     max: String(MAX_RESCHEDULES),
+                    count: (chunks) => (
+                      <span style={{ fontWeight: "var(--fw-semibold)" }}>{chunks}</span>
+                    ),
                   })}
                   {row.proposedByMe && row.rescheduleCount < MAX_RESCHEDULES ? t("theirTurn") : ""}
                 </span>
@@ -460,7 +463,7 @@ function VisitList({
                   ) : null}
                   <a
                     href="/mensagens"
-                    className="upm-btn upm-btn--ghost upm-btn--md"
+                    className="upm-btn upm-btn--secondary upm-btn--md"
                     style={{ textDecoration: "none" }}
                   >
                     <MessageSquare size={14} aria-hidden="true" />

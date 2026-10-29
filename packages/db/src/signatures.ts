@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "./database.types";
-import { nullableArg } from "./rpc-args";
 
 /**
  * Assinaturas de e-mail (P10-06 · 04 §2.6 · 05 §1.8 · 02 §4.3)
@@ -195,48 +194,35 @@ function removedEventAttributes(html: string): string[] {
 }
 
 export const signatureSaveSchema = z.object({
-  id: z.string().uuid().nullish(),
-  name: z.string().trim().min(1, "A assinatura precisa de um nome.").max(80),
   // 200 KB é folgado para uma assinatura e estreito o suficiente para que
   // ninguém guarde uma página inteira aqui por engano.
   html: z.string().max(200_000),
-  mailboxIds: z.array(z.string().uuid()).max(20).default([]),
 });
 
 export type SignatureSaveInput = z.infer<typeof signatureSaveSchema>;
 
 // ---------------------------------------------------------------------------
-// As quatro portas
+// As três portas
+//
+// **Uma assinatura para toda a empresa** (29 out 2026, migração
+// `20261029120000`): a tabela tem no máximo uma linha, e já não há caixas
+// associadas, lista nem apagar. Gravar HTML vazio tira a assinatura dos
+// e-mails — o composer trata `''` como "sem assinatura".
 // ---------------------------------------------------------------------------
 
-export async function listSignatures(client: AnySupabaseClient): Promise<EmailSignatureRow[]> {
-  const { data } = await client
-    .from("email_signatures")
-    .select("*")
-    .order("created_at", { ascending: true });
-
-  return data ?? [];
+/** A assinatura da empresa, ou `null` antes da primeira gravação. */
+export async function getCompanySignature(
+  client: AnySupabaseClient,
+): Promise<EmailSignatureRow | null> {
+  const { data } = await client.from("email_signatures").select("*").limit(1).maybeSingle();
+  return data ?? null;
 }
 
-/** Devolve o `id` — o editor continua a gravar por cima da linha que nasceu. */
-export async function saveSignature(
-  client: AnySupabaseClient,
-  input: SignatureSaveInput & { html: string },
-): Promise<string> {
-  const { data, error } = await client.rpc("email_signature_save", {
-    p_id: nullableArg(input.id),
-    p_name: input.name,
-    p_html: input.html,
-    p_mailbox_ids: input.mailboxIds,
-  });
+export async function saveSignature(client: AnySupabaseClient, html: string): Promise<string> {
+  const { data, error } = await client.rpc("email_signature_save", { p_html: html });
 
   if (error) throw new Error(error.message);
   return String(data);
-}
-
-export async function deleteSignature(client: AnySupabaseClient, id: string): Promise<void> {
-  const { error } = await client.rpc("email_signature_delete", { p_id: id });
-  if (error) throw new Error(error.message);
 }
 
 /**

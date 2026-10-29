@@ -101,6 +101,9 @@ alter table public.seo_pages enable row level security;
 
 -- Leitura por toda a gente, incluindo `anon`: ver a nota no topo. O site
 -- público lê isto sem sessão, para se desenhar a si próprio.
+-- rls-ok: títulos, descrições e cartões de partilha das rotas públicas. É
+-- conteúdo destinado a ser lido por um motor de busca — fechá-lo a `anon`
+-- era fechá-lo ao Google.
 create policy seo_pages_public_select on public.seo_pages
   for select using (true);
 

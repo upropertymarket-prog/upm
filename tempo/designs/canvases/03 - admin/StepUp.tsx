@@ -13,11 +13,14 @@ function AdminStepUpDemo({ theme }: { theme: "light" | "dark" }) {
       <ThemeProvider initialChoice={theme}>
         {/* `data-upm-overlay-root`: o modal nasce aqui dentro em vez de ir ao
             `body`, senão a storyboard mostrava o ecrã de fundo e mais nada —
-            ver a nota de `usePortalTarget` em `packages/ui`. */}
+            ver a nota de `usePortalTarget` em `packages/ui`.
+            `height` e não `minHeight`: o véu cobre a raiz inteira e o modal
+            centra-se nela. Com `minHeight` a raiz esticava até ao fim da página
+            de Planos e o modal descia abaixo do meio da moldura de 900 px. */}
         <div
           data-theme={theme}
           data-upm-overlay-root
-          style={{ minHeight: "900px", background: "var(--bg)" }}
+          style={{ height: "900px", overflow: "hidden", background: "var(--bg)" }}
         >
           {theme === "light" ? <AdminPlanosClaro /> : <AdminPlanosEscuro />}
           <StepUpModal

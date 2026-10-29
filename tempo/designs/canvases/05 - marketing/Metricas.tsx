@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { MetricsView } from "../../../../apps/interno/src/app/marketing/metricas/MetricsView";
 import ptMessages from "../../../../packages/config/messages/pt.json";
 import { CAMPAIGN_ROWS } from "../../_fixtures/marketing";

@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
 import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import "../../_estilos/shell-no-canvas.css";
 import { DashboardView } from "../../../../apps/interno/src/app/admin/painel/DashboardView";
 import type { AdminDashboardPayload } from "../../../../apps/interno/src/lib/admin-shell";
 import { ModerationView } from "../../../../apps/interno/src/app/admin/imoveis/ModerationView";

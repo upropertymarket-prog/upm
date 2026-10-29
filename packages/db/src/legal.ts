@@ -83,7 +83,10 @@ export type TermsAcceptanceInput = z.infer<typeof termsAcceptanceSchema>;
 
 /** A caixa de aceitação é obrigatória e não vem pré-marcada (P9-02, P9-09). */
 export const acceptedCheckboxSchema = z.literal("on", {
-  errorMap: () => ({ message: "Tem de aceitar os Termos e Condições para continuar." }),
+  // `error` e não `errorMap`: na v4 o `errorMap` é **ignorado em silêncio** e a
+  // mensagem cai para o `Invalid input: expected "on"` em inglês. Não dá erro
+  // de tipo — só deixa de se ver (28 out 2026).
+  error: () => "Tem de aceitar os Termos e Condições para continuar.",
 });
 
 /**

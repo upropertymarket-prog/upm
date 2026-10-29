@@ -123,7 +123,7 @@ export function ContractsScreen({
       id: "counterparty",
       header: t("columnCounterparty"),
       cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>
+        <span style={{ color: "var(--muted)", fontWeight: "var(--fw-medium)" }}>
           {row.counterpartyName || t("counterpartyUnset")}
         </span>
       ),
@@ -141,7 +141,9 @@ export function ContractsScreen({
       id: "updated",
       header: t("columnUpdated"),
       cell: (row) => (
-        <span style={{ color: "var(--muted)" }}>{formatDateTime(row.updatedAt, intlLocale)}</span>
+        <span style={{ color: "var(--muted)", fontWeight: "var(--fw-medium)" }}>
+          {formatDateTime(row.updatedAt, intlLocale)}
+        </span>
       ),
     },
     {

@@ -255,6 +255,7 @@ export function AppUpdatesModal({
             <div
               style={{ fontSize: "14px", lineHeight: 1.6, color: "var(--muted)" }}
               // Sanitizado na escrita, no servidor (ver a nota de topo).
+              // html-ok: `sanitizeUpdateBody` em `packages/db/src/updates.ts`.
               dangerouslySetInnerHTML={{ __html: current.bodyHtml }}
             />
           ) : null}

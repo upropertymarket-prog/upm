@@ -1,11 +1,12 @@
 /**
- * Editor de assinaturas (P10-06 · 04 §2.6)
+ * Editor da assinatura (P10-06 · 04 §2.6)
  * =========================================================================
- * Três colunas: lista → HTML → pré-visualização. **Sem media queries** — a
- * grelha é intrínseca (`repeat(auto-fit, minmax(...))` com um `min()` a
- * segurar o mínimo), e por isso passa de três para duas e para uma coluna pela
- * largura disponível, sem pontos de corte escritos à mão. É a regra do
- * projeto e o que `pnpm gate:responsive` mede.
+ * Duas colunas: HTML → pré-visualização. Eram três, com a lista de
+ * assinaturas à cabeça; desde 29 out 2026 há uma só para toda a empresa e a
+ * lista saiu. **Sem media queries** — o corpo é flex com `flex-wrap` e bases
+ * intrínsecas (com um `min()` a segurar o mínimo), e por isso passa de duas
+ * para uma coluna pela largura disponível, sem pontos de corte escritos à
+ * mão. É a regra do projeto e o que `pnpm gate:responsive` mede.
  */
 
 .upm-sig {
@@ -14,71 +15,19 @@
 }
 
 .upm-sig__body {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-5);
-  /* A lista é estreita por natureza (nomes e endereços); o editor e a
-     pré-visualização querem o espaço. Daí a primeira coluna com um máximo e as
-     outras duas a dividir o resto. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  align-items: start;
+  align-items: flex-start;
 }
 
-.upm-sig__list {
-  position: sticky;
-  /* A topbar tem 64–68 px (04 §1.5); a coluna cola-se por baixo dela. */
-  top: var(--sp-5);
-  display: grid;
-  gap: var(--sp-2);
-  padding: var(--sp-3);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  max-width: min(100%, 360px);
-}
-
-.upm-sig__list ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--sp-1);
-}
-
-.upm-sig__item {
-  display: grid;
-  gap: 2px;
-  width: 100%;
-  min-height: 48px;
-  padding: var(--sp-2) var(--sp-3);
-  border: 0;
-  border-radius: var(--r-md);
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-}
-
-.upm-sig__item:hover {
-  background: var(--surface2);
-}
-
-.upm-sig__item[aria-current="true"] {
-  background: var(--accent-soft);
-}
-
-.upm-sig__item-name {
-  font-size: 14px;
-  color: var(--text);
-}
-
-/* O endereço da caixa pode ser longo; trunca com largura mínima zero, que é o
-   que faz o `ellipsis` funcionar dentro de uma grelha. */
-.upm-sig__item-meta {
+.upm-sig__body > * {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-  color: var(--muted);
+}
+
+.upm-sig__editor,
+.upm-sig__preview {
+  flex: 1 1 min(100%, 360px);
 }
 
 .upm-sig__editor {
@@ -88,11 +37,6 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   background: var(--surface);
-}
-
-.upm-sig__editor--empty {
-  place-items: center;
-  min-height: 320px;
 }
 
 .upm-sig__variables {
@@ -118,38 +62,97 @@
   overflow-x: auto;
 }
 
+/* O botão que abre os avisos: largura do conteúdo, não da coluna. */
 .upm-sig__warning {
-  display: flex;
-  align-items: flex-start;
+  display: inline-flex;
+  align-items: center;
   gap: var(--sp-2);
-  margin: 0;
-  padding: var(--sp-3);
+  min-height: 36px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid currentColor;
   border-radius: var(--r-md);
+  font: inherit;
   font-size: 13px;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+.upm-sig__warning[data-tone="danger"],
+.upm-sig__finding[data-tone="danger"] h3 {
+  color: var(--danger);
 }
 
 .upm-sig__warning[data-tone="danger"] {
   background: var(--danger-soft);
-  color: var(--danger);
+}
+
+.upm-sig__warning[data-tone="warn"],
+.upm-sig__finding[data-tone="warn"] h3 {
+  color: var(--warn);
 }
 
 .upm-sig__warning[data-tone="warn"] {
   background: var(--warn-soft);
-  color: var(--warn);
 }
 
-.upm-sig__mailboxes {
+/* O detalhe dentro do modal: um bloco por tipo de aviso. */
+.upm-sig__findings {
   display: grid;
+  gap: var(--sp-5);
+}
+
+.upm-sig__finding {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.upm-sig__finding h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+}
+
+.upm-sig__finding p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.upm-sig__finding ul {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-2);
   margin: 0;
   padding: 0;
-  border: 0;
+  list-style: none;
 }
 
+.upm-sig__finding code {
+  display: inline-block;
+  padding: 2px var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface2);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+/* Guardar à esquerda, avisos à direita, os dois centrados na mesma linha.
+   O `margin-left: auto` empurra os avisos para a ponta; se a coluna apertar
+   e quebrarem de linha, ficam à direita na linha de baixo. */
 .upm-sig__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--sp-3);
+}
+
+.upm-sig__actions .upm-sig__warning {
+  margin-left: auto;
 }
 
 .upm-sig__preview {

@@ -508,6 +508,8 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                 }}
                 // Já sanitizado na gravação (02 §4.3): o que está na base de
                 // dados passou por `sanitizeUpdateBody`.
+                // html-ok: `sanitizeUpdateBody` em `packages/db/src/updates.ts`,
+                // na escrita, com allowlist de tags.
                 dangerouslySetInnerHTML={{ __html: draft.bodyHtml }}
               />
             ) : (

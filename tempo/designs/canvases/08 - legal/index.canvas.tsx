@@ -63,7 +63,7 @@ import {
  */
 export default function LegalCanvas() {
   return (
-    <Canvas name="07 - legal" backgroundColor="#232323">
+    <Canvas name="08 - legal" backgroundColor="#232323">
       <Storyboard
         id="TermosClaro"
         name="Termos e Condições · Claro (/termos)"

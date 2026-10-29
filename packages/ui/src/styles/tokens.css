@@ -181,7 +181,7 @@
 
   /* Tickets (04 §5.6 · 07 §5.11) */
   --state-ticket-new: #a16207;
-  --state-ticket-triage: #a16207;
+  --state-ticket-triage: #0e7490;
   --state-ticket-progress: #2563eb;
   --state-ticket-awaiting: #7c3aed;
   --state-ticket-closed: #047857;

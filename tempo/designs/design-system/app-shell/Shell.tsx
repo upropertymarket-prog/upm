@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "../../../../packages/ui/src/shell/AppShell";
+import "../../_estilos/shell-no-canvas.css";
 import { Brand } from "../../../../packages/ui/src/shell/Brand";
 import { Button } from "../../../../packages/ui/src/components/Button";
 import { Card, CardBody, CardHeader, CardTitle } from "../../../../packages/ui/src/components/Card";
