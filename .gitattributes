@@ -1,0 +1,9 @@
+# Fins de linha LF em todo o repositório, também no Windows.
+#
+# Com `core.autocrlf=true` (o predefinido do Git para Windows), cada checkout
+# reescreve os ficheiros com CRLF, e o `format:check` — prettier, que exige LF —
+# passa a acusar dezenas de ficheiros que no repositório estão certos. Foi o que
+# aconteceu a 1 nov, depois de um `git switch`. O CI corre em Linux e nunca o
+# vê; só a máquina de quem trabalha. Isto fixa o LF na cópia de trabalho para
+# toda a gente, seja qual for a configuração local.
+* text=auto eol=lf

@@ -186,11 +186,27 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 2 — caixa de e-mail: matriz RLS e r
   // -------------------------------------------------------------------------
 
   it("o Suporte NÃO pode reescrever o corpo nem o remetente de um e-mail", async () => {
-    const { error } = await clients.support
+    // `mail_messages` não tem policy de `update`: o RLS filtra todas as linhas,
+    // e o Postgres responde "0 linhas" — **sem erro**. Esperar um erro, como a
+    // versão anterior fazia, mede a forma da recusa e não a recusa; a prova é
+    // que nada foi tocado e que a mensagem continua igual.
+    const { data: before } = await service
+      .from("mail_messages")
+      .select("html, from_address")
+      .eq("id", messageId)
+      .single();
+    const { data: touched } = await clients.support
       .from("mail_messages")
       .update({ html: "<p>outra coisa</p>", from_address: "outro@exemplo.test" })
-      .eq("id", messageId);
-    expect(error).not.toBeNull();
+      .eq("id", messageId)
+      .select("id");
+    expect(touched ?? []).toHaveLength(0);
+    const { data: after } = await service
+      .from("mail_messages")
+      .select("html, from_address")
+      .eq("id", messageId)
+      .single();
+    expect(after).toEqual(before);
   });
 
   it("marcar como lida passa pela função, e funciona", async () => {
