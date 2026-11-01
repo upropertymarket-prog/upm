@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { BRAND_ICONS } from "@upm/config/brand";
 import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
@@ -23,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t("description"),
     // `noindex` em toda a área interna — 02 §3.1 e 07 §6.
     robots: { index: false, follow: false, nocache: true },
-    // TODO: ícone final da marca (07 §10.1).
+    icons: BRAND_ICONS,
   };
 }
 

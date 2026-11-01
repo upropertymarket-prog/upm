@@ -3,10 +3,11 @@
 import { useEffect, useState, useTransition } from "react";
 import { FileText, Maximize2, Minus, Paperclip, Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button, useToast } from "@upm/ui";
+import { Button, useTheme, useToast } from "@upm/ui";
 import { RichText, richTextLabels } from "@upm/ui/editor";
 import type { MailboxOption } from "@upm/db/mail";
 import type { MessageTemplateRow } from "@upm/db/message-templates";
+import { withLogoOrigin } from "@upm/db/signatures";
 
 import type { MailActionResult } from "./actions";
 import { htmlToText, parseAddresses } from "./mail-text";
@@ -44,9 +45,17 @@ import { htmlToText, parseAddresses } from "./mail-text";
  * são os mesmos. O que mudou é quem desenha o corpo e a barra — que continua no
  * fim, junto à linha dos botões, como 04 §2.5 pede.
  *
- * A assinatura entra **no HTML inicial**, separada por um `<hr>`: é texto
- * editável como o resto, porque quem escreve às vezes quer tirá-la — e um
- * bloco intocável obrigaria a um "remover assinatura" que ninguém encontra.
+ * ## A assinatura fica fora do texto (desde 1 nov 2026)
+ *
+ * Entrava no HTML inicial, como texto editável. Deixou de poder: a assinatura
+ * da empresa é HTML de e-mail — uma tabela, dois logótipos e as classes da
+ * troca de tema — e o TipTap só guarda o que as suas extensões conhecem.
+ * Dentro do editor, a tabela virava parágrafos e o logótipo desaparecia.
+ *
+ * Agora mostra-se por baixo do texto, tal como sai, e junta-se ao corpo no
+ * envio e no rascunho (`<hr />` + assinatura). Tirá-la é um botão à vista
+ * no próprio bloco — o "remover assinatura que ninguém encontra" que a nota
+ * antiga temia era o de um menu, não este.
  */
 
 export type ComposerDraft = {
@@ -87,6 +96,15 @@ export function Composer(props: ComposerProps) {
   const tRoot = useTranslations();
   const { toast } = useToast();
   const [html, setHtml] = useState("");
+  const [withSignature, setWithSignature] = useState(true);
+  // O tema **deste** composer decide o logótipo da assinatura, e não um
+  // `[data-theme]` herdado: no canvas há storyboards claras e escuras no mesmo
+  // documento, e um antepassado escuro qualquer trocava o logótipo da clara.
+  const { resolved: theme } = useTheme();
+  // O logótipo vem da origem de quem mostra o composer — ver `withLogoOrigin`.
+  const [origin, setOrigin] = useState<string | undefined>(undefined);
+  useEffect(() => setOrigin(window.location.origin), []);
+  const signatureBlock = props.signature ? `<hr />${props.signature}` : "";
   const [size, setSize] = useState<Size>("normal");
   const [draftId, setDraftId] = useState<string | null>(props.initial?.draftId ?? null);
   const [to, setTo] = useState((props.initial?.to ?? []).join(", "));
@@ -142,10 +160,13 @@ export function Composer(props: ComposerProps) {
   const [opened, setOpened] = useState(0);
   useEffect(() => {
     if (!props.open) return;
-    setHtml(
-      props.initial?.html ??
-        (props.signature ? `<p><br></p><hr />${props.signature}` : "<p><br></p>"),
-    );
+    // Um rascunho guardado já traz a assinatura no fim: separa-se, para o
+    // texto voltar ao editor e a assinatura ao seu bloco. Respostas e
+    // reencaminhamentos não a trazem, e levam-na.
+    const initial = props.initial?.html ?? "<p><br></p>";
+    const saved = Boolean(signatureBlock) && initial.endsWith(signatureBlock);
+    setHtml(saved ? initial.slice(0, -signatureBlock.length) : initial);
+    setWithSignature(props.initial?.draftId ? saved : true);
     setOpened((count) => count + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.open]);
@@ -166,7 +187,7 @@ export function Composer(props: ComposerProps) {
       cc: parseAddresses(cc),
       bcc: parseAddresses(bcc),
       subject,
-      html,
+      html: withSignature ? `${html}${signatureBlock}` : html,
       // A versão em texto do que vai no corpo. Era o `innerText` do
       // `contentEditable`; agora sai do HTML, no servidor é que não — o
       // destinatário recebe as duas partes e a de texto é a que um cliente
@@ -348,7 +369,42 @@ export function Composer(props: ComposerProps) {
             labels={richTextLabels(tRoot)}
             resetKey={opened}
             toolbarPosition="bottom"
-            minHeight={160}
+            minHeight={120}
+            afterContent={
+              !props.signature ? null : withSignature ? (
+                <div className="upm-composer__signature" data-logo={theme}>
+                  <hr />
+                  {/* html-ok: não editável — é o HTML guardado em Assinaturas,
+                      sanitizado na escrita por `sanitizeSignature` (via
+                      `saveSignatureAction`) e recusado por `email_signature_save`
+                      se não o estiver; mostrado como sai. */}
+                  <div
+                    dangerouslySetInnerHTML={{ __html: withLogoOrigin(props.signature, origin) }}
+                  />
+                  <button
+                    type="button"
+                    className="upm-composer__signatureToggle"
+                    onClick={() => {
+                      setWithSignature(false);
+                      setDirty(true);
+                    }}
+                  >
+                    {t("removeSignature")}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="upm-composer__signatureToggle"
+                  onClick={() => {
+                    setWithSignature(true);
+                    setDirty(true);
+                  }}
+                >
+                  {t("addSignature")}
+                </button>
+              )
+            }
           />
 
           <footer className="upm-composer__foot">

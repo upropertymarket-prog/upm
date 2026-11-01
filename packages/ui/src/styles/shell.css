@@ -136,32 +136,39 @@
   display: var(--logo-dark);
 }
 
-/* Espaço reservado do ícone da marca no rail de 84 px — 07 §10.1.
-   Neutro de propósito: nada aqui insinua um desenho. */
+/* Ícone da marca no rail de 84 px — 07 §10.1. O SVG já traz o quadrado de
+   fundo e o canto arredondado; aqui só se lhe dá o tamanho de um alvo. */
 .upm-brand__mark {
   display: inline-flex;
   flex: none;
   width: var(--tap);
   height: var(--tap);
-  border: 1px dashed var(--border2);
-  border-radius: var(--r-xl);
-  background: var(--surface2);
+}
+
+.upm-brand__icon {
+  width: 100%;
+  height: 100%;
 }
 
 /* O ícone da marca é o que expande o rail: sem moldura própria, para continuar
-   a ler-se como a marca e não como mais um botão ao lado dos itens. */
+   a ler-se como a marca e não como mais um botão ao lado dos itens. O hover é o
+   mesmo contorno de 1 px `--accent` do botão de recolher (`.upm-btn--secondary`),
+   desenhado como sombra para não mexer no tamanho do alvo. O raio sai do próprio
+   SVG (`rx="6"` num `viewBox` de 51,1), escalado ao alvo: ≈ 4,7 px. Com o
+   `--r-xs` (8 px) o anel ficava mais redondo do que o quadrado e os cantos do
+   ícone espreitavam por fora dele. */
 .upm-sidebar__brand-toggle {
   display: inline-flex;
   padding: 0;
   border: none;
   background: none;
-  border-radius: var(--r-xl);
+  border-radius: calc(var(--tap) * 6 / 51.1);
   cursor: pointer;
+  transition: box-shadow var(--transition);
 }
 
-.upm-sidebar__brand-toggle:hover .upm-brand__mark {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+.upm-sidebar__brand-toggle:hover {
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .upm-sidebar__brand-toggle:focus-visible {
@@ -226,9 +233,11 @@
 }
 
 /* Sem isto os itens encostavam à parede esquerda do rail de 84 px em vez de
-   ficarem centrados sob o ícone da marca. */
+   ficarem centrados sob o ícone da marca. Os quadrados de 40 px com 4 px entre
+   si colavam-se num bloco; 8 px separa-os sem partir o grupo. */
 .upm-shell[data-collapsed="true"] .upm-nav {
   align-items: center;
+  gap: var(--sp-3);
 }
 
 /* No rail o rótulo desaparece e o item fica a valer por um ícone — cai na

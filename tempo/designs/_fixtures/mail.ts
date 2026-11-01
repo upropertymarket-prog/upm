@@ -4,6 +4,7 @@ import type {
   MailMessageRow,
   MailboxOption,
 } from "../../../packages/db/src/mail";
+import { SIGNATURE } from "./signatures";
 
 /**
  * Correio — os dados das storyboards da Caixa de e-mail (P10-04)
@@ -154,10 +155,8 @@ export const MAIL_SELECTED: MailMessageRow = {
  * próprias** — é assim que ela se adapta ao tema escuro dentro do composer,
  * que é um dos pontos da referência do cliente.
  */
-export const ASSINATURA =
-  "<p><strong>Helena Matos</strong><br>Apoio ao cliente · Suporte<br>" +
-  '<a href="mailto:suporte@upropertymarket.pt">suporte@upropertymarket.pt</a>' +
-  " · +351 210 000 000</p>";
+/** A assinatura da empresa — a mesma das storyboards de Assinaturas. */
+export const ASSINATURA = SIGNATURE.html;
 
 export const MAIL_COUNTS = {
   inbox: 3,

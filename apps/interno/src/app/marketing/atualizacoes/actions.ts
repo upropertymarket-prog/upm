@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@upm/db/server";
+import { sniffImageMimeAllowed } from "@upm/db/image-mime";
 import {
   appUpdateSaveSchema,
   archiveAppUpdate,
@@ -81,7 +82,7 @@ export async function uploadUpdateImage(
   if (!user) return { error: "Sessão inválida." };
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const mime = sniffImageMime(bytes);
+  const mime = sniffImageMimeAllowed(bytes, ["image/png", "image/jpeg", "image/webp"]);
   if (!mime) return { error: "Só se aceitam imagens PNG, JPG e WebP." };
 
   const path = `${user.id}/${randomUUID()}.${mime.extension}`;
@@ -99,22 +100,6 @@ export async function uploadUpdateImage(
 }
 
 /** As assinaturas dos três formatos aceites, e a extensão de cada um. */
-function sniffImageMime(bytes: Uint8Array): { type: string; extension: string } | null {
-  const starts = (signature: number[]) => signature.every((byte, at) => bytes[at] === byte);
-
-  if (starts([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
-    return { type: "image/png", extension: "png" };
-  }
-  if (starts([0xff, 0xd8, 0xff])) return { type: "image/jpeg", extension: "jpg" };
-  // WebP é RIFF com o tipo no 9.º byte.
-  if (
-    starts([0x52, 0x49, 0x46, 0x46]) &&
-    [0x57, 0x45, 0x42, 0x50].every((byte, at) => bytes[8 + at] === byte)
-  ) {
-    return { type: "image/webp", extension: "webp" };
-  }
-  return null;
-}
 
 export async function saveUpdate(input: unknown): Promise<UpdateActionResult> {
   const parsed = appUpdateSaveSchema.safeParse(input);

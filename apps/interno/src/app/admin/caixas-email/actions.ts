@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Constants } from "@upm/db";
+import { PORTAS_ENTRADA, PORTAS_SMTP, hostLooksInternal } from "@upm/config/security";
 import { createClient } from "@upm/db/server";
 import { writeAuditLog } from "@upm/db/audit";
 
@@ -30,16 +31,54 @@ import { writeAuditLog } from "@upm/db/audit";
 
 const securitySchema = z.enum(["ssl_tls", "starttls", "none"]);
 
+/**
+ * O anfitrião é escrito à mão e o nosso servidor liga-se-lhe (12 §5.5)
+ * ---------------------------------------------------------------------------
+ * Estes dois campos decidem a que máquina o `mail-worker` abre um socket. Sem
+ * filtro, `localhost`, `10.0.0.5` ou `169.254.169.254` — o endereço de
+ * metadados, que em várias clouds devolve credenciais — são destinos válidos.
+ *
+ * E o "Testar ligação" devolve erros **distintos por lado**, o que é
+ * precisamente o que um scanner de portas precisa de saber: sem isto, este
+ * ecrã é um mapeador da rede interna com interface gráfica.
+ *
+ * Isto apanha o caso óbvio **no formulário**, para quem está a configurar ter
+ * um erro imediato em vez de um timeout três minutos depois. A defesa a sério
+ * é no worker, depois de resolver o nome — um domínio público pode apontar
+ * para `127.0.0.1`, e é assim que o DNS rebinding funciona.
+ */
+const hostSchema = (campo: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `O servidor ${campo} é obrigatório.`)
+    .max(255)
+    .refine((host) => !hostLooksInternal(host), {
+      message: "Este servidor aponta para a rede interna. Use o anfitrião do fornecedor.",
+    });
+
+/**
+ * Lista branca e não intervalo: deixar passar qualquer porta de 1 a 65535 é o
+ * que torna o teste de ligação útil a quem quer mapear a rede.
+ */
+const portaSchema = (permitidas: readonly number[]) =>
+  z.coerce
+    .number()
+    .int()
+    .refine((porta) => permitidas.includes(porta), {
+      message: `Porta não permitida. Use uma de: ${permitidas.join(", ")}.`,
+    });
+
 const saveSchema = z.object({
   id: z.string().uuid().optional(),
   address: z.string().trim().email("Endereço de e-mail inválido.").max(320),
   displayName: z.string().trim().max(200).optional(),
   protocol: z.enum(["imap", "pop3"]),
-  inHost: z.string().trim().min(1, "O servidor de entrada é obrigatório.").max(255),
-  inPort: z.coerce.number().int().min(1).max(65535),
+  inHost: hostSchema("de entrada"),
+  inPort: portaSchema(PORTAS_ENTRADA),
   inSecurity: securitySchema,
-  smtpHost: z.string().trim().min(1, "O servidor SMTP é obrigatório.").max(255),
-  smtpPort: z.coerce.number().int().min(1).max(65535),
+  smtpHost: hostSchema("SMTP"),
+  smtpPort: portaSchema(PORTAS_SMTP),
   smtpSecurity: securitySchema,
   username: z.string().trim().min(1, "O utilizador é obrigatório.").max(320),
   // Do enum gerado: a lista à mão não tinha `marketing` (D64, 21 out 2026).

@@ -243,7 +243,7 @@ export function Admin() {
   );
 }
 
-/** Comprador com a sidebar colapsada a 84 px — e o ícone da marca por entregar. */
+/** Comprador com a sidebar colapsada a 84 px — o ícone da marca no lugar do wordmark. */
 export function Rail() {
   return (
     <ThemeProvider initialChoice="light">
@@ -260,13 +260,13 @@ export function Rail() {
       >
         <Card>
           <CardHeader>
-            <CardTitle>Ícone da marca — por entregar</CardTitle>
+            <CardTitle>Ícone da marca no rail</CardTitle>
           </CardHeader>
           <CardBody>
             <span style={{ color: "var(--muted)" }}>
-              No rail de 84 px o wordmark não cabe. 07 §10.1 diz que o ícone final vem do cliente e
-              que, até lá, não se inventa nem se deriva um — por isso está ali um espaço reservado
-              neutro, de borda tracejada, com o nome da marca em `aria-label`.
+              No rail de 84 px o wordmark não cabe e entra o ícone da marca, claro ou escuro
+              conforme o tema. É também o botão que expande a sidebar — o nome da marca fica em
+              `aria-label`.
             </span>
           </CardBody>
         </Card>
@@ -295,8 +295,8 @@ export function Cabecalho() {
       />
       <Note>
         No Painel o título é a saudação («Bom dia, Ana»); nas restantes páginas é o título com
-        subtítulo. As ações ficam à direita: Exportar mais a ação primária do contexto (04 §5.5). O
-        quadrado tracejado ao lado do wordmark é o espaço reservado do ícone da marca (07 §10.1).
+        subtítulo. As ações ficam à direita: Exportar mais a ação primária do contexto (04 §5.5). Ao
+        lado do wordmark está o ícone da marca, que o rail colapsado usa (07 §10.1).
       </Note>
     </ThemePair>
   );

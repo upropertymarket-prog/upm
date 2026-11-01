@@ -1,4 +1,6 @@
-import { createSmtpTransport, describe } from "./connection.ts";
+import { wrapOutgoingEmail } from "@upm/db/signature-email";
+
+import { assertHostIsExternal, createSmtpTransport, describe } from "./connection.ts";
 import { getMailbox, getMailboxPassword, type MailWorkerClient } from "./supabase.ts";
 
 /**
@@ -48,6 +50,10 @@ export async function sendMail(
   const password = await getMailboxPassword(client, request.mailboxId);
   if (!password) throw new Error("A caixa não tem credencial gravada no Vault.");
 
+  // 12 §5.5 — a configuração pode ter mudado desde que o formulário a validou,
+  // e um nome público pode passar a resolver para dentro a qualquer momento.
+  await assertHostIsExternal(mailbox.smtp_host, "SMTP");
+
   const transport = createSmtpTransport(mailbox, password);
 
   let messageId: string;
@@ -61,7 +67,9 @@ export async function sendMail(
       cc: request.cc?.length ? request.cc : undefined,
       bcc: request.bcc?.length ? request.bcc : undefined,
       subject: request.subject,
-      html: request.html,
+      // Embrulhado só aqui: o que fica registado na caixa é o fragmento do
+      // composer, e o que sai leva o `<head>` com o modo escuro da assinatura.
+      html: wrapOutgoingEmail(request.html),
       text: request.text || stripHtml(request.html),
       inReplyTo: request.inReplyTo ?? undefined,
       references: request.inReplyTo ?? undefined,

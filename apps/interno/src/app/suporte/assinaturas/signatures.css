@@ -174,20 +174,27 @@
   color: var(--text);
 }
 
+/* O tema da pré-visualização encosta à direita, ao lado do título. */
+.upm-sig__theme {
+  margin-left: auto;
+}
+
 /**
  * A moldura da pré-visualização.
  *
- * Fundo `--surface` e não branco fixo: 04 §2.6 diz que a assinatura é "sem
- * fundo (herda cor do contexto)", e por isso é no contexto da nossa app que
- * ela tem de se ver — nos dois temas. O que a assinatura traz são as suas
- * próprias cores de texto, que é o que um cliente de correio vai respeitar.
+ * O fundo não é daqui: é o documento do `iframe` que faz de corpo de e-mail,
+ * claro ou escuro conforme o tema escolhido na pré-visualização — e não o da
+ * app (ver `signaturePreviewDocument`). A assinatura é "sem fundo (herda cor
+ * do contexto)", e o contexto dela é a caixa de correio de quem recebe.
  */
 .upm-sig__frame {
   width: 100%;
-  min-height: 220px;
+  /* A altura da janela de composer simulada: barra, Para, Assunto, corpo e
+     assinatura, sem barra de rolagem. */
+  min-height: 380px;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: var(--surface);
+  background: transparent;
 }
 
 .upm-sig__muted {

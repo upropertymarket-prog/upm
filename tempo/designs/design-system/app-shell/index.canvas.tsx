@@ -106,7 +106,7 @@ defineAsset(PageHeader, {
 defineAsset(Brand, {
   libraries: ["upm-base"],
   usageInstructions:
-    "Wordmark da UProperty Market. As duas versões (clara e escura) estão sempre no DOM e a CSS escolhe qual se vê, através dos tokens --logo-light/--logo-dark — o logótipo certo aparece no primeiro paint, sem depender de JS. ⚠ `collapsed` NÃO desenha um ícone: mostra um espaço reservado neutro, porque o ícone final da marca é entregue pelo cliente e 07 §10.1 proíbe inventá-lo ou derivá-lo do wordmark. Os ficheiros são servidos de /brand/logo-light.svg e /brand/logo-dark.svg em cada app.",
+    "Wordmark da UProperty Market. As duas versões (clara e escura) estão sempre no DOM e a CSS escolhe qual se vê, através dos tokens --logo-light/--logo-dark — o logótipo certo aparece no primeiro paint, sem depender de JS. `collapsed` troca o wordmark pelo ícone da marca (40 px, o alvo mínimo), com o mesmo par claro/escuro — é o que o rail de 84 px usa. O ícone traz o seu próprio quadrado de fundo: não lhe ponhas moldura nem fundo por fora. Os ficheiros são servidos de /brand/logo-*.svg e /brand/icon-*.svg em cada app; a origem é design/brand/.",
   variants: {
     Wordmark: { props: {} },
     NoRail: { props: { collapsed: true } },

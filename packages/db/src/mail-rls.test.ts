@@ -81,6 +81,23 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 2 — caixa de e-mail: matriz RLS e r
         .eq("id", id);
       if (error) throw new Error(`Falha a preparar ${role}: ${error.message}`);
 
+      // 31 out 2026 — o âmbito do correio passou a ler `staff_members`
+      // (migração `20261031090000_mailbox_scope`): admin vê tudo, o resto vê o
+      // seu departamento. Sem esta linha, o fixture de suporte deixa de ver a
+      // caixa e os testes abaixo falham por uma razão que não é a que testam.
+      //
+      // E o fixture estava a mentir: uma pessoa do Suporte a sério tem
+      // departamento — `staff_members.department` é `not null`.
+      if (fixture.role === "admin" || fixture.role === "support") {
+        const { error: staffError } = await service
+          .from("staff_members")
+          .upsert(
+            { profile_id: id, department: fixture.role === "admin" ? "admin" : "suporte" },
+            { onConflict: "profile_id" },
+          );
+        if (staffError) throw new Error(`Falha a preparar staff_members: ${staffError.message}`);
+      }
+
       const client = createClient(SUPABASE_URL!, ANON_KEY!);
       const { error: signInError } = await client.auth.signInWithPassword({
         email: fixture.email,

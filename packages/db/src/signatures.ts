@@ -3,6 +3,9 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "./database.types";
+import { DARK_RULES } from "./signature-email";
+
+export { SIGNATURE_DARK_MODE_CSS, wrapOutgoingEmail } from "./signature-email";
 
 /**
  * Assinaturas de e-mail (P10-06 · 04 §2.6 · 05 §1.8 · 02 §4.3)
@@ -100,6 +103,10 @@ const POLICY: sanitizeHtml.IOptions = {
   allowedSchemesByTag: { img: ["http", "https", "data"] },
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
+  // A única exceção ao "sem `class`": as do modo escuro (ver
+  // `SIGNATURE_DARK_MODE_CSS`), que o envio serve com uma folha nossa. Só o
+  // prefixo `upm-sig-`; qualquer outra classe continua a sair.
+  allowedClasses: { "*": ["upm-sig-*"] },
   // Sem isto, `sanitize-html` deixa o **conteúdo** de um `<script>` como texto:
   // o código desaparecia da marcação e aparecia escrito na assinatura.
   nonTextTags: ["script", "style", "textarea", "option", "noscript", "iframe"],
@@ -246,52 +253,139 @@ export async function previewSignature(
 }
 
 /**
- * O desenho de 04 §2.6, como ponto de partida
+ * O logótipo da assinatura, em PNG (29 out 2026 — fecha D67)
  * =========================================================================
- * Existe para que a primeira assinatura não comece numa caixa vazia — é o que
- * transforma "escreva HTML" em "mude o que está aqui". Segue o que o doc
- * descreve: marca alinhada ao topo, traço vertical neutro à esquerda do texto,
- * nome / cargo·departamento / e-mail / telefone / slogan.
+ * Dois PNG de 600×201, fundo transparente, rasterizados de
+ * `packages/ui/src/shell/brand/logo-{light,dark}.svg`: o claro (texto navy)
+ * para fundos claros, o escuro (texto quase branco) para fundos escuros.
+ * Vivem em `apps/web/public/brand/` e são servidos pelo site público, porque
+ * é esse o domínio que um cliente de correio consegue ir buscar. 600 px para
+ * desenhar a 160: nítido num ecrã retina.
  *
- * **Sem fundo e com cores explícitas**, e as duas coisas são deliberadas: a
- * assinatura herda o fundo do contexto (o corpo do e-mail de quem recebe, que
- * tanto pode ser claro como escuro) mas **não pode herdar a cor do texto** —
- * um cliente de correio sem a nossa folha de estilos não tem tokens. É a
- * segunda exceção viva à regra de 04 §5.1, ao lado da folha do iframe do
- * leitor, e pela mesma razão: o que sai num e-mail não está na nossa app.
+ * **O claro leva um halo branco de ~2 px** (31 out 2026). Nenhum cliente de
+ * correio inverte imagens, e os que pintam o e-mail de escuro sem ler CSS — a
+ * app do Gmail, o Outlook clássico do Windows — mostram sempre o logótipo
+ * claro. Num fundo branco o halo não se vê; num escuro, é o que deixa ler o
+ * navy. É a rede de segurança por baixo da troca de `SIGNATURE_DARK_MODE_CSS`.
  *
- * ## A marca vai em texto, e não como imagem (D67)
- *
- * 04 §2.6 pede o "logo completo alinhado ao topo", e ele **não pode entrar
- * aqui hoje** por duas razões somadas:
- *
- * 1. **Os logótipos do projeto são SVG** (`packages/ui/src/shell/brand/`), e o
- *    Gmail, o Outlook e o Apple Mail não desenham SVG dentro de um e-mail.
- *    Precisa de um PNG, que é um ativo que ninguém exportou — e exportá-lo é
- *    uma decisão de desenho (tamanho, margem, versão clara/escura), não um
- *    comando.
- * 2. **Precisa de um URL absoluto e público.** O domínio não serve nada ainda,
- *    e um `src` para um caminho que não existe dá um retângulo partido na
- *    assinatura de toda a equipa.
- *
- * Por isso a marca vai como texto, com o laranja do acento: é o que se lê bem
- * em qualquer cliente e **não finge** ter uma imagem. Está registado como
- * **D67** no doc 10 — e é deliberadamente a mesma decisão de D63, onde nenhum
- * `seo.ts` aponta para uma imagem Open Graph inventada.
+ * Copiados também para `apps/interno/public/brand/` e `tempo/public/brand/`,
+ * só para a pré-visualização: enquanto o domínio não estiver no ar, o editor
+ * troca a origem pela sua (ver `signaturePreviewDocument`).
  */
-export const SIGNATURE_TEMPLATE = `<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 1.5;">
+export const SIGNATURE_LOGO_ORIGIN = "https://www.upropertymarket.pt";
+export const SIGNATURE_LOGO_LIGHT = `${SIGNATURE_LOGO_ORIGIN}/brand/assinatura-light.png`;
+export const SIGNATURE_LOGO_DARK = `${SIGNATURE_LOGO_ORIGIN}/brand/assinatura-dark.png`;
+
+/**
+ * O desenho da assinatura, como ponto de partida
+ * =========================================================================
+ * O desenho do cliente (29 out 2026): logótipo à esquerda, traço vertical, e à
+ * direita "A Equipa UProperty Market" com telefone, e-mail e site. Substitui o
+ * de 04 §2.6 (nome / cargo · departamento por pessoa): uma assinatura só para
+ * a empresa, e o mesmo texto para todos.
+ *
+ * **Sem fundo, e o texto herda a cor do contexto.** O corpo do e-mail de quem
+ * recebe tanto pode ser claro como escuro; as únicas cores escritas são
+ * cinzentos médios (rótulos e traço), que se leem nos dois. Os links levam
+ * `color: inherit` para não saírem no azul por omissão — nem num navy que
+ * desaparecia num fundo escuro.
+ *
+ * **Os dois logótipos vão no HTML** (31 out 2026). O escuro está escondido em
+ * linha — `display: none` para todos, `mso-hide: all` para o Outlook do
+ * Windows, que ignora o primeiro — e só aparece quando a folha de
+ * `SIGNATURE_DARK_MODE_CSS` o mostra. Quem não lê essa folha fica com o claro,
+ * que tem o halo para aguentar um fundo escuro.
+ */
+export const SIGNATURE_TEMPLATE = `<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.6;">
   <tr>
-    <td style="padding-right: 14px; vertical-align: top;">
-      <div style="font-weight: 800; font-size: 15px; color: #EA580C; white-space: nowrap;">UProperty Market</div>
-    </td>
-    <td style="padding-left: 14px; border-left: 2px solid #CBD5E1; vertical-align: top;">
-      <div style="font-weight: 700; color: #0F172A;">{{nome}}</div>
-      <div style="color: #64748B;">{{cargo}} · {{departamento}}</div>
-      <div style="padding-top: 6px;">
-        <a href="mailto:{{email}}" style="color: #EA580C; text-decoration: none;">{{email}}</a>
+    <td style="padding-right: 24px; border-right: 1px solid #D4D4D4; vertical-align: middle;">
+      <img class="upm-sig-logo-light" src="${SIGNATURE_LOGO_LIGHT}" alt="UProperty Market" width="160" height="54" style="display: block; border: 0;">
+      <div class="upm-sig-logo-dark" style="display: none; mso-hide: all; max-height: 0; overflow: hidden;">
+        <img src="${SIGNATURE_LOGO_DARK}" alt="UProperty Market" width="160" height="54" style="display: block; border: 0;">
       </div>
-      <div style="color: #64748B;">{{telefone}}</div>
-      <div style="padding-top: 6px; color: #64748B; font-size: 12px;">Imóveis sem comissões.</div>
+    </td>
+    <td style="padding-left: 24px; vertical-align: middle;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 15px;">A Equipa UProperty Market</p>
+      <table cellpadding="0" cellspacing="0" border="0" style="line-height: 1.6;">
+        <tr>
+          <td style="padding-bottom: 4px; color: #8A8A8A; font-size: 13px;">Tel:</td>
+          <td style="padding-bottom: 4px; padding-left: 8px;">(+351) 939 732 637</td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 4px; color: #8A8A8A; font-size: 13px;">Email:</td>
+          <td style="padding-bottom: 4px; padding-left: 8px;"><a href="mailto:info@upropertymarket.pt" style="color: inherit; text-decoration: none;">info@upropertymarket.pt</a></td>
+        </tr>
+        <tr>
+          <td style="color: #8A8A8A; font-size: 13px;">Web:</td>
+          <td style="padding-left: 8px;"><a href="https://www.upropertymarket.pt" style="color: inherit; text-decoration: none;">www.upropertymarket.pt</a></td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>`;
+
+/**
+ * O logótipo servido pela origem de quem o mostra
+ * =========================================================================
+ * A assinatura aponta para o site público, que é o que um cliente de correio
+ * consegue ir buscar. Dentro das nossas apps — o editor, o composer, o canvas —
+ * a mesma imagem vem da origem de quem a mostra, que serve o mesmo PNG em
+ * `/brand/`: assim vê-se o logótipo antes de o domínio estar no ar, e sem
+ * depender dele depois.
+ */
+export function withLogoOrigin(html: string, origin?: string): string {
+  return origin ? html.split(`${SIGNATURE_LOGO_ORIGIN}/brand/`).join(`${origin}/brand/`) : html;
+}
+
+/** As cores da janela de pré-visualização, por tema. Literais: no `iframe` não há tokens. */
+const PREVIEW_COLORS = {
+  light: {
+    page: "#F1F5F9",
+    window: "#FFFFFF",
+    bar: "#F8FAFC",
+    line: "#E2E8F0",
+    text: "#0F172A",
+    muted: "#64748B",
+  },
+  dark: {
+    page: "#0B1120",
+    window: "#0F172A",
+    bar: "#1E293B",
+    line: "#334155",
+    text: "#F8FAFC",
+    muted: "#94A3B8",
+  },
+} as const;
+
+/**
+ * O documento do `iframe` da pré-visualização: um composer simples
+ * =========================================================================
+ * A assinatura não tem fundo nem cor de texto — herda-os do e-mail. Por isso
+ * mostra-se onde vai viver (1 nov 2026): uma janela de "Novo e-mail" básica,
+ * com Para, Assunto, o corpo vazio e a assinatura por baixo do traço. Não é o
+ * `Composer` verdadeiro — é só a moldura que dá contexto ao que se edita.
+ *
+ * No escuro aplicam-se as regras de `SIGNATURE_DARK_MODE_CSS` sem a media
+ * query — o tema escolhido no editor não é o do sistema —, e por isso o que se
+ * vê é o que o Apple Mail ou o Outlook.com mostram em escuro.
+ */
+export function signaturePreviewDocument(
+  html: string,
+  theme: "light" | "dark",
+  origin?: string,
+): string {
+  const c = PREVIEW_COLORS[theme];
+  const style = `<style>
+body { margin: 0; padding: 16px; background: ${c.page}; color: ${c.text}; font-family: Arial, Helvetica, sans-serif; }
+.w { background: ${c.window}; border: 1px solid ${c.line}; border-radius: 10px; overflow: hidden; }
+.bar { padding: 10px 16px; background: ${c.bar}; border-bottom: 1px solid ${c.line}; font-size: 14px; font-weight: 600; }
+.row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-bottom: 1px solid ${c.line}; font-size: 13px; }
+.row span:first-child { min-width: 52px; color: ${c.muted}; }
+.row .cc { margin-left: auto; color: ${c.muted}; }
+.body { padding: 16px; }
+.gap { height: 48px; }
+hr { border: 0; border-top: 1px solid ${c.line}; margin: 0 0 16px; }
+${theme === "dark" ? DARK_RULES("body") : ""}
+</style>`;
+  return `<!doctype html><html style="color-scheme: ${theme};"><head>${style}</head><body><div class="w"><div class="bar">Novo e-mail</div><div class="row"><span>Para</span><span>destinatario@exemplo.pt</span><span class="cc">Cc&nbsp;&nbsp;Bcc</span></div><div class="row"><span>Assunto</span><span>Assunto da mensagem</span></div><div class="body"><div class="gap"></div><hr>${withLogoOrigin(html, origin)}</div></div></body></html>`;
+}

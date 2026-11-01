@@ -124,7 +124,12 @@ export function Sidebar({
       </div>
 
       {groups.map((group) => (
-        <nav className="upm-nav" key={group.label} aria-label={group.label} style={{ rowGap: "8px" }}>
+        <nav
+          className="upm-nav"
+          key={group.label}
+          aria-label={group.label}
+          style={{ rowGap: "8px" }}
+        >
           <span className="upm-sidebar__group">{group.label}</span>
           {group.items.map((item) => {
             const active = item.id === activeId;

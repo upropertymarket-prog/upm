@@ -579,11 +579,13 @@
   max-height: calc(100vh - var(--sp-6));
 }
 
+/* Barra e campos um pouco mais baixos (1 nov 2026): a janela é pequena, e o
+   espaço vai para o texto e para a assinatura. */
 .upm-composer__bar {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5);
+  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-5);
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
 }
@@ -658,7 +660,7 @@
   align-items: center;
   gap: var(--sp-3);
   padding: 0 var(--sp-5);
-  min-height: 44px;
+  min-height: 38px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -721,6 +723,65 @@
 
 .upm-composer__body .ProseMirror hr {
   margin: var(--sp-5) 0;
+}
+
+/**
+ * A assinatura, por baixo do texto e fora da edição (1 nov 2026).
+ *
+ * O traço é o mesmo `<hr />` que a junta ao corpo no envio. O logótipo segue
+ * o tema do composer, pelas mesmas classes que o e-mail usa com a folha do
+ * modo escuro (`SIGNATURE_DARK_MODE_CSS`). Quem decide é o `data-logo` que
+ * o React põe no bloco, e não um `[data-theme]` antepassado: esse apanhava
+ * qualquer escuro acima, e no canvas trocava o logótipo da storyboard clara.
+ */
+.upm-composer__signature {
+  position: relative;
+  padding: 0 var(--sp-5) var(--sp-4);
+  color: var(--text);
+}
+
+.upm-composer__signature hr {
+  margin: 0 0 var(--sp-4);
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.upm-composer__signature[data-logo="dark"] .upm-sig-logo-light {
+  display: none !important;
+}
+
+.upm-composer__signature[data-logo="dark"] .upm-sig-logo-dark {
+  display: block !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Tirar e repor a assinatura: discreto, mas à vista no próprio bloco. */
+.upm-composer__signatureToggle {
+  justify-self: start;
+  margin: 0 var(--sp-5);
+  padding: var(--sp-1) 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.upm-composer__signature .upm-composer__signatureToggle {
+  position: absolute;
+  /* Pousado em cima do traço, do lado direito, com o fundo da janela a
+     interrompê-lo. */
+  top: calc(-1 * var(--sp-3));
+  right: var(--sp-5);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface);
+}
+
+.upm-composer__signatureToggle:hover {
+  color: var(--text);
+  text-decoration: underline;
 }
 
 /* A barra do editor partilhado, dentro da janela: fica no fim e separada por

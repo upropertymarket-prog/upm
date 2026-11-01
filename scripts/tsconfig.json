@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../packages/config/tsconfig/base.json",
+  "compilerOptions": {
+    // Correm no Node, pelo `tsx`. Nada daqui vai para um browser, por isso o
+    // `lib` perde o DOM que o base dá: um `document` usado por engano num
+    // script tem de ser um erro, não um aviso que ninguém vê.
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    // Os scripts importam `../../packages/db/src/...` sem extensão, como o
+    // resto do repositório — `allowImportingTsExtensions` não é preciso, mas
+    // `Bundler` (que vem do base) é o que resolve isso sem reclamar.
+    "allowJs": false
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "gate/**/*.mjs"]
+}

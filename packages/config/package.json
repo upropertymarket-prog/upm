@@ -15,6 +15,7 @@
     "./server": "./server.ts",
     "./security": "./security.ts",
     "./sentry": "./sentry.ts",
+    "./brand": "./brand.ts",
     "./seo-routes": "./seo-routes.generated.ts"
   },
   "files": [
@@ -24,6 +25,7 @@
     "server.ts",
     "security.ts",
     "sentry.ts",
+    "brand.ts",
     "seo-routes.generated.ts"
   ],
   "scripts": {

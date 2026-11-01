@@ -1,11 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { AlertTriangle, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Moon, ShieldAlert, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button, Modal, PageHeader, Select, StatusTag, Textarea, useToast } from "@upm/ui";
+import {
+  Button,
+  Modal,
+  PageHeader,
+  Select,
+  StatusTag,
+  Textarea,
+  useTheme,
+  useToast,
+} from "@upm/ui";
 import type { EmailSignatureRow, SignatureFinding, SignatureVariable } from "@upm/db/signatures";
-import { SIGNATURE_TEMPLATE, SIGNATURE_VARIABLES } from "@upm/db/signatures";
+import {
+  SIGNATURE_TEMPLATE,
+  SIGNATURE_VARIABLES,
+  signaturePreviewDocument,
+} from "@upm/db/signatures";
 import type { MailboxOption } from "@upm/db/mail";
 
 import type { SignatureActionResult } from "./actions";
@@ -74,6 +87,21 @@ export function SignatureManager(props: SignatureManagerProps) {
   const [preview, setPreview] = useState("");
   const [warningsOpen, setWarningsOpen] = useState(false);
   const html = useRef<HTMLTextAreaElement>(null);
+
+  /**
+   * O tema da pré-visualização, **independente do da app** (29 out 2026): a
+   * assinatura vai parar a caixas de correio claras e escuras, e quem a edita
+   * tem de ver as duas sem mudar o tema do ecrã onde trabalha.
+   *
+   * **Abre no tema da app, e acompanha-o quando ele muda** (1 nov 2026). Abria
+   * sempre em claro, e no tema escuro a pré-visualização era um retângulo
+   * branco no meio de um ecrã escuro. O seletor continua a trocá-la sozinha.
+   */
+  const { resolved: appTheme } = useTheme();
+  const [previewTheme, setPreviewTheme] = useState<"light" | "dark">(appTheme);
+  useEffect(() => setPreviewTheme(appTheme), [appTheme]);
+  const [origin, setOrigin] = useState<string | undefined>(undefined);
+  useEffect(() => setOrigin(window.location.origin), []);
 
   // O editor acompanha a assinatura que recebe, e não só a da primeira
   // montagem. Depois de guardar, a página volta com o HTML **limpo** — sem
@@ -218,6 +246,31 @@ export function SignatureManager(props: SignatureManagerProps) {
           <header className="upm-sig__preview-head">
             <span>{t("previewTitle")}</span>
             {previewMailbox ? null : <StatusTag tone="draft">{t("previewRaw")}</StatusTag>}
+            {/* O segmentado da topbar, mas com estado próprio: mexe no fundo do
+                `iframe`, não no `data-theme` da app. */}
+            <div
+              className="upm-segmented upm-sig__theme"
+              role="radiogroup"
+              aria-label={t("previewTheme")}
+            >
+              {(["light", "dark"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={previewTheme === option}
+                  className="upm-segmented__option"
+                  onClick={() => setPreviewTheme(option)}
+                >
+                  {option === "light" ? (
+                    <Sun size={15} aria-hidden="true" />
+                  ) : (
+                    <Moon size={15} aria-hidden="true" />
+                  )}
+                  {t(option === "light" ? "previewLight" : "previewDark")}
+                </button>
+              ))}
+            </div>
           </header>
           {props.mailboxes.length > 0 ? (
             <Select
@@ -237,7 +290,7 @@ export function SignatureManager(props: SignatureManagerProps) {
             className="upm-sig__frame"
             title={t("previewLabel")}
             sandbox=""
-            srcDoc={preview}
+            srcDoc={signaturePreviewDocument(preview, previewTheme, origin)}
           />
           <p className="upm-sig__muted">{t("previewNote")}</p>
         </section>

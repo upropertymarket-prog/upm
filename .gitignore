@@ -27,3 +27,8 @@ tempo/dist/
 # código e continua versionado; estes dois são runtime.
 .tempo/app-devserver.json
 .tempo/app-devserver.log
+
+# Registos que uma aplicação do Windows ("gude") escreve em design/brand/:
+# só erros de rede (WinHTTP), nada do projeto, e um deles fica aberto e a
+# crescer enquanto ela corre.
+design/brand/gude-*.log

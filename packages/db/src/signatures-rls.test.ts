@@ -129,7 +129,10 @@ describe.skipIf(!hasEnv)(
     afterAll(async () => {
       if (!service) return;
       if (original) {
-        await service.from("email_signatures").update({ html: original.html }).eq("id", original.id);
+        await service
+          .from("email_signatures")
+          .update({ html: original.html })
+          .eq("id", original.id);
       } else {
         for (const id of created) await service.from("email_signatures").delete().eq("id", id);
       }

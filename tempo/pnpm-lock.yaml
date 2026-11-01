@@ -29,7 +29,7 @@ importers:
         version: 4.3.3
       tempo-sdk:
         specifier: sdk-v2-latest
-        version: 0.0.81(@babel/core@7.29.7)(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(next@16.3.6(@babel/core@7.29.7)(@types/node@25.9.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.64.12)(vite@7.3.7(@types/node@25.9.8)(jiti@2.7.0)(lightningcss@1.32.0))
+        version: 0.0.85(@babel/core@7.29.7)(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(next@16.3.6(@babel/core@7.29.7)(@types/node@25.9.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.64.12)(vite@7.3.7(@types/node@25.9.8)(jiti@2.7.0)(lightningcss@1.32.0))
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -950,6 +950,9 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/estree@1.0.10':
+    resolution: {integrity: sha512-lTyOMnOcmRBzdCv6/4zUZCrEhV0xrqQiUZBZtVcbmLHBXKLnN8q89v/wKRF/Q0HbwVsqbIG3o5HDoFl9sduM+g==}
+
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
@@ -980,8 +983,8 @@ packages:
   caniuse-lite@1.0.30001818:
     resolution: {integrity: sha512-XJbgo4adscw7R4MZU4/qVFkoMyPaNUAWmdNY4o/k9x7fFwmv4frIlndI9lWuaxviW9ObiZel9LuncnQPn6hQ5A==}
 
-  caniuse-lite@1.0.30001819:
-    resolution: {integrity: sha512-LFUqIIAwpzsIuevnKnsR9qnStBcgzPShTX61lBwN9uFkkf8o8zLiebEjbW8AYtZiF+1YKDWfdt/pWDtMuG8Xwg==}
+  caniuse-lite@1.0.30001820:
+    resolution: {integrity: sha512-gfWD6MxqVCqAOwmODfZf7DchWvlrA+SRdNX7ceLfg3xRqe5ssjjpF7EgslC/0tiLiNTajdaNN/q8c/5u/7Gz8w==}
 
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
@@ -1262,8 +1265,8 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
-  tempo-sdk@0.0.81:
-    resolution: {integrity: sha512-zzwAYBe6eLFrUPgR6GjWGdy8i/ejCf49kxYalcbIvzyjW5TJ3bkHrd7GioXTKtXre78Bj8/SLgd1pRICxskI3Q==}
+  tempo-sdk@0.0.85:
+    resolution: {integrity: sha512-G6Dvrp7+e3DjIj59jEv4rS7Pr8d5eyHvs5j6vpYmdvuGlmoa+lnrnad30WnRoUV5UI5W0/F1gHtjcocHP/1C/w==}
     peerDependencies:
       '@babel/core': ^7.0.0
       astro: ^7.0.0
@@ -1309,8 +1312,8 @@ packages:
       typescript:
         optional: true
 
-  tslib@2.8.1:
-    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+  tslib@2.9.1:
+    resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -1544,17 +1547,17 @@ snapshots:
   '@emnapi/core@1.11.3':
     dependencies:
       '@emnapi/wasi-threads': 1.2.3
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emnapi/runtime@1.11.3':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@emnapi/wasi-threads@1.2.3':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@esbuild/aix-ppc64@0.28.2':
@@ -1869,7 +1872,7 @@ snapshots:
 
   '@rollup/pluginutils@5.5.1(rollup@4.64.12)':
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
       estree-walker: 2.0.2
       picomatch: 4.0.7
     optionalDependencies:
@@ -1952,7 +1955,7 @@ snapshots:
 
   '@swc/helpers@0.5.23':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@tailwindcss/node@4.3.3':
@@ -2025,7 +2028,7 @@ snapshots:
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
-      tslib: 2.8.1
+      tslib: 2.9.1
     optional: true
 
   '@types/babel__core@7.20.5':
@@ -2048,6 +2051,8 @@ snapshots:
   '@types/babel__traverse@7.28.0':
     dependencies:
       '@babel/types': 7.29.8
+
+  '@types/estree@1.0.10': {}
 
   '@types/estree@1.0.9': {}
 
@@ -2083,7 +2088,7 @@ snapshots:
 
   caniuse-lite@1.0.30001818: {}
 
-  caniuse-lite@1.0.30001819:
+  caniuse-lite@1.0.30001820:
     optional: true
 
   client-only@0.0.1:
@@ -2227,7 +2232,7 @@ snapshots:
       '@next/env': 16.3.6
       '@swc/helpers': 0.5.23
       baseline-browser-mapping: 2.11.34
-      caniuse-lite: 1.0.30001819
+      caniuse-lite: 1.0.30001820
       postcss: 8.5.23
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -2394,7 +2399,7 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  tempo-sdk@0.0.81(@babel/core@7.29.7)(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(next@16.3.6(@babel/core@7.29.7)(@types/node@25.9.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.64.12)(vite@7.3.7(@types/node@25.9.8)(jiti@2.7.0)(lightningcss@1.32.0)):
+  tempo-sdk@0.0.85(@babel/core@7.29.7)(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(next@16.3.6(@babel/core@7.29.7)(@types/node@25.9.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(rollup@4.64.12)(vite@7.3.7(@types/node@25.9.8)(jiti@2.7.0)(lightningcss@1.32.0)):
     dependencies:
       '@rollup/pluginutils': 5.5.1(rollup@4.64.12)
       oxc-parser: 0.110.0(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
@@ -2418,7 +2423,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  tslib@2.8.1:
+  tslib@2.9.1:
     optional: true
 
   typescript@5.9.3: {}

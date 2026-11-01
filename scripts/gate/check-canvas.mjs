@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { decidir } from "./canvas-decisao.mjs";
 
 /**
  * Portão dos canvases — as storyboards montam os componentes de hoje
@@ -84,11 +85,17 @@ const resultado = spawnSync(process.execPath, [TSC, "--noEmit", "--pretty", "fal
 });
 
 const saida = `${resultado.stdout ?? ""}${resultado.stderr ?? ""}`;
-const erros = saida.split("\n").filter((linha) => linha.includes("error TS"));
+
+// O host que o Tempo gera e o `.gitignore` deixa fora: sem ele (no CI), o
+// único erro perdoado é o import dele. A regra e a razão: `canvas-decisao.mjs`.
+const HOST_GERADO = ["tsx", "ts"].some((ext) =>
+  existsSync(resolve(SIDECAR, ".tempo", `tempo-host.${ext}`)),
+);
+const { naoArrancou, erros, perdoados } = decidir(saida, resultado.status, HOST_GERADO);
 
 // O `tsc` não arrancou: saiu com erro e não disse uma única coisa sobre tipos.
 // Sem este ramo, é exatamente aqui que o portão dava o verde por omissão.
-if (erros.length === 0 && resultado.status !== 0) {
+if (naoArrancou) {
   console.error("✗ canvas: o `tsc` do sidecar não arrancou — o portão não verificou nada.\n");
   console.error(saida.trim().split("\n").slice(0, 10).join("\n"));
   process.exit(1);
@@ -96,6 +103,11 @@ if (erros.length === 0 && resultado.status !== 0) {
 
 if (erros.length === 0) {
   console.log("✓ canvas: as storyboards compilam contra os componentes de hoje");
+  if (perdoados > 0) {
+    console.log(
+      `  (${perdoados} import(s) de .tempo/tempo-host ignorados: o host não é gerado aqui)`,
+    );
+  }
   process.exit(0);
 }
 

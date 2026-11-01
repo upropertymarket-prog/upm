@@ -145,7 +145,15 @@ export async function middleware(request: NextRequest) {
  *
  * Também evita correr uma chamada de autenticação ao Supabase por cada evento
  * recebido, que não serviria para nada — o webhook escreve com `service_role`.
+ *
+ * **`api/health` sai pela mesma porta, e pela mesma razão** (12 §9.1): um
+ * monitor externo não tem sessão. Se a verificação de saúde passasse por
+ * aqui, levava um 307 para `/entrar` — e um monitor lê um redirect como "a
+ * app respondeu", ou seja, continuaria a dizer verde com a base de dados em
+ * baixo. Um alarme que nunca toca é pior do que não ter alarme.
  */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook|api/health).*)",
+  ],
 };

@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  applySecurityHeaders,
   buildContentSecurityPolicy,
   clientIpFrom,
+  cspReportUri,
   invalidCidrsIn,
   isIpAllowed,
 } from "./security";
@@ -178,6 +180,64 @@ describe("CSP", () => {
       "form-action 'self'",
     ]) {
       expect(csp).toContain(diretiva);
+    }
+  });
+});
+
+describe("relatório de CSP — o alarme com campainha", () => {
+  const DSN_ORIGINAL = process.env.NEXT_PUBLIC_SENTRY_DSN;
+
+  afterEach(() => {
+    if (DSN_ORIGINAL === undefined) delete process.env.NEXT_PUBLIC_SENTRY_DSN;
+    else process.env.NEXT_PUBLIC_SENTRY_DSN = DSN_ORIGINAL;
+  });
+
+  it("deriva o endereço do DSN, em vez de o pedir à parte", () => {
+    process.env.NEXT_PUBLIC_SENTRY_DSN = "https://abc123@o42.ingest.de.sentry.io/7";
+    expect(cspReportUri()).toBe(
+      "https://o42.ingest.de.sentry.io/api/7/security/?sentry_key=abc123",
+    );
+  });
+
+  it("emite `report-uri` E `report-to` — o Safari só entende o primeiro", () => {
+    process.env.NEXT_PUBLIC_SENTRY_DSN = "https://abc123@o42.ingest.de.sentry.io/7";
+    const csp = buildContentSecurityPolicy("n");
+    expect(csp).toContain("report-uri https://o42.ingest.de.sentry.io/api/7/security/");
+    expect(csp).toContain("report-to csp");
+  });
+
+  it("o `report-to` vem sempre acompanhado do cabeçalho que lhe dá destino", () => {
+    process.env.NEXT_PUBLIC_SENTRY_DSN = "https://abc123@o42.ingest.de.sentry.io/7";
+    const headers = new Map<string, string>();
+    applySecurityHeaders({ set: (k, v) => headers.set(k, v) }, "n");
+
+    expect(headers.get("Reporting-Endpoints")).toBe(
+      'csp="https://o42.ingest.de.sentry.io/api/7/security/?sentry_key=abc123"',
+    );
+  });
+
+  it("SEM DSN não emite diretiva nenhuma — nem meia", () => {
+    // É o caso que interessa prender: uma `report-uri` a apontar para lado
+    // nenhum faz o browser tentar e falhar em cada violação, e deixa a CSP
+    // com uma diretiva que parece configurada e não está.
+    delete process.env.NEXT_PUBLIC_SENTRY_DSN;
+    const csp = buildContentSecurityPolicy("n");
+
+    expect(cspReportUri()).toBeNull();
+    expect(csp).not.toContain("report-uri");
+    expect(csp).not.toContain("report-to");
+
+    const headers = new Map<string, string>();
+    applySecurityHeaders({ set: (k, v) => headers.set(k, v) }, "n");
+    expect(headers.has("Reporting-Endpoints")).toBe(false);
+  });
+
+  it("um DSN malformado não parte a CSP da app inteira", () => {
+    for (const mau of ["isto-não-é-um-url", "https://sem-chave.sentry.io/7", "https://k@host/"]) {
+      process.env.NEXT_PUBLIC_SENTRY_DSN = mau;
+      expect(cspReportUri()).toBeNull();
+      // E o resto da política continua inteiro.
+      expect(buildContentSecurityPolicy("n")).toContain("frame-ancestors 'none'");
     }
   });
 });

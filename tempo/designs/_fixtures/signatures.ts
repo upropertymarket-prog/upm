@@ -11,19 +11,30 @@ import type { EmailSignatureRow } from "../../../packages/db/src/signatures";
  * - **Datas fixas.** Duas montagens da mesma storyboard têm de dar o mesmo pixel.
  */
 
-const MODELO = `<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 1.5;">
+const MODELO = `<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.6;">
   <tr>
-    <td style="padding-right: 14px; vertical-align: top;">
-      <div style="font-weight: 800; font-size: 15px; color: #EA580C; white-space: nowrap;">UProperty Market</div>
-    </td>
-    <td style="padding-left: 14px; border-left: 2px solid #CBD5E1; vertical-align: top;">
-      <div style="font-weight: 700; color: #0F172A;">{{nome}}</div>
-      <div style="color: #64748B;">{{cargo}} · {{departamento}}</div>
-      <div style="padding-top: 6px;">
-        <a href="mailto:{{email}}" style="color: #EA580C; text-decoration: none;">{{email}}</a>
+    <td style="padding-right: 24px; border-right: 1px solid #D4D4D4; vertical-align: middle;">
+      <img class="upm-sig-logo-light" src="https://www.upropertymarket.pt/brand/assinatura-light.png" alt="UProperty Market" width="160" height="54" style="display: block; border: 0;">
+      <div class="upm-sig-logo-dark" style="display: none; mso-hide: all; max-height: 0; overflow: hidden;">
+        <img src="https://www.upropertymarket.pt/brand/assinatura-dark.png" alt="UProperty Market" width="160" height="54" style="display: block; border: 0;">
       </div>
-      <div style="color: #64748B;">{{telefone}}</div>
-      <div style="padding-top: 6px; color: #64748B; font-size: 12px;">Imóveis sem comissões.</div>
+    </td>
+    <td style="padding-left: 24px; vertical-align: middle;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 15px;">A Equipa UProperty Market</p>
+      <table cellpadding="0" cellspacing="0" border="0" style="line-height: 1.6;">
+        <tr>
+          <td style="padding-bottom: 4px; color: #8A8A8A; font-size: 13px;">Tel:</td>
+          <td style="padding-bottom: 4px; padding-left: 8px;">(+351) 939 732 637</td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 4px; color: #8A8A8A; font-size: 13px;">Email:</td>
+          <td style="padding-bottom: 4px; padding-left: 8px;"><a href="mailto:info@upropertymarket.pt" style="color: inherit; text-decoration: none;">info@upropertymarket.pt</a></td>
+        </tr>
+        <tr>
+          <td style="color: #8A8A8A; font-size: 13px;">Web:</td>
+          <td style="padding-left: 8px;"><a href="https://www.upropertymarket.pt" style="color: inherit; text-decoration: none;">www.upropertymarket.pt</a></td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>`;
@@ -51,7 +62,11 @@ export const VARIAVEIS_RESOLVIDAS: Record<string, string> = {
 };
 
 /** HTML colado com o que o sanitizador tira — o estado dos avisos. */
+// Os avisos sem estragar o desenho: um `onclick` e um `<script>` não se veem, e
+// a variável que não existe fica no lugar do telefone, onde se percebe porquê.
 export const HTML_COM_AVISOS = MODELO.replace(
-  '<div style="font-weight: 700; color: #0F172A;">{{nome}}</div>',
-  '<div style="font-weight: 700; color: #0F172A;">{{nome}}</div><img src="https://example.com/x.png" onerror="alert(1)"><script>track()</script>',
-).replace("{{telefone}}", "{{telemovel}}");
+  '<a href="mailto:',
+  '<a onclick="track()" href="mailto:',
+)
+  .replace("(+351) 939 732 637", "{{telemovel}}")
+  .replace("</table>\n    </td>", "</table><script>track()</script>\n    </td>");
