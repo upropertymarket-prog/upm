@@ -84,7 +84,28 @@ const resultado = spawnSync(process.execPath, [TSC, "--noEmit", "--pretty", "fal
 });
 
 const saida = `${resultado.stdout ?? ""}${resultado.stderr ?? ""}`;
-const erros = saida.split("\n").filter((linha) => linha.includes("error TS"));
+
+/**
+ * O host gerado, e o único erro que se perdoa por ele faltar
+ * ---------------------------------------------------------------------------
+ * `main.tsx` e `app/tempo-host/page.tsx` importam `.tempo/tempo-host`, que o
+ * Tempo gera na máquina de quem tem a app aberta e que o `.gitignore` deixa de
+ * fora. No CI não existe, e o `tsc` dizia "Cannot find module" sobre ele —
+ * desde 27 out o `main` estava vermelho por isto, sem nenhuma storyboard
+ * partida. Perdoa-se **esse** erro (TS2307 sobre esse módulo) e **só** quando
+ * o ficheiro falta mesmo; qualquer outro erro, inclusive noutro módulo em
+ * falta, continua a parar o portão. Onde o host existe, nada muda.
+ */
+const HOST_GERADO = ["tsx", "ts"].some((ext) =>
+  existsSync(resolve(SIDECAR, ".tempo", `tempo-host.${ext}`)),
+);
+const doHostGerado = (linha) =>
+  linha.includes("error TS2307") && /'(?:\.\.?\/)+\.tempo\/tempo-host'/.test(linha);
+
+const erros = saida
+  .split("\n")
+  .filter((linha) => linha.includes("error TS"))
+  .filter((linha) => HOST_GERADO || !doHostGerado(linha));
 
 // O `tsc` não arrancou: saiu com erro e não disse uma única coisa sobre tipos.
 // Sem este ramo, é exatamente aqui que o portão dava o verde por omissão.

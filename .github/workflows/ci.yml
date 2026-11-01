@@ -212,6 +212,13 @@ jobs:
   secrets:
     name: segredos no histórico
     runs-on: ubuntu-latest
+    # Num `pull_request` a action pede à API a lista de commits do PR; sem
+    # `pull-requests: read` o GITHUB_TOKEN é recusado ("Resource not accessible
+    # by integration") e o portão cai antes de ler um único segredo. No push
+    # para `main` não precisa — foi por isso que só o primeiro PR o mostrou.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
