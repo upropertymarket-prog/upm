@@ -32,8 +32,9 @@ import { HTML_COM_AVISOS, SIGNATURE, VARIAVEIS_RESOLVIDAS } from "../../_fixture
  *
  * - **A editar** — o ecrã a trabalhar: HTML e pré-visualização. Desde 29 out
  *   2026 há uma assinatura só para toda a empresa, e a lista saiu.
- * - **Com avisos** — HTML colado com um `<script>`, um `onerror=` e uma
- *   variável que não existe. É o estado que justifica o editor ser de código.
+ * - **Com avisos** — HTML colado com um `<script>`, um `onclick=` e uma
+ *   variável que não existe (`{{telemovel}}`). É o estado que justifica o
+ *   editor ser de código. Nenhum dos três mexe no desenho da assinatura.
  * - **Antes da primeira** — o editor abre no desenho de partida.
  */
 
@@ -45,7 +46,9 @@ async function inspecionarNoCanvas(input: Record<string, unknown>) {
   const html = String(input.html ?? "");
   const findings: { kind: "unsafe" | "unknownVariable"; detail: string }[] = [];
   if (/<script/i.test(html)) findings.push({ kind: "unsafe", detail: "<script>" });
-  if (/\sonerror\s*=/i.test(html)) findings.push({ kind: "unsafe", detail: "onerror=" });
+  for (const match of html.matchAll(/\s(on[a-z]+)\s*=/gi)) {
+    findings.push({ kind: "unsafe", detail: `${match[1]!.toLowerCase()}=` });
+  }
 
   const used = new Set<string>();
   for (const match of html.matchAll(VARIAVEL)) {
@@ -54,9 +57,12 @@ async function inspecionarNoCanvas(input: Record<string, unknown>) {
     else findings.push({ kind: "unknownVariable", detail: `{{${match[1]}}}` });
   }
 
-  const limpo = html.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/\sonerror="[^"]*"/gi, "");
+  const limpo = html.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/\son[a-z]+="[^"]*"/gi, "");
   const preview = input.mailboxId
-    ? limpo.replace(VARIAVEL, (token, name: string) => VARIAVEIS_RESOLVIDAS[name.toLowerCase()] ?? token)
+    ? limpo.replace(
+        VARIAVEL,
+        (token, name: string) => VARIAVEIS_RESOLVIDAS[name.toLowerCase()] ?? token,
+      )
     : limpo;
 
   return { findings, preview, variables: [...used] };

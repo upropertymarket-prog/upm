@@ -56,3 +56,15 @@
 [data-upm-overlay-root] .upm-drawer {
   height: 100%;
 }
+
+/*
+ * O mesmo defeito, na janela do Composer (1 nov 2026)
+ * -------------------------------------------------------------------------
+ * `.upm-composer` é `position: fixed` no canto inferior direito. No canvas
+ * resolvia contra o plano e aterrava fora da moldura: as storyboards
+ * "Composer" mostravam a caixa sem janela nenhuma. Prende-se ao shell, que
+ * já é o bloco de contenção (regra acima).
+ */
+.upm-shell .upm-composer {
+  position: absolute;
+}

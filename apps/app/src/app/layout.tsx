@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { BRAND_ICONS } from "@upm/config/brand";
 import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
@@ -24,8 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    // TODO: ícone final da marca (07 §10.1) — `icons` fica por preencher até o
-    // cliente entregar o ícone. Nada de derivar um a partir do wordmark.
+    icons: BRAND_ICONS,
   };
 }
 

@@ -159,6 +159,17 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * `api/health` fica **fora** do matcher (12 §9.1).
+ *
+ * Não é só o guard de sessão: é a allowlist de IP, que corre antes do próprio
+ * login. Com ela ativa, um monitor externo — que por definição não está na
+ * rede da equipa — receberia 403 de minuto a minuto e reportaria o `interno`
+ * em baixo para sempre.
+ *
+ * Deixá-la de fora não abre nada: a resposta é `{ ok }` e um código de estado,
+ * sem dizer o que falhou.
+ */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/health).*)"],
 };

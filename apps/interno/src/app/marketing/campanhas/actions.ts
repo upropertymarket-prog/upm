@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
+import { sniffImageMimeAllowed } from "@upm/db/image-mime";
 import {
   campaignAudienceCount,
   campaignEmailSaveSchema,
@@ -333,7 +334,7 @@ export async function carregarImagem(
   if (!user) return { error: "Sessão inválida." };
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const mime = sniffImageMime(bytes);
+  const mime = sniffImageMimeAllowed(bytes, ["image/png", "image/jpeg", "image/webp", "image/gif"]);
   if (!mime) return { error: "Só se aceitam imagens PNG, JPG, WebP e GIF." };
 
   // `{profile_id}/{uuid}.{ext}`: o primeiro segmento é quem carregou, e é o que
@@ -352,22 +353,6 @@ export async function carregarImagem(
 }
 
 /** As assinaturas dos quatro formatos do bucket, e a extensão de cada um. */
-function sniffImageMime(bytes: Uint8Array): { type: string; extension: string } | null {
-  const starts = (signature: number[]) => signature.every((byte, at) => bytes[at] === byte);
-
-  if (starts([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
-    return { type: "image/png", extension: "png" };
-  }
-  if (starts([0xff, 0xd8, 0xff])) return { type: "image/jpeg", extension: "jpg" };
-  if (starts([0x47, 0x49, 0x46, 0x38])) return { type: "image/gif", extension: "gif" };
-  if (
-    starts([0x52, 0x49, 0x46, 0x46]) &&
-    [0x57, 0x45, 0x42, 0x50].every((byte, at) => bytes[8 + at] === byte)
-  ) {
-    return { type: "image/webp", extension: "webp" };
-  }
-  return null;
-}
 
 // ---------------------------------------------------------------------------
 // A pré-visualização e a exportação — o renderizador a sério

@@ -115,7 +115,7 @@ function CaixaDemo({
                   initial={{
                     to: ["ana.silva@example.pt"],
                     subject: "Re: Não consigo publicar o anúncio da casa de Sintra",
-                    html: `<p>Boa tarde, Ana,</p><p>Obrigado pelo contacto — já estamos a ver o que aconteceu com o anúncio.</p><p><br></p><hr />${ASSINATURA}`,
+                    html: `<p>Boa tarde, Ana,</p><p>Obrigado pelo contacto — já estamos a ver o que aconteceu com o anúncio.</p>`,
                   }}
                   onClose={() => undefined}
                   onSave={semEscrita}

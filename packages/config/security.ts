@@ -17,7 +17,50 @@ export function generateNonce(): string {
   return btoa(binary);
 }
 
+/**
+ * Para onde o browser manda o que a CSP bloqueou (12 §5.3)
+ * ===========================================================================
+ * Uma CSP sem relatório é um alarme sem campainha: não se sabe o que ela está
+ * a bloquear nem o que tentou passar. Se amanhã um script legítimo for
+ * recusado, o sintoma é "aquela parte do site não funciona" e ninguém liga as
+ * duas coisas; se alguém tentar injetar um, não fica rasto nenhum.
+ *
+ * O endereço é **derivado do DSN do Sentry** e não de uma variável própria, de
+ * propósito: duas variáveis para a mesma coisa divergem, e a que diverge é
+ * sempre a que ninguém olha. O DSN tem a forma
+ * `https://<chave>@<org>.ingest.<região>.sentry.io/<projeto>` e o endpoint de
+ * CSP do Sentry monta-se a partir dela.
+ *
+ * Sem DSN — em desenvolvimento, por exemplo — a diretiva **não é emitida**.
+ * Uma CSP a apontar para um sítio que não existe faz o browser tentar e falhar
+ * em cada violação, e isso é pior do que não reportar.
+ *
+ * Nota para quem for ler os relatórios: isto é ruidoso. Extensões de browser
+ * injetam scripts em páginas alheias e cada uma dá uma violação que não é
+ * nossa. Vale a pena filtrar no Sentry antes de tirar conclusões.
+ */
+export function cspReportUri(): string | null {
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+  if (!dsn) return null;
+
+  try {
+    const url = new URL(dsn);
+    const chave = url.username;
+    const projeto = url.pathname.replace(/^\//, "");
+    if (!chave || !projeto) return null;
+    return `${url.origin}/api/${projeto}/security/?sentry_key=${chave}`;
+  } catch {
+    // Um DSN malformado não pode partir a CSP da app inteira.
+    return null;
+  }
+}
+
+/** O nome do grupo em `Reporting-Endpoints`, referido por `report-to`. */
+const GRUPO_DE_RELATORIO = "csp";
+
 export function buildContentSecurityPolicy(nonce: string): string {
+  const relatorio = cspReportUri();
+
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
@@ -36,6 +79,11 @@ export function buildContentSecurityPolicy(nonce: string): string {
     "base-uri 'self'",
     "frame-ancestors 'none'",
     "form-action 'self'",
+    // `report-uri` está depreciado e é o único que o Safari e os browsers mais
+    // antigos entendem; `report-to` é o substituto e precisa do cabeçalho
+    // `Reporting-Endpoints`. Vão os dois: entre perder relatórios de metade
+    // dos visitantes e escrever duas linhas, escrevem-se as duas linhas.
+    ...(relatorio ? [`report-uri ${relatorio}`, `report-to ${GRUPO_DE_RELATORIO}`] : []),
   ].join("; ");
 }
 
@@ -127,11 +175,7 @@ function lerIpv6(ip: string): bigint | null {
   const total = esquerda.length + cauda.length;
   if (metades.length === 1 ? total !== 8 : total > 7) return null;
 
-  const todos = [
-    ...esquerda,
-    ...Array.from({ length: 8 - total }, () => "0"),
-    ...cauda,
-  ];
+  const todos = [...esquerda, ...Array.from({ length: 8 - total }, () => "0"), ...cauda];
 
   let valor = 0n;
   for (const grupo of todos) {
@@ -184,6 +228,91 @@ function lerCidr(bruto: string): Rede | null {
 export function invalidCidrsIn(cidrs: readonly string[]): string[] {
   return cidrs.filter((cidr) => lerCidr(cidr) === null);
 }
+
+/**
+ * Redes a que o nosso servidor nunca tem razão para se ligar (12 §5.5)
+ * ===========================================================================
+ * Existe por causa da configuração de caixas de e-mail: é o Admin que escreve
+ * o anfitrião a que o `mail-worker` se vai ligar. Sem esta lista, esse campo
+ * é um pedido para o nosso servidor abrir uma ligação a onde lhe disserem —
+ * `127.0.0.1`, `10.0.0.5`, ou o endereço de metadados da instância, que em
+ * várias clouds devolve credenciais a quem o visitar.
+ *
+ * E há um agravante que é fácil não ver: o "Testar ligação" devolve erros
+ * **distintos por lado** — recusa, expiração, erro de protocolo. Isso é
+ * exatamente o que um scanner de portas precisa de saber. Sem este filtro, o
+ * ecrã de configuração é um mapeador da rede interna com interface gráfica.
+ *
+ * `169.254.169.254` está coberto por `169.254.0.0/16`, que é toda ela
+ * link-local e nunca é um destino legítimo nosso.
+ */
+const REDES_INTERNAS = [
+  "0.0.0.0/8", // "este host"
+  "10.0.0.0/8", // privada
+  "100.64.0.0/10", // CGNAT
+  "127.0.0.0/8", // loopback
+  "169.254.0.0/16", // link-local — inclui os metadados da cloud
+  "172.16.0.0/12", // privada
+  "192.0.0.0/24", // atribuições de protocolo
+  "192.168.0.0/16", // privada
+  "198.18.0.0/15", // testes de desempenho
+  "224.0.0.0/4", // multicast
+  "240.0.0.0/4", // reservada
+  "::1/128", // loopback v6
+  "fc00::/7", // únicas locais v6
+  "fe80::/10", // link-local v6
+  "::/128", // não especificado
+] as const;
+
+/**
+ * `true` se o endereço cai numa rede interna ou reservada — **e também se não
+ * se consegue interpretar**. Falha fechada: um endereço que não entendemos não
+ * é um endereço a que nos ligamos.
+ */
+export function isPrivateOrReservedIp(ip: string): boolean {
+  if (!lerEndereco(ip)) return true;
+  return isIpAllowed(ip, REDES_INTERNAS);
+}
+
+/**
+ * Um anfitrião escrito à mão que claramente aponta para dentro.
+ *
+ * **Não substitui a verificação do IP depois de resolver o nome** — um domínio
+ * público pode apontar para `127.0.0.1`, e é assim que o DNS rebinding
+ * funciona. Isto apanha o caso óbvio no formulário, para quem está a
+ * configurar receber um erro imediato em vez de um timeout três minutos
+ * depois; a defesa a sério está em `assertHostIsExternal`, no worker, que
+ * corre quando o socket vai mesmo abrir.
+ */
+export function hostLooksInternal(host: string): boolean {
+  const limpo = host.trim().toLowerCase().replace(/\.$/, "");
+  if (limpo === "") return true;
+
+  // Um IP escrito diretamente decide-se pelo IP.
+  if (/^[0-9.]+$/.test(limpo) || limpo.includes(":") || limpo.startsWith("[")) {
+    return isPrivateOrReservedIp(limpo);
+  }
+
+  if (limpo === "localhost" || limpo.endsWith(".localhost")) return true;
+  // Nomes que só existem dentro de uma rede.
+  if (/\.(local|internal|intranet|lan|home|corp|localdomain)$/.test(limpo)) return true;
+  // Um nome sem ponto é um nome de máquina da rede local, não um domínio.
+  if (!limpo.includes(".")) return true;
+
+  return false;
+}
+
+/**
+ * As portas de correio que fazem sentido, e só essas (12 §5.5).
+ *
+ * Uma lista branca e não um intervalo: deixar passar qualquer porta de 1 a
+ * 65535 é o que transforma o "Testar ligação" num scanner. São estas que os
+ * fornecedores reais usam; se algum dia aparecer um servidor legítimo fora
+ * delas, acrescenta-se com a razão escrita ao lado — que é melhor do que
+ * deixar as 65 527 restantes abertas por precaução.
+ */
+export const PORTAS_ENTRADA = [110, 143, 993, 995] as const;
+export const PORTAS_SMTP = [25, 465, 587, 2525] as const;
 
 export function isIpAllowed(ip: string, cidrs: readonly string[]): boolean {
   if (cidrs.length === 0) return true;
@@ -244,5 +373,14 @@ export function applySecurityHeaders(
   nonce: string,
 ): void {
   headers.set("Content-Security-Policy", buildContentSecurityPolicy(nonce));
+
+  // Dá nome ao grupo que o `report-to` da CSP refere. Sem este cabeçalho, o
+  // `report-to` aponta para um grupo que não existe e não vai nada — e a CSP
+  // fica com uma diretiva que parece configurada e não está.
+  const relatorio = cspReportUri();
+  if (relatorio) {
+    headers.set("Reporting-Endpoints", `${GRUPO_DE_RELATORIO}="${relatorio}"`);
+  }
+
   for (const { key, value } of SECURITY_HEADERS) headers.set(key, value);
 }

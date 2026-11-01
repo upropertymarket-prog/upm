@@ -1,0 +1,15 @@
+# Ficheiros gerados pelo sidecar dos canvases.
+#
+# O `tempo/` é um servidor de desenvolvimento gerado pela app Tempo, não código
+# nosso: o `canvas_project_init` reescreve-o. Formatá-los é trabalho que se
+# desfaz sozinho na geração seguinte — e, pior, deixa o `format:check`
+# vermelho sem ninguém ter escrito nada. Um portão que fica vermelho por
+# rotina ensina a ignorá-lo.
+#
+# As canvases em `tempo/designs/` **não** estão aqui: essas são escritas à mão
+# e seguem as mesmas regras do resto do repositório.
+tempo/next-env.d.ts
+tempo/vite.config.ts
+tempo/.tempo-styles/
+tempo/.tempo/
+tempo/node_modules/

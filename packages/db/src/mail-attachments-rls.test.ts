@@ -81,6 +81,16 @@ describe.skipIf(!hasEnv)("Fase 10 · anexos do correio: bucket, Cloud interna e 
         .eq("id", id);
       if (error) throw new Error(`Falha a preparar ${role}: ${error.message}`);
 
+      // Ver a nota em `mail-rls.test.ts`: desde `20261031090000_mailbox_scope`
+      // o acesso ao correio lê `staff_members.department`, e um fixture de
+      // suporte sem essa linha deixa de ver os anexos da sua própria caixa.
+      if (fixture.role === "support") {
+        const { error: staffError } = await service
+          .from("staff_members")
+          .upsert({ profile_id: id, department: "suporte" }, { onConflict: "profile_id" });
+        if (staffError) throw new Error(`Falha a preparar staff_members: ${staffError.message}`);
+      }
+
       const client = createClient(SUPABASE_URL!, ANON_KEY!);
       const { error: signInError } = await client.auth.signInWithPassword({
         email: fixture.email,

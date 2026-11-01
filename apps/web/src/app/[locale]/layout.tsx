@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
+import { BRAND_ICONS } from "@upm/config/brand";
 import { NONCE_HEADER } from "@upm/config/security";
 import { ThemeProvider, ThemeScript, ToastProvider } from "@upm/ui";
 import { fontVariables } from "@upm/ui/fonts";
@@ -37,9 +38,9 @@ export async function generateMetadata({
   return {
     title: "UProperty Market",
     description: t("description"),
-    // TODO: ícone final da marca (07 §10.1) — `icons` e o `og:image` por omissão
-    // ficam por preencher até o cliente entregar o ícone. O SEO a sério entra na
-    // Fase 5, com um `seo.ts` por rota (04 §8.1.2).
+    icons: BRAND_ICONS,
+    // TODO: `og:image` por omissão a partir do ícone (07 §10.1). O SEO a sério
+    // entra na Fase 5, com um `seo.ts` por rota (04 §8.1.2).
   };
 }
 

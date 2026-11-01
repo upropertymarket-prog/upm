@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
 
 import { routing } from "./i18n/routing";
+import { sharedCacheControl } from "./lib/cache-policy";
 
 const intl = createIntlMiddleware(routing);
 
@@ -37,6 +38,22 @@ export function middleware(request: NextRequest) {
   const response = intl(new NextRequest(request, { headers: requestHeaders }));
 
   applySecurityHeaders(response.headers, nonce);
+
+  /**
+   * Cache de borda, só no que é igual para toda a gente (12 §10.4).
+   *
+   * **Depois do `intl` e só em respostas que ficam**, pela mesma razão que os
+   * cabeçalhos de segurança: um redirect de idioma não é a página, e pôr-lhe
+   * um `s-maxage` ensinaria a CDN a guardar o desvio em vez do destino.
+   *
+   * A lista do que pode ser partilhado está em `lib/cache-policy.ts`, e é
+   * branca: o caminho que lá não estiver não leva cabeçalho nenhum.
+   */
+  if (response.status === 200) {
+    const cache = sharedCacheControl(request.nextUrl.pathname);
+    if (cache) response.headers.set("Cache-Control", cache);
+  }
+
   return response;
 }
 

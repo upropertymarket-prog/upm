@@ -14,6 +14,7 @@ import {
   type PriceStepInput,
 } from "@upm/db/properties";
 import { approxOffset, geocodeAddress, toEwkt } from "@upm/db/geocoding";
+import { sniffImageMimeAllowed, type ImageKind } from "@upm/db/image-mime";
 
 /**
  * Server Actions do formulário "Nova propriedade" (P4-02) — 05 §1.2, 08 §7.3.
@@ -27,7 +28,8 @@ import { approxOffset, geocodeAddress, toEwkt } from "@upm/db/geocoding";
 const MEDIA_BUCKET = "property-media";
 const DOCUMENTS_BUCKET = "documents";
 
-const MEDIA_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+// `as const` para o tipo chegar ao `sniffImageMimeAllowed` em vez de `string[]`.
+const MEDIA_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const MEDIA_MAX_BYTES = 15 * 1024 * 1024;
 
 const DOCUMENT_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
@@ -240,13 +242,34 @@ export async function uploadPropertyMedia(
   const files = formData.getAll("files").filter((entry): entry is File => entry instanceof File);
   if (files.length === 0) return { error: "Nenhum ficheiro enviado." };
 
+  /**
+   * O tipo decide-se pelos bytes, não pelo que o browser declara (12 §5.4).
+   *
+   * Até 31 out 2026 isto lia `file.type` — que num `FormData` é escrito pelo
+   * browser a partir da extensão do nome, e por quem publica o pedido à mão é
+   * escrito à vontade. Qualquer ficheiro entrava em `property-media` desde que
+   * se dissesse `image/jpeg`.
+   *
+   * E não ficava ali: o `mail-worker` copia a capa de um imóvel para
+   * `campaign-assets` ao montar uma campanha, e esse bucket é **público** —
+   * um ficheiro arbitrário passava de um formulário de anúncio a um URL aberto
+   * na internet, em dois passos que ninguém liga um ao outro.
+   *
+   * Todos os outros cinco caminhos de upload deste produto já validavam pelos
+   * bytes. Este era o que faltava, e é o de maior volume.
+   */
+  const validos: { file: File; bytes: Uint8Array; kind: ImageKind }[] = [];
   for (const file of files) {
-    if (!MEDIA_MIME_TYPES.includes(file.type)) {
-      return { error: `Tipo de ficheiro não suportado: ${file.name}.` };
-    }
     if (file.size > MEDIA_MAX_BYTES) {
       return { error: `Ficheiro demasiado grande: ${file.name} (máx. 15MB).` };
     }
+
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const kind = sniffImageMimeAllowed(bytes, MEDIA_MIME_TYPES);
+    if (!kind) {
+      return { error: `Tipo de ficheiro não suportado: ${file.name}.` };
+    }
+    validos.push({ file, bytes, kind });
   }
 
   const { data: lastPositioned } = await supabase
@@ -264,11 +287,14 @@ export async function uploadPropertyMedia(
   let nextPosition = (lastPositioned?.position ?? -1) + 1;
   let hasCover = (existingCount ?? 0) > 0;
 
-  for (const file of files) {
+  for (const { file, bytes, kind } of validos) {
     const path = `${propertyId}/${crypto.randomUUID()}-${file.name}`;
+    // `kind.type` e não `file.type`: o que fica gravado é o que os bytes
+    // dizem ser. Um `Content-Type` guardado a partir da declaração seria a
+    // mesma mentira, só que persistida.
     const { error: uploadError } = await supabase.storage
       .from(MEDIA_BUCKET)
-      .upload(path, file, { contentType: file.type });
+      .upload(path, bytes, { contentType: kind.type });
     if (uploadError) return { error: "Não foi possível enviar as fotografias." };
 
     const isFirstEver = !hasCover;

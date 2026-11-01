@@ -95,7 +95,13 @@ describe("coverUrlsFor", () => {
 
   it("ids repetidos ou nulos não multiplicam o pedido", async () => {
     const chamadas: Chamadas = { select: 0, assinar: 0 };
-    const mapa = await coverUrlsFor(clienteFalso(MEDIA, chamadas), ["a", "a", null, undefined, "a"]);
+    const mapa = await coverUrlsFor(clienteFalso(MEDIA, chamadas), [
+      "a",
+      "a",
+      null,
+      undefined,
+      "a",
+    ]);
     expect(chamadas.select).toBe(1);
     expect(mapa.size).toBe(1);
   });

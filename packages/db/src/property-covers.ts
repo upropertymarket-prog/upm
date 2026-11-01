@@ -93,5 +93,7 @@ function ganha(candidata: LinhaMedia, atual: LinhaMedia): boolean {
   const capaCandidata = candidata.is_cover === true;
   const capaAtual = atual.is_cover === true;
   if (capaCandidata !== capaAtual) return capaCandidata;
-  return (candidata.position ?? Number.MAX_SAFE_INTEGER) < (atual.position ?? Number.MAX_SAFE_INTEGER);
+  return (
+    (candidata.position ?? Number.MAX_SAFE_INTEGER) < (atual.position ?? Number.MAX_SAFE_INTEGER)
+  );
 }

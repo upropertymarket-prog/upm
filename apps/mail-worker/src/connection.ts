@@ -1,5 +1,7 @@
 import { ImapFlow } from "imapflow";
 import nodemailer from "nodemailer";
+import { lookup } from "node:dns/promises";
+import { hostLooksInternal, isPrivateOrReservedIp } from "@upm/config/security";
 
 import type { MailboxRow } from "./supabase.ts";
 
@@ -18,6 +20,46 @@ import type { MailboxRow } from "./supabase.ts";
  * desligar a verificação do certificado: um worker que aceita qualquer
  * certificado é um worker que entrega as credenciais a quem se puser no meio.
  */
+
+/**
+ * A defesa contra SSRF, no sítio onde o socket abre (12 §5.5)
+ * =========================================================================
+ * O anfitrião destas ligações é escrito à mão no Admin. O formulário já recusa
+ * o caso óbvio (`localhost`, IPs privados, nomes sem ponto), mas isso **não
+ * chega**: um domínio perfeitamente público pode ter um registo A a apontar
+ * para `127.0.0.1`, e o atacante até pode mudá-lo entre o momento em que o
+ * formulário valida e o momento em que o worker se liga. É o DNS rebinding, e
+ * a única forma de o apanhar é olhar para o IP **depois de resolver o nome**,
+ * aqui, onde a ligação vai mesmo acontecer.
+ *
+ * Verifica-se **todos** os endereços que o nome devolve, não o primeiro: um
+ * nome com dois registos A, um público e um privado, passaria metade das
+ * vezes — e um defeito que falha em metade das tentativas é pior do que um que
+ * falha sempre, porque demora meses a ser acreditado.
+ */
+export async function assertHostIsExternal(host: string, lado: string): Promise<void> {
+  if (hostLooksInternal(host)) {
+    throw new Error(`O servidor ${lado} aponta para a rede interna.`);
+  }
+
+  // Um IP escrito diretamente já foi decidido acima; não há nome a resolver.
+  if (/^[0-9.]+$/.test(host) || host.includes(":")) return;
+
+  let enderecos: { address: string }[];
+  try {
+    enderecos = await lookup(host, { all: true });
+  } catch {
+    // Um nome que não resolve não é um risco — é uma configuração errada, e o
+    // erro de ligação a seguir di-lo melhor do que nós aqui.
+    return;
+  }
+
+  for (const { address } of enderecos) {
+    if (isPrivateOrReservedIp(address)) {
+      throw new Error(`O servidor ${lado} resolve para a rede interna.`);
+    }
+  }
+}
 
 export type ImapOptions = ConstructorParameters<typeof ImapFlow>[0];
 
@@ -72,6 +114,9 @@ export async function checkConnection(
   if (mailbox.protocol === "imap") {
     const client = new ImapFlow(imapOptions(mailbox, password));
     try {
+      // Antes de qualquer socket: é este teste que devolve erros distintos por
+      // lado, e por isso é ele que seria o scanner de portas (12 §5.5).
+      await assertHostIsExternal(mailbox.in_host, "de entrada");
       await client.connect();
       result.imap = { ok: true };
     } catch (error) {
@@ -85,6 +130,7 @@ export async function checkConnection(
 
   const transport = createSmtpTransport(mailbox, password);
   try {
+    await assertHostIsExternal(mailbox.smtp_host, "SMTP");
     await transport.verify();
     result.smtp = { ok: true };
   } catch (error) {

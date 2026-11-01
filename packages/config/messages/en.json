@@ -2254,6 +2254,8 @@
       "readerLabel": "Reading",
       "messageCount": "{count, plural, =0 {No messages} one {# message} other {# messages}}",
       "composer": {
+        "removeSignature": "Remove signature",
+        "addSignature": "Add signature",
         "title": "New email",
         "minimize": "Minimise",
         "expand": "Expand",
@@ -2314,7 +2316,10 @@
       "previewTitle": "How it looks in the email",
       "previewRaw": "No mailboxes — variables shown as written",
       "previewNote": "The signature is the same for everyone; variables are filled in with the sender's details, as in the composer.",
-      "previewAs": "Preview as"
+      "previewAs": "Preview as",
+      "previewTheme": "Preview theme",
+      "previewLight": "Light",
+      "previewDark": "Dark"
     }
   },
   "updates": {
@@ -2670,6 +2675,10 @@
   },
   "errors": {
     "unexpectedTitle": "Something went wrong.",
-    "unexpectedBody": "The team has been notified. Please try again in a moment."
+    "unexpectedBody": "The team has been notified. Please try again in a moment.",
+    "retry": "Try again",
+    "backToStart": "Back to start",
+    "notFoundTitle": "We could not find this page.",
+    "notFoundBody": "The link may be wrong, or what you are looking for no longer exists."
   }
 }

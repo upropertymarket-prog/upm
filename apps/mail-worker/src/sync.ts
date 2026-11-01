@@ -3,7 +3,7 @@ import { ImapFlow } from "imapflow";
 import { simpleParser, type AddressObject, type ParsedMail } from "mailparser";
 
 import { discardUploads, storeAttachments } from "./attachments.ts";
-import { describe, imapOptions } from "./connection.ts";
+import { assertHostIsExternal, describe, imapOptions } from "./connection.ts";
 import type { TablesInsert } from "@upm/db";
 import {
   getMailboxPassword,
@@ -112,6 +112,10 @@ async function fetchRecent(
   password: string,
   batch: number,
 ): Promise<ParsedMail[]> {
+  // 12 §5.5 — ver a nota em `send.ts`: valida-se onde o socket abre, não só
+  // onde a configuração foi escrita.
+  await assertHostIsExternal(mailbox.in_host, "de entrada");
+
   const client = new ImapFlow(imapOptions(mailbox, password));
   const parsed: ParsedMail[] = [];
 

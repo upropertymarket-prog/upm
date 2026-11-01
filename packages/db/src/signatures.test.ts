@@ -1,10 +1,16 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  SIGNATURE_LOGO_DARK,
+  SIGNATURE_LOGO_LIGHT,
+  SIGNATURE_LOGO_ORIGIN,
   SIGNATURE_TEMPLATE,
   SIGNATURE_VARIABLES,
   inspectSignature,
   sanitizeSignature,
+  signaturePreviewDocument,
   signatureSaveSchema,
 } from "./signatures";
 
@@ -50,12 +56,14 @@ describe("sanitizeSignature", () => {
     // Sem espaço depois dos dois pontos: o sanitizador reescreve o `style`
     // depois de o interpretar, e é por isso que o que se guarda não é, byte por
     // byte, o que se escreveu — só o que ele reconheceu como CSS válido.
-    expect(clean).toContain("border-left:2px solid #CBD5E1");
-    // As variáveis são texto e têm de sobreviver intactas à sanitização, senão
-    // o composer inseria `{{nome}}` por resolver.
-    for (const name of ["nome", "cargo", "departamento", "email", "telefone"]) {
-      expect(clean).toContain(`{{${name}}}`);
-    }
+    expect(clean).toContain("border-right:1px solid #D4D4D4");
+    expect(clean).toContain(`src="${SIGNATURE_LOGO_LIGHT}"`);
+  });
+
+  it("as variáveis são texto e sobrevivem intactas à sanitização", () => {
+    // Senão o composer inseria `{{nome}}` por resolver.
+    const clean = sanitizeSignature("<p>{{nome}} · {{cargo}} · {{email}}</p>");
+    for (const name of ["nome", "cargo", "email"]) expect(clean).toContain(`{{${name}}}`);
   });
 
   it("tira `<style>` — uma folha dentro do e-mail vaza para a mensagem de quem responde", () => {
@@ -117,12 +125,42 @@ describe("inspectSignature", () => {
     expect(inspectSignature(SIGNATURE_TEMPLATE).findings).toHaveLength(0);
   });
 
-  it("o desenho não aponta para nenhuma imagem (D67)", () => {
-    // Os logótipos do projeto são SVG, que os clientes de correio não desenham,
-    // e não existe PNG nenhum. Um `src` para um caminho inventado dava um
-    // retângulo partido na assinatura de toda a equipa — é a lição de D63.
-    expect(SIGNATURE_TEMPLATE).not.toContain("<img");
-    expect(SIGNATURE_TEMPLATE).toContain("UProperty Market");
+  it("o logótipo é um PNG que existe no site público, e não um SVG", () => {
+    // Os clientes de correio não desenham SVG; e um `src` para um ficheiro
+    // inexistente dava um retângulo partido na assinatura de toda a equipa.
+    expect(SIGNATURE_TEMPLATE).not.toContain(".svg");
+    for (const url of [SIGNATURE_LOGO_LIGHT, SIGNATURE_LOGO_DARK]) {
+      const file = url.replace(SIGNATURE_LOGO_ORIGIN, "");
+      expect(existsSync(join(__dirname, "../../../apps/web/public", file))).toBe(true);
+    }
+  });
+
+  it("a pré-visualização escura aplica a troca do logótipo, e a clara não", () => {
+    const dark = signaturePreviewDocument(SIGNATURE_TEMPLATE, "dark", "http://localhost:3002");
+    expect(dark).toContain("http://localhost:3002/brand/assinatura-dark.png");
+    expect(dark).toContain(".upm-sig-logo-light { display: none !important; }");
+    expect(dark).toContain("color-scheme: dark");
+
+    const light = signaturePreviewDocument(SIGNATURE_TEMPLATE, "light");
+    expect(light).toContain(SIGNATURE_LOGO_LIGHT);
+    expect(light).not.toContain(".upm-sig-logo-light { display: none");
+    // A moldura de um composer simples à volta da assinatura.
+    expect(light).toContain("Novo e-mail");
+  });
+
+  it("o logótipo escuro sobrevive à sanitização escondido, com as classes do modo escuro", () => {
+    const clean = sanitizeSignature(SIGNATURE_TEMPLATE);
+    expect(clean).toContain('class="upm-sig-logo-light"');
+    expect(clean).toContain('class="upm-sig-logo-dark"');
+    // Sem o `mso-hide`, o Outlook do Windows mostrava os dois logótipos.
+    expect(clean).toContain("mso-hide:all");
+    expect(clean).toContain("display:none");
+  });
+
+  it("só as classes `upm-sig-` passam; as outras continuam a sair", () => {
+    const clean = sanitizeSignature('<p class="upm-sig-x titulo">a</p>');
+    expect(clean).toContain('class="upm-sig-x"');
+    expect(clean).not.toContain("titulo");
   });
 });
 

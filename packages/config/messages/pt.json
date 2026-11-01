@@ -2254,6 +2254,8 @@
       "readerLabel": "Leitura",
       "messageCount": "{count, plural, =0 {Sem mensagens} one {# mensagem} other {# mensagens}}",
       "composer": {
+        "removeSignature": "Remover assinatura",
+        "addSignature": "Adicionar assinatura",
         "title": "Novo e-mail",
         "minimize": "Minimizar",
         "expand": "Expandir",
@@ -2314,7 +2316,10 @@
       "previewTitle": "Como fica no e-mail",
       "previewRaw": "Sem caixas — variáveis à vista",
       "previewNote": "A assinatura é a mesma para todos; as variáveis resolvem-se com os dados de quem envia, como no composer.",
-      "previewAs": "Pré-visualizar como"
+      "previewAs": "Pré-visualizar como",
+      "previewTheme": "Tema da pré-visualização",
+      "previewLight": "Claro",
+      "previewDark": "Escuro"
     }
   },
   "updates": {
@@ -2670,6 +2675,10 @@
   },
   "errors": {
     "unexpectedTitle": "Ocorreu um erro inesperado.",
-    "unexpectedBody": "A equipa foi notificada. Tente novamente dentro de instantes."
+    "unexpectedBody": "A equipa foi notificada. Tente novamente dentro de instantes.",
+    "retry": "Tentar novamente",
+    "backToStart": "Voltar ao início",
+    "notFoundTitle": "Não encontrámos esta página.",
+    "notFoundBody": "A ligação pode estar errada ou o que procura já não existe."
   }
 }

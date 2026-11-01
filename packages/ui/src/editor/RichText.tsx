@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -149,6 +149,12 @@ export type RichTextProps = {
   toolbarPosition?: "top" | "bottom";
   className?: string;
   minHeight?: number;
+  /**
+   * O que fica entre o texto e uma barra em baixo, fora da edição. O Composer
+   * põe ali a assinatura (1 nov 2026): é HTML de e-mail — tabela, logótipo —
+   * que o TipTap não sabe guardar, e que por isso não pode entrar no texto.
+   */
+  afterContent?: ReactNode;
 };
 
 export function RichText({
@@ -163,6 +169,7 @@ export function RichText({
   toolbarPosition = "top",
   className,
   minHeight = 200,
+  afterContent,
 }: RichTextProps) {
   /**
    * O painel das variáveis — ver a nota junto ao "+", na barra.
@@ -487,6 +494,7 @@ export function RichText({
     <div className={className} style={{ display: "grid", gap: "var(--sp-2)" }}>
       {toolbarPosition === "top" ? toolbar : null}
       <EditorContent editor={editor} className="upm-richtext" />
+      {afterContent}
       {toolbarPosition === "bottom" ? toolbar : null}
     </div>
   );
