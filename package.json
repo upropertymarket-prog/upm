@@ -41,7 +41,8 @@
     "analytics:import": "tsx scripts/analytics/import-daily.ts",
     "gate:seo": "node scripts/generate-seo-routes.mjs --check && node scripts/gate/check-seo.mjs",
     "seo:routes": "node scripts/generate-seo-routes.mjs",
-    "gate:canvas": "node scripts/gate/check-canvas.mjs"
+    "gate:canvas": "node scripts/gate/check-canvas.mjs",
+    "gate:canvas:test": "node scripts/gate/check-canvas.test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

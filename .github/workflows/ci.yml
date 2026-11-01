@@ -150,6 +150,9 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: tempo
 
+      - name: Portão · storyboards (teste negativo)
+        run: pnpm gate:canvas:test
+
       - name: Portão · storyboards compilam
         run: pnpm gate:canvas
 
