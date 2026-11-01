@@ -494,12 +494,15 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   // Trial — P7-06 (07 §8.1)
   // -------------------------------------------------------------------------
 
-  it("trial: 7 dias uma vez por perfil, extensão uma única vez, decisão só do admin", async () => {
+  it("trial: não há trial novo (P9-05); a extensão de um trial existente é única e do admin", async () => {
     await service.from("trial_extension_requests").delete().eq("profile_id", ids.buyer);
     await service.from("subscriptions").delete().eq("profile_id", ids.buyer);
 
-    // Sem trial nenhum, tem direito. Pedir extensão fora do trial é recusado.
-    expect((await clients.buyer.rpc("trial_eligible", {})).data).toBe(true);
+    // P9-05 (7 out 2026): não há trial gratuito, de todo — `trial_eligible` diz
+    // sempre que não, mesmo a quem nunca teve um. Este teste esperou `true` até
+    // 1 nov, quando correu pela primeira vez contra a base real. Pedir extensão
+    // fora de um trial continua recusado.
+    expect((await clients.buyer.rpc("trial_eligible", {})).data).toBe(false);
     const tooSoon = await clients.buyer.rpc("request_trial_extension", {
       p_reason: "Ainda estou a experimentar e preciso de mais tempo para decidir.",
     });
