@@ -208,11 +208,26 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
       .eq("id", termsDocumentId);
     expect((anonRead ?? []).length).toBe(1);
 
-    const { error: buyerWrite } = await clients.buyer
+    // Sem policy de `update`, o RLS filtra a linha: 0 linhas, **sem erro**.
+    // Esperar um erro mede a forma da recusa, não a recusa — a prova é que
+    // nada foi tocado e o título continua o mesmo.
+    const { data: before } = await service
+      .from("legal_documents")
+      .select("title")
+      .eq("id", termsDocumentId)
+      .single();
+    const { data: touched } = await clients.buyer
       .from("legal_documents")
       .update({ title: "alterado por quem não devia" })
-      .eq("id", termsDocumentId);
-    expect(buyerWrite).not.toBeNull();
+      .eq("id", termsDocumentId)
+      .select("id");
+    expect(touched ?? []).toHaveLength(0);
+    const { data: after } = await service
+      .from("legal_documents")
+      .select("title")
+      .eq("id", termsDocumentId)
+      .single();
+    expect(after).toEqual(before);
   });
 
   it("terms_acceptances: cada um vê a sua, ninguém escreve pelo cliente", async () => {
@@ -366,7 +381,7 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
   // P9-03 / P9-04 — compromisso e porta única do cancelamento
   // -------------------------------------------------------------------------
 
-  it("o compromisso mínimo nasce indefinido e funciona com null, 0 e > 0", async () => {
+  it("o compromisso mínimo nasce do global e funciona com 0 e > 0", async () => {
     const { data: plan } = await service
       .from("plans")
       .select("id")
@@ -387,9 +402,19 @@ describe.skipIf(!hasEnv)("Fase 9 — matriz RLS e regras de identidade", () => {
       started_at: string;
     };
 
-    // Nenhum valor definido nesta fase: null, e sem data de fim.
-    expect(row.minimum_commitment_months).toBeNull();
-    expect(row.commitment_ends_at).toBeNull();
+    // Sem valor no plano, vale o global de `app_settings` — 12 meses por
+    // decisão do cliente de 7 out 2026 (P9-03). Até 1 nov este teste esperava
+    // `null`, de antes dessa decisão; lê-se o global em vez de o repetir aqui,
+    // para o teste seguir a configuração e não uma cópia dela.
+    const { data: setting } = await service
+      .from("app_settings")
+      .select("value")
+      .eq("key", "subscription_default_commitment_months")
+      .single();
+    const global = (setting as { value: number | null } | null)?.value ?? null;
+    expect(row.minimum_commitment_months).toBe(global);
+    if (global && global > 0) expect(row.commitment_ends_at).toBeTruthy();
+    else expect(row.commitment_ends_at).toBeNull();
     expect(row.started_at).toBeTruthy();
 
     // 0 = "definido como nenhum": continua sem data de fim.
