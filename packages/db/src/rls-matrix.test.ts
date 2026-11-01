@@ -18,6 +18,7 @@
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { grantTestPlan } from "./test-plan-fixture";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -73,6 +74,14 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
       if (error) throw new Error(`Falha a autenticar ${email}: ${error.message}`);
       clients[key] = client;
     }
+
+    // Sem plano não há guardados, alertas, conversas nem visitas (P9-05), e os
+    // quatro contam do lado do comprador. Os compradores de teste recebem o que
+    // o webhook do Stripe daria a quem paga — ver `test-plan-fixture.ts`.
+    // O proprietário fica **sem** plano de propósito: a secção da Cloud prova
+    // precisamente o que acontece a quem não o tem.
+    await grantTestPlan(serviceClient, userIds.buyer, "premium-buyer");
+    await grantTestPlan(serviceClient, userIds.buyer2, "premium-buyer");
 
     // Um imóvel `active` do owner de teste, para os cenários de leitura/escrita.
     const { data: property, error } = await serviceClient
@@ -501,18 +510,20 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
       await clients.buyer.from("search_alerts").delete().eq("id", inserted!.id);
     });
 
+    // O alerta é do `buyer2`: alertas são do comprador, e é ele que tem plano
+    // (sem plano o trigger de limite recusa a linha, até à service_role).
     it.each<[Role, boolean]>([
       ["anon", false],
       ["buyer", false], // não é o dono do alerta
-      ["owner", true],
+      ["buyer2", true],
       ["admin", true],
       ["support", true],
     ])(
-      "select do alerta de outro utilizador (owner) como %s → permitido=%s",
+      "select do alerta de outro utilizador (buyer2) como %s → permitido=%s",
       async (role, expected) => {
         const { data: seeded } = await serviceClient
           .from("search_alerts")
-          .insert({ user_id: userIds.owner, filters: {} })
+          .insert({ user_id: userIds.buyer2, filters: {} })
           .select("id")
           .single();
 
