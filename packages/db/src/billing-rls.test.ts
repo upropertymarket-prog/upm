@@ -584,12 +584,17 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
       .eq("link", "/plano");
     expect((notice ?? []).length).toBeGreaterThanOrEqual(1);
 
+    // Dois registos, cada um com o seu papel: o da decisão (o que se decidiu,
+    // escrito por `decide_trial_extension`) e o do trigger de A8 (que houve uma
+    // escrita de staff nesta linha — o que fica mesmo quando uma ação nova se
+    // esquece de auditar). Exatamente um de cada.
     const { data: audit } = await service
       .from("audit_log")
-      .select("id")
+      .select("action")
       .eq("entity", "trial_extension_requests")
       .eq("entity_id", requestId);
-    expect((audit ?? []).length).toBe(1);
+    const actions = (audit ?? []).map((row) => row.action).sort();
+    expect(actions).toEqual(["trial.extension.approved", "trial_extension_requests.update"]);
 
     // Um terceiro não vê o pedido de outro.
     expect(
@@ -602,7 +607,7 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
     ).toBe(1);
 
     await service.from("notifications").delete().eq("profile_id", ids.buyer);
-    await service.from("audit_log").delete().eq("entity_id", requestId);
+    // O `audit_log` não se limpa: é só de acrescentar desde o A8 (2 nov).
     await service.from("trial_extension_requests").delete().eq("profile_id", ids.buyer);
     await service.from("subscriptions").delete().eq("id", sub!.id);
     await setPlan(ids.buyer, "gratuito");

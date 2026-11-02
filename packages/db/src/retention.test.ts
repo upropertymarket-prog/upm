@@ -63,6 +63,8 @@ const PRAZOS: Record<string, string> = {
   purge_audit_log: "24 months",
   purge_mail_messages: "24 months",
   purge_deleted_account_residue: "30 days",
+  // 07 §13.6, desde a Fase 8; passou a função (e ao orquestrador) no A8.
+  purge_personal_data_access_log: "2 years",
 };
 
 /** Apaga comentários `--` e `/* *\/`, como o `gate:rls`: a prosa cita SQL. */
@@ -130,6 +132,20 @@ const ficheiros = readdirSync(MIGRACOES)
   .filter((f) => f.endsWith(".sql"))
   .sort();
 const migracao = semComentarios(readFileSync(join(MIGRACOES, RETENCAO), "utf8"));
+const sqls = ficheiros.map((ficheiro) => ({
+  ficheiro,
+  sql: semComentarios(readFileSync(join(MIGRACOES, ficheiro), "utf8")),
+}));
+
+/**
+ * O SQL do ficheiro que define `nome` **por último** — a versão que está em
+ * vigor. O A8 (2 nov) redefiniu `purge_audit_log` e `run_retention`; ler só
+ * o ficheiro do A7 era testar uma função que já não existe.
+ */
+function vigente(nome: string): string {
+  const ultimo = [...sqls].reverse().find(({ sql }) => funcao(sql, nome) !== null);
+  return ultimo?.sql ?? "";
+}
 
 describe("A7 · retenção — o que nunca se apaga", () => {
   it("nenhuma migração faz delete ou truncate de uma tabela com retenção legal", () => {
@@ -160,13 +176,13 @@ describe("A7 · retenção — o que nunca se apaga", () => {
 describe("A7 · retenção — os prazos e o fecho de cada purga", () => {
   for (const [nome, prazo] of Object.entries(PRAZOS)) {
     it(`${nome}: prazo de ${prazo}`, () => {
-      const f = funcao(migracao, nome);
-      expect(f, `${nome} não está em ${RETENCAO}`).not.toBeNull();
+      const f = funcao(vigente(nome), nome);
+      expect(f, `${nome} não está definida em migração nenhuma`).not.toBeNull();
       expect(intervalos(f!.corpo)).toEqual([prazo]);
     });
 
     it(`${nome}: security definer, search_path vazio, só service_role`, () => {
-      expect(defeitosDeFecho(migracao, nome)).toEqual([]);
+      expect(defeitosDeFecho(vigente(nome), nome)).toEqual([]);
     });
   }
 
@@ -194,7 +210,7 @@ describe("A7 · retenção — os prazos e o fecho de cada purga", () => {
 });
 
 describe("A7 · retenção — o orquestrador", () => {
-  const run = funcao(migracao, "run_retention");
+  const run = funcao(vigente("run_retention"), "run_retention");
 
   it("chama todas as purgas novas, cada uma no seu bloco com exception", () => {
     expect(run).not.toBeNull();
@@ -204,7 +220,7 @@ describe("A7 · retenção — o orquestrador", () => {
     }
     // Um bloco por purga: uma que falha não leva as outras (o defeito de 7 out).
     expect(run!.corpo).toMatch(/exception\s+when\s+others\s+then/i);
-    expect(defeitosDeFecho(migracao, "run_retention")).toEqual([]);
+    expect(defeitosDeFecho(vigente("run_retention"), "run_retention")).toEqual([]);
   });
 
   it("deixa prova em audit_log e está agendado no pg_cron", () => {
@@ -214,7 +230,7 @@ describe("A7 · retenção — o orquestrador", () => {
   });
 
   it("a purga do audit_log poupa a faturação", () => {
-    const corpo = funcao(migracao, "purge_audit_log")!.corpo;
+    const corpo = funcao(vigente("purge_audit_log"), "purge_audit_log")!.corpo;
     for (const entidade of ["invoices", "subscriptions", "subscription_events"]) {
       expect(corpo).toContain(`'${entidade}'`);
     }
@@ -222,13 +238,13 @@ describe("A7 · retenção — o orquestrador", () => {
   });
 
   it("a purga do correio não abandona anexos ainda em Storage", () => {
-    const corpo = funcao(migracao, "purge_mail_messages")!.corpo;
+    const corpo = funcao(vigente("purge_mail_messages"), "purge_mail_messages")!.corpo;
     expect(corpo).toMatch(/not\s+exists\s*\([\s\S]*?->>\s*'path'\s+is\s+not\s+null/i);
   });
 
   it("a purga de leads apaga os eventos antes dos leads (on delete restrict)", () => {
     for (const nome of ["purge_stale_site_leads", "purge_unconfirmed_site_leads"]) {
-      const corpo = funcao(migracao, nome)!.corpo;
+      const corpo = funcao(vigente(nome), nome)!.corpo;
       const eventos = corpo.indexOf("delete from public.site_lead_events");
       const leads = corpo.indexOf("delete from public.site_leads");
       expect(eventos, nome).toBeGreaterThan(-1);

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
+import { recordStaffRead } from "@upm/db/audit";
 import { listActiveTemplates } from "@upm/db/message-templates";
 import {
   getMailMessage,
@@ -81,6 +82,17 @@ export default async function SupportMailboxPage({
   const mailboxId = mailboxes.some((box) => box.id === requested)
     ? requested
     : (mailboxes[0]?.id ?? null);
+
+  // Abrir uma caixa é uma leitura de correio de clientes: fica registada antes
+  // de se mostrar uma única mensagem (A8, 12 §9.2). Se o registo falhar, a
+  // caixa não abre — a função atira e a página cai no `error.tsx`.
+  if (mailboxId) {
+    await recordStaffRead(supabase, {
+      action: "mailbox.opened",
+      entity: "mailboxes",
+      entityId: mailboxId,
+    });
+  }
 
   const folderResult = folderSchema.safeParse(first(params.pasta) ?? "");
   const folder = folderResult.success ? folderResult.data : "inbox";

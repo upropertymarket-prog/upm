@@ -186,9 +186,9 @@ describe.skipIf(!hasEnv)("Admin — matriz RLS da Fase 8", () => {
       await service.from("property_moderation_events").delete().eq("id", moderationEventId);
     }
     if (propertyId) await service.from("properties").delete().eq("id", propertyId);
-    if (personalAccessLogId) {
-      await service.from("personal_data_access_log").delete().eq("id", personalAccessLogId);
-    }
+    // `personal_data_access_log` não se limpa: é só de acrescentar desde o A8
+    // (2 nov), também para a service_role. A linha de teste fica, como fica
+    // qualquer consulta real.
   });
 
   it("personal_data_access_log é só de leitura e só o admin vê os registos", async () => {

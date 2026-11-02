@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
+import { recordStaffRead } from "@upm/db/audit";
 import { registerStaffCloudFile, staffCloudFolder } from "@upm/db/cloud";
 import { listCampaigns } from "@upm/db/campaigns";
 import { campaignReportCsv, type CampaignReportLabels } from "@upm/db/campaign-report";
@@ -101,6 +102,8 @@ export async function descarregarRelatorio(): Promise<MetricsResult> {
   const { csv, filename, total } = await compor(session);
   if (total === 0) return { error: "Ainda não há campanhas para relatar." };
 
+  // O relatório sai da plataforma: fica registado quem o levou (A8).
+  await recordStaffRead(session.supabase, { action: "report.exported", entity: "campaign_report" });
   return { ok: true, csv, filename };
 }
 
@@ -110,6 +113,10 @@ export async function guardarRelatorioNaCloud(): Promise<MetricsResult> {
 
   const { csv, filename, total } = await compor(session);
   if (total === 0) return { error: "Ainda não há campanhas para relatar." };
+
+  // Fica na Cloud interna e não sai — mas é a mesma exportação, e regista-se
+  // pela mesma razão: quem a fez e quando (A8).
+  await recordStaffRead(session.supabase, { action: "report.exported", entity: "campaign_report" });
 
   const bytes = new TextEncoder().encode(csv);
   const storagePath = `${session.userId}/${randomUUID()}/1`;
