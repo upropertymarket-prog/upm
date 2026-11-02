@@ -45,8 +45,15 @@ export default defineConfig({
   // `next dev` compila cada rota na primeira visita: o primeiro acesso a uma
   // página pode levar dezenas de segundos. Os tempos dizem isso, não pressa.
   timeout: 180_000,
-  expect: { timeout: 20_000 },
-  retries: 0,
+  // A primeira visita a cada página compila-a; uma verificação logo a seguir
+  // a uma navegação espera por isso.
+  expect: { timeout: 60_000 },
+  // Uma repetição, e só uma. No Windows, o `next dev` a compilar várias rotas
+  // ao mesmo tempo esbarra em ficheiros que o antivírus está a ler
+  // (`UNKNOWN: unknown error, open …webpack-runtime.js`, visto a 2 nov) e a
+  // página dá 500 sem culpa da app. Um defeito real falha as duas vezes; e o
+  // relatório marca como "flaky" o que só passou à segunda — não se esconde.
+  retries: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     ...devices["Desktop Chrome"],

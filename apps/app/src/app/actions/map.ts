@@ -27,7 +27,10 @@ export async function propertiesWithinPolygon(
     coordinates: [[...coordinates, coordinates[0]]],
   };
 
-  const rpc = supabase.rpc as unknown as (
+  // `.bind(supabase)`: sem ele o método perde o `this` e o supabase-js rebenta
+  // ("Cannot read properties of undefined (reading 'rest')") — o mesmo defeito
+  // que deixou o detalhe do Market a dar 500 até 2 nov.
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     fn: "properties_within_polygon",
     args: { p_geojson: typeof geojson },
   ) => Promise<{ data: MapProperty[] | null; error: unknown }>;

@@ -290,16 +290,23 @@ export function PropertyFormWizard({
         ) : null}
       </div>
 
+      {/* Desligados enquanto o rascunho não existe: um "Seguinte" rápido
+          dava "Rascunho ainda não foi criado" e deixava o passo por gravar
+          (visto pelo E2E de publicação, 2 nov). */}
       <div className="flex justify-end gap-3">
-        <Button variant="secondary" onClick={() => void handleSaveDraft()} disabled={saving}>
+        <Button
+          variant="secondary"
+          onClick={() => void handleSaveDraft()}
+          disabled={saving || creating}
+        >
           {t("saveDraft")}
         </Button>
         {!isLastStep ? (
-          <Button onClick={() => void handleNext()} disabled={saving}>
+          <Button onClick={() => void handleNext()} disabled={saving || creating}>
             {t("next")}
           </Button>
         ) : (
-          <Button onClick={() => void handlePublish()} disabled={saving}>
+          <Button onClick={() => void handlePublish()} disabled={saving || creating}>
             {t("publish")}
           </Button>
         )}

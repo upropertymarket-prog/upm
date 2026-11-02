@@ -81,3 +81,34 @@ export async function apagarContas(): Promise<void> {
     await service().auth.admin.deleteUser(id);
   }
 }
+
+/**
+ * Um imóvel publicado, criado pela API em nome do proprietário — o estado de
+ * um anúncio que já passou a moderação. Para os percursos que começam com um
+ * imóvel no Market (a visita), e não com a publicação em si.
+ */
+export async function imovelPublicado(dono: string, titulo: string): Promise<string> {
+  const { data, error } = await service()
+    .from("properties")
+    .insert({
+      owner_id: dono,
+      ref: `E2E-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      title: titulo,
+      deal: "sale",
+      status: "active",
+      // Os valores que o passo de identificação do assistente valida: um
+      // imóvel sem `condition` não grava, e o ecrã mostra "Novo" só por ser a
+      // primeira opção da lista.
+      property_type: "Apartamento",
+      typology: "T2",
+      condition: "Usado — bom estado",
+      description: "Imóvel criado pelos testes E2E.",
+      price_cents: 25_000_000,
+      city: "Lisboa",
+      published_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+  if (error || !data) throw new Error(`Falha a criar o imóvel: ${error?.message}`);
+  return data.id as string;
+}
