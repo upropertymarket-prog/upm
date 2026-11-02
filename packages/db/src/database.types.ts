@@ -42,6 +42,7 @@ export type Database = {
           profile_id: string | null;
           reason: string | null;
           requested_at: string;
+          residue_purged_at: string | null;
           retained: Json;
           retention_until: string | null;
         };
@@ -53,6 +54,7 @@ export type Database = {
           profile_id?: string | null;
           reason?: string | null;
           requested_at?: string;
+          residue_purged_at?: string | null;
           retained?: Json;
           retention_until?: string | null;
         };
@@ -64,6 +66,7 @@ export type Database = {
           profile_id?: string | null;
           reason?: string | null;
           requested_at?: string;
+          residue_purged_at?: string | null;
           retained?: Json;
           retention_until?: string | null;
         };
@@ -5005,10 +5008,17 @@ export type Database = {
         Returns: string;
       };
       publish_due_app_updates: { Args: never; Returns: number };
+      purge_audit_log: { Args: never; Returns: number };
+      purge_auth_attempts: { Args: never; Returns: number };
       purge_cloud_recycle_bin: { Args: never; Returns: number };
+      purge_deleted_account_residue: { Args: never; Returns: number };
       purge_document_access_log: { Args: never; Returns: number };
+      purge_mail_messages: { Args: never; Returns: number };
+      purge_notification_deliveries: { Args: never; Returns: number };
+      purge_personal_data_access_log: { Args: never; Returns: number };
       purge_property_view_events: { Args: never; Returns: number };
       purge_site_analytics: { Args: never; Returns: number };
+      purge_stale_site_leads: { Args: never; Returns: number };
       purge_ticket_technical_data: { Args: never; Returns: number };
       purge_unconfirmed_site_leads: { Args: never; Returns: number };
       record_auth_attempt: {
@@ -5036,6 +5046,10 @@ export type Database = {
       };
       record_property_view: {
         Args: { p_property_id: string };
+        Returns: boolean;
+      };
+      record_staff_read: {
+        Args: { p_action: string; p_entity: string; p_entity_id?: string };
         Returns: boolean;
       };
       record_subscription_agreement: {
@@ -5143,6 +5157,7 @@ export type Database = {
         Args: { uid: string };
         Returns: Database["public"]["Enums"]["user_role"];
       };
+      run_retention: { Args: never; Returns: Json };
       run_search_alerts: { Args: never; Returns: number };
       save_contract_version: {
         Args: {
@@ -5244,6 +5259,11 @@ export type Database = {
         }[];
       };
       staff_cloud_folder: { Args: { p_name: string }; Returns: string };
+      staff_sees_mailbox: { Args: { p_mailbox_id: string }; Returns: boolean };
+      staff_sees_mailbox_folder: {
+        Args: { p_folder: string };
+        Returns: boolean;
+      };
       start_conversation: { Args: { p_property_id: string }; Returns: string };
       step_up_valid: { Args: never; Returns: boolean };
       submit_site_lead: {

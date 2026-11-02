@@ -88,7 +88,9 @@ describe.skipIf(!hasEnv)("Step-up do PIN (Fase 8, P8-07)", () => {
   afterAll(async () => {
     for (const key of Object.keys(USERS) as Who[]) {
       if (!ids[key]) continue;
-      await service.from("audit_log").delete().eq("actor_id", ids[key]);
+      // Sem apagar o `audit_log`: é só de acrescentar desde o A8 (2 nov), também
+      // para a service_role. Ao apagar o utilizador, o autor passa a null e a
+      // linha fica — que é o que se quer de um registo de prova.
       await service.from("staff_auth").delete().eq("profile_id", ids[key]);
       await service.auth.admin.deleteUser(ids[key]);
     }
