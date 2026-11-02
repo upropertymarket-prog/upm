@@ -28,6 +28,12 @@ const MIGRACOES = fileURLToPath(new URL("../../../supabase/migrations", import.m
  * As tabelas que o staff altera e que, por isso, têm de ter o trigger. Tirar
  * uma daqui é uma decisão de deixar de auditar essa área — tem de se ver no
  * diff deste ficheiro, não acontecer por omissão numa migração.
+ *
+ * **Tabela nova em que o staff escreve ⇒ trigger `audit_staff_write` numa
+ * migração, e o nome aqui.** Se a escrita é por policy de RLS, o teste
+ * `toda a tabela em que o staff pode escrever por RLS está vigiada` recusa o
+ * esquecimento sozinho. Se é só por RPC `security definer`, não a vê: entra à
+ * mão — e na dúvida entra, que um trigger a mais não custa nada.
  */
 const VIGIADAS = [
   "addons",
@@ -49,7 +55,11 @@ const VIGIADAS = [
   "properties",
   "property_documents",
   "property_media",
+  // As duas seguintes faltaram no A8 e foram encontradas pelo detetor de
+  // policies abaixo, na primeira corrida (2 nov, 20261102100000).
+  "saved_properties",
   "scheduled_sends",
+  "search_alerts",
   "seo_pages",
   "site_leads",
   "staff_auth",
@@ -112,6 +122,60 @@ function triggersAtivos(sqls: string[]): Map<string, Set<string>> {
   return out;
 }
 
+/**
+ * Tabelas em que o staff pode **escrever** por RLS, lidas das migrações
+ * ---------------------------------------------------------------------------
+ * A regra "tabela nova em que o staff escreve ⇒ trigger de auditoria" não
+ * pode depender de alguém se lembrar (2 nov 2026, pedido do cliente: que
+ * fique documentada — e, melhor do que documentada, verificada). Este
+ * detetor reconstrói as policies em vigor, pela ordem das migrações, e
+ * devolve as tabelas que têm uma policy de escrita (`insert`, `update`,
+ * `delete` ou `all`) que menciona um papel de staff.
+ *
+ * Não vê tudo: uma tabela que o staff só altera por RPC `security definer`
+ * não tem policy de escrita nenhuma. Essas entram em `VIGIADAS` à mão — e a
+ * regra está escrita no cabeçalho da migração do A8 e na §28 do doc 12.
+ */
+const PAPEL_DE_STAFF =
+  /\b(is_staff|is_admin|is_support|is_marketing|is_internal|staff_sees_mailbox)\s*\(/i;
+
+function tabelasComEscritaDeStaff(sqls: string[]): Set<string> {
+  const vivas = new Map<string, { tabela: string; escreve: boolean }>();
+  for (const sql of sqls) {
+    const eventos = [
+      ...[...sql.matchAll(/create\s+policy\s+"?(\w+)"?\s+on\s+public\.(\w+)([\s\S]*?);/gi)].map(
+        (m) => {
+          const corpo = m[3]!;
+          const cmd = (
+            /\bfor\s+(all|select|insert|update|delete)\b/i.exec(corpo)?.[1] ?? "all"
+          ).toLowerCase();
+          return {
+            i: m.index!,
+            tipo: "+",
+            chave: `${m[2]}.${m[1]}`,
+            tabela: m[2]!,
+            escreve: cmd !== "select" && PAPEL_DE_STAFF.test(corpo),
+          };
+        },
+      ),
+      ...[
+        ...sql.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?"?(\w+)"?\s+on\s+public\.(\w+)/gi),
+      ].map((m) => ({
+        i: m.index!,
+        tipo: "-",
+        chave: `${m[2]}.${m[1]}`,
+        tabela: m[2]!,
+        escreve: false,
+      })),
+    ].sort((a, b) => a.i - b.i);
+    for (const e of eventos) {
+      if (e.tipo === "+") vivas.set(e.chave, { tabela: e.tabela, escreve: e.escreve });
+      else vivas.delete(e.chave);
+    }
+  }
+  return new Set([...vivas.values()].filter((p) => p.escreve).map((p) => p.tabela));
+}
+
 /** Os guardas append-only, pelo nome: os dois de cada tabela de auditoria. */
 const GUARDAS = {
   audit_log: ["audit_log_append_only", "audit_log_append_only_truncate"],
@@ -140,6 +204,28 @@ describe("A8 · auditoria — o que as migrações deixam montado", () => {
     expect(sem).toEqual([]);
   });
 
+  it("toda a tabela em que o staff pode escrever por RLS está vigiada", () => {
+    // Se isto falhar depois de uma migração nova: a tabela da mensagem tem uma
+    // policy de escrita para staff e não tem o trigger. Acrescentar o
+    // `create trigger ... execute function public.audit_staff_write()` numa
+    // migração e o nome a `VIGIADAS`. Não se tira daqui sem decisão escrita.
+    const vigiadas = new Set<string>(VIGIADAS);
+    const porVigiar = [...tabelasComEscritaDeStaff(sqls)].filter((t) => !vigiadas.has(t)).sort();
+    expect(porVigiar).toEqual([]);
+  });
+
+  it("o detetor de policies vê uma tabela nova, e esquece uma policy apagada", () => {
+    const nova =
+      "create policy nova_staff_write on public.nova for update using (public.is_admin()) with check (public.is_admin());";
+    const leitura =
+      "create policy nova_select on public.leitura for select using (public.is_staff());";
+    const dono = "create policy dono_write on public.dono for all using (owner_id = auth.uid());";
+    expect([...tabelasComEscritaDeStaff([nova, leitura, dono])]).toEqual(["nova"]);
+    expect([
+      ...tabelasComEscritaDeStaff([nova, "drop policy if exists nova_staff_write on public.nova;"]),
+    ]).toEqual([]);
+  });
+
   it("o detetor vê um trigger que uma migração posterior apagou", () => {
     const antes =
       "create trigger x_audit after insert on public.x for each row execute function public.audit_staff_write();";
@@ -149,8 +235,12 @@ describe("A8 · auditoria — o que as migrações deixam montado", () => {
   });
 
   it("a função de trigger guarda nomes de colunas, nunca valores", () => {
-    const sql = [...sqls].reverse().find((s) => /function\s+public\.audit_staff_write\(/i.test(s))!;
-    const corpo = sql.slice(sql.search(/function\s+public\.audit_staff_write\(/i));
+    // `create or replace` e não só `function`: um `execute function
+    // public.audit_staff_write()` noutra migração também casava, e o teste
+    // passava a ler um `create trigger` em vez da função (2 nov).
+    const definicao = /create\s+or\s+replace\s+function\s+public\.audit_staff_write\(/i;
+    const sql = [...sqls].reverse().find((s) => definicao.test(s))!;
+    const corpo = sql.slice(sql.search(definicao));
     const ate = corpo.slice(0, corpo.indexOf("$$;", corpo.indexOf("$$") + 2));
     expect(ate).toContain("'changed', to_jsonb(v_changed)");
     // Nenhum `to_jsonb(new)`/`v_new` inteiro vai parar ao `diff`.
