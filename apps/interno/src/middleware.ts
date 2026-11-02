@@ -121,10 +121,21 @@ export async function middleware(request: NextRequest) {
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const recoveryVerified = request.cookies.get(RECOVERY_VERIFIED_COOKIE)?.value === "1";
   const onEnrollPage = pathname === "/configurar-2fa" || pathname.startsWith("/configurar-2fa/");
+  // O ecrã de configuração é só de quem **ainda não tem** 2FA (`nextLevel`
+  // aal1). Até 2 nov abria a qualquer sessão de staff — também a uma só com
+  // palavra-passe de quem já tinha o 2FA. O Supabase recusa aí um fator novo,
+  // por isso não havia salto; mas era uma porta aberta onde não devia haver
+  // nenhuma, e a página que lá vive apagava fatores. Agora: sem 2FA, vai-se
+  // configurar; com 2FA, quem não passou o código vai ao código, e quem passou
+  // vai ao painel.
   if (aal?.nextLevel === "aal1" && !onEnrollPage) {
     return NextResponse.redirect(new URL("/configurar-2fa", request.url));
   }
-  if (aal && aal.currentLevel !== aal.nextLevel && !recoveryVerified && !onEnrollPage) {
+  if (aal?.nextLevel === "aal2" && onEnrollPage) {
+    const destino = aal.currentLevel === "aal2" || recoveryVerified ? "/" : "/verificar-2fa";
+    return NextResponse.redirect(new URL(destino, request.url));
+  }
+  if (aal && aal.currentLevel !== aal.nextLevel && !recoveryVerified) {
     return NextResponse.redirect(new URL("/verificar-2fa", request.url));
   }
 

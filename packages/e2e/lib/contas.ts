@@ -1,0 +1,83 @@
+/**
+ * Contas de teste dos E2E
+ * =========================================================================
+ * Cada teste cria as suas contas (`e2e-<papel>-<carimbo>@upropertymarket.test`)
+ * e regista-as para apagar no fim. Nada fica partilhado entre testes: um
+ * percurso que falha a meio não deixa um estado que faça falhar o seguinte.
+ *
+ * As contas nascem confirmadas (`email_confirm`) quando o teste não é sobre a
+ * confirmação. Os que são — criar conta, recuperar palavra-passe — vão buscar
+ * o link à API de administração (`generateLink`), que gera exatamente o link
+ * que o e-mail levaria, sem depender de uma caixa de correio.
+ */
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+import { ANON_KEY, SERVICE_KEY, SUPABASE_URL } from "./ambiente";
+
+export type Papel = "buyer" | "owner" | "admin" | "support" | "marketing";
+
+export const PALAVRA_PASSE = "E2e-teste-P@ss-2026";
+
+let servico: SupabaseClient | null = null;
+export function service(): SupabaseClient {
+  servico ??= createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+  return servico;
+}
+
+export function anon(): SupabaseClient {
+  return createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
+}
+
+const criadas: string[] = [];
+
+export function emailDeTeste(papel: string): string {
+  const carimbo = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return `e2e-${papel}-${carimbo}@upropertymarket.test`;
+}
+
+export type Conta = { id: string; email: string; papel: Papel };
+
+/** Cria uma conta confirmada, com o papel pedido. */
+export async function criarConta(papel: Papel, nome = `E2E ${papel}`): Promise<Conta> {
+  const email = emailDeTeste(papel);
+  const { data, error } = await service().auth.admin.createUser({
+    email,
+    password: PALAVRA_PASSE,
+    email_confirm: true,
+    user_metadata: { role: papel, full_name: nome },
+  });
+  if (error || !data.user) throw new Error(`Falha a criar ${email}: ${error?.message}`);
+  criadas.push(data.user.id);
+  return { id: data.user.id, email, papel };
+}
+
+/** Regista uma conta criada por outro caminho (o registo pelo site), para apagar no fim. */
+export function registarParaApagar(id: string): void {
+  criadas.push(id);
+}
+
+/**
+ * Plano ativo, como o webhook do Stripe o deixaria a quem paga — o mesmo
+ * expediente de `packages/db/src/test-plan-fixture.ts` (1 nov). Sem plano não
+ * há imóveis, visitas, guardados nem alertas (P9-05).
+ */
+export async function darPlano(perfil: string, slug: "premium-buyer" | "premium-owner") {
+  const { data: plano } = await service().from("plans").select("id").eq("slug", slug).single();
+  if (!plano) throw new Error(`Plano em falta: ${slug}`);
+  const { error } = await service()
+    .from("subscriptions")
+    .insert({ profile_id: perfil, plan_id: plano.id, status: "active" });
+  if (error) throw new Error(`Falha a dar ${slug}: ${error.message}`);
+}
+
+/**
+ * Apaga as contas criadas. A subscrição, os imóveis e o resto saem em
+ * cascata; o `audit_log` fica, com o autor a null — é só de acrescentar (A8).
+ */
+export async function apagarContas(): Promise<void> {
+  while (criadas.length) {
+    const id = criadas.pop()!;
+    await service().from("properties").delete().eq("owner_id", id);
+    await service().auth.admin.deleteUser(id);
+  }
+}

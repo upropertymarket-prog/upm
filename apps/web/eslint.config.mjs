@@ -15,6 +15,8 @@ const eslintConfig = [
     ignores: [
       "node_modules/**",
       ".next/**",
+      // A pasta de build dos servidores dos E2E (`packages/e2e`) — gerada.
+      ".next-e2e/**",
       "out/**",
       "build/**",
       "next-env.d.ts",

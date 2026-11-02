@@ -61,9 +61,18 @@ const GRUPO_DE_RELATORIO = "csp";
 export function buildContentSecurityPolicy(nonce: string): string {
   const relatorio = cspReportUri();
 
+  // Só em `next dev`: o webpack de desenvolvimento carrega o código de cada
+  // rota com `eval`, e sem `'unsafe-eval'` a CSP recusa-o — a navegação no
+  // cliente morre sem nada no ecrã (um `router.push` que "não faz nada"). Foi
+  // o que o E2E do A5 encontrou a 2 nov, no botão que fecha a configuração do
+  // 2FA. É a exceção que o próprio Next documenta para o modo de
+  // desenvolvimento; em produção (`next build`) não há `eval` e a diretiva
+  // fica fechada, como `security.test.ts` verifica.
+  const emDesenvolvimento = process.env.NODE_ENV === "development";
+
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${emDesenvolvimento ? " 'unsafe-eval'" : ""}`,
     // Tailwind é CSS compilado; 'unsafe-inline' aqui cobre os estilos que o
     // próprio Next injeta (muito menor risco do que em script-src).
     "style-src 'self' 'unsafe-inline'",
