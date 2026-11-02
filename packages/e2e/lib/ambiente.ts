@@ -41,3 +41,18 @@ export const temBase = Boolean(SUPABASE_URL && ANON_KEY && SERVICE_KEY);
 /** O Stripe tem de ser de teste. Uma chave `sk_live_` aqui seria um desastre. */
 export const temStripeDeTeste =
   STRIPE_SECRET.startsWith("sk_test_") && Boolean(STRIPE_WEBHOOK_SECRET);
+
+/**
+ * O e-mail de autenticação do Supabase passa por um SMTP próprio (Resend)?
+ * ---------------------------------------------------------------------------
+ * Com o SMTP por omissão, o projeto só envia meia dúzia de e-mails de
+ * autenticação por hora; acima disso o registo e a recuperação **falham para
+ * toda a gente** (429 over_email_send_rate_limit — visto a 2 nov). Os
+ * percursos que dependem de e-mail só fazem sentido depois de configurado.
+ * Saltam com o motivo à vista até lá: não passam em falso, nem falham por uma
+ * causa que não é deles. Quando o SMTP próprio existir: `E2E_SMTP_PROPRIO=1`.
+ */
+export const temSmtpProprio = process.env.E2E_SMTP_PROPRIO === "1";
+export const MOTIVO_SEM_SMTP =
+  "Precisa do SMTP próprio no Supabase Auth (Resend): com o SMTP por omissão, registo e " +
+  "recuperação falham acima de poucos e-mails por hora. Bloqueador de lançamento — ver doc 12 §29.";

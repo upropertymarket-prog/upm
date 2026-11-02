@@ -304,6 +304,13 @@ export async function registerAccount(
       success_url: `${webUrl}/criar-conta/verificacao?email=${encodeURIComponent(email)}&pago=1`,
       cancel_url: `${webUrl}/criar-conta/verificacao?email=${encodeURIComponent(email)}&pago=0`,
       tax_id_collection: { enabled: true },
+      // `customer_update` é obrigatório: a sessão leva um `customer` já criado
+      // E pede o NIF (`tax_id_collection`), e o Stripe recusa essa combinação
+      // sem autorização para atualizar o nome e a morada do cliente ("Tax ID
+      // collection requires updating business name on the customer"). Até
+      // 2 nov faltava, e a criação da sessão falhava sempre: ninguém chegava a
+      // pagar — nem no registo, nem em /plano. Foi o E2E do A5 que o mostrou.
+      customer_update: { name: "auto", address: "auto" },
       billing_address_collection: "auto",
       metadata: { upm_profile_id: profileId, upm_plan_slug: planSlug },
       subscription_data: {
@@ -322,7 +329,10 @@ export async function registerAccount(
       return { error: "Não foi possível abrir o pagamento. Tente novamente a partir de Entrar." };
     }
     return { checkoutUrl: checkout.url };
-  } catch {
+  } catch (erro) {
+    // O motivo vai para o log (até 2 nov este catch engolia-o — ver o
+    // `customer_update` acima).
+    console.error("[registo/checkout]", erro instanceof Error ? erro.message : erro);
     // A conta ficou criada e os Termos aceites; o que falhou foi o pagamento.
     // Dizemos isso, em vez de insinuar que o registo se perdeu.
     return {

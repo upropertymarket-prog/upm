@@ -31,15 +31,13 @@ export default async function MarketPropertyPage({ params }: { params: Promise<{
   ]);
   if (error || !property) notFound();
 
-  const locationRpc = supabase.rpc as unknown as (
-    fn: "property_location_point",
-    args: { p_property_id: string },
-  ) => Promise<{
-    data: { lon: number; lat: number; is_exact: boolean; radius_m: number }[] | null;
-    error: unknown;
-  }>;
+  // A chamada direta, e não `supabase.rpc as unknown as (…)`: tirado do
+  // cliente, o método perde o `this` e o supabase-js rebenta a ler o seu
+  // cliente REST ("Cannot read properties of undefined (reading 'rest')").
+  // Até 2 nov esta página dava 500 para qualquer imóvel — foi o E2E do A5
+  // (pedido de visita) que o mostrou. A função já está nos tipos gerados.
   const [{ data: locationRows }, { data: ownerProfile }] = await Promise.all([
-    locationRpc("property_location_point", { p_property_id: id }),
+    supabase.rpc("property_location_point", { p_property_id: id }),
     property.owner_id
       ? supabase.from("profiles").select("full_name").eq("id", property.owner_id).maybeSingle()
       : Promise.resolve({ data: null }),

@@ -210,6 +210,13 @@ async function checkoutFor(
       // Fatura com NIF opcional (02 §9). A emissão certificada em PT é outra
       // coisa e continua por decidir (07 §9 #4).
       tax_id_collection: { enabled: true },
+      // `customer_update` é obrigatório: a sessão leva um `customer` já criado
+      // E pede o NIF (`tax_id_collection`), e o Stripe recusa essa combinação
+      // sem autorização para atualizar o nome e a morada do cliente ("Tax ID
+      // collection requires updating business name on the customer"). Até
+      // 2 nov faltava, e a criação da sessão falhava sempre: ninguém chegava a
+      // pagar — nem no registo, nem em /plano. Foi o E2E do A5 que o mostrou.
+      customer_update: { name: "auto", address: "auto" },
       billing_address_collection: "auto",
       metadata: { upm_profile_id: userId, ...metadata },
       subscription_data: {
@@ -221,8 +228,11 @@ async function checkoutFor(
 
     if (!checkout.url) return { error: "Não foi possível abrir o pagamento." };
     return { url: checkout.url };
-  } catch {
-    // 08 §3.6: nada de detalhes internos na resposta ao cliente.
+  } catch (erro) {
+    // 08 §3.6: nada de detalhes internos na resposta ao cliente — mas no log
+    // sim. Até 2 nov este catch engolia o motivo, e uma recusa do Stripe que
+    // impedia toda a gente de pagar passou sem deixar rasto em lado nenhum.
+    console.error("[checkout]", erro instanceof Error ? erro.message : erro);
     return { error: "Não foi possível abrir o pagamento. Tente novamente." };
   }
 }
