@@ -25,6 +25,11 @@ export function EnrollForm({
   const [state, formAction, pending] = useActionState(verifyEnrollment, initialState);
   const [confirmed, setConfirmed] = useState(false);
 
+  // Depois de "Guardei os códigos" a página está a navegar para o painel:
+  // não se volta a desenhar o ecrã de configuração (vinha vazio, sem QR) no
+  // intervalo.
+  if (confirmed) return null;
+
   if (state.success && state.recoveryCodes && !confirmed) {
     return (
       <div className="flex flex-col gap-4">

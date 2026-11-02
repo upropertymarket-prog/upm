@@ -9,6 +9,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Os E2E (`packages/e2e`) levantam servidores próprios noutras portas e
+  // compilam para `.next-e2e`, para nunca partilharem o `.next` de um
+  // `next dev` que esteja a correr — partilhá-lo deixa-o a dar 500 em todas
+  // as rotas (o mesmo veneno do `pnpm build`). Sem a variável, nada muda.
+  distDir: process.env.UPM_NEXT_DIST_DIR || ".next",
   // `@upm/config` entra aqui por causa do i18n e `@upm/ui` por causa dos
   // componentes e do `next/font/local` das fontes auto-hospedadas (P1-02):
   // o loader de fontes do Next só corre em código que o Next compila.

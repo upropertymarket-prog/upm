@@ -171,6 +171,24 @@ describe("CSP", () => {
     expect(script).not.toContain("unsafe-eval");
   });
 
+  it("em produção, `unsafe-eval` nunca; em `next dev`, sim — e só aí", () => {
+    const original = process.env.NODE_ENV;
+    const scriptSrc = () =>
+      buildContentSecurityPolicy("n")
+        .split("; ")
+        .find((d) => d.startsWith("script-src"));
+    try {
+      (process.env as Record<string, string>).NODE_ENV = "production";
+      expect(scriptSrc()).not.toContain("unsafe-eval");
+      (process.env as Record<string, string>).NODE_ENV = "development";
+      expect(scriptSrc()).toContain("'unsafe-eval'");
+      // `unsafe-inline` não entra em nenhum dos dois.
+      expect(scriptSrc()).not.toContain("unsafe-inline");
+    } finally {
+      (process.env as Record<string, string>).NODE_ENV = original!;
+    }
+  });
+
   it("mantém as diretivas que fecham as variantes de clickjacking e injeção", () => {
     const csp = buildContentSecurityPolicy("n");
     for (const diretiva of [

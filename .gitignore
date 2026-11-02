@@ -1,6 +1,10 @@
 # Node / Next / Turborepo
 node_modules/
 .next/
+# Os E2E compilam para aqui, para não partilharem o `.next` de um dev a correr.
+.next-e2e/
+packages/e2e/playwright-report/
+packages/e2e/test-results/
 .turbo/
 dist/
 build/

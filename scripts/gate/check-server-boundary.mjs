@@ -49,10 +49,7 @@ const norm = (p) => p.split(sep).join("/");
  * não é uma entrada na allowlist, é um bug.
  */
 const SERVICE_ROLE_PERMITIDO = new Map([
-  [
-    "packages/db/src/server.ts",
-    "a fábrica: é aqui que `createServiceClient` existe",
-  ],
+  ["packages/db/src/server.ts", "a fábrica: é aqui que `createServiceClient` existe"],
   ["packages/db/src/stripe.ts", "a fábrica do lado do Stripe"],
   [
     "apps/app/src/app/api/stripe/webhook/route.ts",
@@ -62,13 +59,14 @@ const SERVICE_ROLE_PERMITIDO = new Map([
     "apps/interno/src/app/actions/step-up.ts",
     "reautenticação: operação de autenticação, por natureza acima do RLS",
   ],
-  [
-    "apps/interno/src/app/actions/auth.ts",
-    "entrada no interno, pela mesma razão do step-up",
-  ],
+  ["apps/interno/src/app/actions/auth.ts", "entrada no interno, pela mesma razão do step-up"],
   [
     "apps/interno/src/app/admin/planos/actions.ts",
     "catálogo de planos: escreve o que o Stripe espelha, sem sessão a que pertença",
+  ],
+  [
+    "packages/e2e/lib/ambiente.ts",
+    "E2E (A5): cria e apaga as contas de teste de cada corrida; corre só num terminal, nunca atende um pedido — a mesma natureza dos `*.test.ts`, que este portão já não varre",
   ],
   [
     "apps/interno/src/app/admin/definicoes/page.tsx",
@@ -113,7 +111,8 @@ function recolher(dir, out = []) {
   if (!existsSync(dir)) return out;
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
     const nome = entrada.name;
-    if (nome === "node_modules" || nome === ".next" || nome === "dist" || nome === "build") continue;
+    // `.next-e2e` é a pasta de build dos servidores dos E2E: código gerado.
+    if (["node_modules", ".next", ".next-e2e", "dist", "build"].includes(nome)) continue;
     const cheio = join(dir, nome);
     if (entrada.isDirectory()) recolher(cheio, out);
     else if (/\.(tsx?|mts|cts)$/.test(nome) && !/\.test\.(tsx?)$/.test(nome)) out.push(cheio);
