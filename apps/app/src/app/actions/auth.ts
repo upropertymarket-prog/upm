@@ -22,7 +22,7 @@ export async function resendVerificationEmail(): Promise<ResendState> {
   } = await supabase.auth.getUser();
   if (!user?.email) return { error: "Sessão inválida." };
 
-  const rateLimit = await checkAuthRateLimit(supabase, user.email, "resend_verification");
+  const rateLimit = await checkAuthRateLimit(user.email, "resend_verification");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -37,7 +37,7 @@ export async function resendVerificationEmail(): Promise<ResendState> {
       emailRedirectTo: `${webUrl}/auth/confirm?next=${encodeURIComponent("/painel")}`,
     },
   });
-  await recordAuthAttempt(supabase, user.email, "resend_verification", !error);
+  await recordAuthAttempt(user.email, "resend_verification", !error);
 
   if (error) return { error: "Não foi possível reenviar o e-mail. Tente novamente." };
   return { sent: true };

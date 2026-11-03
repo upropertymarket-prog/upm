@@ -43,8 +43,8 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
   const supabase = createClient(await cookies());
 
   const [byEmail, byIp] = await Promise.all([
-    checkAuthRateLimit(supabase, email, "login"),
-    checkAuthRateLimit(supabase, ip, "login"),
+    checkAuthRateLimit(email, "login"),
+    checkAuthRateLimit(ip, "login"),
   ]);
   const limited = !byEmail.allowed || !byIp.allowed;
   if (limited) {
@@ -55,8 +55,8 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   await Promise.all([
-    recordAuthAttempt(supabase, email, "login", !error),
-    recordAuthAttempt(supabase, ip, "login", !error),
+    recordAuthAttempt(email, "login", !error),
+    recordAuthAttempt(ip, "login", !error),
   ]);
 
   if (error || !data.user) return { error: genericError };

@@ -280,6 +280,7 @@
     "moreFromOwner": "More listings from {owner}",
     "noResults": "No results for these filters.",
     "viewProperty": "View property",
+    "mapTruncated": "Showing the first {count} properties in this area. Zoom in to see them all.",
     "inYourArea": "Properties listed in your area",
     "filters": {
       "any": "Any",
@@ -1718,7 +1719,9 @@
       "statusEvent": "Status change",
       "assignmentEvent": "Assignee change",
       "noHistory": "No activity recorded",
-      "actionFailed": "Could not save the change. Refresh the page and try again."
+      "actionFailed": "Could not save the change. Refresh the page and try again.",
+      "exportFailed": "Could not export the leads. Please try again.",
+      "exportTruncated": "The export stopped at the first 5000 leads. Use the filters to export the rest in parts."
     },
     "settings": {
       "title": "Settings",

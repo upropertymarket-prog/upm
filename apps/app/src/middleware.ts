@@ -154,6 +154,7 @@ export async function middleware(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook|api/health).*)",
+    // `maplibre/`: o worker do mapa, servido de `public/` com CSP própria (next.config.ts).
+    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook|api/health|maplibre/).*)",
   ],
 };

@@ -13,10 +13,11 @@ import { formatRelative } from "../../components/interaction/interactionTypes";
 import {
   countersFor,
   loadConversations,
+  loadDashboardCounts,
   loadNotifications,
   loadVisits,
 } from "../../lib/interaction";
-import { buildViewsSeries, type ViewRow } from "../../lib/dashboard";
+import { buildViewsSeries } from "../../lib/dashboard";
 import { setLocalePreference } from "../actions/preferences";
 import { ACTIVITY_ROWS } from "./panelShared";
 
@@ -71,6 +72,7 @@ export async function BuyerPanel({
     notifications,
     { data: contractRows },
     { data: views },
+    counts,
   ] = await Promise.all([
     supabase
       .from("saved_properties")
@@ -82,16 +84,16 @@ export async function BuyerPanel({
     loadNotifications(supabase, locale),
     supabase.rpc("my_contracts"),
     supabase.rpc("my_property_views_daily", { p_days: HISTORY_DAYS }),
+    loadDashboardCounts(supabase),
   ]);
 
   const contractsAll = contractRows ?? [];
   const contracts = contractsAll.slice(0, ACTIVITY_ROWS);
 
-  const scheduled = visits.filter((visit) => visit.status === "accepted").length;
-  const awaiting = visits.filter(
-    (visit) => visit.status === "pending" || visit.status === "rescheduled",
-  ).length;
-  const unansweredCount = conversations.filter((item) => item.unread > 0).length;
+  // Contados na base, não sobre as listas (cortadas às 1000) — ver `loadDashboardCounts`.
+  const scheduled = counts.visitsAccepted;
+  const awaiting = counts.visitsAwaiting;
+  const unansweredCount = counts.conversationsUnread;
 
   const stats: DashboardStat[] = [
     {

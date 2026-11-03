@@ -280,6 +280,7 @@
     "moreFromOwner": "Mais anúncios de {owner}",
     "noResults": "Sem resultados para estes filtros.",
     "viewProperty": "Ver imóvel",
+    "mapTruncated": "Estão a ser mostrados os primeiros {count} imóveis desta área. Aproxime o mapa para ver todos.",
     "inYourArea": "Imóveis publicados na sua zona",
     "filters": {
       "any": "Todos",
@@ -1718,7 +1719,9 @@
       "statusEvent": "Alteração de estado",
       "assignmentEvent": "Alteração de responsável",
       "noHistory": "Sem atividade registada",
-      "actionFailed": "Não foi possível guardar a alteração. Atualize a página e tente novamente."
+      "actionFailed": "Não foi possível guardar a alteração. Atualize a página e tente novamente.",
+      "exportFailed": "Não foi possível exportar os leads. Tente novamente.",
+      "exportTruncated": "A exportação ficou nos primeiros 5000 leads. Use os filtros para exportar o resto por partes."
     },
     "settings": {
       "title": "Definições",

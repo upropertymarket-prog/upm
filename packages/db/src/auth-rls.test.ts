@@ -7,6 +7,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -25,7 +27,7 @@ describe.skipIf(!hasEnv)("Fase 3 — staff_auth, auth_attempts, rate limiting", 
   const buyerEmail = "fase3-buyer@upropertymarket.test";
 
   async function getOrCreateUser(email: string, role: string) {
-    const existing = await serviceClient.auth.admin.listUsers();
+    const existing = await listarTodosOsUtilizadores(serviceClient);
     const found = existing.data.users.find((u) => u.email === email);
     if (found) return found.id;
     const created = await serviceClient.auth.admin.createUser({
@@ -114,7 +116,7 @@ describe.skipIf(!hasEnv)("Fase 3 — staff_auth, auth_attempts, rate limiting", 
       });
     }
 
-    const { data } = await buyerClient.rpc("check_auth_rate_limit", {
+    const { data } = await serviceClient.rpc("check_auth_rate_limit", {
       p_identifier: identifier,
       p_kind: "login",
     });
@@ -123,8 +125,24 @@ describe.skipIf(!hasEnv)("Fase 3 — staff_auth, auth_attempts, rate limiting", 
     expect(result.retry_after_seconds).toBeGreaterThan(0);
   });
 
+  // A15: com a sessão — e, por isso, com a chave pública — qualquer pessoa
+  // registava falhas no e-mail de outra até a trancar fora. Só o servidor.
+  it("record_auth_attempt e check_auth_rate_limit: recusados a uma sessão (A15)", async () => {
+    const registo = await buyerClient.rpc("record_auth_attempt", {
+      p_identifier: `alheio-${Date.now()}@example.com`,
+      p_kind: "login",
+      p_succeeded: false,
+    });
+    expect(registo.error).not.toBeNull();
+    const consulta = await buyerClient.rpc("check_auth_rate_limit", {
+      p_identifier: "x@example.com",
+      p_kind: "login",
+    });
+    expect(consulta.error).not.toBeNull();
+  });
+
   it("check_auth_rate_limit: permite um identificador limpo", async () => {
-    const { data } = await buyerClient.rpc("check_auth_rate_limit", {
+    const { data } = await serviceClient.rpc("check_auth_rate_limit", {
       p_identifier: `limpo-${Date.now()}@example.com`,
       p_kind: "login",
     });

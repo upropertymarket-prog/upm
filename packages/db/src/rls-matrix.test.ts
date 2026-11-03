@@ -18,6 +18,8 @@
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+import { listarTodosOsUtilizadores } from "./test-users";
 import { grantTestPlan } from "./test-plan-fixture";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -45,7 +47,7 @@ describe.skipIf(!hasEnv)("Matriz de acesso por papel (08 §2.3)", () => {
   let ownerPropertyId: string;
 
   async function getOrCreateTestUser(email: string, role: string) {
-    const existing = await serviceClient.auth.admin.listUsers();
+    const existing = await listarTodosOsUtilizadores(serviceClient);
     const found = existing.data.users.find((u) => u.email === email);
     if (found) return found.id;
 

@@ -71,14 +71,14 @@ export async function verifyOperationPin(
   }
 
   // 08 §5.5 — bloqueio progressivo, pelo mesmo mecanismo do login (07 §9.1).
-  const rateLimit = await checkAuthRateLimit(supabase, user.id, "pin_verify");
+  const rateLimit = await checkAuthRateLimit(user.id, "pin_verify");
   if (!rateLimit.allowed) {
     return { error: GENERIC_ERROR, retryAfterSeconds: rateLimit.retryAfterSeconds };
   }
 
   const parsed = pinSchema.safeParse(formData.get("pin"));
   if (!parsed.success) {
-    await recordAuthAttempt(supabase, user.id, "pin_verify", false);
+    await recordAuthAttempt(user.id, "pin_verify", false);
     return { error: GENERIC_ERROR };
   }
 
@@ -90,7 +90,7 @@ export async function verifyOperationPin(
 
   const matched = await verifyPin(parsed.data, row?.pin_hash ?? (await timingDecoy()));
   const ok = matched && Boolean(row?.pin_hash);
-  await recordAuthAttempt(supabase, user.id, "pin_verify", ok);
+  await recordAuthAttempt(user.id, "pin_verify", ok);
   if (!ok) return { error: GENERIC_ERROR };
 
   try {

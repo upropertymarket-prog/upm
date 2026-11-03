@@ -16,6 +16,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,7 +42,7 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 1 — tickets: matriz RLS e regras", 
   const ids = {} as Record<keyof typeof USERS, string>;
 
   async function getOrCreateUser(email: string, role: string) {
-    const { data: users, error } = await service.auth.admin.listUsers();
+    const { data: users, error } = await listarTodosOsUtilizadores(service);
     if (error) throw new Error(`Falha a listar utilizadores: ${error.message}`);
     const found = users.users.find((user) => user.email === email);
     if (found) return found.id;
@@ -517,7 +519,7 @@ describe.skipIf(!hasEnv)("Fase 10 · Parte 1 — leituras e notificação (P10-0
     service = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!);
     clients.anon = createClient(SUPABASE_URL!, ANON_KEY!);
 
-    const { data: users } = await service.auth.admin.listUsers();
+    const { data: users } = await listarTodosOsUtilizadores(service);
     for (const role of Object.keys(USERS) as (keyof typeof USERS)[]) {
       const fixture = USERS[role];
       const found = users?.users.find((user) => user.email === fixture.email);

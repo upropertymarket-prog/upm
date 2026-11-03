@@ -1,7 +1,43 @@
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import tempoNextjsPlugin from "tempo-sdk/nextjs";
+
+/**
+ * O worker do MapLibre, servido pela própria app (3 nov 2026)
+ * =========================================================================
+ * O MapLibre 6 descobre o URL do seu worker a partir do `import.meta.url` do
+ * próprio módulo. Empacotado pelo webpack do Next, esse URL não é `http(s)`:
+ * o worker nascia com URL vazio, falhava ("Worker failed to load"), e o mapa
+ * ficava sem mosaicos vetoriais e sem pontos — sem erro nenhum à vista do
+ * utilizador. Encontrado pelo E2E do mapa.
+ *
+ * Copiam-se os dois ficheiros de que o worker precisa (ele importa o
+ * `shared` pelo caminho relativo) do pacote instalado para
+ * `public/maplibre/<versão>/`. Aqui, e não num script à parte, porque o
+ * config corre em todo o `next dev` e `next build` — também nos servidores
+ * dos E2E e no deploy — e a cópia acompanha sempre a versão instalada.
+ * `PropertyMap` aponta o `setWorkerUrl` para lá. A pasta não vai para o git.
+ */
+function publicarWorkerDoMaplibre(): void {
+  const requerer = createRequire(import.meta.url);
+  const pacote = requerer.resolve("maplibre-gl/package.json");
+  const { version } = JSON.parse(readFileSync(pacote, "utf8")) as { version: string };
+  const origem = join(dirname(pacote), "dist");
+  const destino = join(dirname(fileURLToPath(import.meta.url)), "public", "maplibre", version);
+  mkdirSync(destino, { recursive: true });
+  for (const ficheiro of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"]) {
+    if (!existsSync(join(destino, ficheiro))) {
+      copyFileSync(join(origem, ficheiro), join(destino, ficheiro));
+    }
+  }
+}
+publicarWorkerDoMaplibre();
 
 // P1-06 — o plugin liga o `next-intl` ao `src/i18n/request.ts` da app, que
 // reexporta a configuração partilhada de `@upm/config/server`.
@@ -28,6 +64,27 @@ const nextConfig: NextConfig = {
   // o que torna impossível verificar nada com o `stripe listen`. Como pacote
   // externo, o Node faz `require` dele e a rota compila em segundos.
   serverExternalPackages: ["stripe"],
+  // O worker do MapLibre (ver `publicarWorkerDoMaplibre`). Fica fora do
+  // middleware, que poria a CSP das páginas — com `strict-dynamic` e um nonce
+  // que um worker não tem, o `import` do `shared` seria recusado. Leva a sua
+  // própria CSP, de worker: só scripts da própria origem, e rede só para os
+  // mosaicos. A versão está no caminho, por isso a cache pode ser eterna.
+  async headers() {
+    return [
+      {
+        source: "/maplibre/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'none'; script-src 'self'; connect-src 'self' https://tiles.openfreemap.org; img-src 'self' data: blob: https://tiles.openfreemap.org",
+          },
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      },
+    ];
+  },
 };
 
 // `tempo-sdk` tipa o config de entrada com um `NextConfigLike` propositadamente

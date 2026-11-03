@@ -11,7 +11,7 @@ import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
 import { APP, WEB, temBase, MOTIVO_SEM_SMTP, temSmtpProprio } from "../lib/ambiente";
-import { anon, apagarContas, criarConta, PALAVRA_PASSE } from "../lib/contas";
+import { anon, apagarContas, criarConta, emailEntregavel, PALAVRA_PASSE } from "../lib/contas";
 import { linkDeVerificacao, tokenDeRecuperacao } from "../lib/links-de-email";
 import { entrarComoCliente } from "../lib/sessao";
 import { t } from "../lib/textos";
@@ -24,7 +24,9 @@ test.afterAll(async () => {
 });
 
 test("pede o link, define uma palavra-passe nova, e a antiga deixa de servir", async ({ page }) => {
-  const conta = await criarConta("buyer", "E2E Esquecida");
+  // Um endereço que o Auth aceita para enviar: o pedido de recuperação manda
+  // um e-mail a sério, e o `.test` das outras contas seria recusado.
+  const conta = await criarConta("buyer", "E2E Esquecida", emailEntregavel("recuperar"));
   // Aleatória: a ação recusa palavras-passe que aparecem em fugas conhecidas.
   const nova = `E2e-${randomBytes(9).toString("base64url")}-Nova`;
 

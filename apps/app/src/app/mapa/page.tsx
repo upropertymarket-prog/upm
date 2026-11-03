@@ -7,14 +7,15 @@ import { PageHeader } from "@upm/ui";
 import { AppChrome } from "../../components/AppChrome";
 import { PropertyMap } from "../../components/map/PropertyMap";
 import { setLocalePreference } from "../actions/preferences";
-import { propertiesWithinPolygon } from "../actions/map";
+import { propertiesInBounds, propertiesWithinPolygon } from "../actions/map";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Mapa (P4-05) — sem guard de papel (comum a comprador e proprietário).
- * Traz todos os imóveis via `properties_for_map` sem bounding box: o dataset
- * é pequeno nesta fase.
+ * Os imóveis vêm pela área visível (`propertiesInBounds`), pedidos pelo
+ * próprio mapa quando carrega e a cada movimento. Até 3 nov a página trazia
+ * todos "porque o dataset é pequeno" — e acima dos 1000 cortava sem aviso.
  */
 export default async function MapPage() {
   const supabase = createClient(await cookies());
@@ -34,8 +35,6 @@ export default async function MapPage() {
     .single();
   const role = profile?.role === "owner" ? "owner" : "buyer";
 
-  const { data: properties } = await supabase.rpc("properties_for_map", {});
-
   return (
     <AppChrome
       role={role}
@@ -50,7 +49,11 @@ export default async function MapPage() {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <PageHeader title={tNav("map")} subtitle={t("inYourArea")} />
-        <PropertyMap initialProperties={properties ?? []} onDrawPolygon={propertiesWithinPolygon} />
+        <PropertyMap
+          initialProperties={[]}
+          onDrawPolygon={propertiesWithinPolygon}
+          onViewportChange={propertiesInBounds}
+        />
       </div>
     </AppChrome>
   );

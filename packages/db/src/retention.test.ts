@@ -25,6 +25,8 @@ import { fileURLToPath } from "node:url";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const MIGRACOES = fileURLToPath(new URL("../../../supabase/migrations", import.meta.url));
 const RETENCAO = "20261101090000_retencao_por_tabela.sql";
 
@@ -65,6 +67,9 @@ const PRAZOS: Record<string, string> = {
   purge_deleted_account_residue: "30 days",
   // 07 §13.6, desde a Fase 8; passou a função (e ao orquestrador) no A8.
   purge_personal_data_access_log: "2 years",
+  // A15 (2 nov): o histórico do pg_cron não se purgava, e o job de cada
+  // minuto acrescenta ~10 mil linhas por semana.
+  purge_cron_job_run_details: "30 days",
 };
 
 /** Apaga comentários `--` e `/* *\/`, como o `gate:rls`: a prosa cita SQL. */
@@ -273,7 +278,7 @@ describe.skipIf(!hasEnv)("A7 · retenção — contra staging", () => {
 
   beforeAll(async () => {
     service = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!);
-    const { data: users, error } = await service.auth.admin.listUsers();
+    const { data: users, error } = await listarTodosOsUtilizadores(service);
     if (error) throw new Error(`Falha a listar utilizadores: ${error.message}`);
     const found = users.users.find((user) => user.email === ACTOR);
     if (found) actorId = found.id;

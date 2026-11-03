@@ -39,7 +39,7 @@ export async function verifyEnrollment(
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  const rateLimit = await checkAuthRateLimit(supabase, user.id, "totp_challenge");
+  const rateLimit = await checkAuthRateLimit(user.id, "totp_challenge");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -50,7 +50,7 @@ export async function verifyEnrollment(
     factorId,
   });
   if (challengeError || !challenge) {
-    await recordAuthAttempt(supabase, user.id, "totp_challenge", false);
+    await recordAuthAttempt(user.id, "totp_challenge", false);
     return { error: "Não foi possível validar o código. Tente novamente." };
   }
 
@@ -59,7 +59,7 @@ export async function verifyEnrollment(
     challengeId: challenge.id,
     code: codeResult.data,
   });
-  await recordAuthAttempt(supabase, user.id, "totp_challenge", !verifyError);
+  await recordAuthAttempt(user.id, "totp_challenge", !verifyError);
   if (verifyError) return { error: "Código inválido." };
 
   const recoveryCodes = generateRecoveryCodes(10);

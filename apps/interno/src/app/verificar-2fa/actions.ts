@@ -28,7 +28,7 @@ export async function verifyChallenge(
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  const rateLimit = await checkAuthRateLimit(supabase, user.id, "totp_challenge");
+  const rateLimit = await checkAuthRateLimit(user.id, "totp_challenge");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -39,7 +39,7 @@ export async function verifyChallenge(
     factorId,
   });
   if (challengeError || !challenge) {
-    await recordAuthAttempt(supabase, user.id, "totp_challenge", false);
+    await recordAuthAttempt(user.id, "totp_challenge", false);
     return { error: "Código inválido." };
   }
 
@@ -48,7 +48,7 @@ export async function verifyChallenge(
     challengeId: challenge.id,
     code: codeResult.data,
   });
-  await recordAuthAttempt(supabase, user.id, "totp_challenge", !verifyError);
+  await recordAuthAttempt(user.id, "totp_challenge", !verifyError);
   if (verifyError) return { error: "Código inválido." };
 
   redirect("/");
@@ -67,7 +67,7 @@ export async function verifyRecoveryCode(
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  const rateLimit = await checkAuthRateLimit(supabase, user.id, "pin_verify");
+  const rateLimit = await checkAuthRateLimit(user.id, "pin_verify");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -84,7 +84,7 @@ export async function verifyRecoveryCode(
     code.trim().toUpperCase(),
     staffAuth?.recovery_codes_hash ?? [],
   );
-  await recordAuthAttempt(supabase, user.id, "pin_verify", matched);
+  await recordAuthAttempt(user.id, "pin_verify", matched);
   if (!matched) return { error: "Código de recuperação inválido." };
 
   await supabase

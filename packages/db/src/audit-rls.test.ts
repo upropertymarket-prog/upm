@@ -22,6 +22,8 @@ import { fileURLToPath } from "node:url";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const MIGRACOES = fileURLToPath(new URL("../../../supabase/migrations", import.meta.url));
 
 /**
@@ -269,7 +271,7 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
   const ids = {} as Record<keyof typeof USERS, string>;
 
   async function getOrCreate(email: string, role: string) {
-    const { data } = await service.auth.admin.listUsers();
+    const { data } = await listarTodosOsUtilizadores(service);
     const found = data.users.find((u) => u.email === email);
     if (found) return found.id;
     const created = await service.auth.admin.createUser({

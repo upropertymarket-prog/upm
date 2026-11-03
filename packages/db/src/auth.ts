@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { createServiceClient } from "./server";
 
 /**
  * Autenticação e onboarding (Fase 3) — 07 §6, 08 §5, 07 §9.1.
@@ -124,38 +125,61 @@ export type RateLimitResult = { allowed: boolean; retryAfterSeconds: number };
 
 type AnySupabaseClient = SupabaseClient<Database>;
 
+// Os dois RPCs só têm `execute` para `service_role` (A15, 2 nov 2026). Até
+// aí corriam com a sessão de quem pedia — e, por isso, com a chave pública:
+// qualquer pessoa, do browser, registava falhas no e-mail de outra até a
+// trancar fora da entrada. O identificador continua a vir do servidor (o
+// e-mail validado por zod, o IP do pedido, o `user.id` da sessão), nunca de
+// um campo que o cliente escolha à parte.
+
 /**
  * Chamar ANTES de tentar a ação. Falha aberta (`allowed: true`) se o RPC em si
  * falhar — a proteção contra abuso não deve poder trancar um utilizador
  * legítimo fora por um problema de rede; a verificação de credenciais em si
- * continua a ser a defesa principal.
+ * continua a ser a defesa principal. Falha aberta, mas **à vista**: um limite
+ * que deixou de funcionar tem de aparecer no registo do servidor, não passar
+ * por "ninguém abusou".
  */
 export async function checkAuthRateLimit(
-  supabase: AnySupabaseClient,
   identifier: string,
   kind: AuthAttemptKind,
 ): Promise<RateLimitResult> {
-  const { data, error } = await supabase.rpc("check_auth_rate_limit", {
-    p_identifier: identifier,
-    p_kind: kind,
-  });
-  if (error || !data) return { allowed: true, retryAfterSeconds: 0 };
-  const result = data as { allowed: boolean; retry_after_seconds: number };
-  return { allowed: result.allowed, retryAfterSeconds: result.retry_after_seconds };
+  try {
+    const { data, error } = await createServiceClient().rpc("check_auth_rate_limit", {
+      p_identifier: identifier,
+      p_kind: kind,
+    });
+    if (error || !data) throw new Error(error?.message ?? "resposta vazia");
+    const result = data as { allowed: boolean; retry_after_seconds: number };
+    return { allowed: result.allowed, retryAfterSeconds: result.retry_after_seconds };
+  } catch (erro) {
+    console.error(
+      "[limite-de-tentativas] falhou aberto:",
+      erro instanceof Error ? erro.message : erro,
+    );
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
 }
 
 /** Chamar DEPOIS de saber o resultado. Nunca lança — é só telemetria. */
 export async function recordAuthAttempt(
-  supabase: AnySupabaseClient,
   identifier: string,
   kind: AuthAttemptKind,
   succeeded: boolean,
 ): Promise<void> {
-  await supabase.rpc("record_auth_attempt", {
-    p_identifier: identifier,
-    p_kind: kind,
-    p_succeeded: succeeded,
-  });
+  try {
+    const { error } = await createServiceClient().rpc("record_auth_attempt", {
+      p_identifier: identifier,
+      p_kind: kind,
+      p_succeeded: succeeded,
+    });
+    if (error) throw new Error(error.message);
+  } catch (erro) {
+    console.error(
+      "[limite-de-tentativas] não registou:",
+      erro instanceof Error ? erro.message : erro,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

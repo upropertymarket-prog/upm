@@ -12,6 +12,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -37,7 +39,7 @@ describe.skipIf(!hasEnv)("Storage — property-media e documents (P4-01a)", () =
   let ownerPropertyId: string;
 
   async function getOrCreateTestUser(email: string, role: string) {
-    const existing = await serviceClient.auth.admin.listUsers();
+    const existing = await listarTodosOsUtilizadores(serviceClient);
     const found = existing.data.users.find((u) => u.email === email);
     if (found) return found.id;
 

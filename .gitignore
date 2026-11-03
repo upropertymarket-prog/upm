@@ -36,3 +36,6 @@ tempo/dist/
 # só erros de rede (WinHTTP), nada do projeto, e um deles fica aberto e a
 # crescer enquanto ela corre.
 design/brand/gude-*.log
+
+# Worker do MapLibre, copiado do pacote instalado pelo next.config.ts do app.
+apps/app/public/maplibre/
