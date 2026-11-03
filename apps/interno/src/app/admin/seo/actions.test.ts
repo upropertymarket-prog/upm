@@ -27,7 +27,7 @@ const revalidatePath = vi.fn();
 // `after()` só existe dentro de um pedido do Next. Aqui guarda-se a tarefa e
 // corre-se à mão, para se poder ver o que ela pede ao `www` (F2).
 const tarefasDepois: Array<() => unknown> = [];
-const invalidarCacheDoSite = vi.fn(async () => true);
+const invalidarCacheDoSite = vi.fn<(tags: string[]) => Promise<boolean>>(async () => true);
 vi.mock("next/server", () => ({ after: (tarefa: () => unknown) => tarefasDepois.push(tarefa) }));
 vi.mock("@upm/config/site-cache", async (original) => ({
   ...(await original<typeof import("@upm/config/site-cache")>()),
