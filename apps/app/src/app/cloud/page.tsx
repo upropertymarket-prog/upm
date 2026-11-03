@@ -15,13 +15,7 @@ import {
   loadShareContacts,
   loadSharedWithMe,
 } from "../../lib/cloud";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications } from "../../lib/interaction";
 import {
   createFolder,
   deleteFile,
@@ -80,27 +74,16 @@ export default async function CloudPage() {
   const role = profile.role;
   const status = await loadCloudStatus(supabase);
 
-  const [
-    folders,
-    files,
-    sharedWithMe,
-    contacts,
-    conversations,
-    visits,
-    leads,
-    notifications,
-    addons,
-  ] = await Promise.all([
-    status.hasCloud ? loadFolders(supabase) : Promise.resolve([]),
-    status.hasCloud ? loadFiles(supabase) : Promise.resolve([]),
-    loadSharedWithMe(supabase),
-    loadShareContacts(supabase),
-    loadConversations(supabase),
-    loadVisits(supabase),
-    role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-    loadNotifications(supabase, locale),
-    status.hasCloud ? Promise.resolve([]) : loadAddonOptions(supabase),
-  ]);
+  const [folders, files, sharedWithMe, contacts, counters, notifications, addons] =
+    await Promise.all([
+      status.hasCloud ? loadFolders(supabase) : Promise.resolve([]),
+      status.hasCloud ? loadFiles(supabase) : Promise.resolve([]),
+      loadSharedWithMe(supabase),
+      loadShareContacts(supabase),
+      loadNavCounters(supabase, role),
+      loadNotifications(supabase, locale),
+      status.hasCloud ? Promise.resolve([]) : loadAddonOptions(supabase),
+    ]);
 
   // 07 §19.4 — o convite nomeia o preço do extra, e esse preço vem de `addons`.
   const cloudAddon = addons.find((addon) => addon.grants.cloud_gb);
@@ -130,7 +113,7 @@ export default async function CloudPage() {
       activeId="cloud"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor(role, conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
     >
       <CloudScreen

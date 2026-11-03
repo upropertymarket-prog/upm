@@ -14,13 +14,7 @@ import {
   loadPlanOptions,
   loadPlanStatus,
 } from "../../lib/billing";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications } from "../../lib/interaction";
 import {
   cancelSubscription,
   exportInvoice,
@@ -67,18 +61,15 @@ export default async function PlanoPage({
 
   const role = profile.role;
 
-  const [status, plans, addons, invoices, terms, conversations, visits, leads, notifications] =
-    await Promise.all([
-      loadPlanStatus(supabase),
-      loadPlanOptions(supabase, role),
-      loadAddonOptions(supabase),
-      loadInvoices(supabase),
-      loadCurrentTerms(supabase, locale),
-      loadConversations(supabase),
-      loadVisits(supabase),
-      role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-      loadNotifications(supabase, locale),
-    ]);
+  const [status, plans, addons, invoices, terms, counters, notifications] = await Promise.all([
+    loadPlanStatus(supabase),
+    loadPlanOptions(supabase, role),
+    loadAddonOptions(supabase),
+    loadInvoices(supabase),
+    loadCurrentTerms(supabase, locale),
+    loadNavCounters(supabase, role),
+    loadNotifications(supabase, locale),
+  ]);
 
   // P9-04 — a decisão vem da porta única, lida aqui e passada ao ecrã. O
   // componente não a recalcula e não conhece a regra.
@@ -106,7 +97,7 @@ export default async function PlanoPage({
       activeId="plan"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor(role, conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
     >
       <PlanScreen

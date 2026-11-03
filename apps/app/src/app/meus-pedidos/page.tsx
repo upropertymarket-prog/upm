@@ -5,12 +5,7 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
-import {
-  countersFor,
-  loadConversations,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications, loadVisits } from "../../lib/interaction";
 import { acceptVisit, archiveVisit, cancelVisit, rescheduleVisit } from "../actions/visits";
 import { setLocalePreference } from "../actions/preferences";
 import { currentMonth } from "../../lib/dates";
@@ -44,9 +39,9 @@ export default async function MyRequestsPage({
     .single();
   if (!profile || profile.role !== "buyer") redirect("/");
 
-  const [visits, conversations, notifications] = await Promise.all([
+  const [visits, counters, notifications] = await Promise.all([
     loadVisits(supabase),
-    loadConversations(supabase),
+    loadNavCounters(supabase, "buyer"),
     loadNotifications(supabase, locale),
   ]);
 
@@ -58,7 +53,7 @@ export default async function MyRequestsPage({
       activeId="myRequests"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor("buyer", conversations, visits, [])}
+      counters={counters}
       notifications={notifications}
     >
       <VisitsScreen

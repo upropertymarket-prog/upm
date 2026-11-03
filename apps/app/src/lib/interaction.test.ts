@@ -1,19 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { countersFor } from "./interaction";
+import { loadNavCounters } from "./interaction";
 import { currentMonth } from "./dates";
 import {
   formatDay,
   formatRelative,
   formatTime,
   initialsOf,
-  type ConversationSummary,
-  type LeadRow,
-  type VisitRow,
 } from "../components/interaction/interactionTypes";
 
 /**
- * Lógica pura da Fase 5: os contadores da sidebar (07 §4.2/§4.3) e a
+ * Lógica pura da Fase 5: a leitura dos contadores da sidebar e a
  * formatação da lista de conversas e da agenda. O que fala com o Supabase
  * (RLS, funções de estado, gatilhos) é verificado contra staging em
  * `packages/db/src/rls-matrix.test.ts`.
@@ -21,104 +18,47 @@ import {
 
 const NOW = new Date("2026-09-29T12:00:00Z");
 
-function conversation(partial: Partial<ConversationSummary> = {}): ConversationSummary {
-  return {
-    id: "c1",
-    propertyId: "p1",
-    propertyTitle: "T3 Campo de Ourique",
-    propertyLocation: "Lisboa",
-    other: { id: "u1", name: "João Costa", initials: "JC" },
-    lastMessage: "Olá",
-    lastMessageAt: NOW.toISOString(),
-    unread: 0,
-    ...partial,
-  };
+/** Um cliente que só sabe responder ao `my_nav_counters`. */
+function clienteCom(resposta: { data: unknown; error: unknown }) {
+  return { rpc: async () => resposta } as unknown as Parameters<typeof loadNavCounters>[0];
 }
 
-function visit(partial: Partial<VisitRow> = {}): VisitRow {
-  return {
-    id: "v1",
-    propertyId: "p1",
-    propertyTitle: "T3 Campo de Ourique",
-    propertyLocation: "Lisboa",
-    other: { id: "u1", name: "João Costa", initials: "JC" },
-    proposedAt: "2026-10-03T16:30:00Z",
-    message: "",
-    status: "pending",
-    rescheduleCount: 0,
-    proposedByMe: false,
-    ...partial,
-  };
-}
+/*
+ * As regras dos contadores (somar as por ler, a visita que eu propus não
+ * conta, leads só em new/contacted) passaram para SQL no F4 e testam-se lá,
+ * contra a base: `packages/db/src/nav-counters.test.ts`. Aqui fica o que é
+ * de cá — que chaves cada papel recebe, e que uma falha não parte a página.
+ */
+describe("loadNavCounters (07 §4.2/§4.3 · F4)", () => {
+  const contados = { data: { messages: 5, waiting: 1, leads: 2 }, error: null };
 
-function lead(partial: Partial<LeadRow> = {}): LeadRow {
-  return {
-    id: "l1",
-    propertyId: "p1",
-    propertyTitle: "T3 Campo de Ourique",
-    propertyLocation: "Lisboa",
-    contact: { id: "u1", name: "João Costa", initials: "JC" },
-    stage: "new",
-    outcome: null,
-    lastMessage: "",
-    lastActivityAt: NOW.toISOString(),
-    conversationId: "c1",
-    ...partial,
-  };
-}
-
-describe("countersFor (07 §4.2/§4.3)", () => {
-  it("o contador de Mensagens soma as por ler, não as conversas", () => {
-    const counters = countersFor(
-      "owner",
-      [conversation({ id: "a", unread: 2 }), conversation({ id: "b", unread: 3 })],
-      [],
-      [],
-    );
-    expect(counters.messages).toBe(5);
+  it("o proprietário tem Mensagens, Agenda e Leads", async () => {
+    expect(await loadNavCounters(clienteCom(contados), "owner")).toEqual({
+      messages: 5,
+      visitSchedule: 1,
+      leads: 2,
+    });
   });
 
-  it("uma visita cuja data fui eu a propor não conta — está à espera do outro", () => {
-    const counters = countersFor(
-      "owner",
-      [],
-      [
-        visit({ id: "1", status: "rescheduled", proposedByMe: true }),
-        visit({ id: "2", status: "pending", proposedByMe: false }),
-      ],
-      [],
-    );
-    expect(counters.visitSchedule).toBe(1);
+  it("o comprador tem Meus pedidos e não tem Leads nem Agenda", async () => {
+    expect(await loadNavCounters(clienteCom(contados), "buyer")).toEqual({
+      messages: 5,
+      myRequests: 1,
+    });
   });
 
-  it("uma visita aceite ou cancelada não pede resposta nenhuma", () => {
-    const counters = countersFor(
-      "owner",
-      [],
-      [visit({ id: "1", status: "accepted" }), visit({ id: "2", status: "cancelled" })],
-      [],
-    );
-    expect(counters.visitSchedule).toBe(0);
+  it("se a leitura falhar, zeros — o menu não impede a página de abrir", async () => {
+    const falhou = clienteCom({ data: null, error: { message: "boom" } });
+    expect(await loadNavCounters(falhou, "owner")).toEqual({
+      messages: 0,
+      visitSchedule: 0,
+      leads: 0,
+    });
   });
 
-  it("o contador de Leads conta as que ainda estão vivas no funil", () => {
-    const counters = countersFor(
-      "owner",
-      [],
-      [],
-      [
-        lead({ id: "1", stage: "new" }),
-        lead({ id: "2", stage: "contacted" }),
-        lead({ id: "3", stage: "visit" }),
-        lead({ id: "4", stage: "closed", outcome: "won" }),
-      ],
-    );
-    expect(counters.leads).toBe(2);
-  });
-
-  it("o comprador tem Meus pedidos e não tem Leads nem Agenda", () => {
-    const counters = countersFor("buyer", [conversation({ unread: 1 })], [visit()], []);
-    expect(counters).toEqual({ messages: 1, myRequests: 1 });
+  it("um valor que não é número conta como zero", async () => {
+    const estranho = clienteCom({ data: { messages: "5", waiting: null }, error: null });
+    expect(await loadNavCounters(estranho, "buyer")).toEqual({ messages: 0, myRequests: 0 });
   });
 });
 

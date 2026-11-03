@@ -16,13 +16,7 @@ import {
   loadContractsSharedWithMe,
   loadTemplates,
 } from "../../lib/contracts";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications } from "../../lib/interaction";
 import {
   contractShares,
   createContract,
@@ -71,25 +65,16 @@ export default async function ContractsPage({
 
   const role = profile.role;
 
-  const [
-    contracts,
-    templates,
-    sharedWithMe,
-    contacts,
-    conversations,
-    visits,
-    leads,
-    notifications,
-  ] = await Promise.all([
-    loadContracts(supabase),
-    role === "owner" ? loadTemplates(supabase) : Promise.resolve([]),
-    loadContractsSharedWithMe(supabase),
-    loadShareContacts(supabase),
-    loadConversations(supabase),
-    loadVisits(supabase),
-    role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
-    loadNotifications(supabase, locale),
-  ]);
+  const [contracts, templates, sharedWithMe, contacts, counters, notifications] = await Promise.all(
+    [
+      loadContracts(supabase),
+      role === "owner" ? loadTemplates(supabase) : Promise.resolve([]),
+      loadContractsSharedWithMe(supabase),
+      loadShareContacts(supabase),
+      loadNavCounters(supabase, role),
+      loadNotifications(supabase, locale),
+    ],
+  );
 
   const chrome = {
     role,
@@ -97,7 +82,7 @@ export default async function ContractsPage({
     userMeta: role === "owner" ? "Proprietário" : "Comprador",
     activeId: "contracts",
     locale,
-    counters: countersFor(role, conversations, visits, leads),
+    counters,
     notifications,
   } as const;
 

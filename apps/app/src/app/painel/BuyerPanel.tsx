@@ -11,7 +11,7 @@ import type { ActivityItem } from "../../components/dashboard/RecentActivity";
 import type { DashboardStat } from "../../components/dashboard/dashboardTypes";
 import { formatRelative } from "../../components/interaction/interactionTypes";
 import {
-  countersFor,
+  loadNavCounters,
   loadConversations,
   loadDashboardCounts,
   loadNotifications,
@@ -73,6 +73,7 @@ export async function BuyerPanel({
     { data: contractRows },
     { data: views },
     counts,
+    navCounters,
   ] = await Promise.all([
     supabase
       .from("saved_properties")
@@ -85,6 +86,7 @@ export async function BuyerPanel({
     supabase.rpc("my_contracts"),
     supabase.rpc("my_property_views_daily", { p_days: HISTORY_DAYS }),
     loadDashboardCounts(supabase),
+    loadNavCounters(supabase, "buyer"),
   ]);
 
   const contractsAll = contractRows ?? [];
@@ -173,7 +175,7 @@ export async function BuyerPanel({
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor("buyer", conversations, visits, [])}
+      counters={navCounters}
       notifications={notifications}
     >
       <PageHeader

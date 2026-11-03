@@ -6,13 +6,7 @@ import { PageHeader } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
 import { LeadsScreen } from "../../components/leads/LeadsScreen";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadLeads, loadNotifications } from "../../lib/interaction";
 import { updateLeadStage } from "../actions/leads";
 import { setLocalePreference } from "../actions/preferences";
 
@@ -45,10 +39,9 @@ export default async function LeadsPage() {
     .single();
   if (!profile || profile.role !== "owner") redirect("/");
 
-  const [leads, conversations, visits, notifications] = await Promise.all([
+  const [leads, counters, notifications] = await Promise.all([
     loadLeads(supabase),
-    loadConversations(supabase),
-    loadVisits(supabase),
+    loadNavCounters(supabase, "owner"),
     loadNotifications(supabase, locale),
   ]);
 
@@ -64,7 +57,7 @@ export default async function LeadsPage() {
       activeId="leads"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor("owner", conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
     >
       <PageHeader
