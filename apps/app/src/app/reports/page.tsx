@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { myReports } from "@upm/db/support";
 
 import { AppChrome } from "../../components/AppChrome";
@@ -27,7 +27,7 @@ export default async function MyReportsPage() {
   const supabase = createClient(await cookies());
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await obterUtilizador(supabase);
   if (!user) redirect("/");
 
   const [profile, reports, locale, t] = await Promise.all([

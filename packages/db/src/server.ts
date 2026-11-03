@@ -36,6 +36,49 @@ export function createClient(cookies: CookieStore) {
   );
 }
 
+/** O que as páginas usam do utilizador: o mesmo que o `getUser()` devolvia, só isto. */
+export type SessionUser = {
+  id: string;
+  email?: string;
+  user_metadata: Record<string, unknown>;
+  app_metadata: Record<string, unknown>;
+};
+
+/**
+ * O utilizador da sessão, validado sem ir à rede (3 nov 2026)
+ * =========================================================================
+ * `auth.getUser()` pergunta ao servidor de Auth em cada chamada: ~100 ms a
+ * partir daqui, e as páginas da `app` faziam-no **depois** de o middleware já
+ * o ter feito. Medido: até uma página simples custava o dobro das do site.
+ *
+ * `auth.getClaims()` valida a assinatura do token localmente, com a chave
+ * pública do projeto (ES256, guardada em cache), e só vai à rede quando o
+ * token tem de ser renovado. A troca, dita: uma sessão terminada noutro sítio
+ * continua válida até o token expirar (≤ 1 h). Contas suspensas e eliminadas
+ * continuam barradas de imediato — o middleware lê `profiles.status` na base
+ * em cada pedido. É o que o Supabase recomenda para o servidor.
+ *
+ * Devolve a mesma forma de `getUser()` (`{ data: { user } }`), para a troca
+ * ser direta. As Server Actions, que escrevem, continuam no `getUser()`.
+ */
+export async function obterUtilizador(
+  supabase: SupabaseClient<Database>,
+): Promise<{ data: { user: SessionUser | null } }> {
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (error || !claims?.sub) return { data: { user: null } };
+  return {
+    data: {
+      user: {
+        id: claims.sub,
+        email: typeof claims.email === "string" ? claims.email : undefined,
+        user_metadata: (claims.user_metadata as Record<string, unknown>) ?? {},
+        app_metadata: (claims.app_metadata as Record<string, unknown>) ?? {},
+      },
+    },
+  };
+}
+
 export type ServiceClient = SupabaseClient<Database>;
 
 /**

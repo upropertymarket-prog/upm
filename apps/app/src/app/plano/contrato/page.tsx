@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { myAgreements } from "@upm/db/agreement";
 import { isPendingLegalReview, currentLegalDocument } from "@upm/db/legal";
 
@@ -30,7 +30,7 @@ export default async function ContratoPage({
   const supabase = createClient(await cookies());
   const [locale, { data: authData }, params] = await Promise.all([
     getLocale(),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
     searchParams,
   ]);
 

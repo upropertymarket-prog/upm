@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { coverUrlsFor } from "@upm/db/property-covers";
 import { PageHeader } from "@upm/ui";
 
@@ -39,7 +39,7 @@ export default async function MarketPage({
 }) {
   const params = await searchParams;
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, { data: authData }] = await Promise.all([getLocale(), obterUtilizador(supabase)]);
   const user = authData.user;
   if (!user) redirect("/");
 

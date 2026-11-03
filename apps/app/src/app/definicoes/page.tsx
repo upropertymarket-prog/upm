@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { Card, PageHeader, ThemeToggle } from "@upm/ui";
 import { notificationPrefsSchema, type NotificationPrefs } from "@upm/db/interaction";
 
@@ -32,7 +32,7 @@ export default async function SettingsPage() {
   const [t, locale, { data: authData }] = await Promise.all([
     getTranslations(),
     getLocale(),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
   ]);
 
   const user = authData.user;

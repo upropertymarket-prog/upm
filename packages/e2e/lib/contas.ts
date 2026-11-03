@@ -131,19 +131,28 @@ export async function apagarContas(): Promise<void> {
     const { error: erroImoveis } = await service().from("properties").delete().eq("owner_id", id);
     if (erroImoveis) falhas.push(`${id} · imóveis: ${erroImoveis.message}`);
 
-    // Uma conta que assinou o contrato de adesão (o E2E da subscrição) não se
-    // apaga: `subscription_agreements` é registo legal, protegido pela
-    // retenção (A7), e prende a subscrição. Em produção é igual — a conta
-    // anonimiza-se, não desaparece. Fica, sem imóveis, e diz-se.
-    const { count: contratos } = await service()
-      .from("subscription_agreements")
-      .select("id, subscriptions!inner(profile_id)", { count: "exact", head: true })
-      .eq("subscriptions.profile_id", id);
-    if (contratos) {
-      console.warn(
-        `[e2e] a conta ${id} fica: tem ${contratos} contrato(s) de adesão (registo legal).`,
-      );
-      continue;
+    // O contrato de adesão (o E2E da subscrição) prende a subscrição:
+    // `subscription_agreements` é registo legal, protegido pela retenção (A7),
+    // e em produção nunca se apaga — a conta anonimiza-se. Uma conta de TESTE
+    // apaga-o (decisão do cliente, 3 nov 2026), e só uma conta de teste: o
+    // domínio confirma-se aqui, antes de tocar no registo, e não se confia
+    // na lista `criadas`.
+    const { data: dono } = await service().auth.admin.getUserById(id);
+    const deTeste = /@upropertymarket\.test$|^delivered\+.*@resend\.dev$/.test(
+      dono.user?.email ?? "",
+    );
+    const { data: subs } = await service().from("subscriptions").select("id").eq("profile_id", id);
+    const sids = (subs ?? []).map((s) => s.id as string);
+    if (sids.length) {
+      if (!deTeste) {
+        falhas.push(`${id} · tem subscrições e não é conta de teste: não se apagam contratos`);
+        continue;
+      }
+      const { error } = await service()
+        .from("subscription_agreements")
+        .delete()
+        .in("subscription_id", sids);
+      if (error) falhas.push(`${id} · contratos de adesão de teste: ${error.message}`);
     }
     const { error: erroConta } = await service().auth.admin.deleteUser(id);
     if (erroConta) falhas.push(`${id} · conta: ${erroConta.message}`);

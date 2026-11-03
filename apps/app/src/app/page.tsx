@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getLocale } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { Button, PageHeader, greetingKey } from "@upm/ui";
 
 import { AppChrome } from "../components/AppChrome";
@@ -33,7 +33,7 @@ export default async function Page() {
   const supabase = createClient(await cookies());
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await obterUtilizador(supabase);
 
   if (user) {
     const { data: profile } = await supabase

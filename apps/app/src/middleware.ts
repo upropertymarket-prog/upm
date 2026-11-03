@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
 
+import { obterUtilizador } from "@upm/db/server";
+
 import { createMiddlewareClient } from "./lib/supabase-middleware";
 
 /**
@@ -77,9 +79,13 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createMiddlewareClient(request, response);
 
+  // A sessão valida-se localmente (`obterUtilizador` → `getClaims`, chave
+  // ES256 em cache) e o perfil e a subscrição pedem-se ao mesmo tempo. Eram
+  // três idas ao Supabase em série — `getUser`, perfil, `subscription_entitled`
+  // —, ~300 ms antes de qualquer página começar (medido a 3 nov). Agora é uma.
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await obterUtilizador(supabase);
 
   if (!user) {
     const next = webUrl("/entrar", request);
@@ -87,11 +93,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(next);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, status")
-    .eq("id", user.id)
-    .single();
+  const { pathname } = request.nextUrl;
+  const precisaDePlano = !NO_SUBSCRIPTION_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const [{ data: profile }, { data: entitled }] = await Promise.all([
+    supabase.from("profiles").select("role, status").eq("id", user.id).single(),
+    precisaDePlano
+      ? supabase.rpc("subscription_entitled")
+      : Promise.resolve({ data: true as boolean | null }),
+  ]);
 
   const role = profile?.role;
 
@@ -109,7 +118,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(internoUrl(request));
   }
 
-  const { pathname } = request.nextUrl;
   const isOwnerOnly = OWNER_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const isBuyerOnly = BUYER_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
@@ -119,14 +127,11 @@ export async function middleware(request: NextRequest) {
 
   // P9-05 — sem subscrição ativa, tudo encaminha para a contratação.
   //
-  // Uma chamada a mais por pedido, e é a troca certa: a alternativa era o
-  // middleware decidir isto a partir de `profiles.plan_id`, e ficariam duas
-  // respostas possíveis à mesma pergunta. `subscription_entitled()` é a única.
-  if (!NO_SUBSCRIPTION_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    const { data: entitled } = await supabase.rpc("subscription_entitled");
-    if (entitled !== true) {
-      return NextResponse.redirect(new URL("/plano?subscrever=1", request.url));
-    }
+  // `subscription_entitled()` é a única resposta a esta pergunta (decidir a
+  // partir de `profiles.plan_id` dava duas). Pede-se em paralelo com o
+  // perfil, acima: a decisão só se aplica depois de o perfil ter passado.
+  if (precisaDePlano && entitled !== true) {
+    return NextResponse.redirect(new URL("/plano?subscrever=1", request.url));
   }
 
   applySecurityHeaders(response.headers, nonce);

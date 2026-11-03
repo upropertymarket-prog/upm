@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 
 /**
  * Estado da conta `pending` (07 §5.9) — 3 dias de cortesia a contar de
@@ -16,7 +16,7 @@ export async function getPendingGateInfo(): Promise<PendingGateInfo | null> {
   const supabase = createClient(await cookies());
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await obterUtilizador(supabase);
   if (!user) return null;
 
   const { data: profile } = await supabase
