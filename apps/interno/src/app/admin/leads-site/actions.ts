@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@upm/db";
 import { createClient } from "@upm/db/server";
 import { isStepUpRequiredError } from "@upm/db/auth";
 
@@ -78,7 +79,15 @@ function csvCell(value: unknown): string {
   return '"' + text.replaceAll('"', '""') + '"';
 }
 
-export async function exportLeads(input: unknown): Promise<LeadActionResult & { csv?: string }> {
+/** Teto de `admin_export_site_leads` (20261002130200) e o `max_rows` do PostgREST. */
+const EXPORT_CAP = 5000;
+const EXPORT_PAGE = 1000;
+
+type ExportRow = Database["public"]["Functions"]["admin_export_site_leads"]["Returns"][number];
+
+export async function exportLeads(
+  input: unknown,
+): Promise<LeadActionResult & { csv?: string; truncated?: boolean }> {
   const parsed = filtersSchema.safeParse(input);
   if (!parsed.success) return { error: "Invalid export filters." };
   const supabase = await getAdminClient();
@@ -89,18 +98,33 @@ export async function exportLeads(input: unknown): Promise<LeadActionResult & { 
       ? { needsStepUp: true }
       : { error: "PIN confirmation failed." };
   const filters = parsed.data;
-  const { data, error } = await supabase.rpc("admin_export_site_leads", {
-    p_status: filters.status ?? undefined,
-    p_source: filters.source ?? undefined,
-    p_form: filters.form ?? undefined,
-    p_assigned_to: filters.assignedTo ?? undefined,
-    p_search: filters.search || undefined,
-  });
-  if (error || !data) return { error: "Could not export leads." };
+  // Por páginas. O PostgREST corta qualquer resposta às 1000 linhas
+  // (`max_rows`), também a de um RPC, e sem aviso: até 3 nov 2026, o CSV
+  // saía com os primeiros 1000 leads e parecia completo. A função tem o seu
+  // próprio teto, 5000, e ordena por `created_at desc, id desc` — a ordem
+  // estável é o que torna as páginas consistentes.
+  const data: ExportRow[] = [];
+  for (let from = 0; from < EXPORT_CAP; from += EXPORT_PAGE) {
+    const { data: pagina, error } = await supabase
+      .rpc("admin_export_site_leads", {
+        p_status: filters.status ?? undefined,
+        p_source: filters.source ?? undefined,
+        p_form: filters.form ?? undefined,
+        p_assigned_to: filters.assignedTo ?? undefined,
+        p_search: filters.search || undefined,
+      })
+      .range(from, from + EXPORT_PAGE - 1);
+    if (error || !pagina) return { error: "Could not export leads." };
+    data.push(...pagina);
+    if (pagina.length < EXPORT_PAGE) break;
+  }
+  // No teto, há quase de certeza mais: diz-se, em vez de entregar um ficheiro
+  // que parece completo.
+  const truncated = data.length >= EXPORT_CAP;
   const audit = await supabase.rpc("write_audit_log", {
     p_action: "site_leads.export",
     p_entity: "site_leads",
-    p_diff: { filters, exported_count: data.length, limit: 5000 },
+    p_diff: { filters, exported_count: data.length, limit: EXPORT_CAP, truncated },
   });
   if (audit.error) return { error: "The export could not be audited." };
   const headers = [
@@ -124,5 +148,5 @@ export async function exportLeads(input: unknown): Promise<LeadActionResult & { 
       .map((key) => csvCell(key === "utm" ? JSON.stringify(row.utm) : row[key as keyof typeof row]))
       .join(","),
   );
-  return { ok: true, csv: [headers.join(","), ...rows].join("\r\n") };
+  return { ok: true, csv: [headers.join(","), ...rows].join("\r\n"), truncated };
 }

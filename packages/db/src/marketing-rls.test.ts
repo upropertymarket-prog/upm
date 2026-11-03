@@ -23,6 +23,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -47,7 +49,7 @@ describe.skipIf(!hasEnv)("Fase 10 · Marketing: fronteira do papel e Atualizaç�
   const created: string[] = [];
 
   async function getOrCreateUser(email: string, role: string) {
-    const { data: users, error } = await service.auth.admin.listUsers();
+    const { data: users, error } = await listarTodosOsUtilizadores(service);
     if (error) throw new Error(`Falha a listar utilizadores: ${error.message}`);
     const found = users.users.find((user) => user.email === email);
     if (found) return found.id;

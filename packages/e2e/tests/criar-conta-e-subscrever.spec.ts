@@ -24,7 +24,7 @@ import {
   MOTIVO_SEM_SMTP,
   temSmtpProprio,
 } from "../lib/ambiente";
-import { apagarContas, emailDeTeste, registarParaApagar, service } from "../lib/contas";
+import { apagarContas, emailEntregavel, registarParaApagar, service } from "../lib/contas";
 import { linkDeVerificacao, tokenDeEmail } from "../lib/links-de-email";
 import { entrarComoCliente } from "../lib/sessao";
 import {
@@ -47,7 +47,7 @@ test.afterAll(async () => {
 
 test("um proprietário cria conta, paga no Stripe e entra com o plano ativo", async ({ page }) => {
   test.setTimeout(420_000);
-  const email = emailDeTeste("registo");
+  const email = emailEntregavel("registo");
   const palavraPasse = `E2e-${randomBytes(9).toString("base64url")}-Reg`;
 
   const { data: plano } = await service()
@@ -57,29 +57,27 @@ test("um proprietário cria conta, paga no Stripe e entra com o plano ativo", as
     .single();
   expect(plano, "o plano essential-owner tem de existir").not.toBeNull();
 
-  // 1. O assistente.
+  // 1. O assistente. Mostra um passo de cada vez: o "Continuar" é sempre o
+  // único visível, e não o n-ésimo da página.
+  const seguinte = () =>
+    page
+      .getByRole("button", { name: t("auth.nextButton") })
+      .filter({ visible: true })
+      .click();
   await page.goto(`${WEB}/criar-conta`);
   await page.getByRole("button", { name: t("auth.register.profile.owner") }).click();
-  await page
-    .getByRole("button", { name: t("auth.nextButton") })
-    .first()
-    .click();
+  await seguinte();
 
   await page.getByLabel(t("auth.register.account.fullName")).fill("E2E Registo Completo");
   await page.getByLabel(t("auth.register.account.taxId")).fill(nifValido());
   await page.getByLabel(t("auth.register.account.phone")).fill("912345678");
-  await page.getByLabel(t("auth.register.account.email")).fill(email);
+  // `exact`: o consentimento de marketing tem "e-mail" no rótulo.
+  await page.getByLabel(t("auth.register.account.email"), { exact: true }).fill(email);
   await page.getByLabel(t("auth.register.account.password"), { exact: true }).fill(palavraPasse);
-  await page
-    .getByRole("button", { name: t("auth.nextButton") })
-    .nth(1)
-    .click();
+  await seguinte();
 
   await page.getByRole("button", { name: new RegExp(plano!.name) }).click();
-  await page
-    .getByRole("button", { name: t("auth.nextButton") })
-    .nth(2)
-    .click();
+  await seguinte();
 
   const termos = page.getByRole("checkbox", {
     name: new RegExp(t("auth.register.contract.acceptPrefix")),
@@ -88,20 +86,19 @@ test("um proprietário cria conta, paga no Stripe e entra com o plano ativo", as
   await expect(termos).toBeChecked();
   await page.getByRole("button", { name: t("auth.register.contract.submit") }).click();
 
-  // 2. O checkout do Stripe, com o cartão de teste. Se não chegar lá, quase
-  // sempre é o `signUp` recusado pelo limite de e-mail do SMTP por omissão
-  // (429): a conta nem é criada. Diz-se isso em vez de um timeout mudo.
+  // 2. O checkout do Stripe, com o cartão de teste. Se não chegar lá, diz-se
+  // o que o ecrã respondeu, em vez de um timeout mudo — e sem adivinhar a
+  // causa: a 3 nov, a mensagem daqui afirmava "é o SMTP", e era o domínio do
+  // e-mail. A mensagem genérica do registo esconde o motivo de propósito
+  // (enumeração de contas); o motivo real lê-se no Supabase Auth.
   await page.waitForURL(/checkout\.stripe\.com/, { timeout: 120_000 }).catch(async () => {
-    const ecra = (
-      await page
-        .locator("main")
-        .innerText()
-        .catch(() => "")
-    ).slice(0, 300);
+    const erros = await page
+      .locator(".upm-field__error, [role=alert]")
+      .allInnerTexts()
+      .catch(() => [] as string[]);
     throw new Error(
-      "O registo não chegou ao Stripe. Com o SMTP por omissão do Supabase Auth, o signUp " +
-        "falha acima de poucos e-mails por hora (429 over_email_send_rate_limit) e a conta " +
-        `não é criada — bloqueador de lançamento, não defeito do teste. Ecrã: ${ecra}`,
+      `O registo não chegou ao Stripe. O ecrã diz: ${erros.filter(Boolean).join(" | ") || "(nada)"}. ` +
+        "Causas já vistas: domínio do e-mail recusado pelo signUp; limite do SMTP por omissão (429).",
     );
   });
   // O pagamento faz-se pela API (a página do Stripe tem hCaptcha — ver
@@ -109,9 +106,14 @@ test("um proprietário cria conta, paga no Stripe e entra com o plano ativo", as
   const pago = await concluirPagamentoDeTeste(page.url());
 
   // A conta existe; regista-se para apagar no fim, com o cliente do Stripe.
-  const { data: contas } = await service().auth.admin.listUsers({ perPage: 1000 });
-  const conta = contas.users.find((u) => u.email === email);
+  // Pelo id que a sessão leva, e não à procura numa lista: `listUsers` é
+  // paginado, e uma procura numa página só falha quando houver mais contas.
+  const { data: criada } = await service().auth.admin.getUserById(
+    String(pago.sessao.metadata?.upm_profile_id ?? ""),
+  );
+  const conta = criada.user;
   expect(conta, "o registo criou o utilizador").toBeDefined();
+  expect(conta!.email).toBe(email);
   registarParaApagar(conta!.id);
   const { data: perfil } = await service()
     .from("profiles")

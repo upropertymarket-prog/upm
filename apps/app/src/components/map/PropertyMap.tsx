@@ -12,7 +12,13 @@ import type {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Button } from "@upm/ui";
 
-import { MAP_STYLE, type DrawPolygonAction, type MapProperty } from "./mapTypes";
+import {
+  MAP_CAP,
+  MAP_STYLE,
+  type DrawPolygonAction,
+  type MapProperty,
+  type ViewportAction,
+} from "./mapTypes";
 import { formatCents } from "../../lib/money";
 
 /** Centróide aproximado de Portugal continental. */
@@ -64,6 +70,12 @@ export type PropertyMapProps = {
    * canvas-safety do resto do projeto: a action puxa `next/headers`).
    */
   onDrawPolygon: DrawPolygonAction;
+  /**
+   * Server Action `propertiesInBounds`: com ela, o mapa pede os imóveis da
+   * área visível a cada movimento, em vez de receber "todos" à partida. Sem
+   * ela (o canvas), mostra `initialProperties` e não pede nada.
+   */
+  onViewportChange?: ViewportAction;
 };
 
 /**
@@ -73,13 +85,21 @@ export type PropertyMapProps = {
  * e chama `onDrawPolygon`, que substitui os pontos mostrados pelo resultado
  * dentro da área.
  */
-export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapProps) {
+export function PropertyMap({
+  initialProperties,
+  onDrawPolygon,
+  onViewportChange,
+}: PropertyMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const drawingRef = useRef(false);
   const verticesRef = useRef<[number, number][]>([]);
+  // Com uma área desenhada, os pontos são o resultado dela: mover o mapa não
+  // os pode substituir pelos da área visível.
+  const areaActiveRef = useRef(false);
   const [drawing, setDrawing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [truncated, setTruncated] = useState(initialProperties.length >= MAP_CAP);
   const t = useTranslations("market");
 
   /**
@@ -96,7 +116,25 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
     if (!map) return;
     const source = map.getSource(POINTS_SOURCE) as GeoJSONSource | undefined;
     source?.setData(toFeatureCollection(properties) as never);
+    setTruncated(properties.length >= MAP_CAP);
   }, []);
+
+  // Só a resposta ao último movimento conta: uma mais lenta, de um movimento
+  // anterior, não pode pintar por cima.
+  const viewportRequestRef = useRef(0);
+  const loadViewport = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map || !onViewportChange || areaActiveRef.current) return;
+    const b = map.getBounds();
+    const pedido = ++viewportRequestRef.current;
+    const properties = await onViewportChange([
+      b.getWest(),
+      b.getSouth(),
+      b.getEast(),
+      b.getNorth(),
+    ]);
+    if (pedido === viewportRequestRef.current && !areaActiveRef.current) setPoints(properties);
+  }, [onViewportChange, setPoints]);
 
   const setDraw = useCallback(() => {
     const map = mapRef.current;
@@ -117,6 +155,7 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
     setLoading(true);
     try {
       const result = await onDrawPolygon(vertices);
+      areaActiveRef.current = true;
       setPoints(result);
     } finally {
       setLoading(false);
@@ -125,6 +164,14 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    // O worker do MapLibre: o próprio pacote só o encontra quando o seu
+    // `import.meta.url` é `http(s)`. Empacotado pelo Next não é, e o mapa
+    // ficava sem mosaicos nem pontos; o `next.config.ts` publica-o em
+    // `/maplibre/<versão>/`. No canvas (Vite) o URL é `http`, e fica como está.
+    if (!/^https?:/.test(import.meta.url)) {
+      maplibregl.setWorkerUrl(`/maplibre/${maplibregl.getVersion()}/maplibre-gl-worker.mjs`);
+    }
 
     const map = new maplibregl.Map({
       container: containerRef.current,
@@ -159,7 +206,14 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
         type: "symbol",
         source: POINTS_SOURCE,
         filter: ["has", "point_count"],
-        layout: { "text-field": "{point_count_abbreviated}", "text-size": 12 },
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-size": 12,
+          // Uma das fontes que o estilo Liberty serve. Sem isto o MapLibre pede
+          // a sua por omissão ("Open Sans…"), que o OpenFreeMap não tem: 404 em
+          // cada carregamento, e o número desenhado com a fonte do sistema.
+          "text-font": ["Noto Sans Bold"],
+        },
         paint: { "text-color": "#fff" },
       });
       map.addLayer({
@@ -200,12 +254,19 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
         const price = formatCents(Number(feature.properties?.price_cents));
         const title = String(feature.properties?.title ?? "");
         const id = String(feature.properties?.id ?? "");
-        new maplibregl.Popup()
-          .setLngLat([lon, lat])
-          .setHTML(
-            `<strong>${title}</strong><br/>${price}<br/><a href="/market/${id}">${viewPropertyLabelRef.current}</a>`,
-          )
-          .addTo(map);
+        // Nós DOM com `textContent`, nunca `setHTML`: o título é escrito pelo
+        // proprietário. Até 3 nov ia por interpolação para HTML, e um título
+        // com `<img onerror=…>` corria no browser de quem abrisse o mapa.
+        const content = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = title;
+        const priceLine = document.createElement("div");
+        priceLine.textContent = price;
+        const link = document.createElement("a");
+        link.href = `/market/${encodeURIComponent(id)}`;
+        link.textContent = viewPropertyLabelRef.current;
+        content.append(strong, priceLine, link);
+        new maplibregl.Popup().setLngLat([lon, lat]).setDOMContent(content).addTo(map);
       });
 
       map.on("click", (event: MapMouseEvent) => {
@@ -224,6 +285,15 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
         if (!drawingRef.current) return;
         void finishPolygon();
       });
+
+      // Um pedido por paragem, não um por fotograma: o `moveend` dispara uma
+      // vez quando o movimento acaba, e o atraso junta zooms seguidos.
+      let espera: ReturnType<typeof setTimeout> | undefined;
+      map.on("moveend", () => {
+        clearTimeout(espera);
+        espera = setTimeout(() => void loadViewport(), 300);
+      });
+      void loadViewport();
     });
 
     return () => {
@@ -252,7 +322,9 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
   const resetArea = () => {
     verticesRef.current = [];
     setDraw();
-    setPoints(initialProperties);
+    areaActiveRef.current = false;
+    if (onViewportChange) void loadViewport();
+    else setPoints(initialProperties);
   };
 
   return (
@@ -269,6 +341,11 @@ export function PropertyMap({ initialProperties, onDrawPolygon }: PropertyMapPro
           Limpar
         </Button>
       </div>
+      {truncated ? (
+        <p className="text-sm text-muted" role="status">
+          {t("mapTruncated", { count: MAP_CAP })}
+        </p>
+      ) : null}
       {/*
         A altura acompanha o ecrã em vez de ficar nos 560 px fixos: agora que o
         Mapa corre a toda a largura (04 §1.5), uma altura fixa dava uma faixa

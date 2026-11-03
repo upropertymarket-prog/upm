@@ -127,6 +127,50 @@ export async function loadLeads(supabase: Client): Promise<LeadRow[]> {
   }));
 }
 
+export type DashboardCounts = {
+  newLeads: number;
+  visitsAccepted: number;
+  visitsAwaiting: number;
+  conversationsUnread: number;
+};
+
+/**
+ * Os números do Painel, contados na base (3 nov 2026)
+ * =========================================================================
+ * Contavam-se em JS sobre as listas — e o PostgREST corta qualquer resposta
+ * às 1000 linhas, sem aviso. Um proprietário com 1200 leads via "1000", e o
+ * número parecia certo. Aqui o filtro e a contagem vão para o PostgREST
+ * (`count: "exact"` sobre o resultado da função), que conta tudo e só devolve
+ * uma linha.
+ */
+export async function loadDashboardCounts(supabase: Client): Promise<DashboardCounts> {
+  const contar = async (pedido: PromiseLike<{ count: number | null }>) => (await pedido).count ?? 0;
+  const [newLeads, visitsAccepted, visitsAwaiting, conversationsUnread] = await Promise.all([
+    contar(
+      supabase
+        .rpc("my_owner_leads", undefined, { count: "exact" })
+        .in("stage", ["new", "contacted"])
+        .limit(1),
+    ),
+    contar(
+      supabase
+        .rpc("my_visit_requests", undefined, { count: "exact" })
+        .eq("status", "accepted")
+        .limit(1),
+    ),
+    contar(
+      supabase
+        .rpc("my_visit_requests", undefined, { count: "exact" })
+        .in("status", ["pending", "rescheduled"])
+        .limit(1),
+    ),
+    contar(
+      supabase.rpc("my_conversations", undefined, { count: "exact" }).gt("unread", 0).limit(1),
+    ),
+  ]);
+  return { newLeads, visitsAccepted, visitsAwaiting, conversationsUnread };
+}
+
 /**
  * O sino da topbar (04 §5.5). Traz as últimas; o contador vem das não lidas.
  *

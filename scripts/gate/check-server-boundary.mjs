@@ -52,6 +52,10 @@ const SERVICE_ROLE_PERMITIDO = new Map([
   ["packages/db/src/server.ts", "a fábrica: é aqui que `createServiceClient` existe"],
   ["packages/db/src/stripe.ts", "a fábrica do lado do Stripe"],
   [
+    "packages/db/src/auth.ts",
+    "limite de tentativas (A15): os dois RPCs só servem `service_role`, para a chave pública não poder trancar contas alheias; o identificador vem sempre do servidor",
+  ],
+  [
     "apps/app/src/app/api/stripe/webhook/route.ts",
     "autentica-se pela assinatura antes de ler o corpo; as tabelas de faturação não têm caminho de escrita a partir de sessão nenhuma",
   ],

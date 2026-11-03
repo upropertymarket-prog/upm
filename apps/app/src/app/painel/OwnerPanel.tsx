@@ -14,6 +14,7 @@ import { buildViewsSeries, weeklyViews, type ViewRow } from "../../lib/dashboard
 import {
   countersFor,
   loadConversations,
+  loadDashboardCounts,
   loadLeads,
   loadNotifications,
   loadVisits,
@@ -74,24 +75,23 @@ export async function OwnerPanel({
   ).length;
 
   const today = new Date();
-  const since = new Date(today);
-  since.setUTCDate(since.getUTCDate() - HISTORY_DAYS);
 
-  // Sem imóveis não há nada a cruzar — poupa-se um `in ()` vazio ao Postgres.
+  // Somadas por dia na base. Até 3 nov vinha uma linha por imóvel por dia e
+  // somava-se aqui: com 34 imóveis, 30 dias passam das 1000 linhas que o
+  // PostgREST devolve, e o gráfico mostrava menos visitas do que as reais.
+  // Sem imóveis não há nada a somar — poupa-se o pedido.
   const viewRows: ViewRow[] = ids.length
     ? await supabase
-        .from("property_views")
-        .select("day, views_count")
-        .in("property_id", ids)
-        .gte("day", since.toISOString().slice(0, 10))
+        .rpc("my_owned_property_views_daily", { p_days: HISTORY_DAYS })
         .then(({ data }) => (data ?? []) as ViewRow[])
     : [];
 
-  const [visits, conversations, leads, notifications] = await Promise.all([
+  const [visits, conversations, leads, notifications, counts] = await Promise.all([
     loadVisits(supabase),
     loadConversations(supabase),
     loadLeads(supabase),
     loadNotifications(supabase, locale),
+    loadDashboardCounts(supabase),
   ]);
 
   const week = weeklyViews(viewRows, today, chartLabels);
@@ -109,13 +109,9 @@ export async function OwnerPanel({
     .sort((a, b) => a.proposedAt.localeCompare(b.proposedAt))
     .slice(0, ACTIVITY_ROWS);
 
-  const newLeads = leads.filter(
-    (lead) => lead.stage === "new" || lead.stage === "contacted",
-  ).length;
-  const scheduled = visits.filter((visit) => visit.status === "accepted").length;
-  const awaiting = visits.filter(
-    (visit) => visit.status === "pending" || visit.status === "rescheduled",
-  ).length;
+  const newLeads = counts.newLeads;
+  const scheduled = counts.visitsAccepted;
+  const awaiting = counts.visitsAwaiting;
 
   const stats: DashboardStat[] = [
     {
@@ -164,7 +160,7 @@ export async function OwnerPanel({
     tone: item.unread > 0 ? "new" : "archived",
   }));
 
-  const unansweredCount = conversations.filter((item) => item.unread > 0).length;
+  const unansweredCount = counts.conversationsUnread;
 
   // "Contratos" — fecha **D29**. O painel chamava-se "Documentos e contratos" e
   // mostrava só `property_documents`; por decisão do cliente (30 set 2026)

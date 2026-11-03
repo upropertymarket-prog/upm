@@ -115,7 +115,7 @@ export async function registerAccount(
   const supabase = createClient(await cookies());
 
   // 08 §5.1/§5.5 — antes de tentar, nunca depois.
-  const rateLimit = await checkAuthRateLimit(supabase, email, "register");
+  const rateLimit = await checkAuthRateLimit(email, "register");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -152,7 +152,7 @@ export async function registerAccount(
       ? (eligibilityRaw as EligibilityResult)
       : { allowed: false };
   if (!eligibility.allowed) {
-    await recordAuthAttempt(supabase, email, "register", false);
+    await recordAuthAttempt(email, "register", false);
     return { fieldErrors: { taxId: GENERIC_IDENTITY_ERROR }, step: "account" };
   }
 
@@ -210,7 +210,7 @@ export async function registerAccount(
     },
   });
 
-  await recordAuthAttempt(supabase, email, "register", !signUpError);
+  await recordAuthAttempt(email, "register", !signUpError);
 
   if (signUpError || !signUpData.user) {
     // Mesma mensagem genérica do NIF: um "já existe" aqui é enumeração de
@@ -352,7 +352,7 @@ export async function resendVerificationEmail(
 
   const supabase = createClient(await cookies());
 
-  const rateLimit = await checkAuthRateLimit(supabase, email, "resend_verification");
+  const rateLimit = await checkAuthRateLimit(email, "resend_verification");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -367,7 +367,7 @@ export async function resendVerificationEmail(
       emailRedirectTo: `${webUrl}/auth/confirm?next=${encodeURIComponent("/")}`,
     },
   });
-  await recordAuthAttempt(supabase, email, "resend_verification", !error);
+  await recordAuthAttempt(email, "resend_verification", !error);
 
   if (error) return { error: "Não foi possível reenviar o e-mail. Tente novamente." };
   return { sent: true };

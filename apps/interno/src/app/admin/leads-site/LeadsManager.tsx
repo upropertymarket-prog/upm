@@ -98,7 +98,9 @@ export function LeadsManager({
     assignedTo: string | null;
   }) => Promise<LeadActionResult>;
   onAddNote: (input: { leadId: string; note: string }) => Promise<LeadActionResult>;
-  onExport: (input: LeadFilters) => Promise<LeadActionResult & { csv?: string }>;
+  onExport: (
+    input: LeadFilters,
+  ) => Promise<LeadActionResult & { csv?: string; truncated?: boolean }>;
   onVerifyPin: VerifyPinAction;
 }) {
   const t = useTranslations("admin.leads");
@@ -108,6 +110,7 @@ export function LeadsManager({
   const [assignedTo, setAssignedTo] = useState<string>(selected?.assigned_to ?? "");
   const [note, setNote] = useState("");
   const [error, setError] = useState(false);
+  const [exportNotice, setExportNotice] = useState<"failed" | "truncated" | null>(null);
   const [saving, startSaving] = useTransition();
   const { requestStepUp, stepUpModal } = useStepUp(onVerifyPin);
 
@@ -189,15 +192,19 @@ export function LeadsManager({
   }
   function exportCsv() {
     startSaving(async () => {
+      setExportNotice(null);
       const result = await onExport(filters);
       if (result.needsStepUp) {
         requestStepUp(() => exportCsv());
         return;
       }
       if (!result.ok || !result.csv) {
-        setError(true);
+        setExportNotice("failed");
         return;
       }
+      // O ficheiro sai na mesma, mas quem o abre tem de saber que não está
+      // completo — o defeito antigo era precisamente parecer completo.
+      if (result.truncated) setExportNotice("truncated");
       const blob = new Blob(["\uFEFF", result.csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -225,6 +232,14 @@ export function LeadsManager({
             {t("export")}
           </Button>
         </header>
+        {exportNotice ? (
+          <p
+            className={exportNotice === "failed" ? "text-sm text-danger" : "text-sm text-muted"}
+            role={exportNotice === "failed" ? "alert" : "status"}
+          >
+            {exportNotice === "failed" ? t("exportFailed") : t("exportTruncated")}
+          </p>
+        ) : null}
         <Card padded>
           <form action="/admin/leads-site" method="get" className="grid gap-4 md:grid-cols-3">
             <Input

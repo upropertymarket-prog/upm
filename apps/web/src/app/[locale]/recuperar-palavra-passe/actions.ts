@@ -27,7 +27,7 @@ export async function requestPasswordReset(
   const email = emailResult.data;
 
   const supabase = createClient(await cookies());
-  const rateLimit = await checkAuthRateLimit(supabase, email, "password_recovery");
+  const rateLimit = await checkAuthRateLimit(email, "password_recovery");
   if (!rateLimit.allowed) {
     return {
       error: `Demasiadas tentativas. Tente novamente dentro de ${rateLimit.retryAfterSeconds}s.`,
@@ -38,7 +38,7 @@ export async function requestPasswordReset(
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${webUrl}/auth/confirm?next=${encodeURIComponent("/recuperar-palavra-passe/confirmar")}`,
   });
-  await recordAuthAttempt(supabase, email, "password_recovery", !error);
+  await recordAuthAttempt(email, "password_recovery", !error);
 
   // 08 §7.6 — nunca revelar se o e-mail existe: resposta sempre igual.
   return { sent: true };

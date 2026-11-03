@@ -35,11 +35,33 @@ export function emailDeTeste(papel: string): string {
   return `e2e-${papel}-${carimbo}@upropertymarket.test`;
 }
 
+/**
+ * Um endereço que o `signUp` público aceita, para os percursos que passam
+ * pelo registo a sério.
+ * ---------------------------------------------------------------------------
+ * As contas criadas pela API de administração podem ser `.test`; o `signUp`
+ * não: o Supabase recusa o domínio (`email_address_invalid`, visto a 3 nov —
+ * e era isso, não o SMTP, que parava o percurso do registo). Usa-se o
+ * endereço de teste do Resend, `delivered@resend.dev`, que tem MX e que o
+ * Resend dá como entregue sem entregar a ninguém; o `+etiqueta` torna cada
+ * corrida única.
+ */
+export function emailEntregavel(papel: string): string {
+  const carimbo = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return `delivered+e2e-${papel}-${carimbo}@resend.dev`;
+}
+
 export type Conta = { id: string; email: string; papel: Papel };
 
-/** Cria uma conta confirmada, com o papel pedido. */
-export async function criarConta(papel: Papel, nome = `E2E ${papel}`): Promise<Conta> {
-  const email = emailDeTeste(papel);
+/**
+ * Cria uma conta confirmada, com o papel pedido. `email` à parte para os
+ * percursos em que o Auth manda e-mail a essa conta (ver `emailEntregavel`).
+ */
+export async function criarConta(
+  papel: Papel,
+  nome = `E2E ${papel}`,
+  email = emailDeTeste(papel),
+): Promise<Conta> {
   const { data, error } = await service().auth.admin.createUser({
     email,
     password: PALAVRA_PASSE,

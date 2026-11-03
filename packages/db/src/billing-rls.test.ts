@@ -17,6 +17,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listarTodosOsUtilizadores } from "./test-users";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -44,7 +46,7 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   const createdProperties: string[] = [];
 
   async function user(email: string, role: string) {
-    const list = await service.auth.admin.listUsers();
+    const list = await listarTodosOsUtilizadores(service);
     const found = list.data.users.find((u) => u.email === email);
     if (found) return found.id;
     const created = await service.auth.admin.createUser({

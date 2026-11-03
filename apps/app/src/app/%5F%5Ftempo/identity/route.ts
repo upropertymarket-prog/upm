@@ -8,6 +8,12 @@ import { tempoHostIdentity } from "tempo-sdk/nextjs";
 export const dynamic = "force-dynamic";
 
 export function GET() {
+  // Só em desenvolvimento, que é onde o Tempo a usa. Em produção responderia
+  // a qualquer pessoa com a versão do SDK e a framework — pouco, mas é ajudar
+  // quem anda a identificar a stack, e não serve a ninguém (12 §30).
+  if (process.env.NODE_ENV === "production") {
+    return new Response(null, { status: 404 });
+  }
   return Response.json(tempoHostIdentity(), {
     headers: {
       "cache-control": "no-store",
