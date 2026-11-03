@@ -105,13 +105,15 @@ test("o proprietário publica, o admin aprova com 2FA e PIN, e o anúncio aparec
   expect(imovel?.status).toBe("pending_review");
   await cd.close();
 
-  // Antes de aprovado, o site público não o vê: a vista que o `www` lê, como
-  // `anon`, não o devolve. Pela vista e não pela página de propósito — a
-  // página guarda a resposta 5 min (`unstable_cache`), e quem aprova é o
-  // `interno`, que não a invalida (D61). Um pedido aqui guardaria o "não
-  // existe" e o anúncio aprovado ficaria escondido até a cache expirar.
+  // Antes de aprovado, o site público não o vê — nem a vista que o `www` lê,
+  // nem a página. E pede-se a página **de propósito**: é o pior caso da cache.
+  // O `www` guarda este "não existe" (5 min, `unstable_cache`); até ao F2 o
+  // `interno` não o invalidava ao aprovar (D61), e o anúncio aprovado ficava
+  // escondido até a cache expirar. O passo 3 prova que já não fica.
   const { data: antes } = await anon().from("properties_public").select("id").eq("id", imovel!.id);
   expect(antes ?? []).toHaveLength(0);
+  const fichaAntes = await fetch(`${WEB}/propriedades/x-${imovel!.id}`);
+  expect(fichaAntes.status).toBe(404);
 
   // ---------------------------------------------------------------------
   // 2. O admin aprova: 2FA, PIN de operação, aprovação.
@@ -181,10 +183,12 @@ test("o proprietário publica, o admin aprova com 2FA e PIN, e o anúncio aparec
   // ---------------------------------------------------------------------
   // 3. O anúncio aparece no site público, para um visitante sem conta.
   // ---------------------------------------------------------------------
+  // Logo, e não daqui a 5 min: a aprovação pediu ao `www` que esquecesse o
+  // "não existe" guardado no passo 1 (F2). Sem isso, isto falhava.
   const visitante = await browser.newContext();
   const v = await visitante.newPage();
   await v.goto(`${WEB}/propriedades/x-${imovel!.id}`);
-  await expect(v.getByRole("heading", { name: titulo })).toBeVisible();
+  await expect(v.getByRole("heading", { name: titulo })).toBeVisible({ timeout: 15_000 });
   await visitante.close();
 
   // E ficou registado quem aprovou (A8).

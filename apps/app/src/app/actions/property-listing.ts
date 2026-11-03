@@ -1,7 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { SITE_CACHE_TAGS, invalidarCacheDoSite, listingTag } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 
 /**
@@ -35,5 +37,7 @@ export async function archiveProperty(propertyId: string): Promise<ArchiveProper
   if (error) return { error: "Não foi possível arquivar o imóvel. Tente novamente." };
 
   revalidatePath("/propriedades");
+  // Arquivado sai do site público: pede-se ao `www`, que o tem em cache (F2).
+  after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.listings, listingTag(propertyId)]));
   return { archived: true };
 }

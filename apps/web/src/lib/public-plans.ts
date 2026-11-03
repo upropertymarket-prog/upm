@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { SITE_CACHE_TAGS } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
 
 import type { PublicPlan } from "../components/site/Pricing";
@@ -19,7 +20,7 @@ import type { PublicPlan } from "../components/site/Pricing";
  * muda o Admin pode invalidar pela mesma rota de revalidação do `launch_mode`.
  */
 
-export const PLANS_TAG = "public-plans";
+export const PLANS_TAG = SITE_CACHE_TAGS.plans;
 
 type PlanRow = {
   slug: string;

@@ -1,8 +1,10 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { SITE_CACHE_TAGS, invalidarCacheDoSite, listingTag } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 import { isStepUpRequiredError } from "@upm/db/auth";
 
@@ -61,6 +63,8 @@ export async function moderateProperty(input: unknown): Promise<ModerationAction
 
   revalidatePath("/admin/imoveis");
   revalidatePath("/admin/painel");
-  revalidatePath("/propriedades");
+  // O site público é outro processo: o `revalidatePath("/propriedades")` que
+  // aqui estava nunca lá chegou (D61). Pede-se ao `www`, pela etiqueta.
+  after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.listings, listingTag(parsed.data.propertyId)]));
   return { ok: true };
 }

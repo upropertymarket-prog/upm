@@ -1,6 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
+import { SITE_CACHE_TAGS, invalidarCacheDoSite, listingTag } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 import { planLimitMessage } from "@upm/db/billing";
 import {
@@ -24,6 +26,15 @@ import { sniffImageMimeAllowed, type ImageKind } from "@upm/db/image-mime";
  * profundidade, padrão do projeto). Nenhuma lança exceção para o cliente —
  * falhas voltam sempre como `{ error }`.
  */
+
+/**
+ * O que o proprietário muda num anúncio tem de chegar ao site público, que o
+ * guarda em cache noutro processo (F2 · D61). Invalidar um rascunho custa
+ * um pedido e nada mais; perguntar primeiro se está publicado custava o mesmo.
+ */
+async function refletirNoSite(propertyId: string): Promise<void> {
+  after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.listings, listingTag(propertyId)]));
+}
 
 const MEDIA_BUCKET = "property-media";
 const DOCUMENTS_BUCKET = "documents";
@@ -88,6 +99,7 @@ export async function saveIdentificationStep(
     .eq("owner_id", user.id);
 
   if (error) return { error: "Não foi possível guardar a identificação." };
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -120,6 +132,7 @@ export async function saveCharacteristicsStep(
     .eq("owner_id", user.id);
 
   if (error) return { error: "Não foi possível guardar as características." };
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -177,6 +190,7 @@ export async function saveLocationStep(
     .eq("owner_id", user.id);
 
   if (error) return { error: "Não foi possível guardar a morada." };
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -208,6 +222,7 @@ export async function savePriceStep(
     .eq("owner_id", user.id);
 
   if (error) return { error: "Não foi possível guardar o preço." };
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -311,6 +326,7 @@ export async function uploadPropertyMedia(
     hasCover = true;
   }
 
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -346,6 +362,7 @@ export async function reorderPropertyMedia(
     if (error) return { error: "Não foi possível reordenar as fotografias." };
   }
 
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -376,6 +393,7 @@ export async function setCoverMedia(
     .eq("property_id", propertyId);
   if (setError) return { error: "Não foi possível definir a capa." };
 
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -411,6 +429,7 @@ export async function deletePropertyMedia(
     .eq("property_id", propertyId);
   if (deleteError) return { error: "Não foi possível remover a fotografia." };
 
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -505,6 +524,7 @@ export async function publishProperty(propertyId: string): Promise<{ error?: str
     .eq("owner_id", user.id);
 
   if (error) return { error: planLimitMessage(error) ?? "Não foi possível publicar o imóvel." };
+  await refletirNoSite(propertyId);
   return {};
 }
 
@@ -522,5 +542,6 @@ export async function archiveProperty(propertyId: string): Promise<{ error?: str
     .eq("owner_id", user.id);
 
   if (error) return { error: "Não foi possível arquivar o imóvel." };
+  await refletirNoSite(propertyId);
   return {};
 }

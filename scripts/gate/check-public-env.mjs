@@ -41,7 +41,7 @@ const PUBLIC_VAR = /\bNEXT_PUBLIC_[A-Z0-9_]+/g;
 function collect(dir, out = []) {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".next" || entry.name === ".next-e2e" || entry.name === ".git") continue;
+    if (entry.name === "node_modules" || entry.name === ".next" || entry.name === ".next-e2e" || entry.name === "test-results" || entry.name === "playwright-report" || entry.name === ".git") continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
       collect(full, out);

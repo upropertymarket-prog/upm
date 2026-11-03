@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { resolveLocale, type Locale } from "@upm/config";
+import { seoTag as etiquetaSeo } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
 
 import { buildMetadata, type RouteSeo, type SeoOverride, type SeoPath } from "./seo";
@@ -42,7 +43,8 @@ import { buildMetadata, type RouteSeo, type SeoOverride, type SeoPath } from "./
  * versão portuguesa também — e, pior, a cache de uma versão podia servir o
  * texto da outra, porque a chave era a mesma para as duas leituras.
  */
-export const seoTag = (route: string, locale: Locale) => `seo:${locale}:${route}`;
+// A mesma etiqueta que o `interno` pede para invalidar ao gravar (F2).
+export const seoTag = (route: string, locale: Locale) => etiquetaSeo(route, locale);
 
 async function fetchOverride(route: string, locale: Locale): Promise<SeoOverride> {
   const supabase = createAnonClient();

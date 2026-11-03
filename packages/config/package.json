@@ -14,6 +14,8 @@
     "./tsconfig/next.json": "./tsconfig/next.json",
     "./server": "./server.ts",
     "./security": "./security.ts",
+    "./site-cache": "./site-cache.ts",
+    "./site-cache-tags": "./site-cache-tags.ts",
     "./sentry": "./sentry.ts",
     "./brand": "./brand.ts",
     "./seo-routes": "./seo-routes.generated.ts"
@@ -24,6 +26,8 @@
     "i18n.ts",
     "server.ts",
     "security.ts",
+    "site-cache.ts",
+    "site-cache-tags.ts",
     "sentry.ts",
     "brand.ts",
     "seo-routes.generated.ts"
