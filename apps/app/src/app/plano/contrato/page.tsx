@@ -7,13 +7,7 @@ import { isPendingLegalReview, currentLegalDocument } from "@upm/db/legal";
 
 import { AppChrome } from "../../../components/AppChrome";
 import { SubscriptionAgreement } from "../../../components/billing/SubscriptionAgreement";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../../lib/interaction";
+import { loadNavCounters, loadNotifications } from "../../../lib/interaction";
 import { setLocalePreference } from "../../actions/preferences";
 
 export const dynamic = "force-dynamic";
@@ -60,12 +54,10 @@ export default async function ContratoPage({
     .eq("id", user.id)
     .maybeSingle();
 
-  const [agreements, t, conversations, visits, leads, notifications] = await Promise.all([
+  const [agreements, t, counters, notifications] = await Promise.all([
     myAgreements(supabase),
     getTranslations("plan.agreement"),
-    loadConversations(supabase),
-    loadVisits(supabase),
-    role === "owner" ? loadLeads(supabase) : Promise.resolve([]),
+    loadNavCounters(supabase, role),
     loadNotifications(supabase, locale),
   ]);
 
@@ -86,7 +78,7 @@ export default async function ContratoPage({
     activeId: "plan" as const,
     locale,
     onLocaleChange: setLocalePreference,
-    counters: countersFor(role, conversations, visits, leads),
+    counters,
     notifications,
   };
 

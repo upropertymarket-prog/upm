@@ -69,6 +69,14 @@ test("o comprador pede visita no Market e o proprietário aceita na agenda", asy
   const paginaDono = await cd.newPage();
   await entrarComoCliente(paginaDono, dono);
   await paginaDono.goto(`${APP}/agenda`);
+
+  // O número do menu (F4: contado na base, não sobre a lista): um pedido à
+  // espera de resposta dela.
+  const agendaNoMenu = paginaDono.getByRole("link", {
+    name: new RegExp(`^${t("nav.visitSchedule")}`),
+  });
+  await expect(agendaNoMenu).toHaveAccessibleName(new RegExp(`${t("nav.visitSchedule")}\\s*1\\b`));
+
   await paginaDono
     .getByRole("button", { name: t("visits.accept") })
     .first()
@@ -76,6 +84,10 @@ test("o comprador pede visita no Market e o proprietário aceita na agenda", asy
   await expect(paginaDono.getByText(t("visits.acceptRequest"))).toBeVisible();
   await paginaDono.getByRole("button", { name: t("visits.acceptAndShare") }).click();
   await expect(paginaDono.getByText(t("visits.acceptedToast"))).toBeVisible();
+
+  // Aceite, já não pede resposta: o número desaparece do menu.
+  await paginaDono.reload();
+  await expect(agendaNoMenu).toHaveAccessibleName(new RegExp(`^${t("nav.visitSchedule")}$`));
   await cd.close();
 
   // 3. Na base: aceite, e a permissão nasceu — só para este comprador.

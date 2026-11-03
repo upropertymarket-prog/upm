@@ -9,13 +9,7 @@ import { AppChrome } from "../../components/AppChrome";
 import { DangerZone } from "../../components/settings/DangerZone";
 import { NotificationPrefsForm } from "../../components/settings/NotificationPrefsForm";
 import { deleteOwnAccount, exportAccountData } from "../actions/account";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications } from "../../lib/interaction";
 import { updateNotificationPrefs } from "../actions/notifications";
 import { setLocalePreference } from "../actions/preferences";
 
@@ -51,12 +45,10 @@ export default async function SettingsPage() {
     .single();
   const role = profile?.role === "owner" ? "owner" : "buyer";
 
-  const [conversations, visits, notifications] = await Promise.all([
-    loadConversations(supabase),
-    loadVisits(supabase),
+  const [counters, notifications] = await Promise.all([
+    loadNavCounters(supabase, role),
     loadNotifications(supabase, locale),
   ]);
-  const leads = role === "owner" ? await loadLeads(supabase) : [];
 
   // Um `notification_prefs` corrompido não pode deitar a página abaixo: o que
   // não valida cai para o vazio, que a função `notify()` lê como "tudo ligado".
@@ -71,7 +63,7 @@ export default async function SettingsPage() {
       activeId="settings"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor(role, conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
     >
       <PageHeader title={t("settings.title")} subtitle={t("settings.subtitle")} />

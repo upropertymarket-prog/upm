@@ -4874,6 +4874,7 @@ export type Database = {
           stage: Database["public"]["Enums"]["lead_stage"];
         }[];
       };
+      my_nav_counters: { Args: never; Returns: Json };
       my_owned_property_views_daily: {
         Args: { p_days: number };
         Returns: {

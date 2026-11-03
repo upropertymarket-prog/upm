@@ -5,13 +5,7 @@ import { createClient } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
-import {
-  countersFor,
-  loadConversations,
-  loadLeads,
-  loadNotifications,
-  loadVisits,
-} from "../../lib/interaction";
+import { loadNavCounters, loadNotifications, loadVisits } from "../../lib/interaction";
 import { acceptVisit, archiveVisit, cancelVisit, rescheduleVisit } from "../actions/visits";
 import { setLocalePreference } from "../actions/preferences";
 import { currentMonth } from "../../lib/dates";
@@ -50,10 +44,9 @@ export default async function AgendaPage({
     .single();
   if (!profile || profile.role !== "owner") redirect("/");
 
-  const [visits, conversations, leads, notifications] = await Promise.all([
+  const [visits, counters, notifications] = await Promise.all([
     loadVisits(supabase),
-    loadConversations(supabase),
-    loadLeads(supabase),
+    loadNavCounters(supabase, "owner"),
     loadNotifications(supabase, locale),
   ]);
 
@@ -65,7 +58,7 @@ export default async function AgendaPage({
       activeId="visitSchedule"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor("owner", conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
     >
       <VisitsScreen

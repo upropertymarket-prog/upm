@@ -196,29 +196,32 @@ export async function loadNotifications(supabase: Client, locale: string): Promi
 }
 
 /**
- * Contadores da sidebar (07 §4.2/§4.3): Mensagens por ler, visitas à espera de
- * resposta e leads ainda por contactar. Calculados a partir das mesmas listas
- * para não haver duas definições do mesmo número.
+ * Contadores da sidebar (07 §4.2/§4.3), contados na base (F4, 3 nov 2026)
+ * =========================================================================
+ * Mensagens por ler, visitas que esperam resposta minha (um pedido pendente,
+ * ou uma data proposta pelo outro lado — o que eu propus está à espera dele)
+ * e leads ainda por contactar.
+ *
+ * Até aqui contavam-se em JS sobre as listas inteiras, carregadas em cada uma
+ * das 11 páginas só para isto — e acima das 1000 linhas o número saía errado.
+ * `my_nav_counters()` conta a partir das mesmas funções de onde as listas vêm,
+ * com as mesmas regras: uma definição só. Ver a migração `20261103110000`.
+ *
+ * Falha para zeros: um número do menu que não se conseguiu ler não pode
+ * impedir a página de abrir.
  */
-export function countersFor(
+export async function loadNavCounters(
+  supabase: Client,
   role: "owner" | "buyer",
-  conversations: ConversationSummary[],
-  visits: VisitRow[],
-  leads: LeadRow[],
-): Record<string, number> {
-  const messages = conversations.reduce((total, item) => total + item.unread, 0);
-  // O que exige resposta minha: um pedido pendente, ou uma data proposta pelo
-  // outro lado. O que eu próprio propus não conta — está à espera dele.
-  const waiting = visits.filter(
-    (visit) =>
-      (visit.status === "pending" || visit.status === "rescheduled") && !visit.proposedByMe,
-  ).length;
+): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("my_nav_counters");
+  const contadores = (!error && data && typeof data === "object" ? data : {}) as Record<
+    string,
+    unknown
+  >;
+  const numero = (chave: string) => (typeof contadores[chave] === "number" ? contadores[chave] : 0);
 
   return role === "owner"
-    ? {
-        messages,
-        visitSchedule: waiting,
-        leads: leads.filter((lead) => lead.stage === "new" || lead.stage === "contacted").length,
-      }
-    : { messages, myRequests: waiting };
+    ? { messages: numero("messages"), visitSchedule: numero("waiting"), leads: numero("leads") }
+    : { messages: numero("messages"), myRequests: numero("waiting") };
 }

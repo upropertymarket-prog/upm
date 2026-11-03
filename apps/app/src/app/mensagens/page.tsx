@@ -7,12 +7,10 @@ import { PageHeader } from "@upm/ui";
 import { AppChrome } from "../../components/AppChrome";
 import { MessagesPageClient } from "../../components/messages/MessagesPageClient";
 import {
-  countersFor,
+  loadNavCounters,
   loadConversationDetail,
   loadConversations,
-  loadLeads,
   loadNotifications,
-  loadVisits,
 } from "../../lib/interaction";
 import {
   attachmentUrl,
@@ -57,12 +55,11 @@ export default async function MessagesPage({
     .single();
   const role = profile?.role === "owner" ? "owner" : "buyer";
 
-  const [conversations, visits, notifications] = await Promise.all([
+  const [conversations, counters, notifications] = await Promise.all([
     loadConversations(supabase),
-    loadVisits(supabase),
+    loadNavCounters(supabase, role),
     loadNotifications(supabase, locale),
   ]);
-  const leads = role === "owner" ? await loadLeads(supabase) : [];
 
   // Sem conversa escolhida abre a primeira — a lista nunca fica ao lado de um
   // painel vazio quando há alguma coisa para mostrar.
@@ -79,7 +76,7 @@ export default async function MessagesPage({
       activeId="messages"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor(role, conversations, visits, leads)}
+      counters={counters}
       notifications={notifications}
       // A área útil deste ecrã é a janela: os dois painéis vão até ao fim e
       // rolam por dentro, em vez de a página rolar por baixo deles.

@@ -12,10 +12,9 @@ import type { DashboardStat } from "../../components/dashboard/dashboardTypes";
 import { formatRelative } from "../../components/interaction/interactionTypes";
 import { buildViewsSeries, weeklyViews, type ViewRow } from "../../lib/dashboard";
 import {
-  countersFor,
+  loadNavCounters,
   loadConversations,
   loadDashboardCounts,
-  loadLeads,
   loadNotifications,
   loadVisits,
 } from "../../lib/interaction";
@@ -86,12 +85,12 @@ export async function OwnerPanel({
         .then(({ data }) => (data ?? []) as ViewRow[])
     : [];
 
-  const [visits, conversations, leads, notifications, counts] = await Promise.all([
+  const [visits, conversations, notifications, counts, navCounters] = await Promise.all([
     loadVisits(supabase),
     loadConversations(supabase),
-    loadLeads(supabase),
     loadNotifications(supabase, locale),
     loadDashboardCounts(supabase),
+    loadNavCounters(supabase, "owner"),
   ]);
 
   const week = weeklyViews(viewRows, today, chartLabels);
@@ -198,7 +197,7 @@ export async function OwnerPanel({
       activeId="dashboard"
       locale={locale}
       onLocaleChange={setLocalePreference}
-      counters={countersFor("owner", conversations, visits, leads)}
+      counters={navCounters}
       notifications={notifications}
     >
       <PageHeader
