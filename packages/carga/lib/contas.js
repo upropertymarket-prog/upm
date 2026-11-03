@@ -11,7 +11,7 @@
 import encoding from "k6/encoding";
 import http from "k6/http";
 
-import { cabecalhos, cabecalhosDeServico, env } from "./ambiente.js";
+import { cabecalhos, cabecalhosDeServico, env, hostDe } from "./ambiente.js";
 
 const SENHA = "Carga-Teste-UPM-2026!";
 const PLANO = { owner: "premium-owner", buyer: "premium-buyer" };
@@ -67,15 +67,25 @@ function entrar(email) {
   return JSON.parse(r.body);
 }
 
-/** Apaga as contas (os imóveis delas vão primeiro, como nos E2E). */
+/**
+ * Apaga as contas (os imóveis delas vão primeiro, como nos E2E). Uma falha
+ * diz-se: foi uma limpeza calada que deixou 10 anúncios de teste publicados
+ * no site (encontrado pelo fumo deste cenário, a 3 nov). Os anúncios daqui
+ * nunca passam pela moderação, por isso não há histórico a prendê-los.
+ */
 export function apagarContas(contas) {
   for (const c of contas || []) {
-    http.del(`${env.supabase}/rest/v1/properties?owner_id=eq.${c.id}`, null, {
+    const imoveis = http.del(`${env.supabase}/rest/v1/properties?owner_id=eq.${c.id}`, null, {
       headers: cabecalhosDeServico(),
     });
-    http.del(`${env.supabase}/auth/v1/admin/users/${c.id}`, null, {
+    const conta = http.del(`${env.supabase}/auth/v1/admin/users/${c.id}`, null, {
       headers: cabecalhosDeServico(),
     });
+    if (imoveis.status >= 300 || conta.status >= 300) {
+      console.error(
+        `[carga] a conta ${c.email} não saiu: imóveis HTTP ${imoveis.status}, conta HTTP ${conta.status}`,
+      );
+    }
   }
 }
 
@@ -85,7 +95,7 @@ export function apagarContas(contas) {
  * em pedaços de 3180 caracteres (`.0`, `.1`, …) quando não cabe num só.
  */
 export function cookieDeSessao(sessao) {
-  const projeto = new URL(env.supabase).hostname.split(".")[0];
+  const projeto = hostDe(env.supabase).split(".")[0];
   const nome = `sb-${projeto}-auth-token`;
   const valor = `base64-${encoding.b64encode(JSON.stringify(sessao), "rawurl")}`;
   const TAMANHO = 3180;

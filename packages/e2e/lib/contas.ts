@@ -93,15 +93,62 @@ export async function darPlano(perfil: string, slug: "premium-buyer" | "premium-
 }
 
 /**
- * Apaga as contas criadas. A subscrição, os imóveis e o resto saem em
- * cascata; o `audit_log` fica, com o autor a null — é só de acrescentar (A8).
+ * Apaga as contas criadas, e o que elas deixaram.
+ * ---------------------------------------------------------------------------
+ * A subscrição e o resto saem em cascata; o `audit_log` fica, com o autor a
+ * null (A8). O que **não** sai em cascata é o histórico de moderação:
+ * `property_moderation_events` prende o imóvel e o moderador (`restrict`), e
+ * bem — em produção um imóvel nunca se apaga, arquiva-se, e esse histórico
+ * não se perde. Aqui apaga-se primeiro, de propósito.
+ *
+ * Até 3 nov isto não verificava erros: o `delete` do imóvel moderado falhava
+ * em silêncio, a conta também, e ficaram **10 anúncios "E2E Moradia" ativos
+ * no site público**, encontrados pelo teste de carga. Agora uma limpeza que
+ * falha diz que falhou.
  */
 export async function apagarContas(): Promise<void> {
+  const falhas: string[] = [];
   while (criadas.length) {
     const id = criadas.pop()!;
-    await service().from("properties").delete().eq("owner_id", id);
-    await service().auth.admin.deleteUser(id);
+    const { data: imoveis } = await service().from("properties").select("id").eq("owner_id", id);
+    const ids = (imoveis ?? []).map((i) => i.id as string);
+    const passos: Array<[string, PromiseLike<{ error: { message: string } | null }>]> = [
+      [
+        "histórico de moderação do moderador",
+        service().from("property_moderation_events").delete().eq("actor_id", id),
+      ],
+    ];
+    if (ids.length) {
+      passos.push([
+        "histórico de moderação dos imóveis",
+        service().from("property_moderation_events").delete().in("property_id", ids),
+      ]);
+    }
+    for (const [o_que, pedido] of passos) {
+      const { error } = await pedido;
+      if (error) falhas.push(`${id} · ${o_que}: ${error.message}`);
+    }
+    const { error: erroImoveis } = await service().from("properties").delete().eq("owner_id", id);
+    if (erroImoveis) falhas.push(`${id} · imóveis: ${erroImoveis.message}`);
+
+    // Uma conta que assinou o contrato de adesão (o E2E da subscrição) não se
+    // apaga: `subscription_agreements` é registo legal, protegido pela
+    // retenção (A7), e prende a subscrição. Em produção é igual — a conta
+    // anonimiza-se, não desaparece. Fica, sem imóveis, e diz-se.
+    const { count: contratos } = await service()
+      .from("subscription_agreements")
+      .select("id, subscriptions!inner(profile_id)", { count: "exact", head: true })
+      .eq("subscriptions.profile_id", id);
+    if (contratos) {
+      console.warn(
+        `[e2e] a conta ${id} fica: tem ${contratos} contrato(s) de adesão (registo legal).`,
+      );
+      continue;
+    }
+    const { error: erroConta } = await service().auth.admin.deleteUser(id);
+    if (erroConta) falhas.push(`${id} · conta: ${erroConta.message}`);
   }
+  if (falhas.length) throw new Error(`A limpeza dos E2E deixou restos:\n${falhas.join("\n")}`);
 }
 
 /**

@@ -15,15 +15,24 @@
 import { check, group, sleep } from "k6";
 import http from "k6/http";
 
-import { confirmarAlvo, env, etapas, exigir } from "../lib/ambiente.js";
+import { confirmarAlvo, env, etapas, exigir, latencias } from "../lib/ambiente.js";
 import { apagarContas, cookieDeSessao, criarContas } from "../lib/contas.js";
 
 export const options = {
   ...etapas(),
   thresholds: {
     http_req_failed: ["rate<0.01"],
-    "http_req_duration{pagina:painel}": ["p(95)<1500"],
-    "http_req_duration{pagina:lista}": ["p(95)<1500"],
+    // Um limiar sem pedidos passa por omissão (p95=0s): sem isto, um cenário
+    // que rebenta a meio "passava" — visto no fumo de 3 nov. Cada página
+    // medida tem de ter sido pedida, e as verificações têm de passar (todas no
+    // fumo; sob carga, um erro isolado é o próprio resultado a medir).
+    checks: [env.perfil === "fumo" ? "rate==1" : "rate>0.99"],
+    "http_reqs{pagina:painel}": ["count>0"],
+    "http_reqs{pagina:lista}": ["count>0"],
+    ...latencias({
+      "http_req_duration{pagina:painel}": ["p(95)<1500"],
+      "http_req_duration{pagina:lista}": ["p(95)<1500"],
+    }),
   },
 };
 

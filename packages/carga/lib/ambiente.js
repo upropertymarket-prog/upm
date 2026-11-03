@@ -37,10 +37,20 @@ export function exigir(...nomes) {
   if (falta.length) throw new Error(`Faltam variáveis: ${falta.join(", ")} (ver lib/ambiente.js)`);
 }
 
+/**
+ * O host de um URL (`localhost:4401`, `abc.supabase.co`). À mão porque o k6
+ * não tem o `URL` global do browser e do Node — foi o fumo de 3 nov que o
+ * mostrou, com um `ReferenceError` a meio do cenário.
+ */
+export function hostDe(url) {
+  const m = /^[a-z]+:\/\/([^/?#]+)/i.exec(url || "");
+  return m ? m[1].toLowerCase() : "";
+}
+
 /** Recusa carga a sério sem o alvo confirmado por extenso. */
 export function confirmarAlvo() {
   if (env.perfil === "fumo") return;
-  const host = env.app ? new URL(env.app).host : "";
+  const host = hostDe(env.app || env.web);
   if (__ENV.CONFIRMO_ALVO !== host) {
     throw new Error(
       `PERFIL=${env.perfil} pesa no alvo. Repita o host para confirmar: -e CONFIRMO_ALVO=${host}`,
@@ -73,6 +83,16 @@ export function etapas() {
       { duration: "1m", target: 0 },
     ],
   };
+}
+
+/**
+ * Limiares de latência, só fora do `fumo`. O fumo valida o cenário — que
+ * cada passo corre e cada verificação passa —, e corre muitas vezes contra
+ * `next dev`, que compila cada página na primeira visita (11 s no fumo de
+ * 3 nov). Um p95 daí não diz nada da app; num alvo de staging, com carga, diz.
+ */
+export function latencias(limiares) {
+  return env.perfil === "fumo" ? {} : limiares;
 }
 
 /** Cabeçalhos para falar com o PostgREST/Auth do Supabase. */
