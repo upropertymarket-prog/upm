@@ -1,7 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { SITE_CACHE_TAGS, invalidarCacheDoSite } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 import { planFormSchema, syncCatalog } from "@upm/db/billing";
 import { isStepUpRequiredError } from "@upm/db/auth";
@@ -195,6 +197,8 @@ export async function savePlan(
   }
 
   revalidatePath("/admin/planos");
+  // Os preços do site público (`/precos`) vêm do mesmo catálogo (F2).
+  after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.plans]));
 
   const priceChanged =
     !before ||
@@ -229,6 +233,7 @@ export async function syncStripe(): Promise<{ notice?: string; error?: string }>
       createCatalogStore(createServiceClient()),
     );
     revalidatePath("/admin/planos");
+    after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.plans]));
     return {
       notice:
         `Stripe sincronizado: ${report.created} criados, ` +

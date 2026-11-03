@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { SITE_CACHE_TAGS, listingTag } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
 
 /**
@@ -30,7 +31,8 @@ import { createAnonClient } from "@upm/db/server";
 /** 5 minutos — 04 §2.1 ("Revalidação ISR a cada 5 min"). */
 const REVALIDATE = 300;
 
-export const LISTINGS_TAG = "listings";
+// A mesma etiqueta que o `interno` e o `app` pedem para invalidar (F2).
+export const LISTINGS_TAG = SITE_CACHE_TAGS.listings;
 
 /** Uma hora, o mesmo do Market da app autenticada. Ver a nota acima. */
 const SIGNED_URL_TTL = 3600;
@@ -385,7 +387,7 @@ function approxFrom(
 export async function getPublicListing(id: string): Promise<PublicListingDetail | null> {
   try {
     const cached = unstable_cache(() => fetchListing(id), ["public-listing", id], {
-      tags: [LISTINGS_TAG, `listing:${id}`],
+      tags: [LISTINGS_TAG, listingTag(id)],
       revalidate: REVALIDATE,
     });
     return await cached();
@@ -447,7 +449,7 @@ async function fetchAvailability(id: string): Promise<ListingAvailability> {
 export async function getListingAvailability(id: string): Promise<ListingAvailability> {
   try {
     const cached = unstable_cache(() => fetchAvailability(id), ["listing-availability", id], {
-      tags: [LISTINGS_TAG, `listing:${id}`],
+      tags: [LISTINGS_TAG, listingTag(id)],
       revalidate: REVALIDATE,
     });
     return await cached();

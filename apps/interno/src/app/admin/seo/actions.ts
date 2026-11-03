@@ -1,9 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LOCALES } from "@upm/config";
+import { invalidarCacheDoSite, seoTag } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 import { writeAuditLog } from "@upm/db/audit";
 
@@ -164,5 +166,7 @@ export async function saveSeoPage(input: unknown): Promise<SeoActionResult> {
   // o outro a mostrar o valor antigo — é a mesma tabela.
   revalidatePath("/admin/seo");
   revalidatePath("/marketing/seo");
+  // E a terceira: a página do site cujo SEO mudou, no `www` (F2).
+  after(() => invalidarCacheDoSite([seoTag(data.route, data.locale)]));
   return { ok: true, notice };
 }

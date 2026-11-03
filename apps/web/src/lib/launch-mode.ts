@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { SITE_CACHE_TAGS } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
 
 /**
@@ -26,7 +27,7 @@ import { createAnonClient } from "@upm/db/server";
 
 export type LaunchMode = "pre" | "post";
 
-export const LAUNCH_MODE_TAG = "launch-mode";
+export const LAUNCH_MODE_TAG = SITE_CACHE_TAGS.launchMode;
 
 const read = unstable_cache(
   async (): Promise<LaunchMode> => {

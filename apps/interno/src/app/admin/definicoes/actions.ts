@@ -1,8 +1,10 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { SITE_CACHE_TAGS, invalidarCacheDoSite } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
 import { isStepUpRequiredError } from "@upm/db/auth";
 
@@ -65,7 +67,11 @@ export async function saveFeatureFlag(input: unknown): Promise<SettingsActionRes
       ? { needsStepUp: true }
       : { error: "Could not save the feature flag." };
   revalidatePath("/admin/definicoes");
-  if (parsed.data.key === "launch_mode") revalidatePath("/", "layout");
+  // O modo de lançamento é lido pelo `www`, noutro processo: um
+  // `revalidatePath` daqui não lhe chega. Pede-se pela etiqueta (F2).
+  if (parsed.data.key === "launch_mode") {
+    after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.launchMode]));
+  }
   return { ok: true };
 }
 
