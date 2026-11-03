@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
@@ -31,7 +31,7 @@ export default async function AgendaPage({
     getTranslations("nav"),
     getTranslations("visits"),
     getTranslations("roles"),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
   ]);
 
   const user = authData.user;

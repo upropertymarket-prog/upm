@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { isThemeChoice, type ThemeChoice } from "@upm/ui";
 
 /**
@@ -15,7 +15,7 @@ export async function getServerThemeChoice(): Promise<ThemeChoice | null> {
     const supabase = createClient(await cookies());
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = await obterUtilizador(supabase);
     if (!user) return null;
 
     const { data } = await supabase

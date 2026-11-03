@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { Card, Table, type TableColumn } from "@upm/ui";
 
 import { AppChrome } from "../../../../components/AppChrome";
@@ -23,7 +23,7 @@ export default async function PropertyStatsPage({ params }: { params: Promise<{ 
     getLocale(),
     getTranslations("myProperties"),
     getTranslations("roles"),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
   ]);
   const user = authData.user;
   if (!user) redirect("/");

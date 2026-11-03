@@ -62,36 +62,41 @@ export async function OwnerPanel({
   const tStatus = await getTranslations("contracts.status");
   const tActivity = await getTranslations("contracts.activity");
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, title, ref, status")
-    .eq("owner_id", userId);
-
-  const owned = properties ?? [];
-  const ids = owned.map((property) => property.id);
-  const activeCount = owned.filter(
-    (property) => property.status === "active" || property.status === "featured",
-  ).length;
-
-  const today = new Date();
-
-  // Somadas por dia na base. Até 3 nov vinha uma linha por imóvel por dia e
-  // somava-se aqui: com 34 imóveis, 30 dias passam das 1000 linhas que o
-  // PostgREST devolve, e o gráfico mostrava menos visitas do que as reais.
-  // Sem imóveis não há nada a somar — poupa-se o pedido.
-  const viewRows: ViewRow[] = ids.length
-    ? await supabase
-        .rpc("my_owned_property_views_daily", { p_days: HISTORY_DAYS })
-        .then(({ data }) => (data ?? []) as ViewRow[])
-    : [];
-
-  const [visits, conversations, notifications, counts, navCounters] = await Promise.all([
+  // Tudo de uma vez. Eram quatro idas à base em série — imóveis, depois as
+  // visitas por dia, depois um bloco, depois os contratos — e nenhuma depende
+  // de outra: o painel do proprietário passava de 1 s (medido a 3 nov).
+  //
+  // As visitas por dia vêm somadas na base: até 3 nov vinha uma linha por
+  // imóvel por dia e somava-se aqui, e com 34 imóveis 30 dias passavam das
+  // 1000 linhas que o PostgREST devolve. Sem imóveis a função devolve vazio.
+  const [
+    { data: properties },
+    viewRows,
+    visits,
+    conversations,
+    notifications,
+    counts,
+    navCounters,
+    { data: contractRows },
+  ] = await Promise.all([
+    supabase.from("properties").select("id, title, ref, status").eq("owner_id", userId),
+    supabase
+      .rpc("my_owned_property_views_daily", { p_days: HISTORY_DAYS })
+      .then(({ data }) => (data ?? []) as ViewRow[]),
     loadVisits(supabase),
     loadConversations(supabase),
     loadNotifications(supabase, locale),
     loadDashboardCounts(supabase),
     loadNavCounters(supabase, "owner"),
+    supabase.rpc("my_contracts"),
   ]);
+
+  const owned = properties ?? [];
+  const activeCount = owned.filter(
+    (property) => property.status === "active" || property.status === "featured",
+  ).length;
+
+  const today = new Date();
 
   const week = weeklyViews(viewRows, today, chartLabels);
 
@@ -170,7 +175,7 @@ export async function OwnerPanel({
   // `my_contracts()` e não um select: a RLS de `properties` e de `profiles` não
   // deixa alcançar o título do imóvel nem o nome da contraparte por join — é o
   // mesmo padrão de `my_conversations` (07 §19, nota de leitura da Fase 5).
-  const { data: contractRows } = await supabase.rpc("my_contracts");
+  // Lidos no bloco de cima, com o resto.
   const contracts = (contractRows ?? []).slice(0, ACTIVITY_ROWS);
 
   const recentContracts: ActivityItem[] = contracts.map((row) => ({

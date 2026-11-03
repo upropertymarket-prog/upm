@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { formatBytes } from "@upm/db/cloud";
 import { CloudScreen } from "@upm/cloud";
 
@@ -58,21 +58,21 @@ export default async function CloudPage() {
     getLocale(),
     getTranslations("cloud"),
     getTranslations("roles"),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
   ]);
 
   const user = authData.user;
   if (!user) redirect("/");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
+  // O perfil e o estado da Cloud ao mesmo tempo: um não depende do outro, e
+  // em série a página passava de 1 s (medido a 3 nov).
+  const [{ data: profile }, status] = await Promise.all([
+    supabase.from("profiles").select("role, full_name").eq("id", user.id).single(),
+    loadCloudStatus(supabase),
+  ]);
   if (!profile || (profile.role !== "owner" && profile.role !== "buyer")) redirect("/");
 
   const role = profile.role;
-  const status = await loadCloudStatus(supabase);
 
   const [folders, files, sharedWithMe, contacts, counters, notifications, addons] =
     await Promise.all([

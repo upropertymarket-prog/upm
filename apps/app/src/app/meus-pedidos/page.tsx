@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { VisitsScreen } from "../../components/visits/VisitsScreen";
@@ -27,7 +27,7 @@ export default async function MyRequestsPage({
 }) {
   const { visita } = await searchParams;
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, { data: authData }] = await Promise.all([getLocale(), obterUtilizador(supabase)]);
 
   const user = authData.user;
   if (!user) redirect("/");

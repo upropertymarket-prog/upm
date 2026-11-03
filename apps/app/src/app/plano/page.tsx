@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 
 import { AppChrome } from "../../components/AppChrome";
 import { PlanScreen } from "../../components/billing/PlanScreen";
@@ -45,7 +45,7 @@ export default async function PlanoPage({
   const supabase = createClient(await cookies());
   const [locale, { data: authData }, params] = await Promise.all([
     getLocale(),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
     searchParams,
   ]);
 
@@ -73,17 +73,19 @@ export default async function PlanoPage({
 
   // P9-04 — a decisão vem da porta única, lida aqui e passada ao ecrã. O
   // componente não a recalcula e não conhece a regra.
-  const cancelDecision = status.subscriptionId
-    ? await canCancelSubscription(supabase, status.subscriptionId)
-    : null;
-
   // P9-03 — o período mínimo que se aplica a quem subscrever agora (12 meses
   // desde 7 out 2026). Vem da configuração, nunca de código.
-  const { data: globalCommitment } = await supabase
-    .from("app_settings")
-    .select("value")
-    .eq("key", "subscription_default_commitment_months")
-    .maybeSingle();
+  // Os dois ao mesmo tempo: eram mais duas idas à base em série (3 nov).
+  const [cancelDecision, { data: globalCommitment }] = await Promise.all([
+    status.subscriptionId
+      ? canCancelSubscription(supabase, status.subscriptionId)
+      : Promise.resolve(null),
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "subscription_default_commitment_months")
+      .maybeSingle(),
+  ]);
 
   const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 

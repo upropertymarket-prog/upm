@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 
 import { BuyerPanel } from "./BuyerPanel";
 import { OwnerPanel } from "./OwnerPanel";
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function DashboardPage() {
   const supabase = createClient(await cookies());
-  const [locale, { data: authData }] = await Promise.all([getLocale(), supabase.auth.getUser()]);
+  const [locale, { data: authData }] = await Promise.all([getLocale(), obterUtilizador(supabase)]);
 
   const user = authData.user;
   if (!user) redirect("/");

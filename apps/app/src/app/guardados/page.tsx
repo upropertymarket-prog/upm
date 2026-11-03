@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Bookmark } from "lucide-react";
-import { createClient } from "@upm/db/server";
+import { createClient, obterUtilizador } from "@upm/db/server";
 import { EmptyState, StatusTag, Table, type TableColumn } from "@upm/ui";
 
 import { AppChrome } from "../../components/AppChrome";
@@ -35,7 +35,7 @@ export default async function SavedPropertiesPage() {
     getTranslations("property"),
     getTranslations("market.alerts"),
     getTranslations("roles"),
-    supabase.auth.getUser(),
+    obterUtilizador(supabase),
   ]);
   const user = authData.user;
   if (!user) redirect("/");
