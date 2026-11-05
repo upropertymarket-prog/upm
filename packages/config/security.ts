@@ -346,17 +346,23 @@ export function isIpAllowed(ip: string, cidrs: readonly string[]): boolean {
  * `X-Forwarded-For: <ip-da-allowlist>` e, se o pedido chegar ao servidor sem
  * passar por um proxy que reescreva o cabeçalho, passa.
  *
- * Daí a ordem: primeiro os cabeçalhos que **só** um proxy conhecido escreve
- * (`cf-connecting-ip` no Cloudflare, `x-real-ip` em nginx e afins), e o
+ * Daí a ordem: primeiro os cabeçalhos que **só** o proxy à frente escreve, e o
  * `x-forwarded-for` apenas como último recurso.
  *
- * **Isto não substitui o perímetro.** Enquanto a origem for alcançável
- * diretamente, a allowlist de IP é falsificável por cabeçalho — é por isso que
- * 12 §2.1 põe o proxy obrigatório como pré-requisito de B1, e não como
- * melhoria. Em desenvolvimento local não há proxy nenhum e é por isso que a
- * flag está vazia.
+ * **Só se confia no proxy que existe.** O DNS fica na Amen (12 §34.4, 5 nov
+ * 2026): à frente das apps está a Vercel e mais nada. A Vercel escreve
+ * `x-vercel-forwarded-for` e `x-real-ip` por cima do que o cliente mandar;
+ * qualquer outro cabeçalho passa **tal como o cliente o escreveu**. Até aqui a
+ * lista começava em `cf-connecting-ip` e `true-client-ip`, do tempo em que a
+ * Cloudflare ia estar à frente — sem ela, bastava mandar
+ * `CF-Connecting-IP: <ip-da-allowlist>` para entrar no `interno`. Se um dia
+ * houver outro proxy à frente, os cabeçalhos dele entram aqui só nesse dia, e
+ * com a origem fechada a quem não passe por ele.
+ *
+ * Em desenvolvimento local não há proxy nenhum e é por isso que a flag está
+ * vazia.
  */
-const CABECALHOS_DE_CONFIANCA = ["cf-connecting-ip", "true-client-ip", "x-real-ip"] as const;
+const CABECALHOS_DE_CONFIANCA = ["x-vercel-forwarded-for", "x-real-ip"] as const;
 
 export function clientIpFrom(headers: { get: (key: string) => string | null }): string | null {
   for (const nome of CABECALHOS_DE_CONFIANCA) {
