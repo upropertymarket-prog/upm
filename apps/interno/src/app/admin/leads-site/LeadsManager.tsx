@@ -209,7 +209,11 @@ export function LeadsManager({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "leads-site.csv";
+      // A exportação é também o backup diário dos leads (12 §34.5, decisão de
+      // 5 nov 2026): com a data e a hora no nome, a cópia de hoje não apaga a
+      // de ontem na pasta de transferências de quem a faz.
+      const carimbo = new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "h");
+      link.download = `leads-site_${carimbo}.csv`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
