@@ -1,6 +1,10 @@
 import { unstable_cache } from "next/cache";
+import type { Route } from "next";
+import { redirect } from "next/navigation";
 import { SITE_CACHE_TAGS } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
+
+import { modoForcado, type LaunchMode } from "./launch-mode-override";
 
 /**
  * O modo do site público (P2-05 · 03 §1.1 e F14)
@@ -25,7 +29,7 @@ import { createAnonClient } from "@upm/db/server";
  * preso no modo errado é pior do que uma leitura por minuto.
  */
 
-export type LaunchMode = "pre" | "post";
+export type { LaunchMode };
 
 export const LAUNCH_MODE_TAG = SITE_CACHE_TAGS.launchMode;
 
@@ -54,9 +58,24 @@ const read = unstable_cache(
  * pré-inscrição a mais um dia não é.
  */
 export async function getLaunchMode(): Promise<LaunchMode> {
+  const forcado = modoForcado();
+  if (forcado) return forcado;
   try {
     return await read();
   } catch {
     return "pre";
   }
+}
+
+/**
+ * A guarda das Server Actions que só existem depois do lançamento.
+ * ---------------------------------------------------------------------------
+ * O middleware manda de volta quem abrir `/criar-conta` em `pre`, mas uma
+ * Server Action não precisa da página: o Next encaminha-a pelo identificador,
+ * e um `POST /` com o `Next-Action` do registo corre-a na mesma. Por isso a
+ * ação verifica o modo ela própria, no servidor, e em `pre` devolve quem a
+ * chamou à página de pré-lançamento sem fazer nada.
+ */
+export async function soDepoisDoLancamento(): Promise<void> {
+  if ((await getLaunchMode()) === "pre") redirect("/" as Route);
 }

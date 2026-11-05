@@ -80,6 +80,10 @@ vi.mock("@upm/db/auth", async (importOriginal) => {
   };
 });
 
+// O registo só existe depois do lançamento (12 §34.5): estes casos correm em
+// `post`. O último bloco prova o contrário.
+vi.stubEnv("UPM_LAUNCH_MODE_OVERRIDE", "post");
+
 const { registerAccount } = await import("./actions");
 
 const PROFILE_ID = "11111111-1111-1111-1111-111111111111";
@@ -213,5 +217,20 @@ describe("consentimento de marketing (D69)", () => {
     expect(state.checkoutUrl).toBe("https://checkout.stripe.test/sessao");
     expect(erro).toHaveBeenCalledWith(expect.stringContaining("sem permissão"));
     erro.mockRestore();
+  });
+});
+
+describe("em pré-lançamento o registo não existe (12 §34.5)", () => {
+  it("devolve à página de pré-lançamento sem criar conta nem abrir pagamento", async () => {
+    vi.stubEnv("UPM_LAUNCH_MODE_OVERRIDE", "pre");
+    try {
+      // Chamada direta, sem passar pela página: é assim que uma Server Action
+      // se invoca pelo identificador, e o middleware não a vê.
+      await expect(registerAccount({}, formData(REGISTO_VALIDO))).rejects.toThrow("NEXT_REDIRECT");
+      expect(signUp).not.toHaveBeenCalled();
+      expect(sessionsCreate).not.toHaveBeenCalled();
+    } finally {
+      vi.stubEnv("UPM_LAUNCH_MODE_OVERRIDE", "post");
+    }
   });
 });

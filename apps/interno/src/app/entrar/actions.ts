@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@upm/db/server";
@@ -14,10 +15,10 @@ import { checkAuthRateLimit, emailSchema, recordAuthAttempt } from "@upm/db/auth
 
 export type LoginState = { error?: string; suspended?: boolean };
 
+// O IP vem de `clientIpFrom`, que só confia nos cabeçalhos que a Vercel
+// reescreve (12 §34.4) — um sítio só para a regra, em vez de uma cópia por ação.
 function clientIp(headerList: Headers): string {
-  const forwardedFor = headerList.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0]!.trim();
-  return headerList.get("x-real-ip") ?? "unknown";
+  return clientIpFrom(headerList) ?? "unknown";
 }
 
 export async function signIn(_prev: LoginState, formData: FormData): Promise<LoginState> {

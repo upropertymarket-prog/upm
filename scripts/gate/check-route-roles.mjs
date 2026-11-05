@@ -113,7 +113,7 @@ function rotaDe(relativo) {
 function paginas(dir, base, out = []) {
   if (!existsSync(dir)) return out;
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
-    if (entrada.name === "node_modules" || entrada.name === ".next" || entrada.name === ".next-e2e" || entrada.name === "test-results" || entrada.name === "playwright-report") continue;
+    if (entrada.name === "node_modules" || entrada.name === ".next" || entrada.name === ".next-e2e" || entrada.name === ".next-e2e-pre" || entrada.name === "test-results" || entrada.name === "playwright-report") continue;
     const cheio = join(dir, entrada.name);
     if (entrada.isDirectory()) paginas(cheio, base, out);
     else if (entrada.name === "page.tsx") out.push(cheio);

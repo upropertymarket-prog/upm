@@ -1,15 +1,22 @@
 {
   "extends": "@upm/config/tsconfig/next.json",
   "compilerOptions": {
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
-    "next-env.d.ts",
-    "../../packages/ui/src/svg-assets.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../../packages/ui/src/svg-assets.d.ts",
+    ".next-e2e/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".next-e2e/types/**/*.ts"
+    "next-env.d.ts",
+    ".next-e2e-pre/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { createHash, randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -192,7 +193,7 @@ export async function logContractExport(contractId: string): Promise<void> {
     p_subject_type: "contract",
     p_subject_id: contractId,
     p_action: "export_pdf",
-    p_ip: requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+    p_ip: clientIpFrom(requestHeaders) ?? undefined,
     p_user_agent: requestHeaders.get("user-agent") ?? undefined,
   });
 }

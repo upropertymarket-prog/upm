@@ -1,5 +1,6 @@
 "use server";
 
+import { soDepoisDoLancamento } from "@/lib/launch-mode";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 
@@ -22,6 +23,8 @@ export async function requestPasswordReset(
   _prev: RequestRecoveryState,
   formData: FormData,
 ): Promise<RequestRecoveryState> {
+  // Em pré-lançamento esta ação não existe (12 §34.5): ver `soDepoisDoLancamento`.
+  await soDepoisDoLancamento();
   const emailResult = emailSchema.safeParse(formData.get("email"));
   if (!emailResult.success) return { error: "E-mail inválido." };
   const email = emailResult.data;
@@ -48,6 +51,8 @@ export async function setNewPassword(
   _prev: SetNewPasswordState,
   formData: FormData,
 ): Promise<SetNewPasswordState> {
+  // Em pré-lançamento esta ação não existe (12 §34.5): ver `soDepoisDoLancamento`.
+  await soDepoisDoLancamento();
   const passwordResult = passwordSchema.safeParse(formData.get("password"));
   if (!passwordResult.success) return { error: "Mínimo 10 caracteres." };
   const password = passwordResult.data;

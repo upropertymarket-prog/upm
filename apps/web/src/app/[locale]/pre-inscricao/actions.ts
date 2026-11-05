@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -52,10 +53,10 @@ const contactSchema = baseSchema.extend({
   message: z.string().trim().max(5000).optional(),
 });
 
+// O IP vem de `clientIpFrom`, que só confia nos cabeçalhos que a Vercel
+// reescreve (12 §34.4) — um sítio só para a regra, em vez de uma cópia por ação.
 async function clientIp(): Promise<string | null> {
-  const list = await headers();
-  const forwarded = list.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || list.get("x-real-ip") || null;
+  return clientIpFrom(await headers());
 }
 
 function fieldErrorsFrom(error: z.ZodError): Record<string, string> {

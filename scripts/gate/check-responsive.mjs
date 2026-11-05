@@ -30,7 +30,7 @@ const BARE_MINMAX = /repeat\(\s*auto-(?:fit|fill)\s*,\s*minmax\(\s*(\d+)px/g;
 function collect(dir, out = []) {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".next" || entry.name === ".next-e2e" || entry.name === "test-results" || entry.name === "playwright-report" || entry.name === ".git") continue;
+    if (entry.name === "node_modules" || entry.name === ".next" || entry.name === ".next-e2e" || entry.name === ".next-e2e-pre" || entry.name === "test-results" || entry.name === "playwright-report" || entry.name === ".git") continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) collect(full, out);
     else if (/\.(tsx?|jsx?|mjs|css)$/.test(entry.name)) out.push(full);

@@ -116,7 +116,7 @@ function recolher(dir, out = []) {
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
     const nome = entrada.name;
     // `.next-e2e` é a pasta de build dos servidores dos E2E: código gerado.
-    if (["node_modules", ".next", ".next-e2e", "test-results", "playwright-report", "dist", "build"].includes(nome)) continue;
+    if (["node_modules", ".next", ".next-e2e", ".next-e2e-pre", "test-results", "playwright-report", "dist", "build"].includes(nome)) continue;
     const cheio = join(dir, nome);
     if (entrada.isDirectory()) recolher(cheio, out);
     else if (/\.(tsx?|mts|cts)$/.test(nome) && !/\.test\.(tsx?)$/.test(nome)) out.push(cheio);
