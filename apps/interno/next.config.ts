@@ -47,8 +47,21 @@ type TempoConfigInput = Parameters<ReturnType<typeof tempoNextjsPlugin>>[0];
 export default withSentryConfig(
   tempoNextjsPlugin()(withNextIntl(nextConfig) as TempoConfigInput) as NextConfig,
   {
-    silent: true,
-    // Sem upload de source maps enquanto não houver SENTRY_AUTH_TOKEN no CI.
+    // B4 (12 §25): os source maps sobem no build da Vercel, onde vivem
+    // SENTRY_AUTH_TOKEN, SENTRY_ORG e SENTRY_PROJECT (um projeto Sentry por
+    // app). Sem o token o plugin não sobe nada e o build segue: em local e no
+    // CI nada muda.
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.CI,
     disableLogger: true,
+    // Os mapas servem ao Sentry, não ao público: sem isto, qualquer pessoa lia
+    // o código-fonte da app pelo browser. Saem do build depois do upload.
+    hideSourceMaps: true,
+    sourcemaps: { deleteSourcemapsAfterUpload: true },
+    // Também os ficheiros do Next que não são da app, para as pilhas do
+    // cliente virem legíveis até ao fim.
+    widenClientFileUpload: true,
   },
 );
