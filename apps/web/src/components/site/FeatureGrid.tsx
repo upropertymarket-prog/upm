@@ -5,11 +5,13 @@ import {
   Building2,
   CalendarCheck,
   Cloud,
+  Eye,
   FileSignature,
   Handshake,
   LayoutDashboard,
   MapPin,
   MessageSquare,
+  Scale,
   ShieldCheck,
 } from "lucide-react";
 
@@ -40,6 +42,8 @@ const ICONS: Record<IconName, typeof Handshake> = {
   "shield-check": ShieldCheck,
   "layout-dashboard": LayoutDashboard,
   "file-signature": FileSignature,
+  scale: Scale,
+  eye: Eye,
 };
 
 export function FeatureGrid({

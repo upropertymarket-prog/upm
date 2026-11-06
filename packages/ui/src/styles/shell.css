@@ -657,3 +657,27 @@
     display: inline-flex;
   }
 }
+
+/* --- Barra do site público em ecrã estreito (6 nov 2026) ----------------
+   Marca, seis âncoras, idioma, tema e CTA não cabem numa linha abaixo de
+   ~1024 px: as âncoras quebravam em coluna por cima do hero e o CTA saía do
+   ecrã (87 px de rolo horizontal a 390 px). Saem primeiro as âncoras — o
+   rodapé tem a mesma navegação —, depois o tema. A marca, o idioma e o CTA
+   ficam sempre. Classes só da `PublicHeader`; a topbar da app não as usa. */
+@media (width < 1024px) {
+  .upm-topbar__site-nav {
+    display: none !important;
+  }
+}
+
+@media (width < 640px) {
+  .upm-topbar__site-theme {
+    /* `!important` pelo mesmo motivo da regra de cima: o elemento traz
+       `display` inline, e o inline ganha a uma folha de estilos. */
+    display: none !important;
+  }
+
+  .upm-topbar__inner:has(.upm-topbar__site-nav) {
+    padding: 0 var(--sp-4);
+  }
+}

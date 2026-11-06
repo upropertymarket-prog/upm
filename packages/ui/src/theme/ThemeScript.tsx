@@ -57,5 +57,13 @@ export function ThemeScript({
   // html-ok: o `script` é construído aqui em cima, linha a linha, e tudo o que
   // nele vem de fora passa por `JSON.stringify`. Não há entrada de utilizador
   // neste caminho; corre sob a CSP pelo `nonce` do pedido.
-  return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: script }} />;
+  //
+  // `suppressHydrationWarning`: o browser apaga o `nonce` do DOM depois de o
+  // ler (para não o expor a outros scripts), e o React em desenvolvimento via
+  // `nonce=""` contra o do servidor e acendia o "1 Issue" em todas as páginas
+  // (visto a 6 nov 2026). Só silencia este elemento, e não muda nada em
+  // produção — a CSP continua a validar o valor que veio do servidor.
+  return (
+    <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: script }} />
+  );
 }

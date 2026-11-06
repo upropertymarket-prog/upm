@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { SITE_CACHE_TAGS } from "@upm/config/site-cache-tags";
 import { createAnonClient } from "@upm/db/server";
 
-import type { PublicPlan } from "../components/site/Pricing";
+import type { PlanLimits, PublicPlan } from "../components/site/Pricing";
 
 /**
  * O catálogo público de planos (P2-03 · 07 §20.8)
@@ -29,6 +29,7 @@ type PlanRow = {
   price_year_cents: number | null;
   price_month_cents: number | null;
   features: string[] | null;
+  limits: PlanLimits | null;
   position: number | null;
 };
 
@@ -43,6 +44,7 @@ function toPublicPlan(row: PlanRow, index: number, total: number): PublicPlan {
     priceYearCents: row.price_year_cents ?? 0,
     priceMonthCents: row.price_month_cents ?? 0,
     features: row.features ?? [],
+    limits: row.limits ?? {},
     // O do meio, quando há três; o último, quando há dois. É a convenção do
     // protótipo (o `tone: 'accent'` cai sempre no plano intermédio/topo) sem
     // precisar de uma coluna nova na tabela.
@@ -55,7 +57,9 @@ const read = unstable_cache(
     const supabase = createAnonClient();
     const { data, error } = await supabase
       .from("plans")
-      .select("slug, name, audience, price_year_cents, price_month_cents, features, position")
+      .select(
+        "slug, name, audience, price_year_cents, price_month_cents, features, limits, position",
+      )
       .eq("visible", true)
       .order("position");
 

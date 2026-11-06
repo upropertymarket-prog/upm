@@ -498,15 +498,15 @@
       "points": {
         "fairMarket": {
           "title": "Mercado mais justo",
-          "body": "Oportunidades reais, sem especulação sobre o preço."
+          "body": "Defendemos um mercado mais justo e acessível, onde todas as famílias possam encontrar um lar, sem especulação nem desigualdade, com oportunidades reais para todos."
         },
         "freedom": {
           "title": "Liberdade para negociar",
-          "body": "Diálogo aberto entre quem compra e quem vende."
+          "body": "Acreditamos numa negociação direta e livre, sem intermediários nem pressões externas: o diálogo aberto entre quem compra e quem vende, para melhores negócios."
         },
         "transparency": {
           "title": "Transparência",
-          "body": "Informação completa e verificada em cada anúncio."
+          "body": "Deixamos de fora as práticas desnecessárias do mercado imobiliário. A confiança nasce da clareza, com comunicação simples e segura entre todas as partes."
         }
       }
     },
@@ -619,7 +619,8 @@
       "body": "Escolha o plano que precisa e mude quando quiser. Sem comissões sobre a venda, em qualquer plano.",
       "audienceTabs": {
         "owner": "Para proprietários",
-        "buyer": "Para compradores"
+        "buyer": "Para compradores",
+        "builder": "Para construtores"
       },
       "billingLabel": "Periodicidade",
       "billingTabs": {
@@ -627,7 +628,21 @@
         "month": "Mensal"
       },
       "audienceSoon": "Os planos para este público estão a ser preparados.",
-      "featuresSoon": "Funcionalidades por anunciar"
+      "featuresSoon": "Funcionalidades por anunciar",
+      "builderSoon": "Os planos para construtores estão a ser preparados. Fale connosco para saber o que vamos ter para a sua empresa.",
+      "builderCta": "Contacte-nos",
+      "limits": {
+        "properties": "{count, plural, one {1 propriedade ativa} other {Até # propriedades ativas}}",
+        "propertiesUnlimited": "Propriedades ativas ilimitadas",
+        "visits": "{count, plural, one {1 visita agendada} other {Até # visitas agendadas}}",
+        "visitsUnlimited": "Visitas agendadas ilimitadas",
+        "chats": "{count, plural, one {1 conversa ativa} other {Até # conversas ativas}}",
+        "chatsUnlimited": "Conversas ativas ilimitadas",
+        "saved": "{count, plural, one {1 propriedade guardada} other {Até # propriedades guardadas}}",
+        "savedUnlimited": "Propriedades guardadas ilimitadas",
+        "alerts": "{count, plural, one {1 alerta de pesquisa} other {# alertas de pesquisa}}",
+        "cloud": "{count} GB de documentos na cloud"
+      }
     },
     "faq": {
       "title": "Esclareça as suas dúvidas antes de decidir",
@@ -715,7 +730,12 @@
           }
         }
       },
-      "copyright": "© 2026 UProperty Market — Todos os direitos reservados."
+      "copyright": "© 2026 UProperty Market — Todos os direitos reservados.",
+      "social": {
+        "label": "Redes sociais",
+        "instagram": "Instagram",
+        "youtube": "YouTube"
+      }
     },
     "nav": {
       "plataforma": "A plataforma",
@@ -828,6 +848,17 @@
         "retry": "Voltar a inscrever-me",
         "back": "Voltar ao início"
       }
+    },
+    "mission": {
+      "eyebrow": "A nossa missão",
+      "title": "Transformar o mercado imobiliário, tornando-o mais justo e acessível.",
+      "body": "Na UProperty Market, acreditamos que o mercado imobiliário deve estar ao serviço das pessoas, e não de interesses externos. Por isso, estamos a desenvolver uma plataforma que permite comprar e vender casa de forma direta, simples e sem pressões.",
+      "bodyCommitment": "O nosso compromisso é devolver o controlo do processo de compra e venda a quem realmente importa: as pessoas.",
+      "imageLabel": "fotografia · família"
+    },
+    "banner": {
+      "text": "Mais do que uma plataforma — uma nova forma de estar no mercado imobiliário.",
+      "imageLabel": "fotografia · interior"
     }
   },
   "cloud": {

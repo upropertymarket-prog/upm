@@ -112,7 +112,7 @@ export default async function ListingsPage({
             </div>
           </SiteSection>
         </main>
-        <SiteFooter />
+        <SiteFooter launchMode="post" />
       </>
     );
   }
@@ -146,7 +146,7 @@ export default async function ListingsPage({
           />
         </SiteSection>
       </main>
-      <SiteFooter />
+      <SiteFooter launchMode="post" />
     </>
   );
 }

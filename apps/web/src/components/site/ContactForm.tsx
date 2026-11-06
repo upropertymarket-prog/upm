@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2 } from "lucide-react";
-import { Button, Input, Select, Textarea } from "@upm/ui";
+import { Button, Field, Input, Select, Textarea } from "@upm/ui";
+
+import { Link } from "@/i18n/navigation";
 
 import type { LeadFormState } from "@/lib/leadFormState";
 import { CONTACT_REASON_VALUES } from "../../lib/site-content";
@@ -26,6 +28,11 @@ import { CONTACT_REASON_VALUES } from "../../lib/site-content";
  * `consent_marketing = false`. Pedi-lo aqui seria arrancar um consentimento a
  * quem só quer uma resposta.
  *
+ * **Mas com os Termos e a Privacidade** (6 nov 2026, como no site anterior):
+ * quem escreve deixa nome e e-mail, e tem de saber, antes de enviar, o que se
+ * faz com eles. A caixa é obrigatória e nunca vem marcada, e o servidor
+ * recusa sem ela — esconder o botão não chega.
+ *
  * O campo `website` é o honeypot, no mesmo desenho do `PreRegistrationForm`:
  * fora do ecrã, `aria-hidden`, `tabIndex={-1}`. Um humano nunca lá chega.
  */
@@ -39,6 +46,9 @@ export type ContactFormProps = {
 export function ContactForm({ onSubmit }: ContactFormProps) {
   const [state, action, pending] = useActionState<LeadFormState, FormData>(onSubmit, {});
   const tc = useTranslations("site.contact");
+  // As frases do consentimento são as da pré-inscrição: o mesmo texto legal
+  // num sítio só, para não divergirem.
+  const tl = useTranslations("site.preRegistration");
 
   if (state.ok) {
     return (
@@ -117,6 +127,31 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         hint={tc("messageHint")}
         error={state.fieldErrors?.message}
       />
+
+      <Field label={tl("consents")} error={state.fieldErrors?.consentTerms}>
+        {({ describedBy, invalid }) => (
+          <label
+            style={{
+              display: "flex",
+              gap: "var(--sp-3)",
+              alignItems: "start",
+              fontSize: "var(--fs-body)",
+            }}
+          >
+            <input
+              type="checkbox"
+              name="consentTerms"
+              aria-describedby={describedBy}
+              aria-invalid={invalid}
+              style={{ marginTop: "3px", flexShrink: 0 }}
+            />
+            <span>
+              {tl("acceptPrefix")} <Link href="/termos">{tl("terms")}</Link> {tl("acceptMiddle")}{" "}
+              <Link href="/privacidade">{tl("privacy")}</Link>.
+            </span>
+          </label>
+        )}
+      </Field>
 
       {state.error ? (
         <p role="alert" style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--danger)" }}>

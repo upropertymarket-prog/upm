@@ -31,12 +31,44 @@ export type PublicPlan = {
   priceYearCents: number;
   priceMonthCents: number;
   features: string[];
+  /**
+   * Os limites do plano (`plans.limits`, 07 §19.2). Quando `features` vem
+   * vazio, é daqui que sai a lista do cartão (6 nov 2026): até então o site
+   * mostrava "Funcionalidades por anunciar" com os limites já decididos na base.
+   * `null` num limite é "ilimitado".
+   */
+  limits: PlanLimits;
   /** Destaca uma coluna. O catálogo decide, pela posição. */
   highlighted: boolean;
 };
 
+export type PlanLimits = Partial<
+  Record<
+    "active_properties" | "visits" | "active_chats" | "saved" | "alerts" | "cloud_gb",
+    number | null
+  >
+>;
+
 type Billing = "year" | "month";
-type Audience = "owner" | "buyer";
+type Audience = (typeof PRICING_AUDIENCE_IDS)[number];
+
+/**
+ * O que cada público lê primeiro. Ao proprietário interessa quantas
+ * propriedades publica; ao comprador, quantas guarda e quantos alertas tem.
+ */
+const LIMITS_BY_AUDIENCE: Record<"owner" | "buyer", ReadonlyArray<keyof PlanLimits>> = {
+  owner: ["active_properties", "visits", "active_chats", "cloud_gb"],
+  buyer: ["saved", "alerts", "visits", "active_chats", "cloud_gb"],
+};
+
+const LIMIT_KEYS: Record<keyof PlanLimits, { count: string; unlimited?: string }> = {
+  active_properties: { count: "properties", unlimited: "propertiesUnlimited" },
+  visits: { count: "visits", unlimited: "visitsUnlimited" },
+  active_chats: { count: "chats", unlimited: "chatsUnlimited" },
+  saved: { count: "saved", unlimited: "savedUnlimited" },
+  alerts: { count: "alerts" },
+  cloud_gb: { count: "cloud" },
+};
 
 function money(cents: number, locale: string): string {
   return new Intl.NumberFormat(locale === "en" ? "en-IE" : "pt-PT", {
@@ -67,7 +99,26 @@ export function Pricing({
 
   // `both` entra nas duas escadas: um plano para ambos os públicos é
   // relevante em qualquer das tabs.
-  const visible = plans.filter((plan) => plan.audience === audience || plan.audience === "both");
+  const visible =
+    audience === "builder"
+      ? []
+      : plans.filter((plan) => plan.audience === audience || plan.audience === "both");
+
+  function featureLines(plan: PublicPlan): string[] {
+    if (plan.features.length > 0) return plan.features;
+    if (audience === "builder") return [];
+    return LIMITS_BY_AUDIENCE[audience].flatMap((key) => {
+      if (!(key in plan.limits)) return [];
+      const value = plan.limits[key];
+      const keys = LIMIT_KEYS[key];
+      if (value === null || value === undefined) {
+        return keys.unlimited ? [t(`limits.${keys.unlimited}`)] : [];
+      }
+      // Zero não é uma funcionalidade: um plano sem cloud não diz "0 GB".
+      if (value <= 0) return [];
+      return [t(`limits.${keys.count}`, { count: value })];
+    });
+  }
 
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
@@ -98,10 +149,27 @@ export function Pricing({
       {visible.length === 0 ? (
         // Catálogo vazio não é um ecrã partido: é uma frase honesta. Pode
         // acontecer em staging, e um painel de preços em branco faria o
-        // visitante pensar que o site rebentou.
-        <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>
-          {t("audienceSoon")}
-        </p>
+        // visitante pensar que o site rebentou. Para os construtores ainda
+        // não há planos, e a frase leva ao contacto.
+        <div style={{ display: "grid", gap: "var(--sp-4)", justifyItems: "center" }}>
+          <p
+            style={{
+              margin: 0,
+              maxWidth: "34rem",
+              textAlign: "center",
+              color: "var(--muted)",
+              fontSize: "var(--fs-body)",
+              lineHeight: 1.6,
+            }}
+          >
+            {audience === "builder" ? t("builderSoon") : t("audienceSoon")}
+          </p>
+          {audience === "builder" ? (
+            <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
+              {t("builderCta")}
+            </a>
+          ) : null}
+        </div>
       ) : (
         <ul
           style={{
@@ -161,7 +229,7 @@ export function Pricing({
                     gap: "var(--sp-2)",
                   }}
                 >
-                  {plan.features.map((feature) => (
+                  {featureLines(plan).map((feature) => (
                     <li
                       key={feature}
                       style={{
@@ -179,7 +247,7 @@ export function Pricing({
                       {feature}
                     </li>
                   ))}
-                  {plan.features.length === 0 ? (
+                  {featureLines(plan).length === 0 ? (
                     <li
                       style={{
                         display: "flex",

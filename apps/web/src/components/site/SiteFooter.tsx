@@ -1,8 +1,9 @@
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Brand } from "@upm/ui";
+import { Instagram, Youtube } from "lucide-react";
 
-import { FOOTER_COLUMNS } from "../../lib/site-content";
+import { FOOTER_COLUMNS, SOCIAL_LINKS } from "../../lib/site-content";
 import { SITE_MAX_WIDTH } from "./SiteSection";
 
 /**
@@ -16,9 +17,20 @@ import { SITE_MAX_WIDTH } from "./SiteSection";
  *
  * As âncoras (`#sobre`, `#precos`) só funcionam na home. Num site de uma
  * página só isso chega; quando houver `/propriedades`, passam a `/#sobre`.
+ *
+ * `launchMode` esconde os links que só existem depois do lançamento
+ * (`postOnly`, hoje o "Já tenho conta"). Por omissão `pre`: quem não o
+ * passa (o 404, a página de erro) esconde, em vez de mostrar um link que em
+ * pré-lançamento volta à home.
  */
-export function SiteFooter() {
+export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post" }) {
   const t = useTranslations("site.footer");
+  const redes = (
+    [
+      { id: "instagram", href: SOCIAL_LINKS.instagram, Icon: Instagram },
+      { id: "youtube", href: SOCIAL_LINKS.youtube, Icon: Youtube },
+    ] as const
+  ).filter((rede) => rede.href !== "");
 
   return (
     <footer
@@ -108,51 +120,81 @@ export function SiteFooter() {
                     gap: "var(--sp-2)",
                   }}
                 >
-                  {column.links.map((link) => (
-                    <li key={link.id}>
-                      {/* `"route" in link` e não `href.startsWith("#")`: uma
+                  {column.links
+                    .filter(
+                      (link) => launchMode === "post" || !("postOnly" in link && link.postOnly),
+                    )
+                    .map((link) => (
+                      <li key={link.id}>
+                        {/* `"route" in link` e não `href.startsWith("#")`: uma
                           âncora da mesma página e uma rota do site são coisas
                           diferentes — só a segunda leva prefixo de idioma — e
                           o compilador distingue-as por nome de campo, que um
                           `startsWith` sobre uma união de literais não faz. */}
-                      {"route" in link ? (
-                        <Link
-                          href={link.route}
-                          style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
-                        >
-                          {t(`columns.${column.id}.links.${link.id}`)}
-                        </Link>
-                      ) : (
-                        <a
-                          href={link.anchor}
-                          style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
-                        >
-                          {t(`columns.${column.id}.links.${link.id}`)}
-                        </a>
-                      )}
-                    </li>
-                  ))}
+                        {"route" in link ? (
+                          <Link
+                            href={link.route}
+                            style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
+                          >
+                            {t(`columns.${column.id}.links.${link.id}`)}
+                          </Link>
+                        ) : (
+                          <a
+                            href={link.anchor}
+                            style={{ fontSize: "var(--fs-body)", color: "var(--text)" }}
+                          >
+                            {t(`columns.${column.id}.links.${link.id}`)}
+                          </a>
+                        )}
+                      </li>
+                    ))}
                 </ul>
               </nav>
             ))}
           </div>
         </div>
 
-        <p
+        <div
           style={{
-            margin: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "var(--sp-4)",
+            justifyContent: redes.length > 0 ? "space-between" : "center",
+            alignItems: "center",
             paddingTop: "var(--sp-5)",
             borderTop: "1px solid var(--border)",
-            fontSize: "var(--fs-body)",
-            color: "var(--muted)",
-            // Centrado no canvas a 12 out 2026: é a última linha do rodapé,
-            // sozinha debaixo do traço, e alinhada à esquerda ficava a puxar
-            // o olho para um canto sem nada do outro lado.
-            textAlign: "center",
           }}
         >
-          {t("copyright")}
-        </p>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "var(--fs-body)",
+              color: "var(--muted)",
+              // Centrado no canvas a 12 out 2026: é a última linha do rodapé,
+              // sozinha debaixo do traço, e alinhada à esquerda ficava a puxar
+              // o olho para um canto sem nada do outro lado.
+              textAlign: "center",
+            }}
+          >
+            {t("copyright")}
+          </p>
+          {redes.length > 0 ? (
+            <nav aria-label={t("social.label")} style={{ display: "flex", gap: "var(--sp-4)" }}>
+              {redes.map(({ id, href, Icon }) => (
+                <a
+                  key={id}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t(`social.${id}`)}
+                  style={{ color: "var(--muted)", display: "inline-flex" }}
+                >
+                  <Icon size={20} aria-hidden="true" />
+                </a>
+              ))}
+            </nav>
+          ) : null}
+        </div>
       </div>
     </footer>
   );

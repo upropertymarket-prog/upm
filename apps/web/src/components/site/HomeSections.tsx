@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { Tabs } from "@upm/ui";
 
 import { PublicHeader } from "../PublicHeader";
 import { ContactForm } from "./ContactForm";
@@ -15,7 +17,15 @@ import { SectionHeading, SiteSection } from "./SiteSection";
 import { SiteFooter } from "./SiteFooter";
 import type { LeadFormState } from "@/lib/leadFormState";
 import type { PublicListingCard } from "../../lib/public-listings";
-import { ABOUT_POINT_IDS, AUDIENCE_CARDS, COMING_SOON_CARDS } from "../../lib/site-content";
+import { SiteImage } from "./SiteImage";
+import {
+  AUDIENCE_CARDS,
+  AUDIENCE_IDS,
+  COMING_SOON_CARDS,
+  MISSION_VALUE_CARDS,
+  SITE_IMAGES,
+  type AudienceId,
+} from "../../lib/site-content";
 
 /**
  * A home inteira, sem ir buscar nada (P2-01)
@@ -96,105 +106,88 @@ export function HomeSections({
           </div>
         </SiteSection>
 
+        {/* "Sobre nós" e "A nossa missão" na mesma secção (6 nov 2026, como no
+            site de pré-lançamento anterior): a primeira diz o que é a
+            plataforma, a segunda porquê, e os três valores fecham-na. Texto e
+            fotografia alternam de lado, que é o que dá ritmo à página. */}
         <SiteSection id="sobre">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
-              gap: "clamp(1.5rem, 4vw, 3rem)",
-              alignItems: "center",
-            }}
-          >
-            {/* Imagem à esquerda, como 04 §2.1 pede para esta secção. */}
-            <div
-              role="img"
-              aria-label={t("about.imageLabel")}
-              style={{
-                aspectRatio: "4 / 3",
-                borderRadius: "var(--r-lg)",
-                border: "1px solid var(--border)",
-                background: "var(--surface2)",
-                display: "grid",
-                placeItems: "center",
-                color: "var(--muted)",
-                fontSize: "var(--fs-body)",
-              }}
+          <div style={{ display: "grid", gap: "clamp(3rem, 8vw, 6rem)" }}>
+            <Split
+              image={
+                <SiteImage
+                  src={SITE_IMAGES.about}
+                  label={t("about.imageLabel")}
+                  aspectRatio="4 / 3"
+                />
+              }
             >
-              {t("about.imageLabel")}
-            </div>
-            <div style={{ display: "grid", gap: "var(--sp-5)" }}>
               <SectionHeading
                 eyebrow={t("about.eyebrow")}
                 title={t("about.title")}
                 body={t("about.body")}
               />
-              <ul
-                style={{
-                  listStyle: "none",
-                  margin: 0,
-                  padding: 0,
-                  display: "grid",
-                  gap: "var(--sp-4)",
-                }}
-              >
-                {ABOUT_POINT_IDS.map((pointId) => (
-                  <li key={pointId} style={{ display: "grid", gap: "2px" }}>
-                    <strong style={{ fontSize: "14.5px", color: "var(--text)" }}>
-                      {t(`about.points.${pointId}.title`)}
-                    </strong>
-                    <span style={{ fontSize: "14px", color: "var(--muted)" }}>
-                      {t(`about.points.${pointId}.body`)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div>
+                <Link href={signupHref} className="upm-btn upm-btn--primary upm-btn--md">
+                  {t(`platformCta.${launchMode}`)}
+                </Link>
+              </div>
+            </Split>
+
+            <Split
+              imageFirst
+              image={
+                <SiteImage
+                  src={SITE_IMAGES.mission}
+                  label={t("mission.imageLabel")}
+                  aspectRatio="4 / 3"
+                />
+              }
+            >
+              <SectionHeading
+                eyebrow={t("mission.eyebrow")}
+                title={t("mission.title")}
+                body={t("mission.body")}
+              />
+              <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.6, color: "var(--muted)" }}>
+                {t("mission.bodyCommitment")}
+              </p>
+            </Split>
+
+            <FeatureGrid
+              cards={MISSION_VALUE_CARDS.map((card) => ({
+                icon: card.icon,
+                title: t(`about.points.${card.id}.title`),
+                body: t(`about.points.${card.id}.body`),
+              }))}
+              minColumn="15rem"
+            />
           </div>
         </SiteSection>
 
         <SiteSection id="empresas" tone="alt">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
-              gap: "clamp(1.5rem, 4vw, 3rem)",
-              alignItems: "center",
-            }}
-          >
-            {/* Texto à esquerda nesta, ao contrário de "Sobre nós" — é o
-                alternado do protótipo, e é o que dá ritmo à página. */}
-            <div style={{ display: "grid", gap: "var(--sp-5)" }}>
-              <SectionHeading
-                eyebrow={t("business.eyebrow")}
-                title={t("business.title")}
-                body={t("business.body")}
+          <Split
+            image={
+              <SiteImage
+                src={SITE_IMAGES.business}
+                label={t("business.imageLabel")}
+                aspectRatio="4 / 3"
               />
-              <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
-                <Link href={signupHref} className="upm-btn upm-btn--primary upm-btn--md">
-                  {t("business.primaryCta")}
-                </Link>
-                <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
-                  {t("business.secondaryCta")}
-                </a>
-              </div>
+            }
+          >
+            <SectionHeading
+              eyebrow={t("business.eyebrow")}
+              title={t("business.title")}
+              body={t("business.body")}
+            />
+            <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
+              <Link href={signupHref} className="upm-btn upm-btn--primary upm-btn--md">
+                {t("business.primaryCta")}
+              </Link>
+              <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
+                {t("business.secondaryCta")}
+              </a>
             </div>
-            <div
-              role="img"
-              aria-label={t("business.imageLabel")}
-              style={{
-                aspectRatio: "4 / 3",
-                borderRadius: "var(--r-lg)",
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                display: "grid",
-                placeItems: "center",
-                color: "var(--muted)",
-                fontSize: "var(--fs-body)",
-              }}
-            >
-              {t("business.imageLabel")}
-            </div>
-          </div>
+          </Split>
         </SiteSection>
 
         {/* "Em breve" em pré-lançamento, "Propriedades mais recentes" depois — a
@@ -256,6 +249,10 @@ export function HomeSections({
           />
         </SiteSection>
 
+        <SiteSection>
+          <Banner text={t("banner.text")} label={t("banner.imageLabel")} />
+        </SiteSection>
+
         <SiteSection id="duvidas" tone="alt">
           <Faq />
         </SiteSection>
@@ -275,26 +272,129 @@ export function HomeSections({
         </SiteSection>
       </main>
 
-      <SiteFooter />
+      <SiteFooter launchMode={launchMode} />
     </>
   );
 }
 
-/** As duas audiências de 04 §2.1. Por agora só Particulares tem conteúdo
- *  aprovado no protótipo; Empresas entra quando o texto for validado. */
+/**
+ * Texto de um lado, fotografia do outro; em ecrã estreito, uma por baixo da
+ * outra, com o texto sempre primeiro (a ordem do DOM é a da leitura, e o
+ * `imageFirst` só troca o lado visual, pela `order` da grelha).
+ */
+function Split({
+  image,
+  imageFirst = false,
+  children,
+}: {
+  image: ReactNode;
+  imageFirst?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
+        gap: "clamp(1.5rem, 4vw, 3rem)",
+        alignItems: "center",
+      }}
+    >
+      <div style={{ display: "grid", gap: "var(--sp-5)" }}>{children}</div>
+      <div style={imageFirst ? { order: -1 } : undefined}>{image}</div>
+    </div>
+  );
+}
+
+/**
+ * A faixa "Mais do que uma plataforma…" (6 nov 2026, do site anterior): uma
+ * fotografia em largura total com a frase por cima. O véu escuro está lá
+ * sempre — é ele que garante o contraste do texto branco, seja qual for a
+ * fotografia que entrar.
+ */
+function Banner({ text, label }: { text: string; label: string }) {
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "grid",
+        minHeight: "clamp(16rem, 38vw, 26rem)",
+        borderRadius: "var(--r-lg)",
+        overflow: "hidden",
+      }}
+    >
+      <SiteImage src={SITE_IMAGES.banner} label={label} rounded={false} showLabel={false} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "grid",
+          placeItems: "center",
+          padding: "var(--sp-6)",
+          // Preto fixo e não um token: o véu tem de escurecer a fotografia
+          // nos dois temas, e o texto por cima é branco nos dois.
+          background: "rgba(0, 0, 0, 0.45)",
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            maxWidth: "32rem",
+            textAlign: "center",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.4rem, 3.4vw, 2.25rem)",
+            lineHeight: 1.2,
+            color: "#fff",
+          }}
+        >
+          {text}
+        </p>
+      </div>
+      {SITE_IMAGES.banner ? null : (
+        <span
+          style={{
+            position: "absolute",
+            right: "var(--sp-4)",
+            bottom: "var(--sp-3)",
+            fontSize: "var(--fs-label)",
+            color: "rgba(255, 255, 255, 0.7)",
+          }}
+        >
+          {label}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * As duas audiências de 04 §2.1, num seletor (6 nov 2026): o site já fala às
+ * empresas na secção própria, por isso os cartões delas também entram. O
+ * texto dos cartões das Empresas é provisório até o cliente rever os do site
+ * anterior.
+ */
 function Audiences() {
   const t = useTranslations("site.audiences");
+  const [audience, setAudience] = useState<AudienceId>("particulares");
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-6)" }}>
-      <SectionHeading title={t("particulares.title")} align="center" />
-      <FeatureGrid
-        cards={AUDIENCE_CARDS.particulares.map((card) => ({
-          icon: card.icon,
-          title: t(`particulares.cards.${card.id}.title`),
-          body: t(`particulares.cards.${card.id}.body`),
-        }))}
+    <div style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "center" }}>
+      <Tabs
+        label={t(`${audience}.title`)}
+        value={audience}
+        onValueChange={(id) => setAudience(id as AudienceId)}
+        items={AUDIENCE_IDS.map((id) => ({ id, label: t(`tabs.${id}`) }))}
       />
+      <SectionHeading title={t(`${audience}.title`)} align="center" />
+      <div style={{ width: "100%" }}>
+        <FeatureGrid
+          cards={AUDIENCE_CARDS[audience].map((card) => ({
+            icon: card.icon,
+            title: t(`${audience}.cards.${card.id}.title`),
+            body: t(`${audience}.cards.${card.id}.body`),
+          }))}
+        />
+      </div>
     </div>
   );
 }

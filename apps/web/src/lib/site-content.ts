@@ -42,7 +42,9 @@ export type IconName =
   | "building-2"
   | "shield-check"
   | "layout-dashboard"
-  | "file-signature";
+  | "file-signature"
+  | "scale"
+  | "eye";
 
 /**
  * Um cartão já resolvido, pronto a desenhar. O `FeatureGrid` recebe isto —
@@ -88,14 +90,26 @@ export const AUDIENCE_CARDS: Record<AudienceId, readonly FeatureCardRef[]> = {
   ],
 };
 
-/** Os três pontos de "Sobre nós". */
-export const ABOUT_POINT_IDS = ["fairMarket", "freedom", "transparency"] as const;
+/**
+ * Os três valores, em cartões por baixo de "A nossa missão" (6 nov 2026).
+ * Eram uma lista curta dentro de "Sobre nós"; voltaram a ser cartões, como no
+ * site de pré-lançamento anterior, porque são o argumento da missão e não um
+ * pormenor do "Sobre". As chaves continuam em `site.about.points`.
+ */
+export const MISSION_VALUE_CARDS: readonly FeatureCardRef[] = [
+  { icon: "scale", id: "fairMarket" },
+  { icon: "handshake", id: "freedom" },
+  { icon: "eye", id: "transparency" },
+];
 
 /** Os três números do hero. */
 export const HERO_STAT_IDS = ["commission", "privacy", "everything"] as const;
 
 /** As abas de público e de periodicidade da secção de preços. */
-export const PRICING_AUDIENCE_IDS = ["owner", "buyer"] as const;
+// `builder` não tem planos no catálogo: o separador mostra que estão a ser
+// preparados e leva ao contacto (6 nov 2026). Quando houver planos com
+// `audience = "builder"`, aparecem aqui sem mudar o componente.
+export const PRICING_AUDIENCE_IDS = ["owner", "buyer", "builder"] as const;
 export const PRICING_BILLING_IDS = ["year", "month"] as const;
 
 /** As dúvidas, pela ordem em que se respondem. */
@@ -141,7 +155,9 @@ export const FOOTER_COLUMNS = [
     id: "start",
     links: [
       { id: "preRegistration", route: "/pre-inscricao" },
-      { id: "signIn", route: "/entrar" },
+      // Só depois do lançamento: em `pre` não há contas, e o `/entrar` volta à
+      // página de pré-lançamento — um link que não leva a lado nenhum.
+      { id: "signIn", route: "/entrar", postOnly: true },
     ],
   },
   {
@@ -170,3 +186,27 @@ export const NAV_ANCHOR_IDS = [
   "duvidas",
   "contactos",
 ] as const;
+
+/**
+ * As redes sociais do rodapé. Um endereço vazio não desenha o ícone: é assim
+ * que se entra sem conta e se liga quando a conta existir, sem mexer no JSX.
+ */
+export const SOCIAL_LINKS = {
+  instagram: "",
+  youtube: "",
+} as const satisfies Record<"instagram" | "youtube", string>;
+
+/**
+ * As fotografias do site (6 nov 2026). `src` vazio desenha o espaço reservado
+ * com o rótulo, na proporção final — o layout não salta quando a imagem
+ * entra. As fotos são de banco (licença comercial) e entram em
+ * `apps/web/public/site/`; para as ligar basta escrever o caminho aqui.
+ */
+export const SITE_IMAGES = {
+  hero: "",
+  about: "",
+  mission: "",
+  business: "",
+  banner: "",
+} as const satisfies Record<string, string>;
+export type SiteImageSlot = keyof typeof SITE_IMAGES;

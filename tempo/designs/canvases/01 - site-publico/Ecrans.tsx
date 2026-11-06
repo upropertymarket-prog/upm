@@ -34,13 +34,9 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  * `Ecrans.tsx` desse canvas: "um excerto escrito à mão é uma segunda cópia de
  * um contrato, que diverge à primeira cláusula alterada").
  *
- * **O único dado inventado são os planos**, e é deliberado. Os valores reais
- * em staging são os do teste do Stripe — "Smarter (teste)" a 149,90 €/ano —
- * e rever a página de preços com eles seria rever o ecrã errado. Os números
- * abaixo são os de 07 §8.3, que é o que a página vai mostrar quando o
- * catálogo for corrigido no Admin. Em produção nada disto é lido: a página
- * usa `getPublicPlans()`, e `public-site.test.ts` garante que o que o
- * visitante vê é o que está na base de dados.
+ * **Os planos são os reais** (6 nov 2026), copiados da base: ver a nota de
+ * `PLANOS`. Até então eram os números de 07 §8.3, e a storyboard mostrava uma
+ * página de preços que não era a que ia para produção.
  *
  * Três decisões herdadas do canvas `legal`, que custaram tentativas lá:
  *
@@ -189,80 +185,85 @@ const DETALHE: PublicListingDetail = {
   photoUrls: [],
 };
 
-/** Os preços de 07 §8.3 — ver a nota acima sobre porque não são os de staging. */
+/**
+ * Os planos **tal como estão na base e no Stripe** (verificado a 6 nov 2026:
+ * os cinco preços batem certo com os do Stripe, e o "Smarter (teste)" passou
+ * a "Smarter"). `features` vem vazio, como na base: a lista de cada cartão
+ * sai dos `limits`, que é o que o site em produção faz. Se o catálogo mudar no
+ * Admin, estes números atualizam-se à mão — o `public-site.test.ts` é que
+ * garante o lado da produção.
+ */
 const PLANOS: PublicPlan[] = [
   {
     slug: "essential-owner",
     name: "Essential",
     audience: "owner",
-    priceYearCents: 599,
-    priceMonthCents: 69,
-    features: [
-      "1 propriedade ativa",
-      "Até 3 visitas agendadas",
-      "Até 1 chat ativo",
-      "Suporte normal",
-    ],
+    priceYearCents: 5990,
+    priceMonthCents: 599,
+    features: [],
+    limits: {
+      active_properties: 3,
+      visits: 20,
+      active_chats: 15,
+      cloud_gb: 2,
+      saved: 50,
+      alerts: 3,
+    },
     highlighted: false,
   },
   {
     slug: "smarter-owner",
     name: "Smarter",
     audience: "owner",
-    priceYearCents: 2990,
-    priceMonthCents: 299,
-    features: [
-      "Até 5 propriedades ativas",
-      "Até 5 visitas agendadas",
-      "Até 4 chats ativos",
-      "Suporte prioritário",
-      "Cloud de documentação",
-    ],
+    priceYearCents: 14990,
+    priceMonthCents: 1499,
+    features: [],
+    limits: {
+      active_properties: 10,
+      visits: 60,
+      active_chats: 50,
+      cloud_gb: 5,
+      saved: 200,
+      alerts: 10,
+    },
     highlighted: true,
   },
   {
     slug: "premium-owner",
     name: "Premium",
     audience: "owner",
-    priceYearCents: 5990,
-    priceMonthCents: 599,
-    features: [
-      "Propriedades ilimitadas",
-      "Visitas e agenda ilimitadas",
-      "Chats ilimitados",
-      "Suporte premium",
-      "Cloud de documentação 20 GB",
-    ],
+    priceYearCents: 29990,
+    priceMonthCents: 2999,
+    features: [],
+    limits: {
+      active_properties: null,
+      visits: null,
+      active_chats: null,
+      cloud_gb: 20,
+      saved: null,
+      alerts: 20,
+    },
     highlighted: false,
   },
   {
     slug: "smarter-buyer",
     name: "Smarter",
     audience: "buyer",
-    priceYearCents: 2990,
-    priceMonthCents: 299,
-    features: [
-      "Até 25 propriedades guardadas",
-      "Até 5 chats ativos",
-      "Alertas de descida de preço",
-      "Agenda de visitas",
-    ],
-    highlighted: true,
+    priceYearCents: 4990,
+    priceMonthCents: 499,
+    features: [],
+    limits: { saved: 100, alerts: 5, visits: 15, active_chats: 20, cloud_gb: 1 },
+    highlighted: false,
   },
   {
     slug: "premium-buyer",
     name: "Premium",
     audience: "buyer",
-    priceYearCents: 4990,
-    priceMonthCents: 499,
-    features: [
-      "Guardados ilimitados",
-      "Chats ilimitados",
-      "Alertas em tempo real",
-      "Prioridade em visitas",
-      "Contratos digitais ilimitados",
-    ],
-    highlighted: false,
+    priceYearCents: 6990,
+    priceMonthCents: 699,
+    features: [],
+    limits: { saved: null, alerts: 20, visits: null, active_chats: null, cloud_gb: 5 },
+    highlighted: true,
   },
 ];
 

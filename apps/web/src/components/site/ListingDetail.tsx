@@ -413,7 +413,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
         </SiteSection>
       </main>
 
-      <SiteFooter />
+      <SiteFooter launchMode="post" />
     </>
   );
 }

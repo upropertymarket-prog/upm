@@ -498,15 +498,15 @@
       "points": {
         "fairMarket": {
           "title": "A fairer market",
-          "body": "Real opportunities, with no price speculation."
+          "body": "We stand for a fairer, more accessible market, where every family can find a home, with no speculation or inequality and real opportunities for everyone."
         },
         "freedom": {
           "title": "Freedom to negotiate",
-          "body": "An open conversation between buyer and seller."
+          "body": "We believe in direct, free negotiation, with no middlemen or outside pressure: an open conversation between buyer and seller, for better deals."
         },
         "transparency": {
           "title": "Transparency",
-          "body": "Complete, verified information on every listing."
+          "body": "We leave out the property market’s unnecessary practices. Trust comes from clarity, with simple, secure communication between everyone involved."
         }
       }
     },
@@ -619,7 +619,8 @@
       "body": "Pick the plan you need and change it whenever you want. No commission on the sale, on any plan.",
       "audienceTabs": {
         "owner": "For owners",
-        "buyer": "For buyers"
+        "buyer": "For buyers",
+        "builder": "For builders"
       },
       "billingLabel": "Billing period",
       "billingTabs": {
@@ -627,7 +628,21 @@
         "month": "Monthly"
       },
       "audienceSoon": "The plans for this audience are being prepared.",
-      "featuresSoon": "Features to be announced"
+      "featuresSoon": "Features to be announced",
+      "builderSoon": "The plans for builders are being prepared. Get in touch to hear what we will have for your company.",
+      "builderCta": "Contact us",
+      "limits": {
+        "properties": "{count, plural, one {1 active property} other {Up to # active properties}}",
+        "propertiesUnlimited": "Unlimited active properties",
+        "visits": "{count, plural, one {1 scheduled viewing} other {Up to # scheduled viewings}}",
+        "visitsUnlimited": "Unlimited scheduled viewings",
+        "chats": "{count, plural, one {1 active conversation} other {Up to # active conversations}}",
+        "chatsUnlimited": "Unlimited active conversations",
+        "saved": "{count, plural, one {1 saved property} other {Up to # saved properties}}",
+        "savedUnlimited": "Unlimited saved properties",
+        "alerts": "{count, plural, one {1 search alert} other {# search alerts}}",
+        "cloud": "{count} GB of documents in the cloud"
+      }
     },
     "faq": {
       "title": "Clear up your questions before you decide",
@@ -715,7 +730,12 @@
           }
         }
       },
-      "copyright": "© 2026 UProperty Market — All rights reserved."
+      "copyright": "© 2026 UProperty Market — All rights reserved.",
+      "social": {
+        "label": "Social media",
+        "instagram": "Instagram",
+        "youtube": "YouTube"
+      }
     },
     "nav": {
       "plataforma": "The platform",
@@ -828,6 +848,17 @@
         "retry": "Sign up again",
         "back": "Back to home"
       }
+    },
+    "mission": {
+      "eyebrow": "Our mission",
+      "title": "Changing the property market, making it fairer and more accessible.",
+      "body": "At UProperty Market, we believe the property market should serve people, not outside interests. That is why we are building a platform for buying and selling a home directly, simply and without pressure.",
+      "bodyCommitment": "Our commitment is to give control of buying and selling back to the people who really matter: you.",
+      "imageLabel": "photograph · family"
+    },
+    "banner": {
+      "text": "More than a platform — a new way to be in the property market.",
+      "imageLabel": "photograph · interior"
     }
   },
   "cloud": {

@@ -136,6 +136,7 @@ export function PublicHeader({
 
           {anchors !== "none" ? (
             <nav
+              className="upm-topbar__site-nav"
               aria-label={t("site.nav.sections")}
               style={{
                 display: "flex",
@@ -169,15 +170,19 @@ export function PublicHeader({
               onLocaleChange={trocarIdioma}
               label={t("locale.title")}
             />
-            <ThemeToggle
-              variant="segmented"
-              labels={{
-                title: t("theme.title"),
-                light: t("theme.light"),
-                dark: t("theme.dark"),
-                system: t("theme.system"),
-              }}
-            />
+            {/* Em ecrã estreito sai (`shell.css`, "Barra do site público"): o
+                tema segue o do sistema, e o CTA não pode cair da barra. */}
+            <span className="upm-topbar__site-theme" style={{ display: "contents" }}>
+              <ThemeToggle
+                variant="segmented"
+                labels={{
+                  title: t("theme.title"),
+                  light: t("theme.light"),
+                  dark: t("theme.dark"),
+                  system: t("theme.system"),
+                }}
+              />
+            </span>
             {/* `md` e não `sm`: 04 §1.8 fixa 36 px como a altura padrão de um
                 botão, e um CTA de barra de topo não é uma ação dentro de uma
                 linha de lista. */}

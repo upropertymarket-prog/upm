@@ -130,7 +130,7 @@ export function ListingGone({
         ) : null}
       </main>
 
-      <SiteFooter />
+      <SiteFooter launchMode="post" />
     </>
   );
 }
