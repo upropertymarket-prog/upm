@@ -115,7 +115,7 @@ export function HomeSections({
             <Split
               image={
                 <SiteImage
-                  src={SITE_IMAGES.about}
+                  image={SITE_IMAGES.about}
                   label={t("about.imageLabel")}
                   aspectRatio="4 / 3"
                 />
@@ -137,7 +137,7 @@ export function HomeSections({
               imageFirst
               image={
                 <SiteImage
-                  src={SITE_IMAGES.mission}
+                  image={SITE_IMAGES.mission}
                   label={t("mission.imageLabel")}
                   aspectRatio="4 / 3"
                 />
@@ -168,7 +168,7 @@ export function HomeSections({
           <Split
             image={
               <SiteImage
-                src={SITE_IMAGES.business}
+                image={SITE_IMAGES.business}
                 label={t("business.imageLabel")}
                 aspectRatio="4 / 3"
               />
@@ -318,7 +318,7 @@ function Banner({ text, label }: { text: string; label: string }) {
         overflow: "hidden",
       }}
     >
-      <SiteImage src={SITE_IMAGES.banner} label={label} rounded={false} showLabel={false} />
+      <SiteImage image={SITE_IMAGES.banner} label={label} rounded={false} showLabel={false} />
       <div
         style={{
           position: "absolute",

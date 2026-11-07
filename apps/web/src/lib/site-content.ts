@@ -197,16 +197,30 @@ export const SOCIAL_LINKS = {
 } as const satisfies Record<"instagram" | "youtube", string>;
 
 /**
- * As fotografias do site (6 nov 2026). `src` vazio desenha o espaço reservado
- * com o rótulo, na proporção final — o layout não salta quando a imagem
- * entra. As fotos são de banco (licença comercial) e entram em
- * `apps/web/public/site/`; para as ligar basta escrever o caminho aqui.
+ * As fotografias do site (6 e 7 nov 2026)
+ * ---------------------------------------------------------------------------
+ * Fotos de banco, entregues pelo cliente e otimizadas a 7 nov: WebP, largura
+ * de quem as mostra (1600 px no hero e na faixa, 1200 nas outras), sem
+ * metadados, 47 a 70 KB cada (os originais tinham 1 a 4 MB). A missão e a
+ * faixa eram verticais e foram recortadas na origem para o lugar horizontal,
+ * com as caras e o espelho dentro do enquadramento — cortadas pelo browser,
+ * perdiam o assunto. Os originais não entram no repositório.
+ *
+ * O nome do ficheiro diz o que a fotografia mostra (é lido pelos motores de
+ * busca); o texto alternativo, nas duas línguas, está em `site.*.imageLabel`.
+ * `width`/`height` são os do ficheiro: o browser reserva o espaço antes de a
+ * imagem chegar. `null` volta a desenhar o espaço reservado.
  */
-export const SITE_IMAGES = {
-  hero: "",
-  about: "",
-  mission: "",
-  business: "",
-  banner: "",
-} as const satisfies Record<string, string>;
+export type SiteImageFile = { src: string; width: number; height: number };
+
+export const SITE_IMAGES: Record<
+  "hero" | "about" | "mission" | "business" | "banner",
+  SiteImageFile | null
+> = {
+  hero: { src: "/site/sala-de-estar-moderna-sem-comissoes.webp", width: 1600, height: 1136 },
+  about: { src: "/site/comprar-e-vender-casa-online.webp", width: 1200, height: 900 },
+  mission: { src: "/site/familia-com-recem-nascido-em-casa.webp", width: 1200, height: 900 },
+  business: { src: "/site/gestao-de-obra-no-setor-da-construcao.webp", width: 1200, height: 900 },
+  banner: { src: "/site/quarto-moderno-com-espelho-redondo.webp", width: 1600, height: 800 },
+};
 export type SiteImageSlot = keyof typeof SITE_IMAGES;

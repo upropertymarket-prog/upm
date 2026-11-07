@@ -123,7 +123,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
         </div>
 
         <div className="upm-hero__media">
-          <SiteImage src={SITE_IMAGES.hero} label={t("imageLabel")} rounded={false} priority />
+          <SiteImage image={SITE_IMAGES.hero} label={t("imageLabel")} rounded={false} priority />
         </div>
       </div>
     </section>

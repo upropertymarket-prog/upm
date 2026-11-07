@@ -483,7 +483,7 @@
         "privacy": "100 % private contacts",
         "everything": "Everything you need"
       },
-      "imageLabel": "main photograph · interior"
+      "imageLabel": "Bright modern living room with light sofas and a wooden coffee table — buy and sell a home with no commission"
     },
     "platform": {
       "eyebrow": "The platform",
@@ -494,7 +494,7 @@
       "eyebrow": "About us",
       "title": "A digital solution that makes buying and selling property simpler.",
       "body": "UProperty Market makes the process simpler and more direct: you talk securely, over chat, with no need for middlemen, no personal contacts shared and no commission on the sale.",
-      "imageLabel": "photograph · team",
+      "imageLabel": "Smiling woman at her laptop, buying or selling a home online with no middlemen",
       "points": {
         "fairMarket": {
           "title": "A fairer market",
@@ -516,7 +516,7 @@
       "body": "At UProperty Market you get an integrated system with tools built specifically for what the construction sector needs. Centralise all your company's information in one place, always available and always up to date.",
       "primaryCta": "Pre-register",
       "secondaryCta": "Contact us",
-      "imageLabel": "photograph · building site"
+      "imageLabel": "Site engineer in a hard hat and high-visibility vest checking plans on a construction site"
     },
     "comingSoon": {
       "eyebrow": "Coming soon",
@@ -856,11 +856,11 @@
       "title": "Changing the property market, making it fairer and more accessible.",
       "body": "At UProperty Market, we believe the property market should serve people, not outside interests. That is why we are building a platform for buying and selling a home directly, simply and without pressure.",
       "bodyCommitment": "Our commitment is to give control of buying and selling back to the people who really matter: you.",
-      "imageLabel": "photograph · family"
+      "imageLabel": "Couple holding their newborn baby at home — a family finding its home"
     },
     "banner": {
       "text": "More than a platform — a new way to be in the property market.",
-      "imageLabel": "photograph · interior"
+      "imageLabel": "Modern bedroom with a round mirror, white sideboard and an indoor plant"
     }
   },
   "cloud": {

@@ -7,6 +7,7 @@ import { getLaunchMode } from "@/lib/launch-mode";
 import { getPublicListings, LISTINGS_PAGE_SIZE } from "@/lib/public-listings";
 import type { SitePathname } from "@/i18n/pathnames";
 import { localizedPath, type SeoPath } from "@/lib/seo";
+import { SITE_IMAGES } from "@/lib/site-content";
 
 /**
  * `sitemap.xml` do site público (P2-06 · 04 §2.1.1)
@@ -94,12 +95,21 @@ function localizedEntries(
     LOCALES.map((outro) => [outro, `${base}${localizedPath(route, outro)}`]),
   );
 
+  // As fotografias da home entram como imagens da página (7 nov 2026): é a
+  // via que o Google tem para as associar à home na pesquisa de imagens,
+  // com o nome de ficheiro e o `alt` que as descrevem.
+  const images =
+    route.pathname === "/"
+      ? Object.values(SITE_IMAGES).flatMap((imagem) => (imagem ? [`${base}${imagem.src}`] : []))
+      : undefined;
+
   return LOCALES.map((locale) => ({
     url: `${base}${localizedPath(route, locale)}`,
     lastModified: now,
     changeFrequency: (diaria ? "daily" : "monthly") as "daily" | "monthly",
     priority: priorityFor(route.pathname),
     alternates: { languages },
+    ...(images ? { images } : {}),
   }));
 }
 

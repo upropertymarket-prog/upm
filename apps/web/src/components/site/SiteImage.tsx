@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import type { SiteImageFile } from "../../lib/site-content";
+
 /**
  * Uma fotografia do site, ou o seu espaço reservado (6 nov 2026)
  * =========================================================================
@@ -16,7 +18,7 @@ import type { CSSProperties } from "react";
  * cedo é o que conta para o LCP. As outras esperam pela vez delas.
  */
 export function SiteImage({
-  src,
+  image,
   label,
   aspectRatio,
   priority = false,
@@ -24,7 +26,8 @@ export function SiteImage({
   showLabel = true,
   style,
 }: {
-  src: string;
+  /** `null` desenha o espaço reservado. */
+  image: SiteImageFile | null;
   /** O texto alternativo da fotografia e o rótulo do espaço reservado. */
   label: string;
   /** `undefined` deixa a altura vir do contentor (o hero, que preenche a coluna). */
@@ -44,7 +47,7 @@ export function SiteImage({
     ...style,
   };
 
-  if (!src) {
+  if (!image) {
     return (
       <div
         role="img"
@@ -68,8 +71,10 @@ export function SiteImage({
     <div style={moldura}>
       {/* eslint-disable-next-line @next/next/no-img-element -- o canvas não tem o Next; ver a nota do ficheiro. */}
       <img
-        src={src}
+        src={image.src}
         alt={label}
+        width={image.width}
+        height={image.height}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
         decoding="async"
