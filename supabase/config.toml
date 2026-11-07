@@ -37,3 +37,9 @@ enable_confirmations = true
 
 [analytics]
 enabled = false
+
+# A fila de e-mails no pré-lançamento (7 nov 2026): `supabase/functions/outbox`.
+# Sem verificação de JWT de propósito — a chave pública é um JWT válido e está
+# em todos os browsers. A função exige o seu próprio segredo (ver o ficheiro).
+[functions.outbox]
+verify_jwt = false
