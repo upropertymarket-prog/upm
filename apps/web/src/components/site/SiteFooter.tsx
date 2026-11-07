@@ -4,7 +4,7 @@ import { Brand } from "@upm/ui";
 import { Instagram, Youtube } from "lucide-react";
 
 import { FOOTER_COLUMNS, SOCIAL_LINKS } from "../../lib/site-content";
-import { SITE_MAX_WIDTH } from "./SiteSection";
+import "./site.css";
 
 /**
  * Rodapé: marca à esquerda, navegação à direita (P2-01 · 04 §2.1)
@@ -34,15 +34,16 @@ export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post"
 
   return (
     <footer
+      className="upm-site-section"
       style={{
         background: "var(--surface2)",
         borderTop: "1px solid var(--border)",
-        padding: "clamp(2rem, 5vw, 3.5rem) 16px var(--sp-6)",
+        // A largura e as margens são as das secções (`site.css`): a marca do
+        // rodapé alinha com o texto de cima.
+        paddingBlock: "clamp(2rem, 5vw, 3.5rem) var(--sp-6)",
       }}
     >
-      <div
-        style={{ maxWidth: SITE_MAX_WIDTH, margin: "0 auto", display: "grid", gap: "var(--sp-7)" }}
-      >
+      <div className="upm-site-container" style={{ display: "grid", gap: "var(--sp-7)" }}>
         <div
           style={{
             display: "flex",

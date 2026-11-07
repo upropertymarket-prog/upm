@@ -744,7 +744,9 @@
       "precos": "Pricing",
       "duvidas": "FAQ",
       "contactos": "Contact",
-      "sections": "Sections"
+      "sections": "Sections",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "notFound": {
       "metaTitle": "Page not found · UProperty Market",

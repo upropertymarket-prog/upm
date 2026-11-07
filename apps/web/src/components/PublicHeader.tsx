@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Brand, LanguageMenu, ThemeToggle } from "@upm/ui";
 import { LOCALES } from "@upm/config";
+import { Menu, X } from "lucide-react";
 
 import { NAV_ANCHOR_IDS } from "../lib/site-content";
 import { useCanvasSafeRouter } from "@/lib/useCanvasSafeRouter";
@@ -71,6 +73,16 @@ export function PublicHeader({
   const params = useParams();
   const ctaHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
   const ctaLabel = t(`site.headerCta.${launchMode}`);
+  // O menu do telemóvel (7 nov 2026): as âncoras saem da barra abaixo de
+  // 1024 px de página (`shell.css`) e passam para esta lista.
+  const [menuAberto, setMenuAberto] = useState(false);
+  const temMenu = anchors !== "none";
+  const temaLabels = {
+    title: t("theme.title"),
+    light: t("theme.light"),
+    dark: t("theme.dark"),
+    system: t("theme.system"),
+  };
 
   const trocarIdioma = (next: string) => {
     if (onLocaleChange) {
@@ -173,15 +185,7 @@ export function PublicHeader({
             {/* Em ecrã estreito sai (`shell.css`, "Barra do site público"): o
                 tema segue o do sistema, e o CTA não pode cair da barra. */}
             <span className="upm-topbar__site-theme" style={{ display: "contents" }}>
-              <ThemeToggle
-                variant="segmented"
-                labels={{
-                  title: t("theme.title"),
-                  light: t("theme.light"),
-                  dark: t("theme.dark"),
-                  system: t("theme.system"),
-                }}
-              />
+              <ThemeToggle variant="segmented" labels={temaLabels} />
             </span>
             {/* `md` e não `sm`: 04 §1.8 fixa 36 px como a altura padrão de um
                 botão, e um CTA de barra de topo não é uma ação dentro de uma
@@ -189,8 +193,49 @@ export function PublicHeader({
             <Link href={ctaHref} className="upm-btn upm-btn--primary upm-btn--md">
               {ctaLabel}
             </Link>
+            {temMenu ? (
+              <button
+                type="button"
+                className="upm-topbar__site-menu"
+                aria-expanded={menuAberto}
+                aria-controls="upm-site-menu"
+                aria-label={menuAberto ? t("site.nav.closeMenu") : t("site.nav.openMenu")}
+                onClick={() => setMenuAberto((aberto) => !aberto)}
+              >
+                {menuAberto ? (
+                  <X size={20} aria-hidden="true" />
+                ) : (
+                  <Menu size={20} aria-hidden="true" />
+                )}
+              </button>
+            ) : null}
           </div>
         </div>
+
+        {temMenu && menuAberto ? (
+          <div id="upm-site-menu" className="upm-topbar__site-panel">
+            <nav aria-label={t("site.nav.sections")}>
+              <ul>
+                {NAV_ANCHOR_IDS.map((anchorId) => (
+                  <li key={anchorId}>
+                    {/* Fecha ao escolher: a âncora leva à secção, e o menu
+                        aberto ficaria por cima dela. */}
+                    <a
+                      href={anchors === "same-page" ? `#${anchorId}` : `/#${anchorId}`}
+                      onClick={() => setMenuAberto(false)}
+                    >
+                      {t(`site.nav.${anchorId}`)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            {/* O tema sai da barra abaixo de 640 px; aqui continua à mão. */}
+            <div className="upm-topbar__site-panel-theme">
+              <ThemeToggle variant="segmented" labels={temaLabels} />
+            </div>
+          </div>
+        ) : null}
       </header>
     </>
   );

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./site.css";
+
 /**
  * Moldura das secções do site público (P2-01)
  * =========================================================================
@@ -13,6 +15,7 @@ import type { ReactNode } from "react";
  * funciona e um que parece quebrado.
  */
 
+/** A mesma medida de `--site-max` em `site.css`, para quem precisa dela em JS. */
 export const SITE_MAX_WIDTH = "1200px";
 
 export function SiteSection({
@@ -28,18 +31,19 @@ export function SiteSection({
   return (
     <section
       id={id}
+      className="upm-site-section"
       style={{
         background: tone === "alt" ? "var(--surface2)" : "var(--bg)",
         borderTop: tone === "alt" ? "1px solid var(--border)" : undefined,
         borderBottom: tone === "alt" ? "1px solid var(--border)" : undefined,
         // 84 px é a altura da navbar fixa do protótipo.
         scrollMarginTop: "84px",
-        // `clamp` e não media query: a altura da secção acompanha o viewport
-        // sem pontos de rutura (ver a nota de responsividade do projeto).
-        padding: "clamp(2.5rem, 6vw, 5.5rem) 16px",
+        // Só a altura: a largura e a margem dos lados são as de `site.css`
+        // (`.upm-site-container`), iguais em todas as secções desde 7 nov.
+        paddingBlock: "clamp(2.5rem, 6vw, 5.5rem)",
       }}
     >
-      <div style={{ maxWidth: SITE_MAX_WIDTH, margin: "0 auto" }}>{children}</div>
+      <div className="upm-site-container">{children}</div>
     </section>
   );
 }

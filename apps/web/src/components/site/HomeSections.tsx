@@ -291,17 +291,12 @@ function Split({
   imageFirst?: boolean;
   children: ReactNode;
 }) {
+  // As classes estão em `site.css`: o corte para duas colunas mede a secção
+  // (container query), e o texto fica com a sua medida de leitura.
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
-        gap: "clamp(1.5rem, 4vw, 3rem)",
-        alignItems: "center",
-      }}
-    >
-      <div style={{ display: "grid", gap: "var(--sp-5)" }}>{children}</div>
-      <div style={imageFirst ? { order: -1 } : undefined}>{image}</div>
+    <div className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}>
+      <div className="upm-site-split__text">{children}</div>
+      <div className="upm-site-split__media">{image}</div>
     </div>
   );
 }

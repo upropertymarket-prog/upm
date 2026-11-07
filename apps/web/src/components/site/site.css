@@ -1,0 +1,112 @@
+/*
+ * A grelha do site público — uma medida só (7 nov 2026)
+ * =========================================================================
+ * Até aqui cada bloco tinha a sua: as secções 1200 px com 16 px de margem, o
+ * cabeçalho a largura da app (`--content-max`) com outra margem, o hero
+ * alinhado por `100vw`. Nada se alinhava de secção para secção, e o cliente
+ * comparou com o desenho dele no Webflow (framework MAST): um contentor, a
+ * mesma margem em todo o lado, o texto das colunas com largura própria.
+ *
+ * **Container queries e unidades `cqi`, nunca `vw` nem media queries.** No
+ * canvas, cada storyboard é uma moldura de 1440 px dentro da janela do Tempo:
+ * o `vw` e as media queries medem a janela, e a storyboard mostrava outra
+ * página (o texto do hero encostado à esquerda, visto a 7 nov). Medindo a
+ * secção, a storyboard e a produção são a mesma coisa.
+ *
+ * `--site-gutter` resolve-se onde é usado: o `cqi` lá dentro conta contra o
+ * contentor mais próximo de quem o usa (a secção), não contra o `:root`.
+ */
+
+:root {
+  --site-max: 1200px;
+  --site-gutter: clamp(16px, 5cqi, 64px);
+}
+
+/* Cada secção é o seu contentor de medida. */
+.upm-site-section {
+  container-type: inline-size;
+}
+
+.upm-site-container {
+  box-sizing: content-box;
+  max-width: var(--site-max);
+  margin-inline: auto;
+  padding-inline: var(--site-gutter);
+}
+
+/* --- Texto ao lado de fotografia ---------------------------------------- */
+
+.upm-site-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-7);
+  align-items: center;
+}
+
+/* O texto não estica até à fotografia: fica com a medida de leitura e o ar
+   à volta, como no desenho do cliente. */
+.upm-site-split__text {
+  display: grid;
+  gap: var(--sp-5);
+  max-width: 30rem;
+}
+
+@container (min-width: 768px) {
+  .upm-site-split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 7cqi, 6rem);
+  }
+
+  /* Só em duas colunas: no telemóvel o texto vem sempre primeiro. */
+  .upm-site-split--image-first > .upm-site-split__media {
+    order: -1;
+  }
+}
+
+/* --- Hero: texto alinhado com a página, fotografia até à margem ---------- */
+
+.upm-hero {
+  container-type: inline-size;
+  background: var(--bg);
+}
+
+.upm-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.upm-hero__text {
+  display: grid;
+  gap: var(--sp-5);
+  align-content: center;
+  padding: clamp(2.5rem, 8cqi, 6rem) var(--site-gutter);
+}
+
+.upm-hero__media {
+  display: grid;
+  min-height: clamp(18rem, 60cqi, 26rem);
+}
+
+/* Quatro faixas: margem, texto, fotografia, margem. A margem da esquerda é a
+   mesma das secções (nunca menos que a goteira), e a fotografia ocupa as
+   duas da direita, até à borda do ecrã. */
+@container (min-width: 900px) {
+  .upm-hero__grid {
+    grid-template-columns:
+      minmax(var(--site-gutter), 1fr)
+      minmax(0, calc(var(--site-max) / 2))
+      minmax(0, calc(var(--site-max) / 2))
+      minmax(var(--site-gutter), 1fr);
+    min-height: clamp(32rem, 48cqi, 44rem);
+  }
+
+  .upm-hero__text {
+    grid-column: 2;
+    padding: clamp(3rem, 6cqi, 6rem) clamp(2rem, 5cqi, 5rem) clamp(3rem, 6cqi, 6rem) 0;
+  }
+
+  .upm-hero__media {
+    grid-column: 3 / -1;
+    min-height: 0;
+  }
+}
