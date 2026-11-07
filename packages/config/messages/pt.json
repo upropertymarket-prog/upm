@@ -642,6 +642,10 @@
         "savedUnlimited": "Propriedades guardadas ilimitadas",
         "alerts": "{count, plural, one {1 alerta de pesquisa} other {# alertas de pesquisa}}",
         "cloud": "{count} GB de documentos na cloud"
+      },
+      "per": {
+        "year": " / ano",
+        "month": " / mês"
       }
     },
     "faq": {

@@ -642,6 +642,10 @@
         "savedUnlimited": "Unlimited saved properties",
         "alerts": "{count, plural, one {1 search alert} other {# search alerts}}",
         "cloud": "{count} GB of documents in the cloud"
+      },
+      "per": {
+        "year": " / year",
+        "month": " / month"
       }
     },
     "faq": {

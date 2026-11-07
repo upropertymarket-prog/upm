@@ -215,7 +215,9 @@ export function Pricing({
                         fontWeight: "var(--fw-regular)",
                       }}
                     >
-                      {billing === "year" ? " / ano" : " / mês"}
+                      {/* Pelo dicionário desde 7 nov 2026: escrito à mão, o site em inglês
+                          dizia "/ ano". */}
+                      {t(`per.${billing}`)}
                     </span>
                   </span>
                 </div>
