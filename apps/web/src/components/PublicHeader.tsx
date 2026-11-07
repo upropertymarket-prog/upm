@@ -153,7 +153,8 @@ export function PublicHeader({
               style={{
                 display: "flex",
                 gap: "var(--sp-5)",
-                flexWrap: "wrap",
+                // Nunca em duas linhas: quando não cabem, saem para o menu (☰).
+                flexWrap: "nowrap",
                 justifyContent: "center",
                 minWidth: 0,
               }}

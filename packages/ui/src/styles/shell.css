@@ -669,8 +669,9 @@
    conteúdo e a mesma goteira, para a marca alinhar com o texto de baixo. Os
    valores de recurso servem a quem use estas classes sem o `site.css`.
 
-   Marca, seis âncoras, idioma, tema e CTA não cabem numa linha abaixo de
-   ~1024 px: as âncoras quebravam em coluna por cima do hero e o CTA saía do
+   Marca, seis âncoras, idioma, tema e CTA precisam de ~1140 px numa linha
+   (medido a 7 nov; o corte estava nos 1024 e entre os dois as âncoras
+   partiam em duas linhas — visto pelo cliente no canvas). Abaixo de 1200 px: as âncoras quebravam em coluna por cima do hero e o CTA saía do
    ecrã (87 px de rolo horizontal a 390 px). Saem as âncoras para o menu (☰),
    depois o tema. A marca, o idioma e o CTA ficam sempre. */
 .upm-topbar:has(.upm-topbar__site-nav) {
@@ -724,7 +725,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-@container (width >= 1024px) {
+@container (width >= 1200px) {
   /* Se a página alargar com o menu aberto, a lista não fica pendurada. */
   .upm-topbar__site-panel {
     display: none;
@@ -738,7 +739,7 @@
   }
 }
 
-@container (width < 1024px) {
+@container (width < 1200px) {
   .upm-topbar__site-nav {
     /* `!important`: o elemento traz `display` inline, e o inline ganha a uma
        folha de estilos. */
