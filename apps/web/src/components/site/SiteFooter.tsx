@@ -38,12 +38,15 @@ export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post"
       style={{
         background: "var(--surface2)",
         borderTop: "1px solid var(--border)",
-        // A largura e as margens são as das secções (`site.css`): a marca do
-        // rodapé alinha com o texto de cima.
-        paddingBlock: "clamp(2rem, 5vw, 3.5rem) var(--sp-6)",
       }}
     >
-      <div className="upm-site-container" style={{ display: "grid", gap: "var(--sp-7)" }}>
+      {/* A largura e as margens são as das secções (`site.css`): a marca do
+          rodapé alinha com o texto de cima. A altura é a do `cc-footer` do
+          MAST (4rem em cima, 2rem em baixo), no lugar da das secções. */}
+      <div
+        className="upm-site-container"
+        style={{ display: "grid", gap: "var(--sp-7)", paddingBlock: "4rem 2rem" }}
+      >
         <div
           style={{
             display: "flex",

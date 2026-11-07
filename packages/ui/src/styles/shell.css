@@ -679,11 +679,10 @@
 }
 
 .upm-topbar__inner:has(.upm-topbar__site-nav) {
-  box-sizing: content-box;
-  /* `auto` e não o `100%` da app: com `content-box`, 100% mais a goteira
-     passava da página (110 px de rolo a 1100 px, visto a 7 nov). */
-  width: auto;
-  max-width: var(--site-max, 1200px);
+  /* A goteira do MAST faz o papel da largura máxima (6 % da largura, até o
+     conteúdo chegar aos 1440 px): sem `max-width`, a barra alinha com as
+     secções em qualquer largura. */
+  max-width: none;
   padding: 0 var(--site-gutter, 16px);
 }
 
