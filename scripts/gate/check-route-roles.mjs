@@ -74,7 +74,15 @@ const INTERNO_FORA_DE_AREA = new Map([
   ["/entrar", "pré-sessão (publicPaths do middleware)"],
   ["/verificar-2fa", "pré-sessão (publicPaths do middleware)"],
   ["/configurar-2fa", "inscrição no 2FA, antes de haver AAL2 — o middleware trata-a à parte"],
-  ["/definicoes/seguranca", "as definições de segurança da própria conta: iguais para os três papéis"],
+  ["/recuperar", 'pré-sessão: o "Esqueci-me" dos admins (publicPaths do middleware)'],
+  [
+    "/nova-palavra-passe",
+    "a sessão do link de recuperação (aal1): o middleware trata-a à parte e a página termina-a",
+  ],
+  [
+    "/definicoes/seguranca",
+    "as definições de segurança da própria conta: iguais para os três papéis",
+  ],
 ]);
 
 function lerLista(fonte, nome) {
@@ -113,7 +121,15 @@ function rotaDe(relativo) {
 function paginas(dir, base, out = []) {
   if (!existsSync(dir)) return out;
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
-    if (entrada.name === "node_modules" || entrada.name === ".next" || entrada.name === ".next-e2e" || entrada.name === ".next-e2e-pre" || entrada.name === "test-results" || entrada.name === "playwright-report") continue;
+    if (
+      entrada.name === "node_modules" ||
+      entrada.name === ".next" ||
+      entrada.name === ".next-e2e" ||
+      entrada.name === ".next-e2e-pre" ||
+      entrada.name === "test-results" ||
+      entrada.name === "playwright-report"
+    )
+      continue;
     const cheio = join(dir, entrada.name);
     if (entrada.isDirectory()) paginas(cheio, base, out);
     else if (entrada.name === "page.tsx") out.push(cheio);
@@ -220,7 +236,9 @@ const avisos = [];
         const rota = rotaDe(ficheiro.slice(raizInterno.length + 1));
         if (conhecidos.some((p) => rota === p || rota.startsWith(p + "/"))) continue;
         if (INTERNO_FORA_DE_AREA.has(rota)) continue;
-        descobertas.push(`apps/interno/src/app${ficheiro.slice(raizInterno.length)}  → \`${rota}\``);
+        descobertas.push(
+          `apps/interno/src/app${ficheiro.slice(raizInterno.length)}  → \`${rota}\``,
+        );
       }
 
       if (descobertas.length > 0) {

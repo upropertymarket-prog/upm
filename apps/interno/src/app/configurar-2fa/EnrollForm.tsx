@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 
 import { useTranslations } from "next-intl";
-import { useCanvasSafeRouter } from "../../lib/useCanvasSafeRouter";
 import { Button, Input } from "@upm/ui";
 
 import { verifyEnrollment, type VerifyEnrollmentState } from "./actions";
@@ -20,38 +19,7 @@ export function EnrollForm({
   secret: string;
 }) {
   const t = useTranslations("auth.mfa.enroll");
-  // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
-  const router = useCanvasSafeRouter();
   const [state, formAction, pending] = useActionState(verifyEnrollment, initialState);
-  const [confirmed, setConfirmed] = useState(false);
-
-  // Depois de "Guardei os códigos" a página está a navegar para o painel:
-  // não se volta a desenhar o ecrã de configuração (vinha vazio, sem QR) no
-  // intervalo.
-  if (confirmed) return null;
-
-  if (state.success && state.recoveryCodes && !confirmed) {
-    return (
-      <div className="flex flex-col gap-4">
-        <h1 className="text-lg font-semibold text-text">{t("recoveryCodesTitle")}</h1>
-        <p className="text-sm text-muted">{t("recoveryCodesBody")}</p>
-        <ul className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-surface2 p-4 font-mono text-sm text-text">
-          {state.recoveryCodes.map((code) => (
-            <li key={code}>{code}</li>
-          ))}
-        </ul>
-        <Button
-          fullWidth
-          onClick={() => {
-            setConfirmed(true);
-            router?.push("/");
-          }}
-        >
-          {t("recoveryCodesConfirm")}
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-4">

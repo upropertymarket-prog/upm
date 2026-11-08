@@ -114,7 +114,7 @@ const CASOS_ACEITA = [
     ficheiros: {
       "apps/web/src/app/bom.ts": [
         "export function falhou(razao: string) {",
-        '  console.error(`[web] falhou: ${razao}`);',
+        "  console.error(`[web] falhou: ${razao}`);",
         "}",
       ].join("\n"),
     },
@@ -189,7 +189,9 @@ for (const caso of CASOS_ACEITA) {
 }
 
 if (falhou) {
-  console.error("\n  O portão da fronteira do servidor não distingue o que devia. Não confie nele.\n");
+  console.error(
+    "\n  O portão da fronteira do servidor não distingue o que devia. Não confie nele.\n",
+  );
   process.exit(1);
 }
 console.log(

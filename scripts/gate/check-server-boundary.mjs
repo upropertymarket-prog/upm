@@ -65,6 +65,10 @@ const SERVICE_ROLE_PERMITIDO = new Map([
   ],
   ["apps/interno/src/app/actions/auth.ts", "entrada no interno, pela mesma razão do step-up"],
   [
+    "apps/interno/src/lib/staff-access.ts",
+    'recuperação de acesso da equipa (8 nov 2026): `auth.admin` (link de recuperação, fatores 2FA) só existe com esta chave; o alvo nunca vem do pedido sem confirmação — as ações do admin verificam papel, alvo e PIN antes, e o "Esqueci-me" só envia ao e-mail do próprio admin',
+  ],
+  [
     "apps/interno/src/app/admin/planos/actions.ts",
     "catálogo de planos: escreve o que o Stripe espelha, sem sessão a que pertença",
   ],
@@ -116,7 +120,19 @@ function recolher(dir, out = []) {
   for (const entrada of readdirSync(dir, { withFileTypes: true })) {
     const nome = entrada.name;
     // `.next-e2e` é a pasta de build dos servidores dos E2E: código gerado.
-    if (["node_modules", ".next", ".next-e2e", ".next-e2e-pre", "test-results", "playwright-report", "dist", "build"].includes(nome)) continue;
+    if (
+      [
+        "node_modules",
+        ".next",
+        ".next-e2e",
+        ".next-e2e-pre",
+        "test-results",
+        "playwright-report",
+        "dist",
+        "build",
+      ].includes(nome)
+    )
+      continue;
     const cheio = join(dir, nome);
     if (entrada.isDirectory()) recolher(cheio, out);
     else if (/\.(tsx?|mts|cts)$/.test(nome) && !/\.test\.(tsx?)$/.test(nome)) out.push(cheio);

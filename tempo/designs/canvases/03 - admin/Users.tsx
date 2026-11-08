@@ -82,6 +82,8 @@ const selectedProfile = {
 
 const verifyPin: VerifyPinAction = async () => ({ ok: true });
 const onChangeStatus = async () => ({ ok: true });
+const onResetPassword = async () => ({ ok: true });
+const onResetTwoFactor = async () => ({ ok: true });
 
 function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?: boolean }) {
   const cursor = {
@@ -131,6 +133,8 @@ function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?
                 locale="pt"
                 currentAdminId="ccaa0000-0000-4000-8000-000000000099"
                 onChangeStatus={onChangeStatus}
+                onResetPassword={onResetPassword}
+                onResetTwoFactor={onResetTwoFactor}
                 onLogAccess={async () => undefined}
                 onVerifyPin={verifyPin}
               />

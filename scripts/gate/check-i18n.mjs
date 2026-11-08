@@ -97,7 +97,17 @@ const RAIZES = [
 ];
 
 /** Pastas que nunca são produto. */
-const IGNORAR_PASTAS = new Set(["node_modules", ".next", ".next-e2e", ".next-e2e-pre", "test-results", "playwright-report", "dist", "demo-data", "__tests__"]);
+const IGNORAR_PASTAS = new Set([
+  "node_modules",
+  ".next",
+  ".next-e2e",
+  ".next-e2e-pre",
+  "test-results",
+  "playwright-report",
+  "dist",
+  "demo-data",
+  "__tests__",
+]);
 
 /**
  * Ficheiros isentos, cada um com a razão. A lista é curta de propósito: cada

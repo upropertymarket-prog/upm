@@ -1331,7 +1331,9 @@
       "suspended": "Esta conta está suspensa. Contacte o suporte para pedir ajuda.",
       "staffBlocked": "Contas de equipa acedem em interno.upropertymarket.pt, não aqui.",
       "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
-      "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens."
+      "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens.",
+      "passwordSet": "Palavra-passe definida. Entre com a palavra-passe nova e o código da sua app.",
+      "linkInvalid": "O link expirou ou já foi usado. Peça um novo."
     },
     "recovery": {
       "title": "Recuperar palavra-passe",
@@ -1358,9 +1360,6 @@
         "body": "Obrigatória para contas de equipa. Digitalize o código com a sua app de autenticação.",
         "codeLabel": "Código de confirmação",
         "submit": "Ativar",
-        "recoveryCodesTitle": "Guarde estes códigos de recuperação",
-        "recoveryCodesBody": "Cada código só pode ser usado uma vez. Guarde-os num local seguro — não voltam a ser mostrados.",
-        "recoveryCodesConfirm": "Guardei os códigos",
         "qrAlt": "Código QR para a app de autenticação",
         "startFailed": "Não foi possível iniciar a ativação do 2FA. Tente novamente."
       },
@@ -1368,8 +1367,7 @@
         "title": "Código de verificação",
         "codeLabel": "Código de 6 dígitos",
         "submit": "Verificar",
-        "useRecoveryCode": "Usar um código de recuperação",
-        "recoveryLabel": "Código de recuperação"
+        "lostPhone": "Perdeu o telemóvel? Peça a um administrador que lhe reponha a autenticação em duas etapas."
       }
     },
     "pin": {
@@ -1405,6 +1403,21 @@
       "haveAccount": "Já tem conta?",
       "signIn": "Entrar",
       "rememberedPassword": "Lembrou-se da palavra-passe?"
+    },
+    "staffRecovery": {
+      "title": "Recuperar a palavra-passe",
+      "body": "Só para administradores. Se é de outra área da equipa, peça a um administrador que lhe envie o link.",
+      "email": "E-mail",
+      "submit": "Enviar link",
+      "sentTitle": "Verifique o seu e-mail",
+      "sentBody": "Se o endereço for de um administrador, enviámos um link para definir uma nova palavra-passe. É válido durante uma hora.",
+      "backToLogin": "Voltar à entrada",
+      "emailMessage": {
+        "title": "Defina uma nova palavra-passe",
+        "body": "Recebemos um pedido para repor a palavra-passe da sua conta de equipa na UProperty Market. O link é válido durante uma hora.\n\nDepois de definir a palavra-passe, a entrada continua a pedir o código da sua app de autenticação.",
+        "cta": "Definir palavra-passe",
+        "footer": "Se não pediu isto, ignore este e-mail e avise um administrador: a sua palavra-passe não muda sem o link."
+      }
     }
   },
   "plan": {
@@ -1629,7 +1642,19 @@
       "nextPage": "Página seguinte",
       "pageLabel": "Paginação de utilizadores",
       "resultsRange": "{from}–{to} utilizadores",
-      "deleted": "Eliminada"
+      "deleted": "Eliminada",
+      "access": "Acesso",
+      "accessHint": "Para quem perdeu a palavra-passe ou o telemóvel. Pede o PIN de operação e fica registado.",
+      "resetPassword": "Repor palavra-passe",
+      "resetPasswordBody": "Enviamos para o e-mail desta pessoa um link para definir uma palavra-passe nova. A palavra-passe atual continua a servir até ela usar o link.",
+      "confirmResetPassword": "Enviar link",
+      "resetPasswordDone": "Link enviado para o e-mail desta pessoa.",
+      "resetTwoFactor": "Repor 2FA",
+      "resetTwoFactorBody": "Para quem perdeu ou trocou de telemóvel. A app de autenticação atual deixa de servir e, na próxima entrada, esta pessoa lê um código QR novo.",
+      "confirmResetTwoFactor": "Repor 2FA",
+      "resetTwoFactorDone": "2FA reposta. Na próxima entrada, esta pessoa configura a app outra vez.",
+      "accessFailed": "Não foi possível concluir. Tente novamente.",
+      "marketing": "Marketing"
     },
     "moderation": {
       "title": "Moderação de imóveis",

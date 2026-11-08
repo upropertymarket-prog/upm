@@ -183,7 +183,10 @@ for (const ficheiro of ficheiros) {
     for (const m of sql.matchAll(regex)) eventos.push({ i: m.index, tipo, m });
   };
 
-  juntar(/create\s+(?:unlogged\s+)?table\s+(?:if\s+not\s+exists\s+)?([a-zA-Z0-9_."]+)/gi, "tabela+");
+  juntar(
+    /create\s+(?:unlogged\s+)?table\s+(?:if\s+not\s+exists\s+)?([a-zA-Z0-9_."]+)/gi,
+    "tabela+",
+  );
   juntar(/drop\s+table\s+(?:if\s+exists\s+)?([a-zA-Z0-9_."]+)/gi, "tabela-");
   juntar(
     /alter\s+table\s+(?:only\s+)?([a-zA-Z0-9_."]+)\s+enable\s+row\s+level\s+security/gi,

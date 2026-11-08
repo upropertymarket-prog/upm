@@ -1331,7 +1331,9 @@
       "suspended": "This account is suspended. Contact support for help.",
       "staffBlocked": "Staff accounts sign in at interno.upropertymarket.pt, not here.",
       "rateLimited": "Too many attempts. Try again in {seconds}s.",
-      "subtitle": "Sign in to manage your properties, viewings and messages."
+      "subtitle": "Sign in to manage your properties, viewings and messages.",
+      "passwordSet": "Password set. Sign in with your new password and the code from your app.",
+      "linkInvalid": "The link has expired or was already used. Request a new one."
     },
     "recovery": {
       "title": "Recover password",
@@ -1358,9 +1360,6 @@
         "body": "Required for staff accounts. Scan the code with your authenticator app.",
         "codeLabel": "Confirmation code",
         "submit": "Activate",
-        "recoveryCodesTitle": "Save these recovery codes",
-        "recoveryCodesBody": "Each code can only be used once. Keep them somewhere safe — they won't be shown again.",
-        "recoveryCodesConfirm": "I saved the codes",
         "qrAlt": "QR code for your authenticator app",
         "startFailed": "Two-factor setup could not be started. Please try again."
       },
@@ -1368,8 +1367,7 @@
         "title": "Verification code",
         "codeLabel": "6-digit code",
         "submit": "Verify",
-        "useRecoveryCode": "Use a recovery code",
-        "recoveryLabel": "Recovery code"
+        "lostPhone": "Lost your phone? Ask an administrator to reset your two-step verification."
       }
     },
     "pin": {
@@ -1405,6 +1403,21 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "rememberedPassword": "Remembered your password?"
+    },
+    "staffRecovery": {
+      "title": "Recover your password",
+      "body": "Administrators only. If you are in another team area, ask an administrator to send you the link.",
+      "email": "Email",
+      "submit": "Send link",
+      "sentTitle": "Check your email",
+      "sentBody": "If the address belongs to an administrator, we sent a link to set a new password. It is valid for one hour.",
+      "backToLogin": "Back to sign-in",
+      "emailMessage": {
+        "title": "Set a new password",
+        "body": "We received a request to reset the password of your UProperty Market team account. The link is valid for one hour.\n\nAfter you set the password, signing in still asks for the code from your authenticator app.",
+        "cta": "Set password",
+        "footer": "If you did not ask for this, ignore this email and tell an administrator: your password does not change without the link."
+      }
     }
   },
   "plan": {
@@ -1629,7 +1642,19 @@
       "nextPage": "Next page",
       "pageLabel": "User pagination",
       "resultsRange": "{from}–{to} users",
-      "deleted": "Deleted"
+      "deleted": "Deleted",
+      "access": "Access",
+      "accessHint": "For someone who lost their password or phone. Asks for the operation PIN and is logged.",
+      "resetPassword": "Reset password",
+      "resetPasswordBody": "We email this person a link to set a new password. Their current password keeps working until they use the link.",
+      "confirmResetPassword": "Send link",
+      "resetPasswordDone": "Link sent to this person's email.",
+      "resetTwoFactor": "Reset 2FA",
+      "resetTwoFactorBody": "For someone who lost or replaced their phone. Their current authenticator app stops working and, at their next sign-in, they scan a new QR code.",
+      "confirmResetTwoFactor": "Reset 2FA",
+      "resetTwoFactorDone": "2FA reset. At their next sign-in, this person sets up the app again.",
+      "accessFailed": "This could not be completed. Please try again.",
+      "marketing": "Marketing"
     },
     "moderation": {
       "title": "Property moderation",

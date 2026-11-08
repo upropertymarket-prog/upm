@@ -50,12 +50,9 @@ test("o staff configura o 2FA na primeira entrada e é pedido o código nas segu
   await pagina.getByLabel(t("auth.mfa.enroll.codeLabel")).fill(primeiroCodigo);
   await pagina.getByRole("button", { name: t("auth.mfa.enroll.submit") }).click();
 
-  // Os códigos de recuperação aparecem uma vez, e só depois se entra.
-  await expect(
-    pagina.getByRole("heading", { name: t("auth.mfa.enroll.recoveryCodesTitle") }),
-  ).toBeVisible();
-  await pagina.getByRole("button", { name: t("auth.mfa.enroll.recoveryCodesConfirm") }).click();
-  await expect(pagina).toHaveURL(new RegExp(`^${INTERNO}/?(\\?.*)?$`));
+  // Sem códigos de recuperação desde 8 nov 2026: confirmado o código, entra-se.
+  await expect(pagina.getByRole("heading", { name: t("auth.mfa.enroll.title") })).toHaveCount(0);
+  await expect(pagina).not.toHaveURL(/\/(entrar|configurar-2fa)/);
 
   // O fator ficou mesmo — exatamente um, verificado. Até 2 nov a página de
   // configuração apagava-o na re-renderização que se segue à Server Action.

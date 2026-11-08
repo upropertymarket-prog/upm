@@ -3,25 +3,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@upm/db/server";
-import {
-  checkAuthRateLimit,
-  generateRecoveryCodes,
-  hashPin,
-  recordAuthAttempt,
-  totpCodeSchema,
-} from "@upm/db/auth";
+import { checkAuthRateLimit, recordAuthAttempt, totpCodeSchema } from "@upm/db/auth";
 
 /**
  * Ativação do 2FA TOTP obrigatório de `interno` (07 §6) — usa o MFA nativo do
- * Supabase Auth. Os códigos de recuperação são nossos (gerados aqui, hash em
- * `staff_auth.recovery_codes_hash`) porque o Supabase MFA não os fornece.
+ * Supabase Auth. Sem códigos de recuperação desde 8 nov 2026 (decisão do
+ * cliente): quem perde o telemóvel pede a um admin que lhe reponha a 2FA.
  */
 
-export type VerifyEnrollmentState = {
-  error?: string;
-  success?: boolean;
-  recoveryCodes?: string[];
-};
+export type VerifyEnrollmentState = { error?: string };
 
 export async function verifyEnrollment(
   _prev: VerifyEnrollmentState,
@@ -62,11 +52,5 @@ export async function verifyEnrollment(
   await recordAuthAttempt(user.id, "totp_challenge", !verifyError);
   if (verifyError) return { error: "Código inválido." };
 
-  const recoveryCodes = generateRecoveryCodes(10);
-  const hashes = await Promise.all(recoveryCodes.map((code) => hashPin(code)));
-  await supabase
-    .from("staff_auth")
-    .upsert({ profile_id: user.id, recovery_codes_hash: hashes }, { onConflict: "profile_id" });
-
-  return { success: true, recoveryCodes };
+  redirect("/");
 }
