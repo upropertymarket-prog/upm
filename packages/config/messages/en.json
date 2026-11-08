@@ -845,10 +845,10 @@
       "confirmPage": {
         "title": "Confirm your early access",
         "body": "All that is left is to confirm that this email address is yours.",
-        "confirm": "Confirm my sign-up",
+        "confirm": "Confirm my pre-registration",
         "confirming": "Confirming…",
         "okTitle": "Sign-up confirmed",
-        "okBody": "Thank you. Your early-access sign-up is complete, and we will let you know as soon as the first listings go live.",
+        "okBody": "Thank you. Your pre-registration is complete, and we will let you know as soon as we officially launch.",
         "failTitle": "This link no longer works",
         "failBody": "It may have been used already, or it may have expired. Sign up again and we will send you a new link.",
         "retry": "Sign up again",
