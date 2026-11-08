@@ -165,7 +165,7 @@ export default function SitePublicoCanvas() {
         id="ImoveisPreLancamentoClaro"
         name="Market público · pré-lançamento · claro (/propriedades)"
         component={ImoveisPreLancamentoClaro}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 989.6500244140625 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"

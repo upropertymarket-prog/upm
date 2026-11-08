@@ -433,7 +433,7 @@ function ImoveisPreLancamento({ theme }: { theme: "light" | "dark" }) {
       <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
       <main>
         <SiteSection>
-          <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+          <div style={{ display: "grid", gap: "var(--sp-6)", rowGap: "24px" }}>
             <SectionHeading
               eyebrow={EM_BREVE.eyebrow}
               title={EM_BREVE.title}
