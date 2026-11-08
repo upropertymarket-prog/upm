@@ -34,7 +34,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
           {/* Dois blocos (cliente, 8 nov 2026): o principal — eyebrow, título,
               texto e botões — ao centro, e os três números no fundo da
               coluna, ao nível da base da fotografia. Ver `site.css`. */}
-          <div className="upm-hero__main">
+          <div className="upm-hero__main" style={{ rowGap: "16px" }}>
             <span
               style={{
                 // Token e não um valor à mão: `[data-app="web"]` põe
