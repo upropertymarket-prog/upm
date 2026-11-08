@@ -5,6 +5,7 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 
 import { HomeSections } from "../../../../apps/web/src/components/site/HomeSections";
 import { PreRegistrationForm } from "../../../../apps/web/src/app/[locale]/pre-inscricao/PreRegistrationForm";
+import { ConfirmPanel } from "../../../../apps/web/src/app/[locale]/pre-inscricao/confirmar/ConfirmPanel";
 import { FeatureGrid } from "../../../../apps/web/src/components/site/FeatureGrid";
 import { SectionHeading, SiteSection } from "../../../../apps/web/src/components/site/SiteSection";
 import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";
@@ -527,4 +528,57 @@ export function PreInscricaoClaro() {
 
 export function PreInscricaoEscuro() {
   return <PreInscricao theme="dark" />;
+}
+
+/**
+ * A confirmação da pré-inscrição (`/pre-inscricao/confirmar`, 8 nov 2026)
+ * ---------------------------------------------------------------------------
+ * O passo que fecha o pré-lançamento: o visitante chega pelo link do e-mail e
+ * confirma com um botão (a confirmação é um POST — ver `actions.ts`), e só
+ * então a inscrição conta como lead. Dois estados, como a página os mostra:
+ * por confirmar, e confirmada.
+ *
+ * O mesmo cabeçalho, secção e rodapé da `page.tsx`. O token é de exemplo —
+ * o botão não vai a lado nenhum no canvas (`semSubmissao`). O estado
+ * confirmado entra pelo `initialState` do painel, porque uma storyboard não
+ * clica no botão.
+ */
+function ConfirmarInscricao({
+  theme,
+  confirmada,
+}: {
+  theme: "light" | "dark";
+  confirmada: boolean;
+}) {
+  return (
+    <Ecra theme={theme}>
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
+      <main>
+        <SiteSection>
+          <ConfirmPanel
+            token="token-de-exemplo"
+            onConfirm={semSubmissao}
+            initialState={confirmada ? { ok: true } : {}}
+          />
+        </SiteSection>
+      </main>
+      <SiteFooter />
+    </Ecra>
+  );
+}
+
+export function ConfirmarInscricaoClaro() {
+  return <ConfirmarInscricao theme="light" confirmada={false} />;
+}
+
+export function ConfirmarInscricaoEscuro() {
+  return <ConfirmarInscricao theme="dark" confirmada={false} />;
+}
+
+export function InscricaoConfirmadaClaro() {
+  return <ConfirmarInscricao theme="light" confirmada />;
+}
+
+export function InscricaoConfirmadaEscuro() {
+  return <ConfirmarInscricao theme="dark" confirmada />;
 }

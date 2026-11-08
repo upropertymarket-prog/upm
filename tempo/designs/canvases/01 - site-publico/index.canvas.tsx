@@ -11,6 +11,10 @@ import {
   ImoveisSemResultadosEscuro,
   PosLancamentoClaro,
   PosLancamentoEscuro,
+  ConfirmarInscricaoClaro,
+  ConfirmarInscricaoEscuro,
+  InscricaoConfirmadaClaro,
+  InscricaoConfirmadaEscuro,
   PreInscricaoClaro,
   PreInscricaoEscuro,
   PreLancamentoClaro,
@@ -128,58 +132,85 @@ export default function SitePublicoCanvas() {
         layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
       />
 
+      {/* O link do e-mail leva aqui: o passo a seguir à pré-inscrição, e por
+          isso logo abaixo dela. Por confirmar, e depois do clique. */}
+      <Storyboard
+        id="ConfirmarInscricaoClaro"
+        name="Confirmar pré-inscrição · claro (/pre-inscricao/confirmar)"
+        component={ConfirmarInscricaoClaro}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="ConfirmarInscricaoEscuro"
+        name="Confirmar pré-inscrição · escuro (/pre-inscricao/confirmar)"
+        component={ConfirmarInscricaoEscuro}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="InscricaoConfirmadaClaro"
+        name="Inscrição confirmada · claro (/pre-inscricao/confirmar)"
+        component={InscricaoConfirmadaClaro}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="InscricaoConfirmadaEscuro"
+        name="Inscrição confirmada · escuro (/pre-inscricao/confirmar)"
+        component={InscricaoConfirmadaEscuro}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+      />
+
       {/* O ramo `pre` da mesma rota, e por isso **antes** dos outros dois: é o
           que o visitante vê até ao lançamento. */}
       <Storyboard
         id="ImoveisPreLancamentoClaro"
         name="Market público · pré-lançamento · claro (/propriedades)"
         component={ImoveisPreLancamentoClaro}
-        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"
         name="Market público · pré-lançamento · escuro (/propriedades)"
         component={ImoveisPreLancamentoEscuro}
-        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisSemResultados"
         name="Market público · sem propriedades · claro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultados}
-        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisSemResultadosEscuro"
         name="Market público · sem propriedades · escuro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultadosEscuro}
-        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisClaro"
         name="Market público · com propriedades · claro (/propriedades)"
         component={ImoveisClaro}
-        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisEscuro"
         name="Market público · com propriedades · escuro (/propriedades)"
         component={ImoveisEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="FichaClaro"
         name="Detalhe de propriedade · claro (/propriedades/[slug])"
         component={FichaClaro}
-        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 8347, width: 1440, height: 900 }}
       />
       <Storyboard
         id="FichaEscuro"
         name="Detalhe de propriedade · escuro (/propriedades/[slug])"
         component={FichaEscuro}
-        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 8347, width: 1440, height: 900 }}
       />
     </Canvas>
   );
