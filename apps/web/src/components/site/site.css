@@ -99,9 +99,14 @@
 
 .upm-hero__text {
   display: grid;
-  gap: var(--sp-5);
+  gap: var(--sp-6);
   align-content: center;
   padding: clamp(2.5rem, 8cqi, 6rem) var(--site-gutter);
+}
+
+.upm-hero__main {
+  display: grid;
+  gap: var(--sp-5);
 }
 
 .upm-hero__media {
@@ -135,9 +140,18 @@
     min-height: clamp(32rem, 48cqi, 44rem);
   }
 
+  /* Com a fotografia ao lado: o bloco principal ao centro da coluna e os
+     números encostados ao fundo, ao nível da base da fotografia (desenho do
+     cliente, 8 nov 2026). */
   .upm-hero__text {
     grid-column: 2;
-    padding: clamp(3rem, 6cqi, 6rem) clamp(2rem, 5cqi, 5rem) clamp(3rem, 6cqi, 6rem) 0;
+    grid-template-rows: 1fr auto;
+    align-content: stretch;
+    padding: clamp(3rem, 6cqi, 6rem) clamp(2rem, 5cqi, 5rem) clamp(1.75rem, 3cqi, 3rem) 0;
+  }
+
+  .upm-hero__main {
+    align-self: center;
   }
 
   .upm-hero__media {

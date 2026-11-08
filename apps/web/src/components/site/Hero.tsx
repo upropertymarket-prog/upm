@@ -31,65 +31,79 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
           própria secção, para a storyboard e o site serem a mesma página. */}
       <div className="upm-hero__grid">
         <div className="upm-hero__text">
-          <span
-            style={{
-              // Token e não um valor à mão: `[data-app="web"]` põe
-              // `--fs-label` nos 14 px que 07 §3 fixa como mínimo do site
-              // público. Escrever "12px" aqui furava esse piso.
-              fontSize: "var(--fs-label)",
-              fontWeight: "var(--fw-semibold)",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--accent)",
-            }}
-          >
-            {t("eyebrow")}
-          </span>
-          {/* O tamanho está em `site.css` (`.upm-hero__title`): depende da
+          {/* Dois blocos (cliente, 8 nov 2026): o principal — eyebrow, título,
+              texto e botões — ao centro, e os três números no fundo da
+              coluna, ao nível da base da fotografia. Ver `site.css`. */}
+          <div className="upm-hero__main">
+            <span
+              style={{
+                // Token e não um valor à mão: `[data-app="web"]` põe
+                // `--fs-label` nos 14 px que 07 §3 fixa como mínimo do site
+                // público. Escrever "12px" aqui furava esse piso.
+                fontSize: "var(--fs-label)",
+                fontWeight: "var(--fw-semibold)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--accent)",
+              }}
+            >
+              {t("eyebrow")}
+            </span>
+            {/* O tamanho está em `site.css` (`.upm-hero__title`): depende da
               largura da coluna, e só uma regra de container a conhece. */}
-          <h1
-            className="upm-hero__title"
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-display)",
-              lineHeight: 1.08,
-              color: "var(--text)",
-            }}
-          >
-            {/* "sem comissões" na cor primária (cliente, 8 nov 2026). O
+            <h1
+              className="upm-hero__title"
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-display)",
+                lineHeight: 1.08,
+                color: "var(--text)",
+              }}
+            >
+              {/* "sem comissões" na cor primária (cliente, 8 nov 2026). O
                 destaque vem marcado na mensagem (`<accent>`), para cair no
                 sítio certo nas duas línguas. */}
-            {t.rich("title", {
-              accent: (chunks) => <span style={{ color: "var(--accent)" }}>{chunks}</span>,
-            })}
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "16px",
-              lineHeight: 1.6,
-              color: "var(--muted)",
-              maxWidth: "34rem",
-            }}
-          >
-            {t("body")}
-          </p>
+              {t.rich("title", {
+                accent: (chunks) => <span style={{ color: "var(--accent)" }}>{chunks}</span>,
+              })}
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "16px",
+                lineHeight: 1.6,
+                color: "var(--muted)",
+                maxWidth: "34rem",
+              }}
+            >
+              {t("body")}
+            </p>
 
-          <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
-            {/* Links com as classes do botão, não `<Button>`: o destino é uma
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--sp-3)",
+                flexWrap: "wrap",
+                // Um pouco mais de ar entre o texto e os botões (cliente, 8 nov).
+                marginTop: "var(--sp-2)",
+              }}
+            >
+              {/* Links com as classes do botão, não `<Button>`: o destino é uma
               navegação e tem de ser uma âncora real — para abrir em
               separador novo, para o teclado e para os motores de busca.
               É o mesmo padrão de `guardados/page.tsx` e
               `conta-suspensa/page.tsx`. */}
-            <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--md">
-              {t("primaryCta")}
-            </Link>
-            <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--md">
-              {t("secondaryCta")}
-            </a>
+              <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--md">
+                {t("primaryCta")}
+              </Link>
+              <a href="#plataforma" className="upm-btn upm-btn--secondary upm-btn--md">
+                {t("secondaryCta")}
+              </a>
+            </div>
           </div>
 
           <ul
+            className="upm-hero__stats"
             style={{
               listStyle: "none",
               margin: 0,
