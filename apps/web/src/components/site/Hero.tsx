@@ -45,9 +45,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "var(--accent)",
-                // O bloco separa tudo a 16 px; do eyebrow ao título são 12
-                // (cliente, 8 nov 2026).
-                marginBottom: "-4px",
+                // O bloco separa tudo a 16 px; o eyebrow encosta mais ao
+                // título, com o valor afinado no canvas (cliente, 8 nov 2026).
+                marginTop: "0px",
+                marginBottom: "-14px",
               }}
             >
               {t("eyebrow")}
