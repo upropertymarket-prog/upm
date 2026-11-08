@@ -133,3 +133,14 @@
     min-height: 0;
   }
 }
+
+/* --- Selos dos planos (8 nov 2026, do desenho do cliente) --------------- */
+/* Laranja, azul, roxo, pela posição do plano na escada. O roxo não existe na
+   paleta do produto e é só do site: a escada de preços precisa de três cores
+   distintas, e o desenho aprovado usa estas. Os três fundos são escuros o
+   bastante para texto branco nos dois temas. */
+:root {
+  --plan-1: var(--accent-solid, var(--accent));
+  --plan-2: #2563eb;
+  --plan-3: #7c3aed;
+}

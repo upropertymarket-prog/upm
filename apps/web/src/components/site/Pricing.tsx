@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { Check, Minus } from "lucide-react";
+import { CheckCircle2, Minus, XCircle } from "lucide-react";
 import { Tabs } from "@upm/ui";
 
 import { PRICING_AUDIENCE_IDS, PRICING_BILLING_IDS } from "../../lib/site-content";
@@ -22,6 +22,13 @@ import { SectionHeading } from "./SiteSection";
  * Duas tabs, como o protótipo: público (proprietários / compradores) e
  * periodicidade (anual / mensal). O mensal é a derivada do anual (07 §8.3), e
  * ambos vêm da base de dados — aqui só se escolhe qual mostrar.
+ *
+ * **O cartão segue o desenho do cliente** (8 nov 2026): o nome num selo de
+ * cor, o preço grande com o período colado, uma frase "Ideal para…", e duas
+ * secções — Funcionalidades e Alertas — com ✓ verde para o que o plano inclui
+ * e ✗ vermelho para o que não inclui. Tudo sai dos limites do plano; os tipos
+ * de alerta do desenho (mensagens, descida de preço…) não estão decididos no
+ * projeto e entram quando o forem.
  */
 
 export type PublicPlan = {
@@ -54,11 +61,12 @@ type Audience = (typeof PRICING_AUDIENCE_IDS)[number];
 
 /**
  * O que cada público lê primeiro. Ao proprietário interessa quantas
- * propriedades publica; ao comprador, quantas guarda e quantos alertas tem.
+ * propriedades publica; ao comprador, quantas guarda. Os alertas têm secção
+ * própria.
  */
 const LIMITS_BY_AUDIENCE: Record<"owner" | "buyer", ReadonlyArray<keyof PlanLimits>> = {
   owner: ["active_properties", "visits", "active_chats", "cloud_gb"],
-  buyer: ["saved", "alerts", "visits", "active_chats", "cloud_gb"],
+  buyer: ["saved", "visits", "active_chats", "cloud_gb"],
 };
 
 const LIMIT_KEYS: Record<keyof PlanLimits, { count: string; unlimited?: string }> = {
@@ -68,6 +76,23 @@ const LIMIT_KEYS: Record<keyof PlanLimits, { count: string; unlimited?: string }
   saved: { count: "saved", unlimited: "savedUnlimited" },
   alerts: { count: "alerts" },
   cloud_gb: { count: "cloud" },
+};
+
+/**
+ * A cor do selo de cada plano, pela posição na escada (do desenho do cliente):
+ * laranja, azul, roxo. As variáveis estão em `site.css`.
+ */
+const SELOS = ["var(--plan-1)", "var(--plan-2)", "var(--plan-3)"] as const;
+
+type Linha = { texto: string; incluida: boolean };
+
+const ROTULO: CSSProperties = {
+  margin: 0,
+  fontSize: "var(--fs-label)",
+  fontWeight: "var(--fw-semibold)",
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: "var(--muted)",
 };
 
 function money(cents: number, locale: string): string {
@@ -104,178 +129,228 @@ export function Pricing({
       ? []
       : plans.filter((plan) => plan.audience === audience || plan.audience === "both");
 
-  function featureLines(plan: PublicPlan): string[] {
-    if (plan.features.length > 0) return plan.features;
+  /** Um limite em linha: `null` é ilimitado, zero é "não incluído". */
+  function linha(plan: PublicPlan, key: keyof PlanLimits): Linha[] {
+    if (!(key in plan.limits)) return [];
+    const value = plan.limits[key];
+    const keys = LIMIT_KEYS[key];
+    if (value === null || value === undefined) {
+      return keys.unlimited ? [{ texto: t(`limits.${keys.unlimited}`), incluida: true }] : [];
+    }
+    // Zero não se escreve "0 GB": é a funcionalidade, marcada como não incluída.
+    if (value <= 0) return [{ texto: t(`limitsMissing.${key}`), incluida: false }];
+    return [{ texto: t(`limits.${keys.count}`, { count: value }), incluida: true }];
+  }
+
+  function featureLines(plan: PublicPlan): Linha[] {
+    if (plan.features.length > 0) return plan.features.map((texto) => ({ texto, incluida: true }));
     if (audience === "builder") return [];
-    return LIMITS_BY_AUDIENCE[audience].flatMap((key) => {
-      if (!(key in plan.limits)) return [];
-      const value = plan.limits[key];
-      const keys = LIMIT_KEYS[key];
-      if (value === null || value === undefined) {
-        return keys.unlimited ? [t(`limits.${keys.unlimited}`)] : [];
-      }
-      // Zero não é uma funcionalidade: um plano sem cloud não diz "0 GB".
-      if (value <= 0) return [];
-      return [t(`limits.${keys.count}`, { count: value })];
-    });
+    return LIMITS_BY_AUDIENCE[audience].flatMap((key) => linha(plan, key));
+  }
+
+  /**
+   * A frase por baixo do preço ("Ideal para…"), tirada dos limites: ao
+   * proprietário diz quantas propriedades, ao comprador quantas acompanha.
+   */
+  function description(plan: PublicPlan): string | null {
+    if (audience === "builder") return null;
+    const key = audience === "owner" ? "active_properties" : "saved";
+    if (!(key in plan.limits)) return null;
+    const value = plan.limits[key];
+    return value === null || value === undefined
+      ? t(`ideal.${audience}Unlimited`)
+      : t(`ideal.${audience}`, { count: value });
   }
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+    // Duas distâncias (8 nov 2026, pedido do cliente): 40 px do texto às
+    // tabs, que antes estavam coladas ao parágrafo; 24 px das tabs aos cartões.
+    <div style={{ display: "grid", gap: "var(--site-gap)" }}>
       <SectionHeading eyebrow={t("eyebrow")} title={t("title")} body={t("body")} align="center" />
 
-      <div
-        style={{
-          display: "flex",
-          gap: "var(--sp-4)",
-          justifyContent: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <Tabs
-          label={t("eyebrow")}
-          value={audience}
-          onValueChange={(id) => setAudience(id as Audience)}
-          items={PRICING_AUDIENCE_IDS.map((id) => ({ id, label: t(`audienceTabs.${id}`) }))}
-        />
-        <Tabs
-          label={t("billingLabel")}
-          value={billing}
-          onValueChange={(id) => setBilling(id as Billing)}
-          items={PRICING_BILLING_IDS.map((id) => ({ id, label: t(`billingTabs.${id}`) }))}
-        />
-      </div>
-
-      {visible.length === 0 ? (
-        // Catálogo vazio não é um ecrã partido: é uma frase honesta. Pode
-        // acontecer em staging, e um painel de preços em branco faria o
-        // visitante pensar que o site rebentou. Para os construtores ainda
-        // não há planos, e a frase leva ao contacto.
-        <div style={{ display: "grid", gap: "var(--sp-4)", justifyItems: "center" }}>
-          <p
-            style={{
-              margin: 0,
-              maxWidth: "34rem",
-              textAlign: "center",
-              color: "var(--muted)",
-              fontSize: "var(--fs-body)",
-              lineHeight: 1.6,
-            }}
-          >
-            {audience === "builder" ? t("builderSoon") : t("audienceSoon")}
-          </p>
-          {audience === "builder" ? (
-            <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
-              {t("builderCta")}
-            </a>
-          ) : null}
-        </div>
-      ) : (
-        <ul
+      <div style={{ display: "grid", gap: "var(--sp-9)" }}>
+        <div
           style={{
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(17rem, 100%), 1fr))",
+            display: "flex",
             gap: "var(--sp-4)",
-            alignItems: "start",
+            justifyContent: "center",
+            flexWrap: "wrap",
           }}
         >
-          {visible.map((plan) => {
-            const cents = billing === "year" ? plan.priceYearCents : plan.priceMonthCents;
-            return (
-              <li
-                key={plan.slug}
-                style={{
-                  display: "grid",
-                  gap: "var(--sp-4)",
-                  padding: "var(--sp-5)",
-                  borderRadius: "var(--r-lg)",
-                  border: `1px solid ${plan.highlighted ? "var(--accent)" : "var(--border)"}`,
-                  background: "var(--surface)",
-                  alignContent: "start",
-                }}
-              >
-                <div style={{ display: "grid", gap: "var(--sp-2)" }}>
-                  <strong style={{ fontSize: "16px", color: "var(--text)" }}>{plan.name}</strong>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "clamp(1.5rem, 3vw, 2rem)",
-                      color: "var(--text)",
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {money(cents, locale)}
-                    <span
-                      style={{
-                        fontSize: "var(--fs-body)",
-                        color: "var(--muted)",
-                        fontWeight: "var(--fw-regular)",
-                      }}
-                    >
-                      {/* Pelo dicionário desde 7 nov 2026: escrito à mão, o site em inglês
-                          dizia "/ ano". */}
-                      {t(`per.${billing}`)}
-                    </span>
-                  </span>
-                </div>
+          <Tabs
+            label={t("eyebrow")}
+            value={audience}
+            onValueChange={(id) => setAudience(id as Audience)}
+            items={PRICING_AUDIENCE_IDS.map((id) => ({ id, label: t(`audienceTabs.${id}`) }))}
+          />
+          <Tabs
+            label={t("billingLabel")}
+            value={billing}
+            onValueChange={(id) => setBilling(id as Billing)}
+            items={PRICING_BILLING_IDS.map((id) => ({ id, label: t(`billingTabs.${id}`) }))}
+          />
+        </div>
 
-                <ul
+        {visible.length === 0 ? (
+          // Catálogo vazio não é um ecrã partido: é uma frase honesta. Pode
+          // acontecer em staging, e um painel de preços em branco faria o
+          // visitante pensar que o site rebentou. Para os construtores ainda
+          // não há planos, e a frase leva ao contacto.
+          <div style={{ display: "grid", gap: "var(--sp-4)", justifyItems: "center" }}>
+            <p
+              style={{
+                margin: 0,
+                maxWidth: "34rem",
+                textAlign: "center",
+                color: "var(--muted)",
+                fontSize: "var(--fs-body)",
+                lineHeight: 1.6,
+              }}
+            >
+              {audience === "builder" ? t("builderSoon") : t("audienceSoon")}
+            </p>
+            {audience === "builder" ? (
+              <a href="#contactos" className="upm-btn upm-btn--secondary upm-btn--md">
+                {t("builderCta")}
+              </a>
+            ) : null}
+          </div>
+        ) : (
+          <ul
+            style={{
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(17rem, 100%), 1fr))",
+              gap: "var(--sp-8)",
+              alignItems: "start",
+            }}
+          >
+            {visible.map((plan, posicao) => {
+              const cents = billing === "year" ? plan.priceYearCents : plan.priceMonthCents;
+              const ideal = description(plan);
+              const alertas = linha(plan, "alerts");
+              return (
+                <li
+                  key={plan.slug}
                   style={{
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
                     display: "grid",
-                    gap: "var(--sp-2)",
+                    gap: "var(--sp-8)",
+                    padding: "var(--sp-8)",
+                    borderRadius: "var(--r-lg)",
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
+                    alignContent: "start",
                   }}
                 >
-                  {featureLines(plan).map((feature) => (
-                    <li
-                      key={feature}
+                  <div style={{ display: "grid", gap: "var(--sp-5)", justifyItems: "start" }}>
+                    <span
                       style={{
-                        display: "flex",
-                        gap: "var(--sp-2)",
-                        alignItems: "start",
+                        padding: "6px 12px",
+                        borderRadius: "var(--r-md)",
+                        background: SELOS[posicao % SELOS.length],
+                        // Branco fixo: os três fundos do selo são escuros nos
+                        // dois temas.
+                        color: "#fff",
                         fontSize: "var(--fs-body)",
-                        color: "var(--text)",
+                        fontWeight: "var(--fw-semibold)",
                       }}
                     >
-                      <Check
-                        size={15}
-                        style={{ color: "var(--ok)", flexShrink: 0, marginTop: 2 }}
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                  {featureLines(plan).length === 0 ? (
-                    <li
-                      style={{
-                        display: "flex",
-                        gap: "var(--sp-2)",
-                        alignItems: "center",
-                        fontSize: "var(--fs-body)",
-                        color: "var(--muted)",
-                      }}
-                    >
-                      <Minus size={15} style={{ flexShrink: 0 }} />
-                      {t("featuresSoon")}
-                    </li>
-                  ) : null}
-                </ul>
+                      {plan.name}
+                    </span>
+                    <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-display)",
+                          fontSize: "clamp(1.6rem, 3vw, 2rem)",
+                          fontWeight: "var(--fw-bold)",
+                          color: "var(--text)",
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {money(cents, locale)}
+                        <span style={{ fontSize: "0.7em", fontWeight: "var(--fw-semibold)" }}>
+                          {/* Pelo dicionário desde 7 nov 2026: escrito à mão, o site
+                              em inglês dizia "/ ano". */}
+                          {t(`per.${billing}`)}
+                        </span>
+                      </span>
+                      {ideal ? (
+                        <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                          {ideal}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
 
-                <Link
-                  href={{ pathname: ctaHref, query: { plano: plan.slug } }}
-                  className={`upm-btn upm-btn--${plan.highlighted ? "primary" : "secondary"} upm-btn--md upm-btn--full`}
-                >
-                  {ctaLabel}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  <Secao
+                    titulo={t("sections.features")}
+                    linhas={featureLines(plan)}
+                    vazio={t("featuresSoon")}
+                  />
+
+                  {alertas.length > 0 ? (
+                    <>
+                      <hr style={{ margin: 0, border: 0, borderTop: "1px solid var(--border)" }} />
+                      <Secao titulo={t("sections.alerts")} linhas={alertas} />
+                    </>
+                  ) : null}
+
+                  <Link
+                    href={{ pathname: ctaHref, query: { plano: plan.slug } }}
+                    className={`upm-btn upm-btn--${plan.highlighted ? "primary" : "secondary"} upm-btn--md upm-btn--full`}
+                  >
+                    {ctaLabel}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** "FUNCIONALIDADES" / "ALERTAS" e a lista, com ✓ verde ou ✗ vermelho. */
+function Secao({ titulo, linhas, vazio }: { titulo: string; linhas: Linha[]; vazio?: string }) {
+  const item: CSSProperties = {
+    display: "flex",
+    gap: "var(--sp-4)",
+    alignItems: "start",
+    fontSize: "var(--fs-body)",
+    color: "var(--text)",
+  };
+  return (
+    <div style={{ display: "grid", gap: "var(--sp-5)" }}>
+      <p style={ROTULO}>{titulo}</p>
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}>
+        {linhas.map(({ texto, incluida }) => (
+          <li key={texto} style={item}>
+            {incluida ? (
+              <CheckCircle2
+                size={17}
+                aria-hidden="true"
+                style={{ color: "var(--ok)", flexShrink: 0, marginTop: 1 }}
+              />
+            ) : (
+              <XCircle
+                size={17}
+                aria-hidden="true"
+                style={{ color: "var(--danger)", flexShrink: 0, marginTop: 1 }}
+              />
+            )}
+            {texto}
+          </li>
+        ))}
+        {linhas.length === 0 && vazio ? (
+          <li style={{ ...item, alignItems: "center", color: "var(--muted)" }}>
+            <Minus size={17} aria-hidden="true" style={{ flexShrink: 0 }} />
+            {vazio}
+          </li>
+        ) : null}
+      </ul>
     </div>
   );
 }

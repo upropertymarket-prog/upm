@@ -644,8 +644,26 @@
         "cloud": "{count} GB of documents in the cloud"
       },
       "per": {
-        "year": " / year",
-        "month": " / month"
+        "year": "/year",
+        "month": "/month"
+      },
+      "sections": {
+        "features": "Features",
+        "alerts": "Alerts"
+      },
+      "ideal": {
+        "owner": "{count, plural, one {Ideal for owners with a single property} other {Ideal for owners with up to # properties}}",
+        "ownerUnlimited": "Ideal for owners with several properties",
+        "buyer": "{count, plural, one {Ideal if you follow one property} other {Ideal if you follow up to # properties}}",
+        "buyerUnlimited": "Ideal if you search without limits"
+      },
+      "limitsMissing": {
+        "active_properties": "Property listings",
+        "visits": "Viewing calendar",
+        "active_chats": "Conversations",
+        "saved": "Saved properties",
+        "alerts": "Search alerts",
+        "cloud_gb": "Document cloud"
       }
     },
     "faq": {

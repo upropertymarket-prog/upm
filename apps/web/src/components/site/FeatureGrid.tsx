@@ -49,10 +49,21 @@ const ICONS: Record<IconName, typeof Handshake> = {
 export function FeatureGrid({
   cards,
   minColumn = "16rem",
+  maxColumns,
 }: {
   cards: readonly FeatureCard[];
   minColumn?: string;
+  /**
+   * O máximo de cartões por linha (8 nov 2026: 3 nos Particulares/Empresas, a
+   * pedido do cliente). Sem media query: a coluna mínima passa a ser o maior
+   * de `minColumn` e de uma fração da linha, por isso nunca cabem mais do que
+   * `maxColumns` — e abaixo disso a grelha continua a descer sozinha.
+   */
+  maxColumns?: number;
 }) {
+  const coluna = maxColumns
+    ? `max(min(${minColumn}, 100%), calc((100% - ${maxColumns - 1} * var(--sp-4)) / ${maxColumns}))`
+    : `min(${minColumn}, 100%)`;
   return (
     <ul
       style={{
@@ -60,7 +71,7 @@ export function FeatureGrid({
         margin: 0,
         padding: 0,
         display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(min(${minColumn}, 100%), 1fr))`,
+        gridTemplateColumns: `repeat(auto-fit, minmax(${coluna}, 1fr))`,
         gap: "var(--sp-4)",
       }}
     >

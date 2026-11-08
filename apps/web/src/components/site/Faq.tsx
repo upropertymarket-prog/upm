@@ -30,7 +30,17 @@ export function Faq() {
       }}
     >
       {/* Sticky, como o protótipo. Só cola onde há altura para isso. */}
-      <header style={{ position: "sticky", top: "96px", display: "grid", gap: "var(--sp-3)" }}>
+      {/* `maxWidth`: o texto fica com a sua medida de leitura e não estica até
+          às perguntas, como no desenho do cliente (8 nov 2026). */}
+      <header
+        style={{
+          position: "sticky",
+          top: "96px",
+          display: "grid",
+          gap: "var(--sp-3)",
+          maxWidth: "26rem",
+        }}
+      >
         <h2
           style={{
             margin: 0,

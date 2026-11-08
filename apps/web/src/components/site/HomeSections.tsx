@@ -338,6 +338,9 @@ function Banner({ text, label }: { text: string; label: string }) {
             textAlign: "center",
             fontFamily: "var(--font-display)",
             fontSize: "clamp(1.4rem, 3.4vw, 2.25rem)",
+            // Semibold e não o 700 dos títulos (pedido do cliente, 8 nov 2026):
+            // a frase é uma pausa entre secções, não um título.
+            fontWeight: "var(--fw-semibold)",
             lineHeight: 1.2,
             color: "#fff",
           }}
@@ -373,7 +376,9 @@ function Audiences() {
   const [audience, setAudience] = useState<AudienceId>("particulares");
 
   return (
-    <div style={{ display: "grid", gap: "var(--sp-6)", justifyItems: "center" }}>
+    // `--site-gap` (40 px) entre o título e os cartões: com os 14 px de antes
+    // o título colava-se à grelha (pedido do cliente, 8 nov 2026).
+    <div style={{ display: "grid", gap: "var(--site-gap)", justifyItems: "center" }}>
       <Tabs
         label={t(`${audience}.title`)}
         value={audience}
@@ -388,6 +393,7 @@ function Audiences() {
             title: t(`${audience}.cards.${card.id}.title`),
             body: t(`${audience}.cards.${card.id}.body`),
           }))}
+          maxColumns={3}
         />
       </div>
     </div>
