@@ -54,6 +54,7 @@ function href(filters: LeadFilters, extra: Record<string, string | null> = {}) {
   if (filters.source) params.set("source", filters.source);
   if (filters.form) params.set("form", filters.form);
   if (filters.assignedTo) params.set("assigned_to", filters.assignedTo);
+  if (filters.confirmation) params.set("confirmation", filters.confirmation);
   for (const [key, value] of Object.entries(extra)) {
     if (value) params.set(key, value);
     else params.delete(key);
@@ -61,6 +62,16 @@ function href(filters: LeadFilters, extra: Record<string, string | null> = {}) {
   const query = params.toString();
   return query ? "/admin/leads-site?" + query : "/admin/leads-site";
 }
+/**
+ * Só a pré-inscrição pede confirmação por e-mail. As que ficam por confirmar
+ * apaga-as a retenção ao fim de 30 dias (`purge_unconfirmed_site_leads`);
+ * os outros formulários não confirmam nada, e não levam etiqueta.
+ */
+const PURGE_DAYS = 30;
+function purgeDate(createdAt: string) {
+  return new Date(new Date(createdAt).getTime() + PURGE_DAYS * 24 * 60 * 60 * 1000).toISOString();
+}
+
 function statusTone(status: LeadStatus): "active" | "pending" | "rejected" | "primary" {
   if (status === "new") return "pending";
   if (status === "discarded") return "rejected";
@@ -128,6 +139,18 @@ export function LeadsManager({
     { id: "profile", header: t("profileType"), cell: (row) => t("profile." + row.profile_type) },
     { id: "source", header: t("source"), cell: (row) => t("sources." + row.source) },
     { id: "form", header: t("form"), cell: (row) => t("forms." + row.form) },
+    {
+      id: "confirmation",
+      header: t("confirmation"),
+      cell: (row) =>
+        row.form !== "preinscricao" ? (
+          <span className="text-muted">—</span>
+        ) : row.confirmed_at ? (
+          <StatusTag tone="active">{t("confirmed")}</StatusTag>
+        ) : (
+          <StatusTag tone="pending">{t("pendingConfirmation")}</StatusTag>
+        ),
+    },
     {
       id: "status",
       header: t("status"),
@@ -248,6 +271,9 @@ export function LeadsManager({
             {exportNotice === "failed" ? t("exportFailed") : t("exportTruncated")}
           </p>
         ) : null}
+        {/* A nota que o cliente pediu (8 nov 2026): quem trabalha os leads tem
+            de saber que os por confirmar desaparecem sozinhos. */}
+        <p className="text-xs text-muted">{t("retentionNote")}</p>
         <Card padded>
           <form action="/admin/leads-site" method="get" className="grid gap-4 md:grid-cols-3">
             <Input
@@ -286,6 +312,16 @@ export function LeadsManager({
               }))}
             />
             <Select
+              name="confirmation"
+              label={t("confirmationFilter")}
+              defaultValue={filters.confirmation ?? ""}
+              placeholder={t("allConfirmations")}
+              options={(["confirmed", "pending"] as const).map((key) => ({
+                value: key,
+                label: key === "confirmed" ? t("confirmed") : t("pendingConfirmation"),
+              }))}
+            />
+            <Select
               name="assigned_to"
               label={t("assignedTo")}
               defaultValue={filters.assignedTo ?? ""}
@@ -308,7 +344,8 @@ export function LeadsManager({
                   filters.status ||
                   filters.source ||
                   filters.form ||
-                  filters.assignedTo
+                  filters.assignedTo ||
+                  filters.confirmation
                   ? "noResultsTitle"
                   : "emptyTitle",
               )}
@@ -368,6 +405,24 @@ export function LeadsManager({
                   {t("profile." + selected.profile_type)} · {t("sources." + selected.source)} ·{" "}
                   {t("forms." + selected.form)}
                 </p>
+                {selected.form === "preinscricao" ? (
+                  <p className="text-sm">
+                    {selected.confirmed_at ? (
+                      <StatusTag tone="active">
+                        {t("confirmedOn", { date: labelDate(selected.confirmed_at, locale) })}
+                      </StatusTag>
+                    ) : (
+                      <>
+                        <StatusTag tone="pending">{t("pendingConfirmation")}</StatusTag>{" "}
+                        <span className="text-xs text-muted">
+                          {t("deletedOn", {
+                            date: labelDate(purgeDate(selected.created_at), locale),
+                          })}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                ) : null}
               </section>
               <section className="grid gap-2">
                 <h3 className="font-semibold text-text">{t("request")}</h3>

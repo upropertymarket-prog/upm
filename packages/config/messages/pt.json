@@ -1837,7 +1837,15 @@
       "noHistory": "Sem atividade registada",
       "actionFailed": "Não foi possível guardar a alteração. Atualize a página e tente novamente.",
       "exportFailed": "Não foi possível exportar os leads. Tente novamente.",
-      "exportTruncated": "A exportação ficou nos primeiros 5000 leads. Use os filtros para exportar o resto por partes."
+      "exportTruncated": "A exportação ficou nos primeiros 5000 leads. Use os filtros para exportar o resto por partes.",
+      "confirmation": "E-mail",
+      "confirmed": "Confirmado",
+      "pendingConfirmation": "Por confirmar",
+      "confirmationFilter": "Confirmação (pré-inscrições)",
+      "allConfirmations": "Todas",
+      "confirmedOn": "Confirmado a {date}",
+      "deletedOn": "Apagado automaticamente a {date}, se não confirmar.",
+      "retentionNote": "As pré-inscrições por confirmar são apagadas automaticamente 30 dias depois da inscrição. Os restantes leads saem ao fim de 12 meses sem atividade, exceto os convertidos."
     },
     "settings": {
       "title": "Definições",

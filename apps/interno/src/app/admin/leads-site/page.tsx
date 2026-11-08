@@ -36,6 +36,9 @@ export default async function SiteLeadsPage({
   const assignedRaw = first(params.assigned_to) ?? "";
   const assigned = uuid.safeParse(assignedRaw);
   const search = (first(params.search) ?? "").trim().slice(0, 120);
+  const confirmationResult = z
+    .enum(["confirmed", "pending"])
+    .safeParse(first(params.confirmation) ?? "");
   const date = z
     .string()
     .datetime({ offset: true })
@@ -56,6 +59,7 @@ export default async function SiteLeadsPage({
     source: sourceResult.success ? sourceResult.data : null,
     form: formResult.success ? formResult.data : null,
     assignedTo: assigned.success ? assigned.data : null,
+    confirmation: confirmationResult.success ? confirmationResult.data : null,
     search,
   };
   const [auth, listResult, staffResult, sidebarCounters] = await Promise.all([
@@ -66,6 +70,7 @@ export default async function SiteLeadsPage({
       p_form: filters.form ?? undefined,
       p_assigned_to: filters.assignedTo ?? undefined,
       p_search: search || undefined,
+      p_confirmed: filters.confirmation === null ? undefined : filters.confirmation === "confirmed",
       p_cursor_created_at: cursor?.createdAt,
       p_cursor_id: cursor?.id,
       p_direction: cursor ? direction : "next",

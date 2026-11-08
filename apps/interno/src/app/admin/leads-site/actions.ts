@@ -19,6 +19,8 @@ const filtersSchema = z.object({
   source: z.enum(["pre_launch", "post_launch"]).nullable(),
   form: z.enum(["preinscricao", "contacto", "empresas"]).nullable(),
   assignedTo: idSchema.nullable(),
+  // Só das pré-inscrições: os outros formulários não pedem confirmação.
+  confirmation: z.enum(["confirmed", "pending"]).nullable(),
   search: z.string().max(120),
 });
 
@@ -112,6 +114,8 @@ export async function exportLeads(
         p_form: filters.form ?? undefined,
         p_assigned_to: filters.assignedTo ?? undefined,
         p_search: filters.search || undefined,
+        p_confirmed:
+          filters.confirmation === null ? undefined : filters.confirmation === "confirmed",
       })
       .range(from, from + EXPORT_PAGE - 1);
     if (error || !pagina) return { error: "Could not export leads." };
@@ -141,6 +145,7 @@ export async function exportLeads(
     "assigned_name",
     "consent_marketing",
     "consent_at",
+    "confirmed_at",
     "created_at",
   ];
   const rows = data.map((row) =>
