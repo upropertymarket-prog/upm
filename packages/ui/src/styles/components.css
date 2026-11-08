@@ -137,6 +137,11 @@ h6 {
 
 .upm-btn--primary:hover:not(:disabled) {
   background: var(--accent-solid-hover);
+  /* A cor outra vez, e não por esquecimento: um botão que é um link (`<a
+     class="upm-btn">`, o padrão do site) apanhava o `a:hover` de tokens.css,
+     que lhe punha o texto em `--accent-ink` — laranja-escuro sobre laranja,
+     invisível (visto pelo cliente a 8 nov 2026, no CTA da barra e nos preços). */
+  color: var(--on-solid);
 }
 
 .upm-btn--secondary {

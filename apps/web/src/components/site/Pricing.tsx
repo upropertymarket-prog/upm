@@ -196,15 +196,19 @@ export function Pricing({
           // acontecer em staging, e um painel de preços em branco faria o
           // visitante pensar que o site rebentou. Para os construtores ainda
           // não há planos, e a frase leva ao contacto.
-          <div style={{ display: "grid", gap: "var(--sp-4)", justifyItems: "center" }}>
+          // A frase dos construtores maior e em medium, e o botão mais longe
+          // dela (pedido do cliente, 8 nov 2026): é a única coisa que o
+          // separador mostra, e em corpo pequeno parecia uma nota de rodapé.
+          <div style={{ display: "grid", gap: "var(--sp-9)", justifyItems: "center" }}>
             <p
               style={{
                 margin: 0,
-                maxWidth: "34rem",
+                maxWidth: "38rem",
                 textAlign: "center",
-                color: "var(--muted)",
-                fontSize: "var(--fs-body)",
-                lineHeight: 1.6,
+                color: "var(--text)",
+                fontSize: "18px",
+                fontWeight: "var(--fw-medium)",
+                lineHeight: 1.55,
               }}
             >
               {audience === "builder" ? t("builderSoon") : t("audienceSoon")}

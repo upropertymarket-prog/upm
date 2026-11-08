@@ -202,7 +202,9 @@ export function HomeSections({
 
         {launchMode === "pre" ? (
           <SiteSection>
-            <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+            {/* `--site-gap` (40 px) entre o texto e os cartões, como nas outras
+                secções desde 8 nov 2026: com 14 px o texto colava-se à grelha. */}
+            <div style={{ display: "grid", gap: "var(--site-gap)" }}>
               <SectionHeading
                 eyebrow={t("comingSoon.eyebrow")}
                 title={t("comingSoon.title")}
