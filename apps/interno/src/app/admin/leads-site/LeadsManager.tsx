@@ -236,6 +236,10 @@ export function LeadsManager({
             {t("export")}
           </Button>
         </header>
+        {/* A regra das cópias (cliente, 8 nov 2026): a exportação é o backup
+            diário e fica no computador de quem a faz — fora do sistema, e
+            por isso fora da remoção a pedido. Guardam-se 30 dias. */}
+        <p className="text-xs text-muted">{t("exportRetention")}</p>
         {exportNotice ? (
           <p
             className={exportNotice === "failed" ? "text-sm text-danger" : "text-sm text-muted"}

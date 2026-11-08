@@ -1808,6 +1808,7 @@
       "unassigned": "Sem responsável",
       "createdAt": "Recebida em",
       "export": "Exportar CSV",
+      "exportRetention": "Cópia diária: guarde o ficheiro e apague as cópias com mais de 30 dias. Quem pede para apagar os dados também tem de sair das cópias.",
       "tableCaption": "Leads do site",
       "loadFailed": "Não foi possível carregar as leads.",
       "emptyTitle": "Ainda não há leads",

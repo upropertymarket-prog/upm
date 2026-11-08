@@ -1808,6 +1808,7 @@
       "unassigned": "Unassigned",
       "createdAt": "Received",
       "export": "Export CSV",
+      "exportRetention": "Daily copy: keep the file and delete copies older than 30 days. Anyone who asks for their data to be deleted must also leave the copies.",
       "tableCaption": "Site leads",
       "loadFailed": "Could not load leads.",
       "emptyTitle": "No leads yet",
