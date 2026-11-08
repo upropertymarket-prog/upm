@@ -457,8 +457,9 @@
   "site": {
     "preLaunchBanner": "Plataforma em pré-lançamento — pré-inscrição disponível",
     "ogCard": {
-      "line1": "Propriedades sem comissões,",
-      "line2": "nem contactos indesejados.",
+      "lead": "Compre e venda imóveis",
+      "accent": "sem comissões",
+      "tail": ", nem contactos indesejados",
       "preBadge": "Pré-inscrição aberta"
     },
     "platformCta": {
@@ -475,7 +476,7 @@
     },
     "hero": {
       "eyebrow": "Your property your choice",
-      "title": "Propriedades sem comissões, nem contactos indesejados.",
+      "title": "Compre e venda imóveis <accent>sem comissões</accent>, nem contactos indesejados",
       "body": "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários, sem pressões, sem surpresas no fim.",
       "primaryCta": "Começar agora",
       "secondaryCta": "Ver a plataforma",

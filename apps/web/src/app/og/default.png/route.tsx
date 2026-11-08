@@ -54,6 +54,9 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 /** As famílias do site (04 §5.3): títulos e texto. */
 const TITULOS = "Bricolage Grotesque";
+const TEXTO = "#f8fafc";
+/** A cor primária sobre fundo escuro — o `--accent` do tema escuro, o laranja do logótipo. */
+const ACCENT_ON_DARK = "#f97316";
 
 async function dataUrl(url: URL, type: string): Promise<string | null> {
   try {
@@ -104,9 +107,20 @@ export async function GET(request: Request) {
   const locale = resolveLocale(lang);
   const texto = (locale === "en" ? en : pt).site;
 
-  // Uma frase só: partida em duas linhas fixas, o português quebrava
-  // "Propriedades sem / comissões," a meio.
-  const titulo = `${texto.ogCard.line1} ${texto.ogCard.line2}`;
+  // A frase do site (cliente, 8 nov 2026): "Compre e venda imóveis" numa
+  // linha, e depois "sem comissões" na cor primária e o resto, a quebrar
+  // sozinho. O Satori não mistura cores num só bloco de texto: o destaque e o
+  // resto vão palavra a palavra, numa linha flexível que quebra como texto.
+  const { lead, accent, tail } = texto.ogCard;
+  const titulo = `${lead} ${accent}${tail}`;
+  const destaque = accent.split(" ");
+  // Em português o resto começa por ", " (a vírgula cola-se ao destaque); em
+  // inglês, por um espaço.
+  const pontuacao = tail.startsWith(" ") ? "" : tail.trimStart().split(" ")[0]!;
+  const resto = tail
+    .trim()
+    .split(" ")
+    .slice(pontuacao ? 1 : 0);
   const endereco = "upropertymarket.pt";
   const [fundo, logo, modo, titular, selo, rodape] = await Promise.all([
     dataUrl(new URL("/site/og-fundo.jpg", request.url), "image/jpeg"),
@@ -187,18 +201,31 @@ export async function GET(request: Request) {
               </span>
             </div>
           ) : null}
-          <span
+          <div
             style={{
+              display: "flex",
+              flexWrap: "wrap",
               fontFamily: TITULOS,
-              fontSize: 60,
+              fontSize: 58,
               fontWeight: 700,
-              color: "#f8fafc",
-              lineHeight: 1.1,
+              color: TEXTO,
+              lineHeight: 1.12,
               letterSpacing: "-0.02em",
             }}
           >
-            {titulo}
-          </span>
+            <span style={{ width: "100%" }}>{lead}</span>
+            {destaque.map((palavra, i) => (
+              <span key={`d${i}`} style={{ display: "flex", marginRight: "0.25em" }}>
+                <span style={{ color: ACCENT_ON_DARK }}>{palavra}</span>
+                {i === destaque.length - 1 && pontuacao ? <span>{pontuacao}</span> : null}
+              </span>
+            ))}
+            {resto.map((palavra, i) => (
+              <span key={`r${i}`} style={{ marginRight: "0.25em" }}>
+                {palavra}
+              </span>
+            ))}
+          </div>
           <span
             style={{
               fontFamily: "Manrope",

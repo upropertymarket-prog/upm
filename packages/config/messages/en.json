@@ -457,8 +457,9 @@
   "site": {
     "preLaunchBanner": "Platform in pre-launch — pre-registration open",
     "ogCard": {
-      "line1": "Properties with no commission",
-      "line2": "and no unwanted calls.",
+      "lead": "Buy and sell property",
+      "accent": "with no commission",
+      "tail": " and no unwanted calls",
       "preBadge": "Pre-registration open"
     },
     "platformCta": {
@@ -475,7 +476,7 @@
     },
     "hero": {
       "eyebrow": "Your property your choice",
-      "title": "Properties with no commission and no unwanted calls.",
+      "title": "Buy and sell property <accent>with no commission</accent> and no unwanted calls",
       "body": "Buyers and owners talk directly, at their own pace, with transparent information and full control of the process. No middlemen, no pressure, no surprises at the end.",
       "primaryCta": "Get started",
       "secondaryCta": "See the platform",

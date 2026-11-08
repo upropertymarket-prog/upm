@@ -55,7 +55,12 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
               color: "var(--text)",
             }}
           >
-            {t("title")}
+            {/* "sem comissões" na cor primária (cliente, 8 nov 2026). O
+                destaque vem marcado na mensagem (`<accent>`), para cair no
+                sítio certo nas duas línguas. */}
+            {t.rich("title", {
+              accent: (chunks) => <span style={{ color: "var(--accent)" }}>{chunks}</span>,
+            })}
           </h1>
           <p
             style={{
