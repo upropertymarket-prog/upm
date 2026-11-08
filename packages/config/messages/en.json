@@ -1837,7 +1837,15 @@
       "noHistory": "No activity recorded",
       "actionFailed": "Could not save the change. Refresh the page and try again.",
       "exportFailed": "Could not export the leads. Please try again.",
-      "exportTruncated": "The export stopped at the first 5000 leads. Use the filters to export the rest in parts."
+      "exportTruncated": "The export stopped at the first 5000 leads. Use the filters to export the rest in parts.",
+      "confirmation": "Email",
+      "confirmed": "Confirmed",
+      "pendingConfirmation": "Not confirmed",
+      "confirmationFilter": "Confirmation (early access)",
+      "allConfirmations": "All",
+      "confirmedOn": "Confirmed on {date}",
+      "deletedOn": "Deleted automatically on {date} unless confirmed.",
+      "retentionNote": "Unconfirmed early-access sign-ups are deleted automatically 30 days after signing up. Other leads are removed after 12 months without activity, except converted ones."
     },
     "settings": {
       "title": "Settings",

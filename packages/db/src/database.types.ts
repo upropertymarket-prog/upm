@@ -4017,6 +4017,7 @@ export type Database = {
       admin_export_site_leads: {
         Args: {
           p_assigned_to?: string;
+          p_confirmed?: boolean;
           p_form?: string;
           p_search?: string;
           p_source?: string;
@@ -4026,6 +4027,7 @@ export type Database = {
           assigned_name: string;
           consent_at: string;
           consent_marketing: boolean;
+          confirmed_at: string;
           created_at: string;
           email: string;
           form: string;
@@ -4096,6 +4098,7 @@ export type Database = {
       admin_list_site_leads: {
         Args: {
           p_assigned_to?: string;
+          p_confirmed?: boolean;
           p_cursor_created_at?: string;
           p_cursor_id?: string;
           p_direction?: string;
@@ -4109,6 +4112,7 @@ export type Database = {
           assigned_name: string;
           assigned_to: string;
           consent_marketing: boolean;
+          confirmed_at: string;
           created_at: string;
           email: string;
           form: string;
@@ -4250,6 +4254,7 @@ export type Database = {
           assigned_to: string;
           consent_at: string;
           consent_marketing: boolean;
+          confirmed_at: string;
           created_at: string;
           email: string;
           form: string;

@@ -149,7 +149,26 @@ const leadRows: Database["public"]["Functions"]["admin_list_site_leads"]["Return
     assigned_to: null,
     assigned_name: null,
     consent_marketing: false,
+    // Por confirmar: a lista mostra a etiqueta, e o detalhe a data em que é
+    // apagada sozinha (30 dias).
+    confirmed_at: null,
     created_at: "2026-10-02T09:10:00.000Z",
+  },
+  {
+    id: "aa000000-0000-4000-8000-000000000003",
+    source: "pre_launch",
+    form: "preinscricao",
+    name: "Bruno Confirmado",
+    email: "bruno@example.invalid",
+    phone: null,
+    profile_type: "owner",
+    reason: "Vender casa",
+    status: "new",
+    assigned_to: null,
+    assigned_name: null,
+    consent_marketing: true,
+    confirmed_at: "2026-10-02T08:05:00.000Z",
+    created_at: "2026-10-02T08:00:00.000Z",
   },
   {
     id: "aa000000-0000-4000-8000-000000000002",
@@ -164,6 +183,8 @@ const leadRows: Database["public"]["Functions"]["admin_list_site_leads"]["Return
     assigned_to: "cc000000-0000-4000-8000-000000000002",
     assigned_name: "Helena Matos",
     consent_marketing: false,
+    // Pedido de empresa: não confirma nada, e por isso não leva etiqueta.
+    confirmed_at: null,
     created_at: "2026-10-01T14:00:00.000Z",
   },
 ];
@@ -195,6 +216,7 @@ const leadFilters: LeadFilters = {
   source: null,
   form: null,
   assignedTo: null,
+  confirmation: null,
   search: "",
 };
 const stubResult = async () => ({ ok: true });
