@@ -84,6 +84,8 @@ const verifyPin: VerifyPinAction = async () => ({ ok: true });
 const onChangeStatus = async () => ({ ok: true });
 const onResetPassword = async () => ({ ok: true });
 const onResetTwoFactor = async () => ({ ok: true });
+const onExportRecord = async () => ({ ok: true, csv: "" });
+const onDeleteAccount = async () => ({ ok: true });
 
 function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?: boolean }) {
   const cursor = {
@@ -135,6 +137,8 @@ function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?
                 onChangeStatus={onChangeStatus}
                 onResetPassword={onResetPassword}
                 onResetTwoFactor={onResetTwoFactor}
+                onExportRecord={onExportRecord}
+                onDeleteAccount={onDeleteAccount}
                 onLogAccess={async () => undefined}
                 onVerifyPin={verifyPin}
               />

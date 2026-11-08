@@ -6,7 +6,16 @@ import { z } from "zod";
 import { createClient } from "@upm/db/server";
 import { isStepUpRequiredError } from "@upm/db/auth";
 
-import { resetStaffMfa, sendRecoveryLink, staffProfile } from "../../../lib/staff-access";
+import {
+  deleteStaffUser,
+  recordExportedRecently,
+  resetStaffMfa,
+  sendRecoveryLink,
+  staffExitBlockers,
+  staffProfile,
+  staffRecordCsv,
+  type StaffExitBlockers,
+} from "../../../lib/staff-access";
 
 const profileIdSchema = z.string().uuid();
 const statusInputSchema = z.object({
@@ -155,5 +164,81 @@ export async function resetStaffTwoFactor(input: unknown): Promise<StaffAccessAc
     p_entity_id: check.target.id,
     p_diff: { role: check.target.role },
   });
+  return { ok: true };
+}
+
+/**
+ * A saída de alguém da equipa (8 nov 2026)
+ * =========================================================================
+ * Ver `lib/staff-access.ts`. Para além das recusas de
+ * `authorizeStaffAccessChange`, as duas pedem a conta **suspensa**: bloquear
+ * o acesso é o primeiro passo, e nada disto se faz a uma conta que ainda
+ * entra. A eliminação pede ainda, no servidor:
+ *
+ *  - o trabalho passado a outra pessoa (sem leads em aberto nem caixas de
+ *    correio atribuídos);
+ *  - o registo descarregado nas últimas 24 h — depois, a base deixa de saber
+ *    quem fez o quê, e o CSV é a única ligação.
+ */
+export type StaffExitActionResult = StaffAccessActionResult & {
+  csv?: string;
+  notSuspended?: boolean;
+  needsExport?: boolean;
+  blockers?: StaffExitBlockers;
+};
+
+async function authorizeStaffExit(input: unknown) {
+  const check = await authorizeStaffAccessChange(input);
+  if ("result" in check) return check;
+  if (check.target.status !== "suspended") {
+    return { ok: false as const, result: { notSuspended: true } };
+  }
+  return check;
+}
+
+/** O registo da pessoa, em CSV, para guardar fora do sistema antes de a eliminar. */
+export async function exportStaffRecord(input: unknown): Promise<StaffExitActionResult> {
+  const check = await authorizeStaffExit(input);
+  if ("result" in check) return check.result;
+
+  const csv = await staffRecordCsv(check.target.id);
+  if (!csv) return { error: "The record could not be exported." };
+
+  const audit = await check.supabase.rpc("write_audit_log", {
+    p_action: "staff.record_export",
+    p_entity: "profiles",
+    p_entity_id: check.target.id,
+    p_diff: { role: check.target.role },
+  });
+  if (audit.error) return { error: "The export could not be audited." };
+  return { ok: true, csv };
+}
+
+/** Elimina a conta: o perfil e o login saem; nos registos, o autor passa a null. */
+export async function deleteStaffAccount(input: unknown): Promise<StaffExitActionResult> {
+  const check = await authorizeStaffExit(input);
+  if ("result" in check) return check.result;
+
+  const blockers = await staffExitBlockers(check.target.id);
+  if (!blockers) return { error: "The account could not be checked." };
+  if (blockers.openLeads > 0 || blockers.mailboxes > 0) return { blockers };
+  if (!(await recordExportedRecently(check.target.id))) return { needsExport: true };
+
+  // Primeiro o registo da eliminação, depois a eliminação: se ela falhar, o
+  // `audit_log` mostra a tentativa, e não uma conta que desapareceu sem rasto.
+  // Sem nome nem e-mail — a pessoa sai do sistema; o CSV é que a identifica.
+  const audit = await check.supabase.rpc("write_audit_log", {
+    p_action: "staff.account_deleted",
+    p_entity: "profiles",
+    p_entity_id: check.target.id,
+    p_diff: { role: check.target.role },
+  });
+  if (audit.error) return { error: "The deletion could not be audited." };
+
+  if (!(await deleteStaffUser(check.target.id))) {
+    return { error: "The account could not be deleted." };
+  }
+  revalidatePath("/admin/utilizadores");
+  revalidatePath("/admin/painel");
   return { ok: true };
 }

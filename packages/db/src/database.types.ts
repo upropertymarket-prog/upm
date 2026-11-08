@@ -2073,7 +2073,7 @@ export type Database = {
       personal_data_access_log: {
         Row: {
           action: string;
-          actor_profile_id: string;
+          actor_profile_id: string | null;
           id: number;
           occurred_at: string;
           subject_id: string;
@@ -2081,7 +2081,7 @@ export type Database = {
         };
         Insert: {
           action: string;
-          actor_profile_id: string;
+          actor_profile_id?: string | null;
           id?: never;
           occurred_at?: string;
           subject_id: string;
@@ -2089,7 +2089,7 @@ export type Database = {
         };
         Update: {
           action?: string;
-          actor_profile_id?: string;
+          actor_profile_id?: string | null;
           id?: never;
           occurred_at?: string;
           subject_id?: string;
@@ -2564,7 +2564,7 @@ export type Database = {
       property_moderation_events: {
         Row: {
           action: string;
-          actor_id: string;
+          actor_id: string | null;
           created_at: string;
           id: number;
           property_id: string;
@@ -2574,7 +2574,7 @@ export type Database = {
         };
         Insert: {
           action: string;
-          actor_id: string;
+          actor_id?: string | null;
           created_at?: string;
           id?: never;
           property_id: string;
@@ -2584,7 +2584,7 @@ export type Database = {
         };
         Update: {
           action?: string;
-          actor_id?: string;
+          actor_id?: string | null;
           created_at?: string;
           id?: never;
           property_id?: string;
@@ -2941,7 +2941,7 @@ export type Database = {
       };
       site_lead_events: {
         Row: {
-          actor_id: string;
+          actor_id: string | null;
           body: string;
           created_at: string;
           id: number;
@@ -2949,7 +2949,7 @@ export type Database = {
           lead_id: string;
         };
         Insert: {
-          actor_id: string;
+          actor_id?: string | null;
           body: string;
           created_at?: string;
           id?: never;
@@ -2957,7 +2957,7 @@ export type Database = {
           lead_id: string;
         };
         Update: {
-          actor_id?: string;
+          actor_id?: string | null;
           body?: string;
           created_at?: string;
           id?: never;

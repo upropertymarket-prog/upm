@@ -458,7 +458,8 @@
     "preLaunchBanner": "Platform in pre-launch — pre-registration open",
     "ogCard": {
       "line1": "Properties with no commission",
-      "line2": "and no unwanted calls."
+      "line2": "and no unwanted calls.",
+      "preBadge": "Pre-registration open"
     },
     "platformCta": {
       "pre": "Pre-register",
@@ -1654,6 +1655,17 @@
       "confirmResetTwoFactor": "Reset 2FA",
       "resetTwoFactorDone": "2FA reset. At their next sign-in, this person sets up the app again.",
       "accessFailed": "This could not be completed. Please try again.",
+      "exit": "Leaving the team",
+      "exitHint": "Once this person's work has been handed over, the account is deleted. Their record is downloaded first, to keep outside the system.",
+      "deleteAccount": "Delete account",
+      "deleteAccountBody": "First download this person's record (what they did, whose data they viewed, what they moderated) and keep it outside the system. Once deleted, the account no longer exists and the records stay without a name. This cannot be undone.",
+      "exportRecord": "Download record (CSV)",
+      "exportRecordAgain": "Download again",
+      "exportRecordDone": "Record downloaded. Keep it before deleting the account.",
+      "confirmDeleteAccount": "Delete account",
+      "exitBlockers": "Work is still assigned to this person: {openLeads, plural, one {# open lead} other {# open leads}} and {mailboxes, plural, one {# mailbox} other {# mailboxes}}. Hand it over first.",
+      "exitNeedsExport": "Download the record before deleting the account (valid for 24 hours).",
+      "exitNotSuspended": "Suspend the account before deleting it.",
       "marketing": "Marketing"
     },
     "moderation": {
