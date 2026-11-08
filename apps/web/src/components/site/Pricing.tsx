@@ -6,7 +6,11 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, Minus, XCircle } from "lucide-react";
 import { Tabs } from "@upm/ui";
 
-import { PRICING_AUDIENCE_IDS, PRICING_BILLING_IDS } from "../../lib/site-content";
+import {
+  PLAN_ALERT_TYPES,
+  PRICING_AUDIENCE_IDS,
+  PRICING_BILLING_IDS,
+} from "../../lib/site-content";
 import { SectionHeading } from "./SiteSection";
 
 /**
@@ -65,8 +69,8 @@ type Audience = (typeof PRICING_AUDIENCE_IDS)[number];
  * própria.
  */
 const LIMITS_BY_AUDIENCE: Record<"owner" | "buyer", ReadonlyArray<keyof PlanLimits>> = {
-  owner: ["active_properties", "visits", "active_chats", "cloud_gb"],
-  buyer: ["saved", "visits", "active_chats", "cloud_gb"],
+  owner: ["active_properties", "visits", "active_chats", "alerts", "cloud_gb"],
+  buyer: ["saved", "visits", "active_chats", "alerts", "cloud_gb"],
 };
 
 const LIMIT_KEYS: Record<keyof PlanLimits, { count: string; unlimited?: string }> = {
@@ -234,7 +238,12 @@ export function Pricing({
             {visible.map((plan, posicao) => {
               const cents = billing === "year" ? plan.priceYearCents : plan.priceMonthCents;
               const ideal = description(plan);
-              const alertas = linha(plan, "alerts");
+              // Os tipos de alerta pelo degrau do plano na escada (ver
+              // PLAN_ALERT_TYPES): ✓ a partir do degrau em que entram.
+              const alertas = PLAN_ALERT_TYPES.map((tipo) => ({
+                texto: t(`alertTypes.${tipo.id}`),
+                incluida: posicao >= tipo.fromTier,
+              }));
               return (
                 <li
                   key={plan.slug}

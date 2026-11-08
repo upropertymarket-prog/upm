@@ -664,6 +664,13 @@
         "saved": "Propriedades guardadas",
         "alerts": "Alertas de pesquisa",
         "cloud_gb": "Cloud para documentação"
+      },
+      "alertTypes": {
+        "messages": "Alertas de mensagens",
+        "newProperty": "Nova propriedade publicada",
+        "priceDrop": "Queda do preço de imóveis guardados",
+        "belowAverage": "Propriedades publicadas com preços abaixo da média",
+        "priorityAccess": "Acesso prioritário a propriedades recentes"
       }
     },
     "faq": {

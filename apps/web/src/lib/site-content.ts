@@ -112,6 +112,24 @@ export const HERO_STAT_IDS = ["commission", "privacy", "everything"] as const;
 export const PRICING_AUDIENCE_IDS = ["owner", "buyer", "builder"] as const;
 export const PRICING_BILLING_IDS = ["year", "month"] as const;
 
+/**
+ * Os tipos de alerta de cada plano (8 nov 2026, do desenho do cliente)
+ * ---------------------------------------------------------------------------
+ * `fromTier` é o degrau da escada a partir do qual o plano o inclui: 0 o
+ * primeiro (Essential), 1 o do meio (Smarter), 2 o de topo (Premium) — o
+ * mesmo para proprietários e compradores. Os alertas ainda não existem no
+ * produto; existem no lançamento oficial, e o cliente quis-os já no site.
+ * Quando passarem a ser dados do plano (`plans.features` ou uma coluna
+ * própria), esta lista sai daqui.
+ */
+export const PLAN_ALERT_TYPES = [
+  { id: "messages", fromTier: 0 },
+  { id: "newProperty", fromTier: 1 },
+  { id: "priceDrop", fromTier: 1 },
+  { id: "belowAverage", fromTier: 2 },
+  { id: "priorityAccess", fromTier: 2 },
+] as const;
+
 /** As dúvidas, pela ordem em que se respondem. */
 export const FAQ_IDS = [
   "availability",

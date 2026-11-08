@@ -664,6 +664,13 @@
         "saved": "Saved properties",
         "alerts": "Search alerts",
         "cloud_gb": "Document cloud"
+      },
+      "alertTypes": {
+        "messages": "Message alerts",
+        "newProperty": "New property listed",
+        "priceDrop": "Price drops on saved properties",
+        "belowAverage": "Properties listed below the average price",
+        "priorityAccess": "Priority access to new properties"
       }
     },
     "faq": {

@@ -246,6 +246,18 @@ const PLANOS: PublicPlan[] = [
     },
     highlighted: false,
   },
+  // O terceiro plano de comprador, criado a 8 nov 2026 (decisão do cliente):
+  // com três, o destacado passa a ser o do meio, como nos proprietários.
+  {
+    slug: "essential-buyer",
+    name: "Essential",
+    audience: "buyer",
+    priceYearCents: 2990,
+    priceMonthCents: 299,
+    features: [],
+    limits: { saved: 30, alerts: 2, visits: 5, active_chats: 5, cloud_gb: 0 },
+    highlighted: false,
+  },
   {
     slug: "smarter-buyer",
     name: "Smarter",
@@ -254,7 +266,7 @@ const PLANOS: PublicPlan[] = [
     priceMonthCents: 499,
     features: [],
     limits: { saved: 100, alerts: 5, visits: 15, active_chats: 20, cloud_gb: 1 },
-    highlighted: false,
+    highlighted: true,
   },
   {
     slug: "premium-buyer",
@@ -264,7 +276,7 @@ const PLANOS: PublicPlan[] = [
     priceMonthCents: 699,
     features: [],
     limits: { saved: null, alerts: 20, visits: null, active_chats: null, cloud_gb: 5 },
-    highlighted: true,
+    highlighted: false,
   },
 ];
 
