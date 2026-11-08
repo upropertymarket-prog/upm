@@ -45,12 +45,13 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
           >
             {t("eyebrow")}
           </span>
+          {/* O tamanho está em `site.css` (`.upm-hero__title`): depende da
+              largura da coluna, e só uma regra de container a conhece. */}
           <h1
+            className="upm-hero__title"
             style={{
               margin: 0,
               fontFamily: "var(--font-display)",
-              // 28 → 56 px: o topo da escala de 04 §1.3.
-              fontSize: "clamp(1.75rem, 5.2vw, 3.5rem)",
               lineHeight: 1.08,
               color: "var(--text)",
             }}
