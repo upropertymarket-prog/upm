@@ -1,5 +1,7 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
+import { soDepoisDoLancamento } from "@/lib/launch-mode";
 import { cookies, headers } from "next/headers";
 import { createClient, createServiceClient } from "@upm/db/server";
 import { getStripeClient } from "@upm/db/stripe";
@@ -57,17 +59,18 @@ export type { RegisterState, ResendState };
 
 type EligibilityResult = { allowed: boolean; code?: string };
 
+// O IP vem de `clientIpFrom`, que só confia nos cabeçalhos que a Vercel
+// reescreve (12 §34.4) — um sítio só para a regra, em vez de uma cópia por ação.
 async function clientIp(): Promise<string | null> {
-  const list = await headers();
-  const forwarded = list.get("x-forwarded-for");
-  const first = forwarded?.split(",")[0]?.trim();
-  return first || list.get("x-real-ip") || null;
+  return clientIpFrom(await headers());
 }
 
 export async function registerAccount(
   _prev: RegisterState,
   formData: FormData,
 ): Promise<RegisterState> {
+  // Em pré-lançamento esta ação não existe (12 §34.5): ver `soDepoisDoLancamento`.
+  await soDepoisDoLancamento();
   const roleResult = roleAtRegistrationSchema.safeParse(formData.get("role"));
   if (!roleResult.success) return { error: "Escolha um perfil." };
 
@@ -346,6 +349,8 @@ export async function resendVerificationEmail(
   _prev: ResendState,
   formData: FormData,
 ): Promise<ResendState> {
+  // Em pré-lançamento esta ação não existe (12 §34.5): ver `soDepoisDoLancamento`.
+  await soDepoisDoLancamento();
   const emailResult = emailSchema.safeParse(formData.get("email"));
   if (!emailResult.success) return { error: "E-mail inválido." };
   const email = emailResult.data;

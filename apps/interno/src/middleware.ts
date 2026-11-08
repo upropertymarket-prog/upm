@@ -10,12 +10,7 @@ import {
 } from "@upm/config/security";
 
 import { createMiddlewareClient } from "./lib/supabase-middleware";
-import {
-  LAST_ACTIVITY_COOKIE,
-  RECOVERY_VERIFIED_COOKIE,
-  SESSION_COOKIES,
-  SESSION_STARTED_COOKIE,
-} from "./lib/session";
+import { LAST_ACTIVITY_COOKIE, SESSION_COOKIES, SESSION_STARTED_COOKIE } from "./lib/session";
 
 /**
  * As três áreas internas, e cada uma só para o seu papel (07 §24.6).
@@ -87,7 +82,9 @@ export async function middleware(request: NextRequest) {
     return new NextResponse("Acesso não permitido a partir desta rede.", { status: 403 });
   }
 
-  const publicPaths = ["/entrar", "/verificar-2fa"];
+  // `/recuperar` e `/auth/confirmar` (8 nov 2026): o "Esqueci-me" dos admins
+  // e o link do e-mail — quem lá chega ainda não tem sessão.
+  const publicPaths = ["/entrar", "/verificar-2fa", "/recuperar", "/auth/confirmar"];
   if (publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
     applySecurityHeaders(response.headers, nonce);
     return response;
@@ -115,11 +112,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(appUrl(request));
   }
 
+  // A palavra-passe nova, com a sessão do link de recuperação (8 nov 2026):
+  // essa sessão é `aal1` e só serve para isto. A página termina a sessão no
+  // fim, e a entrada seguinte pede a palavra-passe nova **e** o código da app.
+  if (pathname === "/nova-palavra-passe") {
+    applySecurityHeaders(response.headers, nonce);
+    return response;
+  }
+
   // 2FA TOTP obrigatório (07 §6) — usa o MFA nativo do Supabase Auth (AAL2).
-  // Um código de recuperação (verificar-2fa/actions.ts) não eleva o AAL do
-  // Supabase — aceita-se em alternativa o cookie que essa via assina.
+  // Os códigos de recuperação saíram a 8 nov 2026 (decisão do cliente): quem
+  // perde o telemóvel pede a um admin que lhe reponha a 2FA (Admin ›
+  // Utilizadores), e não há outra via à volta do código.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  const recoveryVerified = request.cookies.get(RECOVERY_VERIFIED_COOKIE)?.value === "1";
   const onEnrollPage = pathname === "/configurar-2fa" || pathname.startsWith("/configurar-2fa/");
   // O ecrã de configuração é só de quem **ainda não tem** 2FA (`nextLevel`
   // aal1). Até 2 nov abria a qualquer sessão de staff — também a uma só com
@@ -132,10 +137,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/configurar-2fa", request.url));
   }
   if (aal?.nextLevel === "aal2" && onEnrollPage) {
-    const destino = aal.currentLevel === "aal2" || recoveryVerified ? "/" : "/verificar-2fa";
+    const destino = aal.currentLevel === "aal2" ? "/" : "/verificar-2fa";
     return NextResponse.redirect(new URL(destino, request.url));
   }
-  if (aal && aal.currentLevel !== aal.nextLevel && !recoveryVerified) {
+  if (aal && aal.currentLevel !== aal.nextLevel) {
     return NextResponse.redirect(new URL("/verificar-2fa", request.url));
   }
 

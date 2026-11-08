@@ -21,6 +21,12 @@ export type ConfirmPanelProps = {
   /** O token do link do e-mail. Vazio quando alguém chega à página sem ele. */
   token: string;
   onConfirm: (previous: ConfirmState, formData: FormData) => Promise<ConfirmState>;
+  /**
+   * O estado de partida. Só o canvas o passa (8 nov 2026): "Inscrição
+   * confirmada" só aparece depois do clique, e uma storyboard não clica. A
+   * página nunca o passa, e por isso começa sempre por confirmar.
+   */
+  initialState?: ConfirmState;
 };
 
 const PANEL: React.CSSProperties = {
@@ -46,9 +52,9 @@ const BODY: React.CSSProperties = {
   maxWidth: "28rem",
 };
 
-export function ConfirmPanel({ token, onConfirm }: ConfirmPanelProps) {
+export function ConfirmPanel({ token, onConfirm, initialState = {} }: ConfirmPanelProps) {
   const t = useTranslations("site.preRegistration.confirmPage");
-  const [state, action, pending] = useActionState<ConfirmState, FormData>(onConfirm, {});
+  const [state, action, pending] = useActionState<ConfirmState, FormData>(onConfirm, initialState);
 
   if (state.ok) {
     return (

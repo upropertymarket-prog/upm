@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { createHash, randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -286,7 +287,7 @@ export async function fileDownloadUrl(
     p_subject_type: "file",
     p_subject_id: fileId,
     p_action: action,
-    p_ip: requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+    p_ip: clientIpFrom(requestHeaders) ?? undefined,
     p_user_agent: requestHeaders.get("user-agent") ?? undefined,
     p_bytes_sent: action === "download" ? Number(file.size) : undefined,
   });

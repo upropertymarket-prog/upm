@@ -57,7 +57,15 @@ const DIRETORIOS = [
   "packages/cloud/src",
 ];
 
-const IGNORAR_PASTAS = new Set(["node_modules", ".next", ".next-e2e", "test-results", "playwright-report", "dist"]);
+const IGNORAR_PASTAS = new Set([
+  "node_modules",
+  ".next",
+  ".next-e2e",
+  ".next-e2e-pre",
+  "test-results",
+  "playwright-report",
+  "dist",
+]);
 
 /**
  * Os três padrões, com a razão de cada um na mensagem.

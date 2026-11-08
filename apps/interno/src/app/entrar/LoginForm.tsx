@@ -35,6 +35,11 @@ export function LoginForm({ suspended = false }: { suspended?: boolean }) {
       <Button type="submit" disabled={pending} fullWidth>
         {t("submit")}
       </Button>
+      {/* Só para admins (8 nov 2026): a página explica, e o resto da equipa
+          pede a um admin. */}
+      <a href="/recuperar" className="text-center text-sm text-muted">
+        {t("forgotPassword")}
+      </a>
     </form>
   );
 }

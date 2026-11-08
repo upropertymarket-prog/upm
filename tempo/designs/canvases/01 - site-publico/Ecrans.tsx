@@ -5,6 +5,7 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 
 import { HomeSections } from "../../../../apps/web/src/components/site/HomeSections";
 import { PreRegistrationForm } from "../../../../apps/web/src/app/[locale]/pre-inscricao/PreRegistrationForm";
+import { ConfirmPanel } from "../../../../apps/web/src/app/[locale]/pre-inscricao/confirmar/ConfirmPanel";
 import { FeatureGrid } from "../../../../apps/web/src/components/site/FeatureGrid";
 import { SectionHeading, SiteSection } from "../../../../apps/web/src/components/site/SiteSection";
 import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";
@@ -34,13 +35,9 @@ import ptMessages from "../../../../packages/config/messages/pt.json";
  * `Ecrans.tsx` desse canvas: "um excerto escrito à mão é uma segunda cópia de
  * um contrato, que diverge à primeira cláusula alterada").
  *
- * **O único dado inventado são os planos**, e é deliberado. Os valores reais
- * em staging são os do teste do Stripe — "Smarter (teste)" a 149,90 €/ano —
- * e rever a página de preços com eles seria rever o ecrã errado. Os números
- * abaixo são os de 07 §8.3, que é o que a página vai mostrar quando o
- * catálogo for corrigido no Admin. Em produção nada disto é lido: a página
- * usa `getPublicPlans()`, e `public-site.test.ts` garante que o que o
- * visitante vê é o que está na base de dados.
+ * **Os planos são os reais** (6 nov 2026), copiados da base: ver a nota de
+ * `PLANOS`. Até então eram os números de 07 §8.3, e a storyboard mostrava uma
+ * página de preços que não era a que ia para produção.
  *
  * Três decisões herdadas do canvas `legal`, que custaram tentativas lá:
  *
@@ -189,79 +186,96 @@ const DETALHE: PublicListingDetail = {
   photoUrls: [],
 };
 
-/** Os preços de 07 §8.3 — ver a nota acima sobre porque não são os de staging. */
+/**
+ * Os planos **tal como estão na base e no Stripe** (verificado a 6 nov 2026:
+ * os cinco preços batem certo com os do Stripe, e o "Smarter (teste)" passou
+ * a "Smarter"). `features` vem vazio, como na base: a lista de cada cartão
+ * sai dos `limits`, que é o que o site em produção faz. Se o catálogo mudar no
+ * Admin, estes números atualizam-se à mão — o `public-site.test.ts` é que
+ * garante o lado da produção.
+ */
 const PLANOS: PublicPlan[] = [
   {
     slug: "essential-owner",
     name: "Essential",
     audience: "owner",
-    priceYearCents: 599,
-    priceMonthCents: 69,
-    features: [
-      "1 propriedade ativa",
-      "Até 3 visitas agendadas",
-      "Até 1 chat ativo",
-      "Suporte normal",
-    ],
+    priceYearCents: 5990,
+    priceMonthCents: 599,
+    features: [],
+    limits: {
+      active_properties: 3,
+      visits: 20,
+      active_chats: 15,
+      cloud_gb: 2,
+      saved: 50,
+      alerts: 3,
+    },
     highlighted: false,
   },
   {
     slug: "smarter-owner",
     name: "Smarter",
     audience: "owner",
-    priceYearCents: 2990,
-    priceMonthCents: 299,
-    features: [
-      "Até 5 propriedades ativas",
-      "Até 5 visitas agendadas",
-      "Até 4 chats ativos",
-      "Suporte prioritário",
-      "Cloud de documentação",
-    ],
+    priceYearCents: 14990,
+    priceMonthCents: 1499,
+    features: [],
+    limits: {
+      active_properties: 10,
+      visits: 60,
+      active_chats: 50,
+      cloud_gb: 5,
+      saved: 200,
+      alerts: 10,
+    },
     highlighted: true,
   },
   {
     slug: "premium-owner",
     name: "Premium",
     audience: "owner",
-    priceYearCents: 5990,
-    priceMonthCents: 599,
-    features: [
-      "Propriedades ilimitadas",
-      "Visitas e agenda ilimitadas",
-      "Chats ilimitados",
-      "Suporte premium",
-      "Cloud de documentação 20 GB",
-    ],
+    priceYearCents: 29990,
+    priceMonthCents: 2999,
+    features: [],
+    limits: {
+      active_properties: null,
+      visits: null,
+      active_chats: null,
+      cloud_gb: 20,
+      saved: null,
+      alerts: 20,
+    },
+    highlighted: false,
+  },
+  // O terceiro plano de comprador, criado a 8 nov 2026 (decisão do cliente):
+  // com três, o destacado passa a ser o do meio, como nos proprietários.
+  {
+    slug: "essential-buyer",
+    name: "Essential",
+    audience: "buyer",
+    priceYearCents: 2990,
+    priceMonthCents: 299,
+    features: [],
+    limits: { saved: 30, alerts: 2, visits: 5, active_chats: 5, cloud_gb: 0 },
     highlighted: false,
   },
   {
     slug: "smarter-buyer",
     name: "Smarter",
     audience: "buyer",
-    priceYearCents: 2990,
-    priceMonthCents: 299,
-    features: [
-      "Até 25 propriedades guardadas",
-      "Até 5 chats ativos",
-      "Alertas de descida de preço",
-      "Agenda de visitas",
-    ],
+    priceYearCents: 4990,
+    priceMonthCents: 499,
+    features: [],
+    limits: { saved: 100, alerts: 5, visits: 15, active_chats: 20, cloud_gb: 1 },
     highlighted: true,
   },
   {
     slug: "premium-buyer",
     name: "Premium",
     audience: "buyer",
-    priceYearCents: 4990,
-    priceMonthCents: 499,
-    features: [
-      "Guardados ilimitados",
-      "Chats ilimitados",
-      "Alertas em tempo real",
-      "Prioridade em visitas",
-      "Contratos digitais ilimitados",
-    ],
+    priceYearCents: 6990,
+    priceMonthCents: 699,
+    features: [],
+    limits: { saved: null, alerts: 20, visits: null, active_chats: null, cloud_gb: 5 },
     highlighted: false,
   },
 ];
@@ -431,7 +445,7 @@ function ImoveisPreLancamento({ theme }: { theme: "light" | "dark" }) {
       <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
       <main>
         <SiteSection>
-          <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+          <div style={{ display: "grid", gap: "var(--sp-6)", rowGap: "24px" }}>
             <SectionHeading
               eyebrow={EM_BREVE.eyebrow}
               title={EM_BREVE.title}
@@ -526,4 +540,57 @@ export function PreInscricaoClaro() {
 
 export function PreInscricaoEscuro() {
   return <PreInscricao theme="dark" />;
+}
+
+/**
+ * A confirmação da pré-inscrição (`/pre-inscricao/confirmar`, 8 nov 2026)
+ * ---------------------------------------------------------------------------
+ * O passo que fecha o pré-lançamento: o visitante chega pelo link do e-mail e
+ * confirma com um botão (a confirmação é um POST — ver `actions.ts`), e só
+ * então a inscrição conta como lead. Dois estados, como a página os mostra:
+ * por confirmar, e confirmada.
+ *
+ * O mesmo cabeçalho, secção e rodapé da `page.tsx`. O token é de exemplo —
+ * o botão não vai a lado nenhum no canvas (`semSubmissao`). O estado
+ * confirmado entra pelo `initialState` do painel, porque uma storyboard não
+ * clica no botão.
+ */
+function ConfirmarInscricao({
+  theme,
+  confirmada,
+}: {
+  theme: "light" | "dark";
+  confirmada: boolean;
+}) {
+  return (
+    <Ecra theme={theme}>
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
+      <main>
+        <SiteSection>
+          <ConfirmPanel
+            token="token-de-exemplo"
+            onConfirm={semSubmissao}
+            initialState={confirmada ? { ok: true } : {}}
+          />
+        </SiteSection>
+      </main>
+      <SiteFooter />
+    </Ecra>
+  );
+}
+
+export function ConfirmarInscricaoClaro() {
+  return <ConfirmarInscricao theme="light" confirmada={false} />;
+}
+
+export function ConfirmarInscricaoEscuro() {
+  return <ConfirmarInscricao theme="dark" confirmada={false} />;
+}
+
+export function InscricaoConfirmadaClaro() {
+  return <ConfirmarInscricao theme="light" confirmada />;
+}
+
+export function InscricaoConfirmadaEscuro() {
+  return <ConfirmarInscricao theme="dark" confirmada />;
 }

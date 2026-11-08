@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Mail, ShieldCheck, UserRound, UserRoundCheck } from "lucide-react";
+import { KeyRound, Mail, ShieldCheck, Smartphone, UserRound, UserRoundCheck } from "lucide-react";
 import {
   Button,
   Card,
@@ -21,7 +21,11 @@ import {
 
 import { useStepUp } from "../../../components/StepUpModal";
 import type { VerifyPinAction } from "../../../components/stepUpTypes";
-import type { ProfileStatusActionResult } from "./actions";
+import type { ProfileStatusActionResult, StaffAccessActionResult } from "./actions";
+
+/** As contas de equipa — as únicas com "Acesso" no painel (8 nov 2026). */
+const STAFF_ROLES = new Set(["admin", "support", "marketing"]);
+type AccessAction = "password" | "twoFactor";
 
 export type UserDirectoryRow = {
   id: string;
@@ -142,6 +146,8 @@ export function UsersManager({
   onChangeStatus,
   onLogAccess,
   onVerifyPin,
+  onResetPassword,
+  onResetTwoFactor,
 }: {
   users: UserDirectoryRow[];
   plans: Array<{ id: string; name: string }>;
@@ -159,6 +165,10 @@ export function UsersManager({
   }) => Promise<ProfileStatusActionResult>;
   onLogAccess: (profileId: string) => Promise<void>;
   onVerifyPin: VerifyPinAction;
+  /** Envia à pessoa o link para definir uma palavra-passe nova. */
+  onResetPassword: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
+  /** Remove a 2FA de quem perdeu o telemóvel. */
+  onResetTwoFactor: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
 }) {
   const t = useTranslations("admin.users");
   const tc = useTranslations("common");
@@ -168,6 +178,26 @@ export function UsersManager({
   const [actionFailed, setActionFailed] = useState(false);
   const [saving, startSaving] = useTransition();
   const { requestStepUp, stepUpModal } = useStepUp(onVerifyPin);
+  const [accessTarget, setAccessTarget] = useState<AccessAction | null>(null);
+  const [accessDone, setAccessDone] = useState<AccessAction | null>(null);
+  const [accessFailed, setAccessFailed] = useState(false);
+
+  function applyAccess(action: AccessAction, profileId: string) {
+    startSaving(async () => {
+      const run = action === "password" ? onResetPassword : onResetTwoFactor;
+      const result = await run({ profileId });
+      if (result.needsStepUp) {
+        requestStepUp(() => applyAccess(action, profileId));
+        return;
+      }
+      if (!result.ok) {
+        setAccessFailed(true);
+        return;
+      }
+      setAccessTarget(null);
+      setAccessDone(action);
+    });
+  }
 
   function applyStatus(input: {
     profileId: string;
@@ -434,6 +464,40 @@ export function UsersManager({
             />
           </section>
 
+          {STAFF_ROLES.has(selectedProfile.role) && selectedProfile.id !== currentAdminId ? (
+            <section className="mt-6 grid gap-2">
+              <h3 className="text-sm font-semibold text-text">{t("access")}</h3>
+              <p className="text-xs text-muted">{t("accessHint")}</p>
+              <Button
+                variant="secondary"
+                leadingIcon={<KeyRound size={16} />}
+                onClick={() => {
+                  setAccessTarget("password");
+                  setAccessFailed(false);
+                  setAccessDone(null);
+                }}
+              >
+                {t("resetPassword")}
+              </Button>
+              <Button
+                variant="secondary"
+                leadingIcon={<Smartphone size={16} />}
+                onClick={() => {
+                  setAccessTarget("twoFactor");
+                  setAccessFailed(false);
+                  setAccessDone(null);
+                }}
+              >
+                {t("resetTwoFactor")}
+              </Button>
+              {accessDone ? (
+                <p className="text-sm text-ok" role="status">
+                  {accessDone === "password" ? t("resetPasswordDone") : t("resetTwoFactorDone")}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
           <section className="mt-6 grid gap-2">
             <Button variant="secondary" disabled leadingIcon={<Mail size={16} />}>
               {t("sendEmail")}
@@ -500,6 +564,41 @@ export function UsersManager({
             </Button>
           </div>
         </form>
+      </Modal>
+      <Modal
+        open={accessTarget !== null}
+        onClose={() => setAccessTarget(null)}
+        size="sm"
+        title={accessTarget === "twoFactor" ? t("resetTwoFactor") : t("resetPassword")}
+        icon={accessTarget === "twoFactor" ? <Smartphone size={17} /> : <KeyRound size={17} />}
+        closeLabel={tc("close")}
+      >
+        <div className="grid gap-4">
+          <p className="text-sm text-muted">
+            {accessTarget === "twoFactor" ? t("resetTwoFactorBody") : t("resetPasswordBody")}
+          </p>
+          {accessFailed ? (
+            <p className="text-sm text-danger" role="alert">
+              {t("accessFailed")}
+            </p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setAccessTarget(null)}>
+              {tc("cancel")}
+            </Button>
+            <Button
+              type="button"
+              disabled={saving}
+              onClick={() => {
+                if (selectedProfile && accessTarget) applyAccess(accessTarget, selectedProfile.id);
+              }}
+            >
+              {accessTarget === "twoFactor"
+                ? t("confirmResetTwoFactor")
+                : t("confirmResetPassword")}
+            </Button>
+          </div>
+        </div>
       </Modal>
       {stepUpModal}
     </>

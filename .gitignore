@@ -3,6 +3,7 @@ node_modules/
 .next/
 # Os E2E compilam para aqui, para não partilharem o `.next` de um dev a correr.
 .next-e2e/
+.next-e2e-pre/
 packages/e2e/playwright-report/
 packages/e2e/test-results/
 .turbo/

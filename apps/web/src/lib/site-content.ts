@@ -42,7 +42,9 @@ export type IconName =
   | "building-2"
   | "shield-check"
   | "layout-dashboard"
-  | "file-signature";
+  | "file-signature"
+  | "scale"
+  | "eye";
 
 /**
  * Um cartão já resolvido, pronto a desenhar. O `FeatureGrid` recebe isto —
@@ -88,15 +90,45 @@ export const AUDIENCE_CARDS: Record<AudienceId, readonly FeatureCardRef[]> = {
   ],
 };
 
-/** Os três pontos de "Sobre nós". */
-export const ABOUT_POINT_IDS = ["fairMarket", "freedom", "transparency"] as const;
+/**
+ * Os três valores, em cartões por baixo de "A nossa missão" (6 nov 2026).
+ * Eram uma lista curta dentro de "Sobre nós"; voltaram a ser cartões, como no
+ * site de pré-lançamento anterior, porque são o argumento da missão e não um
+ * pormenor do "Sobre". As chaves continuam em `site.about.points`.
+ */
+export const MISSION_VALUE_CARDS: readonly FeatureCardRef[] = [
+  { icon: "scale", id: "fairMarket" },
+  { icon: "handshake", id: "freedom" },
+  { icon: "eye", id: "transparency" },
+];
 
 /** Os três números do hero. */
 export const HERO_STAT_IDS = ["commission", "privacy", "everything"] as const;
 
 /** As abas de público e de periodicidade da secção de preços. */
-export const PRICING_AUDIENCE_IDS = ["owner", "buyer"] as const;
+// `builder` não tem planos no catálogo: o separador mostra que estão a ser
+// preparados e leva ao contacto (6 nov 2026). Quando houver planos com
+// `audience = "builder"`, aparecem aqui sem mudar o componente.
+export const PRICING_AUDIENCE_IDS = ["owner", "buyer", "builder"] as const;
 export const PRICING_BILLING_IDS = ["year", "month"] as const;
+
+/**
+ * Os tipos de alerta de cada plano (8 nov 2026, do desenho do cliente)
+ * ---------------------------------------------------------------------------
+ * `fromTier` é o degrau da escada a partir do qual o plano o inclui: 0 o
+ * primeiro (Essential), 1 o do meio (Smarter), 2 o de topo (Premium) — o
+ * mesmo para proprietários e compradores. Os alertas ainda não existem no
+ * produto; existem no lançamento oficial, e o cliente quis-os já no site.
+ * Quando passarem a ser dados do plano (`plans.features` ou uma coluna
+ * própria), esta lista sai daqui.
+ */
+export const PLAN_ALERT_TYPES = [
+  { id: "messages", fromTier: 0 },
+  { id: "newProperty", fromTier: 1 },
+  { id: "priceDrop", fromTier: 1 },
+  { id: "belowAverage", fromTier: 2 },
+  { id: "priorityAccess", fromTier: 2 },
+] as const;
 
 /** As dúvidas, pela ordem em que se respondem. */
 export const FAQ_IDS = [
@@ -141,7 +173,9 @@ export const FOOTER_COLUMNS = [
     id: "start",
     links: [
       { id: "preRegistration", route: "/pre-inscricao" },
-      { id: "signIn", route: "/entrar" },
+      // Só depois do lançamento: em `pre` não há contas, e o `/entrar` volta à
+      // página de pré-lançamento — um link que não leva a lado nenhum.
+      { id: "signIn", route: "/entrar", postOnly: true },
     ],
   },
   {
@@ -170,3 +204,41 @@ export const NAV_ANCHOR_IDS = [
   "duvidas",
   "contactos",
 ] as const;
+
+/**
+ * As redes sociais do rodapé. Um endereço vazio não desenha o ícone: é assim
+ * que se entra sem conta e se liga quando a conta existir, sem mexer no JSX.
+ */
+export const SOCIAL_LINKS = {
+  instagram: "",
+  youtube: "",
+} as const satisfies Record<"instagram" | "youtube", string>;
+
+/**
+ * As fotografias do site (6 e 7 nov 2026)
+ * ---------------------------------------------------------------------------
+ * Fotos de banco, entregues pelo cliente e otimizadas a 7 nov: WebP, largura
+ * de quem as mostra (1600 px no hero e na faixa, 1200 nas outras), sem
+ * metadados, 47 a 70 KB cada (os originais tinham 1 a 4 MB). A missão e a
+ * faixa eram verticais e foram recortadas na origem para o lugar horizontal,
+ * com as caras e o espelho dentro do enquadramento — cortadas pelo browser,
+ * perdiam o assunto. Os originais não entram no repositório.
+ *
+ * O nome do ficheiro diz o que a fotografia mostra (é lido pelos motores de
+ * busca); o texto alternativo, nas duas línguas, está em `site.*.imageLabel`.
+ * `width`/`height` são os do ficheiro: o browser reserva o espaço antes de a
+ * imagem chegar. `null` volta a desenhar o espaço reservado.
+ */
+export type SiteImageFile = { src: string; width: number; height: number };
+
+export const SITE_IMAGES: Record<
+  "hero" | "about" | "mission" | "business" | "banner",
+  SiteImageFile | null
+> = {
+  hero: { src: "/site/sala-de-estar-moderna-sem-comissoes.webp", width: 1600, height: 1136 },
+  about: { src: "/site/comprar-e-vender-casa-online.webp", width: 1200, height: 900 },
+  mission: { src: "/site/familia-com-recem-nascido-em-casa.webp", width: 1200, height: 900 },
+  business: { src: "/site/gestao-de-obra-no-setor-da-construcao.webp", width: 1200, height: 900 },
+  banner: { src: "/site/quarto-moderno-com-espelho-redondo.webp", width: 1600, height: 800 },
+};
+export type SiteImageSlot = keyof typeof SITE_IMAGES;

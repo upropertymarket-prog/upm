@@ -30,12 +30,19 @@
  */
 import { defineConfig, devices } from "@playwright/test";
 
-import { APP, INTERNO, WEB } from "./lib/ambiente";
+import { APP, INTERNO, WEB, WEB_PRE } from "./lib/ambiente";
 
+/**
+ * O modo de lançamento de cada `www` vai forçado (`UPM_LAUNCH_MODE_OVERRIDE`,
+ * ignorado em produção): a base só tem um `launch_mode`, e trocá-lo a meio de
+ * uma corrida mudava o site de quem está a trabalhar. Cada `www` compila para a
+ * sua pasta — dois `next dev` no mesmo `distDir` estragam-se um ao outro.
+ */
 const APPS = [
-  { filtro: "@upm/web", url: WEB },
-  { filtro: "@upm/app", url: APP },
-  { filtro: "@upm/interno", url: INTERNO },
+  { filtro: "@upm/web", url: WEB, modo: "post", dist: ".next-e2e" },
+  { filtro: "@upm/web", url: WEB_PRE, modo: "pre", dist: ".next-e2e-pre" },
+  { filtro: "@upm/app", url: APP, modo: "post", dist: ".next-e2e" },
+  { filtro: "@upm/interno", url: INTERNO, modo: "post", dist: ".next-e2e" },
 ] as const;
 
 export default defineConfig({
@@ -65,12 +72,13 @@ export default defineConfig({
     // rota compila-a: 30 s não chegam no arranque a frio do `next dev`.
     actionTimeout: 120_000,
   },
-  webServer: APPS.map(({ filtro, url }) => ({
+  webServer: APPS.map(({ filtro, url, modo, dist }) => ({
     command: `pnpm --filter ${filtro} exec next dev --port ${new URL(url).port}`,
     cwd: "../..",
     url: `${url}/api/health`,
     env: {
-      UPM_NEXT_DIST_DIR: ".next-e2e",
+      UPM_NEXT_DIST_DIR: dist,
+      UPM_LAUNCH_MODE_OVERRIDE: modo,
       WEB_URL: WEB,
       APP_URL: APP,
       INTERNO_URL: INTERNO,

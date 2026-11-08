@@ -56,7 +56,8 @@ const BASE = {
   "apps/interno/src/app/page.tsx": "export default function R() { return null; }",
   "apps/interno/src/app/configurar-2fa/page.tsx": "export default function C() { return null; }",
   "apps/interno/src/app/verificar-2fa/page.tsx": "export default function V() { return null; }",
-  "apps/interno/src/app/definicoes/seguranca/page.tsx": "export default function S() { return null; }",
+  "apps/interno/src/app/definicoes/seguranca/page.tsx":
+    "export default function S() { return null; }",
 };
 
 function montar(ficheiros) {

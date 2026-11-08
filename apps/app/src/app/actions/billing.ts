@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { createHash, randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -111,11 +112,10 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
     }
 
     const headerList = await headers();
-    const forwarded = headerList.get("x-forwarded-for")?.split(",")[0]?.trim();
     const { error: acceptError } = await supabase.rpc("record_terms_acceptance", {
       p_document_id: terms.id,
       p_context: "subscription",
-      p_ip: forwarded || headerList.get("x-real-ip") || null,
+      p_ip: clientIpFrom(headerList),
       p_user_agent: headerList.get("user-agent") ?? undefined,
     });
     if (acceptError) return { error: "Não foi possível registar a aceitação dos Termos." };

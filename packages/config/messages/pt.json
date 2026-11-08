@@ -483,7 +483,7 @@
         "privacy": "100 % contactos privados",
         "everything": "Tudo o que precisa"
       },
-      "imageLabel": "fotografia principal · interior"
+      "imageLabel": "Sala de estar moderna e luminosa, com sofás claros e mesa de centro em madeira — comprar e vender casa sem comissões"
     },
     "platform": {
       "eyebrow": "A plataforma",
@@ -494,19 +494,19 @@
       "eyebrow": "Sobre nós",
       "title": "Uma solução digital para simplificar a compra e venda de propriedades.",
       "body": "A UProperty Market torna o processo mais simples e direto: comunica de forma segura, por chat, sem necessidade de intermediários, sem partilha de contactos pessoais e sem comissões sobre a venda.",
-      "imageLabel": "fotografia · equipa",
+      "imageLabel": "Mulher sorridente ao portátil, a tratar da compra ou venda de casa online, sem intermediários",
       "points": {
         "fairMarket": {
           "title": "Mercado mais justo",
-          "body": "Oportunidades reais, sem especulação sobre o preço."
+          "body": "Defendemos um mercado mais justo e acessível, onde todas as famílias possam encontrar um lar, sem especulação nem desigualdade, com oportunidades reais para todos."
         },
         "freedom": {
           "title": "Liberdade para negociar",
-          "body": "Diálogo aberto entre quem compra e quem vende."
+          "body": "Acreditamos numa negociação direta e livre, sem intermediários nem pressões externas: o diálogo aberto entre quem compra e quem vende, para melhores negócios."
         },
         "transparency": {
           "title": "Transparência",
-          "body": "Informação completa e verificada em cada anúncio."
+          "body": "Deixamos de fora as práticas desnecessárias do mercado imobiliário. A confiança nasce da clareza, com comunicação simples e segura entre todas as partes."
         }
       }
     },
@@ -516,7 +516,7 @@
       "body": "Na UProperty Market, terá acesso a um sistema integrado com ferramentas desenvolvidas especificamente para as necessidades do setor da construção. Centralize toda a informação da sua empresa num único local, sempre acessível e com dados atualizados em tempo real.",
       "primaryCta": "Pré-inscrição",
       "secondaryCta": "Contacte-nos",
-      "imageLabel": "fotografia · obra em construção"
+      "imageLabel": "Técnico de obra com capacete e colete refletor a consultar plantas num estaleiro de construção"
     },
     "comingSoon": {
       "eyebrow": "Em breve",
@@ -619,7 +619,8 @@
       "body": "Escolha o plano que precisa e mude quando quiser. Sem comissões sobre a venda, em qualquer plano.",
       "audienceTabs": {
         "owner": "Para proprietários",
-        "buyer": "Para compradores"
+        "buyer": "Para compradores",
+        "builder": "Para construtores"
       },
       "billingLabel": "Periodicidade",
       "billingTabs": {
@@ -627,7 +628,50 @@
         "month": "Mensal"
       },
       "audienceSoon": "Os planos para este público estão a ser preparados.",
-      "featuresSoon": "Funcionalidades por anunciar"
+      "featuresSoon": "Funcionalidades por anunciar",
+      "builderSoon": "Os planos para construtores estão a ser preparados. Fale connosco para saber o que vamos ter para a sua empresa.",
+      "builderCta": "Contacte-nos",
+      "limits": {
+        "properties": "{count, plural, one {1 propriedade ativa} other {Até # propriedades ativas}}",
+        "propertiesUnlimited": "Propriedades ativas ilimitadas",
+        "visits": "{count, plural, one {1 visita agendada} other {Até # visitas agendadas}}",
+        "visitsUnlimited": "Visitas agendadas ilimitadas",
+        "chats": "{count, plural, one {1 conversa ativa} other {Até # conversas ativas}}",
+        "chatsUnlimited": "Conversas ativas ilimitadas",
+        "saved": "{count, plural, one {1 propriedade guardada} other {Até # propriedades guardadas}}",
+        "savedUnlimited": "Propriedades guardadas ilimitadas",
+        "alerts": "{count, plural, one {1 alerta de pesquisa} other {# alertas de pesquisa}}",
+        "cloud": "{count} GB de documentos na cloud"
+      },
+      "per": {
+        "year": "/ano",
+        "month": "/mês"
+      },
+      "sections": {
+        "features": "Funcionalidades",
+        "alerts": "Alertas"
+      },
+      "ideal": {
+        "owner": "{count, plural, one {Ideal para proprietários com uma só propriedade} other {Ideal para proprietários com até # propriedades}}",
+        "ownerUnlimited": "Ideal para proprietários com várias propriedades",
+        "buyer": "{count, plural, one {Ideal para quem acompanha uma propriedade} other {Ideal para quem acompanha até # propriedades}}",
+        "buyerUnlimited": "Ideal para quem procura sem limites"
+      },
+      "limitsMissing": {
+        "active_properties": "Publicação de propriedades",
+        "visits": "Agenda de visitas",
+        "active_chats": "Conversas",
+        "saved": "Propriedades guardadas",
+        "alerts": "Alertas de pesquisa",
+        "cloud_gb": "Cloud para documentação"
+      },
+      "alertTypes": {
+        "messages": "Alertas de mensagens",
+        "newProperty": "Nova propriedade publicada",
+        "priceDrop": "Queda do preço de imóveis guardados",
+        "belowAverage": "Propriedades publicadas com preços abaixo da média",
+        "priorityAccess": "Acesso prioritário a propriedades recentes"
+      }
     },
     "faq": {
       "title": "Esclareça as suas dúvidas antes de decidir",
@@ -715,7 +759,12 @@
           }
         }
       },
-      "copyright": "© 2026 UProperty Market — Todos os direitos reservados."
+      "copyright": "© 2026 UProperty Market — Todos os direitos reservados.",
+      "social": {
+        "label": "Redes sociais",
+        "instagram": "Instagram",
+        "youtube": "YouTube"
+      }
     },
     "nav": {
       "plataforma": "A plataforma",
@@ -724,7 +773,9 @@
       "precos": "Preços",
       "duvidas": "Dúvidas",
       "contactos": "Contactos",
-      "sections": "Secções"
+      "sections": "Secções",
+      "openMenu": "Abrir menu",
+      "closeMenu": "Fechar menu"
     },
     "notFound": {
       "metaTitle": "Página não encontrada · UProperty Market",
@@ -819,15 +870,26 @@
       "confirmPage": {
         "title": "Confirmar a pré-inscrição",
         "body": "Falta só confirmar que este endereço de e-mail é seu.",
-        "confirm": "Confirmar a minha inscrição",
+        "confirm": "Confirmar a minha pré-inscrição",
         "confirming": "A confirmar…",
         "okTitle": "Inscrição confirmada",
-        "okBody": "Obrigado. A sua pré-inscrição está completa e avisamos-lhe assim que os primeiros anúncios abrirem.",
+        "okBody": "Obrigado. A sua pré-inscrição está completa e avisaremos assim que fizermos o lançamento oficial.",
         "failTitle": "Este link já não serve",
         "failBody": "Pode ter sido usado, ou pode ter expirado. Volte a inscrever-se e enviamos-lhe um link novo.",
         "retry": "Voltar a inscrever-me",
         "back": "Voltar ao início"
       }
+    },
+    "mission": {
+      "eyebrow": "A nossa missão",
+      "title": "Transformar o mercado imobiliário, tornando-o mais justo e acessível.",
+      "body": "Na UProperty Market, acreditamos que o mercado imobiliário deve estar ao serviço das pessoas, e não de interesses externos. Por isso, estamos a desenvolver uma plataforma que permite comprar e vender casa de forma direta, simples e sem pressões.",
+      "bodyCommitment": "O nosso compromisso é devolver o controlo do processo de compra e venda a quem realmente importa: as pessoas.",
+      "imageLabel": "Casal com o filho recém-nascido ao colo, em casa — uma família a encontrar o seu lar"
+    },
+    "banner": {
+      "text": "Mais do que uma plataforma — uma nova forma de estar no mercado imobiliário.",
+      "imageLabel": "Quarto moderno com espelho redondo, cómoda branca e planta de interior"
     }
   },
   "cloud": {
@@ -1269,7 +1331,9 @@
       "suspended": "Esta conta está suspensa. Contacte o suporte para pedir ajuda.",
       "staffBlocked": "Contas de equipa acedem em interno.upropertymarket.pt, não aqui.",
       "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
-      "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens."
+      "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens.",
+      "passwordSet": "Palavra-passe definida. Entre com a palavra-passe nova e o código da sua app.",
+      "linkInvalid": "O link expirou ou já foi usado. Peça um novo."
     },
     "recovery": {
       "title": "Recuperar palavra-passe",
@@ -1296,9 +1360,6 @@
         "body": "Obrigatória para contas de equipa. Digitalize o código com a sua app de autenticação.",
         "codeLabel": "Código de confirmação",
         "submit": "Ativar",
-        "recoveryCodesTitle": "Guarde estes códigos de recuperação",
-        "recoveryCodesBody": "Cada código só pode ser usado uma vez. Guarde-os num local seguro — não voltam a ser mostrados.",
-        "recoveryCodesConfirm": "Guardei os códigos",
         "qrAlt": "Código QR para a app de autenticação",
         "startFailed": "Não foi possível iniciar a ativação do 2FA. Tente novamente."
       },
@@ -1306,8 +1367,7 @@
         "title": "Código de verificação",
         "codeLabel": "Código de 6 dígitos",
         "submit": "Verificar",
-        "useRecoveryCode": "Usar um código de recuperação",
-        "recoveryLabel": "Código de recuperação"
+        "lostPhone": "Perdeu o telemóvel? Peça a um administrador que lhe reponha a autenticação em duas etapas."
       }
     },
     "pin": {
@@ -1343,6 +1403,21 @@
       "haveAccount": "Já tem conta?",
       "signIn": "Entrar",
       "rememberedPassword": "Lembrou-se da palavra-passe?"
+    },
+    "staffRecovery": {
+      "title": "Recuperar a palavra-passe",
+      "body": "Só para administradores. Se é de outra área da equipa, peça a um administrador que lhe envie o link.",
+      "email": "E-mail",
+      "submit": "Enviar link",
+      "sentTitle": "Verifique o seu e-mail",
+      "sentBody": "Se o endereço for de um administrador, enviámos um link para definir uma nova palavra-passe. É válido durante uma hora.",
+      "backToLogin": "Voltar à entrada",
+      "emailMessage": {
+        "title": "Defina uma nova palavra-passe",
+        "body": "Recebemos um pedido para repor a palavra-passe da sua conta de equipa na UProperty Market. O link é válido durante uma hora.\n\nDepois de definir a palavra-passe, a entrada continua a pedir o código da sua app de autenticação.",
+        "cta": "Definir palavra-passe",
+        "footer": "Se não pediu isto, ignore este e-mail e avise um administrador: a sua palavra-passe não muda sem o link."
+      }
     }
   },
   "plan": {
@@ -1567,7 +1642,19 @@
       "nextPage": "Página seguinte",
       "pageLabel": "Paginação de utilizadores",
       "resultsRange": "{from}–{to} utilizadores",
-      "deleted": "Eliminada"
+      "deleted": "Eliminada",
+      "access": "Acesso",
+      "accessHint": "Para quem perdeu a palavra-passe ou o telemóvel. Pede o PIN de operação e fica registado.",
+      "resetPassword": "Repor palavra-passe",
+      "resetPasswordBody": "Enviamos para o e-mail desta pessoa um link para definir uma palavra-passe nova. A palavra-passe atual continua a servir até ela usar o link.",
+      "confirmResetPassword": "Enviar link",
+      "resetPasswordDone": "Link enviado para o e-mail desta pessoa.",
+      "resetTwoFactor": "Repor 2FA",
+      "resetTwoFactorBody": "Para quem perdeu ou trocou de telemóvel. A app de autenticação atual deixa de servir e, na próxima entrada, esta pessoa lê um código QR novo.",
+      "confirmResetTwoFactor": "Repor 2FA",
+      "resetTwoFactorDone": "2FA reposta. Na próxima entrada, esta pessoa configura a app outra vez.",
+      "accessFailed": "Não foi possível concluir. Tente novamente.",
+      "marketing": "Marketing"
     },
     "moderation": {
       "title": "Moderação de imóveis",

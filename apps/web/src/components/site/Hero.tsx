@@ -1,8 +1,9 @@
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
-import { HERO_STAT_IDS } from "../../lib/site-content";
-import { SITE_MAX_WIDTH } from "./SiteSection";
+import { HERO_STAT_IDS, SITE_IMAGES } from "../../lib/site-content";
+import { SiteImage } from "./SiteImage";
+import "./site.css";
 
 /**
  * Hero do site público (P2-01 · 04 §2.1)
@@ -13,30 +14,23 @@ import { SITE_MAX_WIDTH } from "./SiteSection";
  * O destino do CTA muda com `launch_mode` (03 §1.1): em pré-lançamento leva à
  * pré-inscrição, em pós-lançamento ao registo. É o único sítio do hero que
  * depende da flag, e por isso é a única coisa que entra por prop.
+ *
+ * **A fotografia vai até à margem** (6 nov 2026, como no site de
+ * pré-lançamento anterior): a coluna da imagem não fica presa à largura do
+ * site, ocupa a metade direita do ecrã de cima a baixo. O texto alinha-se com
+ * o das outras secções — a mesma margem, a de `site.css`. Abaixo de 900 px
+ * de página a imagem passa para baixo do texto, em largura total.
  */
 export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
   const t = useTranslations("site.hero");
   const primaryHref = launchMode === "pre" ? "/pre-inscricao" : "/criar-conta";
 
   return (
-    <section
-      style={{
-        background: "var(--bg)",
-        padding: "clamp(2rem, 5vw, 4.5rem) 16px clamp(2.5rem, 6vw, 5rem)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: SITE_MAX_WIDTH,
-          margin: "0 auto",
-          display: "grid",
-          // Duas colunas acima de ~56rem e uma abaixo, sem media query.
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(26rem, 100%), 1fr))",
-          gap: "clamp(1.5rem, 4vw, 3rem)",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "grid", gap: "var(--sp-5)" }}>
+    <section className="upm-hero">
+      {/* A grelha está em `site.css` (".upm-hero"): quatro faixas medidas pela
+          própria secção, para a storyboard e o site serem a mesma página. */}
+      <div className="upm-hero__grid">
+        <div className="upm-hero__text">
           <span
             style={{
               // Token e não um valor à mão: `[data-app="web"]` põe
@@ -77,10 +71,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
 
           <div style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}>
             {/* Links com as classes do botão, não `<Button>`: o destino é uma
-                navegação e tem de ser uma âncora real — para abrir em
-                separador novo, para o teclado e para os motores de busca.
-                É o mesmo padrão de `guardados/page.tsx` e
-                `conta-suspensa/page.tsx`. */}
+              navegação e tem de ser uma âncora real — para abrir em
+              separador novo, para o teclado e para os motores de busca.
+              É o mesmo padrão de `guardados/page.tsx` e
+              `conta-suspensa/page.tsx`. */}
             <Link href={primaryHref} className="upm-btn upm-btn--primary upm-btn--md">
               {t("primaryCta")}
             </Link>
@@ -108,8 +102,7 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                   gap: "var(--sp-2)",
                   fontSize: "var(--fs-body)",
                   // `--fw-medium` (500) e não `--fw-semibold` (600): estes três
-                  // números acompanham o hero, não competem com ele. O token e
-                  // não um `500` à mão, pela mesma razão do `--fs-label` acima.
+                  // números acompanham o hero, não competem com ele.
                   fontWeight: "var(--fw-medium)",
                   color: "var(--text)",
                 }}
@@ -129,25 +122,8 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
           </ul>
         </div>
 
-        {/* Espaço reservado da fotografia principal. Fica declarado e com
-            proporção fixa para o layout não saltar quando a imagem real
-            entrar — e com o rótulo que o protótipo lhe dá, para não parecer
-            um erro a quem vê o ecrã antes de haver fotografia. */}
-        <div
-          role="img"
-          aria-label={t("imageLabel")}
-          style={{
-            aspectRatio: "4 / 3",
-            borderRadius: "var(--r-lg)",
-            border: "1px solid var(--border)",
-            background: "var(--surface2)",
-            display: "grid",
-            placeItems: "center",
-            color: "var(--muted)",
-            fontSize: "var(--fs-body)",
-          }}
-        >
-          {t("imageLabel")}
+        <div className="upm-hero__media">
+          <SiteImage image={SITE_IMAGES.hero} label={t("imageLabel")} rounded={false} priority />
         </div>
       </div>
     </section>

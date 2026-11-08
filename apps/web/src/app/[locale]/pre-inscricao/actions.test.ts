@@ -92,6 +92,7 @@ const CONTACTO_VALIDO = {
   email: "ANA@Exemplo.PT",
   reason: "planos",
   message: "Qual é a diferença entre Smarter e Premium?",
+  consentTerms: "on",
 };
 
 const PRE_INSCRICAO_VALIDA = {
@@ -112,6 +113,15 @@ beforeEach(() => {
 });
 
 describe("submitContact", () => {
+  it("recusa sem a caixa dos Termos e da Privacidade, antes de chegar à base", async () => {
+    const { consentTerms: _semCaixa, ...semConsentimento } = CONTACTO_VALIDO;
+    void _semCaixa;
+    const state = await submitContact({}, formData(semConsentimento));
+
+    expect(state.fieldErrors?.consentTerms).toBe("Tem de aceitar os Termos para continuar.");
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("recusa um e-mail inválido antes de chegar à base de dados", async () => {
     const state = await submitContact({}, formData({ ...CONTACTO_VALIDO, email: "ana@" }));
 

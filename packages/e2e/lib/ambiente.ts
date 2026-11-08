@@ -34,6 +34,11 @@ export const STRIPE_WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET ?? "";
 export const WEB = process.env.E2E_WEB_URL ?? "http://localhost:4400";
 export const APP = process.env.E2E_APP_URL ?? "http://localhost:4401";
 export const INTERNO = process.env.E2E_INTERNO_URL ?? "http://localhost:4402";
+/**
+ * Um segundo `www`, em pré-lançamento (12 §34.5). O da 4400 corre em `post`,
+ * porque prova o registo e a entrada; este prova que, em `pre`, eles não existem.
+ */
+export const WEB_PRE = process.env.E2E_WEB_PRE_URL ?? "http://localhost:4403";
 
 /** Sem base não há E2E — saltam, como os `*-rls.test.ts`. */
 export const temBase = Boolean(SUPABASE_URL && ANON_KEY && SERVICE_KEY);

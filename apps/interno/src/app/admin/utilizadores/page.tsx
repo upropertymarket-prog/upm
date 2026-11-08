@@ -7,7 +7,12 @@ import { createClient } from "@upm/db/server";
 import { InternalChrome } from "../../../components/InternalChrome";
 import { setLocalePreference } from "../../actions/preferences";
 import { verifyOperationPin } from "../../actions/step-up";
-import { recordProfileAccess, setProfileStatus } from "./actions";
+import {
+  recordProfileAccess,
+  setProfileStatus,
+  resetStaffPassword,
+  resetStaffTwoFactor,
+} from "./actions";
 import { UsersManager, type UserCursor, type UserDirectoryRow } from "./UsersManager";
 import { getAdminSidebarCounters } from "../../../lib/admin-shell";
 
@@ -158,6 +163,8 @@ export default async function UsersPage({
         onChangeStatus={setProfileStatus}
         onLogAccess={recordProfileAccess}
         onVerifyPin={verifyOperationPin}
+        onResetPassword={resetStaffPassword}
+        onResetTwoFactor={resetStaffTwoFactor}
       />
     </InternalChrome>
   );

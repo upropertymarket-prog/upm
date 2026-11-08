@@ -76,7 +76,7 @@ export default async function UnsubscribePage({
         </SiteSection>
       </main>
 
-      <SiteFooter />
+      <SiteFooter launchMode={launchMode} />
     </>
   );
 }

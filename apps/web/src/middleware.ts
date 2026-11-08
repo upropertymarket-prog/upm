@@ -1,10 +1,12 @@
 import createIntlMiddleware from "next-intl/middleware";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { NONCE_HEADER, applySecurityHeaders, generateNonce } from "@upm/config/security";
 
 import { routing } from "./i18n/routing";
 import { sharedCacheControl } from "./lib/cache-policy";
+import { modoNoMiddleware } from "./lib/launch-mode-edge";
+import { deveRedirecionar } from "./lib/pre-launch-gate";
 
 const intl = createIntlMiddleware(routing);
 
@@ -30,8 +32,27 @@ const intl = createIntlMiddleware(routing);
  * nonce entra num clone do pedido **antes** de ele decidir, em vez de ser posto
  * na resposta depois — ali já não voltava ao servidor que desenha a página.
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const nonce = generateNonce();
+
+  /**
+   * Em pré-lançamento, o site é a página de pré-lançamento (12 §34.5): o que
+   * não estiver na lista de `pre-launch-gate.ts` volta para ela. Antes do
+   * `intl`, para não se gastar a reescrita num pedido que não vai ser servido.
+   *
+   * 307 num GET — temporário, para o browser não decorar o desvio e continuar
+   * a mandar para a home depois do lançamento. 303 no resto, para um `POST`
+   * não ser repetido como `POST` na home.
+   */
+  const destino = deveRedirecionar(await modoNoMiddleware(), request.nextUrl.pathname);
+  if (destino) {
+    const metodoSeguro = request.method === "GET" || request.method === "HEAD";
+    const desvio = NextResponse.redirect(new URL(destino, request.url), metodoSeguro ? 307 : 303);
+    desvio.headers.set("Cache-Control", "no-store");
+    applySecurityHeaders(desvio.headers, nonce);
+    return desvio;
+  }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(NONCE_HEADER, nonce);
 
@@ -68,9 +89,15 @@ export function middleware(request: NextRequest) {
  * prefixá-los, transformando `/sitemap.xml` num redirect para
  * `/pt/sitemap.xml`, que não existe. Um sitemap que responde 404 é um sitemap
  * que o Google deixa de ler.
+ *
+ * O último, `.*\..*`, deixa de fora **qualquer ficheiro** (um caminho com
+ * extensão). Até 5 nov os de `public/` passavam aqui, o `next-intl`
+ * reescrevia `/brand/icon-dark.svg` para `/pt/brand/icon-dark.svg` e a resposta
+ * era 404 — visto pelo E2E do pré-lançamento. Nenhuma página do site tem um
+ * ponto no caminho.
  */
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|robots.txt|sitemap.xml|og/|auth/|api/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|robots.txt|sitemap.xml|og/|auth/|api/|.*\\..*).*)",
   ],
 };

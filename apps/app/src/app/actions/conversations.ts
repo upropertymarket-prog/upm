@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { createHash, randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -209,7 +210,7 @@ export async function attachmentUrl(
     p_subject_type: "chat_attachment",
     p_subject_id: messageId,
     p_action: action,
-    p_ip: requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+    p_ip: clientIpFrom(requestHeaders) ?? undefined,
     p_user_agent: requestHeaders.get("user-agent") ?? undefined,
     p_bytes_sent: action === "download" ? attachment.size : undefined,
   });

@@ -56,7 +56,7 @@ export async function LegalDocumentPage({
     <>
       <PublicHeader locale={locale} launchMode={launchMode} />
       {conteudo}
-      <SiteFooter />
+      <SiteFooter launchMode={launchMode} />
     </>
   );
 

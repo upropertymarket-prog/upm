@@ -1,40 +1,20 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@upm/ui";
 
-import { verifyChallenge, verifyRecoveryCode, type ChallengeState } from "./actions";
+import { verifyChallenge, type ChallengeState } from "./actions";
 
 const initialState: ChallengeState = {};
 
+/**
+ * Só o código da app. Os códigos de recuperação saíram a 8 nov 2026: quem
+ * perdeu o telemóvel pede a um admin que lhe reponha a 2FA.
+ */
 export function ChallengeForm({ factorId }: { factorId: string }) {
   const t = useTranslations("auth.mfa.challenge");
-  const [useRecovery, setUseRecovery] = useState(false);
   const [codeState, codeAction, codePending] = useActionState(verifyChallenge, initialState);
-  const [recoveryState, recoveryAction, recoveryPending] = useActionState(
-    verifyRecoveryCode,
-    initialState,
-  );
-
-  if (useRecovery) {
-    return (
-      <form action={recoveryAction} className="flex flex-col gap-3">
-        <Input name="recoveryCode" label={t("recoveryLabel")} required />
-        {recoveryState.error ? (
-          <p className="text-sm text-danger" role="alert">
-            {recoveryState.error}
-          </p>
-        ) : null}
-        <Button type="submit" disabled={recoveryPending} fullWidth>
-          {t("submit")}
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setUseRecovery(false)}>
-          {t("codeLabel")}
-        </Button>
-      </form>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,9 +31,7 @@ export function ChallengeForm({ factorId }: { factorId: string }) {
           {t("submit")}
         </Button>
       </form>
-      <Button type="button" variant="ghost" size="sm" onClick={() => setUseRecovery(true)}>
-        {t("useRecoveryCode")}
-      </Button>
+      <p className="text-xs text-muted">{t("lostPhone")}</p>
     </div>
   );
 }

@@ -132,13 +132,26 @@ describe("clientIpFrom — a ordem dos cabeçalhos é a defesa", () => {
     // ganha — senão bastava mandar um XFF forjado para entrar na allowlist.
     expect(
       clientIpFrom(
-        cabecalhos({ "cf-connecting-ip": "192.0.2.7", "x-forwarded-for": "203.0.113.1" }),
+        cabecalhos({ "x-vercel-forwarded-for": "192.0.2.7", "x-forwarded-for": "203.0.113.1" }),
       ),
     ).toBe("192.0.2.7");
 
     expect(
       clientIpFrom(cabecalhos({ "x-real-ip": "192.0.2.7", "x-forwarded-for": "203.0.113.1" })),
     ).toBe("192.0.2.7");
+  });
+
+  it("não confia em cabeçalhos de um proxy que não está à frente (12 §34.4)", () => {
+    // Sem Cloudflare, `cf-connecting-ip` e `true-client-ip` chegam como o
+    // cliente os escreveu: a allowlist tem de os ignorar, ou entra quem os forjar.
+    const forjado = cabecalhos({
+      "cf-connecting-ip": "192.0.2.7",
+      "true-client-ip": "192.0.2.7",
+      "x-real-ip": "203.0.113.1",
+    });
+    expect(clientIpFrom(forjado)).toBe("203.0.113.1");
+    expect(isIpAllowed(clientIpFrom(forjado)!, ["192.0.2.0/24"])).toBe(false);
+    expect(clientIpFrom(cabecalhos({ "cf-connecting-ip": "192.0.2.7" }))).toBeNull();
   });
 
   it("usa o x-forwarded-for só como último recurso, e o primeiro valor", () => {

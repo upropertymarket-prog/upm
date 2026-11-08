@@ -17,6 +17,7 @@ const eslintConfig = [
       ".next/**",
       // A pasta de build dos servidores dos E2E (`packages/e2e`) — gerada.
       ".next-e2e/**",
+      ".next-e2e-pre/**",
       "out/**",
       "build/**",
       "next-env.d.ts",

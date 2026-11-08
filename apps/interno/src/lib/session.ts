@@ -12,10 +12,9 @@ export const SESSION_STARTED_COOKIE = "interno_session_started_at";
 export const LAST_ACTIVITY_COOKIE = "interno_last_activity_at";
 
 /**
- * O 2FA por código de recuperação não eleva o AAL do Supabase; este cookie é a
- * prova assinada que o substitui (ver `verificar-2fa/actions.ts`). Sobreviver a
- * um logout seria o pior dos resíduos: devolvia o segundo fator a quem voltasse
- * a entrar sem o apresentar.
+ * Legado: o cookie que os códigos de recuperação punham, até saírem a 8 nov
+ * 2026. Ninguém o escreve nem o lê; fica nesta lista só para o logout o apagar
+ * a quem ainda o traga de uma sessão anterior.
  */
 export const RECOVERY_VERIFIED_COOKIE = "interno_recovery_verified";
 

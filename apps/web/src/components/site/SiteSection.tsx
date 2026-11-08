@@ -1,19 +1,20 @@
 import type { ReactNode } from "react";
 
+import "./site.css";
+
 /**
  * Moldura das secções do site público (P2-01)
  * =========================================================================
  * O `www` **não** usa o shell da app nem o limite de 1600 px de 04 §1.5 — tem
- * "o seu próprio ritmo de larguras" (03 §1.1). Esta é essa medida, num sítio
- * só: largura máxima de 1200 px para texto e cartões, com uma goteira de 16 px
- * que a regra de responsividade do projeto exige a 360 px.
+ * "o seu próprio ritmo de larguras" (03 §1.1). Desde 7 nov 2026 essa medida é
+ * a do MAST, o framework em que o cliente desenhou o site, e vive em
+ * `site.css`: margem de 6 % da largura, conteúdo até 1440 px, a altura das
+ * secções fluida. Aqui fica só o fundo de cada secção.
  *
  * `scroll-margin-top` acompanha a navbar fixa: sem ele, uma âncora de menu
  * deixa o título debaixo da barra, o que é a diferença entre um menu que
  * funciona e um que parece quebrado.
  */
-
-export const SITE_MAX_WIDTH = "1200px";
 
 export function SiteSection({
   id,
@@ -28,18 +29,16 @@ export function SiteSection({
   return (
     <section
       id={id}
+      className="upm-site-section"
       style={{
         background: tone === "alt" ? "var(--surface2)" : "var(--bg)",
         borderTop: tone === "alt" ? "1px solid var(--border)" : undefined,
         borderBottom: tone === "alt" ? "1px solid var(--border)" : undefined,
         // 84 px é a altura da navbar fixa do protótipo.
         scrollMarginTop: "84px",
-        // `clamp` e não media query: a altura da secção acompanha o viewport
-        // sem pontos de rutura (ver a nota de responsividade do projeto).
-        padding: "clamp(2.5rem, 6vw, 5.5rem) 16px",
       }}
     >
-      <div style={{ maxWidth: SITE_MAX_WIDTH, margin: "0 auto" }}>{children}</div>
+      <div className="upm-site-container">{children}</div>
     </section>
   );
 }

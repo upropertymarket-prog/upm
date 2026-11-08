@@ -1,5 +1,6 @@
 "use server";
 
+import { clientIpFrom } from "@upm/config/security";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -50,12 +51,16 @@ const preRegistrationSchema = baseSchema.extend({
 const contactSchema = baseSchema.extend({
   reason: z.enum(["vender", "comprar", "planos", "suporte"]).optional(),
   message: z.string().trim().max(5000).optional(),
+  // Obrigatório desde 6 nov 2026: ver a nota do `ContactForm`.
+  consentTerms: z.literal("on", {
+    error: () => "Tem de aceitar os Termos para continuar.",
+  }),
 });
 
+// O IP vem de `clientIpFrom`, que só confia nos cabeçalhos que a Vercel
+// reescreve (12 §34.4) — um sítio só para a regra, em vez de uma cópia por ação.
 async function clientIp(): Promise<string | null> {
-  const list = await headers();
-  const forwarded = list.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || list.get("x-real-ip") || null;
+  return clientIpFrom(await headers());
 }
 
 function fieldErrorsFrom(error: z.ZodError): Record<string, string> {
@@ -255,6 +260,7 @@ export async function submitContact(
     reason: formData.get("reason") || undefined,
     message: formData.get("message") ?? undefined,
     website: formData.get("website") ?? undefined,
+    consentTerms: formData.get("consentTerms") ?? undefined,
   });
 
   if (!parsed.success) return { fieldErrors: fieldErrorsFrom(parsed.error) };
