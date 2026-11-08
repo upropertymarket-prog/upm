@@ -170,10 +170,10 @@ function layout({
   const contact = (label: string, value: string, href: string) =>
     `<tr><td style="padding:3px 14px 3px 0;font-size:13px;color:${MUTED};white-space:nowrap">${label}</td><td style="padding:3px 0;font-size:14px;white-space:nowrap"><a href="${escape(href)}" style="color:${TEXT};text-decoration:none">${escape(value)}</a></td></tr>`;
   const signature = `<tr><td style="padding:32px 32px 0 32px">
-         <div style="display:inline-block;vertical-align:middle;padding:8px 24px 8px 0">
+         <div class="upm-sig-logo" style="display:inline-block;vertical-align:middle;padding:8px 24px 8px 0">
            <a href="${escape(siteUrl)}"><img src="${escape(siteUrl)}/brand/assinatura-light.png" width="150" height="50" alt="UProperty Market" style="display:block;border:0;width:150px;height:auto"></a>
          </div>
-         <div style="display:inline-block;vertical-align:middle;padding:4px 0 4px 24px;border-left:1px solid ${BORDER}">
+         <div class="upm-sig-text" style="display:inline-block;vertical-align:middle;padding:4px 0 4px 24px;border-left:1px solid ${BORDER}">
            <div style="font-size:15px;font-weight:700;color:${TEXT};padding-bottom:8px">${escape(signoff)}</div>
            <table role="presentation" cellpadding="0" cellspacing="0">
              ${contact("Tel:", SIGNATURE_PHONE, SIGNATURE_PHONE_LINK)}
@@ -188,7 +188,18 @@ function layout({
     : "";
 
   return `<!doctype html>
-<html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title></head>
+<html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title>
+<style>
+  /* Telemóvel (cliente, 8 nov 2026): a assinatura empilha, e aí o texto fica
+     alinhado à esquerda com o logótipo, sem a linha vertical e com mais
+     espaço por baixo do logótipo. Os clientes que ignoram <style> mantêm o
+     desenho de computador, que só fica com a linha — nada se parte. */
+  @media (max-width: 540px) {
+    .upm-sig-logo { display: block !important; padding: 0 0 20px 0 !important; }
+    .upm-sig-text { display: block !important; padding: 0 !important; border-left: 0 !important; }
+  }
+</style>
+</head>
 <body style="margin:0;padding:0;background:${BACKGROUND};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BACKGROUND};padding:32px 16px">
     <tr><td align="center">
