@@ -31,14 +31,11 @@ export async function modoNoMiddleware(): Promise<LaunchMode> {
   let lido = false;
   if (url && chave) {
     try {
-      const resposta = await fetch(
-        `${url}/rest/v1/feature_flags?select=value&key=eq.launch_mode`,
-        {
-          headers: { apikey: chave, Authorization: `Bearer ${chave}` },
-          cache: "no-store",
-          signal: AbortSignal.timeout(2_000),
-        },
-      );
+      const resposta = await fetch(`${url}/rest/v1/feature_flags?select=value&key=eq.launch_mode`, {
+        headers: { apikey: chave, Authorization: `Bearer ${chave}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(2_000),
+      });
       if (resposta.ok) {
         const linhas = (await resposta.json()) as Array<{ value: unknown }>;
         modo = linhas[0]?.value === "post" ? "post" : "pre";

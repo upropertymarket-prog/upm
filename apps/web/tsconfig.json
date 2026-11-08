@@ -2,9 +2,7 @@
   "extends": "@upm/config/tsconfig/next.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -16,7 +14,5 @@
     "next-env.d.ts",
     ".next-e2e-pre/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -706,7 +706,7 @@
   padding: var(--sp-4) var(--site-gutter, 16px) var(--sp-5);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-md, 0 8px 24px rgb(0 0 0 / 0.12));
+  box-shadow: var(--shadow-lg);
 }
 
 .upm-topbar__site-panel ul {
