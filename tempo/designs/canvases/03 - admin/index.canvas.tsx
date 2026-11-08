@@ -18,6 +18,14 @@ import {
   AdminUtilizadoresEscuro,
   AdminUtilizadorDrawerClaro,
   AdminUtilizadorDrawerEscuro,
+  AdminEquipaAcessoClaro,
+  AdminEquipaAcessoEscuro,
+  AdminEquipaSaidaClaro,
+  AdminEquipaSaidaEscuro,
+  AdminEquipaEliminarClaro,
+  AdminEquipaEliminarEscuro,
+  AdminEquipaEliminarDescarregadoClaro,
+  AdminEquipaEliminarDescarregadoEscuro,
 } from "./Users";
 import {
   AdminTrafegoClaro,
@@ -115,30 +123,82 @@ export default function AdminCanvas() {
         layout={{ x: 1520, y: 2330, width: 1440, height: 1050 }}
       />
 
+      {/* A equipa no mesmo painel (8 nov 2026): "Acesso" e a saída da
+          equipa, pela ordem em que se faz — suspender, abrir "Eliminar conta",
+          descarregar o registo, eliminar. */}
+      <Storyboard
+        id="AdminEquipaAcessoClaro"
+        name="Equipa · Acesso (repor palavra-passe e 2FA) · Claro"
+        component={AdminEquipaAcessoClaro}
+        layout={{ x: 0, y: 3460, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaAcessoEscuro"
+        name="Equipa · Acesso (repor palavra-passe e 2FA) · Escuro"
+        component={AdminEquipaAcessoEscuro}
+        layout={{ x: 1520, y: 3460, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaSaidaClaro"
+        name="Equipa · conta suspensa · Saída da equipa · Claro"
+        component={AdminEquipaSaidaClaro}
+        layout={{ x: 0, y: 4590, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaSaidaEscuro"
+        name="Equipa · conta suspensa · Saída da equipa · Escuro"
+        component={AdminEquipaSaidaEscuro}
+        layout={{ x: 1520, y: 4590, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaEliminarClaro"
+        name="Equipa · Eliminar conta · antes do download · Claro"
+        component={AdminEquipaEliminarClaro}
+        layout={{ x: 0, y: 5720, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaEliminarEscuro"
+        name="Equipa · Eliminar conta · antes do download · Escuro"
+        component={AdminEquipaEliminarEscuro}
+        layout={{ x: 1520, y: 5720, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaEliminarDescarregadoClaro"
+        name="Equipa · Eliminar conta · registo descarregado (24 h) · Claro"
+        component={AdminEquipaEliminarDescarregadoClaro}
+        layout={{ x: 0, y: 6850, width: 1440, height: 1050 }}
+      />
+      <Storyboard
+        id="AdminEquipaEliminarDescarregadoEscuro"
+        name="Equipa · Eliminar conta · registo descarregado (24 h) · Escuro"
+        component={AdminEquipaEliminarDescarregadoEscuro}
+        layout={{ x: 1520, y: 6850, width: 1440, height: 1050 }}
+      />
+
       {/* Moderação de imóveis */}
       <Storyboard
         id="AdminModeracaoClaro"
         name="Moderação de imóveis · Claro"
         component={AdminModeracaoClaro}
-        layout={{ x: 0, y: 3460, width: 1440, height: 1050 }}
+        layout={{ x: 0, y: 7980, width: 1440, height: 1050 }}
       />
       <Storyboard
         id="AdminModeracaoEscuro"
         name="Moderação de imóveis · Escuro"
         component={AdminModeracaoEscuro}
-        layout={{ x: 1520, y: 3460, width: 1440, height: 1050 }}
+        layout={{ x: 1520, y: 7980, width: 1440, height: 1050 }}
       />
       <Storyboard
         id="AdminModeracaoDrawerClaro"
         name="Detalhe e decisão de moderação · Claro"
         component={AdminModeracaoDrawerClaro}
-        layout={{ x: 0, y: 4590, width: 1440, height: 1050 }}
+        layout={{ x: 0, y: 9110, width: 1440, height: 1050 }}
       />
       <Storyboard
         id="AdminModeracaoDrawerEscuro"
         name="Detalhe e decisão de moderação · Escuro"
         component={AdminModeracaoDrawerEscuro}
-        layout={{ x: 1520, y: 4590, width: 1440, height: 1050 }}
+        layout={{ x: 1520, y: 9110, width: 1440, height: 1050 }}
       />
 
       {/* Tráfego do site */}
@@ -146,25 +206,25 @@ export default function AdminCanvas() {
         id="AdminTrafegoClaro"
         name="Tráfego do site · Claro (/admin/trafego)"
         component={AdminTrafegoClaro}
-        layout={{ x: 0, y: 5720, width: 1440, height: 1100 }}
+        layout={{ x: 0, y: 10240, width: 1440, height: 1100 }}
       />
       <Storyboard
         id="AdminTrafegoEscuro"
         name="Tráfego do site · Escuro (/admin/trafego)"
         component={AdminTrafegoEscuro}
-        layout={{ x: 1520, y: 5720, width: 1440, height: 1100 }}
+        layout={{ x: 1520, y: 10240, width: 1440, height: 1100 }}
       />
       <Storyboard
         id="AdminTrafegoVazio"
         name="Tráfego do site · Estado vazio"
         component={AdminTrafegoVazio}
-        layout={{ x: 0, y: 6900, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 11420, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminTrafegoVazioEscuro"
         name="Tráfego do site · Estado vazio · Escuro"
         component={AdminTrafegoVazioEscuro}
-        layout={{ x: 1520, y: 6900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 11420, width: 1440, height: 900 }}
       />
 
       {/* Planos */}
@@ -172,13 +232,13 @@ export default function AdminCanvas() {
         id="AdminPlanosClaro"
         name="Planos · Claro (/admin/planos)"
         component={AdminPlanosClaro}
-        layout={{ x: 0, y: 7880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 12400, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminPlanosEscuro"
         name="Planos · Escuro (/admin/planos)"
         component={AdminPlanosEscuro}
-        layout={{ x: 1520, y: 7880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 12400, width: 1440, height: 900 }}
       />
 
       {/* Templates de contrato */}
@@ -186,13 +246,13 @@ export default function AdminCanvas() {
         id="AdminContratosClaro"
         name="Templates de contrato · Claro"
         component={AdminContratosClaro}
-        layout={{ x: 0, y: 8860, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 13380, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminContratosEscuro"
         name="Templates de contrato · Escuro"
         component={AdminContratosEscuro}
-        layout={{ x: 1520, y: 8860, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 13380, width: 1440, height: 900 }}
       />
 
       {/* Leads do site */}
@@ -200,25 +260,25 @@ export default function AdminCanvas() {
         id="AdminLeadsClaro"
         name="Leads do site · Claro"
         component={AdminLeadsClaro}
-        layout={{ x: 0, y: 9840, width: 1440, height: 1080 }}
+        layout={{ x: 0, y: 14360, width: 1440, height: 1080 }}
       />
       <Storyboard
         id="AdminLeadsEscuro"
         name="Leads do site · Escuro"
         component={AdminLeadsEscuro}
-        layout={{ x: 1520, y: 9840, width: 1440, height: 1080 }}
+        layout={{ x: 1520, y: 14360, width: 1440, height: 1080 }}
       />
       <Storyboard
         id="AdminLeadDrawerClaro"
         name="Detalhe da lead · Claro"
         component={AdminLeadDrawerClaro}
-        layout={{ x: 0, y: 11000, width: 1440, height: 1080 }}
+        layout={{ x: 0, y: 15520, width: 1440, height: 1080 }}
       />
       <Storyboard
         id="AdminLeadDrawerEscuro"
         name="Detalhe da lead · Escuro"
         component={AdminLeadDrawerEscuro}
-        layout={{ x: 1520, y: 11000, width: 1440, height: 1080 }}
+        layout={{ x: 1520, y: 15520, width: 1440, height: 1080 }}
       />
 
       {/* Gestor de SEO (P2-06). A storyboard "SEO Manager" de 04 §2.1.1,
@@ -228,13 +288,13 @@ export default function AdminCanvas() {
         id="AdminSeoClaro"
         name="SEO e Open Graph · Claro (/admin/seo)"
         component={AdminSeoClaro}
-        layout={{ x: 0, y: 12160, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 16680, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminSeoEscuro"
         name="SEO e Open Graph · Escuro (/admin/seo)"
         component={AdminSeoEscuro}
-        layout={{ x: 1520, y: 12160, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 16680, width: 1440, height: 1150 }}
       />
 
       {/* Tickets (P10-02), vista só de leitura. Entra entre o SEO e as Caixas
@@ -246,13 +306,13 @@ export default function AdminCanvas() {
         id="AdminTicketsClaro"
         name="Tickets · Só leitura · Claro (/admin/tickets)"
         component={AdminTicketsClaro}
-        layout={{ x: 0, y: 13390, width: 1440, height: 1000 }}
+        layout={{ x: 0, y: 17910, width: 1440, height: 1000 }}
       />
       <Storyboard
         id="AdminTicketsEscuro"
         name="Tickets · Só leitura · Escuro (/admin/tickets)"
         component={AdminTicketsEscuro}
-        layout={{ x: 1520, y: 13390, width: 1440, height: 1000 }}
+        layout={{ x: 1520, y: 17910, width: 1440, height: 1000 }}
       />
 
       {/* Caixa de e-mail (26 out 2026). Entra entre os Tickets e a Configuração
@@ -263,13 +323,13 @@ export default function AdminCanvas() {
         id="AdminCaixaEmailClaro"
         name="Caixa de e-mail · Claro (/admin/email)"
         component={AdminCaixaEmailClaro}
-        layout={{ x: 0, y: 14470, width: 1440, height: 1000 }}
+        layout={{ x: 0, y: 18990, width: 1440, height: 1000 }}
       />
       <Storyboard
         id="AdminCaixaEmailEscuro"
         name="Caixa de e-mail · Escuro (/admin/email)"
         component={AdminCaixaEmailEscuro}
-        layout={{ x: 1520, y: 14470, width: 1440, height: 1000 }}
+        layout={{ x: 1520, y: 18990, width: 1440, height: 1000 }}
       />
 
       {/* O estado real de hoje: nenhuma caixa criada na Amen. No Admin este
@@ -279,13 +339,13 @@ export default function AdminCanvas() {
         id="AdminCaixaEmailSemCaixas"
         name="Caixa de e-mail · Sem caixas configuradas · Claro"
         component={AdminCaixaEmailSemCaixas}
-        layout={{ x: 0, y: 15550, width: 1440, height: 700 }}
+        layout={{ x: 0, y: 20070, width: 1440, height: 700 }}
       />
       <Storyboard
         id="AdminCaixaEmailSemCaixasEscuro"
         name="Caixa de e-mail · Sem caixas configuradas · Escuro"
         component={AdminCaixaEmailSemCaixasEscuro}
-        layout={{ x: 1520, y: 15550, width: 1440, height: 700 }}
+        layout={{ x: 1520, y: 20070, width: 1440, height: 700 }}
       />
 
       {/* Configuração de e-mail (P10-03) */}
@@ -293,13 +353,13 @@ export default function AdminCanvas() {
         id="AdminCaixasEmailClaro"
         name="Configuração de e-mail · Claro (/admin/caixas-email)"
         component={AdminCaixasEmailClaro}
-        layout={{ x: 0, y: 16330, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 20850, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminCaixasEmailEscuro"
         name="Configuração de e-mail · Escuro (/admin/caixas-email)"
         component={AdminCaixasEmailEscuro}
-        layout={{ x: 1520, y: 16330, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 20850, width: 1440, height: 1150 }}
       />
 
       {/* O estado que hoje é o único real: nenhuma caixa criada ainda. É o ecrã
@@ -308,13 +368,13 @@ export default function AdminCanvas() {
         id="AdminCaixasEmailVazio"
         name="Configuração de e-mail · Sem caixas · Claro"
         component={AdminCaixasEmailVazio}
-        layout={{ x: 0, y: 17560, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 22080, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminCaixasEmailVazioEscuro"
         name="Configuração de e-mail · Sem caixas · Escuro"
         component={AdminCaixasEmailVazioEscuro}
-        layout={{ x: 1520, y: 17560, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 22080, width: 1440, height: 900 }}
       />
 
       {/* Definições */}
@@ -322,13 +382,13 @@ export default function AdminCanvas() {
         id="AdminDefinicoesClaro"
         name="Definições · Claro"
         component={AdminDefinicoesClaro}
-        layout={{ x: 0, y: 18540, width: 1440, height: 1150 }}
+        layout={{ x: 0, y: 23060, width: 1440, height: 1150 }}
       />
       <Storyboard
         id="AdminDefinicoesEscuro"
         name="Definições · Escuro"
         component={AdminDefinicoesEscuro}
-        layout={{ x: 1520, y: 18540, width: 1440, height: 1150 }}
+        layout={{ x: 1520, y: 23060, width: 1440, height: 1150 }}
       />
 
       {/* Diálogo transversal às ações sensíveis */}
@@ -336,13 +396,13 @@ export default function AdminCanvas() {
         id="AdminStepUpClaro"
         name="Confirmação de PIN · Claro"
         component={AdminStepUpClaro}
-        layout={{ x: 0, y: 19770, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 24290, width: 1440, height: 900 }}
       />
       <Storyboard
         id="AdminStepUpEscuro"
         name="Confirmação de PIN · Escuro"
         component={AdminStepUpEscuro}
-        layout={{ x: 1520, y: 19770, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 24290, width: 1440, height: 900 }}
       />
     </Canvas>
   );

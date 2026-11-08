@@ -49,7 +49,9 @@ export type DeliveryPayload = {
   cta?: unknown;
   footer?: unknown;
   lang?: unknown;
-  /** A despedida por cima da assinatura ("Equipa UProperty Market"). */
+  /** Uma frase depois do botão e antes da assinatura ("Obrigado pelo seu interesse…"). */
+  closing?: unknown;
+  /** O nome na assinatura ("A Equipa UProperty Market"). */
   signoff?: unknown;
   /**
    * Uma linha a mais no rodapé, com um link — "Mudou de ideias? Remover a
@@ -65,7 +67,16 @@ export type RenderedEmail = { subject: string; html: string; text: string };
 const DEFAULT_CTA = "Abrir na app";
 const DEFAULT_FOOTER =
   "Recebeu este e-mail porque tem uma conta na UProperty Market. Pode escolher que avisos recebe em Definições › Notificações.";
-const DEFAULT_SIGNOFF = "Equipa UProperty Market";
+const DEFAULT_SIGNOFF = "A Equipa UProperty Market";
+
+/**
+ * Os contactos da assinatura (cliente, 8 nov 2026). Iguais nas duas línguas:
+ * só o nome da equipa se traduz (`signoff`).
+ */
+const SIGNATURE_PHONE = "(+351) 939 732 637";
+const SIGNATURE_PHONE_LINK = "tel:+351939732637";
+const SIGNATURE_EMAIL = "info@upropertymarket.pt";
+const SIGNATURE_WEB = "www.upropertymarket.pt";
 
 /**
  * O site público, de onde vem a imagem da assinatura. Um e-mail não leva
@@ -83,6 +94,7 @@ export function renderNotificationEmail(
   const cta = text(payload.cta) || DEFAULT_CTA;
   const footer = text(payload.footer) || DEFAULT_FOOTER;
   const lang = /^[a-z]{2}$/i.test(text(payload.lang)) ? text(payload.lang).toLowerCase() : "pt";
+  const closing = text(payload.closing);
   const signoff = text(payload.signoff) || DEFAULT_SIGNOFF;
   const siteUrl = (options.siteUrl || DEFAULT_SITE_URL).replace(/\/+$/, "");
   const optOutLink = /^https?:\/\//i.test(text(payload.optOutLink)) ? text(payload.optOutLink) : "";
@@ -95,7 +107,10 @@ export function renderNotificationEmail(
     title,
     body,
     link ? `${cta}: ${link}` : "",
-    `${signoff}\n${siteUrl.replace(/^https?:\/\//, "")}`,
+    closing,
+    [signoff, `Tel: ${SIGNATURE_PHONE}`, `Email: ${SIGNATURE_EMAIL}`, `Web: ${SIGNATURE_WEB}`].join(
+      "\n",
+    ),
     footer,
     optOut ? `${optOut.text} ${optOut.label}: ${optOut.link}` : "",
   ]
@@ -104,7 +119,7 @@ export function renderNotificationEmail(
 
   return {
     subject: title,
-    html: layout({ title, body, link, cta, footer, lang, signoff, siteUrl, optOut }),
+    html: layout({ title, body, link, cta, closing, footer, lang, signoff, siteUrl, optOut }),
     text: plain,
   };
 }
@@ -114,6 +129,7 @@ function layout({
   body,
   link,
   cta,
+  closing,
   footer,
   lang,
   signoff,
@@ -124,6 +140,7 @@ function layout({
   body: string;
   link: string;
   cta: string;
+  closing: string;
   footer: string;
   lang: string;
   signoff: string;
@@ -140,14 +157,30 @@ function layout({
     ? `<tr><td style="padding:12px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">${escape(body).replace(/\n/g, "<br>")}</td></tr>`
     : "";
 
-  // A assinatura: a despedida, o logótipo (`public/brand/assinatura-light.png`,
-  // 600×201, mostrado a 150 px) e o endereço do site. O `alt` diz o nome da
-  // marca para quem tem as imagens bloqueadas — o caso por omissão no Outlook.
-  const siteLabel = siteUrl.replace(/^https?:\/\//, "");
-  const signature = `<tr><td style="padding:32px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">
-         ${escape(signoff).replace(/\n/g, "<br>")}<br>
-         <a href="${escape(siteUrl)}" style="display:inline-block;margin-top:12px"><img src="${escape(siteUrl)}/brand/assinatura-light.png" width="150" height="50" alt="UProperty Market" style="display:block;border:0;width:150px;height:auto"></a><br>
-         <a href="${escape(siteUrl)}" style="display:inline-block;margin-top:8px;font-size:13px;color:${MUTED};text-decoration:none">${escape(siteLabel)}</a>
+  const closingRow = closing
+    ? `<tr><td style="padding:24px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">${escape(closing)}</td></tr>`
+    : "";
+
+  // A assinatura da UProperty Market (cliente, 8 nov 2026): o logótipo à
+  // esquerda (`public/brand/assinatura-light.png`, 600×201) e, separados por
+  // uma linha, o nome da equipa e os contactos. Dois blocos `inline-block` e
+  // não duas células: num telemóvel estreito empilham, em vez de alargarem o
+  // e-mail para fora do ecrã. O `alt` diz o nome da marca a quem tem as
+  // imagens bloqueadas — o caso por omissão no Outlook.
+  const contact = (label: string, value: string, href: string) =>
+    `<tr><td style="padding:3px 14px 3px 0;font-size:13px;color:${MUTED};white-space:nowrap">${label}</td><td style="padding:3px 0;font-size:14px;white-space:nowrap"><a href="${escape(href)}" style="color:${TEXT};text-decoration:none">${escape(value)}</a></td></tr>`;
+  const signature = `<tr><td style="padding:32px 32px 0 32px">
+         <div style="display:inline-block;vertical-align:middle;padding:8px 24px 8px 0">
+           <a href="${escape(siteUrl)}"><img src="${escape(siteUrl)}/brand/assinatura-light.png" width="150" height="50" alt="UProperty Market" style="display:block;border:0;width:150px;height:auto"></a>
+         </div>
+         <div style="display:inline-block;vertical-align:middle;padding:4px 0 4px 24px;border-left:1px solid ${BORDER}">
+           <div style="font-size:15px;font-weight:700;color:${TEXT};padding-bottom:8px">${escape(signoff)}</div>
+           <table role="presentation" cellpadding="0" cellspacing="0">
+             ${contact("Tel:", SIGNATURE_PHONE, SIGNATURE_PHONE_LINK)}
+             ${contact("Email:", SIGNATURE_EMAIL, `mailto:${SIGNATURE_EMAIL}`)}
+             ${contact("Web:", SIGNATURE_WEB, siteUrl)}
+           </table>
+         </div>
        </td></tr>`;
 
   const optOutLine = optOut
@@ -163,6 +196,7 @@ function layout({
         <tr><td style="padding:32px 32px 0 32px;font-size:18px;font-weight:700;color:${TEXT}">${escape(title)}</td></tr>
         ${paragraph}
         ${button}
+        ${closingRow}
         ${signature}
         <!-- O espaço antes da linha do rodapé é uma linha da tabela: um
              margin-top numa célula não conta em nenhum cliente de e-mail, e

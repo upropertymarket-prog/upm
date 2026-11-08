@@ -4,17 +4,25 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@upm/ui";
 
-import { verifyChallenge, type ChallengeState } from "./actions";
+import type { ChallengeState } from "./actions";
 
 const initialState: ChallengeState = {};
 
 /**
  * Só o código da app. Os códigos de recuperação saíram a 8 nov 2026: quem
  * perdeu o telemóvel pede a um admin que lhe reponha a 2FA.
+ *
+ * A action vem por prop, pela mesma razão do `LoginForm`: o canvas.
  */
-export function ChallengeForm({ factorId }: { factorId: string }) {
+export function ChallengeForm({
+  factorId,
+  onSubmit,
+}: {
+  factorId: string;
+  onSubmit: (previous: ChallengeState, formData: FormData) => Promise<ChallengeState>;
+}) {
   const t = useTranslations("auth.mfa.challenge");
-  const [codeState, codeAction, codePending] = useActionState(verifyChallenge, initialState);
+  const [codeState, codeAction, codePending] = useActionState(onSubmit, initialState);
 
   return (
     <div className="flex flex-col gap-3">

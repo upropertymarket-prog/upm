@@ -80,6 +80,25 @@ const selectedProfile = {
   current_period_end: "2026-10-28T09:15:00.000Z",
 } satisfies UserDetail;
 
+/**
+ * Alguém da equipa (8 nov 2026): o painel mostra "Acesso" (repor
+ * palavra-passe e 2FA) e, com a conta suspensa, "Saída da equipa".
+ */
+const staffProfile = {
+  id: "ccaa0000-0000-4000-8000-000000000010",
+  full_name: "Carla Sousa",
+  email: "carla.sousa@upropertymarket.pt",
+  role: "support",
+  status: "active",
+  plan_name: null,
+  plan_slug: null,
+  subscription_status: null,
+  trial_ends_at: null,
+  created_at: "2026-10-02T09:00:00.000Z",
+  updated_at: "2026-11-08T10:00:00.000Z",
+  current_period_end: null,
+} satisfies UserDetail;
+
 const verifyPin: VerifyPinAction = async () => ({ ok: true });
 const onChangeStatus = async () => ({ ok: true });
 const onResetPassword = async () => ({ ok: true });
@@ -87,7 +106,17 @@ const onResetTwoFactor = async () => ({ ok: true });
 const onExportRecord = async () => ({ ok: true, csv: "" });
 const onDeleteAccount = async () => ({ ok: true });
 
-function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?: boolean }) {
+function UsersDemo({
+  theme,
+  detail = false,
+  profile = selectedProfile,
+  exitDialog,
+}: {
+  theme: "light" | "dark";
+  detail?: boolean;
+  profile?: UserDetail;
+  exitDialog?: "open" | "exported";
+}) {
   const cursor = {
     createdAt: users[users.length - 1]!.created_at,
     id: users[users.length - 1]!.id,
@@ -129,7 +158,7 @@ function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?
                   firstCursor: { createdAt: users[0]!.created_at, id: users[0]!.id },
                   lastCursor: cursor,
                 }}
-                selectedProfile={detail ? selectedProfile : null}
+                selectedProfile={detail ? profile : null}
                 selectedProfileError={false}
                 loadError={false}
                 locale="pt"
@@ -141,6 +170,7 @@ function UsersDemo({ theme, detail = false }: { theme: "light" | "dark"; detail?
                 onDeleteAccount={onDeleteAccount}
                 onLogAccess={async () => undefined}
                 onVerifyPin={verifyPin}
+                initialExitDialog={exitDialog}
               />
             </InternalChrome>
           </ToastProvider>
@@ -164,4 +194,41 @@ export function AdminUtilizadorDrawerClaro() {
 
 export function AdminUtilizadorDrawerEscuro() {
   return <UsersDemo theme="dark" detail />;
+}
+
+// Equipa: o painel de alguém do suporte, com "Acesso" (8 nov 2026).
+export function AdminEquipaAcessoClaro() {
+  return <UsersDemo theme="light" detail profile={staffProfile} />;
+}
+
+export function AdminEquipaAcessoEscuro() {
+  return <UsersDemo theme="dark" detail profile={staffProfile} />;
+}
+
+// A saída da equipa: a conta suspensa mostra "Saída da equipa"; a janela
+// "Eliminar conta" antes e depois de descarregar o registo (o prazo de 24 h).
+const suspensa = { ...staffProfile, status: "suspended" } satisfies UserDetail;
+
+export function AdminEquipaSaidaClaro() {
+  return <UsersDemo theme="light" detail profile={suspensa} />;
+}
+
+export function AdminEquipaSaidaEscuro() {
+  return <UsersDemo theme="dark" detail profile={suspensa} />;
+}
+
+export function AdminEquipaEliminarClaro() {
+  return <UsersDemo theme="light" detail profile={suspensa} exitDialog="open" />;
+}
+
+export function AdminEquipaEliminarEscuro() {
+  return <UsersDemo theme="dark" detail profile={suspensa} exitDialog="open" />;
+}
+
+export function AdminEquipaEliminarDescarregadoClaro() {
+  return <UsersDemo theme="light" detail profile={suspensa} exitDialog="exported" />;
+}
+
+export function AdminEquipaEliminarDescarregadoEscuro() {
+  return <UsersDemo theme="dark" detail profile={suspensa} exitDialog="exported" />;
 }

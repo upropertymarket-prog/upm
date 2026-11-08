@@ -137,22 +137,36 @@ group("renderNotificationEmail", () => {
    * 8 nov 2026: a assinatura da UProperty Market em todos os e-mails, espaço
    * entre o botão e a linha do rodapé, e o link para apagar a pré-inscrição.
    */
-  it("assina com a despedida e o logótipo do site", () => {
+  it("assina com o logótipo, o nome da equipa e os contactos", () => {
     const email = renderNotificationEmail(
-      { title: "Aviso", signoff: "Kind regards,\nThe UProperty Market team" },
+      {
+        title: "Aviso",
+        closing: "Thank you for your interest!",
+        signoff: "The UProperty Market Team",
+      },
       { appUrl: "https://app.exemplo.pt", siteUrl: "https://www.exemplo.pt/" },
     );
 
-    expect(email.html).toContain("Kind regards,<br>The UProperty Market team");
+    expect(email.html).toContain("Thank you for your interest!");
+    expect(email.html).toContain("The UProperty Market Team");
     expect(email.html).toContain('src="https://www.exemplo.pt/brand/assinatura-light.png"');
     expect(email.html).toContain('alt="UProperty Market"');
-    expect(email.text).toContain("The UProperty Market team\nwww.exemplo.pt");
+    expect(email.html).toContain('href="tel:+351939732637"');
+    expect(email.html).toContain('href="mailto:info@upropertymarket.pt"');
+    expect(email.html).toContain("www.upropertymarket.pt");
+    expect(email.text).toContain(
+      "The UProperty Market Team\nTel: (+351) 939 732 637\nEmail: info@upropertymarket.pt\nWeb: www.upropertymarket.pt",
+    );
+    // A frase de fecho vem antes da assinatura.
+    expect(email.html.indexOf("Thank you for your interest!")).toBeLessThan(
+      email.html.indexOf("The UProperty Market Team"),
+    );
   });
 
   it("assina por omissão, para as entregas do notify()", () => {
     const email = renderNotificationEmail({ title: "Aviso" }, { appUrl: "https://app.exemplo.pt" });
 
-    expect(email.html).toContain("Equipa UProperty Market");
+    expect(email.html).toContain("A Equipa UProperty Market");
     expect(email.html).toContain("https://upropertymarket.pt/brand/assinatura-light.png");
   });
 

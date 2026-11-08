@@ -157,6 +157,7 @@ async function enqueueConfirmationEmail(lead: {
         link,
         cta: t("cta"),
         footer: t("footer"),
+        closing: t("closing"),
         signoff: t("signoff"),
         // A saída, no próprio e-mail (8 nov 2026): quem se inscreveu pode
         // apagar a pré-inscrição sem nos escrever — antes ou depois de a

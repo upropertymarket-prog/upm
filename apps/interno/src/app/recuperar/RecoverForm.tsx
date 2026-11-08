@@ -14,11 +14,14 @@ const initialState: RecoverState = {};
  */
 export function RecoverForm({
   onSubmit,
+  startState = initialState,
 }: {
   onSubmit: (previous: RecoverState, formData: FormData) => Promise<RecoverState>;
+  /** O estado de partida. Só o canvas o passa ("enviado" só aparece depois do clique). */
+  startState?: RecoverState;
 }) {
   const t = useTranslations("auth.staffRecovery");
-  const [state, formAction, pending] = useActionState(onSubmit, initialState);
+  const [state, formAction, pending] = useActionState(onSubmit, startState);
 
   if (state.sent) {
     return (

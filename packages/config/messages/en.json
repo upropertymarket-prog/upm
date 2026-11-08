@@ -864,10 +864,11 @@
       "submit": "Notify me",
       "confirmEmail": {
         "title": "Confirm your email address",
-        "body": "Hello {name},\n\nWe have received your early-access sign-up for UProperty Market. One step is left: confirming that this address is yours. That is what makes the sign-up valid, and what lets us tell you when the first listings go live.",
+        "body": "Hello {name},\n\nWe have received your early-access sign-up for UProperty Market! To complete it, all you need to do is confirm your email address.\n\nThis confirmation validates your sign-up and lets us keep your details so we can send you news and let you know about the platform's official launch.",
         "cta": "Confirm my email",
+        "closing": "Thank you for your interest in UProperty Market!",
         "footer": "You received this email because this address was entered in the UProperty Market early-access form. If that was not you, there is nothing to do: without confirmation, the address is deleted after 30 days.",
-        "signoff": "Kind regards,\nThe UProperty Market team",
+        "signoff": "The UProperty Market Team",
         "optOutText": "Changed your mind?",
         "optOutLabel": "Remove my early-access sign-up and my details"
       },

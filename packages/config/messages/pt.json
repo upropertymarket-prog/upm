@@ -864,10 +864,11 @@
       "submit": "Quero ser avisado",
       "confirmEmail": {
         "title": "Confirme o seu e-mail",
-        "body": "Olá {name},\n\nRecebemos a sua pré-inscrição na UProperty Market. Falta um passo: confirmar que este endereço é seu. É isso que torna a inscrição válida e o que nos autoriza a avisá-lo quando os primeiros anúncios abrirem.",
+        "body": "Olá, {name},\n\nRecebemos a sua pré-inscrição na UProperty Market! Para a concluir, só precisa de confirmar o seu endereço de e-mail.\n\nEsta confirmação valida a sua inscrição e permite-nos manter o seu contacto para lhe dar novidades e informar sobre o lançamento oficial da plataforma.",
         "cta": "Confirmar o e-mail",
+        "closing": "Obrigado pelo seu interesse na UProperty Market!",
         "footer": "Recebeu este e-mail porque este endereço foi deixado na pré-inscrição da UProperty Market. Se não foi você, não precisa de fazer nada: sem confirmação, o endereço é apagado em 30 dias.",
-        "signoff": "Com os melhores cumprimentos,\nEquipa UProperty Market",
+        "signoff": "A Equipa UProperty Market",
         "optOutText": "Mudou de ideias?",
         "optOutLabel": "Remover a minha pré-inscrição e os meus dados"
       },

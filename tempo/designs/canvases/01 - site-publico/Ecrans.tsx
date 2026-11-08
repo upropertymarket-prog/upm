@@ -6,6 +6,7 @@ import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
 import { HomeSections } from "../../../../apps/web/src/components/site/HomeSections";
 import { PreRegistrationForm } from "../../../../apps/web/src/app/[locale]/pre-inscricao/PreRegistrationForm";
 import { ConfirmPanel } from "../../../../apps/web/src/app/[locale]/pre-inscricao/confirmar/ConfirmPanel";
+import { RemovePanel } from "../../../../apps/web/src/app/[locale]/pre-inscricao/remover/RemovePanel";
 import { FeatureGrid } from "../../../../apps/web/src/components/site/FeatureGrid";
 import { SectionHeading, SiteSection } from "../../../../apps/web/src/components/site/SiteSection";
 import { ListingDetail } from "../../../../apps/web/src/components/site/ListingDetail";
@@ -593,4 +594,44 @@ export function InscricaoConfirmadaClaro() {
 
 export function InscricaoConfirmadaEscuro() {
   return <ConfirmarInscricao theme="dark" confirmada />;
+}
+
+/**
+ * `/pre-inscricao/remover` — o link "Remover a minha pré-inscrição e os meus
+ * dados" do e-mail de confirmação (8 nov 2026). Dois estados, como os da
+ * confirmação: por remover (o botão), e removida. O componente é o
+ * `RemovePanel` real; o estado removido entra pelo `initialState`.
+ */
+function RemoverInscricao({ theme, removida }: { theme: "light" | "dark"; removida: boolean }) {
+  return (
+    <Ecra theme={theme}>
+      <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
+      <main>
+        <SiteSection>
+          <RemovePanel
+            token="token-de-exemplo"
+            onRemove={semSubmissao}
+            initialState={removida ? { ok: true } : {}}
+          />
+        </SiteSection>
+      </main>
+      <SiteFooter />
+    </Ecra>
+  );
+}
+
+export function RemoverInscricaoClaro() {
+  return <RemoverInscricao theme="light" removida={false} />;
+}
+
+export function RemoverInscricaoEscuro() {
+  return <RemoverInscricao theme="dark" removida={false} />;
+}
+
+export function InscricaoRemovidaClaro() {
+  return <RemoverInscricao theme="light" removida />;
+}
+
+export function InscricaoRemovidaEscuro() {
+  return <RemoverInscricao theme="dark" removida />;
 }

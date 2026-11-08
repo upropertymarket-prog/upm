@@ -164,6 +164,7 @@ export function UsersManager({
   onResetTwoFactor,
   onExportRecord,
   onDeleteAccount,
+  initialExitDialog,
 }: {
   users: UserDirectoryRow[];
   plans: Array<{ id: string; name: string }>;
@@ -189,6 +190,11 @@ export function UsersManager({
   onExportRecord: (input: { profileId: string }) => Promise<StaffExitActionResult>;
   /** Elimina a conta de quem saiu da equipa, depois do registo descarregado. */
   onDeleteAccount: (input: { profileId: string }) => Promise<StaffExitActionResult>;
+  /**
+   * A janela "Eliminar conta" já aberta — antes ou depois do download. Só o
+   * canvas o passa: uma storyboard não clica no botão. A página nunca o passa.
+   */
+  initialExitDialog?: "open" | "exported";
 }) {
   const t = useTranslations("admin.users");
   const tc = useTranslations("common");
@@ -201,8 +207,8 @@ export function UsersManager({
   const [accessTarget, setAccessTarget] = useState<AccessAction | null>(null);
   const [accessDone, setAccessDone] = useState<AccessAction | null>(null);
   const [accessFailed, setAccessFailed] = useState(false);
-  const [exitOpen, setExitOpen] = useState(false);
-  const [exitExported, setExitExported] = useState(false);
+  const [exitOpen, setExitOpen] = useState(initialExitDialog !== undefined);
+  const [exitExported, setExitExported] = useState(initialExitDialog === "exported");
   const [exitProblem, setExitProblem] = useState<ExitProblem | null>(null);
   const [exitBlockers, setExitBlockers] = useState({ openLeads: 0, mailboxes: 0 });
 
@@ -541,7 +547,11 @@ export function UsersManager({
             />
           </section>
 
-          {STAFF_ROLES.has(selectedProfile.role) && selectedProfile.id !== currentAdminId ? (
+          {/* Com a conta suspensa não há acesso a repor — o link nem sai para
+              uma conta suspensa; o que resta é a saída da equipa. */}
+          {STAFF_ROLES.has(selectedProfile.role) &&
+          selectedProfile.id !== currentAdminId &&
+          selectedProfile.status !== "suspended" ? (
             <section className="mt-6 grid gap-2">
               <h3 className="text-sm font-semibold text-text">{t("access")}</h3>
               <p className="text-xs text-muted">{t("accessHint")}</p>
