@@ -49,6 +49,17 @@ export type DeliveryPayload = {
   cta?: unknown;
   footer?: unknown;
   lang?: unknown;
+  /** Uma frase depois do botão e antes da assinatura ("Obrigado pelo seu interesse…"). */
+  closing?: unknown;
+  /** O nome na assinatura ("A Equipa UProperty Market"). */
+  signoff?: unknown;
+  /**
+   * Uma linha a mais no rodapé, com um link — "Mudou de ideias? Remover a
+   * minha pré-inscrição" (8 nov 2026). As três ou nenhuma.
+   */
+  optOutText?: unknown;
+  optOutLabel?: unknown;
+  optOutLink?: unknown;
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -56,10 +67,26 @@ export type RenderedEmail = { subject: string; html: string; text: string };
 const DEFAULT_CTA = "Abrir na app";
 const DEFAULT_FOOTER =
   "Recebeu este e-mail porque tem uma conta na UProperty Market. Pode escolher que avisos recebe em Definições › Notificações.";
+const DEFAULT_SIGNOFF = "A Equipa UProperty Market";
+
+/**
+ * Os contactos da assinatura (cliente, 8 nov 2026). Iguais nas duas línguas:
+ * só o nome da equipa se traduz (`signoff`).
+ */
+const SIGNATURE_PHONE = "(+351) 939 732 637";
+const SIGNATURE_PHONE_LINK = "tel:+351939732637";
+const SIGNATURE_EMAIL = "info@upropertymarket.pt";
+const SIGNATURE_WEB = "www.upropertymarket.pt";
+
+/**
+ * O site público, de onde vem a imagem da assinatura. Um e-mail não leva
+ * anexos de imagem: a imagem é pedida ao site quando o e-mail é aberto.
+ */
+const DEFAULT_SITE_URL = "https://upropertymarket.pt";
 
 export function renderNotificationEmail(
   payload: DeliveryPayload,
-  options: { appUrl: string },
+  options: { appUrl: string; siteUrl?: string },
 ): RenderedEmail {
   const title = text(payload.title) || "Novidade na UProperty Market";
   const body = text(payload.body);
@@ -67,10 +94,34 @@ export function renderNotificationEmail(
   const cta = text(payload.cta) || DEFAULT_CTA;
   const footer = text(payload.footer) || DEFAULT_FOOTER;
   const lang = /^[a-z]{2}$/i.test(text(payload.lang)) ? text(payload.lang).toLowerCase() : "pt";
+  const closing = text(payload.closing);
+  const signoff = text(payload.signoff) || DEFAULT_SIGNOFF;
+  const siteUrl = (options.siteUrl || DEFAULT_SITE_URL).replace(/\/+$/, "");
+  const optOutLink = /^https?:\/\//i.test(text(payload.optOutLink)) ? text(payload.optOutLink) : "";
+  const optOut =
+    optOutLink && text(payload.optOutText) && text(payload.optOutLabel)
+      ? { text: text(payload.optOutText), label: text(payload.optOutLabel), link: optOutLink }
+      : null;
 
-  const plain = [title, body, link ? `${cta}: ${link}` : "", footer].filter(Boolean).join("\n\n");
+  const plain = [
+    title,
+    body,
+    link ? `${cta}: ${link}` : "",
+    closing,
+    [signoff, `Tel: ${SIGNATURE_PHONE}`, `Email: ${SIGNATURE_EMAIL}`, `Web: ${SIGNATURE_WEB}`].join(
+      "\n",
+    ),
+    footer,
+    optOut ? `${optOut.text} ${optOut.label}: ${optOut.link}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-  return { subject: title, html: layout({ title, body, link, cta, footer, lang }), text: plain };
+  return {
+    subject: title,
+    html: layout({ title, body, link, cta, closing, footer, lang, signoff, siteUrl, optOut }),
+    text: plain,
+  };
 }
 
 function layout({
@@ -78,15 +129,23 @@ function layout({
   body,
   link,
   cta,
+  closing,
   footer,
   lang,
+  signoff,
+  siteUrl,
+  optOut,
 }: {
   title: string;
   body: string;
   link: string;
   cta: string;
+  closing: string;
   footer: string;
   lang: string;
+  signoff: string;
+  siteUrl: string;
+  optOut: { text: string; label: string; link: string } | null;
 }): string {
   const button = link
     ? `<tr><td style="padding:24px 32px 0 32px">
@@ -98,8 +157,49 @@ function layout({
     ? `<tr><td style="padding:12px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">${escape(body).replace(/\n/g, "<br>")}</td></tr>`
     : "";
 
+  const closingRow = closing
+    ? `<tr><td style="padding:24px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">${escape(closing)}</td></tr>`
+    : "";
+
+  // A assinatura da UProperty Market (cliente, 8 nov 2026): o logótipo à
+  // esquerda (`public/brand/assinatura-light.png`, 600×201) e, separados por
+  // uma linha, o nome da equipa e os contactos. Dois blocos `inline-block` e
+  // não duas células: num telemóvel estreito empilham, em vez de alargarem o
+  // e-mail para fora do ecrã. O `alt` diz o nome da marca a quem tem as
+  // imagens bloqueadas — o caso por omissão no Outlook.
+  const contact = (label: string, value: string, href: string) =>
+    `<tr><td style="padding:3px 14px 3px 0;font-size:13px;color:${MUTED};white-space:nowrap">${label}</td><td style="padding:3px 0;font-size:14px;white-space:nowrap"><a href="${escape(href)}" style="color:${TEXT};text-decoration:none">${escape(value)}</a></td></tr>`;
+  const signature = `<tr><td style="padding:32px 32px 0 32px">
+         <div class="upm-sig-logo" style="display:inline-block;vertical-align:middle;padding:8px 24px 8px 0">
+           <a href="${escape(siteUrl)}"><img src="${escape(siteUrl)}/brand/assinatura-light.png" width="150" height="50" alt="UProperty Market" style="display:block;border:0;width:150px;height:auto"></a>
+         </div>
+         <div class="upm-sig-text" style="display:inline-block;vertical-align:middle;padding:4px 0 4px 24px;border-left:1px solid ${BORDER}">
+           <div style="font-size:15px;font-weight:700;color:${TEXT};padding-bottom:8px">${escape(signoff)}</div>
+           <table role="presentation" cellpadding="0" cellspacing="0">
+             ${contact("Tel:", SIGNATURE_PHONE, SIGNATURE_PHONE_LINK)}
+             ${contact("Email:", SIGNATURE_EMAIL, `mailto:${SIGNATURE_EMAIL}`)}
+             ${contact("Web:", SIGNATURE_WEB, siteUrl)}
+           </table>
+         </div>
+       </td></tr>`;
+
+  const optOutLine = optOut
+    ? `<br><br>${escape(optOut.text)} <a href="${escape(optOut.link)}" style="color:${MUTED};text-decoration:underline">${escape(optOut.label)}</a>`
+    : "";
+
   return `<!doctype html>
-<html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title></head>
+<html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title>
+<style>
+  /* Telemóvel (cliente, 8 nov 2026): a assinatura empilha, e aí o texto fica
+     alinhado à esquerda com o logótipo, sem a linha vertical e com mais
+     espaço por baixo do logótipo. Os clientes que ignoram <style> mantêm o
+     desenho de computador, que só fica com a linha — nada se parte. */
+  @media (max-width: 540px) {
+    .upm-sig-logo { display: block !important; padding: 0 0 20px 0 !important; }
+    .upm-sig-text { display: block !important; padding: 0 !important; border-left: 0 !important; }
+  }
+</style>
+</head>
 <body style="margin:0;padding:0;background:${BACKGROUND};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BACKGROUND};padding:32px 16px">
     <tr><td align="center">
@@ -107,8 +207,14 @@ function layout({
         <tr><td style="padding:32px 32px 0 32px;font-size:18px;font-weight:700;color:${TEXT}">${escape(title)}</td></tr>
         ${paragraph}
         ${button}
-        <tr><td style="padding:28px 32px 32px 32px;font-size:12.5px;line-height:1.5;color:${MUTED};border-top:1px solid ${BORDER};margin-top:24px">
-          ${escape(footer)}
+        ${closingRow}
+        ${signature}
+        <!-- O espaço antes da linha do rodapé é uma linha da tabela: um
+             margin-top numa célula não conta em nenhum cliente de e-mail, e
+             até 8 nov a linha cinzenta ficava colada ao botão. -->
+        <tr><td style="height:32px;line-height:32px;font-size:0">&nbsp;</td></tr>
+        <tr><td style="padding:24px 32px 32px 32px;font-size:12.5px;line-height:1.5;color:${MUTED};border-top:1px solid ${BORDER}">
+          ${escape(footer)}${optOutLine}
         </td></tr>
       </table>
     </td></tr>

@@ -212,6 +212,27 @@ export const SEO_ROUTES: readonly SeoRoute[] = [
     noindex: true,
   },
   {
+    route: "/pre-inscricao/remover",
+    text: {
+      pt: {
+        pageName: "Remover a pré-inscrição",
+        titleTag: "Remover a pré-inscrição · UProperty Market",
+        metaDescription: "Apague a sua pré-inscrição e os dados que deixou.",
+      },
+      en: {
+        pageName: "Remove your early access",
+        titleTag: "Remove your early access · UProperty Market",
+        metaDescription: "Delete your early-access sign-up and the details you left.",
+      },
+    },
+    path: {
+      pt: "/pre-inscricao/remover",
+      en: "/en/early-access/remove",
+    },
+    dynamic: false,
+    noindex: true,
+  },
+  {
     route: "/privacidade",
     text: {
       pt: {

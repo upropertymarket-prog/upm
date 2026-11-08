@@ -457,8 +457,10 @@
   "site": {
     "preLaunchBanner": "Plataforma em pré-lançamento — pré-inscrição disponível",
     "ogCard": {
-      "line1": "Propriedades sem comissões,",
-      "line2": "nem contactos indesejados."
+      "lead": "Compre e venda imóveis",
+      "accent": "sem comissões",
+      "tail": ", nem contactos indesejados",
+      "preBadge": "Pré-inscrição aberta"
     },
     "platformCta": {
       "pre": "Fazer pré-inscrição",
@@ -474,7 +476,7 @@
     },
     "hero": {
       "eyebrow": "Your property your choice",
-      "title": "Propriedades sem comissões, nem contactos indesejados.",
+      "title": "Compre e venda imóveis <accent>sem comissões</accent>, nem contactos indesejados",
       "body": "Compradores e proprietários falam diretamente, no seu ritmo, com informação transparente e controlo total do processo. Sem intermediários, sem pressões, sem surpresas no fim.",
       "primaryCta": "Começar agora",
       "secondaryCta": "Ver a plataforma",
@@ -863,9 +865,13 @@
       "submit": "Quero ser avisado",
       "confirmEmail": {
         "title": "Confirme o seu e-mail",
-        "body": "Olá {name},\n\nRecebemos a sua pré-inscrição na UProperty Market. Falta um passo: confirmar que este endereço é seu. É isso que torna a inscrição válida e o que nos autoriza a avisá-lo quando os primeiros anúncios abrirem.",
+        "body": "Olá, {name},\n\nRecebemos a sua pré-inscrição na UProperty Market! Para a concluir, só precisa de confirmar o seu endereço de e-mail.\n\nEsta confirmação valida a sua inscrição e permite-nos manter o seu contacto para lhe dar novidades e informar sobre o lançamento oficial da plataforma.",
         "cta": "Confirmar o e-mail",
-        "footer": "Recebeu este e-mail porque este endereço foi deixado na pré-inscrição da UProperty Market. Se não foi você, não precisa de fazer nada: sem confirmação, o endereço é apagado em 30 dias."
+        "closing": "Obrigado pelo seu interesse na UProperty Market!",
+        "footer": "Recebeu este e-mail porque este endereço foi deixado na pré-inscrição da UProperty Market. Se não foi você, não precisa de fazer nada: sem confirmação, o endereço é apagado em 30 dias.",
+        "signoff": "A Equipa UProperty Market",
+        "optOutText": "Mudou de ideias?",
+        "optOutLabel": "Remover a minha pré-inscrição e os meus dados"
       },
       "confirmPage": {
         "title": "Confirmar a pré-inscrição",
@@ -877,6 +883,17 @@
         "failTitle": "Este link já não serve",
         "failBody": "Pode ter sido usado, ou pode ter expirado. Volte a inscrever-se e enviamos-lhe um link novo.",
         "retry": "Voltar a inscrever-me",
+        "back": "Voltar ao início"
+      },
+      "removePage": {
+        "title": "Remover a pré-inscrição",
+        "body": "Ao confirmar, apagamos a sua pré-inscrição e os dados que deixou: nome, e-mail, perfil e zona de interesse. Deixa de receber avisos da UProperty Market. Não se pode desfazer — se mudar de ideias, pode voltar a inscrever-se.",
+        "remove": "Remover os meus dados",
+        "removing": "A remover…",
+        "okTitle": "Pré-inscrição removida",
+        "okBody": "Os seus dados foram apagados. Não voltamos a contactá-lo.",
+        "failTitle": "Este link já não serve",
+        "failBody": "Pode já ter sido usado, ou ter sido substituído por um e-mail mais recente. Se ainda quiser apagar os seus dados, use o link do último e-mail que recebeu.",
         "back": "Voltar ao início"
       }
     },
@@ -1654,6 +1671,17 @@
       "confirmResetTwoFactor": "Repor 2FA",
       "resetTwoFactorDone": "2FA reposta. Na próxima entrada, esta pessoa configura a app outra vez.",
       "accessFailed": "Não foi possível concluir. Tente novamente.",
+      "exit": "Saída da equipa",
+      "exitHint": "Depois de o trabalho desta pessoa passar a outra, elimina-se a conta. O registo dela sai antes num ficheiro, para guardar fora do sistema.",
+      "deleteAccount": "Eliminar conta",
+      "deleteAccountBody": "Primeiro descarregue o registo desta pessoa (o que fez, de quem consultou dados, o que moderou) e guarde-o fora do sistema. O download é válido durante 24 horas: se a conta não for eliminada nesse prazo, é preciso descarregá-lo outra vez. Depois de eliminada, a conta deixa de existir e os registos ficam sem nome. Não se pode desfazer.",
+      "exportRecord": "Descarregar registo (CSV)",
+      "exportRecordAgain": "Descarregar outra vez",
+      "exportRecordDone": "Registo descarregado. Guarde-o fora do sistema; tem 24 horas para eliminar a conta.",
+      "confirmDeleteAccount": "Eliminar conta",
+      "exitBlockers": "Ainda há trabalho atribuído a esta pessoa: {openLeads, plural, one {# lead em aberto} other {# leads em aberto}} e {mailboxes, plural, one {# caixa de correio} other {# caixas de correio}}. Passe-o a outra pessoa primeiro.",
+      "exitNeedsExport": "O registo não foi descarregado nas últimas 24 horas. Descarregue-o antes de eliminar a conta.",
+      "exitNotSuspended": "Suspenda a conta antes de a eliminar.",
       "marketing": "Marketing"
     },
     "moderation": {

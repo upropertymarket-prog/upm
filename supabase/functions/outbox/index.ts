@@ -26,7 +26,9 @@ import { drainOutbox, errorText, type OutboundEmail } from "../_shared/outbox-co
  *  - `OUTBOX_CRON_SECRET` — o mesmo que está no Vault como `outbox_cron_secret`;
  *  - `RESEND_API_KEY`;
  *  - `MAIL_FROM` — o remetente, de um domínio verificado no Resend;
- *  - `APP_URL` — base dos links relativos (os da pré-inscrição já são absolutos).
+ *  - `APP_URL` — base dos links relativos (os da pré-inscrição já são absolutos);
+ *  - `SITE_URL` (opcional) — o site de onde vem a imagem da assinatura; sem
+ *    ele, `https://upropertymarket.pt`.
  * `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` são postos pelo próprio Supabase.
  */
 
@@ -86,6 +88,8 @@ Deno.serve(async (request) => {
     const relatorio = await drainOutbox(db, enviar, {
       batch: LOTE,
       appUrl: Deno.env.get("APP_URL") ?? "",
+      // De onde vem a imagem da assinatura; por omissão, o domínio de produção.
+      siteUrl: Deno.env.get("SITE_URL") ?? undefined,
     });
     if (relatorio.failed > 0) console.error("[outbox] entregas falhadas", relatorio);
     return Response.json(relatorio);

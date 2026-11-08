@@ -15,10 +15,14 @@ import {
   ConfirmarInscricaoEscuro,
   InscricaoConfirmadaClaro,
   InscricaoConfirmadaEscuro,
+  InscricaoRemovidaClaro,
+  InscricaoRemovidaEscuro,
   PreInscricaoClaro,
   PreInscricaoEscuro,
   PreLancamentoClaro,
   PreLancamentoEscuro,
+  RemoverInscricaoClaro,
+  RemoverInscricaoEscuro,
 } from "./Ecrans";
 
 /**
@@ -159,58 +163,85 @@ export default function SitePublicoCanvas() {
         layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
       />
 
+      {/* O link "Remover a minha pré-inscrição" do mesmo e-mail (8 nov 2026):
+          logo a seguir à confirmação. Por remover, e depois do clique. */}
+      <Storyboard
+        id="RemoverInscricaoClaro"
+        name="Remover pré-inscrição · claro (/pre-inscricao/remover)"
+        component={RemoverInscricaoClaro}
+        layout={{ x: 0, y: 4900, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="RemoverInscricaoEscuro"
+        name="Remover pré-inscrição · escuro (/pre-inscricao/remover)"
+        component={RemoverInscricaoEscuro}
+        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="InscricaoRemovidaClaro"
+        name="Pré-inscrição removida · claro (/pre-inscricao/remover)"
+        component={InscricaoRemovidaClaro}
+        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+      />
+      <Storyboard
+        id="InscricaoRemovidaEscuro"
+        name="Pré-inscrição removida · escuro (/pre-inscricao/remover)"
+        component={InscricaoRemovidaEscuro}
+        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+      />
+
       {/* O ramo `pre` da mesma rota, e por isso **antes** dos outros dois: é o
           que o visitante vê até ao lançamento. */}
       <Storyboard
         id="ImoveisPreLancamentoClaro"
         name="Market público · pré-lançamento · claro (/propriedades)"
         component={ImoveisPreLancamentoClaro}
-        layout={{ x: 0, y: 4900, width: 1440, height: 989.6500244140625 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 989.6500244140625 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"
         name="Market público · pré-lançamento · escuro (/propriedades)"
         component={ImoveisPreLancamentoEscuro}
-        layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisSemResultados"
         name="Market público · sem propriedades · claro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultados}
-        layout={{ x: 0, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 7840, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisSemResultadosEscuro"
         name="Market público · sem propriedades · escuro (/propriedades?cidade=Guarda)"
         component={ImoveisSemResultadosEscuro}
-        layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 7840, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="ImoveisClaro"
         name="Market público · com propriedades · claro (/propriedades)"
         component={ImoveisClaro}
-        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 8820, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisEscuro"
         name="Market público · com propriedades · escuro (/propriedades)"
         component={ImoveisEscuro}
-        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 8820, width: 1440, height: 900 }}
       />
 
       <Storyboard
         id="FichaClaro"
         name="Detalhe de propriedade · claro (/propriedades/[slug])"
         component={FichaClaro}
-        layout={{ x: 0, y: 8347, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 10307, width: 1440, height: 900 }}
       />
       <Storyboard
         id="FichaEscuro"
         name="Detalhe de propriedade · escuro (/propriedades/[slug])"
         component={FichaEscuro}
-        layout={{ x: 1520, y: 8347, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 10307, width: 1440, height: 900 }}
       />
     </Canvas>
   );

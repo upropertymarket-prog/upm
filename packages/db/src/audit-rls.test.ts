@@ -447,4 +447,48 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
     expect((rows ?? []).length).toBeGreaterThan(0);
     expect(rows!.every((r) => r.actor_id === null)).toBe(true);
   });
+
+  // A saída da equipa (8 nov 2026, 20261108090000): quem abriu dados de
+  // alguém ficava preso pelo `personal_data_access_log` (`restrict`) e não se
+  // eliminava. Agora a conta sai; a consulta fica, sem autor, e continua a
+  // não se poder reescrever.
+  it("uma conta da equipa que consultou dados elimina-se: a consulta fica, sem autor", async () => {
+    const email = `audit-saida-${Date.now()}@upropertymarket.test`;
+    const created = await service.auth.admin.createUser({
+      email,
+      password: PASSWORD,
+      email_confirm: true,
+      user_metadata: { role: "admin" },
+    });
+    const tempId = created.data.user!.id;
+    const subject = crypto.randomUUID();
+    const { data: row, error: insertError } = await service
+      .from("personal_data_access_log")
+      .insert({
+        actor_profile_id: tempId,
+        subject_type: "profile",
+        subject_id: subject,
+        action: "view",
+      })
+      .select("id")
+      .single();
+    expect(insertError).toBeNull();
+
+    const removed = await service.auth.admin.deleteUser(tempId);
+    expect(removed.error).toBeNull();
+
+    const { data: after } = await service
+      .from("personal_data_access_log")
+      .select("actor_profile_id, subject_id")
+      .eq("id", row!.id)
+      .single();
+    expect(after).toEqual({ actor_profile_id: null, subject_id: subject });
+
+    // A exceção do trigger é só o autor a null: mexer no resto recusa-se.
+    const rewrite = await service
+      .from("personal_data_access_log")
+      .update({ subject_id: crypto.randomUUID() })
+      .eq("id", row!.id);
+    expect(rewrite.error).not.toBeNull();
+  });
 });

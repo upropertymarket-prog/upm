@@ -457,8 +457,10 @@
   "site": {
     "preLaunchBanner": "Platform in pre-launch — pre-registration open",
     "ogCard": {
-      "line1": "Properties with no commission",
-      "line2": "and no unwanted calls."
+      "lead": "Buy and sell property",
+      "accent": "with no commission",
+      "tail": " and no unwanted calls",
+      "preBadge": "Pre-registration open"
     },
     "platformCta": {
       "pre": "Pre-register",
@@ -474,7 +476,7 @@
     },
     "hero": {
       "eyebrow": "Your property your choice",
-      "title": "Properties with no commission and no unwanted calls.",
+      "title": "Buy and sell property <accent>with no commission</accent> and no unwanted calls",
       "body": "Buyers and owners talk directly, at their own pace, with transparent information and full control of the process. No middlemen, no pressure, no surprises at the end.",
       "primaryCta": "Get started",
       "secondaryCta": "See the platform",
@@ -863,9 +865,13 @@
       "submit": "Notify me",
       "confirmEmail": {
         "title": "Confirm your email address",
-        "body": "Hello {name},\n\nWe have received your early-access sign-up for UProperty Market. One step is left: confirming that this address is yours. That is what makes the sign-up valid, and what lets us tell you when the first listings go live.",
+        "body": "Hello {name},\n\nWe have received your early-access sign-up for UProperty Market! To complete it, all you need to do is confirm your email address.\n\nThis confirmation validates your sign-up and lets us keep your details so we can send you news and let you know about the platform's official launch.",
         "cta": "Confirm my email",
-        "footer": "You received this email because this address was entered in the UProperty Market early-access form. If that was not you, there is nothing to do: without confirmation, the address is deleted after 30 days."
+        "closing": "Thank you for your interest in UProperty Market!",
+        "footer": "You received this email because this address was entered in the UProperty Market early-access form. If that was not you, there is nothing to do: without confirmation, the address is deleted after 30 days.",
+        "signoff": "The UProperty Market Team",
+        "optOutText": "Changed your mind?",
+        "optOutLabel": "Remove my early-access sign-up and my details"
       },
       "confirmPage": {
         "title": "Confirm your early access",
@@ -877,6 +883,17 @@
         "failTitle": "This link no longer works",
         "failBody": "It may have been used already, or it may have expired. Sign up again and we will send you a new link.",
         "retry": "Sign up again",
+        "back": "Back to home"
+      },
+      "removePage": {
+        "title": "Remove your early-access sign-up",
+        "body": "When you confirm, we delete your sign-up and the details you left: name, email, profile and area of interest. You will no longer hear from UProperty Market. This cannot be undone — if you change your mind, you can sign up again.",
+        "remove": "Remove my details",
+        "removing": "Removing…",
+        "okTitle": "Sign-up removed",
+        "okBody": "Your details have been deleted. We will not contact you again.",
+        "failTitle": "This link no longer works",
+        "failBody": "It may have been used already, or replaced by a more recent email. If you still want your details deleted, use the link in the latest email you received.",
         "back": "Back to home"
       }
     },
@@ -1654,6 +1671,17 @@
       "confirmResetTwoFactor": "Reset 2FA",
       "resetTwoFactorDone": "2FA reset. At their next sign-in, this person sets up the app again.",
       "accessFailed": "This could not be completed. Please try again.",
+      "exit": "Leaving the team",
+      "exitHint": "Once this person's work has been handed over, the account is deleted. Their record is downloaded first, to keep outside the system.",
+      "deleteAccount": "Delete account",
+      "deleteAccountBody": "First download this person's record (what they did, whose data they viewed, what they moderated) and keep it outside the system. The download is valid for 24 hours: if the account isn't deleted within that time, it must be downloaded again. Once deleted, the account no longer exists and the records stay without a name. This cannot be undone.",
+      "exportRecord": "Download record (CSV)",
+      "exportRecordAgain": "Download again",
+      "exportRecordDone": "Record downloaded. Keep it outside the system; you have 24 hours to delete the account.",
+      "confirmDeleteAccount": "Delete account",
+      "exitBlockers": "Work is still assigned to this person: {openLeads, plural, one {# open lead} other {# open leads}} and {mailboxes, plural, one {# mailbox} other {# mailboxes}}. Hand it over first.",
+      "exitNeedsExport": "The record wasn't downloaded in the last 24 hours. Download it before deleting the account.",
+      "exitNotSuspended": "Suspend the account before deleting it.",
       "marketing": "Marketing"
     },
     "moderation": {

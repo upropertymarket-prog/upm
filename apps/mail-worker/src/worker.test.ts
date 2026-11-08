@@ -133,6 +133,87 @@ group("renderNotificationEmail", () => {
     expect(email.html).toContain('<html lang="pt"');
   });
 
+  /**
+   * 8 nov 2026: a assinatura da UProperty Market em todos os e-mails, espaço
+   * entre o botão e a linha do rodapé, e o link para apagar a pré-inscrição.
+   */
+  it("assina com o logótipo, o nome da equipa e os contactos", () => {
+    const email = renderNotificationEmail(
+      {
+        title: "Aviso",
+        closing: "Thank you for your interest!",
+        signoff: "The UProperty Market Team",
+      },
+      { appUrl: "https://app.exemplo.pt", siteUrl: "https://www.exemplo.pt/" },
+    );
+
+    expect(email.html).toContain("Thank you for your interest!");
+    expect(email.html).toContain("The UProperty Market Team");
+    expect(email.html).toContain('src="https://www.exemplo.pt/brand/assinatura-light.png"');
+    expect(email.html).toContain('alt="UProperty Market"');
+    expect(email.html).toContain('href="tel:+351939732637"');
+    expect(email.html).toContain('href="mailto:info@upropertymarket.pt"');
+    expect(email.html).toContain("www.upropertymarket.pt");
+    expect(email.text).toContain(
+      "The UProperty Market Team\nTel: (+351) 939 732 637\nEmail: info@upropertymarket.pt\nWeb: www.upropertymarket.pt",
+    );
+    // A frase de fecho vem antes da assinatura.
+    expect(email.html.indexOf("Thank you for your interest!")).toBeLessThan(
+      email.html.indexOf("The UProperty Market Team"),
+    );
+  });
+
+  it("assina por omissão, para as entregas do notify()", () => {
+    const email = renderNotificationEmail({ title: "Aviso" }, { appUrl: "https://app.exemplo.pt" });
+
+    expect(email.html).toContain("A Equipa UProperty Market");
+    expect(email.html).toContain("https://upropertymarket.pt/brand/assinatura-light.png");
+  });
+
+  it("separa o botão da linha do rodapé com uma linha de espaço da tabela", () => {
+    const email = renderNotificationEmail(
+      { title: "Aviso", link: "/x" },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+
+    // Um `margin-top` numa célula não conta em nenhum cliente: o espaço é uma
+    // linha própria, logo antes da que tem a borda.
+    expect(email.html).toMatch(
+      /height:32px[^]*?<tr><td style="padding:24px 32px 32px 32px[^"]*border-top/,
+    );
+    expect(email.html).not.toContain("margin-top:24px");
+  });
+
+  it("põe no rodapé o link para apagar a pré-inscrição, só se vier completo", () => {
+    const completo = renderNotificationEmail(
+      {
+        title: "Confirme",
+        optOutText: "Mudou de ideias?",
+        optOutLabel: "Remover a minha pré-inscrição",
+        optOutLink: "https://www.exemplo.pt/pre-inscricao/remover?token=abc",
+      },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+    expect(completo.html).toContain(
+      'Mudou de ideias? <a href="https://www.exemplo.pt/pre-inscricao/remover?token=abc"',
+    );
+    expect(completo.text).toContain("Remover a minha pré-inscrição: https://www.exemplo.pt/");
+
+    // Um link relativo, ou de outro esquema, não entra: um `javascript:` no
+    // payload não pode chegar a um `href`.
+    const relativo = renderNotificationEmail(
+      {
+        title: "Confirme",
+        optOutText: "Mudou de ideias?",
+        optOutLabel: "Remover",
+        optOutLink: "javascript:alert(1)",
+      },
+      { appUrl: "https://app.exemplo.pt" },
+    );
+    expect(relativo.html).not.toContain("Mudou de ideias?");
+    expect(relativo.html).not.toContain("javascript:");
+  });
+
   it("não aceita um `lang` que não seja um código de duas letras", () => {
     const email = renderNotificationEmail(
       { title: "Aviso", lang: '"><script>alert(1)</script>' },

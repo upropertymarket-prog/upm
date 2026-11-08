@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@upm/db/server";
 
+import { AuthCard } from "../../components/AuthCard";
+import { verifyChallenge } from "./actions";
 import { ChallengeForm } from "./ChallengeForm";
 
 export default async function VerifyTwoFactorPage() {
@@ -16,10 +18,8 @@ export default async function VerifyTwoFactorPage() {
   if (!factor) redirect("/configurar-2fa");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="mx-auto w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
-        <ChallengeForm factorId={factor.id} />
-      </div>
-    </main>
+    <AuthCard>
+      <ChallengeForm factorId={factor.id} onSubmit={verifyChallenge} />
+    </AuthCard>
   );
 }

@@ -8,6 +8,8 @@ import { InternalChrome } from "../../../components/InternalChrome";
 import { setLocalePreference } from "../../actions/preferences";
 import { verifyOperationPin } from "../../actions/step-up";
 import {
+  deleteStaffAccount,
+  exportStaffRecord,
   recordProfileAccess,
   setProfileStatus,
   resetStaffPassword,
@@ -165,6 +167,8 @@ export default async function UsersPage({
         onVerifyPin={verifyOperationPin}
         onResetPassword={resetStaffPassword}
         onResetTwoFactor={resetStaffTwoFactor}
+        onExportRecord={exportStaffRecord}
+        onDeleteAccount={deleteStaffAccount}
       />
     </InternalChrome>
   );

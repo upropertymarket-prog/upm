@@ -2,7 +2,16 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { KeyRound, Mail, ShieldCheck, Smartphone, UserRound, UserRoundCheck } from "lucide-react";
+import {
+  Download,
+  KeyRound,
+  Mail,
+  ShieldCheck,
+  Smartphone,
+  Trash2,
+  UserRound,
+  UserRoundCheck,
+} from "lucide-react";
 import {
   Button,
   Card,
@@ -21,11 +30,16 @@ import {
 
 import { useStepUp } from "../../../components/StepUpModal";
 import type { VerifyPinAction } from "../../../components/stepUpTypes";
-import type { ProfileStatusActionResult, StaffAccessActionResult } from "./actions";
+import type {
+  ProfileStatusActionResult,
+  StaffAccessActionResult,
+  StaffExitActionResult,
+} from "./actions";
 
 /** As contas de equipa — as únicas com "Acesso" no painel (8 nov 2026). */
 const STAFF_ROLES = new Set(["admin", "support", "marketing"]);
 type AccessAction = "password" | "twoFactor";
+type ExitProblem = "blockers" | "needsExport" | "notSuspended" | "failed";
 
 export type UserDirectoryRow = {
   id: string;
@@ -148,6 +162,9 @@ export function UsersManager({
   onVerifyPin,
   onResetPassword,
   onResetTwoFactor,
+  onExportRecord,
+  onDeleteAccount,
+  initialExitDialog,
 }: {
   users: UserDirectoryRow[];
   plans: Array<{ id: string; name: string }>;
@@ -169,6 +186,15 @@ export function UsersManager({
   onResetPassword: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
   /** Remove a 2FA de quem perdeu o telemóvel. */
   onResetTwoFactor: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
+  /** O registo da pessoa, em CSV, para guardar fora do sistema (saída da equipa). */
+  onExportRecord: (input: { profileId: string }) => Promise<StaffExitActionResult>;
+  /** Elimina a conta de quem saiu da equipa, depois do registo descarregado. */
+  onDeleteAccount: (input: { profileId: string }) => Promise<StaffExitActionResult>;
+  /**
+   * A janela "Eliminar conta" já aberta — antes ou depois do download. Só o
+   * canvas o passa: uma storyboard não clica no botão. A página nunca o passa.
+   */
+  initialExitDialog?: "open" | "exported";
 }) {
   const t = useTranslations("admin.users");
   const tc = useTranslations("common");
@@ -181,6 +207,63 @@ export function UsersManager({
   const [accessTarget, setAccessTarget] = useState<AccessAction | null>(null);
   const [accessDone, setAccessDone] = useState<AccessAction | null>(null);
   const [accessFailed, setAccessFailed] = useState(false);
+  const [exitOpen, setExitOpen] = useState(initialExitDialog !== undefined);
+  const [exitExported, setExitExported] = useState(initialExitDialog === "exported");
+  const [exitProblem, setExitProblem] = useState<ExitProblem | null>(null);
+  const [exitBlockers, setExitBlockers] = useState({ openLeads: 0, mailboxes: 0 });
+
+  /** Lê o resultado da saída; `true` quando correu bem. */
+  function exitResult(result: StaffExitActionResult, retry: () => void): boolean {
+    if (result.needsStepUp) {
+      requestStepUp(retry);
+      return false;
+    }
+    if (result.blockers) {
+      setExitBlockers(result.blockers);
+      setExitProblem("blockers");
+      return false;
+    }
+    if (result.needsExport) {
+      setExitExported(false);
+      setExitProblem("needsExport");
+      return false;
+    }
+    if (result.notSuspended) {
+      setExitProblem("notSuspended");
+      return false;
+    }
+    if (!result.ok) {
+      setExitProblem("failed");
+      return false;
+    }
+    setExitProblem(null);
+    return true;
+  }
+
+  function exportRecord(profileId: string, email: string) {
+    startSaving(async () => {
+      const result = await onExportRecord({ profileId });
+      if (!exitResult(result, () => exportRecord(profileId, email)) || !result.csv) return;
+      const blob = new Blob(["﻿", result.csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const carimbo = new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "h");
+      link.download = `registo-equipa_${email.split("@")[0]}_${carimbo}.csv`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExitExported(true);
+    });
+  }
+
+  function deleteAccount(profileId: string) {
+    startSaving(async () => {
+      const result = await onDeleteAccount({ profileId });
+      if (!exitResult(result, () => deleteAccount(profileId))) return;
+      // O perfil já não existe: fecha-se o painel.
+      window.location.assign(makeHref(filters));
+    });
+  }
 
   function applyAccess(action: AccessAction, profileId: string) {
     startSaving(async () => {
@@ -464,7 +547,11 @@ export function UsersManager({
             />
           </section>
 
-          {STAFF_ROLES.has(selectedProfile.role) && selectedProfile.id !== currentAdminId ? (
+          {/* Com a conta suspensa não há acesso a repor — o link nem sai para
+              uma conta suspensa; o que resta é a saída da equipa. */}
+          {STAFF_ROLES.has(selectedProfile.role) &&
+          selectedProfile.id !== currentAdminId &&
+          selectedProfile.status !== "suspended" ? (
             <section className="mt-6 grid gap-2">
               <h3 className="text-sm font-semibold text-text">{t("access")}</h3>
               <p className="text-xs text-muted">{t("accessHint")}</p>
@@ -495,6 +582,26 @@ export function UsersManager({
                   {accessDone === "password" ? t("resetPasswordDone") : t("resetTwoFactorDone")}
                 </p>
               ) : null}
+            </section>
+          ) : null}
+
+          {STAFF_ROLES.has(selectedProfile.role) &&
+          selectedProfile.id !== currentAdminId &&
+          selectedProfile.status === "suspended" ? (
+            <section className="mt-6 grid gap-2">
+              <h3 className="text-sm font-semibold text-text">{t("exit")}</h3>
+              <p className="text-xs text-muted">{t("exitHint")}</p>
+              <Button
+                variant="danger"
+                leadingIcon={<Trash2 size={16} />}
+                onClick={() => {
+                  setExitOpen(true);
+                  setExitExported(false);
+                  setExitProblem(null);
+                }}
+              >
+                {t("deleteAccount")}
+              </Button>
             </section>
           ) : null}
 
@@ -596,6 +703,60 @@ export function UsersManager({
               {accessTarget === "twoFactor"
                 ? t("confirmResetTwoFactor")
                 : t("confirmResetPassword")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={exitOpen}
+        onClose={() => setExitOpen(false)}
+        size="sm"
+        title={t("deleteAccount")}
+        icon={<Trash2 size={17} />}
+        closeLabel={tc("close")}
+      >
+        <div className="grid gap-4">
+          <p className="text-sm text-muted">{t("deleteAccountBody")}</p>
+          <Button
+            type="button"
+            variant="secondary"
+            leadingIcon={<Download size={16} />}
+            disabled={saving}
+            onClick={() => {
+              if (selectedProfile) exportRecord(selectedProfile.id, selectedProfile.email);
+            }}
+          >
+            {exitExported ? t("exportRecordAgain") : t("exportRecord")}
+          </Button>
+          {exitExported ? (
+            <p className="text-sm text-ok" role="status">
+              {t("exportRecordDone")}
+            </p>
+          ) : null}
+          {exitProblem ? (
+            <p className="text-sm text-danger" role="alert">
+              {exitProblem === "blockers"
+                ? t("exitBlockers", exitBlockers)
+                : exitProblem === "needsExport"
+                  ? t("exitNeedsExport")
+                  : exitProblem === "notSuspended"
+                    ? t("exitNotSuspended")
+                    : t("accessFailed")}
+            </p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setExitOpen(false)}>
+              {tc("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={saving || !exitExported}
+              onClick={() => {
+                if (selectedProfile) deleteAccount(selectedProfile.id);
+              }}
+            >
+              {t("confirmDeleteAccount")}
             </Button>
           </div>
         </div>

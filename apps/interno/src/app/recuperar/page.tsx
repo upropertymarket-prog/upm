@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { requestAdminRecovery } from "./actions";
+import { AuthCard } from "../../components/AuthCard";
 import { RecoverForm } from "./RecoverForm";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,10 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
 /** O "Esqueci-me da palavra-passe" do interno, só para admins — ver `actions.ts`. */
 export default function StaffRecoverPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="mx-auto flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-border bg-surface p-6">
-        <RecoverForm onSubmit={requestAdminRecovery} />
-      </div>
-    </main>
+    <AuthCard>
+      <RecoverForm onSubmit={requestAdminRecovery} />
+    </AuthCard>
   );
 }

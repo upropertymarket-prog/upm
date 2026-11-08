@@ -22,6 +22,9 @@ const ABERTAS_NO_PRE = [
   "/",
   "/pre-inscricao",
   "/pre-inscricao/confirmar",
+  // O link "remover a minha pré-inscrição" do e-mail de confirmação (8 nov
+  // 2026): fechá-lo era tirar a quem se inscreveu a forma de apagar os dados.
+  "/pre-inscricao/remover",
   "/termos",
   "/privacidade",
   "/cookies",

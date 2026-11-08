@@ -50,6 +50,7 @@ describe("o que NÃO pode — e é esta a metade que conta", () => {
       "/recuperar-palavra-passe",
       "/pre-inscricao",
       "/pre-inscricao/confirmar",
+      "/pre-inscricao/remover",
       "/auth/confirm",
     ]) {
       expect(sharedCacheControl(caminho)).toBeNull();
