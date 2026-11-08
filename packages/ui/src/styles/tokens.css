@@ -276,7 +276,11 @@
   --ls-title: -0.02em;
 }
 
-/* Site público (`apps/web`): nada desce abaixo de 14 px — 07 §3. */
+/* Site público (`apps/web`): nada desce abaixo de 14 px — 07 §3.
+ *
+ * Excepções intencionais (decididas pelo cliente, não são dívida):
+ *   - faixa de pré-lançamento (`PublicHeader`, `site.preLaunchBanner`):
+ *     12 px, em maiúsculas espaçadas — 8 nov 2026. */
 [data-app="web"] {
   --fs-label: 14px;
   --fs-body: 14px;
