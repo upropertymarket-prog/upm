@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash, randomBytes } from "node:crypto";
 import { clientIpFrom } from "@upm/config/security";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -118,6 +119,7 @@ async function enqueueConfirmationEmail(lead: {
   recipient: string;
   name: string;
   token: string;
+  removalToken: string;
 }): Promise<boolean> {
   try {
     const locale = (await getLocale()) as Locale;
@@ -129,6 +131,7 @@ async function enqueueConfirmationEmail(lead: {
     // O caminho é o inglês em `/en` (D72) e o URL é absoluto: um link de
     // e-mail não tem página de onde ser relativo.
     const link = `${canonicalUrl({ pathname: "/pre-inscricao/confirmar" }, locale)}?token=${encodeURIComponent(lead.token)}`;
+    const removalLink = `${canonicalUrl({ pathname: "/pre-inscricao/remover" }, locale)}?token=${encodeURIComponent(lead.removalToken)}`;
 
     const service = createServiceClient();
 
@@ -154,6 +157,13 @@ async function enqueueConfirmationEmail(lead: {
         link,
         cta: t("cta"),
         footer: t("footer"),
+        signoff: t("signoff"),
+        // A saída, no próprio e-mail (8 nov 2026): quem se inscreveu pode
+        // apagar a pré-inscrição sem nos escrever — antes ou depois de a
+        // confirmar.
+        optOutText: t("optOutText"),
+        optOutLabel: t("optOutLabel"),
+        optOutLink: removalLink,
         lang: locale,
       },
     });
@@ -166,6 +176,27 @@ async function enqueueConfirmationEmail(lead: {
     console.error(`[pre-inscricao] confirmação não enfileirada: ${message}`);
     return false;
   }
+}
+
+/**
+ * O token do link "remover a minha pré-inscrição" (8 nov 2026)
+ * -------------------------------------------------------------------------
+ * 32 bytes em hexadecimal, a mesma forma do de confirmação. Na base fica só o
+ * sha256 (`remove_site_lead` compara o hash). Um novo a cada submissão: o
+ * e-mail anterior é cancelado na fila, e o seu link deixa de servir.
+ */
+async function issueRemovalToken(leadId: string): Promise<string | null> {
+  const token = randomBytes(32).toString("hex");
+  const hash = createHash("sha256").update(token).digest("hex");
+  const { error } = await createServiceClient()
+    .from("site_leads")
+    .update({ removal_token_hash: hash })
+    .eq("id", leadId);
+  if (error) {
+    console.error(`[pre-inscricao] token de remoção não gravado: ${error.message}`);
+    return null;
+  }
+  return token;
 }
 
 async function submit(
@@ -211,10 +242,13 @@ async function submit(
   // ao consentimento. O que a pré-inscrição pede confirmação para fazer é
   // outra coisa: guardar um endereço para o avisar mais tarde.
   if (form === "preinscricao" && row.confirm_token) {
+    const removalToken = await issueRemovalToken(row.lead_id);
+    if (!removalToken) return { error: messageFor(null) };
     const queued = await enqueueConfirmationEmail({
       recipient: payload.email,
       name: payload.name,
       token: row.confirm_token,
+      removalToken,
     });
     if (!queued) return { error: messageFor(null) };
   }

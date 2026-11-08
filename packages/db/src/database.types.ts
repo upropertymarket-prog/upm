@@ -2997,6 +2997,7 @@ export type Database = {
           phone: string | null;
           profile_type: string;
           reason: string | null;
+          removal_token_hash: string | null;
           source: string;
           status: string;
           updated_at: string;
@@ -3017,6 +3018,7 @@ export type Database = {
           phone?: string | null;
           profile_type: string;
           reason?: string | null;
+          removal_token_hash?: string | null;
           source: string;
           status?: string;
           updated_at?: string;
@@ -3037,6 +3039,7 @@ export type Database = {
           phone?: string | null;
           profile_type?: string;
           reason?: string | null;
+          removal_token_hash?: string | null;
           source?: string;
           status?: string;
           updated_at?: string;
@@ -5112,6 +5115,7 @@ export type Database = {
         Returns: Json;
       };
       request_trial_extension: { Args: { p_reason: string }; Returns: string };
+      remove_site_lead: { Args: { p_token: string }; Returns: boolean };
       request_visit: {
         Args: {
           p_message?: string;

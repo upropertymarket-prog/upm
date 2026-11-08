@@ -464,7 +464,12 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
     const subject = crypto.randomUUID();
     const { data: row, error: insertError } = await service
       .from("personal_data_access_log")
-      .insert({ actor_profile_id: tempId, subject_type: "profile", subject_id: subject })
+      .insert({
+        actor_profile_id: tempId,
+        subject_type: "profile",
+        subject_id: subject,
+        action: "view",
+      })
       .select("id")
       .single();
     expect(insertError).toBeNull();

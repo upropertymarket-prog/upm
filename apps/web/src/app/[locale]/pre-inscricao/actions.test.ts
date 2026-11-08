@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
@@ -28,18 +29,26 @@ const headerValues = new Map<string, string>();
  */
 const inserted: unknown[] = [];
 const cancelled: Record<string, unknown>[] = [];
+/** Os `update` por tabela — o do token de remoção vai para `site_leads`. */
+const updates: Array<{ table: string; values: Record<string, unknown>; id?: unknown }> = [];
 let insertError: { message: string } | null = null;
 
-function deliveriesTable() {
+function deliveriesTable(table = "notification_deliveries") {
   const filters: Record<string, unknown> = {};
+  let update: { table: string; values: Record<string, unknown>; id?: unknown } | null = null;
   const chain: Record<string, unknown> = {
     insert: (row: unknown) => {
       inserted.push(row);
       return Promise.resolve({ error: insertError });
     },
-    update: () => chain,
+    update: (values: Record<string, unknown>) => {
+      update = { table, values };
+      updates.push(update);
+      return chain;
+    },
     eq: (column: string, value: unknown) => {
       filters[column] = value;
+      if (update && column === "id") update.id = value;
       // O cancelamento é o único `update` desta tabela aqui, e o terceiro `eq`
       // é o último — é nesse ponto que a consulta é enviada.
       if (Object.keys(filters).length === 3) cancelled.push({ ...filters });
@@ -50,7 +59,7 @@ function deliveriesTable() {
   return chain;
 }
 
-const from = vi.fn(() => deliveriesTable());
+const from = vi.fn((table: string) => deliveriesTable(table));
 
 vi.mock("next/headers", () => ({
   headers: async () => ({ get: (key: string) => headerValues.get(key) ?? null }),
@@ -108,6 +117,7 @@ beforeEach(() => {
   headerValues.clear();
   inserted.length = 0;
   cancelled.length = 0;
+  updates.length = 0;
   insertError = null;
   from.mockClear();
 });
@@ -297,6 +307,26 @@ describe("confirmação da pré-inscrição", () => {
     expect(payload.lang).toBe("pt");
     // O nome entra no corpo pelo ICU, não por concatenação.
     expect(payload.body).toContain("Rui Nunes");
+  });
+
+  it("leva o link para apagar a pré-inscrição, e a base guarda só o hash do token", async () => {
+    await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
+
+    const payload = (inserted[0] as { payload: Record<string, string> }).payload;
+    const token = /\/pre-inscricao\/remover\?token=([0-9a-f]{64})$/.exec(
+      payload.optOutLink ?? "",
+    )?.[1];
+    expect(token).toBeTruthy();
+    expect(payload.optOutText).toBe("site.preRegistration.confirmEmail.optOutText");
+    expect(payload.signoff).toBe("site.preRegistration.confirmEmail.signoff");
+
+    const gravado = updates.find((u) => u.table === "site_leads");
+    expect(gravado?.id).toBe("11111111-1111-1111-1111-111111111111");
+    expect(gravado?.values).toEqual({
+      removal_token_hash: createHash("sha256").update(token!).digest("hex"),
+    });
+    // Nunca o token em claro.
+    expect(JSON.stringify(gravado?.values)).not.toContain(token!);
   });
 
   it("não leva `profile_id`: quem se pré-inscreve não tem conta", async () => {

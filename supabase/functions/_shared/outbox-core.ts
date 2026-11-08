@@ -65,7 +65,7 @@ export function errorText(error: unknown): string {
 export async function drainOutbox(
   db: OutboxDb,
   send: SendEmail,
-  options: { batch: number; appUrl: string; now?: Date },
+  options: { batch: number; appUrl: string; siteUrl?: string; now?: Date },
 ): Promise<OutboxReport> {
   const report: OutboxReport = { sent: 0, failed: 0, skipped: 0, recovered: 0 };
   const now = options.now ?? new Date();
@@ -106,6 +106,7 @@ export async function drainOutbox(
 
     const email = renderNotificationEmail(delivery.payload as DeliveryPayload, {
       appUrl: options.appUrl,
+      siteUrl: options.siteUrl,
     });
 
     try {

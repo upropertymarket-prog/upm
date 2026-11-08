@@ -49,6 +49,10 @@ export const pathnames = {
     pt: "/pre-inscricao/confirmar",
     en: "/early-access/confirm",
   },
+  "/pre-inscricao/remover": {
+    pt: "/pre-inscricao/remover",
+    en: "/early-access/remove",
+  },
   "/criar-conta": { pt: "/criar-conta", en: "/sign-up" },
   "/criar-conta/verificacao": { pt: "/criar-conta/verificacao", en: "/sign-up/verify" },
   "/entrar": { pt: "/entrar", en: "/sign-in" },

@@ -54,6 +54,8 @@ const EXCLUIDAS: readonly SitePathname[] = [
   // de conversão do pré-lançamento e tem de continuar a ser indexada. Esta é
   // só o destino do link do e-mail, e traz um token no URL.
   "/pre-inscricao/confirmar",
+  // O mesmo para o link de remoção (8 nov 2026).
+  "/pre-inscricao/remover",
 ];
 
 export default async function robots(): Promise<MetadataRoute.Robots> {

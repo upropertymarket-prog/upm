@@ -34,6 +34,7 @@ const A15_GLOBAL = "20261103100000_superficie_anon_public_global.sql";
 export const ANON_PERMITIDAS = new Map<string, string>([
   ["submit_site_lead", "formulários do site; honeypot e limite por IP lá dentro"],
   ["confirm_site_lead", "confirmação por token de uso único"],
+  ["remove_site_lead", "apagar a própria pré-inscrição, pelo token do e-mail (8 nov 2026)"],
   ["campaign_unsubscribe", "link de cancelamento do e-mail, por token"],
   ["listing_availability", "só revela o que já foi público (vendido vs. nunca existiu)"],
   ["current_legal_document", "Termos e Privacidade, públicos por natureza"],
@@ -124,7 +125,20 @@ describe("A15 · superfície do anon — estática", () => {
     expect(sql).toMatch(
       /alter default privileges for role postgres in schema public\s+revoke execute on functions from public, anon;/,
     );
-    for (const nome of ANON_PERMITIDAS.keys()) expect(sql).toContain(`'${nome}'`);
+    // As que já existiam estão na lista da A15. As que vieram depois (desde
+    // `remove_site_lead`, 8 nov 2026) não se acrescentam a uma migração já
+    // aplicada: têm o seu `grant ... to anon` explícito na migração que as cria.
+    const posteriores = readdirSync(MIGRACOES)
+      .filter((f) => f.endsWith(".sql") && f > A15)
+      .map((f) => readFileSync(join(MIGRACOES, f), "utf8"))
+      .join("\n");
+    for (const nome of ANON_PERMITIDAS.keys()) {
+      const naA15 = sql.includes(`'${nome}'`);
+      const concedidaDepois = new RegExp(
+        `grant execute on function public\\.${nome}\\([^)]*\\) to anon\\b`,
+      ).test(posteriores);
+      expect(naA15 || concedidaDepois, nome).toBe(true);
+    }
     // A regra por esquema não chega: o `execute` de PUBLIC sobre funções é
     // uma omissão global, e só sai sem `in schema`. Foi o teste negativo de
     // 3 nov (uma função criada e desfeita numa transação) que o mostrou.

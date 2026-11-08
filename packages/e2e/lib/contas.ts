@@ -154,27 +154,11 @@ export async function apagarContas(): Promise<void> {
         .in("subscription_id", sids);
       if (error) falhas.push(`${id} · contratos de adesão de teste: ${error.message}`);
     }
+    // Uma conta de equipa que abriu o painel de alguém também se apaga: desde
+    // a saída da equipa (20261108090000) o `personal_data_access_log` fica,
+    // com o autor a null, em vez de prender a conta.
     const { error: erroConta } = await service().auth.admin.deleteUser(id);
-    if (erroConta) {
-      // Uma conta de equipa que abriu o painel de alguém fica no
-      // `personal_data_access_log` (RGPD, só de acrescentar), que a prende com
-      // `restrict`: não se apaga, por desenho. É a política de saída da equipa,
-      // por decidir pelo cliente (dívida). Até lá, uma conta de **teste** presa
-      // assim desativa-se — sem entrar, sem acesso — e diz-se, em vez de partir
-      // a corrida. Fora disso, um erro continua a ser um erro.
-      const { count } = await service()
-        .from("personal_data_access_log")
-        .select("id", { count: "exact", head: true })
-        .eq("actor_profile_id", id);
-      if (deTeste && (count ?? 0) > 0) {
-        await service().auth.admin.updateUserById(id, { ban_duration: "876000h" });
-        console.warn(
-          `[e2e] ${dono.user?.email} ficou desativada e não apagada: está no registo de acessos (política de saída por decidir).`,
-        );
-      } else {
-        falhas.push(`${id} · conta: ${erroConta.message}`);
-      }
-    }
+    if (erroConta) falhas.push(`${id} · conta: ${erroConta.message}`);
   }
   if (falhas.length) throw new Error(`A limpeza dos E2E deixou restos:\n${falhas.join("\n")}`);
 }

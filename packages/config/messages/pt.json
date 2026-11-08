@@ -866,7 +866,10 @@
         "title": "Confirme o seu e-mail",
         "body": "Olá {name},\n\nRecebemos a sua pré-inscrição na UProperty Market. Falta um passo: confirmar que este endereço é seu. É isso que torna a inscrição válida e o que nos autoriza a avisá-lo quando os primeiros anúncios abrirem.",
         "cta": "Confirmar o e-mail",
-        "footer": "Recebeu este e-mail porque este endereço foi deixado na pré-inscrição da UProperty Market. Se não foi você, não precisa de fazer nada: sem confirmação, o endereço é apagado em 30 dias."
+        "footer": "Recebeu este e-mail porque este endereço foi deixado na pré-inscrição da UProperty Market. Se não foi você, não precisa de fazer nada: sem confirmação, o endereço é apagado em 30 dias.",
+        "signoff": "Com os melhores cumprimentos,\nEquipa UProperty Market",
+        "optOutText": "Mudou de ideias?",
+        "optOutLabel": "Remover a minha pré-inscrição e os meus dados"
       },
       "confirmPage": {
         "title": "Confirmar a pré-inscrição",
@@ -878,6 +881,17 @@
         "failTitle": "Este link já não serve",
         "failBody": "Pode ter sido usado, ou pode ter expirado. Volte a inscrever-se e enviamos-lhe um link novo.",
         "retry": "Voltar a inscrever-me",
+        "back": "Voltar ao início"
+      },
+      "removePage": {
+        "title": "Remover a pré-inscrição",
+        "body": "Ao confirmar, apagamos a sua pré-inscrição e os dados que deixou: nome, e-mail, perfil e zona de interesse. Deixa de receber avisos da UProperty Market. Não se pode desfazer — se mudar de ideias, pode voltar a inscrever-se.",
+        "remove": "Remover os meus dados",
+        "removing": "A remover…",
+        "okTitle": "Pré-inscrição removida",
+        "okBody": "Os seus dados foram apagados. Não voltamos a contactá-lo.",
+        "failTitle": "Este link já não serve",
+        "failBody": "Pode já ter sido usado, ou ter sido substituído por um e-mail mais recente. Se ainda quiser apagar os seus dados, use o link do último e-mail que recebeu.",
         "back": "Voltar ao início"
       }
     },

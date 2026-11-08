@@ -49,6 +49,15 @@ export type DeliveryPayload = {
   cta?: unknown;
   footer?: unknown;
   lang?: unknown;
+  /** A despedida por cima da assinatura ("Equipa UProperty Market"). */
+  signoff?: unknown;
+  /**
+   * Uma linha a mais no rodapé, com um link — "Mudou de ideias? Remover a
+   * minha pré-inscrição" (8 nov 2026). As três ou nenhuma.
+   */
+  optOutText?: unknown;
+  optOutLabel?: unknown;
+  optOutLink?: unknown;
 };
 
 export type RenderedEmail = { subject: string; html: string; text: string };
@@ -56,10 +65,17 @@ export type RenderedEmail = { subject: string; html: string; text: string };
 const DEFAULT_CTA = "Abrir na app";
 const DEFAULT_FOOTER =
   "Recebeu este e-mail porque tem uma conta na UProperty Market. Pode escolher que avisos recebe em Definições › Notificações.";
+const DEFAULT_SIGNOFF = "Equipa UProperty Market";
+
+/**
+ * O site público, de onde vem a imagem da assinatura. Um e-mail não leva
+ * anexos de imagem: a imagem é pedida ao site quando o e-mail é aberto.
+ */
+const DEFAULT_SITE_URL = "https://upropertymarket.pt";
 
 export function renderNotificationEmail(
   payload: DeliveryPayload,
-  options: { appUrl: string },
+  options: { appUrl: string; siteUrl?: string },
 ): RenderedEmail {
   const title = text(payload.title) || "Novidade na UProperty Market";
   const body = text(payload.body);
@@ -67,10 +83,30 @@ export function renderNotificationEmail(
   const cta = text(payload.cta) || DEFAULT_CTA;
   const footer = text(payload.footer) || DEFAULT_FOOTER;
   const lang = /^[a-z]{2}$/i.test(text(payload.lang)) ? text(payload.lang).toLowerCase() : "pt";
+  const signoff = text(payload.signoff) || DEFAULT_SIGNOFF;
+  const siteUrl = (options.siteUrl || DEFAULT_SITE_URL).replace(/\/+$/, "");
+  const optOutLink = /^https?:\/\//i.test(text(payload.optOutLink)) ? text(payload.optOutLink) : "";
+  const optOut =
+    optOutLink && text(payload.optOutText) && text(payload.optOutLabel)
+      ? { text: text(payload.optOutText), label: text(payload.optOutLabel), link: optOutLink }
+      : null;
 
-  const plain = [title, body, link ? `${cta}: ${link}` : "", footer].filter(Boolean).join("\n\n");
+  const plain = [
+    title,
+    body,
+    link ? `${cta}: ${link}` : "",
+    `${signoff}\n${siteUrl.replace(/^https?:\/\//, "")}`,
+    footer,
+    optOut ? `${optOut.text} ${optOut.label}: ${optOut.link}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-  return { subject: title, html: layout({ title, body, link, cta, footer, lang }), text: plain };
+  return {
+    subject: title,
+    html: layout({ title, body, link, cta, footer, lang, signoff, siteUrl, optOut }),
+    text: plain,
+  };
 }
 
 function layout({
@@ -80,6 +116,9 @@ function layout({
   cta,
   footer,
   lang,
+  signoff,
+  siteUrl,
+  optOut,
 }: {
   title: string;
   body: string;
@@ -87,6 +126,9 @@ function layout({
   cta: string;
   footer: string;
   lang: string;
+  signoff: string;
+  siteUrl: string;
+  optOut: { text: string; label: string; link: string } | null;
 }): string {
   const button = link
     ? `<tr><td style="padding:24px 32px 0 32px">
@@ -98,6 +140,20 @@ function layout({
     ? `<tr><td style="padding:12px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">${escape(body).replace(/\n/g, "<br>")}</td></tr>`
     : "";
 
+  // A assinatura: a despedida, o logótipo (`public/brand/assinatura-light.png`,
+  // 600×201, mostrado a 150 px) e o endereço do site. O `alt` diz o nome da
+  // marca para quem tem as imagens bloqueadas — o caso por omissão no Outlook.
+  const siteLabel = siteUrl.replace(/^https?:\/\//, "");
+  const signature = `<tr><td style="padding:32px 32px 0 32px;font-size:15px;line-height:1.55;color:${TEXT}">
+         ${escape(signoff).replace(/\n/g, "<br>")}<br>
+         <a href="${escape(siteUrl)}" style="display:inline-block;margin-top:12px"><img src="${escape(siteUrl)}/brand/assinatura-light.png" width="150" height="50" alt="UProperty Market" style="display:block;border:0;width:150px;height:auto"></a><br>
+         <a href="${escape(siteUrl)}" style="display:inline-block;margin-top:8px;font-size:13px;color:${MUTED};text-decoration:none">${escape(siteLabel)}</a>
+       </td></tr>`;
+
+  const optOutLine = optOut
+    ? `<br><br>${escape(optOut.text)} <a href="${escape(optOut.link)}" style="color:${MUTED};text-decoration:underline">${escape(optOut.label)}</a>`
+    : "";
+
   return `<!doctype html>
 <html lang="${escape(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)}</title></head>
 <body style="margin:0;padding:0;background:${BACKGROUND};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
@@ -107,8 +163,13 @@ function layout({
         <tr><td style="padding:32px 32px 0 32px;font-size:18px;font-weight:700;color:${TEXT}">${escape(title)}</td></tr>
         ${paragraph}
         ${button}
-        <tr><td style="padding:28px 32px 32px 32px;font-size:12.5px;line-height:1.5;color:${MUTED};border-top:1px solid ${BORDER};margin-top:24px">
-          ${escape(footer)}
+        ${signature}
+        <!-- O espaço antes da linha do rodapé é uma linha da tabela: um
+             margin-top numa célula não conta em nenhum cliente de e-mail, e
+             até 8 nov a linha cinzenta ficava colada ao botão. -->
+        <tr><td style="height:32px;line-height:32px;font-size:0">&nbsp;</td></tr>
+        <tr><td style="padding:24px 32px 32px 32px;font-size:12.5px;line-height:1.5;color:${MUTED};border-top:1px solid ${BORDER}">
+          ${escape(footer)}${optOutLine}
         </td></tr>
       </table>
     </td></tr>
