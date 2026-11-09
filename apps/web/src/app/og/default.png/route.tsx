@@ -62,6 +62,12 @@ async function dataUrl(url: URL, type: string): Promise<string | null> {
   try {
     const response = await fetch(url);
     if (!response.ok) return null;
+    // Só uma imagem a sério. Num endereço protegido (os `*.vercel.app`, que
+    // pedem login à Vercel), o pedido volta com a página de login em HTML — e
+    // o Satori, a tentar desenhá-la como imagem, rebentava o cartão com 500
+    // (visto no primeiro deploy, 9 nov 2026). Sem a imagem, o cartão sai na
+    // mesma, só sem fotografia.
+    if (!(response.headers.get("content-type") ?? "").startsWith(type)) return null;
     let bytes = Buffer.from(await response.arrayBuffer());
     // O SVG do logótipo traz um manifesto C2PA de ~20 KB em `<metadata>`, que
     // não desenha nada: sai antes de o embutir.
