@@ -318,14 +318,27 @@ const cartoesEmBreve = () =>
     body: EM_BREVE.cards[card.id as keyof typeof EM_BREVE.cards].body,
   }));
 
-function Ecra({ theme, children }: { theme: "light" | "dark"; children: ReactNode }) {
+function Ecra({
+  theme,
+  altura,
+  children,
+}: {
+  theme: "light" | "dark";
+  altura?: string;
+  children: ReactNode;
+}) {
   return (
     <NextIntlClientProvider locale="pt" messages={ptMessages}>
       <ThemeProvider initialChoice={theme}>
         <div
           data-theme={theme}
           data-app="web"
-          style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)" }}
+          style={{
+            minHeight: "100vh",
+            background: "var(--bg)",
+            color: "var(--text)",
+            height: altura,
+          }}
         >
           {children}
         </div>
@@ -442,7 +455,7 @@ export function ImoveisSemResultadosEscuro() {
  */
 function ImoveisPreLancamento({ theme }: { theme: "light" | "dark" }) {
   return (
-    <Ecra theme={theme}>
+    <Ecra theme={theme} altura="900px">
       <PublicHeader locale="pt" onLocaleChange={semEfeito} launchMode="pre" />
       <main>
         <SiteSection>
