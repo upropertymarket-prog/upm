@@ -196,7 +196,7 @@ export default function SitePublicoCanvas() {
         id="ImoveisPreLancamentoClaro"
         name="Market público · pré-lançamento · claro (/propriedades)"
         component={ImoveisPreLancamentoClaro}
-        layout={{ x: 0, y: 6860, width: 1440, height: 989.6500244140625 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
       />
       <Storyboard
         id="ImoveisPreLancamentoEscuro"
@@ -242,6 +242,18 @@ export default function SitePublicoCanvas() {
         name="Detalhe de propriedade · escuro (/propriedades/[slug])"
         component={FichaEscuro}
         layout={{ x: 1520, y: 10307, width: 1440, height: 900 }}
+      />
+
+      {/* Telemóvel (10 nov 2026, pedido do cliente para ajustes visuais): a
+          home de pré-lançamento a 390 px, a largura de um iPhone, e com a
+          altura da página inteira (~11 500 px medidos) para se ver tudo sem
+          rolar dentro da moldura. O site é desenhado em `cqi`, medido pela
+          moldura: esta largura dá o mesmo desenho que o telemóvel. */}
+      <Storyboard
+        id="PreLancamentoTelemovel"
+        name="Home · Pré-lançamento · telemóvel 390 px (/)"
+        component={PreLancamentoClaro}
+        layout={{ x: 0, y: 11287, width: 390, height: 11500 }}
       />
     </Canvas>
   );
