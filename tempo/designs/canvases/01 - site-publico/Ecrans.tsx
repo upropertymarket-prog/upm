@@ -338,6 +338,9 @@ function Ecra({
             background: "var(--bg)",
             color: "var(--text)",
             height: altura,
+            // Com altura fixa, o que passa dela corta-se: sem isto o conteúdo
+            // transbordava e o canvas media a página inteira na mesma.
+            overflow: altura ? "hidden" : undefined,
           }}
         >
           {children}
@@ -405,7 +408,7 @@ export function PosLancamentoEscuro() {
  */
 function Imoveis({ theme, listings }: { theme: "light" | "dark"; listings: PublicListingCard[] }) {
   return (
-    <Ecra theme={theme}>
+    <Ecra theme={theme} altura="900px">
       {/* A moldura da página — cabeçalho, `main`, rodapé — é reproduzida aqui
           porque vive na `page.tsx` e não no `ListingsBrowser`. São três
           elementos e nenhum conteúdo: sem eles a storyboard mostrava a lista a
@@ -498,7 +501,7 @@ export function ImoveisPreLancamentoEscuro() {
  */
 function Detalhe({ theme }: { theme: "light" | "dark" }) {
   return (
-    <Ecra theme={theme}>
+    <Ecra theme={theme} altura="900px">
       <ListingDetail listing={DETALHE} locale="pt" launchMode="post" onLocaleChange={semEfeito} />
     </Ecra>
   );
