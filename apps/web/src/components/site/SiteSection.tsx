@@ -49,11 +49,14 @@ export function SectionHeading({
   title,
   body,
   align = "left",
+  bodyMaxWidth,
 }: {
   eyebrow?: string;
   title: string;
   body?: string;
   align?: "left" | "center";
+  /** Largura máxima do corpo, para o acompanhar um título curto (Contactos). */
+  bodyMaxWidth?: string;
 }) {
   return (
     <header
@@ -69,10 +72,11 @@ export function SectionHeading({
       {eyebrow ? (
         <span
           style={{
-            // 07 §3: no site público nada desce de 14 px, e `--fs-label` já é
-            // 14 px por `[data-app="web"]`. O sobretítulo distingue-se pelo
-            // peso, pelas maiúsculas e pela cor de acento — não por ser menor.
-            fontSize: "var(--fs-label)",
+            // 13 px em JetBrains Mono (cliente, 11 nov 2026): exceção ao mínimo
+            // de 14 px do site (07 §3), registada em `tokens.css`. Distingue-se
+            // pela fonte, pelas maiúsculas e pela cor de acento.
+            fontFamily: "var(--font-mono)",
+            fontSize: "13px",
             fontWeight: "var(--fw-semibold)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -90,12 +94,23 @@ export function SectionHeading({
           fontSize: "clamp(1.4rem, 3.4vw, 2.5rem)",
           lineHeight: 1.15,
           color: "var(--text)",
+          // Um `\n` na mensagem parte o título nesse sítio (11 nov 2026: "Tem
+          // dúvidas?" / "Fale connosco."). Sem `\n` não muda nada.
+          whiteSpace: "pre-line",
         }}
       >
         {title}
       </h2>
       {body ? (
-        <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6, color: "var(--muted)" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "15px",
+            lineHeight: 1.6,
+            color: "var(--muted)",
+            maxWidth: bodyMaxWidth,
+          }}
+        >
           {body}
         </p>
       ) : null}

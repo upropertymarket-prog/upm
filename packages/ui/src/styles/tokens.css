@@ -281,6 +281,8 @@
  * Excepções intencionais (decididas pelo cliente, não são dívida):
  *   - faixa de pré-lançamento (`PublicHeader`, `site.preLaunchBanner`):
  *     12 px, em maiúsculas espaçadas — 8 nov 2026;
+ *   - sobretítulos das secções e do hero (`SectionHeading`, `Hero`): 13 px
+ *     em JetBrains Mono, maiúsculas espaçadas — 11 nov 2026;
  *   - rótulos dos campos de formulário (`.upm-field__label`): 13 px, o mesmo
  *     da app — em maiúsculas espaçadas, os 14 px pesavam mais do que o campo
  *     — 11 nov 2026. */
@@ -291,6 +293,12 @@
 
 [data-app="web"] .upm-field__label {
   font-size: 13px;
+}
+
+/* Mais ar do rótulo ao campo nos formulários do site (11 nov 2026): 8 px em
+   vez de 6. A app continua nos 6. */
+[data-app="web"] .upm-field {
+  gap: var(--sp-3);
 }
 
 /**
@@ -402,6 +410,13 @@ button {
 }
 
 button {
+  color: var(--text);
+}
+
+/* Os `<select>` nativos que não passam pelo `Select` (interno: e-mail) — a
+   lista do sistema segue pelo menos as cores do tema (11 nov 2026). */
+option {
+  background-color: var(--surface);
   color: var(--text);
 }
 
