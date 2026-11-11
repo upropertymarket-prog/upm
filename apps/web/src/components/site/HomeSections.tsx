@@ -298,7 +298,10 @@ function Split({
   // As classes estão em `site.css`: o corte para duas colunas mede a secção
   // (container query), e o texto fica com a sua medida de leitura.
   return (
-    <div className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}>
+    <div
+      className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}
+      style={{ rowGap: "20px" }}
+    >
       <div className="upm-site-split__text">{children}</div>
       <div className="upm-site-split__media">{image}</div>
     </div>
