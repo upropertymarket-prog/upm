@@ -270,7 +270,13 @@ export function HomeSections({
               alignItems: "start",
             }}
           >
-            <SectionHeading title={t("contact.title")} body={t("contact.body")} />
+            {/* Título em duas linhas ("Tem dúvidas?" / "Fale connosco.") e o
+                texto com uma largura parecida (cliente, 11 nov 2026). */}
+            <SectionHeading
+              title={t("contact.title")}
+              body={t("contact.body")}
+              bodyMaxWidth="20rem"
+            />
             <ContactForm onSubmit={onContact} />
           </div>
         </SiteSection>

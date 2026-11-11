@@ -49,11 +49,14 @@ export function SectionHeading({
   title,
   body,
   align = "left",
+  bodyMaxWidth,
 }: {
   eyebrow?: string;
   title: string;
   body?: string;
   align?: "left" | "center";
+  /** Largura máxima do corpo, para o acompanhar um título curto (Contactos). */
+  bodyMaxWidth?: string;
 }) {
   return (
     <header
@@ -90,12 +93,23 @@ export function SectionHeading({
           fontSize: "clamp(1.4rem, 3.4vw, 2.5rem)",
           lineHeight: 1.15,
           color: "var(--text)",
+          // Um `\n` na mensagem parte o título nesse sítio (11 nov 2026: "Tem
+          // dúvidas?" / "Fale connosco."). Sem `\n` não muda nada.
+          whiteSpace: "pre-line",
         }}
       >
         {title}
       </h2>
       {body ? (
-        <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6, color: "var(--muted)" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "15px",
+            lineHeight: 1.6,
+            color: "var(--muted)",
+            maxWidth: bodyMaxWidth,
+          }}
+        >
           {body}
         </p>
       ) : null}

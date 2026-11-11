@@ -85,7 +85,9 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
   }
 
   return (
-    <form action={action} style={{ display: "grid", gap: "var(--sp-5)" }}>
+    // 20 px entre campos (eram 12, 11 nov 2026): do campo — ou do texto de
+    // apoio por baixo dele — ao rótulo seguinte. Rótulo → campo em `tokens.css`.
+    <form action={action} style={{ display: "grid", gap: "var(--sp-8)" }}>
       {/* Honeypot. Nunca remover sem substituir por outra defesa. */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px" }}>
         <label htmlFor="contact-website">{tc("honeypot")}</label>
@@ -159,8 +161,8 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         </p>
       ) : null}
 
-      {/* Mínimo de 16 px do texto ao CTA (cliente, 11 nov 2026): os 12 px do
-          `gap` do formulário colavam o botão aos consentimentos. */}
+      {/* 24 px dos consentimentos ao botão (cliente, 11 nov 2026): os 20 px do
+          `gap` do formulário mais 4. */}
       <div style={{ marginTop: "4px" }}>
         <Button type="submit" size="md" disabled={pending}>
           {pending ? tc("sending") : tc("send")}

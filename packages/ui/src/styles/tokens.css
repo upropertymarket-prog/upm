@@ -293,6 +293,12 @@
   font-size: 13px;
 }
 
+/* Mais ar do rótulo ao campo nos formulários do site (11 nov 2026): 8 px em
+   vez de 6. A app continua nos 6. */
+[data-app="web"] .upm-field {
+  gap: var(--sp-3);
+}
+
 /**
  * Geometria, alvos e movimento
  * -------------------------------------------------------------------------
@@ -402,6 +408,13 @@ button {
 }
 
 button {
+  color: var(--text);
+}
+
+/* Os `<select>` nativos que não passam pelo `Select` (interno: e-mail) — a
+   lista do sistema segue pelo menos as cores do tema (11 nov 2026). */
+option {
+  background-color: var(--surface);
   color: var(--text);
 }
 
