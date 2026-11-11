@@ -256,7 +256,7 @@ export default function SitePublicoCanvas() {
         id="PreLancamentoTelemovel"
         name="Home · Pré-lançamento · telemóvel 390 px (/)"
         component={PreLancamentoTelemovel}
-        layout={{ x: 0, y: 11362, width: 390, height: 11510.8505859375 }}
+        layout={{ x: 0, y: 11362, width: 390, height: 11518.8505859375 }}
       />
     </Canvas>
   );

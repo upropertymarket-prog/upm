@@ -132,7 +132,7 @@ export function PlatformDemo() {
   const { ref, near } = useNearViewport<HTMLDivElement>();
 
   return (
-    <div ref={ref} style={{ display: "grid", gap: "var(--sp-5)" }}>
+    <div ref={ref} style={{ display: "grid", gap: "var(--sp-5)", rowGap: "16px" }}>
       <div
         role="tablist"
         aria-label={t("profilesLabel")}
