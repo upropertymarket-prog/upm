@@ -77,7 +77,7 @@ export function SectionHeading({
             // pela fonte, pelas maiúsculas e pela cor de acento.
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
-            fontWeight: "var(--fw-semibold)",
+            fontWeight: "var(--fw-medium)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--accent)",

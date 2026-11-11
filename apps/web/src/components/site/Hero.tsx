@@ -41,14 +41,15 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
                 // exceção ao mínimo de 14 px do site, registada em `tokens.css`.
                 fontFamily: "var(--font-mono)",
                 fontSize: "13px",
-                fontWeight: "var(--fw-semibold)",
+                fontWeight: "var(--fw-medium)",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "var(--accent)",
                 // O bloco separa tudo a 16 px; o eyebrow encosta mais ao
-                // título, com o valor afinado no canvas (cliente, 8 nov 2026).
+                // título: 8 px, os mesmos do `SectionHeading` das outras
+                // secções (cliente, 11 nov 2026; eram 2 px).
                 marginTop: "0px",
-                marginBottom: "-14px",
+                marginBottom: "-8px",
               }}
             >
               {t("eyebrow")}
