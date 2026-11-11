@@ -37,10 +37,10 @@ export function Hero({ launchMode }: { launchMode: "pre" | "post" }) {
           <div className="upm-hero__main" style={{ rowGap: "16px" }}>
             <span
               style={{
-                // Token e não um valor à mão: `[data-app="web"]` põe
-                // `--fs-label` nos 14 px que 07 §3 fixa como mínimo do site
-                // público. Escrever "12px" aqui furava esse piso.
-                fontSize: "var(--fs-label)",
+                // Sobretítulo a 13 px em JetBrains Mono (cliente, 11 nov 2026):
+                // exceção ao mínimo de 14 px do site, registada em `tokens.css`.
+                fontFamily: "var(--font-mono)",
+                fontSize: "13px",
                 fontWeight: "var(--fw-semibold)",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",

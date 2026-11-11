@@ -72,10 +72,11 @@ export function SectionHeading({
       {eyebrow ? (
         <span
           style={{
-            // 07 §3: no site público nada desce de 14 px, e `--fs-label` já é
-            // 14 px por `[data-app="web"]`. O sobretítulo distingue-se pelo
-            // peso, pelas maiúsculas e pela cor de acento — não por ser menor.
-            fontSize: "var(--fs-label)",
+            // 13 px em JetBrains Mono (cliente, 11 nov 2026): exceção ao mínimo
+            // de 14 px do site (07 §3), registada em `tokens.css`. Distingue-se
+            // pela fonte, pelas maiúsculas e pela cor de acento.
+            fontFamily: "var(--font-mono)",
+            fontSize: "13px",
             fontWeight: "var(--fw-semibold)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",

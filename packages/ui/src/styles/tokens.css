@@ -281,6 +281,8 @@
  * Excepções intencionais (decididas pelo cliente, não são dívida):
  *   - faixa de pré-lançamento (`PublicHeader`, `site.preLaunchBanner`):
  *     12 px, em maiúsculas espaçadas — 8 nov 2026;
+ *   - sobretítulos das secções e do hero (`SectionHeading`, `Hero`): 13 px
+ *     em JetBrains Mono, maiúsculas espaçadas — 11 nov 2026;
  *   - rótulos dos campos de formulário (`.upm-field__label`): 13 px, o mesmo
  *     da app — em maiúsculas espaçadas, os 14 px pesavam mais do que o campo
  *     — 11 nov 2026. */
