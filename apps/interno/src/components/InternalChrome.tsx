@@ -116,6 +116,7 @@ export function InternalChrome({
         },
         labels: {
           collapse: t("sidebar.collapse"),
+          close: t("sidebar.close"),
           expand: t("sidebar.expand"),
           report: t("sidebar.report"),
           signOut: t("sidebar.signOut"),

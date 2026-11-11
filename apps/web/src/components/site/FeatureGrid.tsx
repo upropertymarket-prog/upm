@@ -46,6 +46,14 @@ const ICONS: Record<IconName, typeof Handshake> = {
   eye: Eye,
 };
 
+/**
+ * Espaço entre cartões (cliente, 11 nov 2026): 20 px no telemóvel, 24 px no
+ * desktop — eram 10 px. Sem media query, em rampa pela largura da secção (o
+ * contentor, `site.css`): 20 px até 640 px, 24 px a partir de 1000 px. Serve
+ * linhas e colunas, e entra também na conta de `maxColumns`.
+ */
+const GAP = "clamp(20px, calc(1.1111cqi + 12.89px), 24px)";
+
 export function FeatureGrid({
   cards,
   minColumn = "16rem",
@@ -62,7 +70,7 @@ export function FeatureGrid({
   maxColumns?: number;
 }) {
   const coluna = maxColumns
-    ? `max(min(${minColumn}, 100%), calc((100% - ${maxColumns - 1} * var(--sp-4)) / ${maxColumns}))`
+    ? `max(min(${minColumn}, 100%), calc((100% - ${maxColumns - 1} * ${GAP}) / ${maxColumns}))`
     : `min(${minColumn}, 100%)`;
   return (
     <ul
@@ -72,7 +80,7 @@ export function FeatureGrid({
         padding: 0,
         display: "grid",
         gridTemplateColumns: `repeat(auto-fit, minmax(${coluna}, 1fr))`,
-        gap: "var(--sp-4)",
+        gap: GAP,
       }}
     >
       {cards.map((card) => {
@@ -84,7 +92,7 @@ export function FeatureGrid({
               display: "grid",
               gap: "var(--sp-3)",
               alignContent: "start",
-              padding: "var(--sp-5)",
+              padding: "var(--sp-7)",
               borderRadius: "var(--r-lg)",
               border: "1px solid var(--border)",
               background: "var(--surface)",

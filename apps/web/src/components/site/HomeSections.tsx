@@ -86,7 +86,9 @@ export function HomeSections({
         <Hero launchMode={launchMode} />
 
         <SiteSection id="plataforma" tone="alt">
-          <div style={{ display: "grid", gap: "var(--sp-6)" }}>
+          {/* `--sp-9` (24 px) e não `--sp-6`: mais ar entre o texto e os
+              botões de perfil da demo (cliente, 11 nov 2026). */}
+          <div style={{ display: "grid", gap: "var(--sp-9)", rowGap: "20px" }}>
             <SectionHeading
               eyebrow={t("platform.eyebrow")}
               title={t("platform.title")}
@@ -296,8 +298,13 @@ function Split({
   // As classes estão em `site.css`: o corte para duas colunas mede a secção
   // (container query), e o texto fica com a sua medida de leitura.
   return (
-    <div className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}>
-      <div className="upm-site-split__text">{children}</div>
+    <div
+      className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}
+      style={{ rowGap: "24px" }}
+    >
+      <div className="upm-site-split__text" style={{ rowGap: "16px" }}>
+        {children}
+      </div>
       <div className="upm-site-split__media">{image}</div>
     </div>
   );

@@ -110,7 +110,8 @@ export const HERO_STAT_IDS = ["commission", "privacy", "everything"] as const;
 // preparados e leva ao contacto (6 nov 2026). Quando houver planos com
 // `audience = "builder"`, aparecem aqui sem mudar o componente.
 export const PRICING_AUDIENCE_IDS = ["owner", "buyer", "builder"] as const;
-export const PRICING_BILLING_IDS = ["year", "month"] as const;
+// Mensal primeiro e por omissão (cliente, 11 nov 2026).
+export const PRICING_BILLING_IDS = ["month", "year"] as const;
 
 /**
  * Os tipos de alerta de cada plano (8 nov 2026, do desenho do cliente)

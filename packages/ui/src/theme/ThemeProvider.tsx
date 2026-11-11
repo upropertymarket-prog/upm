@@ -49,13 +49,23 @@ export function ThemeProvider({
   children,
   initialChoice = "system",
   persist,
+  scope = "document",
 }: {
   children: React.ReactNode;
   /** Mesmo valor que o `ThemeScript` recebeu: `profiles.theme` ou `system`. */
   initialChoice?: ThemeChoice;
   /** Server Action que grava em `profiles.theme`. Ausente = sem sessão. */
   persist?: (choice: ThemeChoice) => void | Promise<void>;
+  /**
+   * `"local"` (11 nov 2026): um tema só para uma parte da página — a
+   * demonstração da home, que tem o seu próprio alternador. Não lê nem escreve
+   * no `<html>`, não guarda no dispositivo e não chama `persist`; quem o usa
+   * aplica o `resolved` (via `useTheme`) num `data-theme` do seu envoltório.
+   * Sem isto, o alternador da demonstração mudava o tema do site inteiro.
+   */
+  scope?: "document" | "local";
 }) {
+  const local = scope === "local";
   const [choice, setChoiceState] = useState<ThemeChoice>(initialChoice);
   const [resolved, setResolved] = useState<ResolvedTheme>(() =>
     initialChoice === "system" ? "light" : initialChoice,
@@ -65,6 +75,11 @@ export function ThemeProvider({
   // DOM (que já teve acesso ao `prefers-color-scheme` real) e adotar a escolha
   // guardada no dispositivo quando o servidor não trouxe nenhuma.
   useEffect(() => {
+    if (local) {
+      setChoiceState(initialChoice);
+      setResolved(resolve(initialChoice));
+      return;
+    }
     const root = document.documentElement;
     const domChoice = root.getAttribute(THEME_CHOICE_ATTR);
     let stored: string | null = null;
@@ -83,7 +98,7 @@ export function ThemeProvider({
             : initialChoice;
     setChoiceState(next);
     setResolved(resolve(next));
-  }, [initialChoice]);
+  }, [initialChoice, local]);
 
   // `system` tem de reagir ao utilizador trocar o tema do sistema operativo
   // com a app aberta — sem isto, "Sistema" significa "o sistema quando abri".
@@ -96,15 +111,17 @@ export function ThemeProvider({
   }, [choice]);
 
   useEffect(() => {
+    if (local) return;
     const root = document.documentElement;
     root.setAttribute(THEME_ATTR, resolved);
     root.setAttribute(THEME_CHOICE_ATTR, choice);
-  }, [choice, resolved]);
+  }, [choice, resolved, local]);
 
   const setChoice = useCallback(
     (next: ThemeChoice) => {
       setChoiceState(next);
       setResolved(resolve(next));
+      if (local) return;
       try {
         window.localStorage.setItem(THEME_STORAGE_KEY, next);
       } catch {
@@ -114,7 +131,7 @@ export function ThemeProvider({
       // uma preferência, não uma transação.
       void persist?.(next);
     },
-    [persist],
+    [persist, local],
   );
 
   const value = useMemo<ThemeContextValue>(

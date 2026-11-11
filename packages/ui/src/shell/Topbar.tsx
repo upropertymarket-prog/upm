@@ -105,14 +105,18 @@ export function Topbar({
         />
 
         <div className="upm-topbar__actions">
+          {/* Abaixo de 768 px saem para a gaveta (`AppShell`, `shell.css`):
+              com menu, pesquisa, idioma, tema e sino na mesma linha, a
+              pesquisa encolhia até desaparecer (11 nov 2026). */}
           <LanguageMenu
+            className="upm-topbar__lang"
             locale={locale}
             locales={locales}
             onLocaleChange={onLocaleChange}
             label={labels.language}
           />
 
-          <ThemeToggle variant="segmented" labels={labels.theme} />
+          <ThemeToggle className="upm-topbar__theme" variant="segmented" labels={labels.theme} />
 
           <div className="upm-menu" ref={notifRef}>
             <Button

@@ -229,7 +229,7 @@ export function LegalDocumentBody({ markdown }: { markdown: string }) {
                 key={key}
                 style={{
                   margin: 0,
-                  padding: "var(--sp-4)",
+                  padding: "var(--sp-7)",
                   borderInlineStart: "3px solid var(--state-warn)",
                   background: "var(--warn-soft, var(--surface-2))",
                   borderRadius: "var(--radius-md, 8px)",

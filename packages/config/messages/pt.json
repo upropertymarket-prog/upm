@@ -40,6 +40,7 @@
   },
   "sidebar": {
     "collapse": "Colapsar menu",
+    "close": "Fechar menu",
     "expand": "Expandir menu",
     "report": "Reportar problema",
     "signOut": "Sair",

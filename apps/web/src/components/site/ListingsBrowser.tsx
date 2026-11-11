@@ -64,7 +64,7 @@ export function ListingsBrowser({ listings, total, page, pageCount, raw }: Listi
             fontSize: "var(--fs-body)",
             color: "var(--muted)",
             textAlign: "center",
-            padding: "var(--sp-7) var(--sp-5)",
+            padding: "var(--sp-7)",
             borderRadius: "var(--r-lg)",
             border: "1px solid var(--border)",
             background: "var(--surface)",

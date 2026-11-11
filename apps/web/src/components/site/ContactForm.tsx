@@ -59,7 +59,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
           gap: "var(--sp-4)",
           justifyItems: "center",
           textAlign: "center",
-          padding: "var(--sp-7) var(--sp-5)",
+          padding: "var(--sp-7)",
           borderRadius: "var(--r-lg)",
           border: "1px solid var(--border)",
           background: "var(--surface)",
@@ -159,7 +159,9 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         </p>
       ) : null}
 
-      <div>
+      {/* Mínimo de 16 px do texto ao CTA (cliente, 11 nov 2026): os 12 px do
+          `gap` do formulário colavam o botão aos consentimentos. */}
+      <div style={{ marginTop: "4px" }}>
         <Button type="submit" size="md" disabled={pending}>
           {pending ? tc("sending") : tc("send")}
         </Button>

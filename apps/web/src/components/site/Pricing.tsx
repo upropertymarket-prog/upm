@@ -124,7 +124,7 @@ export function Pricing({
 }) {
   const t = useTranslations("site.pricing");
   const [audience, setAudience] = useState<Audience>("owner");
-  const [billing, setBilling] = useState<Billing>("year");
+  const [billing, setBilling] = useState<Billing>("month");
 
   // `both` entra nas duas escadas: um plano para ambos os públicos é
   // relevante em qualquer das tabs.
@@ -231,7 +231,9 @@ export function Pricing({
               padding: 0,
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(min(17rem, 100%), 1fr))",
-              gap: "var(--sp-8)",
+              // O mesmo espaço entre cartões do resto do site (`FeatureGrid`):
+              // 20 px no telemóvel, 24 px no desktop (11 nov 2026).
+              gap: "clamp(20px, calc(1.1111cqi + 12.89px), 24px)",
               alignItems: "start",
             }}
           >
@@ -244,6 +246,11 @@ export function Pricing({
                 texto: t(`alertTypes.${tipo.id}`),
                 incluida: posicao >= tipo.fromTier,
               }));
+              // O Smarter em destaque (cliente, 11 nov 2026): contorno de 1 px
+              // na cor primária a meia opacidade. Pelo `slug` e não pela
+              // posição: a escada pode ganhar degraus.
+              const destaque = plan.slug.startsWith("smarter");
+              const contornoDestaque = "color-mix(in srgb, var(--accent) 55%, transparent)";
               return (
                 <li
                   key={plan.slug}
@@ -252,7 +259,7 @@ export function Pricing({
                     gap: "var(--sp-8)",
                     padding: "var(--sp-8)",
                     borderRadius: "var(--r-lg)",
-                    border: "1px solid var(--border)",
+                    border: `1px solid ${destaque ? contornoDestaque : "var(--border)"}`,
                     background: "var(--surface)",
                     alignContent: "start",
                   }}

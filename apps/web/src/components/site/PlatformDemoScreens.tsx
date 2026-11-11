@@ -223,7 +223,30 @@ function DemoPanel({ role, hidden }: { role: TabId; hidden: boolean }) {
    * scroll da página: a home fica onde está.
    */
   useEffect(() => {
-    scroller.current?.scrollTo({ top: 0 });
+    // Quem rola é a área de conteúdo, por baixo da topbar (`demo.css`).
+    scroller.current?.querySelector(".upm-shell__content")?.scrollTo({ top: 0 });
+  }, [section]);
+
+  /**
+   * A largura da barra de scroll da área de conteúdo, em `--upm-demo-sb`.
+   *
+   * Uma barra clássica (desktop) come largura **dentro** do padding direito: à
+   * esquerda ficavam 16 px e à direita 16 + 10, e a grelha não chegava à
+   * margem (cliente, 11 nov 2026). O `demo.css` tira esta largura ao padding
+   * direito. Em telemóveis a barra é sobreposta e mede 0 — fica tudo igual.
+   * Não há forma de a medir só em CSS, daí o `ResizeObserver`.
+   */
+  useEffect(() => {
+    const content = scroller.current?.querySelector<HTMLElement>(".upm-shell__content");
+    if (!content) return;
+    const medir = () =>
+      content.style.setProperty("--upm-demo-sb", `${content.offsetWidth - content.clientWidth}px`);
+    medir();
+    const observer = new ResizeObserver(medir);
+    observer.observe(content);
+    // O conteúdo muda de altura com a secção, e a barra aparece ou desaparece.
+    for (const child of Array.from(content.children)) observer.observe(child);
+    return () => observer.disconnect();
   }, [section]);
 
   const groups: NavGroup[] = [
@@ -246,9 +269,10 @@ function DemoPanel({ role, hidden }: { role: TabId; hidden: boolean }) {
       id={`demo-panel-${role}`}
       aria-labelledby={`demo-tab-${role}`}
       hidden={hidden}
-      style={{ height: "100%", overflow: "auto" }}
+      style={{ height: "100%", overflow: "hidden" }}
     >
       <AppShell
+        className="upm-demo-shell"
         // `.upm-shell` traz `min-height: 100vh` e aqui vive numa caixa, não
         // numa janela. `100%` e **nunca** uma altura em pixels — o aviso no
         // próprio `AppShell` diz o que isso parte. A nota completa, com a
@@ -269,6 +293,7 @@ function DemoPanel({ role, hidden }: { role: TabId; hidden: boolean }) {
           onSignOut: () => undefined,
           labels: {
             collapse: tSidebar("collapse"),
+            close: tSidebar("close"),
             expand: tSidebar("expand"),
             report: tSidebar("report"),
             signOut: tSidebar("signOut"),

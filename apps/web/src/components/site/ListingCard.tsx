@@ -127,7 +127,7 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
           display: "grid",
           gap: "var(--sp-3)",
           alignContent: "start",
-          padding: "var(--sp-5)",
+          padding: "var(--sp-7)",
         }}
       >
         <strong

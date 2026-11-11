@@ -43,9 +43,12 @@ export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post"
       {/* A largura e as margens são as das secções (`site.css`): a marca do
           rodapé alinha com o texto de cima. A altura é a do `cc-footer` do
           MAST (4rem em cima, 2rem em baixo), no lugar da das secções. */}
+      {/* 11 nov 2026: 40 px do último link à linha (eram 16), e a linha do
+          copyright com o mesmo espaço em cima e em baixo — centrada entre o
+          traço e o fim do rodapé. O fundo do contentor passa para essa linha. */}
       <div
         className="upm-site-container"
-        style={{ display: "grid", gap: "var(--sp-7)", paddingBlock: "4rem 2rem" }}
+        style={{ display: "grid", gap: "var(--site-gap)", paddingBlock: "4rem 0" }}
       >
         <div
           style={{
@@ -84,11 +87,13 @@ export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post"
               `justify-content`: assim, quando uma coluna cai para a linha de
               baixo, alinha-se à esquerda das irmãs em vez de ficar sozinha no
               canto com um buraco ao lado. */}
+          {/* As colunas e o alinhamento estão em `site.css`
+              (`.upm-site-footer__cols`): no telemóvel ficam uma por baixo da
+              outra (11 nov 2026), e isso pede uma container query. */}
           <div
+            className="upm-site-footer__cols"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(9rem, 100%), max-content))",
-              justifyContent: "end",
               alignItems: "start",
               gap: "var(--sp-6)",
               flex: "1 1 22rem",
@@ -165,7 +170,7 @@ export function SiteFooter({ launchMode = "pre" }: { launchMode?: "pre" | "post"
             gap: "var(--sp-4)",
             justifyContent: redes.length > 0 ? "space-between" : "center",
             alignItems: "center",
-            paddingTop: "var(--sp-5)",
+            paddingBlock: "var(--sp-9)",
             borderTop: "1px solid var(--border)",
           }}
         >

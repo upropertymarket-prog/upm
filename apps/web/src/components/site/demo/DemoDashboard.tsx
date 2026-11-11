@@ -117,7 +117,9 @@ function Stats({ stats }: { stats: DemoStat[] }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 190px), 1fr))",
+          // A mesma regra do `DashboardStats` da app: 2 × 2 no telemóvel.
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(max(calc((100% - 42px) / 4), min(calc((100% - 14px) / 2), 190px)), 1fr))",
           gap: 14,
         }}
       >
@@ -125,12 +127,15 @@ function Stats({ stats }: { stats: DemoStat[] }) {
           const Icon = STAT_ICONS[stat.icon];
           return (
             <Card key={stat.id} padded>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+              {/* `upm-stat` / `upm-stat__label` (components.css): num cartão
+                  estreito o ícone sobe para cima do rótulo. */}
+              <div
+                className="upm-stat"
+                style={{ display: "flex", flexDirection: "column", gap: 9 }}
+              >
                 <span
+                  className="upm-stat__label"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
                     fontSize: "var(--fs-label)",
                     fontWeight: "var(--fw-semibold)",
                     color: "var(--muted)",

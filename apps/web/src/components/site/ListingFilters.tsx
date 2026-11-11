@@ -53,7 +53,7 @@ export function ListingFilters({ value }: { value: ListingFiltersValue }) {
         // `gap` acima; só a linha sobe.
         rowGap: "16px",
         alignItems: "end",
-        padding: "var(--sp-5)",
+        padding: "var(--sp-7)",
         borderRadius: "var(--r-lg)",
         border: "1px solid var(--border)",
         background: "var(--surface)",

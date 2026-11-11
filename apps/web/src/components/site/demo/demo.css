@@ -17,6 +17,46 @@
  * Sem uma única cor escrita à mão: tudo o que aqui está são tokens.
  */
 
+/* A sidebar do produto tem `height: 100vh`. Aqui o `fixed` está preso à caixa
+   da demonstração (`translateZ(0)` em `PlatformDemo.tsx`), mas o `100vh` é da
+   janela: a sidebar ficava mais alta do que a caixa e o rodapé — idioma, tema e
+   cartão do utilizador — caía fora de vista (11 nov 2026). Com `auto`, o
+   `top: 0; bottom: 0` que ela já tem dá-lhe a altura da caixa. */
+.upm-demo-shell .upm-sidebar {
+  height: auto;
+}
+
+/* O rolo fica só no conteúdo, por baixo da topbar (cliente, 11 nov 2026).
+   Rolando a caixa toda, a barra de scroll subia ao lado da topbar, que é
+   `sticky` e não se mexe — parecia que a barra também rolava. Aqui o shell tem
+   a altura da caixa, a topbar fica fora do rolo e a área de conteúdo rola. */
+.upm-demo-shell {
+  height: 100%;
+}
+
+.upm-demo-shell .upm-shell__main {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.upm-demo-shell .upm-shell__content {
+  --upm-demo-pad: var(--sp-9);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* A barra de scroll fica dentro do padding direito em vez de se somar a
+     ele: as duas margens ficam iguais (`--upm-demo-sb`, medido em
+     `PlatformDemoScreens.tsx`). */
+  padding-right: max(0px, calc(var(--upm-demo-pad) - var(--upm-demo-sb, 0px)));
+}
+
+/* Os mesmos degraus do `shell.css` para o padding do conteúdo. */
+@media (width < 768px) {
+  .upm-demo-shell .upm-shell__content {
+    --upm-demo-pad: var(--sp-7);
+  }
+}
+
 /* O contentor de medida: é a área de conteúdo de cada ecrã da demonstração. */
 .upm-demo-screen {
   container-type: inline-size;
