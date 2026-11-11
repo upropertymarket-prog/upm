@@ -302,7 +302,9 @@ function Split({
       className={imageFirst ? "upm-site-split upm-site-split--image-first" : "upm-site-split"}
       style={{ rowGap: "24px" }}
     >
-      <div className="upm-site-split__text" style={{ rowGap: "16px" }}>{children}</div>
+      <div className="upm-site-split__text" style={{ rowGap: "16px" }}>
+        {children}
+      </div>
       <div className="upm-site-split__media">{image}</div>
     </div>
   );

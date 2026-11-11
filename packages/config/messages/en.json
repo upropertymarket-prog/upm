@@ -40,6 +40,7 @@
   },
   "sidebar": {
     "collapse": "Collapse menu",
+    "close": "Close menu",
     "expand": "Expand menu",
     "report": "Report a problem",
     "signOut": "Sign out",

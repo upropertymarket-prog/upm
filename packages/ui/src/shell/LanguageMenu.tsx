@@ -35,16 +35,44 @@ export function LanguageMenu({
   onLocaleChange,
   /** Nome do controlo, para o `aria-label` e o `title`. */
   label,
+  variant = "menu",
   className,
 }: {
   locale: string;
   locales: LocaleOption[];
   onLocaleChange: (locale: string) => void;
   label: string;
+  /**
+   * `"segmented"` (11 nov 2026): os idiomas lado a lado, com o desenho do
+   * segmentado do tema. É para dentro de um menu — a gaveta da app e o menu do
+   * site no telemóvel —, onde um menu dentro do menu pedia dois toques.
+   */
+  variant?: "menu" | "segmented";
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useClickOutside<HTMLDivElement>(open, () => setOpen(false));
+
+  if (variant === "segmented") {
+    return (
+      <div className={cx("upm-segmented", className)} role="radiogroup" aria-label={label}>
+        {locales.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={option.value === locale}
+            className="upm-segmented__option"
+            onClick={() => {
+              if (option.value !== locale) onLocaleChange(option.value);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   const current = locales.find((item) => item.value === locale);
   const described = `${label}: ${current?.label ?? locale}`;

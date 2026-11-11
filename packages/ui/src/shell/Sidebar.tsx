@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
-import { LifeBuoy, LogOut, PanelLeftClose } from "lucide-react";
+import { LifeBuoy, LogOut, PanelLeftClose, X } from "lucide-react";
 
 import { cx } from "../lib/cx";
 import { Badge } from "../components/StatusTag";
@@ -37,6 +37,8 @@ export type SidebarLabels = {
   signOut: string;
   /** Sufixo de leitor de ecrã para os contadores: "3 por ler". */
   countSuffix: string;
+  /** Botão de fechar a gaveta (telemóvel). Sem ele, usa `collapse`. */
+  close?: string;
 };
 
 export type SidebarProps = {
@@ -49,6 +51,18 @@ export type SidebarProps = {
   onReport: () => void;
   onSignOut: () => void;
   labels: SidebarLabels;
+  /**
+   * Idioma e tema, quando a sidebar é gaveta (abaixo de 768 px). Fora disso
+   * não se mostram: estão na topbar. O `AppShell` monta-os a partir das props
+   * da topbar.
+   */
+  preferences?: React.ReactNode;
+  /**
+   * Fecha a gaveta do telemóvel. Abaixo de 768 px o botão de recolher (que
+   * faz rail) dá lugar a um ✕ que chama isto — numa gaveta, recolher não faz
+   * sentido; fechar, sim.
+   */
+  onCloseMobile?: () => void;
   /**
    * Componente de link da app (`next/link`). Por omissão, `<a>`.
    *
@@ -86,6 +100,8 @@ export function Sidebar({
   onReport,
   onSignOut,
   labels,
+  preferences,
+  onCloseMobile,
   renderLink,
 }: SidebarProps) {
   return (
@@ -111,7 +127,7 @@ export function Sidebar({
             <Brand />
             <button
               type="button"
-              className="upm-btn upm-btn--secondary upm-btn--icon"
+              className="upm-btn upm-btn--secondary upm-btn--icon upm-sidebar__collapse"
               aria-label={labels.collapse}
               title={labels.collapse}
               aria-expanded
@@ -119,6 +135,17 @@ export function Sidebar({
             >
               <PanelLeftClose size={15} />
             </button>
+            {onCloseMobile ? (
+              <button
+                type="button"
+                className="upm-btn upm-btn--secondary upm-btn--icon upm-sidebar__close"
+                aria-label={labels.close ?? labels.collapse}
+                title={labels.close ?? labels.collapse}
+                onClick={onCloseMobile}
+              >
+                <X size={15} />
+              </button>
+            ) : null}
           </>
         )}
       </div>
@@ -169,6 +196,7 @@ export function Sidebar({
       ))}
 
       <div className="upm-sidebar__footer">
+        {preferences ? <div className="upm-sidebar__prefs">{preferences}</div> : null}
         <button type="button" className="upm-sidebar__report" onClick={onReport}>
           <LifeBuoy size={15} aria-hidden="true" />
           {collapsed ? <span className="upm-sr-only">{labels.report}</span> : labels.report}

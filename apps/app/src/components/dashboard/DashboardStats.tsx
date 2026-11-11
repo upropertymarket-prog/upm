@@ -57,7 +57,12 @@ export function DashboardStats({ stats }: { stats: DashboardStat[] }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))",
+          // Nunca uma coluna só (11 nov 2026): no telemóvel os quatro KPIs ficam
+          // em 2 × 2 em vez de um por linha. A coluna mínima é metade da
+          // largura até 210 px, e a partir daí fica tudo como antes (2, 3 ou 4
+          // colunas). O 4.º termo deixa as quatro numa linha quando cabem.
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(max(calc((100% - 42px) / 4), min(calc((100% - 14px) / 2), 210px)), 1fr))",
           gap: 14,
         }}
       >
@@ -65,12 +70,15 @@ export function DashboardStats({ stats }: { stats: DashboardStat[] }) {
           const Icon = ICONS[stat.icon];
           return (
             <Card key={stat.id} padded>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+              {/* `upm-stat` / `upm-stat__label` (components.css): num cartão
+                  estreito o ícone sobe para cima do rótulo. */}
+              <div
+                className="upm-stat"
+                style={{ display: "flex", flexDirection: "column", gap: 9 }}
+              >
                 <span
+                  className="upm-stat__label"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
                     fontSize: "var(--fs-label)",
                     fontWeight: "var(--fw-semibold)",
                     color: "var(--muted)",

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
+import { ThemeProvider, useTheme } from "@upm/ui";
 
 /**
  * Demonstração interativa da plataforma — `/#plataforma` (P2-04 · 07 §7)
@@ -35,9 +36,11 @@ import dynamic from "next/dynamic";
  * o teclado de entrar num separador que não se está a ver.
  *
  * **O tema da demo é independente do tema do site.** Também de 07 §7. O
- * `data-theme="light"` fixo no envoltório faz com que os tokens resolvam
- * sempre em claro lá dentro, mesmo que o visitante esteja a ver o site em
- * escuro — o atributo mais próximo é o que manda. É deliberado: o que se está a
+ * envoltório tem um `data-theme` próprio, vindo de um `ThemeProvider` local
+ * (`scope="local"`): começa em claro, mesmo que o visitante esteja a ver o
+ * site em escuro — o atributo mais próximo é o que manda —, e o alternador de
+ * tema dentro da demo muda só a demo (11 nov 2026; até aí estava fixo em
+ * claro e o alternador mudava o site). É deliberado: o que se está a
  * mostrar é o produto, não mais uma superfície do site, e o enquadramento
  * neutro à volta (`--surface2`) é o que 05 §1.1 chama "fundo neutro".
  *
@@ -162,32 +165,47 @@ export function PlatformDemo() {
         ))}
       </div>
 
-      {/* O envoltório da demo. `data-theme` fixo e `data-app` da app (não
-          "web"): lá dentro a tipografia tem de ser a da plataforma, não a do
-          site público, que 07 §3 sobe para 14 px. `translateZ(0)` é o que
-          prende a sidebar `fixed` a esta caixa — ver a nota do ficheiro. */}
-      <div
-        data-theme="light"
-        style={{
-          /* Subiu de `clamp(420px, 56vw, 620px)` a 27 out 2026, com os ecrãs
-             navegáveis: o Painel tem quatro blocos e, na altura anterior, o
-             primeiro que se via era meia fila de KPI. Continua a rolar por
-             dentro — o que não pode é obrigar a rolar para ver o início. */
-          height: "clamp(460px, 60vw, 700px)",
-          overflow: "hidden",
-          borderRadius: "var(--r-lg)",
-          border: "1px solid var(--border)",
-          background: "var(--surface2)",
-          transform: "translateZ(0)",
-          contain: "paint",
-        }}
-      >
-        {near ? <PlatformDemoScreens active={active} /> : null}
-      </div>
+      {/* O tema da demo é dela (11 nov 2026): um `ThemeProvider` local, que o
+          alternador lá dentro muda sem tocar no `<html>` — antes, "Claro"
+          mudava o site inteiro e "Escuro" não mudava a demo, presa a um
+          `data-theme="light"` fixo. Começa sempre em claro. */}
+      <ThemeProvider scope="local" initialChoice="light">
+        <DemoFrame>{near ? <PlatformDemoScreens active={active} /> : null}</DemoFrame>
+      </ThemeProvider>
 
       <p style={{ margin: 0, fontSize: "var(--fs-label)", color: "var(--muted)" }}>
         {t("disclaimer")}
       </p>
+    </div>
+  );
+}
+
+/**
+ * O envoltório da demo. `data-theme` vem do tema local da demo. `translateZ(0)`
+ * é o que prende a sidebar `fixed` a esta caixa — ver a nota do ficheiro.
+ */
+function DemoFrame({ children }: { children: React.ReactNode }) {
+  const { resolved } = useTheme();
+  return (
+    <div
+      data-theme={resolved}
+      style={{
+        /* Subiu de `clamp(420px, 56vw, 620px)` a 27 out 2026, com os ecrãs
+             navegáveis: o Painel tem quatro blocos e, na altura anterior, o
+             primeiro que se via era meia fila de KPI. Continua a rolar por
+             dentro — o que não pode é obrigar a rolar para ver o início. */
+        // Mínimo de 560 px (era 460) desde 11 nov 2026: no telemóvel a caixa
+        // mostrava pouco mais do que a primeira fila de números.
+        height: "clamp(560px, 60vw, 700px)",
+        overflow: "hidden",
+        borderRadius: "var(--r-lg)",
+        border: "1px solid var(--border)",
+        background: "var(--surface2)",
+        transform: "translateZ(0)",
+        contain: "paint",
+      }}
+    >
+      {children}
     </div>
   );
 }

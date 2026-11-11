@@ -280,10 +280,17 @@
  *
  * Excepções intencionais (decididas pelo cliente, não são dívida):
  *   - faixa de pré-lançamento (`PublicHeader`, `site.preLaunchBanner`):
- *     12 px, em maiúsculas espaçadas — 8 nov 2026. */
+ *     12 px, em maiúsculas espaçadas — 8 nov 2026;
+ *   - rótulos dos campos de formulário (`.upm-field__label`): 13 px, o mesmo
+ *     da app — em maiúsculas espaçadas, os 14 px pesavam mais do que o campo
+ *     — 11 nov 2026. */
 [data-app="web"] {
   --fs-label: 14px;
   --fs-body: 14px;
+}
+
+[data-app="web"] .upm-field__label {
+  font-size: 13px;
 }
 
 /**
@@ -409,15 +416,26 @@ textarea::placeholder {
   outline-offset: 2px;
 }
 
+/* Barra de scroll do site e da app (11 nov 2026): a parte visível passou de
+   4 para 6 px — 12 px de pista com 3 px de margem transparente de cada lado —
+   e ao passar o rato escurece para `--muted`, para se ver que se pode agarrar.
+   Só `::-webkit-scrollbar` e não `scrollbar-width`/`scrollbar-color`: no
+   Chrome, estas duas anulam as pseudo-classes e com elas o hover. */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border2);
   border-radius: var(--r-pill);
   border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--muted);
   background-clip: content-box;
 }
 

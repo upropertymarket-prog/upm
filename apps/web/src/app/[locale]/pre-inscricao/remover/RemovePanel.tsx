@@ -29,7 +29,7 @@ const PANEL: React.CSSProperties = {
   gap: "var(--sp-4)",
   justifyItems: "center",
   textAlign: "center",
-  padding: "var(--sp-7) var(--sp-5)",
+  padding: "var(--sp-7)",
   borderRadius: "var(--r-lg)",
   border: "1px solid var(--border)",
   background: "var(--surface)",

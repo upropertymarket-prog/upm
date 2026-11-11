@@ -504,6 +504,32 @@ h6 {
   gap: var(--sp-6);
 }
 
+/* KPI do Painel (`DashboardStats` e a demonstração da home) — 11 nov 2026.
+   Ícone ao lado do rótulo; num cartão estreito (2 × 2 no telemóvel) o rótulo
+   parte em duas linhas, o ícone ficava centrado entre elas e encolhia. Aí
+   passa para cima do rótulo. Mede o cartão, não a janela. */
+.upm-stat {
+  container-type: inline-size;
+}
+
+.upm-stat__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upm-stat__label > svg {
+  flex: none;
+}
+
+@container (width < 180px) {
+  .upm-stat__label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
 .upm-card--interactive {
   cursor: pointer;
   transition:

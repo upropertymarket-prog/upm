@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { cx } from "../lib/cx";
+import { ThemeToggle } from "../theme/ThemeToggle";
+import { LanguageMenu } from "./LanguageMenu";
 import { Sidebar, type SidebarProps } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 
@@ -91,16 +93,70 @@ export function AppShell({
     }
   }
 
+  // `Esc` fecha a gaveta do telemóvel, como qualquer painel por cima da página.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  // A gaveta é sempre a sidebar inteira: a preferência de rail é do desktop e
+  // não se aplica a um painel que se abre por cima do conteúdo (11 nov 2026).
+  const railed = collapsed && !mobileOpen;
+
   return (
     <div
       className={cx("upm-shell", className)}
-      data-collapsed={collapsed ? "true" : "false"}
+      data-collapsed={railed ? "true" : "false"}
       data-mobile-open={mobileOpen ? "true" : "false"}
       data-content={contentWidth}
       data-fill={fill ? "true" : "false"}
       style={style}
+      // Escolher um destino na gaveta fecha-a: o ecrã novo fica à vista.
+      onClick={(event) => {
+        if (mobileOpen && (event.target as HTMLElement).closest(".upm-sidebar .upm-nav__item")) {
+          setMobileOpen(false);
+        }
+      }}
     >
-      <Sidebar {...sidebar} collapsed={collapsed} onCollapsedChange={changeCollapsed} />
+      {/* O véu atrás da gaveta (só abaixo de 768 px, `shell.css`): tocar fora
+          dela fecha-a. */}
+      {mobileOpen ? (
+        <div
+          className="upm-shell__backdrop"
+          aria-hidden="true"
+          onClick={() => setMobileOpen(false)}
+        />
+      ) : null}
+      <Sidebar
+        {...sidebar}
+        collapsed={railed}
+        onCollapsedChange={changeCollapsed}
+        onCloseMobile={() => setMobileOpen(false)}
+        // Idioma e tema na gaveta do telemóvel, com os mesmos dados da topbar,
+        // de onde saem abaixo de 768 px (11 nov 2026).
+        preferences={
+          <>
+            <div className="upm-sidebar__pref">
+              <span className="upm-sidebar__pref-label">{topbar.labels.language}</span>
+              <LanguageMenu
+                variant="segmented"
+                locale={topbar.locale}
+                locales={topbar.locales}
+                onLocaleChange={topbar.onLocaleChange}
+                label={topbar.labels.language}
+              />
+            </div>
+            <div className="upm-sidebar__pref">
+              <span className="upm-sidebar__pref-label">{topbar.labels.theme.title}</span>
+              <ThemeToggle variant="segmented" labels={topbar.labels.theme} />
+            </div>
+          </>
+        }
+      />
       <div className="upm-shell__gutter" aria-hidden="true" />
       <div className="upm-shell__main">
         <Topbar {...topbar} onOpenSidebar={() => setMobileOpen((value) => !value)} />

@@ -239,28 +239,22 @@ export function PublicHeader({
               </ul>
             </nav>
             {/* Idioma e tema saem da barra abaixo de 640 px; aqui continuam à
-                mão, lado a lado e com o mesmo controlo. O idioma é segmentado e
-                não o `LanguageMenu`: um menu dentro do menu pedia dois toques. */}
+                mão, lado a lado e com o mesmo controlo. O idioma é o
+                `LanguageMenu` segmentado: um menu dentro do menu pedia dois
+                toques. É o mesmo da gaveta da app. */}
             <div className="upm-topbar__site-panel-prefs">
               <div className="upm-topbar__site-panel-group">
                 <span className="upm-topbar__site-panel-label">{t("locale.title")}</span>
-                <div className="upm-segmented" role="radiogroup" aria-label={t("locale.title")}>
-                  {LOCALES.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={locale === value}
-                      className="upm-segmented__option"
-                      onClick={() => {
-                        setMenuAberto(false);
-                        if (value !== locale) trocarIdioma(value);
-                      }}
-                    >
-                      {t(`locale.${value}`)}
-                    </button>
-                  ))}
-                </div>
+                <LanguageMenu
+                  variant="segmented"
+                  locale={locale}
+                  locales={LOCALES.map((value) => ({ value, label: t(`locale.${value}`) }))}
+                  onLocaleChange={(next) => {
+                    setMenuAberto(false);
+                    trocarIdioma(next);
+                  }}
+                  label={t("locale.title")}
+                />
               </div>
               <div className="upm-topbar__site-panel-group">
                 <span className="upm-topbar__site-panel-label">{temaLabels.title}</span>

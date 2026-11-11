@@ -104,7 +104,7 @@ function Fact({
       style={{
         border: "1px solid var(--border)",
         borderRadius: 12,
-        padding: 14,
+        padding: 16,
         background: "var(--surface)",
       }}
     >

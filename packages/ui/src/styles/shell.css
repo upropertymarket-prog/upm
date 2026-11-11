@@ -646,6 +646,72 @@
   }
 }
 
+/* A gaveta do telemóvel (11 nov 2026): ✕ no lugar do botão de recolher,
+   marca e ✕ na mesma linha, e um véu por trás que a fecha ao tocar fora. */
+.upm-sidebar__close,
+.upm-shell__backdrop {
+  display: none;
+}
+
+@media (width < 768px) {
+  .upm-sidebar__brand .upm-sidebar__collapse {
+    display: none;
+  }
+
+  .upm-sidebar__brand .upm-sidebar__close {
+    display: inline-flex;
+  }
+
+  /* O degrau de 1024 px empilha marca e botão (é o rail); na gaveta voltam a
+     ficar lado a lado. */
+  .upm-shell[data-mobile-open="true"] .upm-sidebar__brand {
+    flex-direction: row;
+  }
+
+  .upm-shell__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    /* Por cima da topbar (20), por baixo da gaveta (25). */
+    z-index: calc(var(--z-sidebar) - 1);
+    background: var(--overlay);
+  }
+}
+
+/* Idioma e tema na gaveta (11 nov 2026). Acima de 768 px estão na topbar e a
+   gaveta não existe; abaixo, saem da topbar — que fica com menu, pesquisa e
+   sino — e aparecem no rodapé da gaveta, por cima de "Reportar problema". */
+.upm-sidebar__prefs {
+  display: none;
+}
+
+.upm-sidebar__pref {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: start;
+}
+
+.upm-sidebar__pref-label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+}
+
+@media (width < 768px) {
+  /* Com o contentor à frente: `.upm-segmented` (components.css) também põe
+     `display`, e com a mesma especificidade ganharia quem carregasse depois. */
+  .upm-topbar__actions .upm-topbar__lang,
+  .upm-topbar__actions .upm-topbar__theme {
+    display: none;
+  }
+
+  .upm-sidebar__prefs {
+    display: grid;
+    gap: var(--sp-5);
+    padding-bottom: var(--sp-5);
+  }
+}
+
 /* O botão de menu só existe abaixo de 768 px; acima, quem colapsa é o botão
    junto ao logótipo. */
 .upm-topbar__burger {

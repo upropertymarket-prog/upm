@@ -21,21 +21,22 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
+    // As colunas e o `sticky` estão em `site.css` (`.upm-faq`): o título só
+    // cola quando está ao lado das perguntas. Empilhado, as perguntas passavam
+    // por trás dele ao rolar (cliente, 11 nov 2026).
     <div
+      className="upm-faq"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(min(20rem, 100%), 1fr))",
         gap: "clamp(1.5rem, 4vw, 3rem)",
         alignItems: "start",
       }}
     >
-      {/* Sticky, como o protótipo. Só cola onde há altura para isso. */}
       {/* `maxWidth`: o texto fica com a sua medida de leitura e não estica até
           às perguntas, como no desenho do cliente (8 nov 2026). */}
       <header
+        className="upm-faq__intro"
         style={{
-          position: "sticky",
-          top: "96px",
           display: "grid",
           gap: "var(--sp-3)",
           maxWidth: "26rem",
@@ -57,7 +58,10 @@ export function Faq() {
         </p>
       </header>
 
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-2)" }}>
+      {/* 12 px entre perguntas (eram 6, 11 nov 2026): são cartões com contorno,
+          e a 6 px liam-se como uma tabela. Menos do que os 20–24 px dos outros
+          cartões porque é uma lista de itens da mesma coisa. */}
+      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}>
         {FAQ_IDS.map((itemId, index) => {
           const isOpen = open === index;
           const panelId = `faq-panel-${index}`;
@@ -89,7 +93,7 @@ export function Faq() {
                     // 44 px de alvo: é um controlo de toque grande numa
                     // página pública, não uma ação dentro de uma lista densa.
                     minHeight: "44px",
-                    padding: "var(--sp-3) var(--sp-4)",
+                    padding: "var(--sp-7)",
                     background: "transparent",
                     border: "none",
                     font: "inherit",
@@ -118,7 +122,7 @@ export function Faq() {
                   role="region"
                   aria-labelledby={buttonId}
                   style={{
-                    padding: "0 var(--sp-4) var(--sp-4)",
+                    padding: "0 var(--sp-7) var(--sp-7)",
                     fontSize: "14px",
                     lineHeight: 1.6,
                     color: "var(--muted)",
