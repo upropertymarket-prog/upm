@@ -21,6 +21,7 @@ import {
   PreInscricaoEscuro,
   PreLancamentoClaro,
   PreLancamentoEscuro,
+  PreLancamentoTelemovel,
   RemoverInscricaoClaro,
   RemoverInscricaoEscuro,
 } from "./Ecrans";
@@ -248,12 +249,14 @@ export default function SitePublicoCanvas() {
           home de pré-lançamento a 390 px, a largura de um iPhone, e com a
           altura da página inteira (~11 500 px medidos) para se ver tudo sem
           rolar dentro da moldura. O site é desenhado em `cqi`, medido pela
-          moldura: esta largura dá o mesmo desenho que o telemóvel. */}
+          moldura: esta largura dá o mesmo desenho que o telemóvel. As regras
+          em `svh` não medem a moldura: o componente dá-lhes um ecrã de 844 px
+          (11 nov 2026). */}
       <Storyboard
         id="PreLancamentoTelemovel"
         name="Home · Pré-lançamento · telemóvel 390 px (/)"
-        component={PreLancamentoClaro}
-        layout={{ x: 0, y: 11287, width: 390, height: 11500 }}
+        component={PreLancamentoTelemovel}
+        layout={{ x: 0, y: 11362, width: 390, height: 11510.8505859375 }}
       />
     </Canvas>
   );

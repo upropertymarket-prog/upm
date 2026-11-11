@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
@@ -321,10 +321,17 @@ const cartoesEmBreve = () =>
 function Ecra({
   theme,
   altura,
+  ecraAlto,
   children,
 }: {
   theme: "light" | "dark";
   altura?: string;
+  /**
+   * A altura do ecrã que esta storyboard finge ser, para as regras em `svh`
+   * (o hero do telemóvel, `site.css`). Numa moldura com a página inteira o
+   * `svh` mediria a moldura; isto dá-lhe a altura de um telemóvel.
+   */
+  ecraAlto?: string;
   children: ReactNode;
 }) {
   return (
@@ -335,6 +342,7 @@ function Ecra({
           data-app="web"
           style={{
             minHeight: "100vh",
+            ...(ecraAlto ? ({ "--upm-ecra-alto": ecraAlto } as CSSProperties) : {}),
             background: "var(--bg)",
             color: "var(--text)",
             height: altura,
@@ -356,9 +364,17 @@ const semEfeito = () => undefined;
 /** Os formulários do canvas não submetem: devolvem o estado inicial. */
 const semSubmissao = async () => ({});
 
-function Home({ theme, launchMode }: { theme: "light" | "dark"; launchMode: "pre" | "post" }) {
+function Home({
+  theme,
+  launchMode,
+  ecraAlto,
+}: {
+  theme: "light" | "dark";
+  launchMode: "pre" | "post";
+  ecraAlto?: string;
+}) {
   return (
-    <Ecra theme={theme}>
+    <Ecra theme={theme} ecraAlto={ecraAlto}>
       <HomeSections
         launchMode={launchMode}
         plans={PLANOS}
@@ -375,6 +391,11 @@ function Home({ theme, launchMode }: { theme: "light" | "dark"; launchMode: "pre
 
 export function PreLancamentoClaro() {
   return <Home theme="light" launchMode="pre" />;
+}
+
+/** A home a 390 px com o ecrã de um iPhone (390 × 844) para as regras em `svh`. */
+export function PreLancamentoTelemovel() {
+  return <Home theme="light" launchMode="pre" ecraAlto="844px" />;
 }
 
 export function PreLancamentoEscuro() {

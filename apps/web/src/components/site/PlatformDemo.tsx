@@ -136,7 +136,15 @@ export function PlatformDemo() {
       <div
         role="tablist"
         aria-label={t("profilesLabel")}
-        style={{ display: "flex", gap: "var(--sp-3)", flexWrap: "wrap" }}
+        style={{
+          display: "flex",
+          gap: "var(--sp-3)",
+          flexWrap: "wrap",
+          // Mais ar entre os botões e o simulador (cliente, 11 nov 2026):
+          // somado ao `gap` da grelha dá 24 px. Aqui e não no `gap`, para a
+          // nota por baixo do simulador continuar encostada a ele.
+          marginBottom: "var(--sp-5)",
+        }}
       >
         {TAB_IDS.map((tabId) => (
           <button

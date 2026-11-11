@@ -179,12 +179,17 @@ export function PublicHeader({
                 Até 8 out 2026 isto desenhava os idiomas como dois `<Button>`
                 lado a lado — padrão que não existe em lado nenhum da app e
                 que deixa de caber ao terceiro idioma. */}
-            <LanguageMenu
-              locale={locale}
-              locales={LOCALES.map((value) => ({ value, label: t(`locale.${value}`) }))}
-              onLocaleChange={trocarIdioma}
-              label={t("locale.title")}
-            />
+            {/* Abaixo de 640 px sai para o menu (☰), junto do tema (11 nov
+                2026): com marca, idioma, CTA e ☰ na mesma linha a barra ficava
+                apertada e o CTA perdia o destaque. */}
+            <span className="upm-topbar__site-lang" style={{ display: "contents" }}>
+              <LanguageMenu
+                locale={locale}
+                locales={LOCALES.map((value) => ({ value, label: t(`locale.${value}`) }))}
+                onLocaleChange={trocarIdioma}
+                label={t("locale.title")}
+              />
+            </span>
             {/* Em ecrã estreito sai (`shell.css`, "Barra do site público"): o
                 tema segue o do sistema, e o CTA não pode cair da barra. */}
             <span className="upm-topbar__site-theme" style={{ display: "contents" }}>
@@ -233,9 +238,34 @@ export function PublicHeader({
                 ))}
               </ul>
             </nav>
-            {/* O tema sai da barra abaixo de 640 px; aqui continua à mão. */}
-            <div className="upm-topbar__site-panel-theme">
-              <ThemeToggle variant="segmented" labels={temaLabels} />
+            {/* Idioma e tema saem da barra abaixo de 640 px; aqui continuam à
+                mão, lado a lado e com o mesmo controlo. O idioma é segmentado e
+                não o `LanguageMenu`: um menu dentro do menu pedia dois toques. */}
+            <div className="upm-topbar__site-panel-prefs">
+              <div className="upm-topbar__site-panel-group">
+                <span className="upm-topbar__site-panel-label">{t("locale.title")}</span>
+                <div className="upm-segmented" role="radiogroup" aria-label={t("locale.title")}>
+                  {LOCALES.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={locale === value}
+                      className="upm-segmented__option"
+                      onClick={() => {
+                        setMenuAberto(false);
+                        if (value !== locale) trocarIdioma(value);
+                      }}
+                    >
+                      {t(`locale.${value}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="upm-topbar__site-panel-group">
+                <span className="upm-topbar__site-panel-label">{temaLabels.title}</span>
+                <ThemeToggle variant="segmented" labels={temaLabels} />
+              </div>
             </div>
           </div>
         ) : null}

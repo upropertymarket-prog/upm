@@ -731,9 +731,29 @@
   }
 }
 
-/* O tema dentro do menu só é preciso quando saiu da barra. */
+/* Idioma e tema no fundo do menu, lado a lado; partem em duas linhas se não
+   couberem. */
+.upm-topbar__site-panel-prefs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4) var(--sp-6);
+}
+
+.upm-topbar__site-panel-group {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: start;
+}
+
+.upm-topbar__site-panel-label {
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+}
+
+/* Idioma e tema dentro do menu só são precisos quando saíram da barra. */
 @container (width >= 640px) {
-  .upm-topbar__site-panel-theme {
+  .upm-topbar__site-panel-prefs {
     display: none;
   }
 }
@@ -751,11 +771,12 @@
 }
 
 @container (width < 640px) {
-  .upm-topbar__site-theme {
+  .upm-topbar__site-theme,
+  .upm-topbar__site-lang {
     display: none !important;
   }
 
-  /* Marca, idioma, CTA e menu em 360 px: o espaço entre blocos encolhe. */
+  /* Marca, CTA e menu em 360 px: o espaço entre blocos encolhe. */
   .upm-topbar__inner:has(.upm-topbar__site-nav) {
     column-gap: var(--sp-3) !important;
   }

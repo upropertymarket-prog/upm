@@ -33,11 +33,20 @@
  * O `vw` do MAST passa a `cqi` pela razão de cima. A margem escreve-se como
  * `padding` em vez de largura máxima, que dá o mesmo resultado e deixa o
  * hero usá-la como faixa da grelha.
+ *
+ * **Excepção ao MAST no telemóvel (cliente, 11 nov 2026): 20 px de margem.**
+ * Os 6 % davam 23 px a 390. Sem media query não há degrau, por isso a margem
+ * sobe em rampa: `6.667cqi − 6px` vale 20 px a 390 e encontra os 6 % aos 900
+ * px de largura; daí para cima manda o MAST. Abaixo de 390 fica nos 20 px.
  */
 
 :root {
   --site-max: 1440px;
-  --site-gutter: max(6cqi, calc((100cqi - var(--site-max)) / 2));
+  --site-gutter: max(
+    20px,
+    min(6cqi, calc(6.6667cqi - 6px)),
+    calc((100cqi - var(--site-max)) / 2)
+  );
   --site-gap: 40px;
   --site-section-y: clamp(3rem, calc(2.1429rem + 4.2857cqi), 6rem);
 }
@@ -97,16 +106,32 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* Numa coluna (telemóvel) o texto ocupa 60 % da altura do ecrã (cliente, 11
+   nov 2026), com o mesmo arranjo do desktop: o bloco principal ao centro e os
+   números no fundo. `vh` primeiro como recurso para quem não conhece `svh`;
+   `svh` é a altura com a barra do browser à vista, e não salta ao rolar. A
+   fotografia vem por baixo e espreita no fundo do ecrã.
+   **Com teto de 44rem (704 px)**: num ecrã alto (tablet ao alto) o hero não
+   cresce sem fim, e no canvas a moldura acompanha a altura do conteúdo — sem
+   teto, os 60 % voltavam a esticá-la e a página crescia sem parar.
+   **`--upm-ecra-alto` é só para o canvas** e no site nunca é definida: a
+   storyboard de telemóvel mostra a página inteira numa moldura de 11 500 px, e
+   aí `svh` media a moldura e não um ecrã. A storyboard dá-lhe a altura de um
+   telemóvel (`Ecrans.tsx`); sem ela vale `100svh`. */
 .upm-hero__text {
   display: grid;
   gap: var(--sp-6);
-  align-content: center;
+  grid-template-rows: 1fr auto;
+  align-content: stretch;
+  min-height: min(60vh, 44rem);
+  min-height: min(calc(var(--upm-ecra-alto, 100svh) * 0.6), 44rem);
   padding: clamp(2.5rem, 8cqi, 6rem) var(--site-gutter);
 }
 
 .upm-hero__main {
   display: grid;
   gap: var(--sp-5);
+  align-self: center;
 }
 
 .upm-hero__media {
@@ -145,13 +170,10 @@
      cliente, 8 nov 2026). */
   .upm-hero__text {
     grid-column: 2;
-    grid-template-rows: 1fr auto;
-    align-content: stretch;
+    /* A altura aqui é a da grelha, medida pela largura; os 60 % do ecrã são
+       só do telemóvel. */
+    min-height: 0;
     padding: clamp(3rem, 6cqi, 6rem) clamp(2rem, 5cqi, 5rem) clamp(1.75rem, 3cqi, 3rem) 0;
-  }
-
-  .upm-hero__main {
-    align-self: center;
   }
 
   .upm-hero__media {
