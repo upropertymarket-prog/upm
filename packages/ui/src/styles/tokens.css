@@ -295,6 +295,14 @@
   font-size: 13px;
 }
 
+/* Títulos H1 e H2 do site a 600 em vez de 700 (cliente, 11 nov 2026): são
+   grandes (28–56 px), a hierarquia vem do tamanho, e a Bricolage a 700 ficava
+   pesada — sobretudo em escuro. Pré e pós-lançamento, todas as páginas
+   públicas. A demonstração fica de fora: mostra a app, que continua a 700. */
+[data-app="web"] :is(h1, h2):not(.upm-demo-shell *) {
+  font-weight: var(--fw-semibold);
+}
+
 /* Mais ar do rótulo ao campo nos formulários do site (11 nov 2026): 8 px em
    vez de 6. A app continua nos 6. */
 [data-app="web"] .upm-field {

@@ -50,7 +50,8 @@ export function LegalDocumentView({
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "var(--fs-title)",
-            fontWeight: "var(--fw-bold)",
+            // 600 como os outros títulos do site (11 nov 2026, `tokens.css`).
+            fontWeight: "var(--fw-semibold)",
             lineHeight: "var(--lh-tight)",
             letterSpacing: "var(--ls-title)",
             margin: 0,
