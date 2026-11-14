@@ -4,7 +4,6 @@ import { Link } from "@/i18n/navigation";
 import type { StaticSitePathname } from "@/i18n/routing";
 import { Brand } from "@upm/ui";
 
-import { SITE_IMAGES } from "../../lib/site-content";
 import "./auth.css";
 
 /**
@@ -21,9 +20,9 @@ import "./auth.css";
  *
  * **14 nov 2026 — duas metades.** Logótipo e formulário continuavam a ser
  * pouco: a página não aproveitava a mensagem do site. À esquerda passa a
- * estar o painel da marca — a fotografia do hero sob um véu escuro, "Compre e
- * venda. Sem comissões." e os três números —, à direita o formulário, sem
- * cartão. O painel é igual em todas as páginas: é a marca, não o ecrã.
+ * estar o painel da marca — fundo azul-marinho, "Compre e venda. Sem
+ * comissões." e os três números —, à direita o formulário, sem cartão. O
+ * painel é igual em todas as páginas: é a marca, não o ecrã.
  * Layout em `auth.css`.
  */
 
@@ -82,24 +81,11 @@ function ArrowUpRight() {
 /** O painel da marca: igual em todas as páginas de autenticação. */
 function AuthBrandPanel() {
   const t = useTranslations("auth.shell.pitch");
-  const photo = SITE_IMAGES.hero;
 
   return (
     // Ilha em tema escuro: os tokens (texto, acento, logótipo) trocam sozinhos,
     // seja a página clara ou escura.
     <aside className="upm-auth__brand" data-theme="dark">
-      {photo ? (
-        // eslint-disable-next-line @next/next/no-img-element -- o canvas não tem o Next; ver `SiteImage`.
-        <img
-          className="upm-auth__photo"
-          src={photo.src}
-          alt=""
-          width={photo.width}
-          height={photo.height}
-          decoding="async"
-        />
-      ) : null}
-
       <div className="upm-auth__brand-inner">
         {/* O wordmark leva ao site público: é a saída de quem chegou aqui por
             engano. `Brand` é o componente do design system (07 §10.1). */}
@@ -157,7 +143,7 @@ export function AuthShell({
 
         <div className="upm-auth__main">
           {switchPrompt && switchHref && switchLabel ? (
-            <p className="upm-auth__top" style={{ margin: 0 }}>
+            <p className="upm-auth__top" style={{ margin: 0, justifyContent: "space-between" }}>
               <span>{switchPrompt}</span>
               <Link href={switchHref} className="upm-auth__switch">
                 {switchLabel}

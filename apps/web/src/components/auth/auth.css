@@ -1,8 +1,8 @@
 /**
  * Moldura dos ecrãs de autenticação (14 nov 2026)
  * =========================================================================
- * Duas metades: à esquerda o painel da marca — fotografia do hero sob um véu
- * escuro, a promessa "sem comissões" e os números do site —, à direita o
+ * Duas metades: à esquerda o painel da marca — fundo azul-marinho, a promessa
+ * "sem comissões" e os números do site —, à direita o
  * formulário, sem cartão, com a troca entrar/criar conta em cima e o rodapé
  * legal em baixo.
  *
@@ -30,34 +30,12 @@
 /* --- Painel da marca ---------------------------------------------------- */
 
 /* O painel é uma ilha em tema escuro (`data-theme="dark"` no JSX): os tokens
-   — texto, acento, logótipo — trocam sozinhos, nos dois temas da página. */
+   — texto, acento, logótipo — trocam sozinhos, nos dois temas da página. O
+   fundo é o `--surface2` escuro (#101b2e), o azul-marinho dos cartões da app:
+   sem fotografia, e distinto do `--bg` da página escura. */
 .upm-auth__brand {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: var(--bg);
+  background: var(--surface2);
   color: var(--text);
-}
-
-.upm-auth__photo {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* O véu: mais leve em cima, onde a fotografia respira, e quase opaco em baixo,
-   onde estão o título e os números. */
-.upm-auth__brand::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(120% 60% at 0% 100%, rgb(234 88 12 / 22%), transparent 60%),
-    linear-gradient(180deg, rgb(5 10 22 / 70%) 0%, rgb(5 10 22 / 86%) 45%, rgb(5 10 22 / 96%) 100%);
 }
 
 .upm-auth__brand-inner {

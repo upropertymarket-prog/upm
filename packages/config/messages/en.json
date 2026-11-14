@@ -1319,7 +1319,6 @@
       },
       "contract": {
         "title": "Confirm what you are subscribing to",
-        "pendingReview": "These Terms and Conditions are a DRAFT PENDING LEGAL REVIEW. The text will be replaced by the reviewed version before launch; the version you accept now is recorded.",
         "plan": "Plan",
         "price": "Price",
         "interval": "Billing period",
@@ -1444,6 +1443,28 @@
           "direct": { "value": "1:1", "label": "between buyer and owner" }
         }
       }
+    },
+    "staffShell": {
+      "eyebrow": "Internal area · team",
+      "headline": "Access reserved for the UProperty Market team.",
+      "lead": "Platform management, moderation, support and marketing — in one place, with the same rules for everyone.",
+      "assurances": {
+        "twoFactor": {
+          "title": "Two-step verification",
+          "text": "Required on every team account, at every sign-in."
+        },
+        "pin": {
+          "title": "PIN for sensitive operations",
+          "text": "Actions that change accounts and data ask for a second confirmation."
+        },
+        "audit": {
+          "title": "Audit log",
+          "text": "Every operation is recorded, with who did it and when."
+        }
+      },
+      "restricted": "Area reserved for team members",
+      "monitored": "Restricted and monitored access",
+      "copyright": "© {year} UProperty Market"
     },
     "staffRecovery": {
       "title": "Recover your password",
