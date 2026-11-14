@@ -83,9 +83,7 @@ function StaffPanel() {
             <li key={id} className="upm-iauth__assurance">
               <span className="upm-iauth__assurance-icon">{ICONS[id]}</span>
               <span>
-                <span className="upm-iauth__assurance-title">
-                  {t(`assurances.${id}.title`)}
-                </span>
+                <span className="upm-iauth__assurance-title">{t(`assurances.${id}.title`)}</span>
                 <span className="upm-iauth__assurance-text">{t(`assurances.${id}.text`)}</span>
               </span>
             </li>
