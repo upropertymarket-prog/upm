@@ -62,6 +62,7 @@ export async function setProfileStatus(input: unknown): Promise<ProfileStatusAct
   }
 
   revalidatePath("/admin/utilizadores");
+  revalidatePath("/admin/equipa");
   revalidatePath("/admin/painel");
   return { ok: true };
 }
@@ -239,6 +240,7 @@ export async function deleteStaffAccount(input: unknown): Promise<StaffExitActio
     return { error: "The account could not be deleted." };
   }
   revalidatePath("/admin/utilizadores");
+  revalidatePath("/admin/equipa");
   revalidatePath("/admin/painel");
   return { ok: true };
 }

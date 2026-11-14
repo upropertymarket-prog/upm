@@ -77,21 +77,23 @@ export function InternalChrome({
     installBreadcrumbs();
   }, []);
 
-  const { entries, groupKey } = navFor(role);
-
-  const navItems: NavItem[] = entries.map((entry) => ({
-    id: entry.id,
-    label: t(`nav.${entry.titleKey}`),
-    href: entry.href,
-    icon: createElement(entry.icon, { size: 17 }),
-    count: entry.counter ? counters[entry.id] : undefined,
+  // O Admin tem quatro grupos (14 nov 2026); o Suporte e o Marketing, um.
+  const navGroups = navFor(role).map((group) => ({
+    label: t(`sidebar.groups.${group.labelKey}`),
+    items: group.entries.map((entry): NavItem => ({
+      id: entry.id,
+      label: t(`nav.${entry.titleKey}`),
+      href: entry.href,
+      icon: createElement(entry.icon, { size: 17 }),
+      count: entry.counter ? counters[entry.id] : undefined,
+    })),
   }));
 
   return (
     <AppShell
       fill={fill}
       sidebar={{
-        groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
+        groups: navGroups,
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
         onReport: () => setReportOpen(true),

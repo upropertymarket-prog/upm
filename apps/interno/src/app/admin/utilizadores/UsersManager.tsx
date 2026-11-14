@@ -120,7 +120,19 @@ function dateLabel(value: string | null, locale: string) {
   }).format(new Date(value));
 }
 
-function makeHref(filters: UserFilters, extra: Record<string, string | null> = {}) {
+/**
+ * Utilizadores e Equipa são duas páginas (14 nov 2026): o cliente pediu que a
+ * equipa interna e quem usa a app nunca aparecessem na mesma lista. O ecrã é o
+ * mesmo; muda o público, e com ele o endereço, os papéis e as colunas.
+ */
+export type DirectoryAudience = "clients" | "staff";
+
+const BASE_PATH: Record<DirectoryAudience, string> = {
+  clients: "/admin/utilizadores",
+  staff: "/admin/equipa",
+};
+
+function makeHref(base: string, filters: UserFilters, extra: Record<string, string | null> = {}) {
   const params = new URLSearchParams();
   if (filters.search) params.set("search", filters.search);
   if (filters.role) params.set("role", filters.role);
@@ -131,7 +143,7 @@ function makeHref(filters: UserFilters, extra: Record<string, string | null> = {
     else params.delete(key);
   }
   const query = params.toString();
-  return query ? "/admin/utilizadores?" + query : "/admin/utilizadores";
+  return query ? base + "?" + query : base;
 }
 
 function ProfileAccessLogger({
@@ -148,6 +160,7 @@ function ProfileAccessLogger({
 }
 
 export function UsersManager({
+  audience = "clients",
   users,
   plans,
   filters,
@@ -166,6 +179,8 @@ export function UsersManager({
   onDeleteAccount,
   initialExitDialog,
 }: {
+  /** Clientes da app ou equipa interna — nunca os dois na mesma lista. */
+  audience?: DirectoryAudience;
   users: UserDirectoryRow[];
   plans: Array<{ id: string; name: string }>;
   filters: UserFilters;
@@ -199,6 +214,8 @@ export function UsersManager({
   const t = useTranslations("admin.users");
   const tc = useTranslations("common");
   const tp = useTranslations("pagination");
+  const basePath = BASE_PATH[audience];
+  const isStaff = audience === "staff";
   const [statusTarget, setStatusTarget] = useState<"active" | "suspended" | null>(null);
   const [reason, setReason] = useState("");
   const [actionFailed, setActionFailed] = useState(false);
@@ -261,7 +278,7 @@ export function UsersManager({
       const result = await onDeleteAccount({ profileId });
       if (!exitResult(result, () => deleteAccount(profileId))) return;
       // O perfil já não existe: fecha-se o painel.
-      window.location.assign(makeHref(filters));
+      window.location.assign(makeHref(basePath, filters));
     });
   }
 
@@ -313,16 +330,23 @@ export function UsersManager({
       ),
     },
     { id: "role", header: t("role"), cell: (row) => roleLabel(row.role, t) },
-    {
-      id: "plan",
-      header: t("plan"),
-      cell: (row) =>
-        row.plan_name ? (
-          <StatusTag tone={PLAN_TONE[row.plan_slug ?? ""] ?? "draft"}>{row.plan_name}</StatusTag>
-        ) : (
-          t("noPlan")
-        ),
-    },
+    // A equipa não tem plano: a coluna só dizia "Sem plano" em todas as linhas.
+    ...(isStaff
+      ? []
+      : [
+          {
+            id: "plan",
+            header: t("plan"),
+            cell: (row) =>
+              row.plan_name ? (
+                <StatusTag tone={PLAN_TONE[row.plan_slug ?? ""] ?? "draft"}>
+                  {row.plan_name}
+                </StatusTag>
+              ) : (
+                t("noPlan")
+              ),
+          } satisfies TableColumn<UserDirectoryRow>,
+        ]),
     {
       id: "status",
       header: t("status"),
@@ -334,14 +358,14 @@ export function UsersManager({
   function changePage(nextPage: number) {
     if (nextPage === pageInfo.page) return;
     if (nextPage === 1) {
-      window.location.assign(makeHref(filters));
+      window.location.assign(makeHref(basePath, filters));
       return;
     }
     const isNext = nextPage > pageInfo.page;
     const cursor = isNext ? pageInfo.lastCursor : pageInfo.firstCursor;
     if (!cursor) return;
     window.location.assign(
-      makeHref(filters, {
+      makeHref(basePath, filters, {
         cursor_created_at: cursor.createdAt,
         cursor_id: cursor.id,
         direction: isNext ? "next" : "prev",
@@ -358,16 +382,22 @@ export function UsersManager({
       <div className="flex flex-col gap-6">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-text">{t("title")}</h1>
-            <p className="mt-1 text-sm text-muted">{t("subtitle")}</p>
+            <h1 className="text-2xl font-semibold text-text">
+              {isStaff ? t("teamTitle") : t("title")}
+            </h1>
+            <p className="mt-1 text-sm text-muted">{isStaff ? t("teamSubtitle") : t("subtitle")}</p>
           </div>
         </header>
 
         <Card padded>
           <form
-            action="/admin/utilizadores"
+            action={basePath}
             method="get"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]"
+            className={
+              isStaff
+                ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_auto]"
+                : "grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]"
+            }
           >
             <Input
               name="search"
@@ -380,13 +410,18 @@ export function UsersManager({
               label={t("roleFilter")}
               defaultValue={filters.role}
               placeholder={t("allRoles")}
-              options={[
-                { value: "buyer", label: t("buyer") },
-                { value: "owner", label: t("owner") },
-                { value: "admin", label: t("adminRole") },
-                { value: "support", label: t("support") },
-                { value: "marketing", label: t("marketing") },
-              ]}
+              options={
+                isStaff
+                  ? [
+                      { value: "admin", label: t("adminRole") },
+                      { value: "support", label: t("support") },
+                      { value: "marketing", label: t("marketing") },
+                    ]
+                  : [
+                      { value: "buyer", label: t("buyer") },
+                      { value: "owner", label: t("owner") },
+                    ]
+              }
             />
             <Select
               name="status"
@@ -399,13 +434,15 @@ export function UsersManager({
                 { value: "suspended", label: t("suspended") },
               ]}
             />
-            <Select
-              name="plan"
-              label={t("planFilter")}
-              defaultValue={filters.planId}
-              placeholder={t("allPlans")}
-              options={plans.map((plan) => ({ value: plan.id, label: plan.name }))}
-            />
+            {isStaff ? null : (
+              <Select
+                name="plan"
+                label={t("planFilter")}
+                defaultValue={filters.planId}
+                placeholder={t("allPlans")}
+                options={plans.map((plan) => ({ value: plan.id, label: plan.name }))}
+              />
+            )}
             <div className="flex items-end justify-end sm:col-span-2 xl:col-span-1">
               <Button type="submit">{t("applyFilters")}</Button>
             </div>
@@ -437,7 +474,9 @@ export function UsersManager({
                 rows={users}
                 rowKey={(row) => row.id}
                 selectedKey={selectedProfile?.id}
-                onRowClick={(row) => window.location.assign(makeHref(filters, { id: row.id }))}
+                onRowClick={(row) =>
+                  window.location.assign(makeHref(basePath, filters, { id: row.id }))
+                }
               />
               <Pagination
                 page={pageInfo.page}
@@ -461,7 +500,7 @@ export function UsersManager({
           subtitle={selectedProfile.full_name || selectedProfile.email}
           closeLabel={t("closeDrawer")}
           footerStyle={{ justifyContent: "center" }}
-          onClose={() => window.location.assign(makeHref(filters))}
+          onClose={() => window.location.assign(makeHref(basePath, filters))}
           footer={
             selectedProfile.status === "active" || selectedProfile.status === "suspended" ? (
               <Button
@@ -503,40 +542,45 @@ export function UsersManager({
 
           <section className="mt-6 grid gap-3">
             <h3 className="text-sm font-semibold text-text">{t("accountDetails")}</h3>
-            <DetailRow
-              label={t("plan")}
-              value={
-                selectedProfile.plan_name ? (
-                  <StatusTag tone={PLAN_TONE[selectedProfile.plan_slug ?? ""] ?? "draft"}>
-                    {selectedProfile.plan_name}
-                  </StatusTag>
-                ) : (
-                  t("noPlan")
-                )
-              }
-            />
-            <DetailRow
-              label={t("subscription")}
-              value={
-                selectedProfile.subscription_status
-                  ? t(
-                      selectedProfile.subscription_status === "trialing"
-                        ? "trialing"
-                        : selectedProfile.subscription_status === "past_due"
-                          ? "pastDue"
-                          : "active",
+            {/* Plano e subscrição só existem para quem usa a app. */}
+            {isStaff ? null : (
+              <>
+                <DetailRow
+                  label={t("plan")}
+                  value={
+                    selectedProfile.plan_name ? (
+                      <StatusTag tone={PLAN_TONE[selectedProfile.plan_slug ?? ""] ?? "draft"}>
+                        {selectedProfile.plan_name}
+                      </StatusTag>
+                    ) : (
+                      t("noPlan")
                     )
-                  : t("noSubscription")
-              }
-            />
-            <DetailRow
-              label={t("trialEndsAt")}
-              value={dateLabel(selectedProfile.trial_ends_at, locale)}
-            />
-            <DetailRow
-              label={t("periodEndsAt")}
-              value={dateLabel(selectedProfile.current_period_end, locale)}
-            />
+                  }
+                />
+                <DetailRow
+                  label={t("subscription")}
+                  value={
+                    selectedProfile.subscription_status
+                      ? t(
+                          selectedProfile.subscription_status === "trialing"
+                            ? "trialing"
+                            : selectedProfile.subscription_status === "past_due"
+                              ? "pastDue"
+                              : "active",
+                        )
+                      : t("noSubscription")
+                  }
+                />
+                <DetailRow
+                  label={t("trialEndsAt")}
+                  value={dateLabel(selectedProfile.trial_ends_at, locale)}
+                />
+                <DetailRow
+                  label={t("periodEndsAt")}
+                  value={dateLabel(selectedProfile.current_period_end, locale)}
+                />
+              </>
+            )}
             <DetailRow
               label={t("createdAt")}
               value={dateLabel(selectedProfile.created_at, locale)}
@@ -617,7 +661,7 @@ export function UsersManager({
           open
           title={t("drawerTitle")}
           closeLabel={t("closeDrawer")}
-          onClose={() => window.location.assign(makeHref(filters))}
+          onClose={() => window.location.assign(makeHref(basePath, filters))}
         >
           <p className="text-sm text-danger" role="alert">
             {t("detailFailed")}

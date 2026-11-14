@@ -50,7 +50,11 @@
       "manage": "Manage",
       "admin": "Administration",
       "support": "Support",
-      "marketing": "Marketing"
+      "marketing": "Marketing",
+      "adminGeneral": "General",
+      "adminClients": "Client management",
+      "adminBusiness": "Site and business",
+      "adminTeam": "Team and system"
     }
   },
   "greeting": {
@@ -75,6 +79,7 @@
     "visitSchedule": "Visit schedule",
     "newProperty": "New property",
     "users": "Users",
+    "team": "Internal team",
     "propertyModeration": "Property moderation",
     "siteTraffic": "Site traffic",
     "plans": "Plans",
@@ -1635,7 +1640,9 @@
   "admin": {
     "users": {
       "title": "Users",
-      "subtitle": "Accounts, plans, and access status",
+      "subtitle": "Buyers and owners: accounts, plans and access status",
+      "teamTitle": "Internal team",
+      "teamSubtitle": "Team accounts: administration, support and marketing",
       "search": "Search name or email",
       "searchHint": "Enter a name or email",
       "roleFilter": "Role",
