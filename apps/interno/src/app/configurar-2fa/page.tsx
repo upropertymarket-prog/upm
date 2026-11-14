@@ -1,65 +1,33 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 
 import { AuthCard } from "../../components/AuthCard";
 import { EnrollForm } from "./EnrollForm";
 
+/**
+ * Configurar a 2FA (07 §6).
+ *
+ * O render **não cria nem apaga fatores** (14 nov 2026). Criava-os — apagava o
+ * fator por verificar e criava outro —, e cada re-render, incluindo o que vem
+ * na resposta da Server Action de verificação, trocava o QR que a pessoa
+ * acabara de ler: a app de autenticação ficava com um fator que já não
+ * existia, e nenhum código passava. O fator nasce agora em `startEnrollment`,
+ * chamado uma vez pelo formulário, e o QR fica no estado do cliente.
+ *
+ * Quem já tem a 2FA não chega cá — o middleware desvia-o —, e um código certo
+ * redireciona para `/` dentro da própria action.
+ */
 export default async function SetupTwoFactorPage() {
   const supabase = createClient(await cookies());
-  const t = await getTranslations("auth.mfa.enroll");
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar");
 
-  const { data: existing } = await supabase.auth.mfa.listFactors();
-  const totp = (existing?.all ?? []).filter((factor) => factor.factor_type === "totp");
-
-  // Com um fator **verificado**, esta página só se desenha num caso: logo a
-  // seguir à configuração. A Server Action mexe nos cookies, e o Next volta a
-  // desenhar a página dentro da mesma resposta — é nessa resposta que o
-  // formulário mostra os códigos de recuperação. Aqui não se cria nem se
-  // apaga nada, e não se redireciona (levava a pessoa embora antes de ver os
-  // códigos): devolve-se o mesmo ecrã, e o estado do cliente mantém os códigos.
-  // Uma visita normal com 2FA já não chega cá — o middleware desvia-a.
-  //
-  // Até 2 nov o filtro de baixo apanhava também os fatores verificados: nesta
-  // mesma re-renderização, a página apagava o fator acabado de verificar. O 2FA
-  // de staff nunca ficava — cada entrada voltava a "configure o 2FA". Foi o E2E
-  // do A5 que o mostrou.
-  const verified = totp.find((factor) => factor.status === "verified");
-  if (verified) {
-    return (
-      <AuthCard>
-        <EnrollForm factorId={verified.id} qrCode="" secret="" />
-      </AuthCard>
-    );
-  }
-
-  // Limpa só os fatores **por verificar** de tentativas anteriores (QR
-  // expirado sem terminar) — nunca há mais de um fator ativo por staff.
-  for (const factor of totp.filter((factor) => factor.status === "unverified")) {
-    await supabase.auth.mfa.unenroll({ factorId: factor.id });
-  }
-
-  const { data: enrollment, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
-  if (error || !enrollment) {
-    return (
-      <AuthCard>
-        <p className="text-danger">{t("startFailed")}</p>
-      </AuthCard>
-    );
-  }
-
   return (
     <AuthCard>
-      <EnrollForm
-        factorId={enrollment.id}
-        qrCode={enrollment.totp.qr_code}
-        secret={enrollment.totp.secret}
-      />
+      <EnrollForm />
     </AuthCard>
   );
 }

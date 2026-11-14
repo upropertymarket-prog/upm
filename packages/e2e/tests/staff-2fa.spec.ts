@@ -46,6 +46,14 @@ test("o staff configura o 2FA na primeira entrada e é pedido o código nas segu
   const segredo = (await pagina.locator("p.font-mono").first().textContent())!.trim();
   expect(segredo).toMatch(/^[A-Z2-7]{16,}$/);
 
+  // Um código errado não pode trocar o QR (14 nov 2026): a página criava um
+  // fator novo a cada render, e o re-render da resposta da action deixava a app
+  // de autenticação com um fator que já não existia — nenhum código passava.
+  await pagina.getByLabel(t("auth.mfa.enroll.codeLabel")).fill("000000");
+  await pagina.getByRole("button", { name: t("auth.mfa.enroll.submit") }).click();
+  await expect(pagina.getByRole("alert")).toBeVisible();
+  await expect(pagina.locator("p.font-mono").first()).toHaveText(segredo);
+
   const primeiroCodigo = codigo(segredo);
   await pagina.getByLabel(t("auth.mfa.enroll.codeLabel")).fill(primeiroCodigo);
   await pagina.getByRole("button", { name: t("auth.mfa.enroll.submit") }).click();
