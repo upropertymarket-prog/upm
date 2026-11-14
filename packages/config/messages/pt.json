@@ -1358,6 +1358,7 @@
       "suspended": "Esta conta está suspensa. Contacte o suporte para pedir ajuda.",
       "staffBlocked": "Contas de equipa acedem em interno.upropertymarket.pt, não aqui.",
       "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
+      "welcomeTitle": "Sem pressões, ao seu ritmo.",
       "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens.",
       "passwordSet": "Palavra-passe definida. Entre com a palavra-passe nova e o código da sua app.",
       "linkInvalid": "O link expirou ou já foi usado. Peça um novo."
@@ -1429,7 +1430,20 @@
       "createAccount": "Criar conta",
       "haveAccount": "Já tem conta?",
       "signIn": "Entrar",
-      "rememberedPassword": "Lembrou-se da palavra-passe?"
+      "rememberedPassword": "Lembrou-se da palavra-passe?",
+      "copyright": "© {year} UProperty Market",
+      "legalNav": "Documentos legais",
+      "pitch": {
+        "eyebrow": "Your property, your choice",
+        "headline": "Compre e venda.",
+        "headlineAccent": "Sem comissões.",
+        "lead": "Compradores e proprietários falam diretamente, ao seu ritmo. Sem intermediários, sem pressões, sem surpresas no fim.",
+        "stats": {
+          "commission": { "value": "0 %", "label": "de comissão" },
+          "privacy": { "value": "100 %", "label": "contactos privados" },
+          "direct": { "value": "1:1", "label": "entre comprador e proprietário" }
+        }
+      }
     },
     "staffRecovery": {
       "title": "Recuperar a palavra-passe",

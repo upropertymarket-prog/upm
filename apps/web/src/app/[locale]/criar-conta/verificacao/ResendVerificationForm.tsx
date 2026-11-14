@@ -28,7 +28,7 @@ export function ResendVerificationForm({ email, action }: ResendVerificationForm
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col items-center gap-2">
+    <form action={formAction} className="flex flex-col items-start gap-2">
       <input type="hidden" name="email" value={email} />
       <Button type="submit" variant="secondary" disabled={pending}>
         {t("resend")}

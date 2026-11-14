@@ -102,7 +102,9 @@ const demoTerms = {
 
 function Ecra({ theme, children }: { theme: "light" | "dark"; children: React.ReactNode }) {
   return (
-    <div data-theme={theme}>
+    // `--upm-ecra-alto`: a moldura tem 900 px, e é esse o ecrã que o painel da
+    // marca deve encher — sem a variável, `svh` mede a moldura e não um ecrã.
+    <div data-theme={theme} style={{ "--upm-ecra-alto": "900px" } as React.CSSProperties}>
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         {children}
       </NextIntlClientProvider>
@@ -114,7 +116,7 @@ function Entrar({ theme }: { theme: "light" | "dark" }) {
   return (
     <Ecra theme={theme}>
       <AuthShell
-        title="Entrar"
+        title="Sem pressões, ao seu ritmo."
         subtitle="Entre para gerir os seus imóveis, visitas e mensagens."
         switchPrompt="Ainda não tem conta?"
         switchHref="/criar-conta"
@@ -222,7 +224,6 @@ function PedirRecuperacao({ theme }: { theme: "light" | "dark" }) {
   return (
     <Ecra theme={theme}>
       <AuthShell
-        subtitle="Indique o e-mail da conta e enviamos um link para definir uma nova palavra-passe."
         switchPrompt="Lembrou-se da palavra-passe?"
         switchHref="/entrar"
         switchLabel="Entrar"
@@ -240,7 +241,6 @@ function NovaPalavraPasse({ theme }: { theme: "light" | "dark" }) {
   return (
     <Ecra theme={theme}>
       <AuthShell
-        subtitle="Escolha uma palavra-passe nova. Tem de ter pelo menos 10 caracteres."
         switchPrompt="Lembrou-se da palavra-passe?"
         switchHref="/entrar"
         switchLabel="Entrar"

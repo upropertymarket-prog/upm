@@ -54,9 +54,9 @@ export function LoginForm({ next, action }: LoginFormProps) {
         {t("submit")}
       </Button>
       {/* Só a recuperação fica no formulário. A troca para "criar conta" vive
-          no `AuthShell`, abaixo do cartão (7 out 2026) — tê-la nos dois sítios
+          no `AuthShell`, no topo da coluna (7 out 2026) — tê-la nos dois sítios
           era repetir o mesmo link a dois centímetros de distância. */}
-      <div className="text-sm">
+      <div className="text-center text-sm">
         <Link href="/recuperar-palavra-passe" className="text-accent hover:underline">
           {t("forgotPassword")}
         </Link>

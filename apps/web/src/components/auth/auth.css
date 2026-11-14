@@ -1,0 +1,274 @@
+/**
+ * Moldura dos ecrãs de autenticação (14 nov 2026)
+ * =========================================================================
+ * Duas metades: à esquerda o painel da marca — fotografia do hero sob um véu
+ * escuro, a promessa "sem comissões" e os números do site —, à direita o
+ * formulário, sem cartão, com a troca entrar/criar conta em cima e o rodapé
+ * legal em baixo.
+ *
+ * Tudo em `cqi` e container queries, nunca `vw` nem media queries: no canvas a
+ * storyboard é uma moldura dentro da janela do Tempo, e só o contentor sabe a
+ * largura que tem. Abaixo de 900 px de página o painel passa a uma faixa por
+ * cima do formulário — o mesmo limite do hero e do `.upm-split`.
+ *
+ * A altura passa por `--upm-ecra-alto`, como no hero: no site nunca é definida
+ * e vale `100svh`; o canvas dá-lhe a altura da moldura.
+ */
+
+.upm-auth {
+  container-type: inline-size;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.upm-auth__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: var(--upm-ecra-alto, 100svh);
+}
+
+/* --- Painel da marca ---------------------------------------------------- */
+
+/* O painel é uma ilha em tema escuro (`data-theme="dark"` no JSX): os tokens
+   — texto, acento, logótipo — trocam sozinhos, nos dois temas da página. */
+.upm-auth__brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.upm-auth__photo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* O véu: mais leve em cima, onde a fotografia respira, e quase opaco em baixo,
+   onde estão o título e os números. */
+.upm-auth__brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(120% 60% at 0% 100%, rgb(234 88 12 / 22%), transparent 60%),
+    linear-gradient(180deg, rgb(5 10 22 / 70%) 0%, rgb(5 10 22 / 86%) 45%, rgb(5 10 22 / 96%) 100%);
+}
+
+.upm-auth__brand-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem max(20px, 6cqi);
+}
+
+.upm-auth__pitch {
+  display: grid;
+  gap: var(--sp-7);
+}
+
+.upm-auth__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.upm-auth__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: clamp(2rem, 4.2cqi, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.upm-auth__headline-accent {
+  display: block;
+  color: var(--accent);
+}
+
+.upm-auth__lead {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.upm-auth__stats {
+  list-style: none;
+  margin: 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-7);
+}
+
+.upm-auth__stat {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.upm-auth__stat-value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: clamp(1.5rem, 2.2cqi, 2rem);
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.upm-auth__stat-label {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* No telemóvel a faixa leva só a marca e o título: os números e o texto
+   empurravam o formulário para fora do primeiro ecrã. */
+.upm-auth__lead,
+.upm-auth__stats {
+  display: none;
+}
+
+/* --- Formulário ---------------------------------------------------------- */
+
+.upm-auth__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+  padding: 1.5rem max(20px, 6cqi);
+}
+
+.upm-auth__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-3) var(--sp-5);
+  font-size: var(--fs-body);
+  color: var(--muted);
+}
+
+.upm-auth__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.upm-auth__switch:hover {
+  color: var(--accent);
+}
+
+.upm-auth__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upm-auth__form {
+  position: relative; /* o honeypot do `LoginForm` é `absolute` */
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+  width: 100%;
+}
+
+.upm-auth__heading {
+  display: grid;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.upm-auth__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 2.8cqi, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.upm-auth__subtitle {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.upm-auth__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3) var(--sp-7);
+  padding-top: var(--sp-7);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-body);
+  color: var(--muted);
+}
+
+.upm-auth__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-5);
+}
+
+.upm-auth__legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.upm-auth__legal a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* --- Duas colunas -------------------------------------------------------- */
+
+@container (min-width: 900px) {
+  .upm-auth__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+
+  /* O painel acompanha o scroll do formulário comprido (criar conta): fica
+     preso ao ecrã enquanto a coluna da direita desce. */
+  .upm-auth__brand-inner {
+    position: sticky;
+    top: 0;
+    justify-content: space-between;
+    gap: 3rem;
+    min-height: var(--upm-ecra-alto, 100svh);
+    padding: clamp(2rem, 3.5cqi, 3.5rem);
+  }
+
+  .upm-auth__lead {
+    display: block;
+  }
+
+  .upm-auth__stats {
+    display: grid;
+  }
+
+  .upm-auth__main {
+    padding: clamp(2rem, 3cqi, 3rem) clamp(2rem, 5cqi, 6rem);
+  }
+}

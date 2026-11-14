@@ -13,14 +13,12 @@ export function generateMetadata() {
 }
 
 export default async function RequestPasswordResetPage() {
-  const [t, ts] = await Promise.all([
-    getTranslations("auth.recovery"),
-    getTranslations("auth.shell"),
-  ]);
+  // O título e o subtítulo vivem no formulário: o pedido troca-os pelos de
+  // "enviado" depois de submeter, e a moldura não sabe desse estado.
+  const ts = await getTranslations("auth.shell");
 
   return (
     <AuthShell
-      subtitle={t("subtitle")}
       switchPrompt={ts("rememberedPassword")}
       switchHref="/entrar"
       switchLabel={ts("signIn")}
