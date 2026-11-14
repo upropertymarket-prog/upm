@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import QRCode from "qrcode";
 import { createClient } from "@upm/db/server";
 import { checkAuthRateLimit, recordAuthAttempt, totpCodeSchema } from "@upm/db/auth";
 
@@ -14,7 +15,7 @@ import { checkAuthRateLimit, recordAuthAttempt, totpCodeSchema } from "@upm/db/a
 export type VerifyEnrollmentState = { error?: string };
 
 export type Enrollment =
-  { factorId: string; qrCode: string; secret: string } | { error: "startFailed" };
+  { factorId: string; qrCode: string; uri: string; secret: string } | { error: "startFailed" };
 
 /**
  * Cria o fator TOTP — chamada **uma vez**, pelo formulário, e nunca no render
@@ -54,9 +55,22 @@ export async function startEnrollment(): Promise<Enrollment> {
     friendlyName: user.email ?? undefined,
   });
   if (error || !enrollment) return { error: "startFailed" };
+
+  // O QR é nosso, não o do Supabase (14 nov 2026). O dele levava o endereço
+  // inteiro com correção de erros alta: 69 × 69 módulos em 231 px, que a página
+  // reduzia para 200 — menos de 3 px por módulo, e a câmara do telemóvel não o
+  // lia de um monitor. Aqui o endereço vai sem os parâmetros que já são o valor
+  // por omissão (SHA1, 6 dígitos, 30 s) e com correção "L": bastante menos
+  // módulos, cada um maior no ecrã.
+  const issuer = "UProperty Market";
+  const label = `${encodeURIComponent(issuer)}:${encodeURIComponent(user.email ?? "")}`;
+  const uri = `otpauth://totp/${label}?secret=${enrollment.totp.secret}&issuer=${encodeURIComponent(issuer)}`;
+  const qrSvg = await QRCode.toString(uri, { type: "svg", errorCorrectionLevel: "L", margin: 4 });
+
   return {
     factorId: enrollment.id,
-    qrCode: enrollment.totp.qr_code,
+    qrCode: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg)}`,
+    uri,
     secret: enrollment.totp.secret,
   };
 }

@@ -43,7 +43,10 @@ test("o staff configura o 2FA na primeira entrada e é pedido o código nas segu
   await pagina.goto(`${INTERNO}/suporte/tickets`);
   await expect(pagina).toHaveURL(/\/configurar-2fa/);
 
-  const segredo = (await pagina.locator("p.font-mono").first().textContent())!.trim();
+  // A chave aparece em blocos de 4 ("ABCD EFGH …"); os espaços saem aqui.
+  const chaveNoEcra = async () =>
+    (await pagina.locator("p.font-mono").first().textContent())!.replace(/\s/g, "");
+  const segredo = await chaveNoEcra();
   expect(segredo).toMatch(/^[A-Z2-7]{16,}$/);
 
   // Um código errado não pode trocar o QR (14 nov 2026): a página criava um
@@ -52,7 +55,7 @@ test("o staff configura o 2FA na primeira entrada e é pedido o código nas segu
   await pagina.getByLabel(t("auth.mfa.enroll.codeLabel")).fill("000000");
   await pagina.getByRole("button", { name: t("auth.mfa.enroll.submit") }).click();
   await expect(pagina.getByRole("alert")).toBeVisible();
-  await expect(pagina.locator("p.font-mono").first()).toHaveText(segredo);
+  expect(await chaveNoEcra()).toBe(segredo);
 
   const primeiroCodigo = codigo(segredo);
   await pagina.getByLabel(t("auth.mfa.enroll.codeLabel")).fill(primeiroCodigo);

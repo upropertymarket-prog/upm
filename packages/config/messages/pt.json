@@ -1388,7 +1388,8 @@
         "codeLabel": "Código de confirmação",
         "submit": "Ativar",
         "qrAlt": "Código QR para a app de autenticação",
-        "startFailed": "Não foi possível iniciar a ativação do 2FA. Tente novamente."
+        "startFailed": "Não foi possível iniciar a ativação do 2FA. Tente novamente.",
+        "openInApp": "Está no telemóvel? Abrir na app de autenticação"
       },
       "challenge": {
         "title": "Código de verificação",
