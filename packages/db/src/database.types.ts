@@ -5330,6 +5330,17 @@ export type Database = {
           lead_id: string;
         }[];
       };
+      subscription_mrr_cents: {
+        Args: {
+          p_interval: string;
+          p_intro_months: number;
+          p_intro_price_cents: number;
+          p_price_month_cents: number;
+          p_price_year_cents: number;
+          p_started_at: string;
+        };
+        Returns: number;
+      };
       subscription_agreements_for_me: {
         Args: never;
         Returns: {

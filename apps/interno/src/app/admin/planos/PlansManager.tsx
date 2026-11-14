@@ -46,6 +46,9 @@ export type PlanRow = {
   audience: "owner" | "buyer" | "both";
   priceMonthCents: number;
   priceYearCents: number;
+  /** Oferta do 1.º ano (13 nov 2026). `null` = sem oferta. */
+  introMonthCents: number | null;
+  introYearCents: number | null;
   visible: boolean;
   subscribers: number;
   mrrCents: number;
@@ -306,6 +309,9 @@ export function PlansManager({
                   <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                     {t(AUDIENCE_KEY[plan.audience])} · {money(plan.priceMonthCents)}
                     {t("perMonth")}
+                    {plan.introMonthCents !== null
+                      ? ` · ${t("introSummary", { price: money(plan.introMonthCents) })}`
+                      : null}
                   </span>
                 </span>
                 <span style={{ display: "grid", textAlign: "right" }}>
@@ -643,6 +649,48 @@ function PlanForm({
           defaultValue={((plan?.priceYearCents ?? 0) / 100).toFixed(2)}
         />
       </div>
+
+      {/*
+        Oferta do 1.º ano (13 nov 2026). Vazios = sem oferta. A duração não é
+        campo: é sempre 12 meses (`INTRO_MONTHS`). Guardar cria os cupões no
+        Stripe, como guardar um preço cria um `Price`.
+      */}
+      <fieldset
+        style={{ border: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}
+      >
+        <legend
+          style={{ fontSize: "var(--fs-body)", fontWeight: "var(--fw-semibold)", padding: 0 }}
+        >
+          {t("introLegend")}
+        </legend>
+        <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+          {t("introHint")}
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gap: "var(--sp-5)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
+          }}
+        >
+          <Input
+            label={t("introMonth")}
+            name="introMonth"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={plan?.introMonthCents ? (plan.introMonthCents / 100).toFixed(2) : ""}
+          />
+          <Input
+            label={t("introYear")}
+            name="introYear"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={plan?.introYearCents ? (plan.introYearCents / 100).toFixed(2) : ""}
+          />
+        </div>
+      </fieldset>
 
       <fieldset
         style={{ border: "none", margin: 0, padding: 0, display: "grid", gap: "var(--sp-5)" }}

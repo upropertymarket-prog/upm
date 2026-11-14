@@ -196,23 +196,57 @@ export const trialReasonSchema = z
   .min(10, "Escreva pelo menos uma frase a justificar o pedido.")
   .max(1000);
 
+/**
+ * A oferta de entrada dura sempre 12 meses (cliente, 13 nov 2026). Não é campo
+ * do Admin: no anual, o cupão só cobre anuidades inteiras (`introCouponFor`),
+ * e uma duração editável que só aceita um valor seria um campo que engana.
+ */
+export const INTRO_MONTHS = 12;
+
 /** Modal de criar/editar plano do Admin (P7-05, 04 §8.5). */
-export const planFormSchema = z.object({
-  id: z.string().uuid().optional(),
-  slug: z
-    .string()
-    .trim()
-    .min(2)
-    .max(64)
-    .regex(/^[a-z0-9-]+$/, "O slug usa só minúsculas, números e hífenes."),
-  name: z.string().trim().min(2).max(80),
-  audience: z.enum(["owner", "buyer", "both"]),
-  priceMonthCents: z.number().int().min(0).max(1_000_000),
-  priceYearCents: z.number().int().min(0).max(10_000_000),
-  features: z.array(z.string().trim().min(1).max(120)).max(12),
-  limits: limitsSchema,
-  visible: z.boolean(),
-});
+export const planFormSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    slug: z
+      .string()
+      .trim()
+      .min(2)
+      .max(64)
+      .regex(/^[a-z0-9-]+$/, "O slug usa só minúsculas, números e hífenes."),
+    name: z.string().trim().min(2).max(80),
+    audience: z.enum(["owner", "buyer", "both"]),
+    priceMonthCents: z.number().int().min(0).max(1_000_000),
+    priceYearCents: z.number().int().min(0).max(10_000_000),
+    features: z.array(z.string().trim().min(1).max(120)).max(12),
+    limits: limitsSchema,
+    visible: z.boolean(),
+    /** Oferta do 1.º ano. Os dois vazios = sem oferta. */
+    introMonthCents: z.number().int().positive().max(1_000_000).nullable(),
+    introYearCents: z.number().int().positive().max(10_000_000).nullable(),
+  })
+  // As mesmas regras dos `check` de `20261113090000`, ditas antes de chegar à
+  // base — uma recusa do Postgres chegava ao Admin como "não foi possível guardar".
+  .superRefine((plan, ctx) => {
+    const month = plan.introMonthCents;
+    const year = plan.introYearCents;
+    if ((month === null) !== (year === null)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["introMonthCents"],
+        message: "A oferta do 1.º ano leva os dois preços, mensal e anual — ou nenhum.",
+      });
+      return;
+    }
+    if (month !== null && year !== null) {
+      if (month >= plan.priceMonthCents || year >= plan.priceYearCents) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["introMonthCents"],
+          message: "O preço do 1.º ano tem de ficar abaixo do preço normal, no mensal e no anual.",
+        });
+      }
+    }
+  });
 export type PlanFormInput = z.infer<typeof planFormSchema>;
 
 // ---------------------------------------------------------------------------

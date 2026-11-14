@@ -227,7 +227,28 @@ describe("modal de plano do Admin (P7-05)", () => {
     priceYearCents: 12990,
     features: ["Destaque no Market"],
     visible: true,
+    introMonthCents: null,
+    introYearCents: null,
   };
+
+  it("a oferta do 1.º ano leva os dois preços, abaixo do normal — ou nenhum", () => {
+    const ok = planFormSchema.parse({
+      ...base,
+      limits: {},
+      introMonthCents: 999,
+      introYearCents: 9990,
+    });
+    expect(ok.introMonthCents).toBe(999);
+
+    // Só um dos dois.
+    expect(() =>
+      planFormSchema.parse({ ...base, limits: {}, introMonthCents: 999, introYearCents: null }),
+    ).toThrow(/ou nenhum/);
+    // Igual ao preço normal não é oferta.
+    expect(() =>
+      planFormSchema.parse({ ...base, limits: {}, introMonthCents: 1299, introYearCents: 9990 }),
+    ).toThrow(/abaixo/);
+  });
 
   it("um limite vazio grava-se como ilimitado, nunca como um número grande", () => {
     const parsed = planFormSchema.parse({

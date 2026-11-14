@@ -34,7 +34,9 @@ export default async function PlansPage() {
     supabase.rpc("admin_trial_requests"),
     supabase
       .from("plans")
-      .select("id, features, limits, stripe_price_month_id, stripe_price_year_id"),
+      .select(
+        "id, features, limits, stripe_price_month_id, stripe_price_year_id, intro_price_month_cents, intro_price_year_cents",
+      ),
   ]);
 
   const extras = new Map(
@@ -44,6 +46,10 @@ export default async function PlansPage() {
         features: row.features ?? [],
         limits: (limitsSchema.safeParse(row.limits ?? {}).data ?? {}) as PlanLimits,
         synced: Boolean(row.stripe_price_month_id && row.stripe_price_year_id),
+        introMonthCents:
+          row.intro_price_month_cents === null ? null : Number(row.intro_price_month_cents),
+        introYearCents:
+          row.intro_price_year_cents === null ? null : Number(row.intro_price_year_cents),
       },
     ]),
   );
@@ -62,6 +68,8 @@ export default async function PlansPage() {
       mrrCents: Number(row.mrr_cents),
       features: extra?.features ?? [],
       limits: extra?.limits ?? {},
+      introMonthCents: extra?.introMonthCents ?? null,
+      introYearCents: extra?.introYearCents ?? null,
       // Um plano gratuito não vai ao Stripe e isso não é falta nenhuma.
       syncedWithStripe:
         (extra?.synced ?? false) ||

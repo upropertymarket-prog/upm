@@ -2078,7 +2078,12 @@
         "alerts": "Search alerts",
         "cloud_gb": "Cloud (GB)"
       },
-      "saveAnyway": "Save anyway"
+      "saveAnyway": "Save anyway",
+      "introLegend": "First-year offer",
+      "introHint": "Price for the first 12 months; the regular price after that. Leave both empty for no offer. The site shows the regular price struck through.",
+      "introMonth": "Monthly, first year (€)",
+      "introYear": "Yearly, first year (€)",
+      "introSummary": "first year at {price}"
     },
     "seo": {
       "title": "SEO",
