@@ -37,7 +37,12 @@ export const passwordSchema = z
 
 export const pinSchema = z.string().regex(/^\d{4,6}$/, "O PIN tem de ter entre 4 e 6 dígitos");
 
-export const totpCodeSchema = z.string().regex(/^\d{6}$/, "Código de 6 dígitos");
+// As apps de autenticação mostram o código em dois blocos ("272 699"), e quem o
+// copia traz o espaço. Os espaços saem antes de validar (14 nov 2026).
+export const totpCodeSchema = z
+  .string()
+  .transform((code) => code.replace(/\s/g, ""))
+  .pipe(z.string().regex(/^\d{6}$/, "Código de 6 dígitos"));
 
 export const fullNameSchema = z.string().trim().min(1).max(160);
 
