@@ -43,7 +43,7 @@ export default async function RegisterPage() {
     supabase
       .from("plans")
       .select(
-        "slug, name, audience, price_month_cents, price_year_cents, features, default_commitment_months",
+        "slug, name, audience, price_month_cents, price_year_cents, intro_price_month_cents, intro_price_year_cents, intro_months, features, default_commitment_months",
       )
       .eq("visible", true)
       .order("position"),
@@ -63,6 +63,9 @@ export default async function RegisterPage() {
     audience: plan.audience,
     priceMonthCents: plan.price_month_cents,
     priceYearCents: plan.price_year_cents,
+    introMonthCents: plan.intro_price_month_cents,
+    introYearCents: plan.intro_price_year_cents,
+    introMonths: plan.intro_months,
     features: plan.features ?? [],
     commitmentMonths: resolveCommitmentMonths(plan.default_commitment_months, globalMonths),
   }));

@@ -48,6 +48,12 @@ export type SubscriptionAgreementData = {
   /** Os dois preços do plano no dia, congelados. Ver `Linha` do preço. */
   priceMonthCents: number;
   priceYearCents: number;
+  /**
+   * Oferta de entrada congelada (13 nov 2026), na periodicidade contratada.
+   * Opcional: os contratos anteriores não a têm, e o canvas também não.
+   */
+  introPriceCents?: number | null;
+  introMonths?: number | null;
   currency: string;
   interval: "month" | "year";
   startedAt: string;
@@ -158,6 +164,14 @@ export function SubscriptionAgreement({ data }: { data: SubscriptionAgreementDat
             ({secundario}) · {t("vatIncluded")}
           </span>
         </Linha>
+        {data.introPriceCents && data.introMonths ? (
+          <Linha termo={t("intro")}>
+            {t("introValue", {
+              price: `${money(data.introPriceCents)} ${anual ? t("perYear") : t("perMonth")}`,
+              months: data.introMonths,
+            })}
+          </Linha>
+        ) : null}
         <Linha termo={t("interval")}>
           {data.interval === "year" ? t("intervalYear") : t("intervalMonth")}
         </Linha>

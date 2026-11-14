@@ -4,6 +4,7 @@ import type { ServiceClient } from "./server";
 import {
   CATALOG_CURRENCY,
   type BillingInterval,
+  type CatalogCoupon,
   type CatalogEntry,
   type CatalogPrice,
   type CatalogProduct,
@@ -131,6 +132,50 @@ export function createStripeCatalogApi(stripe: Stripe = getStripeClient()): Stri
         }),
       );
     },
+
+    async getCoupon(id) {
+      try {
+        return toCatalogCoupon(await stripe.coupons.retrieve(id));
+      } catch (error) {
+        if (isMissing(error)) return null;
+        throw error;
+      }
+    },
+
+    async createCoupon({ id, name, amountOff, duration, durationInMonths, product, metadata }) {
+      return toCatalogCoupon(
+        await stripe.coupons.create({
+          id,
+          name,
+          amount_off: amountOff,
+          currency: CATALOG_CURRENCY,
+          duration,
+          ...(durationInMonths ? { duration_in_months: durationInMonths } : {}),
+          // Só no produto do plano: um extra na mesma subscrição paga o preço
+          // dele, sem desconto.
+          applies_to: { products: [product] },
+          metadata,
+        }),
+      );
+    },
+  };
+}
+
+function toCatalogCoupon(coupon: Stripe.Coupon): CatalogCoupon {
+  return {
+    id: coupon.id,
+    amountOff: coupon.amount_off,
+    currency: coupon.currency,
+    // O SDK alarga `duration` a `string`; fora destes três é um cupão que não
+    // é nosso, e lê-se como `forever` para nunca coincidir com uma oferta.
+    duration:
+      coupon.duration === "once"
+        ? "once"
+        : coupon.duration === "repeating"
+          ? "repeating"
+          : "forever",
+    durationInMonths: coupon.duration_in_months,
+    valid: coupon.valid,
   };
 }
 
@@ -153,7 +198,7 @@ export function createCatalogStore(client: ServiceClient): CatalogStore {
         client
           .from("plans")
           .select(
-            "id, slug, name, price_month_cents, price_year_cents, stripe_product_id, stripe_price_month_id, stripe_price_year_id",
+            "id, slug, name, price_month_cents, price_year_cents, stripe_product_id, stripe_price_month_id, stripe_price_year_id, intro_price_month_cents, intro_price_year_cents, intro_months, stripe_coupon_month_id, stripe_coupon_year_id",
           )
           .eq("visible", true)
           .order("position"),
@@ -178,7 +223,16 @@ export function createCatalogStore(client: ServiceClient): CatalogStore {
         stripe_product_id: string | null;
         stripe_price_month_id: string | null;
         stripe_price_year_id: string | null;
+        // Só os planos têm oferta; nos extras as chaves não vêm.
+        intro_price_month_cents?: number | null;
+        intro_price_year_cents?: number | null;
+        intro_months?: number | null;
+        stripe_coupon_month_id?: string | null;
+        stripe_coupon_year_id?: string | null;
       };
+
+      const cents = (value: number | null | undefined) =>
+        value === null || value === undefined ? null : Number(value);
 
       const toEntry = (kind: "plan" | "addon") => (row: CatalogRow) => ({
         kind,
@@ -190,6 +244,11 @@ export function createCatalogStore(client: ServiceClient): CatalogStore {
         stripeProductId: row.stripe_product_id,
         stripePriceMonthId: row.stripe_price_month_id,
         stripePriceYearId: row.stripe_price_year_id,
+        introMonthCents: cents(row.intro_price_month_cents),
+        introYearCents: cents(row.intro_price_year_cents),
+        introMonths: row.intro_months ?? null,
+        stripeCouponMonthId: row.stripe_coupon_month_id ?? null,
+        stripeCouponYearId: row.stripe_coupon_year_id ?? null,
       });
 
       return [
@@ -199,14 +258,22 @@ export function createCatalogStore(client: ServiceClient): CatalogStore {
     },
 
     async saveStripeIds(entry, ids) {
-      const { error } = await client
-        .from(entry.kind === "plan" ? "plans" : "addons")
-        .update({
-          stripe_product_id: ids.productId,
-          stripe_price_month_id: ids.priceMonthId,
-          stripe_price_year_id: ids.priceYearId,
-        })
-        .eq("id", entry.id);
+      const base = {
+        stripe_product_id: ids.productId,
+        stripe_price_month_id: ids.priceMonthId,
+        stripe_price_year_id: ids.priceYearId,
+      };
+      const { error } =
+        entry.kind === "plan"
+          ? await client
+              .from("plans")
+              .update({
+                ...base,
+                stripe_coupon_month_id: ids.couponMonthId,
+                stripe_coupon_year_id: ids.couponYearId,
+              })
+              .eq("id", entry.id)
+          : await client.from("addons").update(base).eq("id", entry.id);
       if (error) throw error;
     },
   };

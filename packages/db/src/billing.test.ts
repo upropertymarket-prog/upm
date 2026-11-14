@@ -14,6 +14,8 @@ import {
   subscriptionIdFromInvoice,
   syncCatalog,
   toSubscriptionStatus,
+  introCouponFor,
+  type CatalogCoupon,
   type CatalogEntry,
   type CatalogPrice,
   type CatalogProduct,
@@ -29,6 +31,7 @@ import {
 function fakeStripe() {
   const products = new Map<string, CatalogProduct>();
   const prices = new Map<string, CatalogPrice>();
+  const coupons = new Map<string, CatalogCoupon>();
   let sequence = 0;
 
   const api: StripeCatalogApi = {
@@ -67,14 +70,29 @@ function fakeStripe() {
       prices.set(price.id, price);
       return price;
     },
+    async getCoupon(id) {
+      return coupons.get(id) ?? null;
+    },
+    async createCoupon({ id, amountOff, duration, durationInMonths }) {
+      if (coupons.has(id)) throw new Error(`Cupão duplicado: ${id}`);
+      const coupon: CatalogCoupon = {
+        id,
+        amountOff,
+        currency: CATALOG_CURRENCY,
+        duration,
+        durationInMonths,
+        valid: true,
+      };
+      coupons.set(id, coupon);
+      return coupon;
+    },
   };
 
-  return { api, products, prices };
+  return { api, products, prices, coupons };
 }
 
 function fakeStore(rows: CatalogEntry[]) {
-  const saves: { slug: string; productId: string; priceMonthId: string; priceYearId: string }[] =
-    [];
+  const saves: ({ slug: string } & Parameters<CatalogStore["saveStripeIds"]>[1])[] = [];
 
   const store: CatalogStore = {
     async list() {
@@ -86,6 +104,8 @@ function fakeStore(rows: CatalogEntry[]) {
       row.stripeProductId = ids.productId;
       row.stripePriceMonthId = ids.priceMonthId;
       row.stripePriceYearId = ids.priceYearId;
+      row.stripeCouponMonthId = ids.couponMonthId;
+      row.stripeCouponYearId = ids.couponYearId;
     },
   };
 
@@ -103,6 +123,11 @@ function entry(partial: Partial<CatalogEntry> = {}): CatalogEntry {
     stripeProductId: null,
     stripePriceMonthId: null,
     stripePriceYearId: null,
+    introMonthCents: null,
+    introYearCents: null,
+    introMonths: null,
+    stripeCouponMonthId: null,
+    stripeCouponYearId: null,
     ...partial,
   };
 }
@@ -352,5 +377,82 @@ describe("syncCatalog (P7-01)", () => {
 
     expect(report.entries[0]!.action).toBe("renamed");
     expect(prices.size).toBe(2);
+  });
+});
+
+describe("oferta do 1.º ano (13 nov 2026)", () => {
+  const essential = {
+    priceMonthCents: 1999,
+    priceYearCents: 19990,
+    introMonthCents: 1099,
+    introYearCents: 10990,
+    introMonths: 12,
+  };
+
+  it("desconta a diferença: 12 faturas no mensal, a primeira anuidade no anual", () => {
+    expect(introCouponFor(entry(essential), "month")).toEqual({
+      id: "upm_intro_essential-owner_month_900_12m",
+      amountOff: 900,
+      duration: "repeating",
+      durationInMonths: 12,
+    });
+    expect(introCouponFor(entry(essential), "year")).toEqual({
+      id: "upm_intro_essential-owner_year_9000_12m",
+      amountOff: 9000,
+      duration: "once",
+      durationInMonths: null,
+    });
+  });
+
+  it("sem oferta não há cupão", () => {
+    expect(introCouponFor(entry(), "month")).toBeNull();
+  });
+
+  it("recusa uma oferta que não fica abaixo do preço, e meses que o anual não cobre", () => {
+    expect(() => introCouponFor(entry({ ...essential, introMonthCents: 1999 }), "month")).toThrow();
+    expect(() => introCouponFor(entry({ ...essential, introMonths: 6 }), "year")).toThrow();
+  });
+
+  it("cria os dois cupões uma vez, guarda-os e reaproveita-os na corrida seguinte", async () => {
+    const { api, coupons } = fakeStripe();
+    const { store, saves } = fakeStore([entry(essential)]);
+
+    const first = await syncCatalog(api, store);
+    expect(first.couponsCreated).toBe(2);
+    expect(saves[0]!.couponMonthId).toBe("upm_intro_essential-owner_month_900_12m");
+    expect(saves[0]!.couponYearId).toBe("upm_intro_essential-owner_year_9000_12m");
+
+    const second = await syncCatalog(api, store);
+    expect(second.couponsCreated).toBe(0);
+    expect(saves).toHaveLength(1);
+    expect(coupons.size).toBe(2);
+  });
+
+  it("tirar a oferta limpa as colunas sem tocar nos cupões", async () => {
+    const { api, coupons } = fakeStripe();
+    const rows = [entry(essential)];
+    const { store, saves } = fakeStore(rows);
+    await syncCatalog(api, store);
+
+    Object.assign(rows[0]!, { introMonthCents: null, introYearCents: null, introMonths: null });
+    await syncCatalog(api, store);
+
+    expect(saves.at(-1)!.couponMonthId).toBeNull();
+    expect(saves.at(-1)!.couponYearId).toBeNull();
+    expect(coupons.size).toBe(2);
+  });
+
+  it("pára se o cupão com aquele id foi mexido à mão no Stripe", async () => {
+    const { api, coupons } = fakeStripe();
+    coupons.set("upm_intro_essential-owner_month_900_12m", {
+      id: "upm_intro_essential-owner_month_900_12m",
+      amountOff: 500,
+      currency: CATALOG_CURRENCY,
+      duration: "repeating",
+      durationInMonths: 12,
+      valid: true,
+    });
+    const { store } = fakeStore([entry(essential)]);
+    await expect(syncCatalog(api, store)).rejects.toThrow(/outro valor/);
   });
 });

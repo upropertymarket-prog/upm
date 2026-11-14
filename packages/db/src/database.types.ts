@@ -2107,6 +2107,11 @@ export type Database = {
       };
       plans: {
         Row: {
+          intro_months: number | null;
+          intro_price_month_cents: number | null;
+          intro_price_year_cents: number | null;
+          stripe_coupon_month_id: string | null;
+          stripe_coupon_year_id: string | null;
           audience: Database["public"]["Enums"]["plan_audience"];
           created_at: string;
           default_commitment_months: number | null;
@@ -2125,6 +2130,11 @@ export type Database = {
           visible: boolean;
         };
         Insert: {
+          intro_months?: number | null;
+          intro_price_month_cents?: number | null;
+          intro_price_year_cents?: number | null;
+          stripe_coupon_month_id?: string | null;
+          stripe_coupon_year_id?: string | null;
           audience: Database["public"]["Enums"]["plan_audience"];
           created_at?: string;
           default_commitment_months?: number | null;
@@ -2143,6 +2153,11 @@ export type Database = {
           visible?: boolean;
         };
         Update: {
+          intro_months?: number | null;
+          intro_price_month_cents?: number | null;
+          intro_price_year_cents?: number | null;
+          stripe_coupon_month_id?: string | null;
+          stripe_coupon_year_id?: string | null;
           audience?: Database["public"]["Enums"]["plan_audience"];
           created_at?: string;
           default_commitment_months?: number | null;
@@ -3217,6 +3232,8 @@ export type Database = {
       };
       subscription_agreements: {
         Row: {
+          intro_months: number | null;
+          intro_price_cents: number | null;
           addons: Json;
           celebrated_at: string;
           commitment_ends_at: string | null;
@@ -3244,6 +3261,8 @@ export type Database = {
           terms_version: string | null;
         };
         Insert: {
+          intro_months?: number | null;
+          intro_price_cents?: number | null;
           addons?: Json;
           celebrated_at?: string;
           commitment_ends_at?: string | null;
@@ -3271,6 +3290,8 @@ export type Database = {
           terms_version?: string | null;
         };
         Update: {
+          intro_months?: number | null;
+          intro_price_cents?: number | null;
           addons?: Json;
           celebrated_at?: string;
           commitment_ends_at?: string | null;
@@ -3418,6 +3439,8 @@ export type Database = {
       };
       subscriptions: {
         Row: {
+          intro_months: number | null;
+          intro_price_cents: number | null;
           cancel_at_period_end: boolean;
           cancel_reason: string | null;
           cancel_requested_at: string | null;
@@ -3439,6 +3462,8 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          intro_months?: number | null;
+          intro_price_cents?: number | null;
           cancel_at_period_end?: boolean;
           cancel_reason?: string | null;
           cancel_requested_at?: string | null;
@@ -3460,6 +3485,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          intro_months?: number | null;
+          intro_price_cents?: number | null;
           cancel_at_period_end?: boolean;
           cancel_reason?: string | null;
           cancel_requested_at?: string | null;
@@ -5306,6 +5333,8 @@ export type Database = {
       subscription_agreements_for_me: {
         Args: never;
         Returns: {
+          intro_months: number | null;
+          intro_price_cents: number | null;
           addons: Json;
           celebrated_at: string;
           commitment_ends_at: string | null;

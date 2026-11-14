@@ -50,7 +50,7 @@ async function demoAction<State>(state: State) {
 
 /**
  * Planos de demonstração — fixos, para a storyboard não depender da BD.
- * Os valores são os do `seed.sql` de 07 §8.3, e `commitmentMonths` é o período
+ * Os valores são os do `seed.sql` (oferta do 1.º ano desde 13 nov 2026), e `commitmentMonths` é o período
  * mínimo decidido a 7 out 2026.
  */
 const demoPlans = [
@@ -58,8 +58,11 @@ const demoPlans = [
     slug: "essential-owner",
     name: "Essential",
     audience: "owner" as const,
-    priceMonthCents: 599,
-    priceYearCents: 5990,
+    priceMonthCents: 1999,
+    priceYearCents: 19990,
+    introMonthCents: 1099,
+    introYearCents: 10990,
+    introMonths: 12,
     features: ["3 propriedades ativas", "2 GB de Cloud"],
     commitmentMonths: 12,
   },
@@ -67,8 +70,11 @@ const demoPlans = [
     slug: "smarter-owner",
     name: "Smarter",
     audience: "owner" as const,
-    priceMonthCents: 1499,
-    priceYearCents: 14990,
+    priceMonthCents: 2999,
+    priceYearCents: 29990,
+    introMonthCents: 1499,
+    introYearCents: 14990,
+    introMonths: 12,
     features: ["10 propriedades ativas", "5 GB de Cloud"],
     commitmentMonths: 12,
   },
@@ -76,8 +82,11 @@ const demoPlans = [
     slug: "premium-owner",
     name: "Premium",
     audience: "owner" as const,
-    priceMonthCents: 2999,
-    priceYearCents: 29990,
+    priceMonthCents: 4999,
+    priceYearCents: 49990,
+    introMonthCents: 2999,
+    introYearCents: 29990,
+    introMonths: 12,
     features: ["Propriedades ilimitadas", "20 GB de Cloud"],
     commitmentMonths: 12,
   },

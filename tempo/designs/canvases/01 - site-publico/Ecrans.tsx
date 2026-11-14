@@ -195,13 +195,19 @@ const DETALHE: PublicListingDetail = {
  * Admin, estes números atualizam-se à mão — o `public-site.test.ts` é que
  * garante o lado da produção.
  */
+/** Os planos de comprador não têm oferta do 1.º ano (13 nov 2026). */
+const SEM_OFERTA = { introYearCents: null, introMonthCents: null, introMonths: null };
+
 const PLANOS: PublicPlan[] = [
   {
     slug: "essential-owner",
     name: "Essential",
     audience: "owner",
-    priceYearCents: 5990,
-    priceMonthCents: 599,
+    priceYearCents: 19990,
+    priceMonthCents: 1999,
+    introYearCents: 10990,
+    introMonthCents: 1099,
+    introMonths: 12,
     features: [],
     limits: {
       active_properties: 3,
@@ -217,8 +223,11 @@ const PLANOS: PublicPlan[] = [
     slug: "smarter-owner",
     name: "Smarter",
     audience: "owner",
-    priceYearCents: 14990,
-    priceMonthCents: 1499,
+    priceYearCents: 29990,
+    priceMonthCents: 2999,
+    introYearCents: 14990,
+    introMonthCents: 1499,
+    introMonths: 12,
     features: [],
     limits: {
       active_properties: 10,
@@ -234,8 +243,11 @@ const PLANOS: PublicPlan[] = [
     slug: "premium-owner",
     name: "Premium",
     audience: "owner",
-    priceYearCents: 29990,
-    priceMonthCents: 2999,
+    priceYearCents: 49990,
+    priceMonthCents: 4999,
+    introYearCents: 29990,
+    introMonthCents: 2999,
+    introMonths: 12,
     features: [],
     limits: {
       active_properties: null,
@@ -255,6 +267,7 @@ const PLANOS: PublicPlan[] = [
     audience: "buyer",
     priceYearCents: 2990,
     priceMonthCents: 299,
+    ...SEM_OFERTA,
     features: [],
     limits: { saved: 30, alerts: 2, visits: 5, active_chats: 5, cloud_gb: 0 },
     highlighted: false,
@@ -265,6 +278,7 @@ const PLANOS: PublicPlan[] = [
     audience: "buyer",
     priceYearCents: 4990,
     priceMonthCents: 499,
+    ...SEM_OFERTA,
     features: [],
     limits: { saved: 100, alerts: 5, visits: 15, active_chats: 20, cloud_gb: 1 },
     highlighted: true,
@@ -275,6 +289,7 @@ const PLANOS: PublicPlan[] = [
     audience: "buyer",
     priceYearCents: 6990,
     priceMonthCents: 699,
+    ...SEM_OFERTA,
     features: [],
     limits: { saved: null, alerts: 20, visits: null, active_chats: null, cloud_gb: 5 },
     highlighted: false,

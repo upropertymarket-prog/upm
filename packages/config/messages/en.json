@@ -674,6 +674,11 @@
         "priceDrop": "Price drops on saved properties",
         "belowAverage": "Properties listed below the average price",
         "priorityAccess": "Priority access to new properties"
+      },
+      "intro": {
+        "was": "Regular price",
+        "now": "First-year price",
+        "note": "For the first {months} months. Then {price}."
       }
     },
     "faq": {
@@ -1308,7 +1313,9 @@
         "submit": "Finish registration",
         "intervalLabel": "Billing period",
         "monthly": "Monthly",
-        "yearly": "Yearly (two months free)"
+        "yearly": "Yearly (two months free)",
+        "introNote": "For the first {months} months. Then {price}.",
+        "wasPrice": "Regular price"
       },
       "contract": {
         "title": "Confirm what you are subscribing to",
@@ -1335,7 +1342,9 @@
         "commitmentMonths": "{months} months",
         "cancellationWithCommitment": "Any time; takes effect at the end of the minimum period",
         "marketing": "I want to receive news, tips and campaigns by email.",
-        "marketingHint": "Optional, and separate from the Terms. You can opt out through the link in every email we send."
+        "marketingHint": "Optional, and separate from the Terms. You can opt out through the link in every email we send.",
+        "introPrice": "Price for the first {months} months",
+        "priceAfter": "Price after that"
       }
     },
     "login": {
@@ -1595,7 +1604,9 @@
       "previous": "Previous agreements",
       "link": "View subscription agreement",
       "perMonth": "/month",
-      "perYear": "/year"
+      "perYear": "/year",
+      "intro": "Introductory offer",
+      "introValue": "{price} for the first {months} months; the amount above after that"
     }
   },
   "admin": {
