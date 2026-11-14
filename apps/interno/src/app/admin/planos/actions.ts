@@ -5,7 +5,7 @@ import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { SITE_CACHE_TAGS, invalidarCacheDoSite } from "@upm/config/site-cache";
 import { createClient } from "@upm/db/server";
-import { planFormSchema, syncCatalog } from "@upm/db/billing";
+import { INTRO_MONTHS, planFormSchema, syncCatalog } from "@upm/db/billing";
 import { isStepUpRequiredError } from "@upm/db/auth";
 import { writeAuditLog } from "@upm/db/audit";
 import {
@@ -78,6 +78,14 @@ function limitFrom(formData: FormData, key: string): number | null {
   return Number.isFinite(value) && value >= 0 ? Math.round(value) : null;
 }
 
+/** Como `centsFrom`, mas um campo vazio é `null` — "sem oferta", não 0 €. */
+function optionalCentsFrom(formData: FormData, key: string): number | null {
+  const raw = (formData.get(key) as string | null)?.trim().replace(",", ".");
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+}
+
 function centsFrom(formData: FormData, key: string): number {
   const raw = (formData.get(key) as string | null)?.trim().replace(",", ".") ?? "0";
   const value = Number(raw);
@@ -111,6 +119,8 @@ export async function savePlan(
       cloud_gb: limitFrom(formData, "cloud_gb"),
     },
     visible: formData.get("visible") === "on",
+    introMonthCents: optionalCentsFrom(formData, "introMonth"),
+    introYearCents: optionalCentsFrom(formData, "introYear"),
   });
 
   if (!parsed.success) {
@@ -127,13 +137,18 @@ export async function savePlan(
     features: plan.features,
     limits: plan.limits,
     visible: plan.visible,
+    intro_price_month_cents: plan.introMonthCents,
+    intro_price_year_cents: plan.introYearCents,
+    intro_months: plan.introMonthCents === null ? null : INTRO_MONTHS,
   };
 
   const before = plan.id
     ? (
         await supabase
           .from("plans")
-          .select("price_month_cents, price_year_cents, limits")
+          .select(
+            "price_month_cents, price_year_cents, intro_price_month_cents, intro_price_year_cents, limits",
+          )
           .eq("id", plan.id)
           .maybeSingle()
       ).data
@@ -200,10 +215,16 @@ export async function savePlan(
   // Os preços do site público (`/precos`) vêm do mesmo catálogo (F2).
   after(() => invalidarCacheDoSite([SITE_CACHE_TAGS.plans]));
 
+  // A oferta também vai ao Stripe (um cupão por periodicidade), por isso conta
+  // como mudança de preço.
+  const asCents = (value: number | null | undefined) =>
+    value === null || value === undefined ? null : Number(value);
   const priceChanged =
     !before ||
     Number(before.price_month_cents) !== plan.priceMonthCents ||
-    Number(before.price_year_cents) !== plan.priceYearCents;
+    Number(before.price_year_cents) !== plan.priceYearCents ||
+    asCents(before.intro_price_month_cents) !== plan.introMonthCents ||
+    asCents(before.intro_price_year_cents) !== plan.introYearCents;
 
   if (!priceChanged || plan.priceMonthCents + plan.priceYearCents === 0) {
     return { ok: true, notice: auditWarning };
@@ -237,7 +258,8 @@ export async function syncStripe(): Promise<{ notice?: string; error?: string }>
     return {
       notice:
         `Stripe sincronizado: ${report.created} criados, ` +
-        `${report.pricesAdded} com preço novo, ${report.unchanged} sem alterações.`,
+        `${report.pricesAdded} com preço novo, ${report.couponsCreated} cupões novos, ` +
+        `${report.unchanged} sem alterações.`,
     };
   } catch {
     return { error: "Guardado. A sincronização com o Stripe falhou — tente outra vez." };

@@ -2078,7 +2078,12 @@
         "alerts": "Alertas de pesquisa",
         "cloud_gb": "Cloud (GB)"
       },
-      "saveAnyway": "Guardar mesmo assim"
+      "saveAnyway": "Guardar mesmo assim",
+      "introLegend": "Oferta do 1.º ano",
+      "introHint": "Preço dos primeiros 12 meses; depois, o preço normal. Deixe os dois vazios para não haver oferta. O site mostra o preço normal riscado.",
+      "introMonth": "Mensal no 1.º ano (€)",
+      "introYear": "Anual no 1.º ano (€)",
+      "introSummary": "1.º ano a {price}"
     },
     "seo": {
       "title": "SEO",
