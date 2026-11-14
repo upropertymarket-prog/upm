@@ -43,14 +43,15 @@ export function EnrollForm() {
       <p className="text-sm text-muted">{t("body")}</p>
       {enrollment ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URI do próprio Supabase, não otimizável pelo next/image. */}
-          <img
-            src={enrollment.qrCode}
-            alt={t("qrAlt")}
-            width={200}
-            height={200}
-            className="mx-auto"
-          />
+          {/* Fundo branco e margem, nos dois temas (14 nov 2026): o SVG do
+              Supabase não traz a "zona de silêncio" à volta, e sobre o fundo
+              escuro a câmara não encontrava os quadrados dos cantos — a app
+              de autenticação nem chegava a ler o código. O branco é do próprio
+              formato QR, não do design system. */}
+          <div className="mx-auto rounded-xl p-4" style={{ background: "#ffffff" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URI do próprio Supabase, não otimizável pelo next/image. */}
+            <img src={enrollment.qrCode} alt={t("qrAlt")} width={200} height={200} />
+          </div>
           <p className="break-all text-center font-mono text-xs text-muted">{enrollment.secret}</p>
         </>
       ) : (
