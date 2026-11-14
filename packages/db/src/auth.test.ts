@@ -39,6 +39,7 @@ describe("schemas de input (08 §7.8)", () => {
   it("código TOTP são sempre 6 dígitos", () => {
     expect(totpCodeSchema.safeParse("123456").success).toBe(true);
     expect(totpCodeSchema.safeParse("12345").success).toBe(false);
+    expect(totpCodeSchema.safeParse("123 456").data).toBe("123456");
   });
 });
 

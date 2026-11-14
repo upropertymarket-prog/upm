@@ -44,7 +44,15 @@ export async function startEnrollment(): Promise<Enrollment> {
     await supabase.auth.mfa.unenroll({ factorId: factor.id });
   }
 
-  const { data: enrollment, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+  // `issuer` explícito (14 nov 2026): sem ele o Supabase usa o `site_url`, e a
+  // entrada na app de autenticação chamava-se "localhost:3000". Com várias
+  // tentativas ficavam várias entradas iguais, e a pessoa lia o código de uma
+  // antiga — que o servidor recusava, com razão.
+  const { data: enrollment, error } = await supabase.auth.mfa.enroll({
+    factorType: "totp",
+    issuer: "UProperty Market",
+    friendlyName: user.email ?? undefined,
+  });
   if (error || !enrollment) return { error: "startFailed" };
   return {
     factorId: enrollment.id,
