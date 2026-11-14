@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@upm/db/server";
 
+import { AuthCard } from "../../components/AuthCard";
 import { EnrollForm } from "./EnrollForm";
 
 export default async function SetupTwoFactorPage() {
@@ -31,11 +32,9 @@ export default async function SetupTwoFactorPage() {
   const verified = totp.find((factor) => factor.status === "verified");
   if (verified) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-        <div className="mx-auto w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
-          <EnrollForm factorId={verified.id} qrCode="" secret="" />
-        </div>
-      </main>
+      <AuthCard>
+        <EnrollForm factorId={verified.id} qrCode="" secret="" />
+      </AuthCard>
     );
   }
 
@@ -48,21 +47,19 @@ export default async function SetupTwoFactorPage() {
   const { data: enrollment, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
   if (error || !enrollment) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-bg px-4">
+      <AuthCard>
         <p className="text-danger">{t("startFailed")}</p>
-      </main>
+      </AuthCard>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-4 py-16">
-      <div className="mx-auto w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
-        <EnrollForm
-          factorId={enrollment.id}
-          qrCode={enrollment.totp.qr_code}
-          secret={enrollment.totp.secret}
-        />
-      </div>
-    </main>
+    <AuthCard>
+      <EnrollForm
+        factorId={enrollment.id}
+        qrCode={enrollment.totp.qr_code}
+        secret={enrollment.totp.secret}
+      />
+    </AuthCard>
   );
 }

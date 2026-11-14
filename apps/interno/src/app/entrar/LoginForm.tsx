@@ -31,7 +31,7 @@ export function LoginForm({
 
   return (
     <>
-      <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+      <h1 className="upm-iauth__title">{t("title")}</h1>
       {notice === "passwordSet" ? (
         <p className="text-sm text-ok" role="status">
           {t("passwordSet")}

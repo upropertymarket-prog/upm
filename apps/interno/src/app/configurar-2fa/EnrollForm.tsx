@@ -23,7 +23,7 @@ export function EnrollForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+      <h1 className="upm-iauth__title">{t("title")}</h1>
       <p className="text-sm text-muted">{t("body")}</p>
       {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URI do próprio Supabase, não otimizável pelo next/image. */}
       <img src={qrCode} alt={t("qrAlt")} width={200} height={200} className="mx-auto" />

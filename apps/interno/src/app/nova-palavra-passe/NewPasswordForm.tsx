@@ -18,7 +18,7 @@ export function NewPasswordForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <h1 className="text-lg font-semibold text-text">{t("newPasswordTitle")}</h1>
+      <h1 className="upm-iauth__title">{t("newPasswordTitle")}</h1>
       <p className="text-sm text-muted">{t("newPasswordSubtitle")}</p>
       <Input
         name="password"

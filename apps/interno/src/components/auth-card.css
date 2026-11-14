@@ -1,0 +1,233 @@
+/**
+ * Moldura dos ecrãs de entrada do interno (14 nov 2026)
+ * =========================================================================
+ * Duas metades, como a autenticação do site, mas com outra mensagem: à
+ * esquerda o painel da equipa — azul-marinho, "acesso reservado" e as três
+ * garantias de segurança que a área de facto cumpre —, à direita o formulário,
+ * sem cartão. O tom é sóbrio de propósito: nada de laranja a gritar, o acento
+ * fica nos pormenores (o eyebrow, os ícones, o botão).
+ *
+ * Em `cqi` e container queries, nunca `vw` nem media queries: no canvas a
+ * storyboard é uma moldura e só o contentor sabe a largura que tem. Abaixo de
+ * 900 px o painel passa a uma faixa por cima do formulário.
+ */
+
+.upm-iauth {
+  container-type: inline-size;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.upm-iauth__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: var(--upm-ecra-alto, 100svh);
+}
+
+/* --- Painel da equipa ---------------------------------------------------- */
+
+/* Ilha em tema escuro (`data-theme="dark"` no JSX): o fundo é o `--surface2`
+   escuro (#101b2e), o mesmo azul-marinho do painel da autenticação do site. */
+.upm-iauth__panel {
+  background: var(--surface2);
+  color: var(--text);
+  border-right: 1px solid var(--border);
+}
+
+.upm-iauth__panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem max(20px, 6cqi);
+}
+
+.upm-iauth__intro {
+  display: grid;
+  gap: var(--sp-7);
+}
+
+.upm-iauth__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* O ponto verde de "sistema operacional" — a única cor de estado do painel. */
+.upm-iauth__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ok);
+  box-shadow: 0 0 0 4px rgb(52 211 153 / 16%);
+}
+
+.upm-iauth__headline {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: clamp(1.75rem, 3.4cqi, 3.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.upm-iauth__lead {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.upm-iauth__assurances {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-7);
+}
+
+.upm-iauth__assurance {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--sp-7);
+  align-items: start;
+}
+
+.upm-iauth__assurance-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface3);
+  color: var(--accent);
+}
+
+.upm-iauth__assurance-title {
+  display: block;
+  font-size: 15px;
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.upm-iauth__assurance-text {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* No telemóvel a faixa leva só a marca e o título: as garantias empurravam o
+   formulário para fora do primeiro ecrã. */
+.upm-iauth__lead,
+.upm-iauth__assurances {
+  display: none;
+}
+
+/* --- Formulário ---------------------------------------------------------- */
+
+.upm-iauth__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+  padding: 1.5rem max(20px, 6cqi);
+}
+
+.upm-iauth__top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--muted);
+}
+
+.upm-iauth__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upm-iauth__form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+  width: 100%;
+  max-width: 24rem;
+}
+
+/* O título de cada ecrã (os formulários desenham o seu `<h1>`). */
+.upm-iauth__title {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: clamp(1.75rem, 2.4cqi, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.upm-iauth__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3) var(--sp-7);
+  padding-top: var(--sp-7);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-body);
+  color: var(--muted);
+}
+
+.upm-iauth__footer-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* --- Duas colunas -------------------------------------------------------- */
+
+@container (min-width: 900px) {
+  .upm-iauth__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+
+  .upm-iauth__panel-inner {
+    position: sticky;
+    top: 0;
+    justify-content: space-between;
+    gap: 3rem;
+    min-height: var(--upm-ecra-alto, 100svh);
+    padding: clamp(2rem, 3.5cqi, 3.5rem);
+  }
+
+  .upm-iauth__lead {
+    display: block;
+  }
+
+  .upm-iauth__assurances {
+    display: grid;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .upm-iauth__main {
+    padding: clamp(2rem, 3cqi, 3rem) clamp(2rem, 5cqi, 6rem);
+  }
+}

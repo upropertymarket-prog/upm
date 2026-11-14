@@ -104,7 +104,15 @@ function Ecra({ theme, children }: { theme: "light" | "dark"; children: React.Re
   return (
     // `--upm-ecra-alto`: a moldura tem 900 px, e é esse o ecrã que o painel da
     // marca deve encher — sem a variável, `svh` mede a moldura e não um ecrã.
-    <div data-theme={theme} style={{ "--upm-ecra-alto": "900px" } as React.CSSProperties}>
+    // Todas as storyboards têm 900 px: o que for mais comprido (criar conta,
+    // contratação) faz scroll dentro do ecrã, como num browser, com o painel
+    // da marca preso (`sticky`) à esquerda.
+    <div
+      data-theme={theme}
+      style={
+        { "--upm-ecra-alto": "900px", height: "900px", overflowY: "auto" } as React.CSSProperties
+      }
+    >
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         {children}
       </NextIntlClientProvider>

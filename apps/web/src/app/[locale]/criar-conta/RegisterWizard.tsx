@@ -333,16 +333,6 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
           <div className="flex flex-col gap-4">
             <h1 className="upm-auth__title">{tc("title")}</h1>
 
-            {terms?.pendingLegalReview ? (
-              <p
-                role="note"
-                className="rounded-xl border border-border px-4 py-3 text-sm"
-                style={{ background: "var(--warn-soft, var(--surface-2))" }}
-              >
-                {tc("pendingReview")}
-              </p>
-            ) : null}
-
             <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">{tc("plan")}</dt>

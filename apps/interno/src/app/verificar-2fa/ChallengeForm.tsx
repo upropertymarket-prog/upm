@@ -26,7 +26,7 @@ export function ChallengeForm({
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="text-lg font-semibold text-text">{t("title")}</h1>
+      <h1 className="upm-iauth__title">{t("title")}</h1>
       <form action={codeAction} className="flex flex-col gap-3">
         <input type="hidden" name="factorId" value={factorId} />
         <Input name="code" label={t("codeLabel")} inputMode="numeric" maxLength={6} required />

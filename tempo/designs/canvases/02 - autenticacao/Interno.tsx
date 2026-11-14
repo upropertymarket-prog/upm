@@ -28,7 +28,20 @@ const semSubmissao = async <T,>(estado: T) => estado;
 
 function Ecra({ theme, children }: { theme: "light" | "dark"; children: React.ReactNode }) {
   return (
-    <div data-theme={theme} style={{ minHeight: "900px", background: "var(--bg)" }}>
+    // 900 px fixos, como as outras storyboards deste canvas; o que passar faz
+    // scroll dentro do ecrã. `--upm-ecra-alto` dá ao `AuthCard` a altura do
+    // ecrã — sem ela, `svh` mede a moldura.
+    <div
+      data-theme={theme}
+      style={
+        {
+          "--upm-ecra-alto": "900px",
+          height: "900px",
+          overflowY: "auto",
+          background: "var(--bg)",
+        } as React.CSSProperties
+      }
+    >
       <NextIntlClientProvider locale="pt" messages={ptMessages}>
         <ThemeProvider initialChoice={theme}>
           <AuthCard>{children}</AuthCard>

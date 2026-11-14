@@ -1319,7 +1319,6 @@
       },
       "contract": {
         "title": "Confirme o que vai contratar",
-        "pendingReview": "Os Termos e Condições estão em MINUTA PARA REVISÃO JURÍDICA. O texto será substituído pela versão revista antes do lançamento; a versão que aceitar agora fica registada.",
         "plan": "Plano",
         "price": "Preço",
         "interval": "Periodicidade",
@@ -1444,6 +1443,28 @@
           "direct": { "value": "1:1", "label": "entre comprador e proprietário" }
         }
       }
+    },
+    "staffShell": {
+      "eyebrow": "Área interna · equipa",
+      "headline": "Acesso reservado à equipa UProperty Market.",
+      "lead": "Gestão da plataforma, moderação, suporte e marketing — num só lugar, com as mesmas regras para todos.",
+      "assurances": {
+        "twoFactor": {
+          "title": "Verificação em dois passos",
+          "text": "Obrigatória em todas as contas da equipa, a cada entrada."
+        },
+        "pin": {
+          "title": "PIN nas operações sensíveis",
+          "text": "As ações que mexem em contas e dados pedem uma segunda confirmação."
+        },
+        "audit": {
+          "title": "Registo de auditoria",
+          "text": "Cada operação fica registada, com quem a fez e quando."
+        }
+      },
+      "restricted": "Área reservada a membros da equipa",
+      "monitored": "Acesso restrito e monitorizado",
+      "copyright": "© {year} UProperty Market"
     },
     "staffRecovery": {
       "title": "Recuperar a palavra-passe",
