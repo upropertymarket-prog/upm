@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Checkbox, Input, Select } from "@upm/ui";
+import { Button, Checkbox, Input, Select } from "@upm/ui";
 
 type Step = "profile" | "account" | "plan" | "contract";
 type ProfileChoice = "buyer" | "owner";
@@ -143,7 +143,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
   ];
 
   return (
-    <Card padded className="mx-auto flex w-full max-w-lg flex-col gap-5">
+    <div className="flex w-full flex-col gap-6">
       <ol className="flex flex-wrap gap-4 text-sm text-muted" aria-label={t("register.title")}>
         {steps.map((item) => (
           <li
@@ -177,7 +177,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
 
         <div hidden={step !== "profile"}>
           <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-semibold text-text">{t("register.profile.title")}</h1>
+            <h1 className="upm-auth__title">{t("register.profile.title")}</h1>
             <div className="flex flex-col gap-3">
               <button
                 type="button"
@@ -206,7 +206,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
 
         <div hidden={step !== "account"}>
           <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-semibold text-text">{t("register.account.title")}</h1>
+            <h1 className="upm-auth__title">{t("register.account.title")}</h1>
             <Input
               name="fullName"
               label={t("register.account.fullName")}
@@ -258,7 +258,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
 
         <div hidden={step !== "plan"}>
           <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-semibold text-text">{t("register.plan.title")}</h1>
+            <h1 className="upm-auth__title">{t("register.plan.title")}</h1>
             <p className="text-sm text-muted">{t("register.plan.hint")}</p>
 
             <Select
@@ -331,7 +331,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
 
         <div hidden={step !== "contract"}>
           <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-semibold text-text">{tc("title")}</h1>
+            <h1 className="upm-auth__title">{tc("title")}</h1>
 
             {terms?.pendingLegalReview ? (
               <p
@@ -472,6 +472,6 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
           </p>
         ) : null}
       </form>
-    </Card>
+    </div>
   );
 }

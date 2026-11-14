@@ -28,7 +28,10 @@ export function NewPasswordForm({ action }: NewPasswordFormProps) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <h1 className="text-lg font-semibold text-text">{t("newPasswordTitle")}</h1>
+      <div className="upm-auth__heading">
+        <h1 className="upm-auth__title">{t("newPasswordTitle")}</h1>
+        <p className="upm-auth__subtitle">{t("newPasswordSubtitle")}</p>
+      </div>
       <Input
         name="password"
         type="password"

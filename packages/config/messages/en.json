@@ -1358,6 +1358,7 @@
       "suspended": "This account is suspended. Contact support for help.",
       "staffBlocked": "Staff accounts sign in at interno.upropertymarket.pt, not here.",
       "rateLimited": "Too many attempts. Try again in {seconds}s.",
+      "welcomeTitle": "No pressure, at your own pace.",
       "subtitle": "Sign in to manage your properties, viewings and messages.",
       "passwordSet": "Password set. Sign in with your new password and the code from your app.",
       "linkInvalid": "The link has expired or was already used. Request a new one."
@@ -1429,7 +1430,20 @@
       "createAccount": "Create account",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
-      "rememberedPassword": "Remembered your password?"
+      "rememberedPassword": "Remembered your password?",
+      "copyright": "© {year} UProperty Market",
+      "legalNav": "Legal documents",
+      "pitch": {
+        "eyebrow": "Your property, your choice",
+        "headline": "Buy and sell.",
+        "headlineAccent": "No commissions.",
+        "lead": "Buyers and owners talk directly, at their own pace. No middlemen, no pressure, no surprises at the end.",
+        "stats": {
+          "commission": { "value": "0 %", "label": "commission" },
+          "privacy": { "value": "100 %", "label": "private contacts" },
+          "direct": { "value": "1:1", "label": "between buyer and owner" }
+        }
+      }
     },
     "staffRecovery": {
       "title": "Recover your password",

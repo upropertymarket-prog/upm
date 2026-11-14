@@ -22,7 +22,7 @@ export default async function LoginPage({
 
   return (
     <AuthShell
-      title={t("title")}
+      title={t("welcomeTitle")}
       subtitle={t("subtitle")}
       switchPrompt={ts("noAccount")}
       switchHref="/criar-conta"
