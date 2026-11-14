@@ -185,7 +185,13 @@ export async function middleware(request: NextRequest) {
  *
  * Deixá-la de fora não abre nada: a resposta é `{ ok }` e um código de estado,
  * sem dizer o que falhou.
+ *
+ * **`brand/` também fica fora** (14 nov 2026): é o favicon e o ícone do iOS
+ * (`BRAND_ICONS`). Dentro do matcher, quem ainda não entrou levava um 307
+ * para `/entrar` em vez do SVG — o browser recebia HTML e o separador ficava
+ * sem ícone, precisamente no ecrã de entrada. São os mesmos ficheiros públicos
+ * do site; não há nada a proteger.
  */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/health).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/health|brand/).*)"],
 };

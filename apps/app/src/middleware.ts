@@ -156,10 +156,14 @@ export async function middleware(request: NextRequest) {
  * aqui, levava um 307 para `/entrar` — e um monitor lê um redirect como "a
  * app respondeu", ou seja, continuaria a dizer verde com a base de dados em
  * baixo. Um alarme que nunca toca é pior do que não ter alarme.
+ *
+ * **`brand/` também** (14 nov 2026): o favicon e o ícone do iOS. Sem sessão
+ * (`/partilha`, `/conta-suspensa`) levavam um redirect em vez do ficheiro, e o
+ * separador ficava sem ícone. São ficheiros públicos, os mesmos do site.
  */
 export const config = {
   matcher: [
     // `maplibre/`: o worker do mapa, servido de `public/` com CSP própria (next.config.ts).
-    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook|api/health|maplibre/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|%5F%5Ftempo|api/stripe/webhook|api/health|maplibre/|brand/).*)",
   ],
 };

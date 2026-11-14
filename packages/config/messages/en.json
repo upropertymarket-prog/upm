@@ -1448,20 +1448,7 @@
       "eyebrow": "Internal area · team",
       "headline": "Access reserved for the UProperty Market team.",
       "lead": "Platform management, moderation, support and marketing — in one place, with the same rules for everyone.",
-      "assurances": {
-        "twoFactor": {
-          "title": "Two-step verification",
-          "text": "Required on every team account, at every sign-in."
-        },
-        "pin": {
-          "title": "PIN for sensitive operations",
-          "text": "Actions that change accounts and data ask for a second confirmation."
-        },
-        "audit": {
-          "title": "Audit log",
-          "text": "Every operation is recorded, with who did it and when."
-        }
-      },
+      "closing": "A dedicated workspace for the team to look after the platform and the people who use it.",
       "restricted": "Area reserved for team members",
       "monitored": "Restricted and monitored access",
       "copyright": "© {year} UProperty Market"

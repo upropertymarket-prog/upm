@@ -1448,20 +1448,7 @@
       "eyebrow": "Área interna · equipa",
       "headline": "Acesso reservado à equipa UProperty Market.",
       "lead": "Gestão da plataforma, moderação, suporte e marketing — num só lugar, com as mesmas regras para todos.",
-      "assurances": {
-        "twoFactor": {
-          "title": "Verificação em dois passos",
-          "text": "Obrigatória em todas as contas da equipa, a cada entrada."
-        },
-        "pin": {
-          "title": "PIN nas operações sensíveis",
-          "text": "As ações que mexem em contas e dados pedem uma segunda confirmação."
-        },
-        "audit": {
-          "title": "Registo de auditoria",
-          "text": "Cada operação fica registada, com quem a fez e quando."
-        }
-      },
+      "closing": "Um espaço de trabalho reservado, para a equipa cuidar da plataforma e de quem a utiliza.",
       "restricted": "Área reservada a membros da equipa",
       "monitored": "Acesso restrito e monitorizado",
       "copyright": "© {year} UProperty Market"

@@ -12,47 +12,14 @@ import "./auth-card.css";
  * moldura que a página, em vez de uma cópia.
  *
  * **14 nov 2026 — duas metades.** O cartão sozinho no meio do ecrã não dizia
- * onde se estava. Passa a ter, à esquerda, o painel da equipa: "acesso
- * reservado" e as três garantias que a área cumpre (2FA obrigatória, PIN nas
- * operações sensíveis, auditoria); à direita o formulário. Layout em
- * `auth-card.css`. O nome fica `AuthCard` para não mexer nos chamadores.
+ * onde se estava. Passa a ter, à esquerda, o painel da equipa ("acesso
+ * reservado"), à direita o formulário. Layout em `auth-card.css`. O nome fica
+ * `AuthCard` para não mexer nos chamadores.
+ *
+ * O painel fecha com uma frase geral, e não com a lista das medidas de
+ * segurança (2FA, PIN, auditoria): a página é pública, e dizer a quem chega
+ * como a área se protege é dar-lhe o mapa (pedido do cliente, 14 nov 2026).
  */
-
-const ICON_PROPS = {
-  width: 20,
-  height: 20,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-} as const;
-
-/** Os ícones das garantias — decorativos, o texto diz tudo. */
-const ICONS = {
-  twoFactor: (
-    <svg {...ICON_PROPS}>
-      <path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  ),
-  pin: (
-    <svg {...ICON_PROPS}>
-      <rect x="4" y="10" width="16" height="10" rx="2" />
-      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-      <path d="M12 14v2" />
-    </svg>
-  ),
-  audit: (
-    <svg {...ICON_PROPS}>
-      <path d="M7 3h7l5 5v13H7z" />
-      <path d="M14 3v5h5" />
-      <path d="M10 13h6M10 17h4" />
-    </svg>
-  ),
-};
 
 function LockIcon() {
   return (
@@ -75,20 +42,9 @@ function StaffPanel() {
         <div className="upm-iauth__intro">
           <span className="upm-iauth__eyebrow">{t("eyebrow")}</span>
           <p className="upm-iauth__headline">{t("headline")}</p>
-          <p className="upm-iauth__lead">{t("lead")}</p>
         </div>
 
-        <ul className="upm-iauth__assurances">
-          {(["twoFactor", "pin", "audit"] as const).map((id) => (
-            <li key={id} className="upm-iauth__assurance">
-              <span className="upm-iauth__assurance-icon">{ICONS[id]}</span>
-              <span>
-                <span className="upm-iauth__assurance-title">{t(`assurances.${id}.title`)}</span>
-                <span className="upm-iauth__assurance-text">{t(`assurances.${id}.text`)}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <p className="upm-iauth__closing">{t("closing")}</p>
       </div>
     </aside>
   );

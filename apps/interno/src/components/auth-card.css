@@ -2,10 +2,10 @@
  * Moldura dos ecrãs de entrada do interno (14 nov 2026)
  * =========================================================================
  * Duas metades, como a autenticação do site, mas com outra mensagem: à
- * esquerda o painel da equipa — azul-marinho, "acesso reservado" e as três
- * garantias de segurança que a área de facto cumpre —, à direita o formulário,
+ * esquerda o painel da equipa — azul-marinho, "acesso reservado" e uma frase
+ * geral, sem detalhes de segurança —, à direita o formulário,
  * sem cartão. O tom é sóbrio de propósito: nada de laranja a gritar, o acento
- * fica nos pormenores (o eyebrow, os ícones, o botão).
+ * fica nos pormenores (o eyebrow, o botão).
  *
  * Em `cqi` e container queries, nunca `vw` nem media queries: no canvas a
  * storyboard é uma moldura e só o contentor sabe a largura que tem. Abaixo de
@@ -87,52 +87,19 @@
   color: var(--muted);
 }
 
-.upm-iauth__assurances {
-  list-style: none;
+/* A frase que fecha o painel: geral de propósito — a página é pública e não
+   lista as medidas de segurança da área. */
+.upm-iauth__closing {
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--sp-7);
-}
-
-.upm-iauth__assurance {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: var(--sp-7);
-  align-items: start;
-}
-
-.upm-iauth__assurance-icon {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface3);
-  color: var(--accent);
-}
-
-.upm-iauth__assurance-title {
-  display: block;
   font-size: 15px;
-  font-weight: var(--fw-semibold);
-  line-height: 1.4;
-  color: var(--text);
-}
-
-.upm-iauth__assurance-text {
-  display: block;
-  margin-top: 2px;
-  font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--muted);
 }
 
-/* No telemóvel a faixa leva só a marca e o título: as garantias empurravam o
+/* No telemóvel a faixa leva só a marca e o título: o resto empurrava o
    formulário para fora do primeiro ecrã. */
 .upm-iauth__lead,
-.upm-iauth__assurances {
+.upm-iauth__closing {
   display: none;
 }
 
@@ -221,8 +188,8 @@
     display: block;
   }
 
-  .upm-iauth__assurances {
-    display: grid;
+  .upm-iauth__closing {
+    display: block;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
   }
