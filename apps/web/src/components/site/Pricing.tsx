@@ -41,6 +41,13 @@ export type PublicPlan = {
   audience: "owner" | "buyer" | "both";
   priceYearCents: number;
   priceMonthCents: number;
+  /**
+   * A oferta do 1.º ano (13 nov 2026). Com ela, o cartão mostra o preço normal
+   * riscado e este a seguir; `null` = sem oferta, e o cartão fica como era.
+   */
+  introYearCents: number | null;
+  introMonthCents: number | null;
+  introMonths: number | null;
   features: string[];
   /**
    * Os limites do plano (`plans.limits`, 07 §19.2). Quando `features` vem
@@ -239,6 +246,8 @@ export function Pricing({
           >
             {visible.map((plan, posicao) => {
               const cents = billing === "year" ? plan.priceYearCents : plan.priceMonthCents;
+              const intro = billing === "year" ? plan.introYearCents : plan.introMonthCents;
+              const oferta = intro !== null && plan.introMonths !== null ? intro : null;
               const ideal = description(plan);
               // Os tipos de alerta pelo degrau do plano na escada (ver
               // PLAN_ALERT_TYPES): ✓ a partir do degrau em que entram.
@@ -280,8 +289,19 @@ export function Pricing({
                       {plan.name}
                     </span>
                     <div style={{ display: "grid", gap: "var(--sp-2)" }}>
+                      {/*
+                        Oferta do 1.º ano (cliente, 13 nov 2026): o preço normal
+                        riscado e o do 1.º ano logo a seguir, na mesma linha. O
+                        `<s>` não se anuncia num leitor de ecrã, por isso cada
+                        valor leva o seu nome escondido — sem ele, ouvia-se "19,99
+                        10,99" e não se percebia qual se paga.
+                      */}
                       <span
                         style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          alignItems: "baseline",
+                          columnGap: "var(--sp-4)",
                           fontFamily: "var(--font-display)",
                           fontSize: "clamp(1.6rem, 3vw, 2rem)",
                           fontWeight: "var(--fw-bold)",
@@ -289,13 +309,38 @@ export function Pricing({
                           lineHeight: 1.1,
                         }}
                       >
-                        {money(cents, locale)}
-                        <span style={{ fontSize: "0.7em", fontWeight: "var(--fw-semibold)" }}>
-                          {/* Pelo dicionário desde 7 nov 2026: escrito à mão, o site
-                              em inglês dizia "/ ano". */}
-                          {t(`per.${billing}`)}
+                        {oferta !== null ? (
+                          <s
+                            style={{
+                              fontSize: "0.6em",
+                              fontWeight: "var(--fw-medium)",
+                              color: "var(--muted)",
+                            }}
+                          >
+                            <span className="upm-sr-only">{t("intro.was")}: </span>
+                            {money(cents, locale)}
+                          </s>
+                        ) : null}
+                        <span>
+                          {oferta !== null ? (
+                            <span className="upm-sr-only">{t("intro.now")}: </span>
+                          ) : null}
+                          {money(oferta ?? cents, locale)}
+                          <span style={{ fontSize: "0.7em", fontWeight: "var(--fw-semibold)" }}>
+                            {/* Pelo dicionário desde 7 nov 2026: escrito à mão, o site
+                                em inglês dizia "/ ano". */}
+                            {t(`per.${billing}`)}
+                          </span>
                         </span>
                       </span>
+                      {oferta !== null ? (
+                        <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                          {t("intro.note", {
+                            months: plan.introMonths as number,
+                            price: `${money(cents, locale)}${t(`per.${billing}`)}`,
+                          })}
+                        </p>
+                      ) : null}
                       {ideal ? (
                         <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                           {ideal}

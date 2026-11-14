@@ -674,6 +674,11 @@
         "priceDrop": "Queda do preço de imóveis guardados",
         "belowAverage": "Propriedades publicadas com preços abaixo da média",
         "priorityAccess": "Acesso prioritário a propriedades recentes"
+      },
+      "intro": {
+        "was": "Preço normal",
+        "now": "Preço do 1.º ano",
+        "note": "Nos primeiros {months} meses. Depois, {price}."
       }
     },
     "faq": {
@@ -1308,7 +1313,9 @@
         "submit": "Concluir registo",
         "intervalLabel": "Periodicidade",
         "monthly": "Mensal",
-        "yearly": "Anual (dois meses grátis)"
+        "yearly": "Anual (dois meses grátis)",
+        "introNote": "Nos primeiros {months} meses. Depois, {price}.",
+        "wasPrice": "Preço normal"
       },
       "contract": {
         "title": "Confirme o que vai contratar",
@@ -1335,7 +1342,9 @@
         "commitmentMonths": "{months} meses",
         "cancellationWithCommitment": "A qualquer momento; produz efeitos no fim do período mínimo",
         "marketing": "Quero receber novidades, dicas e campanhas por e-mail.",
-        "marketingHint": "Opcional, e independente dos Termos. Pode cancelar pelo link que vai em cada e-mail que receba."
+        "marketingHint": "Opcional, e independente dos Termos. Pode cancelar pelo link que vai em cada e-mail que receba.",
+        "introPrice": "Preço nos primeiros {months} meses",
+        "priceAfter": "Preço depois disso"
       }
     },
     "login": {
@@ -1595,7 +1604,9 @@
       "previous": "Contratos anteriores",
       "link": "Ver contrato de adesão",
       "perMonth": "/mês",
-      "perYear": "/ano"
+      "perYear": "/ano",
+      "intro": "Oferta de entrada",
+      "introValue": "{price} nos primeiros {months} meses; depois, o valor acima"
     }
   },
   "admin": {

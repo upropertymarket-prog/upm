@@ -287,6 +287,28 @@ export type CatalogEntry = {
   stripeProductId: string | null;
   stripePriceMonthId: string | null;
   stripePriceYearId: string | null;
+  /**
+   * A oferta de entrada (13 nov 2026). `null` nos três = sem oferta, que é o
+   * caso dos extras e dos planos de comprador. Ver `introCouponFor`.
+   */
+  introMonthCents: number | null;
+  introYearCents: number | null;
+  introMonths: number | null;
+  stripeCouponMonthId: string | null;
+  stripeCouponYearId: string | null;
+};
+
+/**
+ * Um `Coupon` do Stripe, no mínimo de que a sincronização precisa. Como o
+ * `Price`, um cupão não se edita: valor ou duração novos = cupão novo.
+ */
+export type CatalogCoupon = {
+  id: string;
+  amountOff: number | null;
+  currency: string | null;
+  duration: "once" | "repeating" | "forever";
+  durationInMonths: number | null;
+  valid: boolean;
 };
 
 export type CatalogProduct = {
@@ -330,15 +352,30 @@ export type StripeCatalogApi = {
     interval: BillingInterval;
     metadata: Record<string, string>;
   }): Promise<CatalogPrice>;
+  getCoupon(id: string): Promise<CatalogCoupon | null>;
+  createCoupon(input: {
+    id: string;
+    name: string;
+    amountOff: number;
+    duration: "once" | "repeating";
+    durationInMonths: number | null;
+    product: string;
+    metadata: Record<string, string>;
+  }): Promise<CatalogCoupon>;
+};
+
+export type CatalogStripeIds = {
+  productId: string;
+  priceMonthId: string;
+  priceYearId: string;
+  couponMonthId: string | null;
+  couponYearId: string | null;
 };
 
 /** O lado da base de dados. Implementado em `stripe.ts` sobre a service role. */
 export type CatalogStore = {
   list(): Promise<CatalogEntry[]>;
-  saveStripeIds(
-    entry: CatalogEntry,
-    ids: { productId: string; priceMonthId: string; priceYearId: string },
-  ): Promise<void>;
+  saveStripeIds(entry: CatalogEntry, ids: CatalogStripeIds): Promise<void>;
 };
 
 export const CATALOG_CURRENCY = "eur";
@@ -353,6 +390,82 @@ export function productIdFor(entry: Pick<CatalogEntry, "kind" | "slug">): string
   return `upm_${entry.kind}_${entry.slug}`;
 }
 
+/**
+ * O cupão que aplica a oferta de entrada a uma periodicidade, ou `null` se o
+ * plano não tem oferta.
+ *
+ * Desconta a DIFERENÇA para o preço normal, não uma percentagem: o que o
+ * cliente decidiu foram valores (10,99 em vez de 19,99), e uma percentagem
+ * arredondada dava cêntimos de diferença na fatura.
+ *
+ * - **Mensal:** `repeating` durante `introMonths` faturas.
+ * - **Anual:** `once` — a primeira anuidade são os primeiros 12 meses. Só é
+ *   assim enquanto `introMonths` for 12; outro valor no anual não tem tradução
+ *   honesta num cupão, e recusa-se em vez de se aproximar.
+ *
+ * O id é determinístico e leva o valor e a duração, pela mesma razão que o do
+ * `Product`: uma segunda corrida encontra o mesmo cupão, e uma oferta nova
+ * nunca reaproveita um cupão com outro valor.
+ */
+export function introCouponFor(
+  entry: Pick<
+    CatalogEntry,
+    | "slug"
+    | "priceMonthCents"
+    | "priceYearCents"
+    | "introMonthCents"
+    | "introYearCents"
+    | "introMonths"
+  >,
+  interval: BillingInterval,
+): {
+  id: string;
+  amountOff: number;
+  duration: "once" | "repeating";
+  durationInMonths: number | null;
+} | null {
+  const intro = interval === "month" ? entry.introMonthCents : entry.introYearCents;
+  const price = interval === "month" ? entry.priceMonthCents : entry.priceYearCents;
+  const months = entry.introMonths;
+  if (intro === null || months === null) return null;
+
+  const amountOff = price - intro;
+  if (amountOff <= 0 || intro <= 0) {
+    throw new Error(`${entry.slug}: a oferta (${intro}) não fica abaixo do preço (${price}).`);
+  }
+  if (interval === "year" && months !== 12) {
+    throw new Error(
+      `${entry.slug}: oferta de ${months} meses no anual — um cupão só cobre anuidades inteiras.`,
+    );
+  }
+
+  return {
+    id: `upm_intro_${entry.slug}_${interval}_${amountOff}_${months}m`,
+    amountOff,
+    duration: interval === "month" ? "repeating" : "once",
+    durationInMonths: interval === "month" ? months : null,
+  };
+}
+
+/** O Stripe mostra o nome do cupão na fatura e no Checkout; o limite é 40. */
+function couponName(planName: string, interval: BillingInterval): string {
+  return `${planName} · oferta 1.º ${interval === "month" ? "ano (mensal)" : "ano"}`.slice(0, 40);
+}
+
+function couponMatches(
+  coupon: CatalogCoupon | null,
+  wanted: NonNullable<ReturnType<typeof introCouponFor>>,
+): coupon is CatalogCoupon {
+  return (
+    coupon !== null &&
+    coupon.valid &&
+    coupon.currency === CATALOG_CURRENCY &&
+    coupon.amountOff === wanted.amountOff &&
+    coupon.duration === wanted.duration &&
+    coupon.durationInMonths === wanted.durationInMonths
+  );
+}
+
 export type SyncAction =
   "created" | "price_added" | "price_reused" | "renamed" | "unchanged" | "skipped";
 
@@ -364,10 +477,13 @@ export type SyncEntryResult = {
   productId?: string;
   priceMonthId?: string;
   priceYearId?: string;
+  couponMonthId?: string | null;
+  couponYearId?: string | null;
 };
 
 export type SyncReport = {
   entries: SyncEntryResult[];
+  couponsCreated: number;
   created: number;
   pricesAdded: number;
   pricesReused: number;
@@ -405,6 +521,7 @@ function priceMatches(
 export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): Promise<SyncReport> {
   const entries = await store.list();
   const results: SyncEntryResult[] = [];
+  let couponsCreated = 0;
 
   for (const entry of entries) {
     if (entry.priceMonthCents <= 0 && entry.priceYearCents <= 0) {
@@ -476,17 +593,54 @@ export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): P
       if (action === "unchanged" || action === "price_reused") action = "price_added";
     }
 
+    // A oferta de entrada. Sem oferta, a coluna fica `null` — é isso que tira o
+    // desconto do Checkout quando o Admin acaba com ela, sem tocar no cupão,
+    // que continua a servir quem já o apanhou.
+    const couponIds: Record<BillingInterval, string | null> = { month: null, year: null };
+
+    for (const interval of BILLING_INTERVALS) {
+      const wanted = introCouponFor(entry, interval);
+      if (!wanted) continue;
+
+      const existing = await api.getCoupon(wanted.id);
+      if (couponMatches(existing, wanted)) {
+        couponIds[interval] = existing.id;
+        continue;
+      }
+      if (existing) {
+        // Mesmo id, outro conteúdo: alguém mexeu no cupão à mão no Stripe. Não
+        // se apaga nem se inventa um id ao lado — pára-se, para alguém ver.
+        throw new Error(`${entry.slug}: o cupão ${wanted.id} existe no Stripe com outro valor.`);
+      }
+
+      const created = await api.createCoupon({
+        id: wanted.id,
+        name: couponName(entry.name, interval),
+        amountOff: wanted.amountOff,
+        duration: wanted.duration,
+        durationInMonths: wanted.durationInMonths,
+        product: product.id,
+        metadata,
+      });
+      couponIds[interval] = created.id;
+      couponsCreated += 1;
+    }
+
     const changed =
       action !== "unchanged" ||
       entry.stripeProductId !== product.id ||
       entry.stripePriceMonthId !== priceIds.month ||
-      entry.stripePriceYearId !== priceIds.year;
+      entry.stripePriceYearId !== priceIds.year ||
+      entry.stripeCouponMonthId !== couponIds.month ||
+      entry.stripeCouponYearId !== couponIds.year;
 
     if (changed) {
       await store.saveStripeIds(entry, {
         productId: product.id,
         priceMonthId: priceIds.month,
         priceYearId: priceIds.year,
+        couponMonthId: couponIds.month,
+        couponYearId: couponIds.year,
       });
     }
 
@@ -497,11 +651,14 @@ export async function syncCatalog(api: StripeCatalogApi, store: CatalogStore): P
       productId: product.id,
       priceMonthId: priceIds.month,
       priceYearId: priceIds.year,
+      couponMonthId: couponIds.month,
+      couponYearId: couponIds.year,
     });
   }
 
   return {
     entries: results,
+    couponsCreated,
     created: results.filter((r) => r.action === "created").length,
     pricesAdded: results.filter((r) => r.action === "price_added").length,
     pricesReused: results.filter((r) => r.action === "price_reused").length,

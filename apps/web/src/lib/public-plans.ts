@@ -28,6 +28,9 @@ type PlanRow = {
   audience: string;
   price_year_cents: number | null;
   price_month_cents: number | null;
+  intro_price_year_cents: number | null;
+  intro_price_month_cents: number | null;
+  intro_months: number | null;
   features: string[] | null;
   limits: PlanLimits | null;
   position: number | null;
@@ -43,6 +46,9 @@ function toPublicPlan(row: PlanRow, index: number, total: number): PublicPlan {
     audience: row.audience === "owner" || row.audience === "buyer" ? row.audience : "both",
     priceYearCents: row.price_year_cents ?? 0,
     priceMonthCents: row.price_month_cents ?? 0,
+    introYearCents: row.intro_price_year_cents,
+    introMonthCents: row.intro_price_month_cents,
+    introMonths: row.intro_months,
     features: row.features ?? [],
     limits: row.limits ?? {},
     // O do meio, quando há três; o último, quando há dois. É a convenção do
@@ -58,7 +64,7 @@ const read = unstable_cache(
     const { data, error } = await supabase
       .from("plans")
       .select(
-        "slug, name, audience, price_year_cents, price_month_cents, features, limits, position",
+        "slug, name, audience, price_year_cents, price_month_cents, intro_price_year_cents, intro_price_month_cents, intro_months, features, limits, position",
       )
       .eq("visible", true)
       .order("position");

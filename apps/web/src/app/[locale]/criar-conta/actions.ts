@@ -162,10 +162,18 @@ export async function registerAccount(
   // O plano e o preço vêm do catálogo, nunca do pedido (P7-02 mantém-se).
   const priceColumn =
     intervalResult.data === "month" ? "stripe_price_month_id" : "stripe_price_year_id";
+  // A oferta do 1.º ano (13 nov 2026) também vem do catálogo: o cupão e o preço
+  // da periodicidade escolhida.
+  const couponColumn =
+    intervalResult.data === "month" ? "stripe_coupon_month_id" : "stripe_coupon_year_id";
+  const introColumn =
+    intervalResult.data === "month" ? "intro_price_month_cents" : "intro_price_year_cents";
 
   const { data: plan } = await service
     .from("plans")
-    .select(`id, slug, name, audience, price_month_cents, price_year_cents, ${priceColumn}`)
+    .select(
+      `id, slug, name, audience, price_month_cents, price_year_cents, intro_months, ${priceColumn}, ${couponColumn}, ${introColumn}`,
+    )
     .eq("slug", planSlug)
     .eq("visible", true)
     .maybeSingle();
@@ -183,6 +191,20 @@ export async function registerAccount(
     // é um problema de catálogo (P7-01), não uma alternativa para o utilizador.
     return { error: "Este plano ainda não está disponível para subscrição.", step: "plan" };
   }
+
+  // O site prometeu o preço do 1.º ano; se o cupão não estiver sincronizado,
+  // cobrar o preço normal seria faltar a essa promessa sem ninguém dar conta.
+  // Recusa-se, como um `Price` em falta.
+  const introPrice = planRow[introColumn];
+  const couponId = planRow[couponColumn];
+  const hasIntro = typeof introPrice === "number" && introPrice > 0;
+  if (hasIntro && (typeof couponId !== "string" || couponId.length === 0)) {
+    console.error(`[criar-conta] ${planSlug}: oferta sem cupão — falta correr pnpm stripe:sync`);
+    return { error: "Este plano ainda não está disponível para subscrição.", step: "plan" };
+  }
+  const introMetadata: Record<string, string> = hasIntro
+    ? { upm_intro_price_cents: String(introPrice), upm_intro_months: String(planRow.intro_months) }
+    : {};
 
   // O documento que lhe foi mostrado tem de estar publicado AGORA e com o
   // mesmo corpo. Procura-se pelo id, não pelo idioma: a página carrega os Termos
@@ -304,6 +326,7 @@ export async function registerAccount(
       mode: "subscription",
       customer: customer.id,
       line_items: [{ price: priceId, quantity: 1 }],
+      ...(hasIntro ? { discounts: [{ coupon: couponId as string }] } : {}),
       success_url: `${webUrl}/criar-conta/verificacao?email=${encodeURIComponent(email)}&pago=1`,
       cancel_url: `${webUrl}/criar-conta/verificacao?email=${encodeURIComponent(email)}&pago=0`,
       tax_id_collection: { enabled: true },
@@ -324,6 +347,7 @@ export async function registerAccount(
           upm_plan_slug: planSlug,
           upm_terms_document_id: documentId,
           upm_terms_version: terms.version,
+          ...introMetadata,
         },
       },
     });

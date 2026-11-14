@@ -137,7 +137,9 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
   if (kind === "plan") {
     const { data: plan } = await supabase
       .from("plans")
-      .select(`slug, audience, price_month_cents, price_year_cents, ${column}`)
+      .select(
+        `slug, audience, price_month_cents, price_year_cents, intro_months, intro_price_month_cents, intro_price_year_cents, stripe_coupon_month_id, stripe_coupon_year_id, ${column}`,
+      )
       .eq("slug", slug)
       .eq("visible", true)
       .maybeSingle();
@@ -159,18 +161,52 @@ export async function startCheckout(input: unknown): Promise<CheckoutState> {
     if (typeof priceId !== "string" || priceId.length === 0) {
       return { error: "Este plano ainda não está disponível para subscrição." };
     }
+    // Oferta do 1.º ano (13 nov 2026) — só para quem nunca teve subscrição. É
+    // o caminho de quem criou conta e não chegou a pagar no registo ("entre na
+    // sua conta para concluir"): o site prometeu-lhe a oferta, e perdê-la por o
+    // pagamento ter falhado à primeira seria faltar à promessa. Quem já foi
+    // subscritor muda de plano ao preço normal.
+    const introPrice =
+      interval === "month" ? plan.intro_price_month_cents : plan.intro_price_year_cents;
+    const couponId =
+      interval === "month" ? plan.stripe_coupon_month_id : plan.stripe_coupon_year_id;
+    let intro: { couponId: string; metadata: Record<string, string> } | null = null;
+    if (introPrice && couponId && plan.intro_months) {
+      const { count } = await supabase
+        .from("subscriptions")
+        .select("id", { count: "exact", head: true })
+        .eq("profile_id", user.id);
+      if (count === 0) {
+        intro = {
+          couponId,
+          metadata: {
+            upm_intro_price_cents: String(introPrice),
+            upm_intro_months: String(plan.intro_months),
+          },
+        };
+      }
+    }
+
     // P9-05 — não há trial. O `trial_period_days` saiu daqui: a decisão do
     // cliente de 7 out 2026 é que quem se inscreve paga no momento da
     // inscrição. `trial_eligible()` continua a existir e devolve sempre false.
-    return checkoutFor(supabase, user.id, user.email, priceId, {
-      upm_plan_slug: slug,
-      ...(acceptedTerms
-        ? {
-            upm_terms_document_id: acceptedTerms.id,
-            upm_terms_version: acceptedTerms.version,
-          }
-        : {}),
-    });
+    return checkoutFor(
+      supabase,
+      user.id,
+      user.email,
+      priceId,
+      {
+        upm_plan_slug: slug,
+        ...(acceptedTerms
+          ? {
+              upm_terms_document_id: acceptedTerms.id,
+              upm_terms_version: acceptedTerms.version,
+            }
+          : {}),
+        ...intro?.metadata,
+      },
+      intro?.couponId,
+    );
   }
 
   const { data: addon } = await supabase
@@ -195,6 +231,7 @@ async function checkoutFor(
   email: string | undefined,
   priceId: string,
   metadata: Record<string, string>,
+  couponId?: string,
 ): Promise<CheckoutState> {
   try {
     const { customerId, error } = await ensureCustomer(supabase, userId, email);
@@ -205,6 +242,7 @@ async function checkoutFor(
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
+      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
       success_url: `${appUrl()}/plano?checkout=sucesso`,
       cancel_url: `${appUrl()}/plano?checkout=cancelado`,
       // Fatura com NIF opcional (02 §9). A emissão certificada em PT é outra

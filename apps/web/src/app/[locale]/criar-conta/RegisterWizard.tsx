@@ -28,6 +28,13 @@ export type RegisterPlan = {
   name: string;
   priceMonthCents: number;
   priceYearCents: number;
+  /**
+   * Oferta do 1.º ano (13 nov 2026): o preço dos primeiros `introMonths` meses.
+   * `null` = sem oferta. O preço normal continua em `price*Cents`.
+   */
+  introMonthCents: number | null;
+  introYearCents: number | null;
+  introMonths: number | null;
   features: string[];
   audience: "owner" | "buyer" | "both";
   /**
@@ -83,6 +90,13 @@ function money(cents: number, locale: string) {
   return new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" }).format(cents / 100);
 }
 
+/** O preço normal e, se houver oferta, o do 1.º ano, na periodicidade escolhida. */
+function pricesFor(plan: RegisterPlan, interval: "month" | "year") {
+  const cents = interval === "month" ? plan.priceMonthCents : plan.priceYearCents;
+  const intro = interval === "month" ? plan.introMonthCents : plan.introYearCents;
+  return { cents, intro: intro !== null && plan.introMonths !== null ? intro : null };
+}
+
 /**
  * Registo com contratação paga (Fase 9 — P9-01, P9-02, P9-09)
  * =========================================================================
@@ -118,11 +132,8 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
 
   const visiblePlans = plans.filter((plan) => plan.audience === "both" || plan.audience === role);
   const chosen = visiblePlans.find((plan) => plan.slug === planSlug) ?? null;
-  const cents = chosen
-    ? interval === "month"
-      ? chosen.priceMonthCents
-      : chosen.priceYearCents
-    : 0;
+  const chosenPrices = chosen ? pricesFor(chosen, interval) : { cents: 0, intro: null };
+  const per = interval === "month" ? t("register.plan.perMonth") : t("register.plan.perYear");
 
   const steps: { id: Step; label: string }[] = [
     { id: "profile", label: t("register.steps.profile") },
@@ -262,29 +273,44 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
             />
 
             <div className="flex flex-col gap-3">
-              {visiblePlans.map((plan) => (
-                <button
-                  key={plan.slug}
-                  type="button"
-                  className="flex flex-col gap-1 rounded-xl border border-border p-4 text-left hover:border-accent data-[selected=true]:border-accent data-[selected=true]:bg-accent-soft"
-                  data-selected={planSlug === plan.slug ? "true" : undefined}
-                  onClick={() => setPlanSlug(plan.slug)}
-                >
-                  <strong className="text-text">{plan.name}</strong>
-                  <span className="text-sm text-text">
-                    {money(
-                      interval === "month" ? plan.priceMonthCents : plan.priceYearCents,
-                      "pt-PT",
-                    )}
-                    {interval === "month"
-                      ? t("register.plan.perMonth")
-                      : t("register.plan.perYear")}
-                  </span>
-                  {plan.features.length > 0 ? (
-                    <span className="text-sm text-muted">{plan.features.join(" · ")}</span>
-                  ) : null}
-                </button>
-              ))}
+              {visiblePlans.map((plan) => {
+                const prices = pricesFor(plan, interval);
+                return (
+                  <button
+                    key={plan.slug}
+                    type="button"
+                    className="flex flex-col gap-1 rounded-xl border border-border p-4 text-left hover:border-accent data-[selected=true]:border-accent data-[selected=true]:bg-accent-soft"
+                    data-selected={planSlug === plan.slug ? "true" : undefined}
+                    onClick={() => setPlanSlug(plan.slug)}
+                  >
+                    <strong className="text-text">{plan.name}</strong>
+                    {/* O preço normal riscado e o do 1.º ano a seguir, como no site. */}
+                    <span className="flex flex-wrap items-baseline gap-x-2 text-sm text-text">
+                      {prices.intro !== null ? (
+                        <s className="text-muted">
+                          <span className="sr-only">{t("register.plan.wasPrice")}: </span>
+                          {money(prices.cents, "pt-PT")}
+                        </s>
+                      ) : null}
+                      <span className={prices.intro !== null ? "font-semibold" : undefined}>
+                        {money(prices.intro ?? prices.cents, "pt-PT")}
+                        {per}
+                      </span>
+                    </span>
+                    {prices.intro !== null ? (
+                      <span className="text-sm text-muted">
+                        {t("register.plan.introNote", {
+                          months: plan.introMonths as number,
+                          price: `${money(prices.cents, "pt-PT")}${per}`,
+                        })}
+                      </span>
+                    ) : null}
+                    {plan.features.length > 0 ? (
+                      <span className="text-sm text-muted">{plan.features.join(" · ")}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="flex gap-3">
@@ -322,10 +348,31 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
                 <dt className="text-muted">{tc("plan")}</dt>
                 <dd className="text-text">{chosen?.name ?? "—"}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">{tc("price")}</dt>
-                <dd className="text-text">{money(cents, "pt-PT")}</dd>
-              </div>
+              {/*
+                Com oferta, o contrato diz os DOIS preços e quando muda um para o
+                outro — riscar um preço é para a montra; aqui é o que se aceita
+                pagar, e o DL 24/2014 (art. 4.º) quer o preço total antes da
+                celebração.
+              */}
+              {chosen && chosenPrices.intro !== null ? (
+                <>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted">
+                      {tc("introPrice", { months: chosen.introMonths as number })}
+                    </dt>
+                    <dd className="text-text">{money(chosenPrices.intro, "pt-PT")}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted">{tc("priceAfter")}</dt>
+                    <dd className="text-text">{money(chosenPrices.cents, "pt-PT")}</dd>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted">{tc("price")}</dt>
+                  <dd className="text-text">{money(chosenPrices.cents, "pt-PT")}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">{tc("interval")}</dt>
                 <dd className="text-text">

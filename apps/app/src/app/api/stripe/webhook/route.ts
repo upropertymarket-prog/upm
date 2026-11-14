@@ -193,6 +193,16 @@ async function profileFor(db: ServiceClient, customerId: string | null, metaProf
  * `plans` com esse `stripe_price_*_id`; os restantes procuram-se em `addons`.
  * Nada se infere por nome — é sempre o id do preço a decidir.
  */
+/** Só inteiros positivos passam; qualquer outra coisa é como se não viesse. */
+function introFromMetadata(metadata: Stripe.Metadata | null | undefined) {
+  const price = Number(metadata?.upm_intro_price_cents);
+  const months = Number(metadata?.upm_intro_months);
+  if (!Number.isInteger(price) || price <= 0 || !Number.isInteger(months) || months <= 0) {
+    return {};
+  }
+  return { intro_price_cents: price, intro_months: months };
+}
+
 async function applySubscription(db: ServiceClient, subscription: Stripe.Subscription) {
   const customerId = refId(subscription.customer);
   const profileId = await profileFor(
@@ -206,27 +216,34 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
   const items = subscription.items.data;
   const priceIds = items.map((item) => item.price.id);
 
+  // O plano reconhece-se pelo `Price` OU pelo `Product`. Só pelo `Price` (até
+  // 13 nov 2026), uma mudança de preço deixava as subscrições antigas — que
+  // continuam no `Price` antigo, como manda 02 §9 — sem plano no evento
+  // seguinte: a coluna já apontava para o novo. O produto não muda com o preço.
+  const productIds = [...new Set(items.map((item) => refId(item.price.product)))].filter(
+    (id): id is string => Boolean(id),
+  );
   const { data: plans } = await db
     .from("plans")
-    .select("id, stripe_price_month_id, stripe_price_year_id")
+    .select("id, stripe_product_id, stripe_price_month_id, stripe_price_year_id")
     .or(
-      `stripe_price_month_id.in.(${priceIds.join(",")}),stripe_price_year_id.in.(${priceIds.join(",")})`,
+      [
+        `stripe_price_month_id.in.(${priceIds.join(",")})`,
+        `stripe_price_year_id.in.(${priceIds.join(",")})`,
+        ...(productIds.length > 0 ? [`stripe_product_id.in.(${productIds.join(",")})`] : []),
+      ].join(","),
     );
 
-  const planItem = items.find((item) =>
-    (plans ?? []).some(
-      (plan) =>
-        plan.stripe_price_month_id === item.price.id || plan.stripe_price_year_id === item.price.id,
-    ),
-  );
+  const planFor = (item: Stripe.SubscriptionItem) =>
+    (plans ?? []).find(
+      (row) =>
+        row.stripe_price_month_id === item.price.id ||
+        row.stripe_price_year_id === item.price.id ||
+        (row.stripe_product_id !== null && row.stripe_product_id === refId(item.price.product)),
+    );
 
-  const plan = planItem
-    ? (plans ?? []).find(
-        (row) =>
-          row.stripe_price_month_id === planItem.price.id ||
-          row.stripe_price_year_id === planItem.price.id,
-      )
-    : undefined;
+  const planItem = items.find((item) => planFor(item) !== undefined);
+  const plan = planItem ? planFor(planItem) : undefined;
 
   const interval = planItem?.price.recurring?.interval === "month" ? "month" : "year";
   const periodEnd = secondsToIso(
@@ -267,6 +284,9 @@ async function applySubscription(db: ServiceClient, subscription: Stripe.Subscri
     ...(subscription.metadata?.upm_terms_version
       ? { terms_version: subscription.metadata.upm_terms_version }
       : {}),
+    // Oferta do 1.º ano (13 nov 2026): o preço e a duração com que a pessoa
+    // entrou, escritos por nós no Checkout. O contrato lê-os daqui.
+    ...introFromMetadata(subscription.metadata),
   };
 
   const { data: saved, error } = await db

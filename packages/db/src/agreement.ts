@@ -37,6 +37,9 @@ export type SubscriptionAgreement = {
   priceCents: number;
   priceMonthCents: number;
   priceYearCents: number;
+  /** Oferta de entrada, na periodicidade contratada. `null` = sem oferta. */
+  introPriceCents: number | null;
+  introMonths: number | null;
   currency: string;
   interval: "month" | "year";
   commitmentMonths: number | null;
@@ -87,6 +90,8 @@ function toAgreement(row: AgreementRow): SubscriptionAgreement {
     priceCents: row.price_cents,
     priceMonthCents: row.price_month_cents,
     priceYearCents: row.price_year_cents,
+    introPriceCents: row.intro_price_cents,
+    introMonths: row.intro_months,
     currency: row.currency,
     interval: toInterval(row.interval),
     commitmentMonths: row.minimum_commitment_months,

@@ -121,6 +121,8 @@ export default async function ContratoPage({
             priceCents: agreement.priceCents,
             priceMonthCents: agreement.priceMonthCents,
             priceYearCents: agreement.priceYearCents,
+            introPriceCents: agreement.introPriceCents,
+            introMonths: agreement.introMonths,
             currency: agreement.currency,
             interval: agreement.interval,
             startedAt: agreement.celebratedAt,

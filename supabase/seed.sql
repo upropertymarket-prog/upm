@@ -22,24 +22,37 @@
 -- também acrescenta o `check` que impede um plano a 0 € de voltar à escada.
 -- Numa base nova, o plano simplesmente não nasce.
 
-insert into public.plans (slug, name, audience, price_year_cents, price_month_cents, "position", limits) values
-  ('essential-owner', 'Essential', 'owner', 5990, 599, 1,
-    '{"active_properties": 3, "visits": 20, "active_chats": 15, "saved": 50, "alerts": 3, "cloud_gb": 2}'),
-  ('smarter-owner', 'Smarter', 'owner', 14990, 1499, 2,
-    '{"active_properties": 10, "visits": 60, "active_chats": 50, "saved": 200, "alerts": 10, "cloud_gb": 5}'),
-  ('premium-owner', 'Premium', 'owner', 29990, 2999, 3,
-    '{"active_properties": null, "visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 20}'),
+-- OFERTA DO 1.º ANO — cliente, 13 nov 2026 (`20261113090000_oferta_primeiro_ano.sql`).
+-- O proprietário passa a 19,99 / 29,99 / 49,99 €/mês, com os primeiros 12 meses
+-- a 10,99 / 14,99 / 29,99. `price_*` é o preço normal, o que vai para o `Price`
+-- do Stripe; a oferta vive em `intro_*` e no Stripe é um `Coupon`.
+insert into public.plans (slug, name, audience, price_year_cents, price_month_cents, "position", limits,
+                          intro_price_year_cents, intro_price_month_cents, intro_months) values
+  ('essential-owner', 'Essential', 'owner', 19990, 1999, 1,
+    '{"active_properties": 3, "visits": 20, "active_chats": 15, "saved": 50, "alerts": 3, "cloud_gb": 2}',
+    10990, 1099, 12),
+  ('smarter-owner', 'Smarter', 'owner', 29990, 2999, 2,
+    '{"active_properties": 10, "visits": 60, "active_chats": 50, "saved": 200, "alerts": 10, "cloud_gb": 5}',
+    14990, 1499, 12),
+  ('premium-owner', 'Premium', 'owner', 49990, 4999, 3,
+    '{"active_properties": null, "visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 20}',
+    29990, 2999, 12),
   ('smarter-buyer', 'Smarter', 'buyer', 4990, 499, 1,
-    '{"visits": 15, "active_chats": 20, "saved": 100, "alerts": 5, "cloud_gb": 1}'),
+    '{"visits": 15, "active_chats": 20, "saved": 100, "alerts": 5, "cloud_gb": 1}',
+    null, null, null),
   ('premium-buyer', 'Premium', 'buyer', 6990, 699, 2,
-    '{"visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 5}')
+    '{"visits": null, "active_chats": null, "saved": null, "alerts": 20, "cloud_gb": 5}',
+    null, null, null)
 on conflict (slug) do update set
   name = excluded.name,
   audience = excluded.audience,
   price_year_cents = excluded.price_year_cents,
   price_month_cents = excluded.price_month_cents,
   "position" = excluded."position",
-  limits = excluded.limits;
+  limits = excluded.limits,
+  intro_price_year_cents = excluded.intro_price_year_cents,
+  intro_price_month_cents = excluded.intro_price_month_cents,
+  intro_months = excluded.intro_months;
 
 -- Extra de subscrição — 07 §19.3. Soma-se ao que o plano dá, é único por
 -- conta e não levanta mais nenhum limite. Os IDs do Stripe ficam null até

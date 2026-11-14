@@ -14,8 +14,8 @@
  * confirmação de produção e fica para o fim do projeto (07 §16.1). O script é
  * o mesmo; só muda a chave.
  *
- * Os PREÇOS vêm da base de dados, nunca deste ficheiro: a grelha de 07 §8.3 é
- * provisória e 07 §9 #2 continua em aberto.
+ * Os PREÇOS vêm da base de dados, nunca deste ficheiro. A oferta do 1.º ano
+ * (`plans.intro_*`, 13 nov 2026) vira um `Coupon` por periodicidade.
  */
 import { syncCatalog, type CatalogStore } from "../../packages/db/src/billing";
 import {
@@ -60,6 +60,14 @@ async function main() {
           interval: input.interval,
           active: true,
         }),
+        createCoupon: async (input: Parameters<typeof api.createCoupon>[0]) => ({
+          id: `${input.id} (novo)`,
+          amountOff: input.amountOff,
+          currency: "eur",
+          duration: input.duration,
+          durationInMonths: input.durationInMonths,
+          valid: true,
+        }),
       }
     : api;
 
@@ -79,11 +87,17 @@ async function main() {
       console.log(
         `       ${entry.productId} · mês ${entry.priceMonthId} · ano ${entry.priceYearId}`,
       );
+      if (entry.couponMonthId || entry.couponYearId) {
+        console.log(
+          `       oferta · mês ${entry.couponMonthId ?? "—"} · ano ${entry.couponYearId ?? "—"}`,
+        );
+      }
     }
   }
 
   console.log(
     `\n${report.created} criados · ${report.pricesAdded} com preço novo · ` +
+      `${report.couponsCreated} cupões novos · ` +
       `${report.unchanged} sem alterações · ${report.skipped} ignorados`,
   );
 }
