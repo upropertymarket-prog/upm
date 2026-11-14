@@ -50,7 +50,11 @@
       "manage": "Gerir",
       "admin": "Administração",
       "support": "Suporte",
-      "marketing": "Marketing"
+      "marketing": "Marketing",
+      "adminGeneral": "Geral",
+      "adminClients": "Gestão de clientes",
+      "adminBusiness": "Site e negócio",
+      "adminTeam": "Equipa e sistema"
     }
   },
   "greeting": {
@@ -75,6 +79,7 @@
     "visitSchedule": "Agenda de visitas",
     "newProperty": "Nova propriedade",
     "users": "Utilizadores",
+    "team": "Equipa interna",
     "propertyModeration": "Moderação de imóveis",
     "siteTraffic": "Tráfego do site",
     "plans": "Planos",
@@ -1635,7 +1640,9 @@
   "admin": {
     "users": {
       "title": "Utilizadores",
-      "subtitle": "Contas, planos e estado de acesso",
+      "subtitle": "Compradores e proprietários: contas, planos e estado de acesso",
+      "teamTitle": "Equipa interna",
+      "teamSubtitle": "Contas da equipa: administração, suporte e marketing",
       "search": "Pesquisar nome ou e-mail",
       "searchHint": "Escreva um nome ou e-mail",
       "roleFilter": "Papel",

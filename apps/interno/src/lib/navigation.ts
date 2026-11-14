@@ -11,10 +11,12 @@ import {
   Mail,
   Megaphone,
   Search,
+  ShieldCheck,
   Settings,
   Signature,
   Sparkles,
   TrendingUp,
+  UserPlus,
   Users,
   Cloud,
 } from "lucide-react";
@@ -53,54 +55,99 @@ export type NavEntry = {
   counter?: boolean;
 };
 
-/** 07 §4.1 — Admin. */
-export const ADMIN_NAV: NavEntry[] = [
-  { id: "dashboard", titleKey: "dashboard", href: "/admin/painel", icon: LayoutDashboard },
-  { id: "users", titleKey: "users", href: "/admin/utilizadores", icon: Users },
+export type NavGroup = { labelKey: string; entries: NavEntry[] };
+
+/**
+ * 07 §4.1 — Admin, **em quatro grupos** (14 nov 2026, pedido do cliente).
+ * =========================================================================
+ * Uma lista corrida de treze entradas não dizia o que era gestão com o
+ * cliente e o que era da casa. A ordem e o agrupamento são os do cliente; os
+ * nomes dos grupos são nossos:
+ *  - **Geral** — o dia a dia: painel, correio e Cloud;
+ *  - **Gestão de clientes** — quem usa a app e o que publica ou assina;
+ *  - **Site e negócio** — o site público e o que se vende nele;
+ *  - **Equipa e sistema** — a casa por dentro.
+ *
+ * A **Equipa interna** entrou aqui no mesmo dia: a equipa saiu de
+ * Utilizadores, que passou a ser só de clientes.
+ */
+export const ADMIN_NAV_GROUPS: NavGroup[] = [
   {
-    id: "propertyModeration",
-    titleKey: "propertyModeration",
-    href: "/admin/imoveis",
-    icon: Building2,
-    counter: true,
+    labelKey: "adminGeneral",
+    entries: [
+      { id: "dashboard", titleKey: "dashboard", href: "/admin/painel", icon: LayoutDashboard },
+      /**
+       * **A caixa de e-mail do Admin** (26 out 2026), e entra *antes* da
+       * Configuração de e-mail de propósito: lê-se "a caixa, e as caixas que a
+       * servem". O Admin tinha a segunda sem a primeira — podia criar a caixa
+       * `geral@` e ligar-lhe o IMAP, e não tinha onde ler o que lá caísse.
+       *
+       * É a mesma caixa do Suporte, pela mesma porta de código (ver
+       * `/admin/email/page.tsx`), com uma ação de menos: criar um ticket a partir
+       * de um e-mail continua a ser só do Suporte (07 §5.10).
+       */
+      { id: "mailbox", titleKey: "mailbox", href: "/admin/email", icon: Inbox, counter: true },
+      /**
+       * **A Cloud da equipa, pela terceira porta** (26 out 2026).
+       *
+       * O Admin tinha a permissão e não tinha entrada: `is_internal()` — o
+       * predicado das políticas de `scope = 'staff'` desde `20261015180000` — são
+       * admin, suporte e marketing, e só os dois últimos tinham linha de menu.
+       * Decisão do cliente: quem tem acesso interno tem esta Cloud, sem custo, que
+       * é da empresa. Aponta ao mesmo `CloudScreen` e às mesmas server actions de
+       * `/suporte/cloud`, como o SEO e a caixa de e-mail já fazem.
+       */
+      { id: "internalCloud", titleKey: "internalCloud", href: "/admin/cloud", icon: Cloud },
+    ],
   },
-  { id: "siteTraffic", titleKey: "siteTraffic", href: "/admin/trafego", icon: TrendingUp },
-  { id: "plans", titleKey: "plans", href: "/admin/planos", icon: CreditCard },
   {
-    id: "contractTemplates",
-    titleKey: "contractTemplates",
-    href: "/admin/contratos",
-    icon: FileSignature,
+    labelKey: "adminClients",
+    entries: [
+      { id: "users", titleKey: "users", href: "/admin/utilizadores", icon: Users },
+      {
+        id: "propertyModeration",
+        titleKey: "propertyModeration",
+        href: "/admin/imoveis",
+        icon: Building2,
+        counter: true,
+      },
+      {
+        id: "contractTemplates",
+        titleKey: "contractTemplates",
+        href: "/admin/contratos",
+        icon: FileSignature,
+      },
+    ],
   },
-  { id: "siteLeads", titleKey: "siteLeads", href: "/admin/leads-site", icon: Users, counter: true },
-  { id: "seo", titleKey: "seo", href: "/admin/seo", icon: Search },
-  // Só leitura (07 §5.10).
-  { id: "tickets", titleKey: "tickets", href: "/admin/tickets", icon: LifeBuoy },
-  /**
-   * **A caixa de e-mail do Admin** (26 out 2026), e entra *antes* da
-   * Configuração de e-mail de propósito: lê-se "a caixa, e as caixas que a
-   * servem". O Admin tinha a segunda sem a primeira — podia criar a caixa
-   * `geral@` e ligar-lhe o IMAP, e não tinha onde ler o que lá caísse.
-   *
-   * É a mesma caixa do Suporte, pela mesma porta de código (ver
-   * `/admin/email/page.tsx`), com uma ação de menos: criar um ticket a partir
-   * de um e-mail continua a ser só do Suporte (07 §5.10).
-   */
-  { id: "mailbox", titleKey: "mailbox", href: "/admin/email", icon: Inbox, counter: true },
-  { id: "mailboxes", titleKey: "mailboxes", href: "/admin/caixas-email", icon: Mail },
-  /**
-   * **A Cloud da equipa, pela terceira porta** (26 out 2026).
-   *
-   * O Admin tinha a permissão e não tinha entrada: `is_internal()` — o
-   * predicado das políticas de `scope = 'staff'` desde `20261015180000` — são
-   * admin, suporte e marketing, e só os dois últimos tinham linha de menu.
-   * Decisão do cliente: quem tem acesso interno tem esta Cloud, sem custo, que
-   * é da empresa. Aponta ao mesmo `CloudScreen` e às mesmas server actions de
-   * `/suporte/cloud`, como o SEO e a caixa de e-mail já fazem.
-   */
-  { id: "internalCloud", titleKey: "internalCloud", href: "/admin/cloud", icon: Cloud },
-  { id: "settings", titleKey: "settings", href: "/admin/definicoes", icon: Settings },
+  {
+    labelKey: "adminBusiness",
+    entries: [
+      { id: "siteTraffic", titleKey: "siteTraffic", href: "/admin/trafego", icon: TrendingUp },
+      {
+        id: "siteLeads",
+        titleKey: "siteLeads",
+        href: "/admin/leads-site",
+        icon: UserPlus,
+        counter: true,
+      },
+      { id: "seo", titleKey: "seo", href: "/admin/seo", icon: Search },
+      { id: "plans", titleKey: "plans", href: "/admin/planos", icon: CreditCard },
+    ],
+  },
+  {
+    labelKey: "adminTeam",
+    entries: [
+      // Só leitura (07 §5.10).
+      { id: "tickets", titleKey: "tickets", href: "/admin/tickets", icon: LifeBuoy },
+      { id: "team", titleKey: "team", href: "/admin/equipa", icon: ShieldCheck },
+      { id: "mailboxes", titleKey: "mailboxes", href: "/admin/caixas-email", icon: Mail },
+      { id: "settings", titleKey: "settings", href: "/admin/definicoes", icon: Settings },
+    ],
+  },
 ];
+
+/** A mesma lista, corrida — para quem só precisa das rotas. */
+export const ADMIN_NAV: NavEntry[] = ADMIN_NAV_GROUPS.flatMap((group) => group.entries);
 
 /**
  * 07 §4.1 — Suporte. Abre na Caixa de e-mail (03 §1.3).
@@ -168,11 +215,9 @@ export const MARKETING_NAV: NavEntry[] = [
 
 export type InternalRole = "admin" | "support" | "marketing";
 
-export function navFor(role: InternalRole): {
-  entries: NavEntry[];
-  groupKey: InternalRole;
-} {
-  if (role === "admin") return { entries: ADMIN_NAV, groupKey: "admin" };
-  if (role === "marketing") return { entries: MARKETING_NAV, groupKey: "marketing" };
-  return { entries: SUPPORT_NAV, groupKey: "support" };
+/** Os grupos do menu de cada papel; o Suporte e o Marketing têm um só. */
+export function navFor(role: InternalRole): NavGroup[] {
+  if (role === "admin") return ADMIN_NAV_GROUPS;
+  if (role === "marketing") return [{ labelKey: "marketing", entries: MARKETING_NAV }];
+  return [{ labelKey: "support", entries: SUPPORT_NAV }];
 }

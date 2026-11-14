@@ -543,6 +543,12 @@ export function CloudScreen(props: CloudScreenProps) {
                 onClick={() => setView({ kind: "shared" })}
               />
             ) : null}
+            {/* A reciclagem não é uma pasta (14 nov 2026, pedido do cliente):
+                uma linha separa-a das pastas, no mesmo traço do armazenamento. */}
+            <hr
+              aria-hidden="true"
+              style={{ margin: "var(--sp-2) 0", border: 0, borderTop: "1px solid var(--border)" }}
+            />
             <NavRow
               label={t("navRecycle")}
               icon={<Trash2 size={15} />}

@@ -4100,6 +4100,7 @@ export type Database = {
       };
       admin_list_profiles: {
         Args: {
+          p_audience?: string;
           p_cursor_created_at?: string;
           p_cursor_id?: string;
           p_direction?: string;
