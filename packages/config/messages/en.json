@@ -1388,7 +1388,8 @@
         "codeLabel": "Confirmation code",
         "submit": "Activate",
         "qrAlt": "QR code for your authenticator app",
-        "startFailed": "Two-factor setup could not be started. Please try again."
+        "startFailed": "Two-factor setup could not be started. Please try again.",
+        "openInApp": "On your phone? Open in your authenticator app"
       },
       "challenge": {
         "title": "Verification code",

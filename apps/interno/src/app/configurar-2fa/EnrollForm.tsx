@@ -43,16 +43,30 @@ export function EnrollForm() {
       <p className="text-sm text-muted">{t("body")}</p>
       {enrollment ? (
         <>
-          {/* Fundo branco e margem, nos dois temas (14 nov 2026): o SVG do
-              Supabase não traz a "zona de silêncio" à volta, e sobre o fundo
-              escuro a câmara não encontrava os quadrados dos cantos — a app
-              de autenticação nem chegava a ler o código. O branco é do próprio
-              formato QR, não do design system. */}
-          <div className="mx-auto rounded-xl p-4" style={{ background: "#ffffff" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URI do próprio Supabase, não otimizável pelo next/image. */}
-            <img src={enrollment.qrCode} alt={t("qrAlt")} width={200} height={200} />
+          {/* Fundo branco, nos dois temas (14 nov 2026): sobre o fundo escuro a
+              câmara não encontrava os quadrados dos cantos. O branco é do
+              próprio formato QR, não do design system. 240 px e `pixelated`
+              para cada módulo chegar nítido à câmara — ver `startEnrollment`. */}
+          <div className="mx-auto rounded-xl p-3" style={{ background: "#ffffff" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- SVG gerado no servidor (data URI), não otimizável pelo next/image. */}
+            <img
+              src={enrollment.qrCode}
+              alt={t("qrAlt")}
+              width={240}
+              height={240}
+              style={{ imageRendering: "pixelated" }}
+            />
           </div>
-          <p className="break-all text-center font-mono text-xs text-muted">{enrollment.secret}</p>
+          {/* No telemóvel não há câmara a apontar para o próprio ecrã: o link
+              abre a app de autenticação com a conta já preenchida. */}
+          <a href={enrollment.uri} className="text-center text-sm text-accent">
+            {t("openInApp")}
+          </a>
+          {/* A chave em blocos de 4 para se poder escrever à mão; as apps
+              ignoram os espaços. */}
+          <p className="text-center font-mono text-sm text-muted" style={{ wordSpacing: "0.2em" }}>
+            {enrollment.secret.match(/.{1,4}/g)?.join(" ")}
+          </p>
         </>
       ) : (
         <div
@@ -63,7 +77,7 @@ export function EnrollForm() {
       )}
       <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="factorId" value={enrollment?.factorId ?? ""} />
-        <Input name="code" label={t("codeLabel")} inputMode="numeric" maxLength={6} required />
+        <Input name="code" label={t("codeLabel")} inputMode="numeric" maxLength={7} required />
         {state.error ? (
           <p className="text-sm text-danger" role="alert">
             {state.error}
