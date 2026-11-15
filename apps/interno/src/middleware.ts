@@ -20,11 +20,16 @@ import { LAST_ACTIVITY_COOKIE, SESSION_COOKIES, SESSION_STARTED_COOKIE } from ".
  * marketing **não** é staff (ver `is_marketing()` em `20261014120100`), e um
  * guarda que lesse "é da equipa?" dava-lhe a moderação de imóveis e o
  * diretório de utilizadores de uma vez.
+ *
+ * **O Admin também entra no Marketing** (14 nov 2026, pedido do cliente): o
+ * módulo de Marketing faz parte do Admin. O contrário não — o marketing
+ * continua fora de `/admin`. A base acompanha: `is_marketing()` passou a
+ * aceitar o admin na mesma data.
  */
 const AREA_PREFIX = {
-  "/admin": "admin",
-  "/suporte": "support",
-  "/marketing": "marketing",
+  "/admin": ["admin"],
+  "/suporte": ["support"],
+  "/marketing": ["marketing", "admin"],
 } as const;
 
 const SESSION_MAX_MS = 8 * 60 * 60 * 1000;
@@ -166,7 +171,7 @@ export async function middleware(request: NextRequest) {
   // para a sua — e não um 403: quem se perde num link antigo quer chegar ao
   // trabalho dele, não a uma parede.
   for (const [prefix, allowed] of Object.entries(AREA_PREFIX)) {
-    if (pathname.startsWith(prefix) && role !== allowed) {
+    if (pathname.startsWith(prefix) && !(allowed as readonly string[]).includes(role ?? "")) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

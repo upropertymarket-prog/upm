@@ -57,6 +57,7 @@ export function TrafficDashboard({
   summary,
   series,
   breakdown,
+  lastDataDate,
   onFilterChange,
 }: {
   locale: string;
@@ -65,6 +66,11 @@ export function TrafficDashboard({
   summary: TrafficSummary;
   series: TrafficPoint[];
   breakdown: TrafficBreakdown;
+  /**
+   * O dia mais recente que a importação gravou; `null` quando nunca gravou
+   * nada. Omitido (o canvas) não mostra o aviso.
+   */
+  lastDataDate?: string | null;
   onFilterChange: (next: TrafficFilterChange) => void;
 }) {
   const t = useTranslations("admin.traffic");
@@ -72,9 +78,36 @@ export function TrafficDashboard({
 
   const hasData = summary.visits > 0 || summary.conversions > 0;
 
+  // A importação grava "ontem": dois dias sem nada é uma importação parada
+  // (14 nov 2026). Sem este aviso, a página mostrava os dados de demonstração
+  // de 2 out como se fossem visitas, e navegar no site não mexia em nada.
+  const staleSince =
+    lastDataDate === undefined
+      ? undefined
+      : lastDataDate === null ||
+          Date.now() - new Date(lastDataDate + "T00:00:00Z").getTime() > 2 * 86_400_000
+        ? lastDataDate
+        : undefined;
+
   return (
     <div style={{ display: "grid", gap: "var(--sp-6)" }}>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
+
+      {staleSince !== undefined ? (
+        <p
+          role="status"
+          className="rounded-xl border border-border px-4 py-3 text-sm"
+          style={{ background: "var(--warn-soft, var(--surface2))" }}
+        >
+          {staleSince === null
+            ? t("staleNever")
+            : t("staleSince", {
+                date: new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "pt-PT", {
+                  dateStyle: "long",
+                }).format(new Date(staleSince + "T00:00:00Z")),
+              })}
+        </p>
+      ) : null}
 
       <Card padded>
         <div

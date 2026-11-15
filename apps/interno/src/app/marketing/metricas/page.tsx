@@ -31,13 +31,13 @@ export default async function MarketingMetricsPage() {
 
   const [campaigns, shell, receipts] = await Promise.all([
     listCampaigns(supabase),
-    getMarketingShellData(supabase, t("sidebar.groups.marketing")),
+    getMarketingShellData(supabase, t("sidebar.groups.marketing"), t("sidebar.groups.admin")),
     countEmailEvents(supabase),
   ]);
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="emailMetrics"

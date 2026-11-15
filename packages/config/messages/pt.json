@@ -965,6 +965,7 @@
     "folderNamePlaceholder": "Escrituras",
     "create": "Criar",
     "upload": "Carregar ficheiro",
+    "dropHere": "Largue para carregar",
     "navAll": "Todos os ficheiros",
     "navShared": "Partilhados comigo",
     "navRecycle": "Reciclagem",
@@ -1944,6 +1945,12 @@
         "plans": "Planos",
         "mailboxes": "Configuração de e-mail"
       },
+      "linkHints": {
+        "users": "Contas de compradores e proprietários",
+        "moderation": "Imóveis à espera de revisão",
+        "leads": "Contactos deixados no site",
+        "plans": "Preços, limites e oferta do 1.º ano"
+      },
       "activityTrend": "Registos e submissões",
       "last30Days": "Por dia nos últimos 30 dias",
       "chartLabel": "Registos de contas e imóveis submetidos por dia",
@@ -1993,6 +2000,8 @@
     },
     "traffic": {
       "title": "Tráfego do site",
+      "staleSince": "Os dados mais recentes são de {date}: a importação diária de visitas não está a correr, e os números abaixo não acompanham o site.",
+      "staleNever": "Ainda não há dados de visitas: a recolha de visitas do site não está ligada.",
       "subtitle": "Analítica sem cookies do site público",
       "scope": {
         "label": "Âmbito do site",

@@ -38,12 +38,12 @@ export default async function MarketingUpdatesPage() {
   const [updates, reach, shell] = await Promise.all([
     listAppUpdates(supabase),
     appUpdateReach(supabase),
-    getMarketingShellData(supabase, t("sidebar.groups.marketing")),
+    getMarketingShellData(supabase, t("sidebar.groups.marketing"), t("sidebar.groups.admin")),
   ]);
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="updates"

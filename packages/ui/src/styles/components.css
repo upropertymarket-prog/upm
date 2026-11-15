@@ -1312,3 +1312,64 @@ h6 {
     height: var(--split-aside-h, auto);
   }
 }
+
+/* Zona de largar ficheiros (14 nov 2026) — a Cloud, ao arrastar um ficheiro
+   por cima. A moldura tracejada **anda** (o tracejado desliza à volta), para se
+   ver que a zona está viva e não é só um cartão com outra borda. É um `<rect>`
+   de SVG e não uma `border`: só o SVG anima o traço e segue os cantos
+   redondos. Sem movimento para quem o pediu ao sistema. */
+.upm-dropzone {
+  position: relative;
+}
+
+.upm-dropzone__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-2xl);
+  background: color-mix(in srgb, var(--accent-soft) 88%, transparent);
+  pointer-events: none;
+}
+
+.upm-dropzone__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.upm-dropzone__frame rect {
+  x: 1px;
+  y: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  rx: 16px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 10 8;
+  animation: upm-dropzone-march 0.9s linear infinite;
+}
+
+.upm-dropzone__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
+}
+
+@keyframes upm-dropzone-march {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upm-dropzone__frame rect {
+    animation: none;
+  }
+}
