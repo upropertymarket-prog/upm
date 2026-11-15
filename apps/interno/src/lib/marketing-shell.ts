@@ -22,6 +22,12 @@ import type { Database } from "@upm/db";
 type Client = SupabaseClient<Database>;
 
 export type MarketingShellData = {
+  /**
+   * O Admin também entra no Marketing (14 nov 2026): com ele, o shell é o do
+   * Admin — o menu dele, com o grupo Marketing lá dentro —, e não o menu do
+   * marketing, que o deixava sem caminho de volta.
+   */
+  role: "marketing" | "admin";
   userName: string;
   userMeta: string;
   locale: string;
@@ -31,6 +37,7 @@ export type MarketingShellData = {
 export async function getMarketingShellData(
   supabase: Client,
   groupLabel: string,
+  adminGroupLabel: string,
 ): Promise<MarketingShellData> {
   const {
     data: { user },
@@ -38,7 +45,7 @@ export async function getMarketingShellData(
 
   const [profileResult, staffResult] = await Promise.all([
     user
-      ? supabase.from("profiles").select("full_name, locale").eq("id", user.id).maybeSingle()
+      ? supabase.from("profiles").select("full_name, locale, role").eq("id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
     user
       ? supabase.from("staff_members").select("department").eq("profile_id", user.id).maybeSingle()
@@ -47,13 +54,15 @@ export async function getMarketingShellData(
 
   const profile = profileResult.data;
   const department = staffResult.data?.department ?? null;
+  const role = profile?.role === "admin" ? "admin" : "marketing";
+  const label = role === "admin" ? adminGroupLabel : groupLabel;
 
   return {
+    role,
     userName: profile?.full_name?.trim() || user?.email || "—",
     // "Marketing · marketing" é redundante, e acontece porque o departamento
     // tem o mesmo nome da área. Mostra-se só o grupo nesse caso.
-    userMeta:
-      department && department !== "marketing" ? `${groupLabel} · ${department}` : groupLabel,
+    userMeta: department && department !== "marketing" ? `${label} · ${department}` : label,
     locale: profile?.locale ?? "pt",
     counters: {},
   };

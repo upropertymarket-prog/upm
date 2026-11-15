@@ -33,6 +33,7 @@ export function TrafficView(props: {
   summary: TrafficSummary;
   series: TrafficPoint[];
   breakdown: TrafficBreakdown;
+  lastDataDate: string | null;
 }) {
   // Ver `useCanvasSafeRouter`: no canvas não há router, e o do Next atira.
   const router = useCanvasSafeRouter();

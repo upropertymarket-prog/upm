@@ -64,11 +64,18 @@ export default async function TrafficPage({
     ...(scope === "all" ? {} : { p_site_mode: scope }),
   };
 
-  const [shell, summaryResult, seriesResult, breakdownResult] = await Promise.all([
+  const [shell, summaryResult, seriesResult, breakdownResult, latestResult] = await Promise.all([
     getAdminShellData(supabase),
     supabase.rpc("admin_site_traffic_summary", args),
     supabase.rpc("admin_site_traffic_series", args),
     supabase.rpc("admin_site_traffic_breakdown", { ...args, p_limit: 8 }),
+    // O dia mais recente gravado, em qualquer modo: diz se a importação corre.
+    supabase
+      .from("site_analytics_daily")
+      .select("date")
+      .order("date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const totals = summaryResult.data?.[0];
@@ -110,6 +117,7 @@ export default async function TrafficPage({
         summary={summary}
         series={series}
         breakdown={breakdown}
+        lastDataDate={latestResult.data?.date ? String(latestResult.data.date) : null}
       />
     </InternalChrome>
   );

@@ -49,7 +49,11 @@ export default async function MarketingSeoPage() {
   const supabase = createClient(await cookies());
   const t = await getTranslations();
 
-  const shell = await getMarketingShellData(supabase, t("sidebar.groups.marketing"));
+  const shell = await getMarketingShellData(
+    supabase,
+    t("sidebar.groups.marketing"),
+    t("sidebar.groups.admin"),
+  );
 
   const viewerLocale: Locale = LOCALES.includes(shell.locale as Locale)
     ? (shell.locale as Locale)
@@ -58,7 +62,7 @@ export default async function MarketingSeoPage() {
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="seo"

@@ -211,6 +211,63 @@ export function CloudScreen(props: CloudScreenProps) {
       : undefined;
 
   /**
+   * Envia um ou mais ficheiros, um de cada vez, para a pasta aberta. Pára no
+   * primeiro erro e mostra-o: continuar escondia-o atrás do toast de sucesso
+   * dos que vinham a seguir.
+   */
+  function uploadFiles(files: File[]) {
+    if (files.length === 0) return;
+    run(async () => {
+      let last: CloudWriteResult = {};
+      for (const file of files) {
+        const form = new FormData();
+        form.set("file", file);
+        if (uploadFolderId) form.set("folderId", uploadFolderId);
+        last = await props.onUpload(form);
+        if (last.error) return last;
+      }
+      return last;
+    }, t("toast.uploaded"));
+  }
+
+  /**
+   * Arrastar ficheiros para a lista (14 nov 2026). Só onde um upload faz
+   * sentido — não na reciclagem nem no "Partilhados comigo". O contador existe
+   * porque o `dragleave` dispara ao passar por cima de cada filho: com um
+   * booleano, a moldura piscava a cada linha da tabela.
+   */
+  const canDrop = view.kind !== "recycle" && view.kind !== "shared";
+  const dragDepth = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const hasFiles = (event: React.DragEvent) => event.dataTransfer.types.includes("Files");
+  const dropHandlers = canDrop
+    ? {
+        onDragEnter: (event: React.DragEvent) => {
+          if (!hasFiles(event)) return;
+          event.preventDefault();
+          dragDepth.current += 1;
+          setDragging(true);
+        },
+        onDragOver: (event: React.DragEvent) => {
+          if (!hasFiles(event)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+        },
+        onDragLeave: () => {
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragging(false);
+        },
+        onDrop: (event: React.DragEvent) => {
+          if (!hasFiles(event)) return;
+          event.preventDefault();
+          dragDepth.current = 0;
+          setDragging(false);
+          uploadFiles(Array.from(event.dataTransfer.files));
+        },
+      }
+    : {};
+
+  /**
    * `done` é o rótulo que o ecrã tem à mão; `notice` é a frase que a escrita
    * trouxe. Quando as duas existem ganha a da escrita, que sabe o que
    * aconteceu — "Ficheiro na reciclagem — fica lá 30 dias" diz mais do que
@@ -487,11 +544,7 @@ export function CloudScreen(props: CloudScreenProps) {
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 event.target.value = "";
-                if (!file) return;
-                const form = new FormData();
-                form.set("file", file);
-                if (uploadFolderId) form.set("folderId", uploadFolderId);
-                run(() => props.onUpload(form), t("toast.uploaded"));
+                if (file) uploadFiles([file]);
               }}
             />
           </>
@@ -598,15 +651,32 @@ export function CloudScreen(props: CloudScreenProps) {
         </Card>
 
         <div
+          className="upm-dropzone"
           style={{
             display: "grid",
             gap: "var(--sp-6)",
             alignContent: "start",
             minWidth: 0,
+            minHeight: 240,
           }}
+          {...dropHandlers}
         >
-          <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
-            {view.kind === "recycle" && binned.length > 0 && props.onEmptyRecycleBin ? (
+          {dragging ? (
+            <div className="upm-dropzone__overlay" role="status">
+              <svg className="upm-dropzone__frame" aria-hidden="true">
+                <rect />
+              </svg>
+              <span className="upm-dropzone__label">
+                <ArrowUpFromLine size={18} aria-hidden="true" />
+                {t("dropHere")}
+              </span>
+            </div>
+          ) : null}
+          {/* Só existe na reciclagem (14 nov 2026). Desenhada sempre, mesmo
+              vazia, empurrava a tabela 14 px (o `gap` da coluna) e o topo dela
+              deixava de alinhar com o das pastas. */}
+          {view.kind === "recycle" && binned.length > 0 && props.onEmptyRecycleBin ? (
+            <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
               <Button
                 variant="danger"
                 size="sm"
@@ -614,8 +684,8 @@ export function CloudScreen(props: CloudScreenProps) {
               >
                 {t("emptyRecycleBin")}
               </Button>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
 
           {view.kind === "shared" ? (
             <SharedWithMeList

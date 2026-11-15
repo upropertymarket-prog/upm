@@ -38,7 +38,7 @@ export default async function MarketingTemplatesPage() {
 
   const [templates, shell, auth] = await Promise.all([
     listTemplates(supabase),
-    getMarketingShellData(supabase, t("sidebar.groups.marketing")),
+    getMarketingShellData(supabase, t("sidebar.groups.marketing"), t("sidebar.groups.admin")),
     supabase.auth.getUser(),
   ]);
 
@@ -51,7 +51,7 @@ export default async function MarketingTemplatesPage() {
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="templates"

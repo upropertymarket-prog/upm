@@ -47,6 +47,20 @@
   --site-section-y: clamp(3rem, calc(2.1429rem + 4.2857cqi), 6rem);
 }
 
+/* O menu do site leva às secções a deslizar, e não num salto (14 nov 2026,
+   pedido do cliente): o salto fazia perder o sítio de onde se vinha. Só nas
+   páginas do site — o `:has` deixa a app e o interno como estão — e sem
+   movimento para quem o pediu ao sistema. */
+html:has(.upm-site-section) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.upm-site-section) {
+    scroll-behavior: auto;
+  }
+}
+
 /* Cada secção é o seu contentor de medida. */
 .upm-site-section {
   container-type: inline-size;

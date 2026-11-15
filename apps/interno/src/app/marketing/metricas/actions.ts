@@ -47,7 +47,9 @@ async function getMarketingClient() {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  return (profile?.role ?? null) === "marketing" ? { supabase, userId: user.id } : null;
+  return ["marketing", "admin"].includes(profile?.role ?? "")
+    ? { supabase, userId: user.id }
+    : null;
 }
 
 /**

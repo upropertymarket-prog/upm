@@ -68,7 +68,7 @@ export default async function MarketingCampaignsPage({
   const [campaigns, senders, shell, properties] = await Promise.all([
     listCampaigns(supabase),
     campaignSenderOptions(supabase),
-    getMarketingShellData(supabase, t("sidebar.groups.marketing")),
+    getMarketingShellData(supabase, t("sidebar.groups.marketing"), t("sidebar.groups.admin")),
     listarImoveis(supabase),
   ]);
 
@@ -102,7 +102,7 @@ export default async function MarketingCampaignsPage({
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="campaigns"

@@ -34,8 +34,10 @@ export function SiteSection({
         background: tone === "alt" ? "var(--surface2)" : "var(--bg)",
         borderTop: tone === "alt" ? "1px solid var(--border)" : undefined,
         borderBottom: tone === "alt" ? "1px solid var(--border)" : undefined,
-        // 84 px é a altura da navbar fixa do protótipo.
-        scrollMarginTop: "84px",
+        // A altura real da barra, do token (14 nov 2026). Estava fixo em 84 px,
+        // a altura do protótipo; a barra tem 68, e cada âncora parava 16 px
+        // abaixo dela — via-se o fim da secção anterior por cima do título.
+        scrollMarginTop: "var(--topbar-h)",
       }}
     >
       <div className="upm-site-container">{children}</div>

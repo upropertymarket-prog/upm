@@ -965,6 +965,7 @@
     "folderNamePlaceholder": "Deeds",
     "create": "Create",
     "upload": "Upload file",
+    "dropHere": "Drop to upload",
     "navAll": "All files",
     "navShared": "Shared with me",
     "navRecycle": "Recycle bin",
@@ -1944,6 +1945,12 @@
         "plans": "Plans",
         "mailboxes": "Email configuration"
       },
+      "linkHints": {
+        "users": "Buyer and owner accounts",
+        "moderation": "Listings waiting for review",
+        "leads": "Contacts left on the site",
+        "plans": "Prices, limits and first-year offer"
+      },
       "activityTrend": "Registrations and submissions",
       "last30Days": "Daily for the last 30 days",
       "chartLabel": "Account registrations and property submissions per day",
@@ -1993,6 +2000,8 @@
     },
     "traffic": {
       "title": "Site traffic",
+      "staleSince": "The latest data is from {date}: the daily visits import is not running, and the numbers below do not follow the site.",
+      "staleNever": "There is no visit data yet: site visit tracking is not connected.",
       "subtitle": "Cookieless analytics for the public site",
       "scope": {
         "label": "Site scope",

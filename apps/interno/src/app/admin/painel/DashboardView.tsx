@@ -199,7 +199,6 @@ export function DashboardView({
     ["moderation", "/admin/imoveis", <Building2 size={18} key="icon" />],
     ["leads", "/admin/leads-site", <ClipboardList size={18} key="icon" />],
     ["plans", "/admin/planos", <CircleDollarSign size={18} key="icon" />],
-    ["mailboxes", "/admin/caixas-email", <Mail size={18} key="icon" />],
   ] as const;
   return (
     <div className="flex flex-col gap-6">
@@ -245,26 +244,39 @@ export function DashboardView({
               hint={t("openBugsHint")}
             />
           </section>
-          <Card padded>
-            <section className="grid gap-4">
-              <h2 className="text-lg font-semibold text-text">{t("quickAccess")}</h2>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {quickLinks.map(([key, href, icon]) => (
-                  <a
-                    key={key}
-                    href={href}
-                    className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium hover:bg-surface2"
-                  >
-                    <span className="flex items-center gap-3 text-text">
-                      <span className="text-accent">{icon}</span>
-                      {t("links." + key)}
+          {/* Cartões e não botões, e sem caixa à volta (14 nov 2026, pedido do
+              cliente): cada atalho é um cartão do design system, ao lado dos
+              KPIs, com o que se faz lá numa linha. A Configuração de e-mail
+              saiu — mexe-se nela uma vez, não é um atalho de todos os dias. */}
+          <section aria-labelledby="quick-access" className="grid gap-4">
+            <h2 id="quick-access" className="text-lg font-semibold text-text">
+              {t("quickAccess")}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {quickLinks.map(([key, href, icon]) => (
+                <a
+                  key={key}
+                  href={href}
+                  className="upm-card upm-card--pad upm-card--interactive"
+                  style={{ gap: "var(--sp-5)", textDecoration: "none" }}
+                >
+                  <span className="flex items-start justify-between gap-3">
+                    <span
+                      className="grid place-items-center rounded-xl bg-accent-soft text-accent"
+                      style={{ width: 40, height: 40 }}
+                    >
+                      {icon}
                     </span>
                     <ArrowUpRight className="text-muted" size={16} aria-hidden="true" />
-                  </a>
-                ))}
-              </div>
-            </section>
-          </Card>
+                  </span>
+                  <span className="grid gap-1">
+                    <span className="text-base font-semibold text-text">{t("links." + key)}</span>
+                    <span className="text-sm text-muted">{t("linkHints." + key)}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
             <Card padded>
               <section className="grid gap-4">

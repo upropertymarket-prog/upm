@@ -213,8 +213,10 @@ function CloudDemo({ theme }: { theme: "light" | "dark" }) {
         subtitle="2,1 GB de 5 GB usados"
         status={{
           hasCloud: true,
-          usedBytes: 2100000000,
-          limitBytes: 5000000000,
+          // Em GB binários, como a base calcula (`cloud_gb * 1073741824`): em
+          // decimais a barra dizia "2 GB de 4,7 GB" ao lado de "2,1 GB de 5 GB".
+          usedBytes: 2.1 * 1024 ** 3,
+          limitBytes: 5 * 1024 ** 3,
           nearPlanLimit: false,
         }}
         folders={folders}

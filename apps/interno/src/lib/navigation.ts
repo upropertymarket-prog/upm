@@ -134,6 +134,26 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
       { id: "plans", titleKey: "plans", href: "/admin/planos", icon: CreditCard },
     ],
   },
+  /**
+   * **O Marketing dentro do Admin** (14 nov 2026, pedido do cliente). As mesmas
+   * rotas e ecrãs de `/marketing` — não cópias —, e o shell muda para o do
+   * Admin quando é ele quem lá entra (`marketing-shell.ts`). O SEO e a Cloud
+   * já tinham porta própria no Admin e ficam nos grupos onde estão.
+   */
+  {
+    labelKey: "marketing",
+    entries: [
+      { id: "updates", titleKey: "updates", href: "/marketing/atualizacoes", icon: Sparkles },
+      { id: "campaigns", titleKey: "campaigns", href: "/marketing/campanhas", icon: Megaphone },
+      { id: "templates", titleKey: "templates", href: "/marketing/modelos", icon: FileText },
+      {
+        id: "emailMetrics",
+        titleKey: "emailMetrics",
+        href: "/marketing/metricas",
+        icon: BarChart3,
+      },
+    ],
+  },
   {
     labelKey: "adminTeam",
     entries: [

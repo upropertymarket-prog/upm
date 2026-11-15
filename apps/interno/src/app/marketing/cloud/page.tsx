@@ -36,12 +36,12 @@ export default async function MarketingCloudPage() {
 
   const [cloud, shell] = await Promise.all([
     loadStaffCloud(supabase),
-    getMarketingShellData(supabase, t("sidebar.groups.marketing")),
+    getMarketingShellData(supabase, t("sidebar.groups.marketing"), t("sidebar.groups.admin")),
   ]);
 
   return (
     <InternalChrome
-      role="marketing"
+      role={shell.role}
       userName={shell.userName}
       userMeta={shell.userMeta}
       activeId="internalCloud"
