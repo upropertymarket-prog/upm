@@ -14,7 +14,19 @@ const projectRoot = path.resolve(tempoRoot, "..");
 export default defineConfig({
   root: tempoRoot,
   resolve: {
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "tempo-sdk"],
+    // O Tempo reinstala "tempo-sdk@latest" (0.0.104) sempre que arranca o
+    // devserver. Essa versão delega o <CanvasHost> no runtime da app, e o da
+    // app 0.0.147 tem um CanvasContext próprio: todas as storyboards dão
+    // "<Canvas> must be rendered inside <CanvasContext>". O código do browser
+    // usa a 0.0.99 (dist-tag sdk-v2-latest), instalada como "tempo-sdk-v2".
+    // Retirar quando a app do Tempo passar da 0.0.147.
+    alias: [
+      {
+        find: /^tempo-sdk\/(canvas|assets)(\/.*)?$/,
+        replacement: "tempo-sdk-v2/$1$2",
+      },
+    ],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "tempo-sdk", "tempo-sdk-v2"],
   },
   plugins: [tempoHostStyles.vite(), 
     tailwindcss(),
