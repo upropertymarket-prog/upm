@@ -7,6 +7,24 @@ import { cx } from "../lib/cx";
 import { Badge } from "../components/StatusTag";
 import { Brand } from "./Brand";
 
+/** Um pouco mais do que `--motion-panel` (240 ms): desliga-se depois de acabar. */
+const RAIL_MOTION_MS = 320;
+
+/**
+ * Liga a transição do rail só para a mudança que o clique vai provocar (19 nov
+ * 2026) — ver `data-animating` em `shell.css`. O atributo vive no
+ * `.upm-shell`, que é de quem a largura muda, e sai sozinho: uma carga de
+ * página nunca o encontra ligado.
+ */
+function animateRail(from: HTMLElement) {
+  const shell = from.closest<HTMLElement>(".upm-shell");
+  if (!shell) return;
+  shell.dataset.animating = "true";
+  window.setTimeout(() => {
+    delete shell.dataset.animating;
+  }, RAIL_MOTION_MS);
+}
+
 export type NavItem = {
   id: string;
   label: string;
@@ -118,7 +136,10 @@ export function Sidebar({
             aria-label={labels.expand}
             title={labels.expand}
             aria-expanded={false}
-            onClick={() => onCollapsedChange(false)}
+            onClick={(event) => {
+              animateRail(event.currentTarget);
+              onCollapsedChange(false);
+            }}
           >
             <Brand collapsed />
           </button>
@@ -131,7 +152,10 @@ export function Sidebar({
               aria-label={labels.collapse}
               title={labels.collapse}
               aria-expanded
-              onClick={() => onCollapsedChange(true)}
+              onClick={(event) => {
+                animateRail(event.currentTarget);
+                onCollapsedChange(true);
+              }}
             >
               <PanelLeftClose size={15} />
             </button>

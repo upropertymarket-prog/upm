@@ -868,6 +868,51 @@ h6 {
   max-width: 640px;
 }
 
+/* Entrada a deslizar (19 nov 2026). A gaveta aparecia de uma vez e lia-se como
+   um salto de página; agora o véu entra em fade e o painel desliza um pouco da
+   direita e "pousa". Só a entrada: a gaveta desmonta ao fechar, e o ecrã por
+   trás já está à vista. Em CSS, para valer para todas as gavetas e modais do
+   produto sem mexer nos ecrãs. */
+.upm-overlay {
+  animation: upm-overlay-in var(--motion-panel) both;
+}
+
+.upm-drawer {
+  animation: upm-drawer-in var(--motion-panel) both;
+}
+
+.upm-modal {
+  animation: upm-modal-in var(--motion-panel) both;
+}
+
+@keyframes upm-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes upm-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+
+@keyframes upm-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upm-overlay,
+  .upm-drawer,
+  .upm-modal {
+    animation: none;
+  }
+}
+
 .upm-panel__header {
   display: flex;
   align-items: flex-start;
