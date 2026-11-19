@@ -14,7 +14,16 @@ export default defineConfig({
    * falta e é só um alias que o Vitest não conhecia.
    */
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    alias: [
+      { find: "@", replacement: fileURLToPath(new URL("./src", import.meta.url)) },
+      // `server-only` atira fora da condição `react-server` — ver o stub.
+      {
+        find: /^server-only$/,
+        replacement: fileURLToPath(
+          new URL("../../packages/db/src/server-only.stub.ts", import.meta.url),
+        ),
+      },
+    ],
   },
   test: {
     environment: "node",

@@ -11,6 +11,7 @@
  * Sem credenciais (o CI, e quem não as tem), esses ficheiros saltam e o resto
  * são testes puros: ficam em paralelo, como sempre.
  */
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 // Basta o URL para saber que há base: é o que todos os ficheiros que falam
@@ -19,6 +20,15 @@ import { defineConfig } from "vitest/config";
 const comBase = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 export default defineConfig({
+  // `server-only` atira fora da condição `react-server` — ver o stub.
+  resolve: {
+    alias: [
+      {
+        find: /^server-only$/,
+        replacement: fileURLToPath(new URL("./src/server-only.stub.ts", import.meta.url)),
+      },
+    ],
+  },
   test: {
     fileParallelism: !comBase,
   },
