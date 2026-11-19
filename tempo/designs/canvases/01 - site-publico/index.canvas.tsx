@@ -236,13 +236,13 @@ export default function SitePublicoCanvas() {
         id="FichaClaro"
         name="Detalhe de propriedade · claro (/propriedades/[slug])"
         component={FichaClaro}
-        layout={{ x: 0, y: 10307, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 9800, width: 1440, height: 900 }}
       />
       <Storyboard
         id="FichaEscuro"
         name="Detalhe de propriedade · escuro (/propriedades/[slug])"
         component={FichaEscuro}
-        layout={{ x: 1520, y: 10307, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 9800, width: 1440, height: 900 }}
       />
 
       {/* Telemóvel (10 nov 2026, pedido do cliente para ajustes visuais): a
@@ -256,7 +256,7 @@ export default function SitePublicoCanvas() {
         id="PreLancamentoTelemovel"
         name="Home · Pré-lançamento · telemóvel 390 px (/)"
         component={PreLancamentoTelemovel}
-        layout={{ x: 0, y: 11362, width: 390, height: 11654.8505859375 }}
+        layout={{ x: 0, y: 10780, width: 390, height: 11654.8505859375 }}
       />
     </Canvas>
   );
