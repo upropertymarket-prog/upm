@@ -116,6 +116,7 @@ grant execute on function public.ip_interno_permitido(text) to anon, authenticat
 ```
 
 Notas sobre a função:
+
 - O parâmetro é `text`, não `inet`. Com `inet`, um cabeçalho malformado rebentava no
   PostgREST com 400 antes de entrar na função. Assim dá `false`, que é falhar fechado.
 - Bits fora da máscara: ver **"Resolvido: `10.0.0.1/8` e o `::cidr`"** abaixo. O rascunho já
