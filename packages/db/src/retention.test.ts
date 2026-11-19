@@ -291,6 +291,8 @@ describe.skipIf(!hasEnv)("A7 · retenção — contra staging", () => {
       });
       if (createError || !data.user) throw new Error(`Falha a criar ${ACTOR}`);
       actorId = data.user.id;
+      // O trigger só aceita buyer/owner do metadata; a equipa recebe o papel aqui.
+      await service.from("profiles").update({ role: "admin" }).eq("id", actorId);
     }
   });
 

@@ -48,17 +48,23 @@ describe.skipIf(!hasEnv)("Faturação — acesso e limites (Fase 7)", () => {
   async function user(email: string, role: string) {
     const list = await listarTodosOsUtilizadores(service);
     const found = list.data.users.find((u) => u.email === email);
-    if (found) return found.id;
-    const created = await service.auth.admin.createUser({
-      email,
-      password: PASSWORD,
-      email_confirm: true,
-      user_metadata: { role },
-    });
-    if (created.error || !created.data.user) {
-      throw new Error(`Falha a criar ${email}: ${created.error?.message}`);
+    let id = found?.id;
+    if (!id) {
+      const created = await service.auth.admin.createUser({
+        email,
+        password: PASSWORD,
+        email_confirm: true,
+        user_metadata: { role },
+      });
+      if (created.error || !created.data.user) {
+        throw new Error(`Falha a criar ${email}: ${created.error?.message}`);
+      }
+      id = created.data.user.id;
     }
-    return created.data.user.id;
+    // O trigger só aceita buyer/owner do metadata; a equipa recebe o papel aqui
+    // — também nas contas que já existem, para se repararem se nasceram buyer.
+    await service.from("profiles").update({ role }).eq("id", id);
+    return id;
   }
 
   /** Põe o perfil num plano concreto, sem passar pelo Stripe. */
