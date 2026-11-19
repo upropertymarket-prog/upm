@@ -80,6 +80,46 @@
   }
 }
 
+/* Expandir e recolher o rail a deslizar (19 nov 2026). Só quando a mudança vem
+   do botão: o `Sidebar` liga `data-animating` no clique e desliga-o quando a
+   transição acaba. Sempre ligada, a transição animava o rail em cada carga de
+   página — o estado guardado só se lê depois de montar, e o shell monta de novo
+   a cada página. A coluna e a sidebar mudam de largura juntas; o que entra
+   (rótulos, marca, cartão) aparece em fade por cima. */
+.upm-shell[data-animating="true"] {
+  transition: grid-template-columns var(--motion-panel);
+}
+
+.upm-shell[data-animating="true"] .upm-sidebar {
+  /* Durante a transição o conteúdo já é o do estado final; sem isto, o
+     wordmark de 120 px num rail ainda estreito abria um rolo horizontal. */
+  overflow-x: hidden;
+  transition: width var(--motion-panel);
+}
+
+.upm-shell[data-animating="true"]
+  :is(.upm-brand, .upm-nav__label, .upm-sidebar__group, .upm-usercard__text) {
+  animation: upm-rail-fade var(--motion-panel) both;
+}
+
+@keyframes upm-rail-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upm-shell[data-animating="true"],
+  .upm-shell[data-animating="true"] .upm-sidebar {
+    transition: none;
+  }
+
+  .upm-shell[data-animating="true"]
+    :is(.upm-brand, .upm-nav__label, .upm-sidebar__group, .upm-usercard__text) {
+    animation: none;
+  }
+}
+
 /* --- Sidebar --------------------------------------------------------- */
 
 .upm-sidebar {

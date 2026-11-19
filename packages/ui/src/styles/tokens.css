@@ -374,6 +374,10 @@
 
   --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
   --transition: 140ms ease;
+  /* Painéis que entram ou mudam de tamanho — gaveta e rail (19 nov 2026). Mais
+     longo do que `--transition`, que é para cor e borda; a curva desacelera no
+     fim, para o painel "pousar" em vez de parar a seco. */
+  --motion-panel: 240ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 /**
