@@ -18,6 +18,7 @@ import {
 } from "@upm/ui";
 import type { Database } from "@upm/db";
 import { useStepUp } from "../../../components/StepUpModal";
+import { useDrawerNavigation } from "../../../lib/useDrawerNavigation";
 import type { VerifyPinAction } from "../../../components/stepUpTypes";
 import type { LeadActionResult, LeadFilters } from "./actions";
 
@@ -84,9 +85,9 @@ export function LeadsManager({
   filters,
   staff,
   pageInfo,
-  selected,
+  selected: loadedLead,
   history,
-  detailError,
+  detailError: loadedDetailError,
   loadError,
   locale,
   onUpdate,
@@ -117,10 +118,30 @@ export function LeadsManager({
   const t = useTranslations("admin.leads");
   const tp = useTranslations("pagination");
   const tc = useTranslations("common");
+  const { navigate, refresh, intent } = useDrawerNavigation();
+  // Enquanto a navegação corre, manda o clique: a gaveta abre (ou fecha) já, e
+  // a ficha que estava aberta não fica à vista à espera do servidor.
+  const selected = intent
+    ? intent.id && loadedLead?.id === intent.id
+      ? loadedLead
+      : null
+    : loadedLead;
+  const detailError = intent ? false : loadedDetailError;
+  const openingLabel = intent?.id && !selected ? (intent.label ?? "") : null;
   const [status, setStatus] = useState<LeadStatus>((selected?.status as LeadStatus) ?? "new");
   const [assignedTo, setAssignedTo] = useState<string>(selected?.assigned_to ?? "");
   const [note, setNote] = useState("");
   const [error, setError] = useState(false);
+  // A página já não recarrega ao trocar de ficha, e o estado do formulário da
+  // gaveta não pode passar de um lead para o seguinte.
+  const [formLeadId, setFormLeadId] = useState(loadedLead?.id ?? null);
+  if ((loadedLead?.id ?? null) !== formLeadId) {
+    setFormLeadId(loadedLead?.id ?? null);
+    setStatus((loadedLead?.status as LeadStatus) ?? "new");
+    setAssignedTo(loadedLead?.assigned_to ?? "");
+    setNote("");
+    setError(false);
+  }
   const [exportNotice, setExportNotice] = useState<"failed" | "truncated" | null>(null);
   const [saving, startSaving] = useTransition();
   const { requestStepUp, stepUpModal } = useStepUp(onVerifyPin);
@@ -132,7 +153,7 @@ export function LeadsManager({
       cell: (row) => (
         <span className="grid">
           <strong>{row.name}</strong>
-          <span className="text-xs text-muted">{row.email}</span>
+          <span className="text-sm text-muted">{row.email}</span>
         </span>
       ),
     },
@@ -170,11 +191,11 @@ export function LeadsManager({
 
   function changePage(nextPage: number) {
     if (nextPage === pageInfo.page) return;
-    if (nextPage === 1) return window.location.assign(href(filters));
+    if (nextPage === 1) return navigate(href(filters));
     const next = nextPage > pageInfo.page;
     const cursor = next ? pageInfo.lastCursor : pageInfo.firstCursor;
     if (!cursor) return;
-    window.location.assign(
+    navigate(
       href(filters, {
         cursor_created_at: cursor.createdAt,
         cursor_id: cursor.id,
@@ -192,7 +213,7 @@ export function LeadsManager({
         assignedTo: assignedTo || null,
       });
       setError(!result.ok);
-      if (result.ok) window.location.reload();
+      if (result.ok) refresh();
     });
   }
   function saveNote() {
@@ -200,7 +221,9 @@ export function LeadsManager({
     startSaving(async () => {
       const result = await onAddNote({ leadId: selected.id, note });
       setError(!result.ok);
-      if (result.ok) window.location.reload();
+      if (!result.ok) return;
+      setNote("");
+      refresh();
     });
   }
   function cancelLeadChanges() {
@@ -259,10 +282,6 @@ export function LeadsManager({
             {t("export")}
           </Button>
         </header>
-        {/* A regra das cópias (cliente, 8 nov 2026): a exportação é o backup
-            diário e fica no computador de quem a faz — fora do sistema, e
-            por isso fora da remoção a pedido. Guardam-se 30 dias. */}
-        <p className="text-xs text-muted">{t("exportRetention")}</p>
         {exportNotice ? (
           <p
             className={exportNotice === "failed" ? "text-sm text-danger" : "text-sm text-muted"}
@@ -271,18 +290,30 @@ export function LeadsManager({
             {exportNotice === "failed" ? t("exportFailed") : t("exportTruncated")}
           </p>
         ) : null}
-        {/* A nota que o cliente pediu (8 nov 2026): quem trabalha os leads tem
-            de saber que os por confirmar desaparecem sozinhos. */}
-        <p className="text-xs text-muted">{t("retentionNote")}</p>
+        {/* As duas regras que o cliente pediu (8 nov 2026): os leads por
+            confirmar desaparecem sozinhos; e a exportação é o backup diário,
+            fica no computador de quem a faz — fora do sistema e da remoção a
+            pedido — e guarda-se 30 dias. Juntas, a 13 px e com uma medida de
+            leitura (19 nov 2026): a 12 px e à largura do ecrã, cada uma fazia
+            uma linha de quase 200 caracteres. */}
+        <div className="grid max-w-[72ch] gap-1 text-sm text-muted">
+          <p>{t("retentionNote")}</p>
+          <p>{t("exportRetention")}</p>
+        </div>
         <Card padded>
-          <form action="/admin/leads-site" method="get" className="grid gap-4 md:grid-cols-3">
+          {/* Uma linha só (19 nov 2026): a pesquisa cresce o dobro dos selects, e
+              o botão fica no fim da linha, alinhado pela base dos campos. Num
+              ecrã estreito a linha parte-se sozinha, sem media queries. */}
+          <form action="/admin/leads-site" method="get" className="flex flex-wrap items-end gap-3">
             <Input
+              className="min-w-0 flex-[2_1_14rem]"
               name="search"
               label={t("search")}
               placeholder={t("searchHint")}
               defaultValue={filters.search}
             />
             <Select
+              className="min-w-0 flex-[1_1_8.5rem]"
               name="status"
               label={t("statusFilter")}
               defaultValue={filters.status ?? ""}
@@ -292,6 +323,7 @@ export function LeadsManager({
               )}
             />
             <Select
+              className="min-w-0 flex-[1_1_8.5rem]"
               name="source"
               label={t("sourceFilter")}
               defaultValue={filters.source ?? ""}
@@ -302,6 +334,7 @@ export function LeadsManager({
               }))}
             />
             <Select
+              className="min-w-0 flex-[1_1_8.5rem]"
               name="form"
               label={t("formFilter")}
               defaultValue={filters.form ?? ""}
@@ -312,6 +345,7 @@ export function LeadsManager({
               }))}
             />
             <Select
+              className="min-w-0 flex-[1_1_8.5rem]"
               name="confirmation"
               label={t("confirmationFilter")}
               defaultValue={filters.confirmation ?? ""}
@@ -322,15 +356,16 @@ export function LeadsManager({
               }))}
             />
             <Select
+              className="min-w-0 flex-[1_1_8.5rem]"
               name="assigned_to"
               label={t("assignedTo")}
               defaultValue={filters.assignedTo ?? ""}
               placeholder={t("allStaff")}
               options={staff.map((member) => ({ value: member.id, label: member.full_name }))}
             />
-            <div className="flex items-end justify-end">
-              <Button type="submit">{t("applyFilters")}</Button>
-            </div>
+            <Button type="submit" className="shrink-0">
+              {t("applyFilters")}
+            </Button>
           </form>
         </Card>
         <Card padded>
@@ -359,7 +394,9 @@ export function LeadsManager({
                 rows={rows}
                 rowKey={(row) => row.id}
                 selectedKey={selected?.id}
-                onRowClick={(row) => window.location.assign(href(filters, { id: row.id }))}
+                onRowClick={(row) =>
+                  navigate(href(filters, { id: row.id }), { id: row.id, label: row.email })
+                }
               />
               <Pagination
                 page={pageInfo.page}
@@ -381,7 +418,7 @@ export function LeadsManager({
           title={t("detailTitle")}
           subtitle={selected.email}
           closeLabel={t("closeDrawer")}
-          onClose={() => window.location.assign(href(filters))}
+          onClose={() => navigate(href(filters), { id: null })}
         >
           {detailError ? (
             <p role="alert" className="text-sm text-danger">
@@ -525,12 +562,24 @@ export function LeadsManager({
             </div>
           )}
         </Drawer>
+      ) : openingLabel !== null ? (
+        <Drawer
+          open
+          title={t("detailTitle")}
+          subtitle={openingLabel}
+          closeLabel={t("closeDrawer")}
+          onClose={() => navigate(href(filters), { id: null })}
+        >
+          <p role="status" className="text-sm text-muted">
+            {tc("loading")}
+          </p>
+        </Drawer>
       ) : detailError ? (
         <Drawer
           open
           title={t("detailTitle")}
           closeLabel={t("closeDrawer")}
-          onClose={() => window.location.assign(href(filters))}
+          onClose={() => navigate(href(filters), { id: null })}
         >
           <p role="alert" className="text-sm text-danger">
             {t("detailFailed")}

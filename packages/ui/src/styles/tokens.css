@@ -295,6 +295,13 @@
   font-size: 13px;
 }
 
+/* Tabelas do interno a 14 px (cliente, 19 nov 2026). É um ecrã de trabalho, lido
+   num monitor durante horas, e a 13 px as listas de leads e da equipa liam-se
+   "super pequenas". Só o corpo: os cabeçalhos ficam no `--fs-label`. */
+[data-app="interno"] .upm-table {
+  font-size: var(--fs-body-lg);
+}
+
 /* Títulos H1 e H2 do site a 600 em vez de 700 (cliente, 11 nov 2026): são
    grandes (28–56 px), a hierarquia vem do tamanho, e a Bricolage a 700 ficava
    pesada — sobretudo em escuro. Pré e pós-lançamento, todas as páginas
