@@ -233,6 +233,19 @@
   min-width: 0;
 }
 
+/* Entre grupos (19 nov 2026). Sem isto o título de um grupo ficava a 4 px do
+   último item do grupo de cima e a 14 px dos seus próprios itens — lia-se como
+   o fim do grupo anterior. Com 24 px acima e 14 abaixo, pertence ao seu. */
+.upm-nav + .upm-nav {
+  margin-top: var(--sp-8);
+}
+
+/* No rail não há títulos: basta um respiro um pouco maior do que o de dentro
+   do grupo (8 px) para os grupos se continuarem a ler como blocos. */
+.upm-shell[data-collapsed="true"] .upm-nav + .upm-nav {
+  margin-top: var(--sp-3);
+}
+
 .upm-nav__item {
   display: flex;
   align-items: center;

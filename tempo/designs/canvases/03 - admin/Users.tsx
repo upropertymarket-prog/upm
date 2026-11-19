@@ -80,24 +80,45 @@ const selectedProfile = {
   current_period_end: "2026-10-28T09:15:00.000Z",
 } satisfies UserDetail;
 
+/** Quem tem a sessão aberta no canvas: o José Curado. */
+const CURRENT_ADMIN_ID = "ccaa0000-0000-4000-8000-000000000099";
+
 /**
  * Alguém da equipa (8 nov 2026): o painel mostra "Acesso" (repor
- * palavra-passe e 2FA) e, com a conta suspensa, "Saída da equipa".
+ * palavra-passe e 2FA) e, com a conta suspensa, "Saída da equipa". A equipa
+ * do canvas é a da base desde 19 nov 2026: o José Curado e o Tiago Araújo.
  */
 const staffProfile = {
   id: "ccaa0000-0000-4000-8000-000000000010",
-  full_name: "Carla Sousa",
-  email: "carla.sousa@upropertymarket.pt",
-  role: "support",
+  full_name: "Tiago Araújo",
+  email: "tiago.araujo@upropertymarket.pt",
+  role: "admin",
   status: "active",
   plan_name: null,
   plan_slug: null,
   subscription_status: null,
   trial_ends_at: null,
-  created_at: "2026-10-02T09:00:00.000Z",
-  updated_at: "2026-11-08T10:00:00.000Z",
+  created_at: "2026-11-14T10:00:00.000Z",
+  updated_at: "2026-11-19T10:00:00.000Z",
   current_period_end: null,
 } satisfies UserDetail;
+
+/** A lista por trás da ficha de alguém da equipa: `/admin/equipa` só lista a equipa. */
+const staffUsers: UserDirectoryRow[] = [
+  {
+    id: CURRENT_ADMIN_ID,
+    full_name: "José Curado",
+    email: "jose.curado@upropertymarket.pt",
+    role: "admin",
+    status: "active",
+    plan_name: null,
+    plan_slug: null,
+    subscription_status: null,
+    trial_ends_at: null,
+    created_at: "2026-11-14T09:00:00.000Z",
+  },
+  staffProfile,
+];
 
 const verifyPin: VerifyPinAction = async () => ({ ok: true });
 const onChangeStatus = async () => ({ ok: true });
@@ -109,17 +130,25 @@ const onDeleteAccount = async () => ({ ok: true });
 function UsersDemo({
   theme,
   detail = false,
+  team = false,
   profile = selectedProfile,
   exitDialog,
 }: {
   theme: "light" | "dark";
   detail?: boolean;
+  /** A página da Equipa sem ficha aberta. */
+  team?: boolean;
   profile?: UserDetail;
   exitDialog?: "open" | "exported";
 }) {
+  // Uma ficha da equipa abre na página da Equipa, como na app — no diretório
+  // de clientes o painel mostrava plano e subscrição, que a equipa não tem.
+  const audience =
+    team || ["admin", "support", "marketing"].includes(profile.role) ? "staff" : "clients";
+  const rows = audience === "staff" ? staffUsers : users;
   const cursor = {
-    createdAt: users[users.length - 1]!.created_at,
-    id: users[users.length - 1]!.id,
+    createdAt: rows[rows.length - 1]!.created_at,
+    id: rows[rows.length - 1]!.id,
   };
 
   return (
@@ -135,15 +164,16 @@ function UsersDemo({
           <ToastProvider>
             <InternalChrome
               role="admin"
-              userName="Helena Matos"
+              userName="José Curado"
               userMeta="Administração"
-              activeId="users"
+              activeId={audience === "staff" ? "team" : "users"}
               locale="pt"
               onLocaleChange={async () => undefined}
               counters={{ propertyModeration: 4, siteLeads: 12 }}
             >
               <UsersManager
-                users={users}
+                audience={audience}
+                users={rows}
                 plans={[
                   { id: "plan-essential", name: "Essential" },
                   { id: "plan-smarter", name: "Smarter" },
@@ -155,14 +185,14 @@ function UsersDemo({
                   pageCount: 3,
                   hasNext: true,
                   hasPrevious: false,
-                  firstCursor: { createdAt: users[0]!.created_at, id: users[0]!.id },
+                  firstCursor: { createdAt: rows[0]!.created_at, id: rows[0]!.id },
                   lastCursor: cursor,
                 }}
                 selectedProfile={detail ? profile : null}
                 selectedProfileError={false}
                 loadError={false}
                 locale="pt"
-                currentAdminId="ccaa0000-0000-4000-8000-000000000099"
+                currentAdminId={CURRENT_ADMIN_ID}
                 onChangeStatus={onChangeStatus}
                 onResetPassword={onResetPassword}
                 onResetTwoFactor={onResetTwoFactor}
@@ -196,7 +226,16 @@ export function AdminUtilizadorDrawerEscuro() {
   return <UsersDemo theme="dark" detail />;
 }
 
-// Equipa: o painel de alguém do suporte, com "Acesso" (8 nov 2026).
+// Equipa: a página, uma tabela por departamento (19 nov 2026).
+export function AdminEquipaClaro() {
+  return <UsersDemo theme="light" team />;
+}
+
+export function AdminEquipaEscuro() {
+  return <UsersDemo theme="dark" team />;
+}
+
+// Equipa: o painel de alguém da equipa, com "Acesso" (8 nov 2026).
 export function AdminEquipaAcessoClaro() {
   return <UsersDemo theme="light" detail profile={staffProfile} />;
 }

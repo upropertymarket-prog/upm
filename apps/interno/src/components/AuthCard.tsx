@@ -36,7 +36,15 @@ function StaffPanel() {
   return (
     // Ilha em tema escuro: os tokens trocam sozinhos, seja a página clara ou escura.
     <aside className="upm-iauth__panel" data-theme="dark">
-      <div className="upm-iauth__panel-inner">
+      <div
+        style={{
+          paddingTop: "50px",
+          paddingRight: "50px",
+          paddingBottom: "24px",
+          paddingLeft: "50px",
+        }}
+        className="upm-iauth__panel-inner"
+      >
         <Brand />
 
         <div className="upm-iauth__intro">
@@ -44,7 +52,9 @@ function StaffPanel() {
           <p className="upm-iauth__headline">{t("headline")}</p>
         </div>
 
-        <p className="upm-iauth__closing">{t("closing")}</p>
+        <p style={{ paddingTop: "16px", paddingBottom: "0px" }} className="upm-iauth__closing">
+          {t("closing")}
+        </p>
       </div>
     </aside>
   );
@@ -58,7 +68,15 @@ export function AuthCard({ children }: { children: React.ReactNode }) {
       <div className="upm-iauth__grid">
         <StaffPanel />
 
-        <div className="upm-iauth__main">
+        <div
+          style={{
+            paddingTop: "43px",
+            paddingRight: "72px",
+            paddingBottom: "50px",
+            paddingLeft: "72px",
+          }}
+          className="upm-iauth__main"
+        >
           <p className="upm-iauth__top">
             <LockIcon />
             <span>{t("restricted")}</span>
