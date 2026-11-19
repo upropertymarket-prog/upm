@@ -29,6 +29,7 @@ import {
 } from "@upm/ui";
 
 import { useStepUp } from "../../../components/StepUpModal";
+import { useDrawerNavigation } from "../../../lib/useDrawerNavigation";
 import type { VerifyPinAction } from "../../../components/stepUpTypes";
 import type {
   ProfileStatusActionResult,
@@ -165,8 +166,8 @@ export function UsersManager({
   plans,
   filters,
   pageInfo,
-  selectedProfile,
-  selectedProfileError,
+  selectedProfile: loadedProfile,
+  selectedProfileError: loadedProfileError,
   loadError,
   locale,
   currentAdminId,
@@ -216,6 +217,16 @@ export function UsersManager({
   const tp = useTranslations("pagination");
   const basePath = BASE_PATH[audience];
   const isStaff = audience === "staff";
+  const { navigate, refresh, intent } = useDrawerNavigation();
+  // Enquanto a navegação corre, manda o clique: a gaveta abre (ou fecha) já, e
+  // a ficha que estava aberta não fica à vista à espera do servidor.
+  const selectedProfile = intent
+    ? intent.id && loadedProfile?.id === intent.id
+      ? loadedProfile
+      : null
+    : loadedProfile;
+  const selectedProfileError = intent ? false : loadedProfileError;
+  const openingLabel = intent?.id && !selectedProfile ? (intent.label ?? "") : null;
   const [statusTarget, setStatusTarget] = useState<"active" | "suspended" | null>(null);
   const [reason, setReason] = useState("");
   const [actionFailed, setActionFailed] = useState(false);
@@ -228,6 +239,16 @@ export function UsersManager({
   const [exitExported, setExitExported] = useState(initialExitDialog === "exported");
   const [exitProblem, setExitProblem] = useState<ExitProblem | null>(null);
   const [exitBlockers, setExitBlockers] = useState({ openLeads: 0, mailboxes: 0 });
+  // A página já não recarrega ao trocar de ficha: o resultado de uma ação na
+  // ficha anterior ("link enviado", um erro) não pode aparecer na seguinte.
+  const [shownProfileId, setShownProfileId] = useState(loadedProfile?.id ?? null);
+  if ((loadedProfile?.id ?? null) !== shownProfileId) {
+    setShownProfileId(loadedProfile?.id ?? null);
+    setActionFailed(false);
+    setAccessDone(null);
+    setAccessFailed(false);
+    setExitProblem(null);
+  }
 
   /** Lê o resultado da saída; `true` quando correu bem. */
   function exitResult(result: StaffExitActionResult, retry: () => void): boolean {
@@ -278,7 +299,7 @@ export function UsersManager({
       const result = await onDeleteAccount({ profileId });
       if (!exitResult(result, () => deleteAccount(profileId))) return;
       // O perfil já não existe: fecha-se o painel.
-      window.location.assign(makeHref(basePath, filters));
+      navigate(makeHref(basePath, filters), { id: null });
     });
   }
 
@@ -314,7 +335,8 @@ export function UsersManager({
         setActionFailed(true);
         return;
       }
-      window.location.reload();
+      setStatusTarget(null);
+      refresh();
     });
   }
 
@@ -358,13 +380,13 @@ export function UsersManager({
   function changePage(nextPage: number) {
     if (nextPage === pageInfo.page) return;
     if (nextPage === 1) {
-      window.location.assign(makeHref(basePath, filters));
+      navigate(makeHref(basePath, filters));
       return;
     }
     const isNext = nextPage > pageInfo.page;
     const cursor = isNext ? pageInfo.lastCursor : pageInfo.firstCursor;
     if (!cursor) return;
-    window.location.assign(
+    navigate(
       makeHref(basePath, filters, {
         cursor_created_at: cursor.createdAt,
         cursor_id: cursor.id,
@@ -475,7 +497,10 @@ export function UsersManager({
                 rowKey={(row) => row.id}
                 selectedKey={selectedProfile?.id}
                 onRowClick={(row) =>
-                  window.location.assign(makeHref(basePath, filters, { id: row.id }))
+                  navigate(makeHref(basePath, filters, { id: row.id }), {
+                    id: row.id,
+                    label: row.full_name || row.email,
+                  })
                 }
               />
               <Pagination
@@ -500,7 +525,7 @@ export function UsersManager({
           subtitle={selectedProfile.full_name || selectedProfile.email}
           closeLabel={t("closeDrawer")}
           footerStyle={{ justifyContent: "center" }}
-          onClose={() => window.location.assign(makeHref(basePath, filters))}
+          onClose={() => navigate(makeHref(basePath, filters), { id: null })}
           footer={
             selectedProfile.status === "active" || selectedProfile.status === "suspended" ? (
               <Button
@@ -656,12 +681,24 @@ export function UsersManager({
             <p className="text-xs text-muted">{t("emailUnavailable")}</p>
           </section>
         </Drawer>
+      ) : openingLabel !== null ? (
+        <Drawer
+          open
+          title={t("drawerTitle")}
+          subtitle={openingLabel}
+          closeLabel={t("closeDrawer")}
+          onClose={() => navigate(makeHref(basePath, filters), { id: null })}
+        >
+          <p className="text-sm text-muted" role="status">
+            {tc("loading")}
+          </p>
+        </Drawer>
       ) : selectedProfileError ? (
         <Drawer
           open
           title={t("drawerTitle")}
           closeLabel={t("closeDrawer")}
-          onClose={() => window.location.assign(makeHref(basePath, filters))}
+          onClose={() => navigate(makeHref(basePath, filters), { id: null })}
         >
           <p className="text-sm text-danger" role="alert">
             {t("detailFailed")}

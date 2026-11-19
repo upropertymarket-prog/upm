@@ -62,35 +62,35 @@ export default async function SiteLeadsPage({
     confirmation: confirmationResult.success ? confirmationResult.data : null,
     search,
   };
-  const [auth, listResult, staffResult, sidebarCounters] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase.rpc("admin_list_site_leads", {
-      p_status: filters.status ?? undefined,
-      p_source: filters.source ?? undefined,
-      p_form: filters.form ?? undefined,
-      p_assigned_to: filters.assignedTo ?? undefined,
-      p_search: search || undefined,
-      p_confirmed: filters.confirmation === null ? undefined : filters.confirmation === "confirmed",
-      p_cursor_created_at: cursor?.createdAt,
-      p_cursor_id: cursor?.id,
-      p_direction: cursor ? direction : "next",
-      p_limit: PAGE_SIZE + 1,
-    }),
-    supabase.rpc("admin_site_lead_staff"),
-    getAdminSidebarCounters(supabase),
-  ]);
-  let detail: LeadDetail | null = null;
-  let history: LeadEvent[] = [];
-  let detailError = false;
-  if (selectedId) {
-    const [detailResult, historyResult] = await Promise.all([
-      supabase.rpc("admin_site_lead_detail", { p_lead_id: selectedId }),
-      supabase.rpc("admin_site_lead_history", { p_lead_id: selectedId }),
+  // Uma vaga só, com o detalhe dentro (19 nov 2026). Abrir uma ficha fazia três
+  // vagas seguidas — lista, depois detalhe, depois o perfil de quem está a ver
+  // —, e cada uma é uma ida à base.
+  const [auth, listResult, staffResult, sidebarCounters, detailResult, historyResult] =
+    await Promise.all([
+      supabase.auth.getUser(),
+      supabase.rpc("admin_list_site_leads", {
+        p_status: filters.status ?? undefined,
+        p_source: filters.source ?? undefined,
+        p_form: filters.form ?? undefined,
+        p_assigned_to: filters.assignedTo ?? undefined,
+        p_search: search || undefined,
+        p_confirmed:
+          filters.confirmation === null ? undefined : filters.confirmation === "confirmed",
+        p_cursor_created_at: cursor?.createdAt,
+        p_cursor_id: cursor?.id,
+        p_direction: cursor ? direction : "next",
+        p_limit: PAGE_SIZE + 1,
+      }),
+      supabase.rpc("admin_site_lead_staff"),
+      getAdminSidebarCounters(supabase),
+      selectedId ? supabase.rpc("admin_site_lead_detail", { p_lead_id: selectedId }) : null,
+      selectedId ? supabase.rpc("admin_site_lead_history", { p_lead_id: selectedId }) : null,
     ]);
-    detail = detailResult.data?.[0] ?? null;
-    history = historyResult.data ?? [];
-    detailError = Boolean(detailResult.error || historyResult.error || !detail);
-  }
+  const detail: LeadDetail | null = detailResult?.data?.[0] ?? null;
+  const history: LeadEvent[] = historyResult?.data ?? [];
+  const detailError = Boolean(
+    selectedId && (detailResult?.error || historyResult?.error || !detail),
+  );
   const raw = listResult.data ?? [];
   const rows = raw.slice(0, PAGE_SIZE) as LeadRow[];
   const hasNext = direction === "prev" ? page > 1 : raw.length > PAGE_SIZE;

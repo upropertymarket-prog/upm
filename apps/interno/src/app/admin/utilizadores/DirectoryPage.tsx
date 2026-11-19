@@ -95,7 +95,14 @@ export async function DirectoryPage({
   const parsed = parseQuery(params, audience);
   const supabase = createClient(await cookies());
 
-  const [authResult, listResult, plansResult, counters] = await Promise.all([
+  // O detalhe entra na mesma vaga da lista (19 nov 2026). Eram quatro vagas
+  // seguidas — lista, detalhe, perfil, departamento — e cada uma é uma ida à
+  // base; abrir uma ficha demorava perto de 3 s.
+  const selectedIdRaw = first(params.id);
+  const selectedId =
+    selectedIdRaw && uuidSchema.safeParse(selectedIdRaw).success ? selectedIdRaw : null;
+
+  const [authResult, listResult, plansResult, counters, selectedResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase.rpc("admin_list_profiles", {
       p_search: parsed.filters.search || undefined,
@@ -110,27 +117,22 @@ export async function DirectoryPage({
     }),
     supabase.from("plans").select("id, name").order("position"),
     getAdminSidebarCounters(supabase),
+    selectedId ? supabase.rpc("admin_profile_detail", { p_profile_id: selectedId }) : null,
   ]);
 
-  // The selected drawer query runs separately only when there is a validated id.
-  const selectedIdRaw = first(params.id);
-  const selectedId =
-    selectedIdRaw && uuidSchema.safeParse(selectedIdRaw).success ? selectedIdRaw : null;
-  const selectedResult = selectedId
-    ? await supabase.rpc("admin_profile_detail", { p_profile_id: selectedId })
-    : null;
-
   const profileId = authResult.data.user?.id ?? null;
-  const { data: chromeProfile } = profileId
-    ? await supabase.from("profiles").select("full_name, locale").eq("id", profileId).maybeSingle()
-    : { data: null };
-  const { data: staff } = profileId
-    ? await supabase
-        .from("staff_members")
-        .select("department")
-        .eq("profile_id", profileId)
-        .maybeSingle()
-    : { data: null };
+  const [{ data: chromeProfile }, { data: staff }] = await Promise.all([
+    profileId
+      ? supabase.from("profiles").select("full_name, locale").eq("id", profileId).maybeSingle()
+      : Promise.resolve({ data: null }),
+    profileId
+      ? supabase
+          .from("staff_members")
+          .select("department")
+          .eq("profile_id", profileId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
   const rawRows = listResult.data ?? [];
   const hasMoreForward = parsed.direction === "next" && rawRows.length > PAGE_SIZE;
