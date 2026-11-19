@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -461,14 +462,14 @@ function VisitList({
                       {t("archive")}
                     </Button>
                   ) : null}
-                  <a
+                  <Link
                     href="/mensagens"
                     className="upm-btn upm-btn--secondary upm-btn--md"
                     style={{ textDecoration: "none" }}
                   >
                     <MessageSquare size={14} aria-hidden="true" />
                     {t("openConversation")}
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

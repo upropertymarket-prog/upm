@@ -1,6 +1,8 @@
 "use client";
 
 import { createElement, useEffect, useState } from "react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   AppShell,
@@ -13,6 +15,7 @@ import {
 import { LOCALES } from "@upm/config";
 
 import { navFor } from "../lib/navigation";
+import { rememberChrome } from "./chromeMemory";
 import { AppUpdatesGate } from "./notifications/AppUpdatesGate";
 import { useNotifications } from "./notifications/useNotifications";
 
@@ -67,10 +70,11 @@ function initials(name: string): string {
  * O shell em si não sabe nada de perfis: 04 §5.5 diz que é idêntico nos quatro,
  * e é esta camada que escolhe a lista.
  *
- * A navegação usa `<a>` e não `next/link`: com `typedRoutes` ligado, um `Link`
- * para uma rota que ainda não existe falha o typecheck, e as rotas de 03 §1.2
- * nascem nas Fases 3–7. Passa a `next/link` (via `renderLink`) quando as
- * páginas existirem — o `<AppShell>` já tem o ponto de entrada para isso.
+ * A navegação é `next/link`, via `renderLink` (19 nov 2026). Era `<a>`
+ * enquanto as rotas de 03 §1.2 não existiam todas; o preço era cada clique no
+ * menu recarregar o documento inteiro, com o ecrã parado na página antiga até
+ * a nova chegar toda do servidor. Com o `Link`, a troca é no cliente e o
+ * `loading.tsx` da rota aparece no instante do clique.
  */
 export function AppChrome({
   role,
@@ -100,6 +104,11 @@ export function AppChrome({
     installBreadcrumbs();
   }, []);
 
+  // O esqueleto da próxima página redesenha este shell (ver `chromeMemory`).
+  useEffect(() => {
+    rememberChrome({ role, userName, userMeta, locale, counters, notifications: items });
+  }, [role, userName, userMeta, locale, counters, items]);
+
   const { entries, groupKey } = navFor(role);
 
   const navItems: NavItem[] = entries.map((entry) => ({
@@ -118,6 +127,12 @@ export function AppChrome({
         groups: [{ label: t(`sidebar.groups.${groupKey}`), items: navItems }],
         activeId,
         user: { name: userName, meta: userMeta, initials: initials(userName), online: true },
+        // O `href` vem de `navigation.ts`, que é a lista das rotas que existem.
+        renderLink: ({ href, className, title, children, "aria-current": current }) => (
+          <Link href={href as Route} className={className} title={title} aria-current={current}>
+            {children}
+          </Link>
+        ),
         onReport: () => setReportOpen(true),
         /**
          * A ação entra **ao clicar**, e não no topo do módulo (22 out 2026).

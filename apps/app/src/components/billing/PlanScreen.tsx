@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useMemo, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -411,12 +412,12 @@ export function PlanScreen({
               sem ela não houve celebração, e um link para uma página que diria
               "ainda não há contrato" era um beco. */}
           {status.subscriptionStatus ? (
-            <a
+            <Link
               href="/plano/contrato"
               style={{ fontSize: "var(--fs-body)", color: "var(--accent)" }}
             >
               {t("agreement.link")}
-            </a>
+            </Link>
           ) : null}
         </div>
 

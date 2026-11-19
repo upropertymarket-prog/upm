@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BarChart3, Eye, SquarePen } from "lucide-react";
 import { Card, CardBody, StatusTag } from "@upm/ui";
@@ -59,22 +61,22 @@ export function OwnerListingBar({ status, viewsCount, editHref, statsHref }: Own
           </span>
         ) : null}
         <span style={{ display: "flex", gap: "var(--sp-4)", marginLeft: "auto" }}>
-          <a
-            href={statsHref}
+          <Link
+            href={statsHref as Route}
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
             <BarChart3 size={15} aria-hidden="true" />
             {t("stats")}
-          </a>
-          <a
-            href={editHref}
+          </Link>
+          <Link
+            href={editHref as Route}
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
             <SquarePen size={15} aria-hidden="true" />
             {t("edit")}
-          </a>
+          </Link>
         </span>
       </CardBody>
     </Card>

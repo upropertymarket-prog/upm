@@ -1418,3 +1418,42 @@ h6 {
     animation: none;
   }
 }
+
+/* =========================================================================
+ * Skeleton — o ecrã novo antes de ter dados (19 nov 2026)
+ * Um bloco na cor das superfícies secundárias com um brilho que atravessa da
+ * esquerda para a direita. Sem movimento para quem o pediu ao sistema.
+ * ====================================================================== */
+
+.upm-skel {
+  display: block;
+  flex-shrink: 0;
+  max-width: 100%;
+  border-radius: var(--r-sm, 6px);
+  background-color: var(--surface2);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--border) 70%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: upm-skel-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes upm-skel-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upm-skel {
+    animation: none;
+    background-image: none;
+  }
+}

@@ -10,6 +10,16 @@ import { Topbar, type TopbarProps } from "./Topbar";
 
 const COLLAPSED_KEY = "upm-sidebar-collapsed";
 
+/**
+ * O último valor do rail visto **neste separador** (19 nov 2026). O shell
+ * monta de novo a cada página — e a cada esqueleto de carregamento —, e o
+ * `localStorage` só se lê depois de montar: sem isto, quem tem o rail recolhido
+ * via a sidebar abrir e fechar em cada mudança de página. Só se escreve no
+ * browser (efeito e clique), por isso no servidor fica sempre `null` e o
+ * primeiro render bate com o HTML.
+ */
+let lastCollapsed: boolean | null = null;
+
 export type AppShellProps = {
   sidebar: Omit<SidebarProps, "collapsed" | "onCollapsedChange">;
   topbar: Omit<TopbarProps, "onOpenSidebar">;
@@ -72,19 +82,23 @@ export function AppShell({
   className,
   style,
 }: AppShellProps) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [collapsed, setCollapsed] = useState(() => lastCollapsed ?? defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(COLLAPSED_KEY);
-      if (stored === "1" || stored === "0") setCollapsed(stored === "1");
+      if (stored === "1" || stored === "0") {
+        lastCollapsed = stored === "1";
+        setCollapsed(lastCollapsed);
+      }
     } catch {
       // Storage bloqueado: fica o valor por omissão.
     }
   }, []);
 
   function changeCollapsed(next: boolean) {
+    lastCollapsed = next;
     setCollapsed(next);
     try {
       window.localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0");

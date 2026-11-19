@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
@@ -181,22 +183,26 @@ export function LeadsScreen({ rows, onUpdateStage }: LeadsScreenProps) {
             width: "max-content",
           }}
         >
-          <a
-            href={row.conversationId ? `/mensagens?conversa=${row.conversationId}` : "/mensagens"}
+          <Link
+            href={
+              row.conversationId
+                ? `/mensagens?conversa=${row.conversationId}`
+                : ("/mensagens" as Route)
+            }
             className="upm-btn upm-btn--secondary upm-btn--md"
             style={{ textDecoration: "none", width: 124, minWidth: 32, padding: 0 }}
           >
             <MessageSquare size={16} aria-hidden="true" />
             {t("reply")}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/agenda"
             className="upm-btn upm-btn--secondary upm-btn--icon"
             style={{ textDecoration: "none" }}
             aria-label={t("openSchedule", { name: row.contact.name })}
           >
             <CalendarPlus size={16} aria-hidden="true" />
-          </a>
+          </Link>
           <Button variant="secondary" size="md" onClick={() => openLead(row)}>
             {t("details")}
           </Button>

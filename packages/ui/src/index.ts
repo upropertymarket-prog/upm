@@ -68,6 +68,26 @@ export type { EmptyStateProps } from "./components/EmptyState";
 export { Pagination, paginationRange } from "./components/Pagination";
 export type { PaginationProps } from "./components/Pagination";
 
+// Esqueletos de carregamento — os `loading.tsx` de cada rota (19 nov 2026)
+export {
+  ShellSkeleton,
+  Skeleton,
+  SkeletonCard,
+  SkeletonCards,
+  SkeletonColumns,
+  SkeletonField,
+  SkeletonFilters,
+  SkeletonForm,
+  SkeletonHeader,
+  SkeletonList,
+  SkeletonPage,
+  SkeletonSplit,
+  SkeletonStats,
+  SkeletonTable,
+  SkeletonTabs,
+} from "./components/Skeleton";
+export type { SkeletonProps } from "./components/Skeleton";
+
 // Tema (P1-03)
 export { ThemeScript } from "./theme/ThemeScript";
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";

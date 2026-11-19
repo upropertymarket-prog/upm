@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Check, RotateCcw, Star, X } from "lucide-react";
 import {
@@ -260,9 +262,9 @@ export function ModerationView({
 
         <nav aria-label={t("statusTabs")} className="flex flex-wrap gap-2">
           {(["pending_review", "active", "rejected", "featured"] as const).map((item) => (
-            <a
+            <Link
               key={item}
-              href={makeHref(item)}
+              href={makeHref(item) as Route}
               aria-current={status === item ? "page" : undefined}
               className={
                 status === item
@@ -272,7 +274,7 @@ export function ModerationView({
             >
               {t("status." + item)}
               <span className="tabular-nums">{counts[item] ?? 0}</span>
-            </a>
+            </Link>
           ))}
         </nav>
 
