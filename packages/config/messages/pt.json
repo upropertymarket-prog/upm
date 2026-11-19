@@ -10,7 +10,9 @@
     "loading": "A carregar…",
     "understood": "Entendi",
     "later": "Mais tarde",
-    "edit": "Editar"
+    "edit": "Editar",
+    "showPassword": "Mostrar palavra-passe",
+    "hidePassword": "Ocultar palavra-passe"
   },
   "pagination": {
     "previous": "Anterior",

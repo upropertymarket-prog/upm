@@ -14,6 +14,7 @@ export function NewPasswordForm({
   onSubmit: (previous: NewPasswordState, formData: FormData) => Promise<NewPasswordState>;
 }) {
   const t = useTranslations("auth.recovery");
+  const tCommon = useTranslations("common");
   const [state, formAction, pending] = useActionState(onSubmit, initialState);
 
   return (
@@ -23,6 +24,7 @@ export function NewPasswordForm({
       <Input
         name="password"
         type="password"
+        revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
         label={t("newPassword")}
         autoComplete="new-password"
         minLength={10}
