@@ -3,301 +3,216 @@
 /**
  * Narração de canvas — App shell (04 §5.5)
  * =========================================================================
- * O ponto destes storyboards é uma coisa só: **o shell é idêntico nos 4
- * perfis**. O que muda é a lista de navegação (07 §4.1–§4.3) e a etiqueta de
- * grupo. Por isso o Proprietário e o Admin aparecem lado a lado.
+ * O shell é idêntico nos cinco perfis; o que muda é a lista de navegação
+ * (07 §4.1–§4.3) e a etiqueta de grupo. Cada storyboard monta o chrome
+ * verdadeiro de cada app (19 nov 2026):
+ *  - Admin, Suporte e Marketing pelo `InternalChrome` do `interno`;
+ *  - Proprietário e Comprador pelo `AppChrome` da `app`.
  *
- * Cada storyboard corre no seu próprio iframe, logo o `ThemeProvider` pode fixar
- * o tema de cada um sem afetar os outros.
+ * Os menus vêm de `navigation.ts` e os textos de `pt.json`: se um menu mudar
+ * na app, muda aqui sem tocar neste ficheiro. O conteúdo da página fica só pelo
+ * `PageHeader` — o assunto destas molduras é o shell, não a página.
+ *
+ * Moldura de 1440 × 900, como as outras storyboards. O tema fica num invólucro
+ * `data-theme`, que vence por proximidade na cascata; o `ThemeProvider` fica
+ * pelo contexto de que o `ThemeToggle` da topbar precisa.
  */
-import { createElement } from "react";
-import {
-  Bookmark,
-  Building2,
-  CalendarDays,
-  Cloud,
-  CreditCard,
-  FileSignature,
-  LayoutDashboard,
-  Mail,
-  Map,
-  MessageSquare,
-  Settings,
-  Store,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { NextIntlClientProvider } from "next-intl";
 
-import { AppShell } from "../../../../packages/ui/src/shell/AppShell";
 import "../../_estilos/shell-no-canvas.css";
-import { Brand } from "../../../../packages/ui/src/shell/Brand";
 import { Button } from "../../../../packages/ui/src/components/Button";
-import { Card, CardBody, CardHeader, CardTitle } from "../../../../packages/ui/src/components/Card";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { ThemeProvider } from "../../../../packages/ui/src/theme/ThemeProvider";
-import type { NavItem } from "../../../../packages/ui/src/shell/Sidebar";
-import { Note, Row, ThemePair } from "../../_narration/ThemePair";
+import { ToastProvider } from "../../../../packages/ui/src/components/Toast";
+import { InternalChrome } from "../../../../apps/interno/src/components/InternalChrome";
+import { AppChrome } from "../../../../apps/app/src/components/AppChrome";
+import ptMessages from "../../../../packages/config/messages/pt.json";
+import { NoNavigation } from "../../canvases/06 - proprietario/NoNavigation";
 
-const LABELS = {
-  collapse: "Colapsar menu",
-  expand: "Expandir menu",
-  report: "Reportar problema",
-  signOut: "Sair",
-  countSuffix: "por ler",
-};
-
-const TOPBAR_LABELS = {
-  search: "Pesquisar",
-  openMenu: "Abrir menu",
-  language: "Idioma",
-  notifications: "Notificações",
-  markAllRead: "Marcar como lidas",
-  noNotifications: "Sem notificações",
-  theme: { title: "Tema", light: "Claro", dark: "Escuro", system: "Sistema" },
-};
-
-const LOCALES = [
-  { value: "pt", label: "Português" },
-  { value: "en", label: "English" },
-];
-
-/**
- * O tipo do ícone é o dos ícones do `lucide-react` — um componente que aceita
- * `size`. Estava como `Parameters<typeof createElement>[0]`, que aceita
- * qualquer coisa e por isso recusava o `size` que esta função passa: o
- * `createElement` genérico não sabe que props é que o componente tem.
- */
-type IconComponent = (props: { size?: number }) => React.ReactNode;
-
-function item(
-  id: string,
-  label: string,
-  href: string,
-  icon: IconComponent,
-  count?: number,
-): NavItem {
-  return { id, label, href, icon: createElement(icon, { size: 17 }), count };
-}
-
-/** 07 §4.3 — menu do proprietário, na ordem definitiva. */
-const OWNER_NAV: NavItem[] = [
-  item("dashboard", "Painel", "/painel", LayoutDashboard),
-  item("market", "Market", "/market", Store),
-  item("properties", "As minhas propriedades", "/propriedades", Building2),
-  item("leads", "Leads", "/leads", Users, 9),
-  item("messages", "Mensagens", "/mensagens", MessageSquare, 3),
-  item("visits", "Agenda de visitas", "/agenda", CalendarDays, 3),
-  item("map", "Mapa", "/mapa", Map),
-  item("cloud", "Cloud", "/cloud", Cloud),
-  item("contracts", "Contratos", "/contratos", FileSignature, 1),
-  item("plan", "Plano", "/plano", CreditCard),
-  item("settings", "Definições", "/definicoes", Settings),
-];
-
-/** 07 §4.2 — menu do comprador, para comparar com o do proprietário. */
-const BUYER_NAV: NavItem[] = [
-  item("dashboard", "Painel", "/painel", LayoutDashboard),
-  item("market", "Market", "/market", Store),
-  item("saved", "Guardados", "/guardados", Bookmark, 4),
-  item("messages", "Mensagens", "/mensagens", MessageSquare, 3),
-  item("map", "Mapa", "/mapa", Map),
-  item("requests", "Meus pedidos", "/meus-pedidos", CalendarDays, 2),
-  item("cloud", "Cloud", "/cloud", Cloud),
-  item("contracts", "Contratos", "/contratos", FileSignature),
-  item("plan", "Plano", "/plano", CreditCard),
-  item("settings", "Definições", "/definicoes", Settings),
-];
-
-/** 07 §4.1 — menu do admin. Note `/admin/tickets`, só de leitura (07 §5.10). */
-const ADMIN_NAV: NavItem[] = [
-  item("dashboard", "Painel", "/admin/painel", LayoutDashboard),
-  item("users", "Utilizadores", "/admin/utilizadores", Users),
-  item("moderation", "Moderação de imóveis", "/admin/imoveis", Building2, 4),
-  item("traffic", "Tráfego do site", "/admin/trafego", TrendingUp),
-  item("plans", "Planos", "/admin/planos", CreditCard),
-  item("templates", "Templates de contrato", "/admin/contratos", FileSignature),
-  item("leads", "Leads do site", "/admin/leads-site", Users, 12),
-  item("mailboxes", "Caixas de e-mail", "/admin/caixas-email", Mail),
-  item("settings", "Definições", "/admin/definicoes", Settings),
-];
+type Theme = "light" | "dark";
 
 const NOTIFICATIONS = [
   { id: "n1", text: "João Costa pediu uma visita ao UPM-1041", when: "há 2 h", read: false },
   { id: "n2", text: "O UPM-1047 foi aprovado pela moderação", when: "ontem", read: true },
 ];
 
-/**
- * Todos os storyboards de um canvas partilham o mesmo documento, logo o
- * `ThemeProvider` — que escreve `data-theme` na raiz — não serve para fixar o
- * tema de um storyboard: o último a montar ganhava para todos. O tema de cada
- * shell fica num invólucro `data-theme`, que vence por proximidade na cascata; o
- * provider fica só pelo contexto de que o `ThemeToggle` precisa.
- */
-function Shell({
-  theme,
-  nav,
-  group,
-  user,
-  meta,
-  title,
-  subtitle,
-  primaryAction,
-  collapsed = false,
-  children,
-}: {
-  theme: "light" | "dark";
-  nav: NavItem[];
-  group: string;
-  user: string;
-  meta: string;
-  title: string;
-  subtitle: string;
-  primaryAction: string;
-  collapsed?: boolean;
-  children?: React.ReactNode;
-}) {
+const noop = async () => undefined;
+
+/** Invólucro comum: tema, traduções, toasts e travão de navegação. */
+function Frame({ theme, children }: { theme: Theme; children: React.ReactNode }) {
   return (
-    <div data-theme={theme}>
-      <AppShell
-        defaultCollapsed={collapsed}
-        sidebar={{
-          groups: [{ label: group, items: nav }],
-          activeId: "dashboard",
-          user: {
-            name: user,
-            meta,
-            initials: user
-              .split(" ")
-              .map((part) => part[0])
-              .join(""),
-            online: true,
-          },
-          onReport: () => undefined,
-          onSignOut: () => undefined,
-          labels: LABELS,
-        }}
-        topbar={{
-          labels: TOPBAR_LABELS,
-          locale: "pt",
-          locales: LOCALES,
-          onLocaleChange: () => undefined,
-          notifications: NOTIFICATIONS,
-          onMarkAllRead: () => undefined,
-        }}
-      >
-        <PageHeader
-          title={title}
-          subtitle={subtitle}
-          actions={
-            <>
-              <Button variant="secondary">Exportar</Button>
-              <Button>{primaryAction}</Button>
-            </>
-          }
-        />
-        {children ?? (
-          <Card padded>
-            <span style={{ color: "var(--muted)" }}>
-              O conteúdo da página entra aqui. O shell é o mesmo nos quatro perfis (04 §5.5).
-            </span>
-          </Card>
-        )}
-      </AppShell>
+    <div data-theme={theme} style={{ height: "900px", background: "var(--bg)" }}>
+      <NoNavigation>
+        <NextIntlClientProvider locale="pt" messages={ptMessages}>
+          <ThemeProvider initialChoice={theme}>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </NoNavigation>
     </div>
   );
 }
 
-/** Proprietário, tema claro, sidebar a 256 px. */
-export function Proprietario() {
+function AdminDemo({ theme }: { theme: Theme }) {
   return (
-    <ThemeProvider initialChoice="light">
-      <Shell
-        theme="light"
-        nav={OWNER_NAV}
-        group="Gerir"
-        user="Ana Silva"
-        meta="Proprietária · Premium"
-        title="Boa tarde, Ana"
-        subtitle="Resumo da sua atividade e ativos"
-        primaryAction="Nova propriedade"
-      />
-    </ThemeProvider>
-  );
-}
-
-/** Admin, tema escuro. Mesmo shell, outra lista (07 §4.1). */
-export function Admin() {
-  return (
-    <ThemeProvider initialChoice="dark">
-      <Shell
-        theme="dark"
-        nav={ADMIN_NAV}
-        group="Administração"
-        user="Helena Matos"
-        meta="Administração · IT"
-        title="Painel"
-        subtitle="Estado da plataforma"
-        primaryAction="Moderar imóveis"
-      />
-    </ThemeProvider>
-  );
-}
-
-/** Comprador com a sidebar colapsada a 84 px — o ícone da marca no lugar do wordmark. */
-export function Rail() {
-  return (
-    <ThemeProvider initialChoice="light">
-      <Shell
-        theme="light"
-        nav={BUYER_NAV}
-        group="Procurar"
-        user="João Costa"
-        meta="Comprador · Smarter"
-        title="Bom dia, João"
-        subtitle="Resumo da sua atividade"
-        primaryAction="Criar alerta"
-        collapsed
+    <Frame theme={theme}>
+      <InternalChrome
+        role="admin"
+        userName="Helena Matos"
+        userMeta="Administração · IT"
+        activeId="dashboard"
+        locale="pt"
+        onLocaleChange={noop}
+        counters={{ mailbox: 5, propertyModeration: 4, siteLeads: 12 }}
+        notifications={NOTIFICATIONS}
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>Ícone da marca no rail</CardTitle>
-          </CardHeader>
-          <CardBody>
-            <span style={{ color: "var(--muted)" }}>
-              No rail de 84 px o wordmark não cabe e entra o ícone da marca, claro ou escuro
-              conforme o tema. É também o botão que expande a sidebar — o nome da marca fica em
-              `aria-label`.
-            </span>
-          </CardBody>
-        </Card>
-      </Shell>
-    </ThemeProvider>
+        <PageHeader
+          title="Boa tarde, Helena"
+          subtitle="Estado da plataforma"
+          actions={
+            <>
+              <Button variant="secondary">Exportar</Button>
+              <Button>Moderar imóveis</Button>
+            </>
+          }
+        />
+      </InternalChrome>
+    </Frame>
   );
 }
 
-/** PageHeader e Brand isolados, nos dois temas. */
-export function Cabecalho() {
+function SuporteDemo({ theme }: { theme: Theme }) {
   return (
-    <ThemePair>
-      <Row label="Brand · wordmark trocado por CSS, sem esperar por JS">
-        <Brand />
-        <Brand collapsed />
-      </Row>
-      <PageHeader
-        title="As minhas propriedades"
-        subtitle="Aqui pode gerir todo o seu portfólio"
-        actions={
-          <>
-            <Button variant="secondary">Exportar</Button>
-            <Button>Nova propriedade</Button>
-          </>
-        }
-      />
-      <Note>
-        No Painel o título é a saudação («Bom dia, Ana»); nas restantes páginas é o título com
-        subtítulo. As ações ficam à direita: Exportar mais a ação primária do contexto (04 §5.5). Ao
-        lado do wordmark está o ícone da marca, que o rail colapsado usa (07 §10.1).
-      </Note>
-    </ThemePair>
+    <Frame theme={theme}>
+      <InternalChrome
+        role="support"
+        userName="Rita Sousa"
+        userMeta="Suporte · Apoio ao cliente"
+        activeId="tickets"
+        locale="pt"
+        onLocaleChange={noop}
+        counters={{ mailbox: 3, tickets: 6 }}
+        notifications={NOTIFICATIONS}
+      >
+        <PageHeader title="Tickets" subtitle="Pedidos de ajuda dos clientes" />
+      </InternalChrome>
+    </Frame>
   );
+}
+
+function MarketingDemo({ theme }: { theme: Theme }) {
+  return (
+    <Frame theme={theme}>
+      <InternalChrome
+        role="marketing"
+        userName="Marta Nunes"
+        userMeta="Marketing · Comunicação"
+        activeId="campaigns"
+        locale="pt"
+        onLocaleChange={noop}
+        notifications={NOTIFICATIONS}
+      >
+        <PageHeader
+          title="Campanhas"
+          subtitle="E-mails para clientes e pré-inscritos"
+          actions={<Button>Nova campanha</Button>}
+        />
+      </InternalChrome>
+    </Frame>
+  );
+}
+
+function ProprietarioDemo({ theme }: { theme: Theme }) {
+  return (
+    <Frame theme={theme}>
+      <AppChrome
+        role="owner"
+        userName="Ana Silva"
+        userMeta="Proprietária · Premium"
+        activeId="dashboard"
+        locale="pt"
+        onLocaleChange={noop}
+        counters={{ leads: 9, messages: 3, visitSchedule: 3, contracts: 1 }}
+        notifications={NOTIFICATIONS}
+        liveNotifications={false}
+        appUpdates={false}
+      >
+        <PageHeader
+          title="Boa tarde, Ana"
+          subtitle="Resumo da sua atividade e ativos"
+          actions={
+            <>
+              <Button variant="secondary">Exportar</Button>
+              <Button>Nova propriedade</Button>
+            </>
+          }
+        />
+      </AppChrome>
+    </Frame>
+  );
+}
+
+function CompradorDemo({ theme }: { theme: Theme }) {
+  return (
+    <Frame theme={theme}>
+      <AppChrome
+        role="buyer"
+        userName="João Costa"
+        userMeta="Comprador · Smarter"
+        activeId="dashboard"
+        locale="pt"
+        onLocaleChange={noop}
+        counters={{ saved: 4, messages: 3, myRequests: 2 }}
+        notifications={NOTIFICATIONS}
+        liveNotifications={false}
+        appUpdates={false}
+      >
+        <PageHeader
+          title="Bom dia, João"
+          subtitle="Resumo da sua atividade"
+          actions={<Button>Criar alerta</Button>}
+        />
+      </AppChrome>
+    </Frame>
+  );
+}
+
+export function AdminClaro() {
+  return <AdminDemo theme="light" />;
+}
+
+export function AdminEscuro() {
+  return <AdminDemo theme="dark" />;
+}
+
+export function SuporteClaro() {
+  return <SuporteDemo theme="light" />;
+}
+
+export function SuporteEscuro() {
+  return <SuporteDemo theme="dark" />;
+}
+
+export function MarketingClaro() {
+  return <MarketingDemo theme="light" />;
+}
+
+export function MarketingEscuro() {
+  return <MarketingDemo theme="dark" />;
+}
+
+export function ProprietarioClaro() {
+  return <ProprietarioDemo theme="light" />;
+}
+
+export function ProprietarioEscuro() {
+  return <ProprietarioDemo theme="dark" />;
+}
+
+export function CompradorClaro() {
+  return <CompradorDemo theme="light" />;
+}
+
+export function CompradorEscuro() {
+  return <CompradorDemo theme="dark" />;
 }

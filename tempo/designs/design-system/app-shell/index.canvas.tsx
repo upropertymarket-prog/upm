@@ -5,40 +5,95 @@ import { AppShell } from "../../../../packages/ui/src/shell/AppShell";
 import { Brand } from "../../../../packages/ui/src/shell/Brand";
 import { PageHeader } from "../../../../packages/ui/src/shell/PageHeader";
 import { ThemeToggle } from "../../../../packages/ui/src/theme/ThemeToggle";
-import { Proprietario as Proprietario2 } from "./Shell";
-import { Admin as Admin2 } from "./Shell";
-import { Rail as Rail2 } from "./Shell";
-import { Cabecalho as Cabecalho2 } from "./Shell";
+import {
+  AdminClaro,
+  AdminEscuro,
+  SuporteClaro,
+  SuporteEscuro,
+  MarketingClaro,
+  MarketingEscuro,
+  ProprietarioClaro,
+  ProprietarioEscuro,
+  CompradorClaro,
+  CompradorEscuro,
+} from "./Shell";
 
+/**
+ * O shell nos cinco perfis, claro e escuro (19 nov 2026). Uma linha por perfil,
+ * pela ordem do menu da casa: Admin, Suporte, Marketing, Proprietário e
+ * Comprador. Molduras de 1440 × 900, como as outras storyboards.
+ */
 export default function AppShellCanvas() {
   return (
     <Canvas name="App Shell" backgroundColor="#232323">
       <Storyboard
-        id="Proprietario"
-        name="Shell · Proprietário (claro)"
-        component={Proprietario2}
-        layout={{ x: 0, y: 0, width: 1556, height: 860 }}
+        id="AdminClaro"
+        name="Shell · Admin (claro)"
+        component={AdminClaro}
+        layout={{ x: 0, y: 0, width: 1440, height: 900 }}
         vrt
       />
       <Storyboard
-        id="Admin"
+        id="AdminEscuro"
         name="Shell · Admin (escuro)"
-        component={Admin2}
-        layout={{ x: 1636, y: 0, width: 1556, height: 860 }}
+        component={AdminEscuro}
+        layout={{ x: 1520, y: 0, width: 1440, height: 900 }}
         vrt
       />
       <Storyboard
-        id="Rail"
-        name="Shell · sidebar colapsada a 84 px"
-        component={Rail2}
-        layout={{ x: 0, y: 940, width: 1556, height: 860 }}
+        id="SuporteClaro"
+        name="Shell · Suporte (claro)"
+        component={SuporteClaro}
+        layout={{ x: 0, y: 980, width: 1440, height: 900 }}
         vrt
       />
       <Storyboard
-        id="Cabecalho"
-        name="PageHeader e Brand"
-        component={Cabecalho2}
-        layout={{ x: 1636, y: 940, width: 1180, height: 460, intrinsicSizing: "root-element" }}
+        id="SuporteEscuro"
+        name="Shell · Suporte (escuro)"
+        component={SuporteEscuro}
+        layout={{ x: 1520, y: 980, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="MarketingClaro"
+        name="Shell · Marketing (claro)"
+        component={MarketingClaro}
+        layout={{ x: 0, y: 1960, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="MarketingEscuro"
+        name="Shell · Marketing (escuro)"
+        component={MarketingEscuro}
+        layout={{ x: 1520, y: 1960, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="ProprietarioClaro"
+        name="Shell · Proprietário (claro)"
+        component={ProprietarioClaro}
+        layout={{ x: 0, y: 2940, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="ProprietarioEscuro"
+        name="Shell · Proprietário (escuro)"
+        component={ProprietarioEscuro}
+        layout={{ x: 1520, y: 2940, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="CompradorClaro"
+        name="Shell · Comprador (claro)"
+        component={CompradorClaro}
+        layout={{ x: 0, y: 3920, width: 1440, height: 900 }}
+        vrt
+      />
+      <Storyboard
+        id="CompradorEscuro"
+        name="Shell · Comprador (escuro)"
+        component={CompradorEscuro}
+        layout={{ x: 1520, y: 3920, width: 1440, height: 900 }}
         vrt
       />
     </Canvas>
@@ -48,7 +103,7 @@ export default function AppShellCanvas() {
 defineAsset(AppShell, {
   libraries: ["upm-base"],
   usageInstructions:
-    "Shell das apps autenticadas: sidebar 248 px (colapsável para 84 px) + topbar 68 px + conteúdo (04 §5.5). É IDÊNTICO nos 4 perfis — comprador, proprietário, admin e suporte recebem este mesmo componente e só mudam a lista de navegação (07 §4.1–§4.3) e a etiqueta de grupo. Não o copie por perfil. Abaixo de 1024 px a sidebar fica em rail e abaixo de 768 px passa a drawer (02 §13). A preferência de rail é do dispositivo (localStorage), não da conta. O site público NÃO usa este shell: 03 §1.1 pede navbar fixa e âncoras.",
+    "Shell das apps autenticadas: sidebar 248 px (colapsável para 84 px) + topbar 68 px + conteúdo (04 §5.5). É IDÊNTICO nos 5 perfis — comprador, proprietário, admin, suporte e marketing recebem este mesmo componente e só mudam a lista de navegação (07 §4.1–§4.3) e a etiqueta de grupo. Não o copie por perfil. Abaixo de 1024 px a sidebar fica em rail e abaixo de 768 px passa a drawer (02 §13). A preferência de rail é do dispositivo (localStorage), não da conta. O site público NÃO usa este shell: 03 §1.1 pede navbar fixa e âncoras.",
   variants: {
     Proprietario: {
       props: {

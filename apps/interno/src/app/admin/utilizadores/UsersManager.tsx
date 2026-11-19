@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import {
   Download,
   KeyRound,
-  Mail,
   ShieldCheck,
   Smartphone,
   Trash2,
@@ -39,6 +38,13 @@ import type {
 
 /** As contas de equipa — as únicas com "Acesso" no painel (8 nov 2026). */
 const STAFF_ROLES = new Set(["admin", "support", "marketing"]);
+
+/** As tabelas da página da Equipa, pela ordem do menu da casa. */
+const STAFF_SECTIONS = [
+  { role: "admin", labelKey: "adminRole" },
+  { role: "support", labelKey: "support" },
+  { role: "marketing", labelKey: "marketing" },
+] as const;
 type AccessAction = "password" | "twoFactor";
 type ExitProblem = "blockers" | "needsExport" | "notSuspended" | "failed";
 
@@ -351,11 +357,16 @@ export function UsersManager({
         </span>
       ),
     },
-    { id: "role", header: t("role"), cell: (row) => roleLabel(row.role, t) },
     // A equipa não tem plano: a coluna só dizia "Sem plano" em todas as linhas.
+    // Nem papel: cada departamento tem a sua tabela.
     ...(isStaff
       ? []
       : [
+          {
+            id: "role",
+            header: t("role"),
+            cell: (row) => roleLabel(row.role, t),
+          } satisfies TableColumn<UserDirectoryRow>,
           {
             id: "plan",
             header: t("plan"),
@@ -417,7 +428,7 @@ export function UsersManager({
             method="get"
             className={
               isStaff
-                ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_auto]"
+                ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_auto]"
                 : "grid gap-4 sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto]"
             }
           >
@@ -427,24 +438,19 @@ export function UsersManager({
               placeholder={t("searchHint")}
               defaultValue={filters.search}
             />
-            <Select
-              name="role"
-              label={t("roleFilter")}
-              defaultValue={filters.role}
-              placeholder={t("allRoles")}
-              options={
-                isStaff
-                  ? [
-                      { value: "admin", label: t("adminRole") },
-                      { value: "support", label: t("support") },
-                      { value: "marketing", label: t("marketing") },
-                    ]
-                  : [
-                      { value: "buyer", label: t("buyer") },
-                      { value: "owner", label: t("owner") },
-                    ]
-              }
-            />
+            {/* Na equipa o papel é a própria divisão em tabelas. */}
+            {isStaff ? null : (
+              <Select
+                name="role"
+                label={t("roleFilter")}
+                defaultValue={filters.role}
+                placeholder={t("allRoles")}
+                options={[
+                  { value: "buyer", label: t("buyer") },
+                  { value: "owner", label: t("owner") },
+                ]}
+              />
+            )}
             <Select
               name="status"
               label={t("statusFilter")}
@@ -471,51 +477,90 @@ export function UsersManager({
           </form>
         </Card>
 
-        <Card padded>
-          {loadError ? (
-            <EmptyState icon={<UserRound size={36} />} title={t("loadFailed")} />
-          ) : users.length === 0 ? (
-            <EmptyState
-              icon={<UserRound size={36} />}
-              title={
-                filters.search || filters.role || filters.status || filters.planId
-                  ? t("noResultsTitle")
-                  : t("emptyTitle")
-              }
-              description={
-                filters.search || filters.role || filters.status || filters.planId
-                  ? t("noResultsDescription")
-                  : t("emptyDescription")
-              }
-            />
-          ) : (
-            <>
-              <Table
-                caption={t("tableCaption")}
-                columns={columns}
-                rows={users}
-                rowKey={(row) => row.id}
-                selectedKey={selectedProfile?.id}
-                onRowClick={(row) =>
-                  navigate(makeHref(basePath, filters, { id: row.id }), {
-                    id: row.id,
-                    label: row.full_name || row.email,
-                  })
+        {isStaff && !loadError ? (
+          // Uma tabela por departamento (19 nov 2026). A equipa é pequena: a
+          // página traz-na toda de uma vez e não pagina.
+          STAFF_SECTIONS.map(({ role, labelKey }) => {
+            const rows = users.filter((row) => row.role === role);
+            return (
+              <Card padded key={role}>
+                <section className="grid gap-4" aria-labelledby={`team-${role}`}>
+                  <h2 id={`team-${role}`} className="text-base font-semibold text-text">
+                    {t(labelKey)}{" "}
+                    <span className="font-normal text-muted tabular-nums">{rows.length}</span>
+                  </h2>
+                  {rows.length === 0 ? (
+                    <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
+                      {filters.search || filters.status
+                        ? t("noResultsTitle")
+                        : t("teamSectionEmpty")}
+                    </p>
+                  ) : (
+                    <Table
+                      caption={t(labelKey)}
+                      columns={columns}
+                      rows={rows}
+                      rowKey={(row) => row.id}
+                      selectedKey={selectedProfile?.id}
+                      onRowClick={(row) =>
+                        navigate(makeHref(basePath, filters, { id: row.id }), {
+                          id: row.id,
+                          label: row.full_name || row.email,
+                        })
+                      }
+                    />
+                  )}
+                </section>
+              </Card>
+            );
+          })
+        ) : (
+          <Card padded>
+            {loadError ? (
+              <EmptyState icon={<UserRound size={36} />} title={t("loadFailed")} />
+            ) : users.length === 0 ? (
+              <EmptyState
+                icon={<UserRound size={36} />}
+                title={
+                  filters.search || filters.role || filters.status || filters.planId
+                    ? t("noResultsTitle")
+                    : t("emptyTitle")
+                }
+                description={
+                  filters.search || filters.role || filters.status || filters.planId
+                    ? t("noResultsDescription")
+                    : t("emptyDescription")
                 }
               />
-              <Pagination
-                page={pageInfo.page}
-                pageCount={pageInfo.pageCount}
-                summary={t("resultsRange", {
-                  from: (pageInfo.page - 1) * PAGE_SIZE + 1,
-                  to: (pageInfo.page - 1) * PAGE_SIZE + users.length,
-                })}
-                labels={{ previous: tp("previous"), next: tp("next"), page: t("pageLabel") }}
-                onPageChange={changePage}
-              />
-            </>
-          )}
-        </Card>
+            ) : (
+              <>
+                <Table
+                  caption={t("tableCaption")}
+                  columns={columns}
+                  rows={users}
+                  rowKey={(row) => row.id}
+                  selectedKey={selectedProfile?.id}
+                  onRowClick={(row) =>
+                    navigate(makeHref(basePath, filters, { id: row.id }), {
+                      id: row.id,
+                      label: row.full_name || row.email,
+                    })
+                  }
+                />
+                <Pagination
+                  page={pageInfo.page}
+                  pageCount={pageInfo.pageCount}
+                  summary={t("resultsRange", {
+                    from: (pageInfo.page - 1) * PAGE_SIZE + 1,
+                    to: (pageInfo.page - 1) * PAGE_SIZE + users.length,
+                  })}
+                  labels={{ previous: tp("previous"), next: tp("next"), page: t("pageLabel") }}
+                  onPageChange={changePage}
+                />
+              </>
+            )}
+          </Card>
+        )}
       </div>
 
       {selectedProfile ? (
@@ -566,7 +611,9 @@ export function UsersManager({
           </section>
 
           <section className="mt-6 grid gap-3">
-            <h3 className="text-sm font-semibold text-text">{t("accountDetails")}</h3>
+            <h3 className="text-sm font-semibold text-text">
+              {isStaff ? t("accountDetailsStaff") : t("accountDetails")}
+            </h3>
             {/* Plano e subscrição só existem para quem usa a app. */}
             {isStaff ? null : (
               <>
@@ -621,45 +668,56 @@ export function UsersManager({
           {STAFF_ROLES.has(selectedProfile.role) &&
           selectedProfile.id !== currentAdminId &&
           selectedProfile.status !== "suspended" ? (
-            <section className="mt-6 grid gap-2">
-              <h3 className="text-sm font-semibold text-text">{t("access")}</h3>
-              <p className="text-xs text-muted">{t("accessHint")}</p>
-              <Button
-                variant="secondary"
-                leadingIcon={<KeyRound size={16} />}
-                onClick={() => {
-                  setAccessTarget("password");
-                  setAccessFailed(false);
-                  setAccessDone(null);
-                }}
-              >
-                {t("resetPassword")}
-              </Button>
-              <Button
-                variant="secondary"
-                leadingIcon={<Smartphone size={16} />}
-                onClick={() => {
-                  setAccessTarget("twoFactor");
-                  setAccessFailed(false);
-                  setAccessDone(null);
-                }}
-              >
-                {t("resetTwoFactor")}
-              </Button>
-              {accessDone ? (
-                <p className="text-sm text-ok" role="status">
-                  {accessDone === "password" ? t("resetPasswordDone") : t("resetTwoFactorDone")}
+            // Título e texto juntos (8 px); os botões afastam-se do texto (16 px).
+            <section className="mt-6 grid gap-4">
+              <div className="grid gap-2">
+                <h3 className="text-sm font-semibold text-text">{t("access")}</h3>
+                <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
+                  {t("accessHint")}
                 </p>
-              ) : null}
+              </div>
+              <div className="grid gap-2">
+                <Button
+                  variant="secondary"
+                  leadingIcon={<KeyRound size={16} />}
+                  onClick={() => {
+                    setAccessTarget("password");
+                    setAccessFailed(false);
+                    setAccessDone(null);
+                  }}
+                >
+                  {t("resetPassword")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  leadingIcon={<Smartphone size={16} />}
+                  onClick={() => {
+                    setAccessTarget("twoFactor");
+                    setAccessFailed(false);
+                    setAccessDone(null);
+                  }}
+                >
+                  {t("resetTwoFactor")}
+                </Button>
+                {accessDone ? (
+                  <p className="text-sm text-ok" role="status">
+                    {accessDone === "password" ? t("resetPasswordDone") : t("resetTwoFactorDone")}
+                  </p>
+                ) : null}
+              </div>
             </section>
           ) : null}
 
           {STAFF_ROLES.has(selectedProfile.role) &&
           selectedProfile.id !== currentAdminId &&
           selectedProfile.status === "suspended" ? (
-            <section className="mt-6 grid gap-2">
-              <h3 className="text-sm font-semibold text-text">{t("exit")}</h3>
-              <p className="text-xs text-muted">{t("exitHint")}</p>
+            <section className="mt-6 grid gap-4">
+              <div className="grid gap-2">
+                <h3 className="text-sm font-semibold text-text">{t("exit")}</h3>
+                <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
+                  {t("exitHint")}
+                </p>
+              </div>
               <Button
                 variant="danger"
                 leadingIcon={<Trash2 size={16} />}
@@ -673,13 +731,6 @@ export function UsersManager({
               </Button>
             </section>
           ) : null}
-
-          <section className="mt-6 grid gap-2">
-            <Button variant="secondary" disabled leadingIcon={<Mail size={16} />}>
-              {t("sendEmail")}
-            </Button>
-            <p className="text-xs text-muted">{t("emailUnavailable")}</p>
-          </section>
         </Drawer>
       ) : openingLabel !== null ? (
         <Drawer

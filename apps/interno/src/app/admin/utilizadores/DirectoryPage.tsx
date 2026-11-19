@@ -23,7 +23,12 @@ import {
 } from "./UsersManager";
 import { getAdminSidebarCounters } from "../../../lib/admin-shell";
 
-const PAGE_SIZE = 25;
+/**
+ * A equipa vem toda numa página (19 nov 2026): o ecrã divide-a em três
+ * tabelas por departamento, e paginar antes de dividir partia um departamento
+ * entre páginas. 100 é o teto de `admin_list_profiles`.
+ */
+const PAGE_SIZE: Record<DirectoryAudience, number> = { clients: 25, staff: 100 };
 // `marketing` entrou com P10-07, quando a área nasceu (07 §24.6). Sem ele aqui,
 // o filtro de papel do diretório recusava em silêncio a opção que o ecrã
 // oferece.
@@ -112,7 +117,7 @@ export async function DirectoryPage({
       p_cursor_created_at: parsed.cursor?.createdAt,
       p_cursor_id: parsed.cursor?.id,
       p_direction: parsed.direction,
-      p_limit: PAGE_SIZE + 1,
+      p_limit: PAGE_SIZE[audience] + 1,
       p_audience: audience,
     }),
     supabase.from("plans").select("id, name").order("position"),
@@ -135,8 +140,8 @@ export async function DirectoryPage({
   ]);
 
   const rawRows = listResult.data ?? [];
-  const hasMoreForward = parsed.direction === "next" && rawRows.length > PAGE_SIZE;
-  const users = rawRows.slice(0, PAGE_SIZE) as UserDirectoryRow[];
+  const hasMoreForward = parsed.direction === "next" && rawRows.length > PAGE_SIZE[audience];
+  const users = rawRows.slice(0, PAGE_SIZE[audience]) as UserDirectoryRow[];
   // Um id de outro público abre nada: a ficha de um cliente não aparece na
   // página da equipa, nem o contrário.
   const selectedRow = selectedResult?.data?.[0] ?? null;
