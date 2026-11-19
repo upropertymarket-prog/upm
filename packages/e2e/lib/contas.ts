@@ -70,6 +70,13 @@ export async function criarConta(
   });
   if (error || !data.user) throw new Error(`Falha a criar ${email}: ${error?.message}`);
   criadas.push(data.user.id);
+  // O trigger `handle_new_user` só aceita buyer/owner do metadata (18 nov
+  // 2026); os papéis da equipa ficam a cargo do service_role.
+  const { error: erroPapel } = await service()
+    .from("profiles")
+    .update({ role: papel })
+    .eq("id", data.user.id);
+  if (erroPapel) throw new Error(`Falha a dar o papel ${papel} a ${email}: ${erroPapel.message}`);
   return { id: data.user.id, email, papel };
 }
 

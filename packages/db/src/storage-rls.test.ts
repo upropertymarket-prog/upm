@@ -52,6 +52,8 @@ describe.skipIf(!hasEnv)("Storage — property-media e documents (P4-01a)", () =
     if (created.error || !created.data.user) {
       throw new Error(`Falha a criar utilizador de teste ${email}: ${created.error?.message}`);
     }
+    // O trigger só aceita buyer/owner do metadata; a equipa recebe o papel aqui.
+    await serviceClient.from("profiles").update({ role }).eq("id", created.data.user.id);
     return created.data.user.id;
   }
 

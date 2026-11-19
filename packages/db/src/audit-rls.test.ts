@@ -281,6 +281,8 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
       user_metadata: { role },
     });
     if (created.error || !created.data.user) throw new Error(`Falha a criar ${email}`);
+    // O trigger só aceita buyer/owner do metadata; a equipa recebe o papel aqui.
+    await service.from("profiles").update({ role }).eq("id", created.data.user.id);
     return created.data.user.id;
   }
 
@@ -428,6 +430,7 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
       user_metadata: { role: "admin" },
     });
     const tempId = created.data.user!.id;
+    await service.from("profiles").update({ role: "admin" }).eq("id", tempId);
     const temp = createClient(SUPABASE_URL!, ANON_KEY!);
     await temp.auth.signInWithPassword({ email, password: PASSWORD });
 
@@ -461,6 +464,7 @@ describe.skipIf(!hasEnv)("A8 · auditoria — contra a base", () => {
       user_metadata: { role: "admin" },
     });
     const tempId = created.data.user!.id;
+    await service.from("profiles").update({ role: "admin" }).eq("id", tempId);
     const subject = crypto.randomUUID();
     const { data: row, error: insertError } = await service
       .from("personal_data_access_log")
