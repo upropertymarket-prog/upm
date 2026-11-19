@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { Card, CardBody, StatusTag } from "@upm/ui";
 
 import { formatCents } from "../../lib/money";
@@ -23,8 +25,8 @@ export function PropertyCard({ property }: { property: PropertyCardData }) {
     /* `height: 100%` nos dois níveis: a grelha estica o `<a>` à altura da fila,
        mas sem isto o cartão ficava pela sua própria altura e os cartões da
        mesma fila acabavam desalinhados em baixo. */
-    <a
-      href={`/market/${property.id}`}
+    <Link
+      href={`/market/${property.id}` as Route}
       style={{ display: "block", height: "100%", textDecoration: "none" }}
     >
       <Card interactive style={{ height: "100%" }}>
@@ -78,6 +80,6 @@ export function PropertyCard({ property }: { property: PropertyCardData }) {
           </p>
         </CardBody>
       </Card>
-    </a>
+    </Link>
   );
 }

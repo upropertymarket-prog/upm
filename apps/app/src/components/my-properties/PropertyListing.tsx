@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { Tables } from "@upm/db";
 import { Card, PageHeader, StatusTag, Table, type StatusTone, type TableColumn } from "@upm/ui";
@@ -129,20 +131,20 @@ export function PropertyListing({ rows, statusValue, onArchive }: PropertyListin
             justifyContent: "flex-start",
           }}
         >
-          <a
-            href={`/propriedades/${row.id}/estatisticas`}
+          <Link
+            href={`/propriedades/${row.id}/estatisticas` as Route}
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
             {t("stats")}
-          </a>
-          <a
-            href={`/propriedades/${row.id}/editar`}
+          </Link>
+          <Link
+            href={`/propriedades/${row.id}/editar` as Route}
             className="upm-btn upm-btn--secondary upm-btn--sm"
             style={{ textDecoration: "none" }}
           >
             {t("edit")}
-          </a>
+          </Link>
           <ArchivePropertyButton
             propertyId={row.id}
             title={row.title}

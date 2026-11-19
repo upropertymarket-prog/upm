@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays } from "lucide-react";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
@@ -27,9 +28,9 @@ export function UpcomingVisits({ rows }: UpcomingVisitsProps) {
       <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
         <CalendarDays size={16} aria-hidden="true" color="var(--accent)" />
         <strong style={{ fontSize: "var(--fs-body-lg)" }}>{t("title")}</strong>
-        <a href="/agenda" style={{ marginLeft: "auto", fontWeight: "var(--fw-bold)" }}>
+        <Link href="/agenda" style={{ marginLeft: "auto", fontWeight: "var(--fw-bold)" }}>
           {t("seeSchedule")}
-        </a>
+        </Link>
       </div>
 
       {rows.length === 0 ? (

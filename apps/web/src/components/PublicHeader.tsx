@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -36,6 +36,18 @@ import { useCanvasSafeRouter } from "@/lib/useCanvasSafeRouter";
  * - `"home"` — fora dela, `/#precos`: vai à home e cai na secção.
  * - `"none"` — quando não há sítio para onde mandar a pessoa.
  */
+
+/**
+ * O último modo que esta barra mostrou, neste separador (19 nov 2026). O
+ * `HeaderLoading` usa-o para desenhar a mesma barra enquanto a página seguinte
+ * carrega, sem ir à base perguntar o modo. Só se escreve num efeito — no
+ * servidor fica sempre `null`.
+ */
+let lastLaunchMode: "pre" | "post" | null = null;
+
+export function recallLaunchMode() {
+  return lastLaunchMode;
+}
 export function PublicHeader({
   locale,
   onLocaleChange,
@@ -77,6 +89,11 @@ export function PublicHeader({
   // 1024 px de página (`shell.css`) e passam para esta lista.
   const [menuAberto, setMenuAberto] = useState(false);
   const temMenu = anchors !== "none";
+
+  // O esqueleto da próxima página redesenha esta barra (`HeaderLoading`).
+  useEffect(() => {
+    lastLaunchMode = launchMode;
+  }, [launchMode]);
   const temaLabels = {
     title: t("theme.title"),
     light: t("theme.light"),

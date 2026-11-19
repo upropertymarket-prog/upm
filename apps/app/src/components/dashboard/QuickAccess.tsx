@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   Bookmark,
@@ -16,8 +18,8 @@ import {
  * são Fase 5. Um atalho para uma rota que ainda não existe é um beco, por isso
  * os quatro lugares ficam pelas rotas de Fase 4 até P5-01/P5-02 aterrarem.
  *
- * `<a>` e não `next/link`: com `typedRoutes` ligado, um `Link` para uma rota
- * que ainda não existe falha o typecheck — a mesma razão do `AppChrome`.
+ * `next/link` desde 19 nov 2026, como o `AppChrome`: com `<a>`, cada atalho
+ * recarregava o documento e o ecrã ficava parado até a página nova chegar.
  */
 const OWNER_SHORTCUTS = [
   { href: "/market", icon: Store, key: "market", navKey: "market" },
@@ -73,9 +75,9 @@ export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
         {shortcuts.map((shortcut) => {
           const Icon = shortcut.icon;
           return (
-            <a
+            <Link
               key={shortcut.href}
-              href={shortcut.href}
+              href={shortcut.href as Route}
               className="upm-card upm-card--pad upm-card--interactive"
               style={{
                 display: "flex",
@@ -112,7 +114,7 @@ export function QuickAccess({ role = "owner" }: { role?: "owner" | "buyer" }) {
               >
                 {t(`${shortcut.key}.body`)}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>

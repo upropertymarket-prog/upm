@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   ArrowUpRight,
@@ -254,9 +256,9 @@ export function DashboardView({
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {quickLinks.map(([key, href, icon]) => (
-                <a
+                <Link
                   key={key}
-                  href={href}
+                  href={href as Route}
                   className="upm-card upm-card--pad upm-card--interactive"
                   style={{ gap: "var(--sp-5)", textDecoration: "none" }}
                 >
@@ -273,7 +275,7 @@ export function DashboardView({
                     <span className="text-base font-semibold text-text">{t("links." + key)}</span>
                     <span className="text-sm text-muted">{t("linkHints." + key)}</span>
                   </span>
-                </a>
+                </Link>
               ))}
             </div>
           </section>
@@ -388,13 +390,13 @@ function MailConfigCard({
         {summary && summary.total > 0 ? (
           <StatusTag tone={tone}>{failing > 0 ? failing : pending > 0 ? pending : "OK"}</StatusTag>
         ) : null}
-        <a
+        <Link
           href="/admin/caixas-email"
           className="ml-auto flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-text hover:bg-surface2"
         >
           {t("mailConfig.cta")}
           <ArrowUpRight className="text-muted" size={16} aria-hidden="true" />
-        </a>
+        </Link>
       </section>
     </Card>
   );

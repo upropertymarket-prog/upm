@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FileSignature, MessageSquare } from "lucide-react";
 import { Card, StatusTag, type StatusTone } from "@upm/ui";
@@ -107,8 +109,8 @@ function ActivityPanel({
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {items.map((item) => (
             <li key={item.id} style={{ borderBottom: "1px solid var(--border)" }}>
-              <a
-                href={item.href}
+              <Link
+                href={item.href as Route}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -141,7 +143,7 @@ function ActivityPanel({
                   </span>
                 </span>
                 <StatusTag tone={item.tone}>{item.tag}</StatusTag>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

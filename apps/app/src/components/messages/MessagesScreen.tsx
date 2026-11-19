@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { INTL_LOCALE, resolveLocale } from "@upm/config";
@@ -286,12 +288,12 @@ export function MessagesScreen({
               </span>
               <div style={{ display: "grid", minWidth: 0, flex: 1 }}>
                 <strong style={{ fontSize: "var(--fs-body-lg)" }}>{active.other.name}</strong>
-                <a
-                  href={`/market/${active.propertyId}`}
+                <Link
+                  href={`/market/${active.propertyId}` as Route}
                   style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}
                 >
                   {t("viewProperty", { title: active.propertyTitle })}
-                </a>
+                </Link>
               </div>
               {active.canShareAddress ? (
                 <Button

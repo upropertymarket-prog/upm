@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -151,12 +153,12 @@ export default async function ContratoPage({
                 .filter((row) => row.id !== agreement.id)
                 .map((row) => (
                   <li key={row.id} className="text-sm">
-                    <a
-                      href={`/plano/contrato?id=${row.id}`}
+                    <Link
+                      href={`/plano/contrato?id=${row.id}` as Route}
                       className="text-accent hover:underline"
                     >
                       {row.reference}
-                    </a>{" "}
+                    </Link>{" "}
                     <span className="text-muted">
                       · {new Date(row.celebratedAt).toLocaleDateString(locale)} · {row.planName}
                     </span>

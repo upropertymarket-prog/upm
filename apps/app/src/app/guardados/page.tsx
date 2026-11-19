@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -79,7 +80,7 @@ export default async function SavedPropertiesPage() {
     {
       id: "title",
       header: tProp("fields.property"),
-      cell: (row) => <a href={`/market/${row.propertyId}`}>{row.title}</a>,
+      cell: (row) => <Link href={`/market/${row.propertyId}` as Route}>{row.title}</Link>,
     },
     {
       id: "deal",
