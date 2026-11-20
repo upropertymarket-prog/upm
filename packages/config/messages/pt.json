@@ -1890,7 +1890,7 @@
       "allConfirmations": "Todas",
       "confirmedOn": "Confirmado a {date}",
       "deletedOn": "Apagado automaticamente a {date}, se não confirmar.",
-      "retentionNote": "Os leads são apagados automaticamente ao fim de 12 meses sem atividade, exceto os convertidos. As pré-inscrições não pedem confirmação por e-mail, para podermos avisar todos os interessados no lançamento.",
+      "retentionNote": "Os leads são apagados automaticamente ao fim de 12 meses sem atividade, exceto os convertidos. As pré-inscrições não pedem confirmação por e-mail e só entram nessa regra depois do lançamento, contando a partir do dia em que a app abre — para podermos avisar todos os interessados.",
       "retentionInfo": "Regras de retenção e cópias",
       "actions": "Ações",
       "deleteLead": "Apagar lead",

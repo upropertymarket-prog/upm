@@ -260,6 +260,18 @@ describe("A7 · retenção — o orquestrador", () => {
     expect(depois).toEqual([]);
   });
 
+  // 20 nov 2026: a lista de espera é para avisar no lançamento, que pode
+  // chegar mais de um ano depois.
+  it("as pré-inscrições não saem antes do lançamento, nem logo a seguir", () => {
+    const corpo = funcao(vigente("purge_stale_site_leads"), "purge_stale_site_leads")!.corpo;
+    expect(corpo).toContain("key = 'launch_mode'");
+    expect(corpo).toMatch(
+      /not\s*\(\s*l\.form\s*=\s*'preinscricao'\s+and\s+coalesce\(v_mode,\s*'pre'\)\s*<>\s*'post'\s*\)/,
+    );
+    // Depois do lançamento, o dia do lançamento conta como atividade.
+    expect(corpo).toMatch(/when\s+l\.form\s*=\s*'preinscricao'\s+then\s+v_launch_at/);
+  });
+
   it("a purga de leads apaga os eventos antes dos leads (on delete restrict)", () => {
     for (const nome of ["purge_stale_site_leads"]) {
       const corpo = funcao(vigente(nome), nome)!.corpo;
