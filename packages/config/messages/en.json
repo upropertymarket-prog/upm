@@ -1890,7 +1890,7 @@
       "allConfirmations": "All",
       "confirmedOn": "Confirmed on {date}",
       "deletedOn": "Deleted automatically on {date} unless confirmed.",
-      "retentionNote": "Leads are deleted automatically after 12 months without activity, except converted ones. Early-access sign-ups do not ask for email confirmation, so everyone interested can be told at launch.",
+      "retentionNote": "Leads are deleted automatically after 12 months without activity, except converted ones. Early-access sign-ups do not ask for email confirmation and only fall under that rule after launch, counting from the day the app opens, so everyone interested can be told.",
       "retentionInfo": "Retention and copy rules",
       "actions": "Actions",
       "deleteLead": "Delete lead",
