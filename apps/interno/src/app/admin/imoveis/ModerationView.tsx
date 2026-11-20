@@ -482,7 +482,10 @@ export function ModerationView({
                       {item.actor_name}
                     </p>
                     {item.reason ? <p className="mt-1 text-sm text-muted">{item.reason}</p> : null}
-                    <time className="text-[length:var(--fs-body)] text-muted" dateTime={item.created_at}>
+                    <time
+                      className="text-[length:var(--fs-body)] text-muted"
+                      dateTime={item.created_at}
+                    >
                       {dateLabel(item.created_at, locale)}
                     </time>
                   </li>

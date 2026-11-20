@@ -1046,7 +1046,12 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                     ))}
                   </div>
                   <p
-                    style={{ margin: 0, fontSize: "var(--fs-body)", lineHeight: 1.5, color: "var(--muted)" }}
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--fs-body)",
+                      lineHeight: 1.5,
+                      color: "var(--muted)",
+                    }}
                   >
                     {t("receiptsNote")}
                   </p>
@@ -1176,7 +1181,12 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                   </div>
 
                   <p
-                    style={{ margin: 0, fontSize: "var(--fs-body)", lineHeight: 1.5, color: "var(--muted)" }}
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--fs-body)",
+                      lineHeight: 1.5,
+                      color: "var(--muted)",
+                    }}
                   >
                     {t("sendPendingNote")}
                   </p>

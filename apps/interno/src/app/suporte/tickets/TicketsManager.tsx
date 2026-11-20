@@ -245,7 +245,9 @@ export function TicketsManager({
                         <StatusTag tone={SEVERITY_TONE[row.severity]}>
                           {t(`severity.${row.severity}`)}
                         </StatusTag>
-                        <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>{row.ref}</code>
+                        <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                          {row.ref}
+                        </code>
                         <StatusTag tone={row.origin === "auto" ? "draft" : "archived"}>
                           {t(`origin.${row.origin}`)}
                         </StatusTag>
@@ -289,7 +291,9 @@ export function TicketsManager({
                     flexWrap: "wrap",
                   }}
                 >
-                  <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>{selected.ref}</code>
+                  <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                    {selected.ref}
+                  </code>
                   <StatusTag tone={SEVERITY_TONE[selected.severity]}>
                     {t(`severity.${selected.severity}`)}
                   </StatusTag>
@@ -442,7 +446,11 @@ function TechnicalFacts({ ticket, t }: { ticket: SupportTicketDetail; t: Transla
           {visible.map(([key, value]) => (
             <div key={key} style={{ display: "contents" }}>
               <dt
-                style={{ color: "var(--muted)", fontFamily: "var(--font-mono)", fontSize: "var(--fs-body)" }}
+                style={{
+                  color: "var(--muted)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "var(--fs-body)",
+                }}
               >
                 {key}
               </dt>
@@ -454,7 +462,9 @@ function TechnicalFacts({ ticket, t }: { ticket: SupportTicketDetail; t: Transla
 
       {/* A diferença entre "não capturámos" e "a retenção apagou" (90 dias). */}
       {ticket.technical_purged_at ? (
-        <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>{t("purged")}</p>
+        <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+          {t("purged")}
+        </p>
       ) : null}
 
       {errors.length > 0 ? (

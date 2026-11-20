@@ -312,7 +312,13 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                       style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
                     >
                       <strong>{tm("approxLocation")}</strong>
-                      <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "var(--fs-body)" }}>
+                      <span
+                        style={{
+                          marginLeft: "auto",
+                          color: "var(--muted)",
+                          fontSize: "var(--fs-body)",
+                        }}
+                      >
                         {tm("addressAfterContact")}
                       </span>
                     </div>

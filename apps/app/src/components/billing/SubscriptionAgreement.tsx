@@ -204,7 +204,9 @@ export function SubscriptionAgreement({ data }: { data: SubscriptionAgreementDat
         <Linha termo={t("hash")}>
           {/* O hash em monoespaçado e quebrável: são 64 caracteres sem espaços,
               e sem `break-all` esticam a linha e dão rolo horizontal. */}
-          <code className="break-all font-mono text-[length:var(--fs-body)]">{data.terms.contentHash}</code>
+          <code className="break-all font-mono text-[length:var(--fs-body)]">
+            {data.terms.contentHash}
+          </code>
         </Linha>
         <Linha termo={t("acceptedAt")}>{dateTime(data.terms.acceptedAt)}</Linha>
         {data.terms.ip ? <Linha termo={t("ip")}>{data.terms.ip}</Linha> : null}

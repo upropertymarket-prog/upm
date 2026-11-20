@@ -67,7 +67,9 @@ export function ReportsTimeline({ reports, locale }: { reports: MyReportRow[]; l
                         flexWrap: "wrap",
                       }}
                     >
-                      <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>{report.ref}</code>
+                      <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                        {report.ref}
+                      </code>
                       <StatusTag tone={STATUS_TONE[report.status]}>
                         {t(`steps.${REPORTER_TIMELINE[report.status]}`)}
                       </StatusTag>

@@ -260,7 +260,9 @@ export function UpdatesManager(props: UpdatesManagerProps) {
           }}
         >
           {props.updates.length === 0 ? (
-            <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>{t("empty")}</p>
+            <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+              {t("empty")}
+            </p>
           ) : (
             props.updates.map((row) => (
               <button

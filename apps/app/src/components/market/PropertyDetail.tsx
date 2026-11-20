@@ -280,7 +280,13 @@ export function PropertyDetail({
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <strong>{t("approxLocation")}</strong>
-                  <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "var(--fs-body)" }}>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      color: "var(--muted)",
+                      fontSize: "var(--fs-body)",
+                    }}
+                  >
                     {t("addressAfterContact")}
                   </span>
                 </div>
@@ -322,7 +328,9 @@ export function PropertyDetail({
               <strong style={{ fontSize: 30 }}>{price}</strong>
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
                 <strong>{ownerName}</strong>
-                <div style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>{t("respondsIn")}</div>
+                <div style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>
+                  {t("respondsIn")}
+                </div>
               </div>
               {/* As ações num bloco só, encostado à base do cartão: 16 px entre
                   elas e 16 px até à borda, em vez do espaçamento geral do
@@ -336,7 +344,9 @@ export function PropertyDetail({
           {nextListing ? (
             <Card>
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>{t("nextListing")}</span>
+                <span style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>
+                  {t("nextListing")}
+                </span>
                 <Link
                   href={`/market/${nextListing.id}`}
                   style={{
