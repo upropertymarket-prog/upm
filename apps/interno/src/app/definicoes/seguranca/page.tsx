@@ -10,8 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function SecuritySettingsPage() {
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-16">
-      <div className="rounded-2xl border border-border bg-surface p-6">
+    <main className="flex min-h-dvh w-full items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6">
         <PinSetupForm />
       </div>
     </main>
