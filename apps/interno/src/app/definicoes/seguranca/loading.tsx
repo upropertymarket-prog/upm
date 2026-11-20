@@ -5,8 +5,8 @@ import { Skeleton, SkeletonField, SkeletonPage } from "@upm/ui";
 export default function Loading() {
   const t = useTranslations("common");
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-16">
-      <div className="rounded-2xl border border-border bg-surface p-6">
+    <main className="flex min-h-dvh w-full items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6">
         <SkeletonPage label={t("loading")}>
           <Skeleton width="55%" height={22} radius="var(--r-md)" />
           <Skeleton width="90%" height={12} />
