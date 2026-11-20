@@ -8,6 +8,7 @@
  *   pnpm analytics:import --days 7             # os últimos 7 dias
  *   pnpm analytics:import --from 2026-09-01 --to 2026-09-30
  *   pnpm analytics:import --conversions-only   # sem fornecedor, só o que é nosso
+ *                                              # (o pg_cron já o faz de hora a hora)
  *
  * Ontem e não hoje, de propósito: o dia em curso ainda está a acontecer, e
  * importá-lo grava um total que vai mudar. O `upsert` corrigi-lo-ia na corrida
@@ -19,12 +20,9 @@
  * `--conversions-only` continua a funcionar: as conversões são nossas (07 §21.5).
  */
 import {
-  buildAnalyticsRows,
-  conversionKey,
   createAnalyticsStore,
   createUmamiProvider,
   importSiteAnalytics,
-  listDates,
   umamiConfigFromEnv,
   type SiteMode,
 } from "../../packages/db/src/analytics";
@@ -76,29 +74,16 @@ async function main() {
 
   console.log(`Tráfego do site · ${from} a ${to} · modo ${siteMode}`);
 
-  // As conversões não dependem do fornecedor e entram sempre. É isto que faz a
-  // página ter números verdadeiros antes de haver credenciais (07 §21.5 #2).
+  // As conversões não dependem do fornecedor: o pg_cron já as reconta de hora a
+  // hora. Isto é a mesma recontagem, à mão — para intervalos fora da janela de 7
+  // dias do cron. Só escreve `conversions`; as visitas que lá estejam ficam.
   if (process.argv.includes("--conversions-only")) {
-    const conversions = await store.conversions(from, to);
-    let written = 0;
-
-    for (const date of listDates(from, to)) {
-      const value = conversions.get(conversionKey(date, siteMode)) ?? 0;
-      if (value === 0) continue;
-
-      const rows = buildAnalyticsRows({
-        siteMode,
-        traffic: {
-          totals: { date, visits: 0, uniques: 0, avgDurationS: 0, bounces: 0 },
-          dimensions: [],
-        },
-        conversions: value,
-      });
-      await store.upsert(rows);
-      written += rows.length;
-    }
-
-    console.log(`  ${written} linha(s) de conversões escritas, sem fornecedor.`);
+    const { data, error } = await client.rpc("refresh_site_conversions", {
+      p_from: from,
+      p_to: to,
+    });
+    if (error) throw new Error(`Conversões: ${error.message}`);
+    console.log(`  ${data ?? 0} linha(s) de conversões escritas, sem fornecedor.`);
     return;
   }
 
