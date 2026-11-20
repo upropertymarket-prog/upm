@@ -1,4 +1,7 @@
-import { forwardRef } from "react";
+"use client";
+
+import { forwardRef, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { cx } from "../lib/cx";
 import { Field } from "./Field";
@@ -13,6 +16,8 @@ export type InputProps = NativeInput & {
   /** Ícone à esquerda dentro da moldura (protótipos: lupa na pesquisa). */
   leadingIcon?: React.ReactNode;
   trailingSlot?: React.ReactNode;
+  /** Rótulos do botão de mostrar/ocultar, que só aparece em `type="password"`. */
+  revealLabels?: { show: string; hide: string };
   className?: string;
 };
 
@@ -23,13 +28,32 @@ export type InputProps = NativeInput & {
  * `<input>` é transparente por dentro. É assim que os protótipos fazem a
  * pesquisa com lupa, e permite ícones sem dois anéis de foco.
  *
+ * Um `type="password"` traz o botão de mostrar/ocultar (19 nov 2026): quem
+ * escreve uma palavra-passe às cegas engana-se e só o descobre no "Credenciais
+ * inválidas". Vale para todos os campos de segredo, PIN incluído.
+ *
  * O canvas deste componente está em tempo/designs/design-system/formularios/index.canvas.tsx.
  * Se alterar este componente, mantenha o canvas e a declaração de asset coerentes.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, labelHidden, hint, error, leadingIcon, trailingSlot, className, disabled, ...rest },
+  {
+    label,
+    labelHidden,
+    hint,
+    error,
+    leadingIcon,
+    trailingSlot,
+    revealLabels = { show: "Mostrar", hide: "Ocultar" },
+    className,
+    disabled,
+    type,
+    ...rest
+  },
   ref,
 ) {
+  const [revealed, setRevealed] = useState(false);
+  const isSecret = type === "password";
+
   return (
     <Field label={label} labelHidden={labelHidden} hint={hint} error={error} className={className}>
       {({ id, describedBy, invalid }) => (
@@ -46,8 +70,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             aria-invalid={invalid || undefined}
             aria-describedby={describedBy}
             disabled={disabled}
+            type={isSecret && revealed ? "text" : type}
             {...rest}
           />
+          {isSecret ? (
+            <button
+              type="button"
+              className="upm-control__reveal"
+              aria-label={revealed ? revealLabels.hide : revealLabels.show}
+              aria-controls={id}
+              aria-pressed={revealed}
+              disabled={disabled}
+              onClick={() => setRevealed((value) => !value)}
+            >
+              {revealed ? (
+                <EyeOff size={16} aria-hidden="true" />
+              ) : (
+                <Eye size={16} aria-hidden="true" />
+              )}
+            </button>
+          ) : null}
           {trailingSlot}
         </div>
       )}

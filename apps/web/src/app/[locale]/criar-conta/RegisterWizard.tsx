@@ -113,6 +113,7 @@ function pricesFor(plan: RegisterPlan, interval: "month" | "year") {
  */
 export function RegisterWizard({ action, plans, terms, initialSelection }: RegisterWizardProps) {
   const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const tc = useTranslations("auth.register.contract");
   const [step, setStep] = useState<Step>(initialSelection?.step ?? "profile");
   const [role, setRole] = useState<ProfileChoice | null>(initialSelection?.role ?? null);
@@ -240,6 +241,7 @@ export function RegisterWizard({ action, plans, terms, initialSelection }: Regis
             <Input
               name="password"
               type="password"
+              revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
               label={t("register.account.password")}
               hint={t("register.account.passwordHint")}
               autoComplete="new-password"

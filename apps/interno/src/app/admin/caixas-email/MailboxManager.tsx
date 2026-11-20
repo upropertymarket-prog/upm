@@ -428,6 +428,7 @@ export function MailboxManager({
                 <Input
                   label={t("newPassword")}
                   type="password"
+                  revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
                   value={password}
                   autoComplete="new-password"
                   onChange={(event) => setPassword(event.target.value)}

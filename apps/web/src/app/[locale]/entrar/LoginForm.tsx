@@ -27,6 +27,7 @@ export type LoginFormProps = {
 
 export function LoginForm({ next, action }: LoginFormProps) {
   const t = useTranslations("auth.login");
+  const tCommon = useTranslations("common");
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
@@ -41,6 +42,7 @@ export function LoginForm({ next, action }: LoginFormProps) {
       <Input
         name="password"
         type="password"
+        revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
         label={t("password")}
         autoComplete="current-password"
         required

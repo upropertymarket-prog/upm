@@ -24,6 +24,7 @@ export type NewPasswordFormProps = {
 
 export function NewPasswordForm({ action }: NewPasswordFormProps) {
   const t = useTranslations("auth.recovery");
+  const tCommon = useTranslations("common");
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
@@ -35,6 +36,7 @@ export function NewPasswordForm({ action }: NewPasswordFormProps) {
       <Input
         name="password"
         type="password"
+        revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
         label={t("newPassword")}
         autoComplete="new-password"
         required

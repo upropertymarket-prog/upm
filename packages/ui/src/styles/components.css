@@ -271,6 +271,44 @@ h6 {
   color: var(--muted);
 }
 
+/* Mostrar/ocultar a palavra-passe (19 nov 2026). O botão vive dentro da
+   moldura, à direita, como o ícone à esquerda: 24 px de alvo (2.5.8, AA) e o
+   anel de foco próprio, porque o da moldura já está aceso pelo `<input>`. */
+.upm-control__reveal {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: calc(var(--sp-2) * -1);
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.upm-control__reveal:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.upm-control__reveal:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.upm-control__reveal:disabled {
+  cursor: not-allowed;
+}
+
+/* O Edge desenha o seu próprio olho: com o nosso, ficavam dois. */
+.upm-control__input::-ms-reveal {
+  display: none;
+}
+
 /* O `<input>` é transparente dentro do invólucro: a moldura, o foco e o estado
    de erro vivem no `.upm-control`, como nos protótipos. */
 .upm-control__input {

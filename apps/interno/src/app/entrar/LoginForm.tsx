@@ -27,6 +27,7 @@ export function LoginForm({
   notice?: "passwordSet" | "linkInvalid" | null;
 }) {
   const t = useTranslations("auth.login");
+  const tCommon = useTranslations("common");
   const [state, formAction, pending] = useActionState(onSubmit, initialState);
 
   return (
@@ -47,6 +48,7 @@ export function LoginForm({
         <Input
           name="password"
           type="password"
+          revealLabels={{ show: tCommon("showPassword"), hide: tCommon("hidePassword") }}
           label={t("password")}
           autoComplete="current-password"
           required
