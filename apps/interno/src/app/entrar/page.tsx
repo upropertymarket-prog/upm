@@ -17,17 +17,10 @@ export default async function InternoLoginPage({
 }) {
   const params = await searchParams;
   const suspended = params.suspended === "1";
-  // Os avisos do caminho de recuperação (8 nov 2026).
-  const notice =
-    params.aviso === "palavra_passe_definida"
-      ? "passwordSet"
-      : params.erro === "link_invalido"
-        ? "linkInvalid"
-        : null;
 
   return (
     <AuthCard>
-      <LoginForm onSubmit={signIn} suspended={suspended} notice={notice} />
+      <LoginForm onSubmit={signIn} suspended={suspended} />
     </AuthCard>
   );
 }

@@ -1367,8 +1367,7 @@
       "rateLimited": "Demasiadas tentativas. Tente novamente dentro de {seconds}s.",
       "welcomeTitle": "Sem pressões, ao seu ritmo.",
       "subtitle": "Entre para gerir os seus imóveis, visitas e mensagens.",
-      "passwordSet": "Palavra-passe definida. Entre com a palavra-passe nova e o código da sua app.",
-      "linkInvalid": "O link expirou ou já foi usado. Peça um novo."
+      "staffForgotPassword": "Esqueceu-se da palavra-passe? Peça a um administrador."
     },
     "recovery": {
       "title": "Recuperar palavra-passe",
@@ -1447,9 +1446,18 @@
         "headlineAccent": "Sem comissões.",
         "lead": "Compradores e proprietários falam diretamente, ao seu ritmo. Sem intermediários, sem pressões, sem surpresas no fim.",
         "stats": {
-          "commission": { "value": "0 %", "label": "de comissão" },
-          "privacy": { "value": "100 %", "label": "contactos privados" },
-          "direct": { "value": "1:1", "label": "entre comprador e proprietário" }
+          "commission": {
+            "value": "0 %",
+            "label": "de comissão"
+          },
+          "privacy": {
+            "value": "100 %",
+            "label": "contactos privados"
+          },
+          "direct": {
+            "value": "1:1",
+            "label": "entre comprador e proprietário"
+          }
         }
       }
     },
@@ -1461,21 +1469,6 @@
       "restricted": "Área reservada a membros da equipa",
       "monitored": "Acesso restrito e monitorizado",
       "copyright": "© {year} UProperty Market"
-    },
-    "staffRecovery": {
-      "title": "Recuperar a palavra-passe",
-      "body": "Só para administradores. Se é de outra área da equipa, peça a um administrador que lhe envie o link.",
-      "email": "E-mail",
-      "submit": "Enviar link",
-      "sentTitle": "Verifique o seu e-mail",
-      "sentBody": "Se o endereço for de um administrador, enviámos um link para definir uma nova palavra-passe. É válido durante uma hora.",
-      "backToLogin": "Voltar à entrada",
-      "emailMessage": {
-        "title": "Defina uma nova palavra-passe",
-        "body": "Recebemos um pedido para repor a palavra-passe da sua conta de equipa na UProperty Market. O link é válido durante uma hora.\n\nDepois de definir a palavra-passe, a entrada continua a pedir o código da sua app de autenticação.",
-        "cta": "Definir palavra-passe",
-        "footer": "Se não pediu isto, ignore este e-mail e avise um administrador: a sua palavra-passe não muda sem o link."
-      }
     }
   },
   "plan": {
@@ -1706,11 +1699,11 @@
       "resultsRange": "{from}–{to} utilizadores",
       "deleted": "Eliminada",
       "access": "Acesso",
-      "accessHint": "Para quem perdeu a palavra-passe ou o telemóvel. Pede o PIN de operação e fica registado.",
-      "resetPassword": "Repor palavra-passe",
-      "resetPasswordBody": "Enviamos para o e-mail desta pessoa um link para definir uma palavra-passe nova. A palavra-passe atual continua a servir até ela usar o link.",
-      "confirmResetPassword": "Enviar link",
-      "resetPasswordDone": "Link enviado para o e-mail desta pessoa.",
+      "accessHint": "Só a administração muda palavras-passe e repõe a 2FA da equipa. Pede o PIN de operação e fica registado.",
+      "resetPassword": "Mudar palavra-passe",
+      "resetPasswordBody": "Defina a palavra-passe nova desta pessoa e entregue-lha pessoalmente: não fica registada nem sai por e-mail. As sessões que ela tiver abertas terminam e a palavra-passe antiga deixa de servir. A entrada continua a pedir o código da app.",
+      "confirmResetPassword": "Mudar palavra-passe",
+      "resetPasswordDone": "Palavra-passe mudada. Entregue-a a esta pessoa pessoalmente; as sessões que tinha abertas terminaram.",
       "resetTwoFactor": "Repor 2FA",
       "resetTwoFactorBody": "Para quem perdeu ou trocou de telemóvel. A app de autenticação atual deixa de servir e, na próxima entrada, esta pessoa lê um código QR novo.",
       "confirmResetTwoFactor": "Repor 2FA",
@@ -1727,7 +1720,13 @@
       "exitBlockers": "Ainda há trabalho atribuído a esta pessoa: {openLeads, plural, one {# lead em aberto} other {# leads em aberto}} e {mailboxes, plural, one {# caixa de correio} other {# caixas de correio}}. Passe-o a outra pessoa primeiro.",
       "exitNeedsExport": "O registo não foi descarregado nas últimas 24 horas. Descarregue-o antes de eliminar a conta.",
       "exitNotSuspended": "Suspenda a conta antes de a eliminar.",
-      "marketing": "Marketing"
+      "marketing": "Marketing",
+      "newPassword": "Palavra-passe nova",
+      "newPasswordHint": "Entre 10 e 72 caracteres.",
+      "confirmPassword": "Confirmar a palavra-passe",
+      "generatePassword": "Gerar uma palavra-passe",
+      "passwordMismatch": "As duas palavras-passe não coincidem.",
+      "passwordPwned": "Esta palavra-passe apareceu em fugas de dados conhecidas. Escolha outra."
     },
     "moderation": {
       "title": "Moderação de imóveis",

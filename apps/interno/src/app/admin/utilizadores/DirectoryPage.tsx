@@ -12,7 +12,7 @@ import {
   exportStaffRecord,
   recordProfileAccess,
   setProfileStatus,
-  resetStaffPassword,
+  setStaffPassword,
   resetStaffTwoFactor,
 } from "./actions";
 import {
@@ -199,7 +199,7 @@ export async function DirectoryPage({
         onChangeStatus={setProfileStatus}
         onLogAccess={recordProfileAccess}
         onVerifyPin={verifyOperationPin}
-        onResetPassword={resetStaffPassword}
+        onSetPassword={setStaffPassword}
         onResetTwoFactor={resetStaffTwoFactor}
         onExportRecord={exportStaffRecord}
         onDeleteAccount={deleteStaffAccount}

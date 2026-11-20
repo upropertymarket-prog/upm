@@ -68,17 +68,15 @@ const APP_PARTILHADAS = new Map();
 /**
  * Rotas do `interno` fora das três áreas. As quatro primeiras são o caminho de
  * entrada; a quinta é pessoal e por isso igual para os três papéis.
+ *
+ * `/recuperar` e `/nova-palavra-passe` saíram a 20 nov 2026: a palavra-passe
+ * da equipa muda-a um admin, e ninguém a recupera sozinho.
  */
 const INTERNO_FORA_DE_AREA = new Map([
   ["/", "o encaminhador: lê o papel e manda cada um para a sua área"],
   ["/entrar", "pré-sessão (publicPaths do middleware)"],
   ["/verificar-2fa", "pré-sessão (publicPaths do middleware)"],
   ["/configurar-2fa", "inscrição no 2FA, antes de haver AAL2 — o middleware trata-a à parte"],
-  ["/recuperar", 'pré-sessão: o "Esqueci-me" dos admins (publicPaths do middleware)'],
-  [
-    "/nova-palavra-passe",
-    "a sessão do link de recuperação (aal1): o middleware trata-a à parte e a página termina-a",
-  ],
   [
     "/definicoes/seguranca",
     "as definições de segurança da própria conta: iguais para os três papéis",

@@ -122,7 +122,7 @@ const staffUsers: UserDirectoryRow[] = [
 
 const verifyPin: VerifyPinAction = async () => ({ ok: true });
 const onChangeStatus = async () => ({ ok: true });
-const onResetPassword = async () => ({ ok: true });
+const onSetPassword = async () => ({ ok: true });
 const onResetTwoFactor = async () => ({ ok: true });
 const onExportRecord = async () => ({ ok: true, csv: "" });
 const onDeleteAccount = async () => ({ ok: true });
@@ -194,7 +194,7 @@ function UsersDemo({
                 locale="pt"
                 currentAdminId={CURRENT_ADMIN_ID}
                 onChangeStatus={onChangeStatus}
-                onResetPassword={onResetPassword}
+                onSetPassword={onSetPassword}
                 onResetTwoFactor={onResetTwoFactor}
                 onExportRecord={onExportRecord}
                 onDeleteAccount={onDeleteAccount}

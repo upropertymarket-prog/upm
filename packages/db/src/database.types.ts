@@ -4276,6 +4276,10 @@ export type Database = {
         };
         Returns: Database["public"]["Enums"]["profile_status"];
       };
+      admin_set_staff_password: {
+        Args: { p_password: string; p_profile_id: string };
+        Returns: undefined;
+      };
       admin_site_lead_detail: {
         Args: { p_lead_id: string };
         Returns: {

@@ -17,14 +17,6 @@ import {
 import {
   InternoEntrarClaro,
   InternoEntrarEscuro,
-  InternoLinkInvalido,
-  InternoNovaPalavraPasseClaro,
-  InternoNovaPalavraPasseEscuro,
-  InternoPalavraPasseDefinida,
-  InternoRecuperarClaro,
-  InternoRecuperarEnviadoClaro,
-  InternoRecuperarEnviadoEscuro,
-  InternoRecuperarEscuro,
   InternoVerificar2faClaro,
   InternoVerificar2faEscuro,
 } from "./Interno";
@@ -124,9 +116,9 @@ export default function AutenticacaoCanvas() {
         layout={{ x: 1520, y: 4900, width: 1440, height: 900 }}
       />
 
-      {/* Interno — a entrada da equipa (8 nov 2026), pela ordem em que se
-          percorre: entrar, os avisos da recuperação, o "Esqueci-me", a
-          palavra-passe nova e o código da 2FA. */}
+      {/* Interno — a entrada da equipa: entrar e o código da 2FA. O
+          "Esqueci-me", os avisos do link e a palavra-passe nova saíram a 20 nov
+          2026 — a palavra-passe da equipa muda-a um admin. */}
       <Storyboard
         id="InternoEntrarClaro"
         name="Interno · Entrar · Claro (interno /entrar)"
@@ -140,64 +132,16 @@ export default function AutenticacaoCanvas() {
         layout={{ x: 1520, y: 5880, width: 1440, height: 900 }}
       />
       <Storyboard
-        id="InternoPalavraPasseDefinida"
-        name="Interno · Entrar · palavra-passe definida (/entrar?aviso=palavra_passe_definida)"
-        component={InternoPalavraPasseDefinida}
-        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoLinkInvalido"
-        name="Interno · Entrar · link inválido (/entrar?erro=link_invalido)"
-        component={InternoLinkInvalido}
-        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoRecuperarClaro"
-        name="Interno · Esqueci-me (só admins) · Claro (/recuperar)"
-        component={InternoRecuperarClaro}
-        layout={{ x: 0, y: 7840, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoRecuperarEscuro"
-        name="Interno · Esqueci-me (só admins) · Escuro (/recuperar)"
-        component={InternoRecuperarEscuro}
-        layout={{ x: 1520, y: 7840, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoRecuperarEnviadoClaro"
-        name="Interno · Esqueci-me · resposta (sempre a mesma) · Claro (/recuperar)"
-        component={InternoRecuperarEnviadoClaro}
-        layout={{ x: 0, y: 8820, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoRecuperarEnviadoEscuro"
-        name="Interno · Esqueci-me · resposta (sempre a mesma) · Escuro (/recuperar)"
-        component={InternoRecuperarEnviadoEscuro}
-        layout={{ x: 1520, y: 8820, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoNovaPalavraPasseClaro"
-        name="Interno · Palavra-passe nova · Claro (/nova-palavra-passe)"
-        component={InternoNovaPalavraPasseClaro}
-        layout={{ x: 0, y: 9800, width: 1440, height: 900 }}
-      />
-      <Storyboard
-        id="InternoNovaPalavraPasseEscuro"
-        name="Interno · Palavra-passe nova · Escuro (/nova-palavra-passe)"
-        component={InternoNovaPalavraPasseEscuro}
-        layout={{ x: 1520, y: 9800, width: 1440, height: 900 }}
-      />
-      <Storyboard
         id="InternoVerificar2faClaro"
         name="Interno · Código da 2FA · Claro (/verificar-2fa)"
         component={InternoVerificar2faClaro}
-        layout={{ x: 0, y: 10780, width: 1440, height: 900 }}
+        layout={{ x: 0, y: 6860, width: 1440, height: 900 }}
       />
       <Storyboard
         id="InternoVerificar2faEscuro"
         name="Interno · Código da 2FA · Escuro (/verificar-2fa)"
         component={InternoVerificar2faEscuro}
-        layout={{ x: 1520, y: 10780, width: 1440, height: 900 }}
+        layout={{ x: 1520, y: 6860, width: 1440, height: 900 }}
       />
     </Canvas>
   );

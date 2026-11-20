@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Recuperação de acesso da equipa, pelo admin — as recusas (8 nov 2026)
+ * Acesso da equipa, pelo admin — as recusas (8 e 20 nov 2026)
  * =========================================================================
- * `resetStaffPassword` e `resetStaffTwoFactor` mexem no acesso de outras
+ * `setStaffPassword` e `resetStaffTwoFactor` mexem no acesso de outras
  * pessoas com a chave de serviço, por isso a autorização é toda de cá: não há
  * RLS por trás de `auth.admin`. Cada recusa tem de acontecer **antes** de se
  * tocar na conta — é isso que os testes verificam, além da recusa em si.
@@ -13,11 +13,15 @@ const getUser = vi.fn();
 const maybeSingle = vi.fn();
 const rpc = vi.fn();
 const staffProfile = vi.fn();
-const sendRecoveryLink = vi.fn();
+const isPasswordPwned = vi.fn();
 const resetStaffMfa = vi.fn();
 
 vi.mock("next/headers", () => ({ cookies: async () => ({}) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@upm/db/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@upm/db/auth")>()),
+  isPasswordPwned: (...a: unknown[]) => isPasswordPwned(...a),
+}));
 vi.mock("@upm/db/server", () => ({
   createClient: () => ({
     auth: { getUser },
@@ -31,7 +35,6 @@ const recordExportedRecently = vi.fn();
 const deleteStaffUser = vi.fn();
 vi.mock("../../../lib/staff-access", () => ({
   staffProfile: (...a: unknown[]) => staffProfile(...a),
-  sendRecoveryLink: (...a: unknown[]) => sendRecoveryLink(...a),
   resetStaffMfa: (...a: unknown[]) => resetStaffMfa(...a),
   staffRecordCsv: (...a: unknown[]) => staffRecordCsv(...a),
   staffExitBlockers: (...a: unknown[]) => staffExitBlockers(...a),
@@ -39,7 +42,7 @@ vi.mock("../../../lib/staff-access", () => ({
   deleteStaffUser: (...a: unknown[]) => deleteStaffUser(...a),
 }));
 
-const { resetStaffPassword, resetStaffTwoFactor, exportStaffRecord, deleteStaffAccount } =
+const { setStaffPassword, resetStaffTwoFactor, exportStaffRecord, deleteStaffAccount } =
   await import("./actions");
 
 const ADMIN = "11111111-1111-4111-8111-111111111111";
@@ -55,7 +58,7 @@ beforeEach(() => {
   staffProfile
     .mockReset()
     .mockResolvedValue({ id: ALVO, role: "support", status: "active", email: "s@x.pt" });
-  sendRecoveryLink.mockReset().mockResolvedValue(true);
+  isPasswordPwned.mockReset().mockResolvedValue(false);
   resetStaffMfa.mockReset().mockResolvedValue(true);
   staffRecordCsv.mockReset().mockResolvedValue("origem,data\r\nconta,2026");
   staffExitBlockers.mockReset().mockResolvedValue({ openLeads: 0, mailboxes: 0 });
@@ -67,7 +70,6 @@ beforeEach(() => {
 const SUSPENSO = { id: ALVO, role: "support", status: "suspended", email: "s@x.pt" };
 
 const acoes = [
-  ["repor palavra-passe", resetStaffPassword, sendRecoveryLink, null],
   ["repor 2FA", resetStaffTwoFactor, resetStaffMfa, null],
   ["descarregar o registo de quem sai", exportStaffRecord, staffRecordCsv, SUSPENSO],
   ["eliminar a conta de quem sai", deleteStaffAccount, deleteStaffUser, SUSPENSO],
@@ -130,6 +132,84 @@ for (const [nome, acao, efeito, alvo] of acoes) {
     });
   });
 }
+
+/**
+ * A palavra-passe da equipa, pelo admin (20 nov 2026)
+ * =========================================================================
+ * Quem escreve é `admin_set_staff_password`, que repete as recusas na base e
+ * regista no `audit_log`. Aqui verifica-se que cada recusa acontece antes de
+ * a palavra-passe sair para a base — e que ela só sai para lá.
+ */
+describe("mudar a palavra-passe de alguém da equipa", () => {
+  const NOVA = "Nova-palavra-passe-2026";
+  const chamouAEscrita = () =>
+    rpc.mock.calls.some(([nomeRpc]) => nomeRpc === "admin_set_staff_password");
+
+  it("um admin, sobre alguém da equipa ativo, com o PIN: grava pela base", async () => {
+    expect(await setStaffPassword({ profileId: ALVO, password: NOVA })).toEqual({ ok: true });
+    expect(rpc).toHaveBeenCalledWith("require_step_up");
+    expect(rpc).toHaveBeenCalledWith("admin_set_staff_password", {
+      p_profile_id: ALVO,
+      p_password: NOVA,
+    });
+  });
+
+  it("recusa quem não é admin (suporte, marketing, cliente, sem sessão)", async () => {
+    for (const role of ["support", "marketing", "owner", "buyer", null]) {
+      sessao(role);
+      const result = await setStaffPassword({ profileId: ALVO, password: NOVA });
+      expect(result.ok, String(role)).toBeUndefined();
+      expect(result.error, String(role)).toBeTruthy();
+    }
+    expect(chamouAEscrita()).toBe(false);
+  });
+
+  it("recusa o próprio admin: a sua muda-a o outro", async () => {
+    expect((await setStaffPassword({ profileId: ADMIN, password: NOVA })).error).toBeTruthy();
+    expect(chamouAEscrita()).toBe(false);
+  });
+
+  it("recusa uma conta que não é da equipa, e uma suspensa", async () => {
+    staffProfile.mockResolvedValue(null);
+    expect((await setStaffPassword({ profileId: ALVO, password: NOVA })).error).toBeTruthy();
+    staffProfile.mockResolvedValue(SUSPENSO);
+    expect((await setStaffPassword({ profileId: ALVO, password: NOVA })).error).toBeTruthy();
+    expect(chamouAEscrita()).toBe(false);
+  });
+
+  it("sem o PIN, pede-o e não grava", async () => {
+    rpc.mockImplementation(async (nomeRpc: string) =>
+      nomeRpc === "require_step_up"
+        ? { error: { code: "42501", message: "PIN", hint: "step_up_required" } }
+        : { error: null },
+    );
+    expect(await setStaffPassword({ profileId: ALVO, password: NOVA })).toEqual({
+      needsStepUp: true,
+    });
+    expect(chamouAEscrita()).toBe(false);
+  });
+
+  it("recusa uma palavra-passe curta, longa ou de uma fuga conhecida", async () => {
+    expect((await setStaffPassword({ profileId: ALVO, password: "curta" })).error).toBeTruthy();
+    expect(
+      (await setStaffPassword({ profileId: ALVO, password: "x".repeat(73) })).error,
+    ).toBeTruthy();
+    isPasswordPwned.mockResolvedValue(true);
+    expect(await setStaffPassword({ profileId: ALVO, password: NOVA })).toEqual({ pwned: true });
+    expect(chamouAEscrita()).toBe(false);
+  });
+
+  it("se a base recusar, diz que falhou — sem ecoar a palavra-passe", async () => {
+    rpc.mockImplementation(async (nomeRpc: string) =>
+      nomeRpc === "admin_set_staff_password"
+        ? { error: { code: "42501", message: "Sem permissão" } }
+        : { error: null },
+    );
+    const result = await setStaffPassword({ profileId: ALVO, password: NOVA });
+    expect(result.ok).toBeUndefined();
+    expect(JSON.stringify(result)).not.toContain(NOVA);
+  });
+});
 
 /**
  * A saída da equipa (8 nov 2026): o que só estas duas pedem. Primeiro
