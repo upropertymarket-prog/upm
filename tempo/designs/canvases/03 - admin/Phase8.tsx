@@ -388,6 +388,7 @@ function LeadsDemo({ theme, detail }: { theme: "light" | "dark"; detail: boolean
         onUpdate={stubResult}
         onAddNote={stubResult}
         onExport={async () => ({ ok: true, csv: "" })}
+        onDelete={stubResult}
         onVerifyPin={verifyPin}
       />
     </Frame>
