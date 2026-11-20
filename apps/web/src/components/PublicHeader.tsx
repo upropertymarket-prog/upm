@@ -141,8 +141,8 @@ export function PublicHeader({
             background: "var(--accent)",
             color: "var(--on-solid)",
             textAlign: "center",
-            // Excepção intencional ao piso de 14 px do site (07 §3), pedida
-            // pelo cliente a 8 nov 2026. Registada em `tokens.css`.
+            // tamanho-ok: excepção intencional ao piso de 14 px do site (07 §3),
+            // pedida pelo cliente a 8 nov 2026. Registada em `tokens.css`.
             fontSize: "12px",
             fontWeight: "var(--fw-semibold)",
             letterSpacing: "0.14em",

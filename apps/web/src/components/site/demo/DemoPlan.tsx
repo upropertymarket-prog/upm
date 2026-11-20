@@ -144,7 +144,7 @@ export function DemoPlan({ role }: { role: DemoRole }) {
         <div style={{ display: "grid", gap: "var(--sp-2)", alignContent: "start" }}>
           <span
             style={{
-              fontSize: "var(--fs-pill)",
+              fontSize: "var(--fs-label)",
               fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",

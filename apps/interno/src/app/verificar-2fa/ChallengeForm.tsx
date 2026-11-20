@@ -39,7 +39,7 @@ export function ChallengeForm({
           {t("submit")}
         </Button>
       </form>
-      <p className="text-xs text-muted">{t("lostPhone")}</p>
+      <p className="text-[length:var(--fs-body)] text-muted">{t("lostPhone")}</p>
     </div>
   );
 }

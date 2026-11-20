@@ -75,6 +75,23 @@ export async function addLeadNote(input: unknown): Promise<LeadActionResult> {
   return { ok: true };
 }
 
+/** Irreversível: a função pede o PIN, e quem chama trata o `needsStepUp`. */
+export async function deleteLead(input: unknown): Promise<LeadActionResult> {
+  const parsed = idSchema.safeParse(input);
+  if (!parsed.success) return { error: "Invalid lead." };
+  const supabase = await getAdminClient();
+  if (!supabase) return { error: "Not authorized." };
+  const { error } = await supabase.rpc("admin_delete_site_lead", { p_lead_id: parsed.data });
+  if (error) {
+    return isStepUpRequiredError(error)
+      ? { needsStepUp: true }
+      : { error: "Could not delete the lead." };
+  }
+  revalidatePath("/admin/leads-site");
+  revalidatePath("/admin/painel");
+  return { ok: true };
+}
+
 function csvCell(value: unknown): string {
   let text = value === null || value === undefined ? "" : String(value);
   if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;

@@ -174,7 +174,7 @@ export function BlockCanvas(props: BlockCanvasProps) {
             >
               <span
                 style={{
-                  fontSize: "12px",
+                  fontSize: "var(--fs-body)",
                   fontWeight: "var(--fw-semibold)",
                   color: "var(--muted)",
                 }}
@@ -544,7 +544,7 @@ function clamp(value: number, min: number, max: number): number {
 /** A nota de um bloco: diz o que o bloco faz quando não é óbvio pelos campos. */
 function Note({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}>
+    <p style={{ margin: 0, fontSize: "var(--fs-body)", lineHeight: 1.5, color: "var(--muted)" }}>
       {children}
     </p>
   );
@@ -608,7 +608,7 @@ function ImageField({
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            fontSize: "12px",
+            fontSize: "var(--fs-body)",
             color: "var(--muted)",
           }}
         >

@@ -283,7 +283,7 @@ function Block({ block, context }: { block: CampaignBlock; context: CampaignRend
         <Section style={{ padding: "24px 0 0", ...ALIGN_STYLE(block.align) }}>
           <Hr style={{ borderColor: BORDER, margin: "0 0 16px" }} />
           {block.text ? (
-            <Text style={{ margin: "0 0 8px", fontSize: "12px", lineHeight: 1.5, color: MUTED }}>
+            <Text style={{ margin: "0 0 8px", fontSize: "13px", lineHeight: 1.5, color: MUTED }}>
               {substitute(block.text, context)}
             </Text>
           ) : null}
@@ -291,7 +291,7 @@ function Block({ block, context }: { block: CampaignBlock; context: CampaignRend
               editável era deixá-lo apagável. */}
           <Link
             href={context.unsubscribeUrl}
-            style={{ fontSize: "12px", color: MUTED, textDecoration: "underline" }}
+            style={{ fontSize: "13px", color: MUTED, textDecoration: "underline" }}
           >
             {context.labels.unsubscribe}
           </Link>

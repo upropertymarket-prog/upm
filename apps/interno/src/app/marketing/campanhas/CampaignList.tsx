@@ -151,7 +151,7 @@ export function CampaignList(props: CampaignListProps) {
                 não vale uma ida ao servidor por campanha, e o que interessa
                 aqui é quantos a *receberam* — que é o que `recipients` guarda
                 depois do envio. */}
-            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
               {campaignSummary(row, t, dateFormat)}
             </span>
           </span>

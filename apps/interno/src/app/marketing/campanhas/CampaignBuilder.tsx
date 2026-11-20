@@ -737,7 +737,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                         style={{
                           display: "grid",
                           gap: "var(--sp-1)",
-                          fontSize: "12.5px",
+                          fontSize: "var(--fs-body)",
                           fontWeight: "var(--fw-semibold)",
                           color: "var(--text)",
                         }}
@@ -761,7 +761,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                           <span
                             style={{
                               fontFamily: "ui-monospace, monospace",
-                              fontSize: "12px",
+                              fontSize: "var(--fs-body)",
                               fontWeight: "var(--fw-regular)",
                               color: "var(--muted)",
                             }}
@@ -777,7 +777,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                       <p
                         style={{
                           margin: 0,
-                          fontSize: "12px",
+                          fontSize: "var(--fs-body)",
                           lineHeight: 1.5,
                           color: "var(--muted)",
                         }}
@@ -973,7 +973,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                         });
                       }}
                     />
-                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                    <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                       {count === null ? t("audienceUnknown") : t("audienceCount", { count })}
                     </span>
                     {/* D69: zero é a resposta certa até o registo recolher o
@@ -982,7 +982,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                     {count === 0 &&
                     audience !== "site_leads_pre" &&
                     audience !== "site_leads_post" ? (
-                      <span style={{ fontSize: "12px", color: "var(--warn)" }}>
+                      <span style={{ fontSize: "var(--fs-body)", color: "var(--warn)" }}>
                         {t("audienceConsentNote")}
                       </span>
                     ) : null}
@@ -1046,7 +1046,12 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                     ))}
                   </div>
                   <p
-                    style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--fs-body)",
+                      lineHeight: 1.5,
+                      color: "var(--muted)",
+                    }}
                   >
                     {t("receiptsNote")}
                   </p>
@@ -1176,7 +1181,12 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                   </div>
 
                   <p
-                    style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: "var(--muted)" }}
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--fs-body)",
+                      lineHeight: 1.5,
+                      color: "var(--muted)",
+                    }}
                   >
                     {t("sendPendingNote")}
                   </p>
@@ -1218,7 +1228,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                   <div style={{ display: "grid", gap: "var(--sp-2)" }}>
                     <span
                       style={{
-                        fontSize: "12.5px",
+                        fontSize: "var(--fs-body)",
                         fontWeight: "var(--fw-semibold)",
                         color: "var(--text)",
                       }}
@@ -1235,7 +1245,7 @@ export function CampaignBuilder(props: CampaignBuilderProps) {
                         // Texto de máquina em tipo de máquina: uma mensagem de
                         // erro com caminhos e códigos lê-se mal em proporcional.
                         fontFamily: "ui-monospace, monospace",
-                        fontSize: "12.5px",
+                        fontSize: "var(--fs-body)",
                         lineHeight: 1.6,
                         color: "var(--muted)",
                         overflowWrap: "anywhere",
@@ -1301,7 +1311,7 @@ function Panel({
           <h2
             style={{
               margin: 0,
-              fontSize: "12px",
+              fontSize: "var(--fs-body)",
               fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.04em",
               textTransform: "uppercase",

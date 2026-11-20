@@ -156,14 +156,14 @@ export function ModerationView({
           ) : (
             <span
               aria-hidden="true"
-              className="flex h-12 w-16 items-center justify-center rounded-lg bg-surface2 text-xs text-muted"
+              className="flex h-12 w-16 items-center justify-center rounded-lg bg-surface2 text-[length:var(--fs-body)] text-muted"
             >
               {t("noPhoto")}
             </span>
           )}
           <span className="grid gap-1">
             <strong>{row.title || t("untitled")}</strong>
-            <span className="text-xs text-muted">{row.ref}</span>
+            <span className="text-[length:var(--fs-body)] text-muted">{row.ref}</span>
           </span>
         </span>
       ),
@@ -350,7 +350,7 @@ export function ModerationView({
           <section className="grid gap-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs text-muted">{selectedProperty.ref}</p>
+                <p className="text-[length:var(--fs-body)] text-muted">{selectedProperty.ref}</p>
                 <h3 className="mt-1 text-lg font-semibold text-text">
                   {selectedProperty.title || t("untitled")}
                 </h3>
@@ -380,7 +380,7 @@ export function ModerationView({
                         className="block aspect-[4/3] bg-surface2 bg-cover bg-center"
                         style={{ backgroundImage: "url(" + item.signedUrl + ")" }}
                       />
-                      <span className="block px-3 py-2 text-xs text-muted">
+                      <span className="block px-3 py-2 text-[length:var(--fs-body)] text-muted">
                         {t(item.kind === "floorplan" ? "floorplan" : "photo")}
                       </span>
                     </a>
@@ -459,7 +459,7 @@ export function ModerationView({
                     ) : (
                       <span className="text-sm text-muted">{document.name}</span>
                     )}
-                    <span className="ml-2 text-xs text-muted">
+                    <span className="ml-2 text-[length:var(--fs-body)] text-muted">
                       {t("documentKind." + document.kind)}
                     </span>
                   </li>
@@ -477,12 +477,15 @@ export function ModerationView({
                 {history.map((item) => (
                   <li key={item.id} className="border-l-2 border-border pl-3">
                     <p className="text-sm font-medium text-text">{t("event." + item.action)}</p>
-                    <p className="text-xs text-muted">
+                    <p className="text-[length:var(--fs-body)] text-muted">
                       {t("status." + item.status_from)} → {t("status." + item.status_to)} ·{" "}
                       {item.actor_name}
                     </p>
                     {item.reason ? <p className="mt-1 text-sm text-muted">{item.reason}</p> : null}
-                    <time className="text-xs text-muted" dateTime={item.created_at}>
+                    <time
+                      className="text-[length:var(--fs-body)] text-muted"
+                      dateTime={item.created_at}
+                    >
                       {dateLabel(item.created_at, locale)}
                     </time>
                   </li>

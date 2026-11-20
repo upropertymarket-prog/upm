@@ -260,7 +260,14 @@ export function ReportProblemModal({
           <strong style={{ fontSize: "13px", color: "var(--text)" }}>
             {labels.technicalTitle}
           </strong>
-          <p style={{ margin: 0, fontSize: "12.5px", color: "var(--muted)", lineHeight: 1.5 }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "var(--fs-body)",
+              color: "var(--muted)",
+              lineHeight: 1.5,
+            }}
+          >
             {labels.technicalNote}
           </p>
         </div>

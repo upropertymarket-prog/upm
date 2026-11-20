@@ -36,7 +36,7 @@ function inline(text: string, keyPrefix: string): React.ReactNode[] {
           key={key}
           style={{
             fontFamily: "var(--font-mono, ui-monospace, monospace)",
-            fontSize: "0.9em",
+            fontSize: "max(0.9em, 13px)",
             background: "var(--surface-2)",
             borderRadius: "var(--radius-sm, 4px)",
             padding: "0.1em 0.35em",

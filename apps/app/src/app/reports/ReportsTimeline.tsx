@@ -67,11 +67,13 @@ export function ReportsTimeline({ reports, locale }: { reports: MyReportRow[]; l
                         flexWrap: "wrap",
                       }}
                     >
-                      <code style={{ fontSize: "12px", color: "var(--muted)" }}>{report.ref}</code>
+                      <code style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
+                        {report.ref}
+                      </code>
                       <StatusTag tone={STATUS_TONE[report.status]}>
                         {t(`steps.${REPORTER_TIMELINE[report.status]}`)}
                       </StatusTag>
-                      <span style={{ fontSize: "12.5px", color: "var(--muted)" }}>
+                      <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                         {dateFormat.format(new Date(report.created_at))}
                       </span>
                     </span>

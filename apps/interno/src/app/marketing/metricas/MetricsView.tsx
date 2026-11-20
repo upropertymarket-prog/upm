@@ -128,7 +128,7 @@ export function MetricsView(props: MetricsViewProps) {
       cell: (row) => (
         <span style={{ display: "grid", gap: "2px" }}>
           <span style={{ color: "var(--text)" }}>{row.name}</span>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+          <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
             {tc(`audience.${row.audience}`)}
           </span>
         </span>
@@ -146,7 +146,7 @@ export function MetricsView(props: MetricsViewProps) {
             </StatusTag>
           </span>
           {row.sent_at ? (
-            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+            <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
               {dateFormat.format(new Date(row.sent_at))}
             </span>
           ) : null}

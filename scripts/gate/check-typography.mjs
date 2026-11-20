@@ -18,7 +18,16 @@
  *     ficheiros. Um literal não se liga a token nenhum, logo não acompanha
  *     mudanças de escala e não aparece em nenhuma busca por `--fw-`.
  *
- * As três são verificáveis por leitura do código, e é por isso que cabem aqui
+ * **E o tamanho (20 nov 2026).** Nenhum texto abaixo de 13 px (07 §3). O
+ * cliente pediu-o várias vezes e a app continuava a ter 70 textos a 12 px:
+ * `text-xs` do Tailwind, `fontSize: "12px"` em linha, `font-size: 12px` em
+ * folhas próprias. As únicas exceções de escala são `--fs-pill` (tags) e
+ * `--fs-badge` (dígitos do contador), que se consomem por `var()` e por isso
+ * este portão não vê; fora delas, uma exceção decidida pelo cliente leva um
+ * comentário `tamanho-ok: <razão>` nas três linhas de cima — como a faixa de
+ * pré-lançamento.
+ *
+ * As três primeiras são verificáveis por leitura do código, e é por isso que cabem aqui
  * em vez de numa revisão visual. O que este portão **não** faz é julgar se o
  * peso escolhido é o certo para o papel: isso vê-se no storyboard "Tipografia"
  * das Fundações, e com os olhos.
@@ -84,6 +93,24 @@ const literaisJs = [];
 const literaisCss = [];
 const tokensAltos = [];
 const classesPesadas = [];
+const tamanhosPequenos = [];
+
+/** O piso do texto (07 §3). */
+const PISO = 13;
+const pequeno = (valor) => Number(valor) < PISO;
+
+/**
+ * A exceção marca-se no código, ao lado do valor, e não numa lista aqui: assim
+ * a razão fica onde quem lê o valor a vê. Procura-se no texto **com**
+ * comentários, na própria linha e nas três de cima.
+ */
+function excecaoDeTamanho(original, index) {
+  const linha = lineOf(original, index);
+  return original
+    .split("\n")
+    .slice(Math.max(0, linha - 4), linha)
+    .some((l) => l.includes("tamanho-ok:"));
+}
 
 const TOKENS = join("packages", "ui", "src", "styles", "tokens.css");
 const COMPONENTES = join("packages", "ui", "src", "styles", "components.css");
@@ -103,7 +130,13 @@ for (const file of [
   ...collect(sob("tempo/designs")),
 ]) {
   if (EXCECOES.some((e) => file.includes(e))) continue;
-  const text = stripComments(readFileSync(file, "utf8"));
+  const original = readFileSync(file, "utf8");
+  const text = stripComments(original);
+  const tamanho = (m) => {
+    if (!excecaoDeTamanho(original, m.index)) {
+      tamanhosPequenos.push(`${file}:${lineOf(text, m.index)}  ${m[0]}`);
+    }
+  };
 
   if (file.endsWith(".css")) {
     // Em `tokens.css` os números são a definição da escala; em qualquer outra
@@ -114,6 +147,9 @@ for (const file of [
       }
       continue;
     }
+    for (const m of text.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) {
+      if (pequeno(m[1])) tamanho(m);
+    }
     for (const m of text.matchAll(/font-weight:\s*(\d{3}|bold(?:er)?|normal)\b/g)) {
       literaisCss.push(`${file}:${lineOf(text, m.index)}  font-weight: ${m[1]}`);
     }
@@ -122,6 +158,14 @@ for (const file of [
 
   for (const m of text.matchAll(/fontWeight:\s*"?(\d{3})"?/g)) {
     literaisJs.push(`${file}:${lineOf(text, m.index)}  fontWeight: ${m[1]}`);
+  }
+  for (const m of text.matchAll(/fontSize:\s*["'`]?(\d+(?:\.\d+)?)(?:px)?["'`]?(?=\s*[,}\n])/g)) {
+    if (pequeno(m[1])) tamanho(m);
+  }
+  // `text-xs` é 12 px — o defeito de 20 nov 2026 entrou quase todo por aqui.
+  for (const m of text.matchAll(/(?<![\w-])text-xs(?![\w-])/g)) tamanho(m);
+  for (const m of text.matchAll(/(?<![\w-])text-\[(\d+(?:\.\d+)?)px\]/g)) {
+    if (pequeno(m[1])) tamanho(m);
   }
   // `font-extrabold` e `font-black` do Tailwind são 800 e 900 por outra porta.
   for (const m of text.matchAll(/\bfont-(extrabold|black)\b/g)) {
@@ -138,10 +182,17 @@ const temRegraDeCabecalho = existsSync(sob(COMPONENTES))
   ? /h1,\s*h2,\s*h3\s*\{[^}]*font-weight/.test(readFileSync(sob(COMPONENTES), "utf8"))
   : false;
 
-const falhas = literaisJs.length + literaisCss.length + tokensAltos.length + classesPesadas.length;
+const falhas =
+  literaisJs.length +
+  literaisCss.length +
+  tokensAltos.length +
+  classesPesadas.length +
+  tamanhosPequenos.length;
 
 if (falhas === 0 && temRegraDeCabecalho) {
-  console.log("✓ Tipografia: pesos por token, escala até " + TETO + ", cabeçalhos com regra");
+  console.log(
+    `✓ Tipografia: pesos por token, escala até ${TETO}, cabeçalhos com regra, texto a partir de ${PISO} px`,
+  );
   process.exit(0);
 }
 
@@ -179,6 +230,14 @@ if (classesPesadas.length > 0) {
   for (const hit of classesPesadas) console.error(`      ${hit}`);
   console.error("\n  `font-extrabold` é 800 e `font-black` é 900 — o mesmo 800 que foi");
   console.error("  eliminado da escala, a entrar por outra porta. Use `font-semibold`.\n");
+}
+
+if (tamanhosPequenos.length > 0) {
+  console.error(`✗ Texto abaixo de ${PISO} px (07 §3):\n`);
+  for (const hit of tamanhosPequenos) console.error(`      ${hit}`);
+  console.error("\n  Use `var(--fs-body)` (13 px na app, 14 px no site); em Tailwind,");
+  console.error("  `text-[length:var(--fs-body)]`. `text-xs` é 12 px. Uma exceção decidida");
+  console.error("  pelo cliente leva um comentário `tamanho-ok: <razão>` logo acima.\n");
 }
 
 process.exit(1);
