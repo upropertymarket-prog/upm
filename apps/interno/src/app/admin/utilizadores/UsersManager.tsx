@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import {
   Download,
   KeyRound,
+  RefreshCw,
   ShieldCheck,
   Smartphone,
   Trash2,
@@ -34,6 +35,7 @@ import type {
   ProfileStatusActionResult,
   StaffAccessActionResult,
   StaffExitActionResult,
+  StaffPasswordActionResult,
 } from "./actions";
 
 /** As contas de equipa — as únicas com "Acesso" no painel (8 nov 2026). */
@@ -47,6 +49,29 @@ const STAFF_SECTIONS = [
 ] as const;
 type AccessAction = "password" | "twoFactor";
 type ExitProblem = "blockers" | "needsExport" | "notSuspended" | "failed";
+type PasswordProblem = "mismatch" | "pwned";
+
+/**
+ * Uma palavra-passe gerada para o admin entregar (20 nov 2026): 16 caracteres
+ * aleatórios do `crypto` do browser, em grupos de quatro para se ditar, sem os
+ * que se confundem a ler (0/O, 1/l/I). Nunca sai do browser senão para a
+ * action que a grava.
+ */
+const LEGIVEIS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function generatePassword(): string {
+  const chars: string[] = [];
+  // Sem enviesar: os bytes acima do último múltiplo do alfabeto descartam-se.
+  const limit = 256 - (256 % LEGIVEIS.length);
+  while (chars.length < 16) {
+    for (const byte of crypto.getRandomValues(new Uint8Array(32))) {
+      if (byte < limit && chars.length < 16) {
+        chars.push(LEGIVEIS[byte % LEGIVEIS.length]!);
+      }
+    }
+  }
+  return [0, 4, 8, 12].map((i) => chars.slice(i, i + 4).join("")).join("-");
+}
 
 export type UserDirectoryRow = {
   id: string;
@@ -180,7 +205,7 @@ export function UsersManager({
   onChangeStatus,
   onLogAccess,
   onVerifyPin,
-  onResetPassword,
+  onSetPassword,
   onResetTwoFactor,
   onExportRecord,
   onDeleteAccount,
@@ -204,8 +229,11 @@ export function UsersManager({
   }) => Promise<ProfileStatusActionResult>;
   onLogAccess: (profileId: string) => Promise<void>;
   onVerifyPin: VerifyPinAction;
-  /** Envia à pessoa o link para definir uma palavra-passe nova. */
-  onResetPassword: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
+  /** O admin define a palavra-passe de outra pessoa da equipa (e entrega-lha). */
+  onSetPassword: (input: {
+    profileId: string;
+    password: string;
+  }) => Promise<StaffPasswordActionResult>;
   /** Remove a 2FA de quem perdeu o telemóvel. */
   onResetTwoFactor: (input: { profileId: string }) => Promise<StaffAccessActionResult>;
   /** O registo da pessoa, em CSV, para guardar fora do sistema (saída da equipa). */
@@ -241,6 +269,9 @@ export function UsersManager({
   const [accessTarget, setAccessTarget] = useState<AccessAction | null>(null);
   const [accessDone, setAccessDone] = useState<AccessAction | null>(null);
   const [accessFailed, setAccessFailed] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordProblem, setPasswordProblem] = useState<PasswordProblem | null>(null);
   const [exitOpen, setExitOpen] = useState(initialExitDialog !== undefined);
   const [exitExported, setExitExported] = useState(initialExitDialog === "exported");
   const [exitProblem, setExitProblem] = useState<ExitProblem | null>(null);
@@ -309,19 +340,35 @@ export function UsersManager({
     });
   }
 
-  function applyAccess(action: AccessAction, profileId: string) {
+  /** Abre (ou fecha) a janela de acesso; a palavra-passe escrita nunca fica para a seguinte. */
+  function openAccess(action: AccessAction | null) {
+    setAccessTarget(action);
+    setAccessFailed(false);
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordProblem(null);
+    if (action) setAccessDone(null);
+  }
+
+  function applyAccess(action: AccessAction, profileId: string, password = "") {
     startSaving(async () => {
-      const run = action === "password" ? onResetPassword : onResetTwoFactor;
-      const result = await run({ profileId });
+      const result: StaffPasswordActionResult =
+        action === "password"
+          ? await onSetPassword({ profileId, password })
+          : await onResetTwoFactor({ profileId });
       if (result.needsStepUp) {
-        requestStepUp(() => applyAccess(action, profileId));
+        requestStepUp(() => applyAccess(action, profileId, password));
+        return;
+      }
+      if (result.pwned) {
+        setPasswordProblem("pwned");
         return;
       }
       if (!result.ok) {
         setAccessFailed(true);
         return;
       }
-      setAccessTarget(null);
+      openAccess(null);
       setAccessDone(action);
     });
   }
@@ -663,8 +710,9 @@ export function UsersManager({
             />
           </section>
 
-          {/* Com a conta suspensa não há acesso a repor — o link nem sai para
-              uma conta suspensa; o que resta é a saída da equipa. */}
+          {/* Com a conta suspensa não há acesso a repor — a base recusa mudar
+              a palavra-passe de uma conta suspensa; o que resta é a saída da
+              equipa. */}
           {STAFF_ROLES.has(selectedProfile.role) &&
           selectedProfile.id !== currentAdminId &&
           selectedProfile.status !== "suspended" ? (
@@ -680,22 +728,14 @@ export function UsersManager({
                 <Button
                   variant="secondary"
                   leadingIcon={<KeyRound size={16} />}
-                  onClick={() => {
-                    setAccessTarget("password");
-                    setAccessFailed(false);
-                    setAccessDone(null);
-                  }}
+                  onClick={() => openAccess("password")}
                 >
                   {t("resetPassword")}
                 </Button>
                 <Button
                   variant="secondary"
                   leadingIcon={<Smartphone size={16} />}
-                  onClick={() => {
-                    setAccessTarget("twoFactor");
-                    setAccessFailed(false);
-                    setAccessDone(null);
-                  }}
+                  onClick={() => openAccess("twoFactor")}
                 >
                   {t("resetTwoFactor")}
                 </Button>
@@ -806,38 +846,94 @@ export function UsersManager({
       </Modal>
       <Modal
         open={accessTarget !== null}
-        onClose={() => setAccessTarget(null)}
+        onClose={() => openAccess(null)}
         size="sm"
         title={accessTarget === "twoFactor" ? t("resetTwoFactor") : t("resetPassword")}
         icon={accessTarget === "twoFactor" ? <Smartphone size={17} /> : <KeyRound size={17} />}
         closeLabel={tc("close")}
       >
-        <div className="grid gap-4">
+        <form
+          className="grid gap-4"
+          // A palavra-passe de outra pessoa não é para o gestor de palavras-passe
+          // do browser do admin guardar.
+          autoComplete="off"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!selectedProfile || !accessTarget) return;
+            if (accessTarget === "password" && newPassword !== confirmPassword) {
+              setPasswordProblem("mismatch");
+              return;
+            }
+            setPasswordProblem(null);
+            setAccessFailed(false);
+            applyAccess(accessTarget, selectedProfile.id, newPassword);
+          }}
+        >
           <p className="text-sm text-muted">
             {accessTarget === "twoFactor" ? t("resetTwoFactorBody") : t("resetPasswordBody")}
           </p>
+          {accessTarget === "password" ? (
+            <>
+              <Input
+                type="password"
+                label={t("newPassword")}
+                hint={t("newPasswordHint")}
+                revealLabels={{ show: tc("showPassword"), hide: tc("hidePassword") }}
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={10}
+                maxLength={72}
+                required
+              />
+              <Input
+                type="password"
+                label={t("confirmPassword")}
+                revealLabels={{ show: tc("showPassword"), hide: tc("hidePassword") }}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={10}
+                maxLength={72}
+                required
+                error={passwordProblem === "mismatch" ? t("passwordMismatch") : undefined}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                leadingIcon={<RefreshCw size={16} />}
+                onClick={() => {
+                  const generated = generatePassword();
+                  setNewPassword(generated);
+                  setConfirmPassword(generated);
+                  setPasswordProblem(null);
+                }}
+              >
+                {t("generatePassword")}
+              </Button>
+            </>
+          ) : null}
+          {passwordProblem === "pwned" ? (
+            <p className="text-sm text-danger" role="alert">
+              {t("passwordPwned")}
+            </p>
+          ) : null}
           {accessFailed ? (
             <p className="text-sm text-danger" role="alert">
               {t("accessFailed")}
             </p>
           ) : null}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={() => setAccessTarget(null)}>
+            <Button type="button" variant="secondary" onClick={() => openAccess(null)}>
               {tc("cancel")}
             </Button>
-            <Button
-              type="button"
-              disabled={saving}
-              onClick={() => {
-                if (selectedProfile && accessTarget) applyAccess(accessTarget, selectedProfile.id);
-              }}
-            >
+            <Button type="submit" disabled={saving}>
               {accessTarget === "twoFactor"
                 ? t("confirmResetTwoFactor")
                 : t("confirmResetPassword")}
             </Button>
           </div>
-        </div>
+        </form>
       </Modal>
       <Modal
         open={exitOpen}

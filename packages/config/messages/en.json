@@ -1367,8 +1367,7 @@
       "rateLimited": "Too many attempts. Try again in {seconds}s.",
       "welcomeTitle": "No pressure, at your own pace.",
       "subtitle": "Sign in to manage your properties, viewings and messages.",
-      "passwordSet": "Password set. Sign in with your new password and the code from your app.",
-      "linkInvalid": "The link has expired or was already used. Request a new one."
+      "staffForgotPassword": "Forgot your password? Ask an administrator."
     },
     "recovery": {
       "title": "Recover password",
@@ -1447,9 +1446,18 @@
         "headlineAccent": "No commissions.",
         "lead": "Buyers and owners talk directly, at their own pace. No middlemen, no pressure, no surprises at the end.",
         "stats": {
-          "commission": { "value": "0 %", "label": "commission" },
-          "privacy": { "value": "100 %", "label": "private contacts" },
-          "direct": { "value": "1:1", "label": "between buyer and owner" }
+          "commission": {
+            "value": "0 %",
+            "label": "commission"
+          },
+          "privacy": {
+            "value": "100 %",
+            "label": "private contacts"
+          },
+          "direct": {
+            "value": "1:1",
+            "label": "between buyer and owner"
+          }
         }
       }
     },
@@ -1461,21 +1469,6 @@
       "restricted": "Area reserved for team members",
       "monitored": "Restricted and monitored access",
       "copyright": "© {year} UProperty Market"
-    },
-    "staffRecovery": {
-      "title": "Recover your password",
-      "body": "Administrators only. If you are in another team area, ask an administrator to send you the link.",
-      "email": "Email",
-      "submit": "Send link",
-      "sentTitle": "Check your email",
-      "sentBody": "If the address belongs to an administrator, we sent a link to set a new password. It is valid for one hour.",
-      "backToLogin": "Back to sign-in",
-      "emailMessage": {
-        "title": "Set a new password",
-        "body": "We received a request to reset the password of your UProperty Market team account. The link is valid for one hour.\n\nAfter you set the password, signing in still asks for the code from your authenticator app.",
-        "cta": "Set password",
-        "footer": "If you did not ask for this, ignore this email and tell an administrator: your password does not change without the link."
-      }
     }
   },
   "plan": {
@@ -1706,11 +1699,11 @@
       "resultsRange": "{from}–{to} users",
       "deleted": "Deleted",
       "access": "Access",
-      "accessHint": "For someone who lost their password or phone. Asks for the operation PIN and is logged.",
-      "resetPassword": "Reset password",
-      "resetPasswordBody": "We email this person a link to set a new password. Their current password keeps working until they use the link.",
-      "confirmResetPassword": "Send link",
-      "resetPasswordDone": "Link sent to this person's email.",
+      "accessHint": "Only administrators change team passwords and reset 2FA. Asks for the operation PIN and is logged.",
+      "resetPassword": "Change password",
+      "resetPasswordBody": "Set this person’s new password and hand it over in person: it is not logged or emailed. Any sessions they have open end, and the old password stops working. Sign-in still asks for the app code.",
+      "confirmResetPassword": "Change password",
+      "resetPasswordDone": "Password changed. Hand it to this person in person; the sessions they had open have ended.",
       "resetTwoFactor": "Reset 2FA",
       "resetTwoFactorBody": "For someone who lost or replaced their phone. Their current authenticator app stops working and, at their next sign-in, they scan a new QR code.",
       "confirmResetTwoFactor": "Reset 2FA",
@@ -1727,7 +1720,13 @@
       "exitBlockers": "Work is still assigned to this person: {openLeads, plural, one {# open lead} other {# open leads}} and {mailboxes, plural, one {# mailbox} other {# mailboxes}}. Hand it over first.",
       "exitNeedsExport": "The record wasn't downloaded in the last 24 hours. Download it before deleting the account.",
       "exitNotSuspended": "Suspend the account before deleting it.",
-      "marketing": "Marketing"
+      "marketing": "Marketing",
+      "newPassword": "New password",
+      "newPasswordHint": "Between 10 and 72 characters.",
+      "confirmPassword": "Confirm the password",
+      "generatePassword": "Generate a password",
+      "passwordMismatch": "The two passwords do not match.",
+      "passwordPwned": "This password has appeared in known data breaches. Choose another."
     },
     "moderation": {
       "title": "Property moderation",

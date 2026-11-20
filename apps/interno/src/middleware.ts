@@ -87,9 +87,9 @@ export async function middleware(request: NextRequest) {
     return new NextResponse("Acesso não permitido a partir desta rede.", { status: 403 });
   }
 
-  // `/recuperar` e `/auth/confirmar` (8 nov 2026): o "Esqueci-me" dos admins
-  // e o link do e-mail — quem lá chega ainda não tem sessão.
-  const publicPaths = ["/entrar", "/verificar-2fa", "/recuperar", "/auth/confirmar"];
+  // Sem `/recuperar` nem `/auth/confirmar` desde 20 nov 2026: a palavra-passe
+  // da equipa muda-a um admin, e não há caminho de recuperação antes da sessão.
+  const publicPaths = ["/entrar", "/verificar-2fa"];
   if (publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
     applySecurityHeaders(response.headers, nonce);
     return response;
@@ -117,18 +117,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(appUrl(request));
   }
 
-  // A palavra-passe nova, com a sessão do link de recuperação (8 nov 2026):
-  // essa sessão é `aal1` e só serve para isto. A página termina a sessão no
-  // fim, e a entrada seguinte pede a palavra-passe nova **e** o código da app.
-  if (pathname === "/nova-palavra-passe") {
-    applySecurityHeaders(response.headers, nonce);
-    return response;
-  }
-
   // 2FA TOTP obrigatório (07 §6) — usa o MFA nativo do Supabase Auth (AAL2).
   // Os códigos de recuperação saíram a 8 nov 2026 (decisão do cliente): quem
-  // perde o telemóvel pede a um admin que lhe reponha a 2FA (Admin ›
-  // Utilizadores), e não há outra via à volta do código.
+  // perde o telemóvel pede a um admin que lhe reponha a 2FA (Admin › Equipa),
+  // e não há outra via à volta do código.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const onEnrollPage = pathname === "/configurar-2fa" || pathname.startsWith("/configurar-2fa/");
   // O ecrã de configuração é só de quem **ainda não tem** 2FA (`nextLevel`

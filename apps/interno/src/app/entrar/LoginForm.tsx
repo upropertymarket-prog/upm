@@ -19,12 +19,9 @@ const initialState: LoginState = {};
 export function LoginForm({
   onSubmit,
   suspended = false,
-  notice = null,
 }: {
   onSubmit: (previous: LoginState, formData: FormData) => Promise<LoginState>;
   suspended?: boolean;
-  /** Os avisos do caminho de recuperação: palavra-passe definida, ou link inválido. */
-  notice?: "passwordSet" | "linkInvalid" | null;
 }) {
   const t = useTranslations("auth.login");
   const tCommon = useTranslations("common");
@@ -33,16 +30,6 @@ export function LoginForm({
   return (
     <>
       <h1 className="upm-iauth__title">{t("title")}</h1>
-      {notice === "passwordSet" ? (
-        <p className="text-sm text-ok" role="status">
-          {t("passwordSet")}
-        </p>
-      ) : null}
-      {notice === "linkInvalid" ? (
-        <p className="text-sm text-danger" role="alert">
-          {t("linkInvalid")}
-        </p>
-      ) : null}
       <form action={formAction} className="flex flex-col gap-4">
         <Input name="email" type="email" label={t("email")} autoComplete="email" required />
         <Input
@@ -66,11 +53,9 @@ export function LoginForm({
         <Button type="submit" disabled={pending} fullWidth>
           {t("submit")}
         </Button>
-        {/* Só para admins (8 nov 2026): a página explica, e o resto da equipa
-            pede a um admin. */}
-        <a href="/recuperar" className="text-center text-sm text-muted">
-          {t("forgotPassword")}
-        </a>
+        {/* Sem "Esqueci-me" (20 nov 2026): a palavra-passe da equipa muda-a
+            um admin, a de um admin muda-a o outro. */}
+        <p className="text-center text-sm text-muted">{t("staffForgotPassword")}</p>
       </form>
     </>
   );

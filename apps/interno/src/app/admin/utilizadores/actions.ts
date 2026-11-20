@@ -4,13 +4,12 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@upm/db/server";
-import { isStepUpRequiredError } from "@upm/db/auth";
+import { isPasswordPwned, isStepUpRequiredError, passwordSchema } from "@upm/db/auth";
 
 import {
   deleteStaffUser,
   recordExportedRecently,
   resetStaffMfa,
-  sendRecoveryLink,
   staffExitBlockers,
   staffProfile,
   staffRecordCsv,
@@ -89,8 +88,8 @@ export async function recordProfileAccess(profileId: unknown): Promise<void> {
  *  1. quem pede tem de ser admin (`getAdminClient`);
  *  2. o alvo tem de ser da equipa (admin, suporte, marketing) — a conta de um
  *     cliente recupera-se pelo site, não por aqui;
- *  3. o alvo não pode ser o próprio: a sua palavra-passe recupera-a pelo
- *     "Esqueci-me", e a sua 2FA repõe-na o outro admin;
+ *  3. o alvo não pode ser o próprio: a sua palavra-passe e a sua 2FA muda-as
+ *     o outro admin;
  *  4. o PIN de operação (`require_step_up`), como as outras ações sensíveis.
  *
  * Cada uma fica no `audit_log`.
@@ -134,20 +133,39 @@ async function authorizeStaffAccessChange(input: unknown): Promise<
   return { ok: true, supabase, target };
 }
 
-/** Envia ao próprio o link para definir uma palavra-passe nova. */
-export async function resetStaffPassword(input: unknown): Promise<StaffAccessActionResult> {
-  const check = await authorizeStaffAccessChange(input);
+/**
+ * O admin define a palavra-passe de outra pessoa da equipa (20 nov 2026)
+ * ---------------------------------------------------------------------------
+ * A app é da empresa: ninguém da equipa muda a própria, e a de um admin muda-a
+ * o outro. A escrita é `admin_set_staff_password`, que repete na base as
+ * recusas daqui, cifra a palavra-passe, termina as sessões da pessoa e regista
+ * no `audit_log` quem mudou a de quem — sem a palavra-passe.
+ *
+ * A palavra-passe não sai daqui para lado nenhum: nem log, nem e-mail, nem
+ * resposta. Quem a entrega à pessoa é o admin, de viva voz.
+ */
+const staffPasswordSchema = staffAccessSchema.extend({ password: passwordSchema });
+
+export type StaffPasswordActionResult = StaffAccessActionResult & { pwned?: boolean };
+
+export async function setStaffPassword(input: unknown): Promise<StaffPasswordActionResult> {
+  const parsed = staffPasswordSchema.safeParse(input);
+  if (!parsed.success) return { error: "Invalid request." };
+
+  const check = await authorizeStaffAccessChange({ profileId: parsed.data.profileId });
   if ("result" in check) return check.result;
+  if (check.target.status !== "active") return { error: "Only active accounts." };
 
-  const sent = await sendRecoveryLink(check.target.email);
-  if (!sent) return { error: "The recovery link could not be sent." };
+  if (await isPasswordPwned(parsed.data.password)) return { pwned: true };
 
-  await check.supabase.rpc("write_audit_log", {
-    p_action: "staff.password_reset_link",
-    p_entity: "profiles",
-    p_entity_id: check.target.id,
-    p_diff: { role: check.target.role },
+  const { error } = await check.supabase.rpc("admin_set_staff_password", {
+    p_profile_id: check.target.id,
+    p_password: parsed.data.password,
   });
+  if (error) {
+    if (isStepUpRequiredError(error)) return { needsStepUp: true };
+    return { error: "The password could not be changed." };
+  }
   return { ok: true };
 }
 
