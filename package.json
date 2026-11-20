@@ -38,7 +38,7 @@
     "create-staff-user": "node scripts/create-staff-user.mjs",
     "stripe:sync": "tsx scripts/stripe/sync-catalog.ts",
     "stripe:reconcile": "tsx scripts/stripe/reconcile.ts",
-    "analytics:import": "tsx scripts/analytics/import-daily.ts",
+    "analytics:import": "tsx --conditions=react-server scripts/analytics/import-daily.ts",
     "gate:seo": "node scripts/generate-seo-routes.mjs --check && node scripts/gate/check-seo.mjs",
     "seo:routes": "node scripts/generate-seo-routes.mjs",
     "gate:canvas": "node scripts/gate/check-canvas.mjs",

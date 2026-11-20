@@ -5110,6 +5110,10 @@ export type Database = {
         };
         Returns: number;
       };
+      refresh_site_conversions: {
+        Args: { p_from?: string; p_to?: string };
+        Returns: number;
+      };
       register_account_identity: {
         Args: {
           p_email: string;
