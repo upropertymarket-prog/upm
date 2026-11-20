@@ -154,7 +154,7 @@ export function TemplateManager({
                       })}
                     </span>
                   </span>
-                  <span className="text-xs text-muted">{t(`status.${template.status}`)}</span>
+                  <span className="text-[length:var(--fs-body)] text-muted">{t(`status.${template.status}`)}</span>
                 </button>
               ))}
             </div>

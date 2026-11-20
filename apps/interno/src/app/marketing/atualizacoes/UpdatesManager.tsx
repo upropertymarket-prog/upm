@@ -260,7 +260,7 @@ export function UpdatesManager(props: UpdatesManagerProps) {
           }}
         >
           {props.updates.length === 0 ? (
-            <p style={{ margin: 0, fontSize: "12.5px", color: "var(--muted)" }}>{t("empty")}</p>
+            <p style={{ margin: 0, fontSize: "var(--fs-body)", color: "var(--muted)" }}>{t("empty")}</p>
           ) : (
             props.updates.map((row) => (
               <button
@@ -318,7 +318,7 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                     {t(`status.${row.status}`)}
                   </StatusTag>
                 </span>
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)" }}>
                   {row.version ? `${row.version} · ` : ""}
                   {t(`audience.${row.audience}`)}
                   {/* O alcance só diz algo numa publicada: numa agendada é
@@ -416,7 +416,7 @@ export function UpdatesManager(props: UpdatesManagerProps) {
             <div style={{ display: "grid", gap: "var(--sp-2)" }}>
               <span
                 style={{
-                  fontSize: "12.5px",
+                  fontSize: "var(--fs-body)",
                   fontWeight: "var(--fw-semibold)",
                   color: "var(--text)",
                 }}
@@ -458,7 +458,7 @@ export function UpdatesManager(props: UpdatesManagerProps) {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
-                    fontSize: "12px",
+                    fontSize: "var(--fs-body)",
                     color: "var(--muted)",
                   }}
                 >
@@ -516,7 +516,7 @@ export function UpdatesManager(props: UpdatesManagerProps) {
               <div style={{ display: "grid", gap: "var(--sp-2)" }}>
                 <span
                   style={{
-                    fontSize: "12.5px",
+                    fontSize: "var(--fs-body)",
                     fontWeight: "var(--fw-semibold)",
                     color: "var(--text)",
                   }}

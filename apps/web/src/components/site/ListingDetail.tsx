@@ -114,7 +114,7 @@ function Fact({
           alignItems: "center",
           gap: 6,
           color: "var(--muted)",
-          fontSize: 12,
+          fontSize: "var(--fs-body)",
         }}
       >
         {icon}
@@ -183,7 +183,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                 <ListingGallery photos={listing.photoUrls} title={listing.title} />
 
                 <header style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <span style={{ color: "var(--muted)", fontSize: 12 }}>
+                  <span style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>
                     {tm("ref", { ref: listing.ref ?? "" })}
                   </span>
                   <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>{listing.title}</h1>
@@ -312,7 +312,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                       style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
                     >
                       <strong>{tm("approxLocation")}</strong>
-                      <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>
+                      <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "var(--fs-body)" }}>
                         {tm("addressAfterContact")}
                       </span>
                     </div>
@@ -391,7 +391,7 @@ export function ListingDetail({ listing, locale, launchMode, onLocaleChange }: L
                         lugar serve para a explicar em vez de ficar vazio. */}
                     <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
                       <strong>{t("talkToOwner")}</strong>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
+                      <div style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>
                         O contacto é feito dentro da plataforma — sem chamadas nem partilha de
                         número.
                       </div>

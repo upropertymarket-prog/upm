@@ -383,7 +383,7 @@ export function PlanScreen({
         <div style={{ display: "grid", gap: "var(--sp-2)" }}>
           <span
             style={{
-              fontSize: "var(--fs-pill)",
+              fontSize: "var(--fs-label)",
               fontWeight: "var(--fw-semibold)",
               letterSpacing: "0.1em",
               textTransform: "uppercase",

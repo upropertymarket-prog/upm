@@ -218,7 +218,7 @@ export function PropertyDetail({
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <span style={{ color: "var(--muted)", fontSize: 12 }}>
+            <span style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>
               {t("ref", { ref: property.ref ?? "" })}
             </span>
             <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>{property.title}</h1>
@@ -280,7 +280,7 @@ export function PropertyDetail({
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <strong>{t("approxLocation")}</strong>
-                  <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: 12 }}>
+                  <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "var(--fs-body)" }}>
                     {t("addressAfterContact")}
                   </span>
                 </div>
@@ -322,7 +322,7 @@ export function PropertyDetail({
               <strong style={{ fontSize: 30 }}>{price}</strong>
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
                 <strong>{ownerName}</strong>
-                <div style={{ color: "var(--muted)", fontSize: 12 }}>{t("respondsIn")}</div>
+                <div style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>{t("respondsIn")}</div>
               </div>
               {/* As ações num bloco só, encostado à base do cartão: 16 px entre
                   elas e 16 px até à borda, em vez do espaçamento geral do
@@ -336,7 +336,7 @@ export function PropertyDetail({
           {nextListing ? (
             <Card>
               <CardBody style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span style={{ color: "var(--muted)", fontSize: 12 }}>{t("nextListing")}</span>
+                <span style={{ color: "var(--muted)", fontSize: "var(--fs-body)" }}>{t("nextListing")}</span>
                 <Link
                   href={`/market/${nextListing.id}`}
                   style={{
@@ -416,7 +416,7 @@ function Detail({
           alignItems: "center",
           gap: 6,
           color: "var(--muted)",
-          fontSize: 12,
+          fontSize: "var(--fs-body)",
         }}
       >
         {icon}

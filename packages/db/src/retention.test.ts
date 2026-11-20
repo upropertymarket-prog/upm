@@ -59,7 +59,6 @@ const PROTEGIDAS = [
  */
 const PRAZOS: Record<string, string> = {
   purge_stale_site_leads: "12 months",
-  purge_unconfirmed_site_leads: "30 days",
   purge_notification_deliveries: "90 days",
   purge_auth_attempts: "90 days",
   purge_audit_log: "24 months",
@@ -219,8 +218,7 @@ describe("A7 · retenção — o orquestrador", () => {
 
   it("chama todas as purgas novas, cada uma no seu bloco com exception", () => {
     expect(run).not.toBeNull();
-    const novas = Object.keys(PRAZOS).filter((n) => n !== "purge_unconfirmed_site_leads");
-    for (const nome of novas) {
+    for (const nome of Object.keys(PRAZOS)) {
       expect(run!.corpo, nome).toContain(`v_n := public.${nome}()`);
     }
     // Um bloco por purga: uma que falha não leva as outras (o defeito de 7 out).
@@ -247,8 +245,23 @@ describe("A7 · retenção — o orquestrador", () => {
     expect(corpo).toMatch(/not\s+exists\s*\([\s\S]*?->>\s*'path'\s+is\s+not\s+null/i);
   });
 
+  // 20 nov 2026: a pré-inscrição deixou de confirmar por e-mail, e a purga
+  // dos 30 dias apagava as pessoas a avisar no lançamento.
+  it("a purga das pré-inscrições por confirmar saiu, com o job", () => {
+    const saida = sqls.findIndex(({ sql }) =>
+      sql.includes("drop function if exists public.purge_unconfirmed_site_leads()"),
+    );
+    expect(saida, "falta a migração que retira a purga").toBeGreaterThan(-1);
+    expect(sqls[saida]!.sql).toContain("cron.unschedule('upm-purge-unconfirmed-site-leads')");
+    // Nenhuma migração posterior a volta a criar.
+    const depois = sqls
+      .slice(saida + 1)
+      .filter(({ sql }) => funcao(sql, "purge_unconfirmed_site_leads") !== null);
+    expect(depois).toEqual([]);
+  });
+
   it("a purga de leads apaga os eventos antes dos leads (on delete restrict)", () => {
-    for (const nome of ["purge_stale_site_leads", "purge_unconfirmed_site_leads"]) {
+    for (const nome of ["purge_stale_site_leads"]) {
       const corpo = funcao(vigente(nome), nome)!.corpo;
       const eventos = corpo.indexOf("delete from public.site_lead_events");
       const leads = corpo.indexOf("delete from public.site_leads");

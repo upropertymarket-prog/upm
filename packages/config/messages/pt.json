@@ -867,7 +867,7 @@
       "alreadyTitle": "Já está inscrito",
       "okTitle": "Pré-inscrição recebida",
       "alreadyBody": "Este endereço já tinha a inscrição confirmada. Avisamos assim que os primeiros anúncios abrirem.",
-      "okBody": "Enviámos-lhe um e-mail para confirmar o endereço. A inscrição fica completa quando clicar no link.",
+      "okBody": "Obrigado. Avisamos por e-mail assim que a UProperty Market abrir.",
       "name": "Nome",
       "email": "E-mail",
       "consents": "Consentimentos",
@@ -1890,7 +1890,17 @@
       "allConfirmations": "Todas",
       "confirmedOn": "Confirmado a {date}",
       "deletedOn": "Apagado automaticamente a {date}, se não confirmar.",
-      "retentionNote": "As pré-inscrições por confirmar são apagadas automaticamente 30 dias depois da inscrição. Os restantes leads saem ao fim de 12 meses sem atividade, exceto os convertidos."
+      "retentionNote": "Os leads são apagados automaticamente ao fim de 12 meses sem atividade, exceto os convertidos. As pré-inscrições não pedem confirmação por e-mail, para podermos avisar todos os interessados no lançamento.",
+      "retentionInfo": "Regras de retenção e cópias",
+      "actions": "Ações",
+      "deleteLead": "Apagar lead",
+      "deleteLeadNamed": "Apagar a lead de {email}",
+      "deleteTitle": "Apagar esta lead?",
+      "deleteBody": "A lead de {email} é apagada de vez, com as notas e o histórico. Não é possível desfazer.",
+      "deleteCopiesNote": "Se a pessoa pediu para apagar os dados, retire-a também das cópias diárias que tiver guardado.",
+      "confirmDelete": "Apagar de vez",
+      "deleteFailed": "Não foi possível apagar a lead. Tente novamente.",
+      "deleted": "Lead apagada."
     },
     "settings": {
       "title": "Definições",

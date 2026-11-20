@@ -2,18 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Download, MessageSquareText, UsersRound } from "lucide-react";
+import { Download, Info, MessageSquareText, Trash2, UsersRound } from "lucide-react";
 import {
   Button,
   Card,
   Drawer,
   EmptyState,
   Input,
+  Modal,
   Pagination,
   Select,
   StatusTag,
   Table,
   Textarea,
+  useClickOutside,
   type TableColumn,
 } from "@upm/ui";
 import type { Database } from "@upm/db";
@@ -55,7 +57,6 @@ function href(filters: LeadFilters, extra: Record<string, string | null> = {}) {
   if (filters.source) params.set("source", filters.source);
   if (filters.form) params.set("form", filters.form);
   if (filters.assignedTo) params.set("assigned_to", filters.assignedTo);
-  if (filters.confirmation) params.set("confirmation", filters.confirmation);
   for (const [key, value] of Object.entries(extra)) {
     if (value) params.set(key, value);
     else params.delete(key);
@@ -63,16 +64,6 @@ function href(filters: LeadFilters, extra: Record<string, string | null> = {}) {
   const query = params.toString();
   return query ? "/admin/leads-site?" + query : "/admin/leads-site";
 }
-/**
- * Só a pré-inscrição pede confirmação por e-mail. As que ficam por confirmar
- * apaga-as a retenção ao fim de 30 dias (`purge_unconfirmed_site_leads`);
- * os outros formulários não confirmam nada, e não levam etiqueta.
- */
-const PURGE_DAYS = 30;
-function purgeDate(createdAt: string) {
-  return new Date(new Date(createdAt).getTime() + PURGE_DAYS * 24 * 60 * 60 * 1000).toISOString();
-}
-
 function statusTone(status: LeadStatus): "active" | "pending" | "rejected" | "primary" {
   if (status === "new") return "pending";
   if (status === "discarded") return "rejected";
@@ -93,6 +84,7 @@ export function LeadsManager({
   onUpdate,
   onAddNote,
   onExport,
+  onDelete,
   onVerifyPin,
 }: {
   rows: LeadRow[];
@@ -113,6 +105,7 @@ export function LeadsManager({
   onExport: (
     input: LeadFilters,
   ) => Promise<LeadActionResult & { csv?: string; truncated?: boolean }>;
+  onDelete: (leadId: string) => Promise<LeadActionResult>;
   onVerifyPin: VerifyPinAction;
 }) {
   const t = useTranslations("admin.leads");
@@ -145,6 +138,10 @@ export function LeadsManager({
   const [exportNotice, setExportNotice] = useState<"failed" | "truncated" | null>(null);
   const [saving, startSaving] = useTransition();
   const { requestStepUp, stepUpModal } = useStepUp(onVerifyPin);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const infoRef = useClickOutside<HTMLDivElement>(infoOpen, () => setInfoOpen(false));
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; email: string } | null>(null);
+  const [deleteFailed, setDeleteFailed] = useState(false);
 
   const columns: TableColumn<LeadRow>[] = [
     {
@@ -161,18 +158,6 @@ export function LeadsManager({
     { id: "source", header: t("source"), cell: (row) => t("sources." + row.source) },
     { id: "form", header: t("form"), cell: (row) => t("forms." + row.form) },
     {
-      id: "confirmation",
-      header: t("confirmation"),
-      cell: (row) =>
-        row.form !== "preinscricao" ? (
-          <span className="text-muted">—</span>
-        ) : row.confirmed_at ? (
-          <StatusTag tone="active">{t("confirmed")}</StatusTag>
-        ) : (
-          <StatusTag tone="pending">{t("pendingConfirmation")}</StatusTag>
-        ),
-    },
-    {
       id: "status",
       header: t("status"),
       cell: (row) => (
@@ -187,6 +172,31 @@ export function LeadsManager({
       cell: (row) => row.assigned_name || t("unassigned"),
     },
     { id: "created", header: t("createdAt"), cell: (row) => labelDate(row.created_at, locale) },
+    {
+      id: "actions",
+      header: <span className="upm-sr-only">{t("actions")}</span>,
+      align: "right",
+      width: "56px",
+      // A linha inteira abre a ficha, também com Enter e espaço: sem parar a
+      // propagação, o clique e o teclado no botão abriam a gaveta por baixo do
+      // modal.
+      cell: (row) => (
+        <Button
+          variant="ghost"
+          iconOnly
+          aria-label={t("deleteLeadNamed", { email: row.email })}
+          title={t("deleteLead")}
+          onClick={(event) => {
+            event.stopPropagation();
+            setDeleteFailed(false);
+            setDeleteTarget({ id: row.id, email: row.email });
+          }}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <Trash2 size={16} />
+        </Button>
+      ),
+    },
   ];
 
   function changePage(nextPage: number) {
@@ -236,6 +246,27 @@ export function LeadsManager({
     setNote("");
     setError(false);
   }
+  function deleteLead() {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+    startSaving(async () => {
+      setDeleteFailed(false);
+      const result = await onDelete(target.id);
+      if (result.needsStepUp) {
+        requestStepUp(() => deleteLead());
+        return;
+      }
+      if (!result.ok) {
+        setDeleteFailed(true);
+        return;
+      }
+      setDeleteTarget(null);
+      // A ficha aberta era a da lead apagada: fecha-se, em vez de ficar a
+      // mostrar o erro de "não foi possível carregar".
+      if (selected?.id === target.id) navigate(href(filters), { id: null });
+      else refresh();
+    });
+  }
   function exportCsv() {
     startSaving(async () => {
       setExportNotice(null);
@@ -270,7 +301,37 @@ export function LeadsManager({
       <div className="flex flex-col gap-6">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-text">{t("title")}</h1>
+            <div className="flex items-center gap-1">
+              <h1 className="text-2xl font-semibold text-text">{t("title")}</h1>
+              {/* As regras de retenção e da cópia diária (8 nov 2026) estavam em
+                  texto corrido por cima dos filtros. São para consultar, não
+                  para ler todos os dias: ficam atrás de um ícone (20 nov 2026). */}
+              <div ref={infoRef} className="relative">
+                <Button
+                  variant="ghost"
+                  iconOnly
+                  aria-label={t("retentionInfo")}
+                  aria-expanded={infoOpen}
+                  aria-controls="leads-retention-info"
+                  title={t("retentionInfo")}
+                  onClick={() => setInfoOpen((open) => !open)}
+                >
+                  <Info size={17} />
+                </Button>
+                {infoOpen ? (
+                  <div
+                    id="leads-retention-info"
+                    role="region"
+                    aria-label={t("retentionInfo")}
+                    className="absolute left-0 top-full z-20 mt-2 grid w-[min(36rem,calc(100vw-2rem))] gap-2 rounded-xl border border-border bg-surface p-4 text-text"
+                    style={{ boxShadow: "var(--shadow-lg)", fontSize: "var(--fs-body)" }}
+                  >
+                    <p>{t("retentionNote")}</p>
+                    <p className="text-muted">{t("exportRetention")}</p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
             <p className="mt-1 text-sm text-muted">{t("subtitle")}</p>
           </div>
           <Button
@@ -290,16 +351,6 @@ export function LeadsManager({
             {exportNotice === "failed" ? t("exportFailed") : t("exportTruncated")}
           </p>
         ) : null}
-        {/* As duas regras que o cliente pediu (8 nov 2026): os leads por
-            confirmar desaparecem sozinhos; e a exportação é o backup diário,
-            fica no computador de quem a faz — fora do sistema e da remoção a
-            pedido — e guarda-se 30 dias. Juntas, a 13 px e com uma medida de
-            leitura (19 nov 2026): a 12 px e à largura do ecrã, cada uma fazia
-            uma linha de quase 200 caracteres. */}
-        <div className="grid max-w-[72ch] gap-1 text-sm text-muted">
-          <p>{t("retentionNote")}</p>
-          <p>{t("exportRetention")}</p>
-        </div>
         <Card padded>
           {/* Uma linha só (19 nov 2026): a pesquisa cresce o dobro dos selects, e
               o botão fica no fim da linha, alinhado pela base dos campos. Num
@@ -346,17 +397,6 @@ export function LeadsManager({
             />
             <Select
               className="min-w-0 flex-[1_1_8.5rem]"
-              name="confirmation"
-              label={t("confirmationFilter")}
-              defaultValue={filters.confirmation ?? ""}
-              placeholder={t("allConfirmations")}
-              options={(["confirmed", "pending"] as const).map((key) => ({
-                value: key,
-                label: key === "confirmed" ? t("confirmed") : t("pendingConfirmation"),
-              }))}
-            />
-            <Select
-              className="min-w-0 flex-[1_1_8.5rem]"
               name="assigned_to"
               label={t("assignedTo")}
               defaultValue={filters.assignedTo ?? ""}
@@ -379,8 +419,7 @@ export function LeadsManager({
                   filters.status ||
                   filters.source ||
                   filters.form ||
-                  filters.assignedTo ||
-                  filters.confirmation
+                  filters.assignedTo
                   ? "noResultsTitle"
                   : "emptyTitle",
               )}
@@ -442,22 +481,13 @@ export function LeadsManager({
                   {t("profile." + selected.profile_type)} · {t("sources." + selected.source)} ·{" "}
                   {t("forms." + selected.form)}
                 </p>
-                {selected.form === "preinscricao" ? (
-                  <p className="text-sm">
-                    {selected.confirmed_at ? (
-                      <StatusTag tone="active">
-                        {t("confirmedOn", { date: labelDate(selected.confirmed_at, locale) })}
-                      </StatusTag>
-                    ) : (
-                      <>
-                        <StatusTag tone="pending">{t("pendingConfirmation")}</StatusTag>{" "}
-                        <span className="text-xs text-muted">
-                          {t("deletedOn", {
-                            date: labelDate(purgeDate(selected.created_at), locale),
-                          })}
-                        </span>
-                      </>
-                    )}
+                {/* Desde 20 nov 2026 a pré-inscrição não confirma por e-mail; a
+                    etiqueta fica para quem confirmou antes disso. */}
+                {selected.confirmed_at ? (
+                  <p>
+                    <StatusTag tone="active">
+                      {t("confirmedOn", { date: labelDate(selected.confirmed_at, locale) })}
+                    </StatusTag>
                   </p>
                 ) : null}
               </section>
@@ -468,14 +498,14 @@ export function LeadsManager({
                   {selected.message || t("noMessage")}
                 </p>
                 {utmEntries(selected.utm).length > 0 ? (
-                  <p className="text-xs text-muted">
+                  <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
                     {t("campaign")}:{" "}
                     {utmEntries(selected.utm)
                       .map(([key, value]) => `${key}=${value}`)
                       .join(" · ")}
                   </p>
                 ) : null}
-                <p className="text-xs text-muted">
+                <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
                   {t("marketingConsent")}: {selected.consent_marketing ? t("yes") : t("no")}
                   {selected.consent_at ? " · " + labelDate(selected.consent_at, locale) : ""}
                 </p>
@@ -544,7 +574,7 @@ export function LeadsManager({
                               : t("assignmentEvent")}
                         </p>
                         <p className="whitespace-pre-wrap text-sm text-muted">{item.body}</p>
-                        <p className="text-xs text-muted">
+                        <p className="text-muted" style={{ fontSize: "var(--fs-body)" }}>
                           {item.actor_name} · {labelDate(item.created_at, locale)}
                         </p>
                       </li>
@@ -586,6 +616,42 @@ export function LeadsManager({
           </p>
         </Drawer>
       ) : null}
+      <Modal
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        size="sm"
+        title={t("deleteTitle")}
+        icon={<Trash2 size={17} />}
+        closeLabel={tc("close")}
+      >
+        <div className="grid gap-4">
+          <div className="grid gap-2 text-sm">
+            <p className="text-text">
+              {t("deleteBody", { email: deleteTarget?.email ?? "" })}
+            </p>
+            <p className="text-muted">{t("deleteCopiesNote")}</p>
+          </div>
+          {deleteFailed ? (
+            <p className="text-sm text-danger" role="alert">
+              {t("deleteFailed")}
+            </p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={() => setDeleteTarget(null)}>
+              {tc("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              leadingIcon={<Trash2 size={16} />}
+              disabled={saving}
+              onClick={deleteLead}
+            >
+              {t("confirmDelete")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
       {stepUpModal}
     </>
   );

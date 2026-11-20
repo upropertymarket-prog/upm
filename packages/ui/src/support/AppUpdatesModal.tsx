@@ -167,7 +167,7 @@ export function AppUpdatesModal({
               <span
                 style={{
                   marginRight: "auto",
-                  fontSize: "12.5px",
+                  fontSize: "var(--fs-body)",
                   color: "var(--muted)",
                   fontVariantNumeric: "tabular-nums",
                 }}

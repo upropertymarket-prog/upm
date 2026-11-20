@@ -182,7 +182,7 @@ export function DashboardView({
       cell: (row) => (
         <span className="grid">
           <strong>{t("actions." + row.action)}</strong>
-          <span className="text-xs text-muted">{t("entities." + row.entity)}</span>
+          <span className="text-[length:var(--fs-body)] text-muted">{t("entities." + row.entity)}</span>
         </span>
       ),
     },

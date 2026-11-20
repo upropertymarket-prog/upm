@@ -230,7 +230,7 @@
   margin: 0;
   padding: 0 var(--sp-5) var(--sp-4);
   color: var(--muted);
-  font-size: var(--fs-pill);
+  font-size: var(--fs-body);
 }
 
 @media (max-width: 640px) {

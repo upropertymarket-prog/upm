@@ -6,7 +6,7 @@ import { createClient } from "@upm/db/server";
 import { InternalChrome } from "../../../components/InternalChrome";
 import { setLocalePreference } from "../../actions/preferences";
 import { verifyOperationPin } from "../../actions/step-up";
-import { addLeadNote, exportLeads, updateLead } from "./actions";
+import { addLeadNote, deleteLead, exportLeads, updateLead } from "./actions";
 import { LeadsManager } from "./LeadsManager";
 import { getAdminSidebarCounters } from "../../../lib/admin-shell";
 
@@ -142,6 +142,7 @@ export default async function SiteLeadsPage({
         onUpdate={updateLead}
         onAddNote={addLeadNote}
         onExport={exportLeads}
+        onDelete={deleteLead}
         onVerifyPin={verifyOperationPin}
       />
     </InternalChrome>

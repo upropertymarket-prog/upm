@@ -92,7 +92,7 @@ export function PropertyLocationMap({
         }}
       />
       {!isExact ? (
-        <span style={{ fontSize: "0.85em", color: "var(--muted)", textAlign: "center" }}>
+        <span style={{ fontSize: "var(--fs-body)", color: "var(--muted)", textAlign: "center" }}>
           Localização aproximada — a morada exata é partilhada pelo proprietário após aceitar uma
           visita ou pedido de contacto.
         </span>

@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
@@ -23,56 +22,14 @@ const rpc = vi.fn();
 const headerValues = new Map<string, string>();
 
 /**
- * A fila de saída, simulada com a forma que o `supabase-js` tem de ter para o
- * encadeamento funcionar: cada método devolve o próprio objeto, e o `await` no
- * fim resolve. Guardamos o `insert` e os `eq` do cancelamento para os afirmar.
+ * A chave de serviço não deve ser usada: desde 20 nov 2026 a pré-inscrição não
+ * enfileira e-mail nem grava token. Se alguém a voltar a chamar, os testes
+ * abaixo veem-no aqui.
  */
-const inserted: unknown[] = [];
-const cancelled: Record<string, unknown>[] = [];
-/** Os `update` por tabela — o do token de remoção vai para `site_leads`. */
-const updates: Array<{ table: string; values: Record<string, unknown>; id?: unknown }> = [];
-let insertError: { message: string } | null = null;
-
-function deliveriesTable(table = "notification_deliveries") {
-  const filters: Record<string, unknown> = {};
-  let update: { table: string; values: Record<string, unknown>; id?: unknown } | null = null;
-  const chain: Record<string, unknown> = {
-    insert: (row: unknown) => {
-      inserted.push(row);
-      return Promise.resolve({ error: insertError });
-    },
-    update: (values: Record<string, unknown>) => {
-      update = { table, values };
-      updates.push(update);
-      return chain;
-    },
-    eq: (column: string, value: unknown) => {
-      filters[column] = value;
-      if (update && column === "id") update.id = value;
-      // O cancelamento é o único `update` desta tabela aqui, e o terceiro `eq`
-      // é o último — é nesse ponto que a consulta é enviada.
-      if (Object.keys(filters).length === 3) cancelled.push({ ...filters });
-      return chain;
-    },
-    then: (resolve: (value: { error: null }) => unknown) => resolve({ error: null }),
-  };
-  return chain;
-}
-
-const from = vi.fn((table: string) => deliveriesTable(table));
+const from = vi.fn();
 
 vi.mock("next/headers", () => ({
   headers: async () => ({ get: (key: string) => headerValues.get(key) ?? null }),
-}));
-
-vi.mock("next-intl/server", () => ({
-  getLocale: async () => "pt",
-  // O e-mail leva texto traduzido; o teste só precisa de saber que a chave
-  // certa foi pedida e que o `{name}` foi interpolado.
-  getTranslations: async ({ namespace }: { namespace: string }) => {
-    return (key: string, values?: Record<string, string>) =>
-      values?.name ? `${namespace}.${key}:${values.name}` : `${namespace}.${key}`;
-  },
 }));
 
 vi.mock("@upm/db/server", () => ({
@@ -115,10 +72,6 @@ beforeEach(() => {
   rpc.mockReset();
   rpc.mockResolvedValue(row());
   headerValues.clear();
-  inserted.length = 0;
-  cancelled.length = 0;
-  updates.length = 0;
-  insertError = null;
   from.mockClear();
 });
 
@@ -276,96 +229,31 @@ describe("submitPreRegistration", () => {
     const state = await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
 
     expect(state).toEqual({ ok: true, alreadyConfirmed: true });
-    // E, por não haver token, não se enfileira nada.
-    expect(inserted).toHaveLength(0);
+    expect(from).not.toHaveBeenCalled();
   });
 });
 
 /**
- * A confirmação do double opt-in — o que estava em falta e fazia com que
- * nenhuma pré-inscrição contasse como lead.
- *
- * O envio em si é do `mail-worker`; o que se testa aqui é a única coisa que
- * vive nesta camada: que a entrega vai para a fila, com o link certo, sem
- * perfil, e que a entrega anterior é cancelada.
+ * Sem confirmação por e-mail (20 nov 2026). Em pré-lançamento o endereço serve
+ * para avisar no lançamento, e o double opt-in apagava ao fim de 30 dias quem
+ * não clicasse — as pessoas que se queria avisar.
  */
-describe("confirmação da pré-inscrição", () => {
-  it("enfileira o e-mail com o token no link", async () => {
-    await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
-
-    expect(inserted).toHaveLength(1);
-    expect(inserted[0]).toMatchObject({
-      channel: "email",
-      recipient: "rui@exemplo.pt",
-      template: "site_lead_confirmation",
-    });
-
-    const payload = (inserted[0] as { payload: Record<string, string> }).payload;
-    expect(payload.link).toContain("/pre-inscricao/confirmar?token=tok");
-    // Absoluto: um link de e-mail não tem página de onde ser relativo.
-    expect(payload.link).toMatch(/^https?:\/\//);
-    expect(payload.lang).toBe("pt");
-    // O nome entra no corpo pelo ICU, não por concatenação.
-    expect(payload.body).toContain("Rui Nunes");
-  });
-
-  it("leva o link para apagar a pré-inscrição, e a base guarda só o hash do token", async () => {
-    await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
-
-    const payload = (inserted[0] as { payload: Record<string, string> }).payload;
-    const token = /\/pre-inscricao\/remover\?token=([0-9a-f]{64})$/.exec(
-      payload.optOutLink ?? "",
-    )?.[1];
-    expect(token).toBeTruthy();
-    expect(payload.optOutText).toBe("site.preRegistration.confirmEmail.optOutText");
-    expect(payload.signoff).toBe("site.preRegistration.confirmEmail.signoff");
-
-    const gravado = updates.find((u) => u.table === "site_leads");
-    expect(gravado?.id).toBe("11111111-1111-1111-1111-111111111111");
-    expect(gravado?.values).toEqual({
-      removal_token_hash: createHash("sha256").update(token!).digest("hex"),
-    });
-    // Nunca o token em claro.
-    expect(JSON.stringify(gravado?.values)).not.toContain(token!);
-  });
-
-  it("não leva `profile_id`: quem se pré-inscreve não tem conta", async () => {
-    await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
-
-    expect(inserted[0]).not.toHaveProperty("profile_id");
-  });
-
-  it("cancela a entrega anterior, porque o token dela já não serve", async () => {
-    await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
-
-    expect(cancelled).toEqual([
-      {
-        recipient: "rui@exemplo.pt",
-        template: "site_lead_confirmation",
-        status: "queued",
-      },
-    ]);
-  });
-
-  it("falha o pedido quando a fila recusa, em vez de prometer um e-mail", async () => {
-    insertError = { message: "fila indisponível" };
-
+describe("pré-inscrição sem confirmação por e-mail", () => {
+  it("grava e agradece, sem enfileirar e-mail nem gravar token", async () => {
     const state = await submitPreRegistration({}, formData(PRE_INSCRICAO_VALIDA));
 
-    expect(state.ok).toBeUndefined();
-    expect(state.error).toBe("Não foi possível enviar o pedido. Tente novamente.");
+    expect(state).toEqual({ ok: true });
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(from).not.toHaveBeenCalled();
   });
 
-  it("não confirma por e-mail quem usou o formulário de contacto", async () => {
+  it("também não envia nada a quem usou o formulário de contacto", async () => {
     await submitContact({}, formData(CONTACTO_VALIDO));
 
-    // Quem faz uma pergunta não espera um passo a mais para a fazer chegar.
-    expect(inserted).toHaveLength(0);
+    expect(from).not.toHaveBeenCalled();
   });
 
-  it("não enfileira nada quando o honeypot apanha um bot", async () => {
-    // A função SQL devolve uma linha de nulos e grava nada — o mesmo "obrigado"
-    // para o bot, e zero e-mails enviados a um endereço que ele escolheu.
+  it("dá o mesmo obrigado a um bot apanhado pelo honeypot", async () => {
     rpc.mockResolvedValue(row({ lead_id: null, confirm_token: null }));
 
     const state = await submitPreRegistration(
@@ -374,6 +262,6 @@ describe("confirmação da pré-inscrição", () => {
     );
 
     expect(state).toEqual({ ok: true });
-    expect(inserted).toHaveLength(0);
+    expect(from).not.toHaveBeenCalled();
   });
 });

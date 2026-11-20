@@ -64,7 +64,7 @@ export default function RouteError({
         }
       />
       {error.digest ? (
-        <p style={{ color: "var(--muted)", fontSize: "12px", marginTop: "var(--sp-3)" }}>
+        <p style={{ color: "var(--muted)", fontSize: "var(--fs-body)", marginTop: "var(--sp-3)" }}>
           {error.digest}
         </p>
       ) : null}

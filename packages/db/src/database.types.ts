@@ -4041,6 +4041,7 @@ export type Database = {
         }[];
       };
       admin_dashboard_metrics: { Args: never; Returns: Json };
+      admin_delete_site_lead: { Args: { p_lead_id: string }; Returns: undefined };
       admin_export_site_leads: {
         Args: {
           p_assigned_to?: string;
@@ -5064,7 +5065,6 @@ export type Database = {
       purge_site_analytics: { Args: never; Returns: number };
       purge_stale_site_leads: { Args: never; Returns: number };
       purge_ticket_technical_data: { Args: never; Returns: number };
-      purge_unconfirmed_site_leads: { Args: never; Returns: number };
       record_auth_attempt: {
         Args: { p_identifier: string; p_kind: string; p_succeeded: boolean };
         Returns: undefined;

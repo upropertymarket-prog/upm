@@ -39,8 +39,12 @@ const BASE = {
     "  font-weight: var(--fw-bold);",
     "}",
   ].join("\n"),
-  "apps/web/src/ok.tsx":
+  "apps/web/src/ok.tsx": [
     'export const A = () => <b style={{ fontWeight: "var(--fw-semibold)" }} />;',
+    'export const B = () => <p className="text-[length:var(--fs-body)]" style={{ fontSize: 14 }} />;',
+    "// tamanho-ok: faixa decidida pelo cliente",
+    'export const C = () => <p style={{ fontSize: "12px" }} />;',
+  ].join("\n"),
 };
 
 function montar(ficheiros) {
@@ -88,6 +92,21 @@ const CASOS = [
     esperado: /Classe do Tailwind/,
   },
   {
+    nome: "text-xs do Tailwind",
+    ficheiros: { "apps/web/src/mau.tsx": 'const A = <p className="text-xs text-muted" />;' },
+    esperado: /abaixo de 13 px/,
+  },
+  {
+    nome: "fontSize a 12 px em JSX",
+    ficheiros: { "apps/web/src/mau.tsx": 'const A = <p style={{ fontSize: "12.5px" }} />;' },
+    esperado: /abaixo de 13 px/,
+  },
+  {
+    nome: "font-size a 12 px em CSS",
+    ficheiros: { "apps/web/src/mau.css": ".x { font-size: 12px; }" },
+    esperado: /abaixo de 13 px/,
+  },
+  {
     nome: "regra de cabeçalho removida",
     ficheiros: { "packages/ui/src/styles/components.css": ".upm-btn { color: red; }" },
     esperado: /já não declara o peso de h1–h3/,
@@ -115,7 +134,7 @@ for (const caso of CASOS) {
   );
 }
 
-// Controlo: sem o verde, um portão que recusasse tudo passava nos cinco casos.
+// Controlo: sem o verde, um portão que recusasse tudo passava nos oito casos.
 {
   const raiz = montar(BASE);
   const { codigo, saida } = correr(raiz);
@@ -138,4 +157,4 @@ if (falhou) {
   console.error("\n  O portão da tipografia não distingue o que devia. Não confie nele.\n");
   process.exit(1);
 }
-console.log("\n✓ O portão da tipografia recusa as cinco violações e aceita o resto");
+console.log("\n✓ O portão da tipografia recusa as oito violações e aceita o resto");
